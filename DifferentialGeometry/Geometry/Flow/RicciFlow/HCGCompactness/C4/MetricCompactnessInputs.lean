@@ -5,21 +5,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInput
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeComparisonBridge
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # MSM135 Theorem 3.9 — inputs for the conditional endpoint
 
-**Endpoint ruling (2026-07-05, user).**  The unconditional `metricCompactness`
-(`HCGCompactness/MetricCompactness.lean`) cannot be discharged by the Chapter 4
-construction alone: the construction consumes book-external theorems (the honest
-inputs below) that are *not* among its three hypotheses, and the project has no
-volume-form/comparison infrastructure to prove them natively.  The Chapter 4
-working target is therefore this **conditional** endpoint: the same conclusion,
-with the externally cited theorems bundled as an explicit input structure.  The
-unconditional `metricCompactness` keeps its single `sorry`, now documented as
-`= MetricCompactnessInputs.metricCompactness + the cited external theorems`.
 
 This module owns only the input and producer-side interfaces.  The final
 conditional endpoint is assembled in `C4/MetricCompactnessEndpoint.lean`, above
@@ -28,8 +17,6 @@ foundational layer does not participate in an import cycle.
 
 ## The bundle, field by field (mathematical audit 2026-07-05)
 
-Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
-(complete + `|∇^ℓ Rm| ≤ C_ℓ` + `inj(O_k) ≥ ρ`) by the book's citations:
 
 * `decay` — Cheeger–Gromov–Taylor injectivity-radius decay (`lbl384`):
   `inj(x) ≥ a·min{ρ,1}^n·e^{−C·d(x,O)}`, constants `a(n,C₀), C(n,C₀)`.  The Lean
@@ -55,17 +42,54 @@ Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
   floor over all base points would be false.
 ## Deliberately NOT in the bundle (derived at assembly, or bundle-v2)
 
-* **Construction-stage scale data** (`SigmaScaleField` and the
-  per-configuration `CmHessianInput` / `StrictDistInput`): these are
-  parameterized by Step A's constructed nets and Step C's configurations, so
-  they cannot appear at sequence level.  The packing-local intrinsic and
-  Euclidean-radius members are derived below as `gpScaleTail` and
-  `radiusScaleTail` after `D`, `pb`, and `r` are fixed.  The legacy all-index
-  `Item3RadiusInput` is compatibility-only.  Sigma-domain, full convexity,
-  Hessian, and strict-distance geometry stays separate assembly work.
-* **`IsometryDerivBounds`** (`lbl375`, [H6] §5): the isometry-derivative
-  polynomial recursion is per-map-sequence; its bundle-v2 field shape is pinned
-  by the B-loc bridge brick (see `CHAPTER4_PLAN.md`), not yet stated here.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -/
 
 noncomputable section
@@ -85,14 +109,14 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-/-- Compatibility between the CGT injectivity profile and the source radius of
-the normal-coordinate metric estimates.
 
-The fixed positive ratio is global, while the actual lower bound is allowed to
-decay with basepoint distance.  The same floor lies both in the ball carrying
-the metric estimates and in the named smooth exponential-chart ball.  This is
-the H6-compatible noncompact substitute for an unjustified absolute radius
-floor. -/
+
+
+
+
+
+
+
 structure NormalRadiusProfile
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X)
@@ -107,11 +131,11 @@ structure NormalRadiusProfile
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     ratio * hd.mu (hd.dist k x (X.obj k).basepoint) ≤
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x
 
 namespace NormalRadiusProfile
 
-/-- Reindex a normal-coordinate radius profile along a subsequence. -/
+
 def subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -133,7 +157,7 @@ def subseq
     letI : T2Space (TangentBundle I (X.obj (f k)).M) :=
       (X.obj (f k)).t2TangentBundle
     change h.ratio * hd.mu (hd.dist (f k) x (X.obj (f k)).basepoint) ≤
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj (f k)).metric x
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj (f k)).metric x
     exact h.le_exp_radius (f k) x
 
 /-- Compatibility name for the relative intrinsic framed-radius coefficient. -/
@@ -142,27 +166,32 @@ def gpRatio
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : Real :=
-  h.ratio
+  Real.sqrt (1 / 2 : Real) * h.ratio
 
-/-- The intrinsic-radius profile coefficient is strictly positive. -/
+
 theorem gpRatio_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : 0 < h.gpRatio := by
-  exact h.ratio_pos
+  rw [gpRatio]
+  exact mul_pos (Real.sqrt_pos.mpr (by norm_num)) h.ratio_pos
 
-/-- The intrinsic-radius coefficient is no larger than the original normal
-coordinate profile coefficient. -/
+
+
 theorem gpRatio_le_ratio
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : h.gpRatio ≤ h.ratio := by
-  exact le_rfl
+  rw [gpRatio]
+  have hsqrt : Real.sqrt (1 / 2 : Real) ≤ 1 :=
+    Real.sqrt_le_one.mpr (by norm_num)
+  simpa only [one_mul] using
+    mul_le_mul_of_nonneg_right hsqrt h.ratio_pos.le
 
-/-- The profile gives a positive source-radius floor on each fixed
-basepoint-distance sublevel. -/
+
+
 theorem floor_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -171,8 +200,8 @@ theorem floor_pos
     0 < h.ratio * hd.mu R :=
   mul_pos h.ratio_pos (hd.mu_pos R)
 
-/-- On a fixed basepoint-distance sublevel, the profile floor lies inside the
-normal-coordinate control radius. -/
+
+
 theorem floor_le_radius
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -199,7 +228,7 @@ theorem floor_le_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     h.ratio * hd.mu R ≤
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -208,11 +237,11 @@ theorem floor_le_exp
     h.ratio * hd.mu R ≤
         h.ratio * hd.mu (hd.dist k x (X.obj k).basepoint) :=
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
-    _ ≤ Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
+    _ ≤ Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
       h.le_exp_radius k x
 
-/-- On a fixed basepoint-distance sublevel, the strengthened H6 profile also
-lies inside the intrinsic `g_p` exponential radius. -/
+
+
 theorem floor_le_expGp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -229,10 +258,21 @@ theorem floor_le_expGp
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  simpa only [gpRatio] using h.floor_le_exp hx
+  rw [gpRatio, Geometry.Riemannian.expRadiusGp]
+  calc
+    Real.sqrt (1 / 2 : Real) * h.ratio * hd.mu R =
+        Real.sqrt (1 / 2 : Real) * (h.ratio * hd.mu R) := by ring
+    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+          (I := I) (X.obj k).metric x) * (h.ratio * hd.mu R) :=
+      mul_le_mul_of_nonneg_right
+        (Real.sqrt_le_sqrt (hb.half_le_gpConst k x)) (h.floor_pos R).le
+    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+          (I := I) (X.obj k).metric x) *
+          Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
+      mul_le_mul_of_nonneg_left (h.floor_le_exp hx) (Real.sqrt_nonneg _)
 
-/-- Choosing the covering divisor larger than `c / ratio` places the scaled
-covering radius strictly below the profile floor. -/
+
+
 theorem mul_lambda_lt_floor
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -246,8 +286,8 @@ theorem mul_lambda_lt_floor
     _ < h.ratio * hd.mu R :=
       mul_lt_mul_of_pos_right ((div_lt_iff₀ hD).2 hc) (hd.mu_pos R)
 
-/-- On a fixed basepoint-distance sublevel, the same divisor choice places the
-scaled covering radius inside every controlled normal-coordinate ball. -/
+
+
 theorem mul_lambda_lt_radius
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -274,15 +314,15 @@ theorem mul_lambda_lt_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     c * hd.lambda D R <
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
   exact (h.mul_lambda_lt_floor hD hc).trans_le (h.floor_le_exp hx)
 
-/-- Choosing the covering divisor larger than `c / gpRatio` places the scaled
-covering radius inside every controlled intrinsic `g_p` exponential ball. -/
+
+
 theorem mul_lambda_lt_expGp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -309,9 +349,9 @@ theorem mul_lambda_lt_expGp
         mul_lt_mul_of_pos_right ((div_lt_iff₀ hD).2 hc) (hd.mu_pos R)
   exact hfloor.trans_le (h.floor_le_expGp hx)
 
-/-- On the finite family of slots selected after packing, the item-3 intrinsic
-radius inequality holds eventually along the net-limit subsequence.  The factor
-`8` is the exact budget produced by the lower half of `lambda_window`. -/
+
+
+
 theorem gpScaleTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -376,9 +416,17 @@ theorem halfGpScaleTail
         (a / 2) * L.lamInf (γ : Nat) <
           Geometry.Riemannian.expRadiusGp
             (I := I) (X.obj (L.φ n)).metric c := by
+  have hsqrt : (1 / 2 : Real) < Real.sqrt (1 / 2 : Real) := by
+    have hsqrtSq := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
+    have hsqrtNonneg := Real.sqrt_nonneg (1 / 2 : Real)
+    nlinarith
+  have hratioD : 0 < h.ratio * D := mul_pos h.ratio_pos hD
   have haGp : a < h.gpRatio * D := by
-    rw [gpRatio]
-    nlinarith [ha]
+    calc
+      a < (1 / 2 : Real) * (h.ratio * D) := by nlinarith
+      _ < Real.sqrt (1 / 2 : Real) * (h.ratio * D) :=
+        mul_lt_mul_of_pos_right hsqrt hratioD
+      _ = h.gpRatio * D := by rw [gpRatio]; ring
   have hwin : ∀ᶠ n in atTop, ∀ γ ∈ Finset.range (pb.A r),
       L.lamInf γ / 2 ≤ hd.lambda D (seqRadius hd D P (L.φ n) γ) :=
     (Filter.eventually_all_finset _).mpr fun γ _ =>
@@ -412,8 +460,8 @@ theorem halfGpScaleTail
       h.mul_lambda_lt_expGp (D := D) (c := a)
         (R := seqRadius hd D P (L.φ n) (γ : Nat)) hD haGp hx
 
-/-- On the finite packing family, the H6 metric-control radius eventually
-contains every ball of radius `a * lamInf`. -/
+
+
 theorem metricScaleTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -457,10 +505,9 @@ theorem metricScaleTail
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
     _ ≤ hb.radius (L.φ n) c := h.le_radius (L.φ n) c
 
-/-- On the finite packing family, a positive radius `a * lamInf` eventually
-lies below the smooth legacy exponential-chart radius.  The factor-`2` budget
-is exactly the loss in `lambda_window`; intrinsic injectivity is carried by
-the H6 chart provider rather than this compatibility tail. -/
+
+
+
 theorem radiusScaleTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -510,7 +557,6 @@ theorem radiusScaleTail
   exact ⟨hrad_pos, hrad_lambda.trans hexp.le⟩
 
 end NormalRadiusProfile
-
 /-- The provider-neutral fixed-divisor input consumed by Step A and by the
 provider-native H6 route.  Normal-coordinate data is deliberately absent: a
 chart provider supplies it separately. -/
@@ -669,31 +715,31 @@ noncomputable def properMetrics
 
 end MetricCompactCore
 
-/-- The `D`-independent producer data for Chapter 4 metric compactness.
 
-The total packing bound is supplied as a family because its counting function
-may depend on the covering divisor.  The divisor is chosen only after all
-scalar scale constraints are known; `MetricCompactnessInputs.ofBase` then
-instantiates this family at that single value. -/
+
+
+
+
+
+
 structure MetricCompactBase
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-  /-- A0 (`lbl384`): Cheeger–Gromov–Taylor injectivity-radius decay. -/
+
   decay : InjRadiusDecayInput (I := I) X
-  /-- `lbl387`, uniformly available after each positive divisor is chosen. -/
+
   pack : ∀ D : Real, 0 < D → decay.PackingBound D
-  /-- A0': Bishop–Gromov intersection multiplicity at small scales. -/
+
   volume : VolumeComparisonInput (I := I) X
-  /-- The two Bishop–Gromov inputs quantify over the same supplied distance. -/
+
   dist_eq : volume.dist = decay.dist
-  /-- The supplied distance realizes the Riemannian emetric. -/
+
   realizes : decay.RealizesEdist
-  /-- `lbl395` ([H6] Cor 4.12): normal-coordinate metric `C^p` bounds. -/
+
   normalBounds : NormalCoordMetricBoundInput (I := I) X
-  /-- H6/CGT compatibility at a fixed positive fraction of the decay profile. -/
+
   normalRadius : NormalRadiusProfile decay normalBounds
 
 namespace MetricCompactBase
-
 /-- Forget the legacy normal-coordinate fields and retain only the
 provider-neutral geometric producers. -/
 def toSeed
@@ -711,9 +757,9 @@ instance
     Coe (MetricCompactBase (I := I) X) (MetricCompactSeed (I := I) X) :=
   ⟨toSeed⟩
 
-/-- A single sufficiently large divisor simultaneously fits one supplied
-`gpRatio` scale budget (which may aggregate finitely many constants) and the
-existing Step A multiplicity cap. -/
+
+
+
 theorem exists_largeD
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X) (c : Real) :
@@ -782,9 +828,9 @@ theorem exists_largeD
   refine ⟨D, hD_one, hmuD, hc, ?_⟩
   exact (mul_le_mul_of_nonneg_right hfac hlam_nonneg).trans hKlam.le
 
-/-- Choose one divisor before packing so that the intrinsic `g_p` and item-3
-exponential-ball scales fit the available normal,
-comparison, and injectivity radii, while retaining the Step A cap. -/
+
+
+
 theorem exists_item3D
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X) (c₀ : Real) :
@@ -861,16 +907,16 @@ theorem exists_item3D
 
 end MetricCompactBase
 
-/-- The bundled Chapter 4 book-external inputs for MSM135 Theorem 3.9.
 
-The geometric fields are the theorems cited externally by the book
-(Cheeger–Gromov–Taylor, Bishop–Gromov, and [H6] Cor 4.12).  The
-fixed-divisor scale compatibility is now produced in-tree from
-`MetricCompactBase.exists_largeD`; it is not an additional book input.  See the
-module docstring for the per-field mathematical audit. -/
+
+
+
+
+
+
 structure MetricCompactnessInputs
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-  /-- A0 (`lbl384`): Cheeger–Gromov–Taylor injectivity-radius decay. -/
+
   decay : InjRadiusDecayInput (I := I) X
   /-- `lbl387`, uniformly available after every positive divisor is chosen. -/
   packAll : ∀ D : Real, 0 < D → decay.PackingBound D
@@ -878,27 +924,26 @@ structure MetricCompactnessInputs
   large against the relative normal-coordinate radius profile. -/
   D : Real
   hD : 0 < D
-  /-- `lbl387`: Bishop–Gromov total packing count `A(r)`. -/
+
   pack : decay.PackingBound D
-  /-- A0': Bishop-Gromov intersection multiplicity, capped at `m * r ≤ r0`. -/
+
   volume : VolumeComparisonInput (I := I) X
-  /-- The two Bishop–Gromov inputs quantify over the same supplied distance. -/
+
   dist_eq : volume.dist = decay.dist
-  /-- Producer compatibility: the multiplicity cap dominates the largest Step A
-  ratio times the largest packing scale `λ[0]`. -/
+
+
   stepA_cap_le :
     max 4 (50 * Real.exp (decay.C * (20 * decay.lambda D 0))) *
       decay.lambda D 0 <= volume.r0
-  /-- The supplied distance realizes the Riemannian emetric. -/
+
   realizes : decay.RealizesEdist
-  /-- `lbl395` ([H6] Cor 4.12): normal-coordinate metric `C^p` bounds. -/
+
   normalBounds : NormalCoordMetricBoundInput (I := I) X
-  /-- H6/CGT compatibility: the controlled normal-coordinate radius contains a
-  fixed positive fraction of the injectivity profile. -/
+
+
   normalRadius : NormalRadiusProfile decay normalBounds
 
 namespace MetricCompactnessInputs
-
 /-- Forget the legacy chart-specific normal-coordinate fields. -/
 def toCore
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -955,8 +1000,8 @@ def ofBase
   normalBounds := b.normalBounds
   normalRadius := b.normalRadius
 
-/-- Choose the divisor once, instantiate its packing bound, and return the
-existing fixed-divisor consumer bundle with the requested scalar budget. -/
+
+
 theorem exists_ofBase
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X) (c : Real) :
@@ -970,8 +1015,8 @@ theorem exists_ofBase
   · exact hmuD
   · exact hc
 
-/-- Choose the divisor with all current item-3 scale budgets and instantiate
-the original fixed-divisor consumer bundle at that same value. -/
+
+
 theorem exists_item3OfBase
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X) (c₀ : Real) :
@@ -995,8 +1040,8 @@ theorem exists_item3OfBase
   · exact hradD
   · exact hradRatio
 
-/-- Convert the arbitrary aggregate budget returned by the one-shot divisor
-selector into the slotwise physical-cage scale inequality. -/
+
+
 theorem physScale_of_extra
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X) {aMin : Real}
@@ -1010,13 +1055,13 @@ theorem physScale_of_extra
       (by simpa only [mul_comm] using hextra) inp.normalRadius.gpRatio_pos.le
   simpa only [mul_comm] using (div_lt_iff₀ haMin).1 hD
 
-/-- The fixed-divisor bundle and its scalar budgets produce both finite-slot
-item-3 scale tails after the net limit and packing range are fixed. -/
+
+
 theorem item3ScaleTails
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
-    (_hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
     (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
       inp.normalRadius.ratio * inp.D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1029,12 +1074,12 @@ theorem item3ScaleTails
       (item3Factor_pos inp.decay inp.D) hradRatio
       P inp.realizes L inp.pack r⟩
 
-/-- Build the conditional compactness input bundle from an explicit uniform
-local-volume packing producer.
 
-This keeps the public `MetricCompactnessInputs.volume` field as the Step A
-consumer shape `VolumeComparisonInput`, while allowing callers to supply the
-more precise uniform local-volume data checked by `UniformBallPack.toVCInput`. -/
+
+
+
+
+
 def ofUniformVolume
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (decay : InjRadiusDecayInput (I := I) X)
@@ -1066,7 +1111,7 @@ def ofUniformVolume
   normalBounds := normalBounds
   normalRadius := normalRadius
 
-/-- Reindex the conditional compactness input bundle along a subsequence. -/
+
 def subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X) (f : Nat -> Nat) :
@@ -1088,9 +1133,9 @@ def subseq
   normalBounds := inp.normalBounds.subseq f
   normalRadius := inp.normalRadius.subseq f
 
-/-- The Step A `m = 4` multiplicity cap extracted from the bundled maximum cap.
 
-This is the exact cap needed by `net_multiplicity` at scale `lambda[0]`. -/
+
+
 theorem cap_four
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X) :
@@ -1103,10 +1148,10 @@ theorem cap_four
     le_max_left _ _
   exact (mul_le_mul_of_nonneg_right hle hlam).trans inp.stepA_cap_le
 
-/-- The Step A `m = 4` multiplicity cap at any nonnegative radius argument.
 
-This combines `cap_four` with monotonicity of `lambda`; it is the form used
-when a net radius is known to be bounded by the base scale `lambda[0]`. -/
+
+
+
 theorem cap_four_of_nonneg
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X) {R : Real} (hR : 0 <= R) :
@@ -1119,9 +1164,9 @@ theorem cap_four_of_nonneg
     mul_le_mul_of_nonneg_left hlam (by norm_num)
   exact hmul.trans inp.cap_four
 
-/-- The Step A item-5 ratio cap extracted from the bundled maximum cap.
 
-This is the exact cap hypothesis required by `NetLimitData.inter_count`. -/
+
+
 theorem cap_inter
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X) :
@@ -1135,7 +1180,7 @@ theorem cap_inter
     le_max_right _ _
   exact (mul_le_mul_of_nonneg_right hle hlam).trans inp.stepA_cap_le
 
-/-- Bundle-level wrapper for Step A's net multiplicity estimate. -/
+
 theorem net_mult
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X) (k : Nat) {R : Real}
@@ -1149,7 +1194,7 @@ theorem net_mult
     inp.decay inp.D k inp.hD inp.realizes inp.volume inp.dist_eq R
     (inp.cap_four_of_nonneg hR) hS hSR z J hJS hJz
 
-/-- Bundle-level wrapper for the Step A item-5 intersection count. -/
+
 theorem inter_count
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1166,7 +1211,7 @@ theorem inter_count
   exact NetLimitData.inter_count inp.decay inp.hD P L inp.realizes inp.pack
     inp.volume inp.dist_eq inp.cap_inter α
 
-/-- Bundle-level wrapper for the Step A diagonal net datum. -/
+
 theorem exists_net_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1174,7 +1219,7 @@ theorem exists_net_data
     Nonempty (NetLimitData inp.decay inp.D P) :=
   exists_netLimitData inp.decay inp.hD P
 
-/-- Bundle-level wrapper for the stabilized Step A net datum. -/
+
 theorem exists_stable_net
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1185,8 +1230,8 @@ theorem exists_stable_net
         (∀ᶠ k in atTop, ¬ BInter inp.decay inp.D P L.lamInf α β (L.φ k)) :=
   exists_stableNetData inp.decay inp.hD P
 
-/-- Bundle-level Step A net package: a stable diagonal net datum together with
-the item-5 intersection bound supplied by the bundled volume input. -/
+
+
 theorem exists_stepA_net
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1207,8 +1252,8 @@ theorem exists_stepA_net
   obtain ⟨L, hstable⟩ := inp.exists_stable_net P
   exact ⟨L, hstable, fun α => inp.inter_count P L α⟩
 
-/-- The per-member proper metric realization supplied by the endpoint's
-completeness and connectedness hypotheses. -/
+
+
 noncomputable def properMetrics
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (_inp : MetricCompactnessInputs (I := I) X)
@@ -1219,7 +1264,7 @@ noncomputable def properMetrics
     ∀ k : Nat, ProperMetricOn (I := I) (X.obj k) :=
   fun k => properMetricOn (I := I) (X.obj k) (hcomplete.complete k) (hconn k)
 
-/-- Endpoint-hypothesis wrapper for the Step A net package. -/
+
 theorem stepA_net
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1249,8 +1294,8 @@ theorem stepA_net
                 (50 * Real.exp (inp.decay.C * (20 * inp.decay.lambda inp.D 0)))) :=
   inp.exists_stepA_net (inp.properMetrics hcomplete hconn)
 
-/-- Endpoint-hypothesis wrapper for the Step A net package after reindexing by
-a subsequence. -/
+
+
 theorem stepA_net_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)

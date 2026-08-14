@@ -11,11 +11,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-! # `C²`-in-time continuity of the realized DeTurck solution
 
-`deturck_solution_c2_continuous_icc0`: the metric family `g_DT` realized from the
-mild solution is `C²` (jointly continuous through second order) on `[0, T]`, from
-the Sobolev-scale and realize hypotheses on the solution. -/
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -37,14 +37,13 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
 theorem deturck_solution_c2_continuous_icc0
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -90,6 +89,6 @@ theorem deturck_solution_c2_continuous_icc0
     exact continuousOn_const.add hcomp
   refine ⟨hconj1, ?_⟩
   intro x v w
-  exact ricci_continuous_in_metric_time (I := I) (M := M) g_DT T x v w hconj1 hC2_chart
+  exact ricci_continuous_in_metric_time (I := I) (M := M) g_DT T x v w hC2_chart
 
 end DifferentialGeometry.PDE.RicciFlow

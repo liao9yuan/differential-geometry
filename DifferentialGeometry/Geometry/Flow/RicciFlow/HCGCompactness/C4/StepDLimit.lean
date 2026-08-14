@@ -7,27 +7,25 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 Step D, D3e: the limit `PointedRiemannianManifold`
 
-Assembles the `HCGCompactness.PointedRiemannianManifold` bundle for the direct-limit manifold
-`S.Lim` of a `SmoothSeqSystem` (`Geometry/Topology/DirectLimitManifold.lean`).  Every field is
-now available from D3a–D3d:
 
-* `charted` — `SeqSystem.instChartedSpaceLim` (D3a),
-* `smooth` — `SmoothSeqSystem.instIsManifoldLim` (D3b),
-* `sigmaCompact`, `t2` — `SeqSystem.instSigmaCompactSpaceLim` / `instT2SpaceLim` (D3c),
-* `t2TangentBundle` — `SmoothSeqSystem.instT2SpaceTangentBundleLim` (D3c, via the general
-  `FiberBundle.t2Space_totalSpace`),
-* `metric` — `SmoothSeqSystem.limitMetric` (D3d): per-factor metrics with the isometry cocycle
-  (`MetricCocycle`, D2c's conclusion shape) glue to `g∞` with `(incl k)^* g∞ = g k`
-  (`limitMetric_pullback`).
 
-`limitPointedCoc` is the full D3 endpoint (metrics + cocycle in, pointed bundle out);
-`limitPointed` stays as the metric-generic form. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,10 +36,10 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff
 
-/-- **D3e — the limit pointed Riemannian manifold** (MSM135 `lbl408`).  Carrier `S.Lim`, basepoint
-`incl 0 O₀`, and the smooth Riemannian metric `ginf` (the D3d producer, supplied as input).  All the
-topological/manifold structure fields (`charted`/`smooth`/`sigmaCompact`/`t2`/`t2TangentBundle`) are
-synthesized from the D3a–D3c instances in `DirectLimitManifold.lean`. -/
+
+
+
+
 def limitPointed
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E]
@@ -56,10 +54,10 @@ def limitPointed
   basepoint := S.toSeqSystem.incl 0 O₀
   metric := ginf
 
-/-- **The full D3 endpoint (MSM135 `lbl408`): the limit pointed Riemannian manifold from
-per-factor metrics.**  Given per-factor metrics `g k` with the isometry cocycle (D2c's conclusion
-shape), the direct limit carries the pointed bundle with metric `g∞ = limitMetric` (D3d), so that
-`(incl k)^* g∞ = g k` (`SmoothSeqSystem.limitMetric_pullback`). -/
+
+
+
+
 def limitPointedCoc
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E]
@@ -74,15 +72,15 @@ def limitPointedCoc
 
 section StepD4a
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
   [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
 
-/-- **The stage members as pointed Riemannian manifolds**: carrier `A k`, basepoint the
-transported `F_{0≤k} O₀`, metric `g k`.  The `X.obj k` of the D4a comparison-map package. -/
+
+
 def factorPointed (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ) :
     PointedRiemannianManifold.{u, uE, uH} (I := I) where
@@ -90,15 +88,17 @@ def factorPointed (S : SmoothSeqSystem I A) (O₀ : A 0)
   basepoint := S.toSeqSystem.F (Nat.zero_le k) O₀
   metric := g k
 
-/-- The stage sequence of `factorPointed` members. -/
+
 def factorSeq (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) :
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
   obj := factorPointed S O₀ g
 
-/-- **The stage ranges exhaust the limit by open sets** (MSM135 `lbl379` packaged for the
-comparison maps): open (stage inclusions are open embeddings), monotone (`range_incl_mono`),
-and every compact factors through a stage (`isCompact_exists`). -/
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (k : ℕ), SigmaCompactSpace (A k)]
+    [∀ (k : ℕ), T2Space (A k)] in
 theorem rangeExhausts (S : SmoothSeqSystem I A) :
     ExhaustsByOpen (fun k => Set.range (S.toSeqSystem.incl k)) where
   isOpen k := (S.toSeqSystem.incl_isOpenEmb k).isOpen_range
@@ -109,9 +109,9 @@ theorem rangeExhausts (S : SmoothSeqSystem I A) :
     rw [hKeq]
     exact (Set.image_subset_range _ _).trans (S.toSeqSystem.range_incl_mono hk)
 
-/-- **D4a — comparison maps with separate sequence and limit-stage metrics.**  The maps depend
-only on the direct system, while the source pointed sequence uses `gSeq` and the direct-limit
-metric is glued from the cocycle family `gLim`. -/
+
+
+
 noncomputable def limitCGMapsOf (S : SmoothSeqSystem I A) (O₀ : A 0)
     (gSeq gLim : ∀ k, SmoothRiemannianMetric I (A k)) (hgLim : S.MetricCocycle gLim) :
     PointedRiemannianCGMaps.{u, uE, uH} (I := I)
@@ -124,7 +124,7 @@ noncomputable def limitCGMapsOf (S : SmoothSeqSystem I A) (O₀ : A 0)
   base_mem k := ⟨S.toSeqSystem.F (Nat.zero_le k) O₀, S.toSeqSystem.incl_comp (Nat.zero_le k) O₀⟩
   basepoint_map k := S.invIncl_incl_le (Nat.zero_le k) O₀
 
-/-- Same-family specialization of `limitCGMapsOf`. -/
+
 noncomputable def limitCGMaps (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) :
     PointedRiemannianCGMaps.{u, uE, uH} (I := I)
@@ -137,19 +137,18 @@ end StepD4a
 
 section StepD4bc
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
   [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
 
-set_option maxHeartbeats 800000 in
-/-- **D4b/c — stagewise compact-open convergence gives convergence to the direct limit.**
-The comparison maps are the inverses of the stage inclusions.  The source-domain seminorm is
-transported to the stage by simultaneous pullback invariance and open-subtype restriction
-invariance; the local formula `limitMetric_of_mem` identifies the restricted direct-limit metric
-with the pullback of the stage-limit metric. -/
+
+
+
+
+
 def limitCGConverges
     (S : SmoothSeqSystem I A) (O₀ : A 0)
     (gSeq gLim : ∀ k, SmoothRiemannianMetric I (A k))
@@ -255,10 +254,10 @@ def limitCGConverges
   let sourceT2 : T2Space (metricSourceOpen (I := I) Φ k) := by
     change T2Space (MetricSourceDomain (I := I) Φ k)
     exact metricSourceDomT2 (I := I) Φ k
-  let targetSigma : SigmaCompactSpace (metricTargetOpen (I := I) Φ k) := by
+  letI targetSigma : SigmaCompactSpace (metricTargetOpen (I := I) Φ k) := by
     change SigmaCompactSpace (MetricTargetDomain (I := I) Φ k)
     exact metricTargetDomSigmaOf (I := I) Φ k (hσtgt k)
-  let targetT2 : T2Space (metricTargetOpen (I := I) Φ k) := by
+  letI targetT2 : T2Space (metricTargetOpen (I := I) Φ k) := by
     change T2Space (MetricTargetDomain (I := I) Φ k)
     exact metricTargetDomT2 (I := I) Φ k
   let sourceMetric : SmoothRiemannianMetric I (MetricSourceDomain (I := I) Φ k) :=
@@ -320,9 +319,8 @@ def limitCGConverges
           dsimp only [targetSeq, targetLim]
           dsimp only [stageSet, stageVal]
           exact @metricDerivNormSupOn_restrictOpen E inferInstance inferInstance
-            inferInstance inferInstance inferInstance H inferInstance I
-            inferInstance
-            (A k) inferInstance inferInstance inferInstance inferInstance inferInstance
+            inferInstance inferInstance H inferInstance I
+            (A k) inferInstance inferInstance inferInstance inferInstance
             (gSeq k) (gLim k) (gLim k) (metricTargetOpen (I := I) Φ k)
             targetSigma targetT2 (F '' metricSourceCompactSet (I := I) Φ k K) p
     _ < ε := hkConv k hkC stageSet hKstage
@@ -333,8 +331,8 @@ section StepD5
 
 open Bundle
 
-/-- A continuous path starting in the interior of a closed set and ending outside it has a first
-exit time.  The path remains in the closed set through that time and meets its frontier there. -/
+
+
 theorem exists_first_exit
     {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsClosed K)
     {γ : ℝ → X} (hγ : ContinuousOn γ (Set.Icc 0 1))
@@ -386,7 +384,7 @@ theorem exists_first_exit
     exact ⟨htK, htNot⟩
 
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
@@ -395,10 +393,7 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Pointwise isometry of the stage inclusions (D5 cornerstone).**  Under the
-`RiemannianBundle` structures of the limit metric and the stage metric, the stage-inclusion
-derivative preserves the extended norm — `limitMetric_pullback` read through the fiber
-inner-product bridge (the `TangentNormDiamond` idiom). -/
+omit [CompleteSpace E] in
 theorem enorm_mfd_incl (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) (a : A k) (v : TangentSpace I a) :
@@ -423,9 +418,7 @@ theorem enorm_mfd_incl (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Stage inclusions preserve path length (D5).**  For a `C¹` path in a stage, the pushed
-path in the limit has the same `pathELength` — pointwise the chain rule plus the isometry
-`enorm_mfd_incl`. -/
+omit [CompleteSpace E] in
 theorem pathELength_incl (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) {γ : ℝ → A k} {t₀ t₁ : ℝ}
@@ -456,10 +449,7 @@ theorem pathELength_incl (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **The stage inclusions are 1-Lipschitz for the Riemannian edistances (D5).**  Every stage
-`C¹` path pushes to a limit path of the same length (`pathELength_incl`), so the infimum over
-limit paths is at most the infimum over stage paths.  (The reverse inequality is not abstract —
-a limit path may leave the stage range; the book recovers it on balls via the `2^k` exhaustion.) -/
+omit [CompleteSpace E] in
 theorem edist_incl_le (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) (a b : A k) :
@@ -486,12 +476,7 @@ theorem edist_incl_le (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Limit paths inside a stage range pull back at equal length (D5).**  If a `C¹` limit path
-stays in `range (incl k)` on `[t₀, t₁]`, its `(incl k)⁻¹`-pullback is a stage path of the same
-`pathELength` — `pathELength_incl` applied to the pullback plus `incl ∘ (incl)⁻¹ = id` on the
-range.  This is the reverse comparison the book uses on balls (`lbl408` completeness): limit
-almost-geodesics between points of a deep ball stay in a stage range, so stage distances are
-controlled by limit distances there. -/
+omit [CompleteSpace E] in
 theorem pathELength_invIncl (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) {δ : ℝ → S.toSeqSystem.Lim} {t₀ t₁ : ℝ}
@@ -522,11 +507,7 @@ theorem pathELength_invIncl (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Reverse distance comparison on deep balls (D5, the `lbl408` completeness mechanism).**
-If the closed `riemannianEDist`-ball of radius `r` around `x` lies in a stage range, then stage
-points under `x, y` with `edist x y < r` satisfy the reverse bound: every limit path from `x` of
-length `< r` stays in the ball (its partial lengths dominate the distances), hence in the range,
-so it pulls back at equal length (`pathELength_invIncl`) and bounds the stage distance. -/
+omit [CompleteSpace E] in
 theorem edist_invIncl_le (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) {x y : S.toSeqSystem.Lim} {r : ENNReal}
@@ -550,7 +531,6 @@ theorem edist_invIncl_le (S : SmoothSeqSystem I A)
   letI : RiemannianBundle (fun a : A k => TangentSpace I a) :=
     ⟨(g k).toRiemannianMetric⟩
   obtain ⟨γ, hγ0, hγ1, hγC, hlen⟩ := Manifold.exists_lt_of_riemannianEDist_lt hxy
-  -- the path stays in the `r`-ball, hence in the stage range
   have hmem : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ t ∈ Set.range (S.toSeqSystem.incl k) := by
     intro t ht
     refine hsub (γ t) ?_
@@ -560,7 +540,6 @@ theorem edist_invIncl_le (S : SmoothSeqSystem I A)
         (hγC.mono (Set.Icc_subset_Icc le_rfl ht.2)) hγ0 rfl ht.1
     refine hseg.trans (le_trans ?_ hlen.le)
     exact Manifold.pathELength_mono le_rfl ht.2
-  -- pull the path back and compare
   have hpull1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1
       (Function.invFun (S.toSeqSystem.incl k) ∘ γ) (Set.Icc 0 1) := by
     intro t ht
@@ -578,11 +557,7 @@ theorem edist_invIncl_le (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Closed `riemannianEDist`-balls of the limit are compact (D5a core).**  Given the metric
-exhaustion (`hexh`, the honest input discharged at D6 from the `2^k`-ball structure) and
-compactness of the stage `riemannianEDist`-balls (`hcpt`, from the members' properness), a
-closed limit ball of finite radius is a closed subset of the `incl k`-image of a compact stage
-ball — `edist_invIncl_le` transports the radius. -/
+omit [CompleteSpace E] in
 theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal),
@@ -605,14 +580,12 @@ theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
     ⟨(g k).toRiemannianMetric⟩
   have hz : z ∈ Set.range (S.toSeqSystem.incl k) :=
     hk z (by rw [Manifold.riemannianEDist_self]; exact zero_le _)
-  -- the compact stage ball, pushed to the limit
   have himg : IsCompact (S.toSeqSystem.incl k ''
       {b : A k | Manifold.riemannianEDist I (Function.invFun (S.toSeqSystem.incl k) z) b
         ≤ r + 1}) :=
     (hcpt k _ (r + 1)).image (S.toSeqSystem.continuous_incl k)
   refine IsCompact.of_isClosed_subset himg ?_ ?_
-  · -- the limit ball is closed: `riemannianEDist z ·` is `edist` for the induced emetric
-    letI : IsManifold I 1 S.toSeqSystem.Lim :=
+  · letI : IsManifold I 1 S.toSeqSystem.Lim :=
       IsManifold.of_le (by decide : (1 : WithTop ℕ∞) ≤ ∞)
     letI : TopologicalSpace.MetrizableSpace S.toSeqSystem.Lim :=
       Manifold.metrizableSpace I S.toSeqSystem.Lim
@@ -628,8 +601,7 @@ theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
         = (fun w : S.toSeqSystem.Lim => edist z w) ⁻¹' (Set.Iic r) := rfl
     rw [hset]
     exact IsClosed.preimage hcont isClosed_Iic
-  · -- the limit ball sits inside the pushed stage ball
-    intro w hw
+  · intro w hw
     have hw' : Manifold.riemannianEDist I z w ≤ r := hw
     have hwr : w ∈ Set.range (S.toSeqSystem.incl k) :=
       hk w (hw'.trans le_self_add)
@@ -640,8 +612,6 @@ theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every finite closed ball of the direct limit is covered by the image of a compact set in one
-stage.  This is the correct localized compactness input for an open-stage direct system. -/
 def HasCompactBallCover (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) : Prop :=
   ∀ (z : S.toSeqSystem.Lim) (r : ENNReal), r ≠ ⊤ →
@@ -653,8 +623,7 @@ def HasCompactBallCover (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Metric-ball exhaustion plus compact containment of each stage image in the next stage gives
-a compact stage cover for every finite limit ball. -/
+omit [CompleteSpace E] in
 theorem compactCover_of_step (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal),
@@ -676,7 +645,7 @@ theorem compactCover_of_step (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A compact stage cover makes each finite closed limit ball compact. -/
+omit [CompleteSpace E] in
 theorem compact_cball_cover (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hcover : HasCompactBallCover S g hg)
@@ -713,9 +682,6 @@ theorem compact_cball_cover (S : SmoothSeqSystem I A)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Localized D5 completeness.**  Compact stage covers of finite limit balls imply that the
-direct-limit metric is proper and hence complete, without requiring the open stages themselves to
-be complete or proper. -/
 theorem limitComplete_cover [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
@@ -754,11 +720,6 @@ theorem limitComplete_cover [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **D5a — the limit is metrically complete** (MSM135 `lbl408` completeness, L2087–2100).
-Under the metric exhaustion (`hexh`) and stage-ball compactness (`hcpt`), the closed balls of the
-limit's Riemannian distance are compact (`isCompact_cball_lim`), so the realized metric space is
-proper, hence complete.  Connectedness of the limit (from preconnected stages) supplies the
-finiteness of the Riemannian distance. -/
 theorem limitComplete [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)

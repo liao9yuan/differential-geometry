@@ -2,14 +2,13 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Uniform intrinsic form of the closed-manifold Sobolev embedding
 
-This module composes the constant-first chart embedding with the uniform
-reverse chart-to-intrinsic component estimate.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.Analysis.Sobolev
 
@@ -20,10 +19,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold ContDiff
 
-/-- Uniform sub-critical Sobolev embedding in terms of the intrinsic `L^p`
-norms of a smooth scalar and its Riemannian gradient. -/
+
+
 theorem sobolev_intrinsic
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -88,9 +87,9 @@ theorem sobolev_intrinsic
             (ENNReal.ofReal p) (riemannianVolumeMeasure I M g)) := by
       rw [← mul_assoc, ← ENNReal.ofReal_mul hCs]
 
-/-- Real-valued `L^p` form of the uniform intrinsic Sobolev embedding. -/
+
 theorem sobolev_lpNorm
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

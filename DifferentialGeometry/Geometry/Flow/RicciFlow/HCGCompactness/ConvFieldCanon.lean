@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SourceCovLip
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenAssembly
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 /-!
@@ -32,8 +30,8 @@ open Set
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -62,7 +60,6 @@ theorem open_upgrade_canon
   letI : T2Space mc.limit.M := mc.limit.t2
   letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
   letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact
-
   have hsrc : SrcSigma (I := I) Phi := by
     intro k
     exact Geometry.isSigmaCompact_of_isOpen I
@@ -78,7 +75,6 @@ theorem open_upgrade_canon
     exact Geometry.isSigmaCompact_of_isOpen I
       (PointedCGHMaps.target_open (I := I) Phi k)
   let bf := Classical.choice (nonempty_bumpFamily (I := I) Phi)
-
   let gRefT : ∀ k : Nat,
       letI : TopologicalSpace (X.term (mc.subseq k)).M :=
         (X.term (mc.subseq k)).topology
@@ -99,7 +95,6 @@ theorem open_upgrade_canon
       letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
         (X.term (mc.subseq k)).sigmaCompact
       (X.term (mc.subseq k)).S.family.metric 0
-
   have hcanonRel := StepDCanonData.canon_rel (I := I) canon hsrc htgt
   dsimp only at hcanonRel
   obtain ⟨Crel, hCrel, hrelZero⟩ := hcanonRel
@@ -137,7 +132,6 @@ theorem open_upgrade_canon
   dsimp only at hinit
   have hcp := StepDCanonData.canon_cp (I := I) canon hsrc htgt
   dsimp only at hcp
-
   let beta : Nat → Real := fun n => RealTimeInterval.openWindowLeft a 0 n
   let psi : Nat → Real := fun n => RealTimeInterval.openWindowRight b 0 n
   have hwindow : ∀ n : Nat, ∃ A Bmax : Real,
@@ -194,7 +188,6 @@ theorem open_upgrade_canon
     have hrestricted := metricUniformEquivalentOnWindow_mono (I := I)
       (Set.subset_univ (Phi.target k)) hall
     simpa only [gRefT, B] using hrestricted
-
   have hzeroWindow (n : Nat) : (0 : Real) ∈ Set.Icc (beta n) (psi n) := by
     simpa only [beta, psi, RealTimeInterval.openWindow] using
       RealTimeInterval.initial_mem_window hzero n
@@ -204,7 +197,6 @@ theorem open_upgrade_canon
     intro t ht
     rw [hD]
     exact RealTimeInterval.openWindow_subset hzero n ht
-
   have hShiT (n N : Nat) : ∃ KShi : Real, 0 ≤ KShi ∧
       ∀ k : Nat,
         letI : TopologicalSpace (X.term (mc.subseq k)).M :=
@@ -246,7 +238,6 @@ theorem open_upgrade_canon
     obtain ⟨KShi, hKShi, hShi⟩ := hShiT n N
     exact ⟨KShi, hKShi, fun k =>
       srcShi (I := I) Phi hsrc htgt (beta n) (psi n) N KShi hShi k⟩
-
   have hBsrc (n : Nat) : 1 ≤ Crel * Bmax n := by
     exact one_le_mul_of_one_le_of_one_le hCrel (hBmax n)
   have hequivSrc (n : Nat) : ∀ k : Nat,
@@ -280,13 +271,11 @@ theorem open_upgrade_canon
       (beta n) (psi n) gRefT (B n) Crel (hequivT n) hrel k t ht
     exact metricUniformEquivalentOn_of_le (I := I) hEq
       (mul_le_mul_of_nonneg_left (hBmajor n t ht) (zero_le_one.trans hCrel))
-
   have srcData (n : Nat) : SrcCovLipData (I := I) Phi mc.limit.metric
       hsrc htgt (beta n) (psi n) :=
     srcCovLip_of_soln (I := I) Phi mc.limit.metric hsrc htgt
       (hbetaPsi n) (hzeroWindow n) (hregular n)
       (Crel * Bmax n) (hBsrc n) (hequivSrc n) (hShiSrc n) hinit
-
   let cLow : Nat → Real := fun n => (Crel * Bmax n)⁻¹
   have hcLow (n : Nat) : 0 < cLow n := by
     exact inv_pos.mpr (zero_lt_one.trans_le (hBsrc n))
@@ -313,7 +302,6 @@ theorem open_upgrade_canon
       (hbound_of_equiv (I := I) Phi mc.limit.metric hsrc htgt
         (beta n) (psi n) gRefT (B n) Crel (Bmax n)
         (hBmajor n) hCrel (hequivT n) hrel k t ht' y v)
-
   have hcovTail : ∀ n q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real),
       t ∈ RealTimeInterval.openWindow a b 0 n →
       ∀ z : mc.limit.M, z ∈ bf.grow k →
@@ -346,7 +334,6 @@ theorem open_upgrade_canon
     obtain ⟨C, hC⟩ := hcov q
     exact ⟨C, fun k t ht z hz => hC k t (by
       simpa only [beta, psi, RealTimeInterval.openWindow] using ht) z hz⟩
-
   have hlipTail : ∀ n p : Nat, ∃ Lt : Real, 0 ≤ Lt ∧
       ∀ (k : Nat) (s t : Real),
         s ∈ RealTimeInterval.openWindow a b 0 n →
@@ -390,7 +377,6 @@ theorem open_upgrade_canon
       (by simpa only [beta, psi, RealTimeInterval.openWindow] using hs)
       (by simpa only [beta, psi, RealTimeInterval.openWindow] using ht)
       q hq z hz
-
   have hlipSrc : ∀ n k : Nat,
       letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
         sourceDomTop (I := I) Phi k
@@ -425,7 +411,6 @@ theorem open_upgrade_canon
       (by simpa only [beta, psi, RealTimeInterval.openWindow] using hs)
       (by simpa only [beta, psi, RealTimeInterval.openWindow] using ht)
       q hq y
-
   simpa only [mc] using
     (open_upgrade_of_raw (I := I) (X := X) mc Phi bf hsrc htgt
       hzero hD cLow hcLow hbound hcovTail hlipTail hlipSrc hcp)

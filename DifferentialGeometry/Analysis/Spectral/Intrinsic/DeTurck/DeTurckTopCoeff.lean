@@ -1,13 +1,13 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckTopAppCc
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
 
-/-!
-# Combined Ricci--DeTurck top coefficient
 
-This module gives the canonical coefficient of the second-derivative path arm
-for the complete Ricci--DeTurck right-hand side.  Keeping the Ricci and DeTurck
-contributions combined makes their principal-part cancellation available
-without any high-regularity hypothesis on the metric path.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -25,14 +25,14 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The complete second-order path coefficient of the Ricci--DeTurck RHS. -/
+
 def deTurckPhiMetTotal (g₀ g_bg g : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 :=
   deTurckLieArm2PrincipalCoeff (I := I) g₀ g g_bg
@@ -44,6 +44,8 @@ private theorem trace_perm_comp (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
     traceHessianSlotPerm ((traceHessianSlotPerm⁻¹ * σ) j) = σ j := by
   rw [Equiv.Perm.mul_apply, Equiv.Perm.inv_def, Equiv.apply_symm_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 private theorem lieTrace_reindex (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ ρ : Equiv.Perm (Fin 4))
     (hcomp : ∀ j : Fin 4, traceHessianSlotPerm (ρ j) = σ j) :
@@ -73,6 +75,7 @@ private theorem lieTrace_reindex (g₀ g₁ : SmoothRiemannianMetric I M)
     rw [hcomp j]
   rw [harg]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- The combined top coefficient is the two reindexed trace-Hessian
 coefficients minus the doubled Ricci principal coefficient. -/
 theorem phiMet_reindex (g₀ g_bg g : SmoothRiemannianMetric I M) :
@@ -101,13 +104,14 @@ theorem phiMet_reindex (g₀ g_bg g : SmoothRiemannianMetric I M) :
       (trace_perm_comp deTurckLieArm2DivSlotPermAT)]
   abel
 
+omit [BoundarylessManifold I M] in
 /-- Along the realized affine metric path, the complete top coefficient is the
 DeTurck coefficient minus the two Lichnerowicz-form Ricci coefficients. -/
 theorem phi_realized_eq
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) :
     deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg

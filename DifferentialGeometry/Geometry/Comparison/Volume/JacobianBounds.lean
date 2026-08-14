@@ -1,16 +1,15 @@
-import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
+import DifferentialGeometry.Geometry.Comparison.Volume.RadialJacobiScaling
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.AbsoluteValue
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Jacobian determinant bounds for normal-coordinate volume comparison
 
-This file starts Stage V1c of the volume-comparison lane.  It isolates the
-determinant-bound algebra that will consume the radial-Jacobi estimates from
-`SecondOrderGronwall` and `CovariantGronwall`.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,13 +29,13 @@ section MatrixBounds
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-/-- Entrywise control of a real square matrix gives an upper bound for
-`sqrt(det A)` once the determinant is known to be nonnegative.
 
-This is the reusable V1c algebraic bridge from Jacobi-field entry estimates to
-the upper normal-density bound.  The lower bound is not obtainable from
-entrywise estimates alone; it must come from the Grönwall lower/singular-value
-input. -/
+
+
+
+
+
+
 lemma sqrt_det_le_of_entry_bound
     {A : Matrix ι ι ℝ} {C : ℝ}
     (hdet_nonneg : 0 ≤ A.det)
@@ -53,11 +52,11 @@ lemma sqrt_det_le_of_entry_bound
     exact hdet_abs
   exact Real.sqrt_le_sqrt hdet_le
 
-/-- If every eigenvalue of a positive semidefinite real matrix is bounded below
-by `a`, then `sqrt(a^n)` is a lower bound for `sqrt(det A)`.
 
-This is the reusable V1c algebraic bridge from future singular-value lower
-estimates to the lower normal-density bound. -/
+
+
+
+
 lemma sqrt_pow_le_sqrt_det
     {A : Matrix ι ι ℝ} {a : ℝ}
     (hA : A.PosSemidef)
@@ -75,8 +74,8 @@ lemma sqrt_pow_le_sqrt_det
     exact hprod
   exact Real.sqrt_le_sqrt hdet
 
-/-- A unit-vector Rayleigh lower bound gives a lower bound for every eigenvalue
-of a real Hermitian matrix. -/
+
+
 lemma eigenvalues_ge_of_rayleigh
     {A : Matrix ι ι ℝ} {a : ℝ}
     (hA : A.IsHermitian)
@@ -87,8 +86,8 @@ lemma eigenvalues_ge_of_rayleigh
   rw [hA.eigenvalues_eq i]
   exact hray (hA.eigenvectorBasis i) (hA.eigenvectorBasis.norm_eq_one i)
 
-/-- A Rayleigh lower bound for a positive semidefinite real matrix gives the
-corresponding determinant square-root lower bound. -/
+
+
 lemma sqrt_pow_le_sqrt_det_of_rayleigh
     {A : Matrix ι ι ℝ} {a : ℝ}
     (hA : A.PosSemidef)
@@ -101,8 +100,8 @@ lemma sqrt_pow_le_sqrt_det_of_rayleigh
 
 end MatrixBounds
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -116,32 +115,44 @@ section NormalChart
 variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), ContinuousLinearMap.add_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v y w : TangentSpace I x) :
     g.inner x v (y + w) = g.inner x v y + g.inner x v w :=
   ContinuousLinearMap.map_add (g.inner x v) y w
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) (c : ℝ)
     (y : TangentSpace I x) :
     g.inner x v (c • y) = c * g.inner x v y := by
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, ContinuousLinearMap.zero_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_smul_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (t : ℝ) (v w : TangentSpace I x) :
     g.inner x (t • v + w) (t • v + w) =
@@ -155,10 +166,12 @@ private lemma g_inner_smul_add_diag
   rw [hsymm]
   ring
 
-/-- Local Cauchy-Schwarz inequality for the pointwise Riemannian inner product.
 
-This is kept local to the V1c determinant-bound layer for now.  If later
-comparison lanes need it, move it to the metric algebra layer. -/
+
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma riemannian_inner_cauchy_schwarz
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -221,8 +234,10 @@ private lemma riemannian_inner_cauchy_schwarz
   rw [hsqrt_mul] at hC
   exact hC
 
-/-- A uniform upper bound for the Riemannian lengths of endpoint radial Jacobi
-fields gives an entrywise upper bound for the radial-Jacobi Gram matrix. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialEntry_le_of_length_bound
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {B : ℝ}
     (hB : 0 ≤ B)
@@ -240,9 +255,11 @@ lemma radialEntry_le_of_length_bound
   rw [radialJacobiGram_apply]
   exact hcs.trans (mul_le_mul (hJ i) (hJ j) (Real.sqrt_nonneg _) hB)
 
-/-- The quadratic form of the radial-Jacobi Gram matrix is the squared
-Riemannian length of the corresponding linear combination of endpoint radial
-Jacobi fields. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialJacobiGram_quadratic
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (v : Fin (Module.finrank ℝ E) → ℝ) :
@@ -285,11 +302,12 @@ lemma radialJacobiGram_quadratic
     g.inner q (∑ i, v i • J i) (∑ i, v i • J i)
   rw [hleft, hright]
 
-/-- Entrywise upper bounds for the radial-Jacobi Gram matrix give the
-corresponding upper bound for the normal-coordinate density.
 
-The intended V1c consumer proves `hentry` from Jacobi/Gronwall estimates, with
-`C` an explicit capped-scale function. -/
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_le_of_radial_entry_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {C : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -317,8 +335,9 @@ lemma normalDensity_le_of_radial_entry_bound
       (A := radialJacobiGram (I := I) g p x)
       (C := C) hdet_nonneg hentry
 
-/-- Endpoint length control for the radial Jacobi fields gives the corresponding
-upper bound for the normal-coordinate density. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_le_of_radial_length_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -335,14 +354,15 @@ lemma normalDensity_le_of_radial_length_bound
     (I := I) g p hxsrc hxrad
     (radialEntry_le_of_length_bound (I := I) g p x hB hJ)
 
-/-- Pointwise upper density bound from the radial-Jacobi Gronwall endpoint
-producer.
 
-This theorem removes the intermediate endpoint-length hypothesis by consuming
-`radialJacobi_fin_le`.  It still keeps the real analytic producers explicit:
-radial regularity, parallel orthonormal frame, differentiability of each basis
-Jacobi field and its covariant derivative, the ODE bound, and the scalar model
-bound `hG`. -/
+
+
+
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {K b B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -401,11 +421,12 @@ lemma density_le_gronwall
     (radialJacobi_fin_le (I := I) g p x hK hb h1b hγ hcard F hpar hON
       hFdiff hJdiff hDJdiff hODE hG)
 
-/-- Pointwise upper density bound from a uniform initial-speed estimate.
 
-Compared with `density_le_gronwall`, this version replaces the per-basis scalar
-Gronwall hypothesis by a single initial-speed bound `A` and one scalar model
-comparison.  The analytic Jacobi/parallel-frame hypotheses remain explicit. -/
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_init_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -460,12 +481,13 @@ lemma density_le_gronwall_of_init_bound
     (radialJacobi_fin_le_of_init_bound (I := I) g p x hK hb h1b hγ hcard F
       hpar hON hFdiff hJdiff hDJdiff hODE hinit hmodel)
 
-/-- Pointwise upper density bound from actual radial-Jacobi initial derivative
-equalities and a uniform `g_p`-length bound on the fixed model basis.
 
-This is the V1c-facing form after the scalar compression step: the remaining
-initial-speed producer is now the honest fixed-basis statement `D_tJ_k(0)=e_k`,
-together with a separate bound on the basis lengths at the center. -/
+
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_deriv_eq
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -520,12 +542,13 @@ lemma density_le_gronwall_of_deriv_eq
     (radialJacobi_fin_le_of_deriv_eq (I := I) g p x hK hb h1b hγ hcard F
       hpar hON hFdiff hJdiff hDJdiff hODE hderiv hbasis hmodel)
 
-/-- Pointwise upper density bound from a small-radius radial-Jacobi derivative
-producer.
 
-This is the density-level consumer of `fin_deriv_radius`: it keeps the
-fixed-basis smallness side condition explicit while removing the manually
-assembled `D_tJ_k(0)=e_k` hypothesis. -/
+
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_radius_deriv
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {r K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -583,12 +606,13 @@ lemma density_le_gronwall_of_radius_deriv
       hpar hON hFdiff hJdiff hDJdiff hODE hderivRadius hxsmall hbasisSmall
       hbasis hmodel)
 
-/-- Pointwise upper density bound from a small-radius derivative producer
-applied to a positive scalar multiple of each fixed basis vector.
 
-This is the density-level consumer of the scaled-radius endpoint bridge: the
-fixed basis itself need not lie in the derivative radius, only the scaled basis
-`a • e_k` does. -/
+
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_scaled_radius
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a r K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -650,7 +674,6 @@ lemma density_le_gronwall_of_scaled_radius
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local-regularity version of `exists_dens_le_rm04`. -/
 theorem exists_dens_le_rm04_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -707,7 +730,6 @@ theorem exists_dens_le_rm04_at
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Pointwise upper density bound from the endpoint-closed Rm04 radial package. -/
 theorem exists_dens_le_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -756,8 +778,9 @@ theorem exists_dens_le_rm04
   exact h x hx hBnn ha hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm hxsrc hxrad
     (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hinit hmodel
 
-/-- The radial-Jacobi Gram matrix is positive definite on the normal-coordinate
-source, before the C² radius. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobiGram_posDef
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -767,11 +790,12 @@ lemma radialJacobiGram_posDef
   exact DifferentialGeometry.Integral.Measure.paramGramMatrix_posDef
     (I := I) g (NormalCoordinates.expMapDiffeo (I := I) g p) hxsrc
 
-/-- Eigenvalue lower bounds for the radial-Jacobi Gram matrix give the
-corresponding lower bound for the normal-coordinate density.
 
-The future V1c singular-value/Gronwall lower producer should supply `heig` with
-an explicit capped-scale lower bound. -/
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_eigen_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -789,11 +813,12 @@ lemma normalDensity_ge_of_eigen_bound
       (radialJacobiGram_posDef (I := I) g p hxsrc hxrad).posSemidef
       ha heig
 
-/-- Rayleigh lower bounds for the radial-Jacobi Gram matrix give the
-corresponding lower bound for the normal-coordinate density.
 
-This is the V1c lower-route consumer that future singular-value/Gronwall
-producers should target before passing to determinant estimates. -/
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_rayleigh_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -812,8 +837,9 @@ lemma normalDensity_ge_of_rayleigh_bound
       (radialJacobiGram_posDef (I := I) g p hxsrc hxrad).posSemidef
       ha hray
 
-/-- A lower bound for every unit linear combination of endpoint radial Jacobi
-fields gives the corresponding lower bound for the normal-coordinate density. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_combo_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -830,9 +856,10 @@ lemma normalDensity_ge_of_combo_bound
       rw [← radialJacobiGram_quadratic (I := I) g p x (⇑v)] at h
       simpa using h)
 
-/-- A lower bound for the single endpoint radial Jacobi field generated by each
-unit coefficient direction gives the corresponding lower bound for the
-normal-coordinate density. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_dir_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -854,7 +881,6 @@ lemma normalDensity_ge_of_dir_bound
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local-regularity version of `exists_dens_ge_rm04`. -/
 theorem exists_dens_ge_rm04_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -915,7 +941,6 @@ theorem exists_dens_ge_rm04_at
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Pointwise lower density bound from the endpoint-closed Rm04 radial package. -/
 theorem exists_dens_ge_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -971,7 +996,6 @@ theorem exists_dens_ge_rm04
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local-regularity version of `exists_dens_two_rm04`. -/
 theorem exists_dens_two_rm04_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1058,8 +1082,6 @@ theorem exists_dens_two_rm04_at
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local-regularity two-sided Rm04 density bounds with separate lower and
-upper endpoint constants. -/
 theorem exists_dens_pair_rm04_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1147,7 +1169,6 @@ theorem exists_dens_pair_rm04_at
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Two-sided pointwise density bounds from the endpoint-closed Rm04 radial packages. -/
 theorem exists_dens_two_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1209,8 +1230,9 @@ theorem exists_dens_two_rm04
     hxsrc hxrad (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff
     hinit hmodelLe hmodelGe
 
-/-- A model ball with radius below the normal-coordinate `C²` radius lies in
-the source of the exponential-map parametrization. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma ball_src_of_radius
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) :
@@ -1222,8 +1244,9 @@ lemma ball_src_of_radius
     ball_subset_normalChartAt_target (I := I) g p (hwR.trans_le hR)
   simpa [normalChartAt_target_eq (I := I) g p] using hw_target
 
-/-- A determinant lower bound for the radial-Jacobi Gram matrix gives the
-corresponding pointwise lower bound for the normal-coordinate density. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_det
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {c : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -1233,8 +1256,9 @@ lemma density_ge_det
   rw [normalDensity_radial (I := I) g p hxsrc hxrad]
   exact Real.sqrt_le_sqrt hdet
 
-/-- Model-ball form of `density_ge_det`, with source and `C²`-radius
-membership discharged from the radius bound. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_det_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R c : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1251,8 +1275,9 @@ lemma density_ge_det_ball
     exact hwR.trans_le hR
   exact density_ge_det (I := I) g p hwsrc hwrad (hdet w hw)
 
-/-- Model-ball form of `normalDensity_ge_of_rayleigh_bound`, with source and
-`C²`-radius membership discharged from the radius bound. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_rayleigh_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R a : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1272,8 +1297,9 @@ lemma density_ge_rayleigh_ball
     exact hwR.trans_le hR
   exact normalDensity_ge_of_rayleigh_bound (I := I) g p hwsrc hwrad ha (hray w hw)
 
-/-- Model-ball form of `normalDensity_ge_of_combo_bound`, with source and
-`C²`-radius membership discharged from the radius bound. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_combo_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R a : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1294,8 +1320,9 @@ lemma density_ge_combo_ball
     exact hwR.trans_le hR
   exact normalDensity_ge_of_combo_bound (I := I) g p hwsrc hwrad ha (hcombo w hw)
 
-/-- Model-ball form of `normalDensity_ge_of_dir_bound`, with source and
-`C²`-radius membership discharged from the radius bound. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_dir_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R a : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1318,11 +1345,11 @@ lemma density_ge_dir_ball
     exact hwR.trans_le hR
   exact normalDensity_ge_of_dir_bound (I := I) g p hwsrc hwrad ha (hdir w hw)
 
-/-- V1c upper-bound consumer form.
 
-If the radial-Jacobi Gram entries are uniformly bounded on the normal-coordinate
-image of `A`, then the V1a volume integral is bounded by the corresponding
-constant-density model-Haar integral. -/
+
+
+
+
 theorem normalChart_volume_le_of_radial_entry_bound
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -1363,10 +1390,10 @@ theorem normalChart_volume_le_of_radial_entry_bound
   exact normalDensity_le_of_radial_entry_bound
     (I := I) g p hwsrc hwrad (hentry w hw)
 
-/-- V1c upper-bound consumer from endpoint radial-Jacobi length estimates.
 
-This is the form meant to consume the first Grönwall upper estimate before any
-singular-value lower bound is available. -/
+
+
+
 theorem normalChart_volume_le_of_radial_length_bound
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -1388,11 +1415,11 @@ theorem normalChart_volume_le_of_radial_length_bound
     (I := I) g p hA_meas hA_source hA_rad
     (fun w hw => radialEntry_le_of_length_bound (I := I) g p w hB (hJ w hw))
 
-/-- Constant-measure form of the endpoint-length upper bound.
 
-This is the V1d-facing version: after the Grönwall length estimate is supplied,
-the remaining work is to bound the model-Haar measure of the normal-coordinate
-image. -/
+
+
+
+
 theorem normalChart_volume_le_const_mul_of_radial_length_bound
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)

@@ -31,11 +31,13 @@ theorem exists_ball_cover {x : V} {r rho : ℝ} (hr : 0 < r)
       s.card ≤ Nat.ceil ((4 * r / rho + 1) ^ Module.finrank ℝ V) ∧
       Metric.closedBall x r ⊆ ⋃ c ∈ s, Metric.ball c rho := by
   classical
+  letI : NeZero (Module.finrank ℝ V) :=
+    ⟨(Module.finrank_pos (R := ℝ) (M := V)).ne'⟩
   let e := (stdOrthonormalBasis ℝ V).repr
   obtain ⟨t, htcard, _, htcover, _⟩ :=
     DeGiorgi.exists_finite_inner_ball_cover_with_card
       (d := Module.finrank ℝ V) (x₀ := e x)
-      (r := r) (rho := rho) (R := r + 3 * rho)
+      (r := r) (ρ := rho) (R := r + 3 * rho)
       hr hrho (by linarith)
   let s : Finset V := t.image (fun c ↦ e.symm c)
   refine ⟨s, Finset.card_image_le.trans htcard, ?_⟩
@@ -87,8 +89,7 @@ theorem exists_shell_cover (x : V) {rho : ℝ} (hrho : 0 < rho) (k : ℕ) :
   rw [Nat.ceil_le]
   norm_num only [Nat.cast_pow, Nat.cast_mul, Nat.cast_ofNat,
     Nat.cast_add, Nat.cast_one]
-  exact hpow
-
+  simpa only [Nat.cast_add, Nat.cast_one] using hpow
 end Euclidean
 end Parabolic
 end Analysis

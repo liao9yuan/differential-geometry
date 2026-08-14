@@ -3,14 +3,14 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 
-/-!
-# Uniform scalar-multiplier jet bounds
 
-This file realizes a smooth scalar multiplier as a rank-zero mixed tensor
-coefficient.  Compact-parameter bounds for its action then follow from the
-parametric operator-field jet estimate, without a second iterated Leibniz
-calculus.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,7 +54,7 @@ private theorem rank_zero_one (x : M) (c : Tensor0SSpace 0 I x) :
     Tensor0SSpace.evalScalar_apply]
   exact congrArg (Tensor0SSpace.toModel c) (Subsingleton.elim Fin.elim0 v)
 
-/-- The rank-zero mixed coefficient induced by a smooth scalar function. -/
+
 noncomputable def scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) : SmoothCcTensor g 0 0 where
   toSection := tensorRSField_smulByFun ∞ (zeta : M → ℝ) zeta.contMDiff
@@ -64,8 +64,6 @@ noncomputable def scalarCc (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- The scalar readout of a rank-zero scalar coefficient is its defining
-smooth function. -/
 @[simp] theorem scalar0_scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -88,8 +86,6 @@ smooth function. -/
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] in
-/-- Either the manifold is empty, or it admits a strictly positive smooth
-rank-zero tensor of unit Riemannian mass. -/
 theorem unit_init_or_empty (g : SmoothRiemannianMetric I M) :
     IsEmpty M ∨
       ∃ u0 : SmoothCcTensor g 0 0,
@@ -128,10 +124,11 @@ theorem unit_init_or_empty (g : SmoothRiemannianMetric I M) :
         MeasureTheory.measureReal_def]
       exact mul_inv_cancel₀ hvol.ne'
 
-/-- Applying the rank-zero coefficient is pointwise scalar multiplication. -/
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem app_scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) (U : SmoothCcTensor g 0 0) :
-    appCc (I := I) (M := M) g 0 0 (scalarCc (I := I) (M := M) g zeta) U =
+    operatorFieldApply (I := I) (M := M) g 0 0 (scalarCc (I := I) (M := M) g zeta) U =
       scalarSmul (I := I) (M := M) g 0 0 zeta U := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -149,8 +146,6 @@ theorem app_scalarCc (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] in
-/-- The scalar readout of a rank-zero scalar multiplier is ordinary pointwise
-scalar multiplication. -/
 theorem scalar0_smul_cc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) (U : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -207,8 +202,6 @@ private theorem joint_rs_smul {r s : ℕ} {S : Set ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Joint smoothness of scalar coefficients realizes joint smoothness of their
-rank-zero mixed-tensor coefficients. -/
 theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S : Set ℝ}
     (hzeta : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
@@ -235,9 +228,9 @@ theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
     (fun p : M × ℝ => A p.1) hA
   exact hsmul.congr fun p _ => rfl
 
-/-- A jointly smooth scalar family on a compact parameter set acts with one
-uniform covariant-jet window, independent of the parameter and of the support
-of the input tensor. -/
+
+
+
 theorem smul_jet_unif (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S K : Set ℝ}
     (hK : IsCompact K) (hKS : K ⊆ S)

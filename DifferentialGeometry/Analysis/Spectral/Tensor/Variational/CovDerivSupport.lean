@@ -6,7 +6,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Geometry.Operator.Gradient
@@ -16,23 +16,10 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 
-/-!
-# Compact support of the gradient inner-product integrand
-
-For a closed smooth Riemannian manifold `(M, g)`, the pointwise gradient
-inner product `tensorCovDerivPointwiseInner g r s S T` vanishes wherever the
-section `S` (or `T`) vanishes, hence is supported inside `tsupport S.toFun`
-(and `tsupport T.toFun`). Since a compactly-supported section has compact
-support, the integrand has compact support — the analytic prerequisite for
-integrability against the Riemannian volume measure.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -51,7 +38,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -62,8 +49,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Auxiliary: if `S.toSection y = 0` for all `y` in a neighbourhood of `x`, then
-the directional covariant derivative of `S` at `x` vanishes in every direction. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -94,8 +81,8 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
   rw [hcongr, hcov_zero]
   rfl
 
-/-- If `x ∉ tsupport S.toFun`, then the directional covariant derivative of `S` at `x`
-vanishes in every direction. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) (v : E) :
@@ -123,7 +110,8 @@ lemma tensorCovDerivAt_eq_zero_off_tsupport
   exact tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (I := I) (M := M) g r s S x hev v
 
-/-- The integrand vanishes at any point outside `tsupport S.toFun`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -140,8 +128,8 @@ private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
   rw [hSi, TensorRSSpace.toModel_zero, tensorInnerPointwise_zero_left]
   ring
 
-/-- The integrand `tensorCovDerivPointwiseInner g r s S T` has compact support: it
-vanishes outside `tsupport S.toFun`, which is compact in `M`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -154,9 +142,8 @@ theorem tensorCovDerivPointwiseInner_hasCompactSupport
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
-/-- The topological support of the integrand `tensorCovDerivPointwiseInner g r s
-S T` is contained in the topological support of `S.toFun`: the integrand
-vanishes wherever the first section vanishes. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -168,9 +155,8 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_left
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
-/-- The topological support of the integrand `tensorCovDerivPointwiseInner g r s
-S T` is contained in the topological support of `T.toFun`: the integrand
-vanishes wherever the second section vanishes. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

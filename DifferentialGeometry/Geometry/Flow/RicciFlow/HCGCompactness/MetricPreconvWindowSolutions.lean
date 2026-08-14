@@ -4,16 +4,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Flow-instantiated P3 window endpoint
 
-This file contains the small producer-shape layer between the Ricci-flow
-solution data/P1-P2 inputs and the abstract `windowGInf` endpoint.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -25,19 +23,18 @@ open DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-/-- The solution time/spatial-derivative swap input consumed by the metric
-time-Lipschitz producer. -/
+
+
 def SolSwapData
     (gRef : SmoothRiemannianMetric I M)
     (D : Nat -> RealTimeInterval)
@@ -52,7 +49,7 @@ def SolSwapData
       (fun r y => (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) r) p') y
         (fun a : Fin (p' + 2) => V a y))
 
-/-- Local all-compact, finite-order producer data for the spatial P2 bound. -/
+
 structure SolCovData
     (β ψ t0 : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -78,7 +75,7 @@ structure SolCovData
           metricCovDerivNorm (I := I) r (gSeq i t0) gRef x <= initC r) /\
         (forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius)
 
-/-- Local positive-order data for the time-Lipschitz producer. -/
+
 structure SolLipData
     (K : Set M) (β ψ : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -102,7 +99,7 @@ structure SolLipData
         0 <= CN /\
         MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a CN
 
-/-- Zero-order producer data for the time-Lipschitz estimate. -/
+
 structure SolLip0Data
     (K : Set M) (beta psiT : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -122,7 +119,7 @@ structure SolLip0Data
         (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x 2
           (ricCovTower (I := I) (gSeq i t) (gSeq i t) 0 x)) <= KShi0
 
-/-- Global lower metric control in the exact form consumed by `windowGInf`. -/
+
 def SolLowData
     (beta psiT : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -131,8 +128,8 @@ def SolLowData
     exists c : Real, 0 < c /\ forall (k : Nat) (x : M) (v : TangentSpace I x),
       c * gRef.inner x v v <= (gSeq (rho k) t).inner x v v
 
-/-- The honest solution-window inputs needed to feed the abstract `windowGInf`
-endpoint. -/
+
+
 inductive SolWindowData : Type _ where
   | mk
       (K : Set M) (hK : IsCompact K)
@@ -150,7 +147,7 @@ inductive SolWindowData : Type _ where
       (Hlip : SolLipData (I := I) K beta psiT p gSeq gRef D S)
       (hlow : SolLowData (I := I) beta psiT gSeq gRef)
 
-/-- Compact conclusion package for the flow-instantiated P3 window endpoint. -/
+
 inductive WindowMetricPreconvConclusion : Type _ where
   | intro
       (K : Set M) (beta psiT : Real) (p : Nat)
@@ -158,15 +155,24 @@ inductive WindowMetricPreconvConclusion : Type _ where
       (gRef : SmoothRiemannianMetric I M)
       (out : WindowGInfOut (E := E) (H := H) (I := I) (M := M) K beta psiT p gSeq gRef)
 
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private lemma metricTensorField_eq_metricTensor0S
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.metricTensorField (I := I) g x =
       metricTensor0S (I := I) g x := by
   ext v
   rw [Tensor0SBundle.metricTensorField_apply, metricTensor0S_apply]
 
-/-- Zeroth fixed-background metric derivative bound from window metric equivalence. -/
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem covZeroBdd
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -213,8 +219,11 @@ theorem covZeroBdd
   rw [hcov]
   exact le_trans hcomp (by rw [hself])
 
-/-- Spatial boundedness in the exact all-compact/all-order form consumed by `windowGInf`. -/
+
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem covBddAllSol
+    [Module.Finite ℝ E]
     {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -246,9 +255,13 @@ theorem covBddAllSol
     obtain ⟨C, hC⟩ := horders q.succ hq le_rfl
     exact ⟨C, fun k z hz => hC (rho k) t ht z hz⟩
 
-/-- Order-zero time-Lipschitz control from the flow equation and the zero-order
-moving Ricci bound. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem hgLip0Sol
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -313,8 +326,12 @@ theorem hgLip0Sol
                 (mul_le_mul_of_nonneg_left hshi (Real.sqrt_nonneg _)) (by norm_num))
     s hs t ht x hx
 
-/-- Uniform time-Lipschitz control for all target orders `a <= p`. -/
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem hgLipFinSol
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real} {p : Nat}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -377,8 +394,8 @@ theorem hgLipFinSol
     exact le_trans (hspec.2 i s hs t ht x hx)
       (mul_le_mul_of_nonneg_right hchosen habs_nonneg)
 
-/-- A countable dense net in a nonempty closed real interval, stated in the
-form consumed by `windowGInf`. -/
+
+
 theorem denseIccSeq {beta psiT : Real} (hbeta : beta <= psiT) :
     exists e : Nat -> Real,
       (forall n : Nat, e n ∈ Set.Icc beta psiT) /\
@@ -398,9 +415,12 @@ theorem denseIccSeq {beta psiT : Real} (hbeta : beta <= psiT) :
     refine ⟨n, ?_⟩
     simpa [tx, eX, X, Subtype.dist_eq, Real.dist_eq] using hn
 
-/-- Flow-instantiated P3 window endpoint obtained by feeding the honest
-solution producers into the named-output abstract `windowGInfOut`. -/
-theorem winGInfOfSol (hne : Nonempty M)
+
+
+omit [Module.Finite ℝ E] in
+theorem winGInfOfSol
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (beta psiT t0 : Real) (hbeta : beta <= psiT)
     (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -431,7 +451,7 @@ theorem winGInfOfSol (hne : Nonempty M)
     hne K hK beta psiT p gSeq gRef e he hdense
     L hL hgLip (covBddAllSol (I := I) hS hmet hreg Hcov) hlow'
 
-/-- Compact-data version of `winGInfOfSol`. -/
+
 noncomputable def winGInfOfData (hne : Nonempty M)
     (W : SolWindowData (I := I) (M := M)) :
     WindowMetricPreconvConclusion (E := E) (H := H) (I := I) (M := M) := by

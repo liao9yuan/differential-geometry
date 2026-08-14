@@ -13,9 +13,3 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompa
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.SolutionCompactnessInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.HamiltonCompactness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.HamiltonPositiveRicciAdapter
-
-/-!
-# Hamilton--Cheeger--Gromov Compactness
-
-Umbrella import for the RicciFlower-native compactness interface.
--/

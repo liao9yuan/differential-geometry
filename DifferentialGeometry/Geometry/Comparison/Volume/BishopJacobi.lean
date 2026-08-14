@@ -27,13 +27,16 @@ open DifferentialGeometry.Geometry.Riemannian.Volume
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The Jacobi density ratio has logarithmic derivative equal to the
 difference between the Jacobi and model mean curvatures. -/
 theorem hasDerivAt_denRatio
@@ -60,7 +63,7 @@ theorem hasDerivAt_denRatio
       curveDensity (I := I) g γ V r)
     (m := curveMean (I := I) g γ V) hq ht hden rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 /-- A uniform linear lower bound for every unit Jacobi combination gives a
@@ -129,6 +132,9 @@ theorem denRatio_ge_of_dir
       ring
     _ ≤ curveDensity (I := I) g γ V t := hcurve
 
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A Jacobi density whose mean curvature is bounded above by the model mean
 curvature has antitone ratio to the model density. -/
 theorem curveRatio_anti
@@ -181,6 +187,7 @@ theorem curveRatio_anti
       exact hderiv t ht'
   simpa only [R] using hanti
 
+omit [SigmaCompactSpace M] in
 /-- A positive constant-speed transverse Jacobi family under the Ricci lower
 bound has mean curvature at most the speed-scaled hyperbolic model, provided
 its density ratio stays positive at the pole. -/

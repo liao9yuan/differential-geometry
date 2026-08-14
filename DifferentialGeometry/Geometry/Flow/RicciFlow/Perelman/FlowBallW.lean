@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CollapseScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Cutoff W-form on curvature-controlled flow balls
@@ -26,13 +25,12 @@ open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 

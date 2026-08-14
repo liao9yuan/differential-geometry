@@ -4,15 +4,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalLive
 
 set_option autoImplicit false
 
-/-!
-# Source-local finite-support capstone
 
-This file assembles the source-chart cover, chart-local limit weights, sparse
-two-index point families, and the selected normal-branch readout.  Every source
-slot keeps its own chart and weight family.  The only global operation is a
-finite maximum of the pair-index thresholds after the local capstones have
-been proved.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,9 +36,10 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- A frozen source ball is covered by source-local patches, and one pair-index
-tail retains the complete controlled-chart center solution on every patch. The
-joining map is the intrinsic minimizing join produced by the selected branch. -/
+
+
+
+
 def HasSuppCmFin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -48,7 +49,6 @@ def HasSuppCmFin
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    (chart : NormalChartFamily (I := I) X)
     (q : LiveSlot L pb r → NNReal) (δ : LiveSlot L pb r → Real)
     (sourceBall : Set (X.obj (L.φ n)).M)
     (sourcePatch : LiveSlot L pb r → Set (X.obj (L.φ n)).M)
@@ -98,14 +98,11 @@ def HasSuppCmFin
           (fun y => y) x
         ∃ hcm : CenterInput (I := I) Y.metric (mu alpha x) pts join x
             (radSeq alpha a b x),
-          HasChartCmSol (I := I) Y (hcomplete.complete (L.φ n))
-            (hconn (L.φ n)) (seqCenterD hd P L n (alpha.1 : Nat))
-            (chart (L.φ n) (seqCenterD hd P L n (alpha.1 : Nat)))
-            (q := q alpha) (delta := δ alpha)
+          HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn q δ alpha
             (mu alpha x) pts join x (radSeq alpha a b x) hcm
 
-/-- A frozen support-local center capstone persists under a further strict
-refinement of both pair indices and the frozen source stage. -/
+
+
 theorem HasSuppCmFin.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -115,7 +112,6 @@ theorem HasSuppCmFin.subseq
     {hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M}
-    {chart : NormalChartFamily (I := I) X}
     {q : LiveSlot L pb r → NNReal} {δ : LiveSlot L pb r → Real}
     {ψ : Nat → Nat} (hψ : StrictMono ψ)
     {sourceBall : Set (X.obj (L.φ (ψ n))).M}
@@ -123,9 +119,9 @@ theorem HasSuppCmFin.subseq
     {mu : LiveSlot L pb r → (X.obj (L.φ (ψ n))).M → Fin (pb.A r) → Real}
     {ptsSeq : LiveSlot L pb r → Nat → Nat → (X.obj (L.φ (ψ n))).M →
       Fin (pb.A r) → (X.obj (L.φ (ψ n))).M}
-    (h : HasSuppCmFin (I := I) hd P L pb r (ψ n) hcomplete hconn chart q δ
+    (h : HasSuppCmFin (I := I) hd P L pb r (ψ n) hcomplete hconn q δ
       sourceBall sourcePatch mu ptsSeq) :
-    HasSuppCmFin (I := I) hd P (L.subseq hψ) pb r n hcomplete hconn chart q δ
+    HasSuppCmFin (I := I) hd P (L.subseq hψ) pb r n hcomplete hconn q δ
       sourceBall sourcePatch mu
       (fun alpha a b x gamma ↦ ptsSeq alpha (ψ a) (ψ b) x gamma) := by
   classical
@@ -151,10 +147,10 @@ theorem HasSuppCmFin.subseq
     simpa only [radSeq', NetLimitData.subseq_phi,
       Function.comp_apply] using hout
 
-/-- The canonical source patches, local limit weights, and direct two-stage
-point family at one frozen source stage, together with their compact-cover and
-strict-center capstones.  This package keeps the source chart local and does
-not compare weights from different live slots. -/
+
+
+
+
 def HasSuppCmData
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -165,7 +161,6 @@ def HasSuppCmData
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    (chart : NormalChartFamily (I := I) X)
     (U : LiveSlot L inp.pack r → Set E)
     (aInf : (alpha : LiveSlot L inp.pack r) →
       Fin (inp.pack.A r) → E → Real)
@@ -205,40 +200,29 @@ def HasSuppCmData
         (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
       z gamma
   let chi := fun (alpha : LiveSlot L inp.pack r) =>
-    chart (Lphi.φ n) (beta n alpha)
+    NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
   let sourceBall := Lphi.hatSourceBall inp.decay P r n
   let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
-    sourceBall ∩ (chi alpha).hom.target ∩ (chi alpha).inv ⁻¹' U alpha
+    sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
   let localWeight := fun (alpha : LiveSlot L inp.pack r)
       (x : Y.M) (gamma : Fin (inp.pack.A r)) =>
-    weightInf alpha ((chi alpha).inv x) gamma
+    weightInf alpha (chi alpha x) gamma
   let pairPts : (alpha : LiveSlot L inp.pack r) →
       InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
     fun alpha target a b x =>
-      let Ya := X.obj (Lphi.φ a)
-      letI : TopologicalSpace Ya.M := Ya.topology
-      letI : ChartedSpace H Ya.M := Ya.charted
-      letI : IsManifold I ∞ Ya.M := Ya.smooth
-      letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-      let Yb := X.obj (Lphi.φ b)
-      letI : TopologicalSpace Yb.M := Yb.topology
-      letI : ChartedSpace H Yb.M := Yb.charted
-      letI : IsManifold I ∞ Yb.M := Yb.smooth
-      letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
-      (chi alpha).hom
-        ((chart (Lphi.φ b) (beta b target.1)).transition
-          (chart (Lphi.φ b) (beta b alpha))
-          ((chart (Lphi.φ a) (beta a alpha)).transition
-            (chart (Lphi.φ a) (beta a target.1))
-            ((chi alpha).inv x)))
+      (chi alpha).symm
+        (normalTransition (I := I) (X.obj (Lphi.φ b))
+          (beta b target.1) (beta b alpha)
+          (normalTransition (I := I) (X.obj (Lphi.φ a))
+            (beta a alpha) (beta a target.1) (chi alpha x)))
   let pts := fun (alpha : LiveSlot L inp.pack r) a b x gamma =>
     totalPts (X := X) pairPts alpha a b x gamma
   HasCompactCover sourceBall sourcePatch ∧
     HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
-      hcomplete hconn chart q δ sourceBall sourcePatch localWeight pts
+      hcomplete hconn q δ sourceBall sourcePatch localWeight pts
 
-/-- The canonical frozen support/center package persists when the source stage
-and both pair indices are refined by the same strict subsequence. -/
+
+
 theorem HasSuppCmData.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {inp : MetricCompactnessInputs (I := I) X}
@@ -248,7 +232,6 @@ theorem HasSuppCmData.subseq
     {hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M}
-    {chart : NormalChartFamily (I := I) X}
     {U : LiveSlot L inp.pack r → Set E}
     {aInf : (alpha : LiveSlot L inp.pack r) →
       Fin (inp.pack.A r) → E → Real}
@@ -256,9 +239,9 @@ theorem HasSuppCmData.subseq
     {δ : LiveSlot L inp.pack r → Real}
     {phi ψ : Nat → Nat} {hphi : StrictMono phi} (hψ : StrictMono ψ)
     (h : HasSuppCmData (I := I) inp P L r hr phi hphi (ψ n)
-      hcomplete hconn chart U aInf q δ) :
+      hcomplete hconn U aInf q δ) :
     HasSuppCmData (I := I) inp P L r hr (phi ∘ ψ) (hphi.comp hψ) n
-      hcomplete hconn chart U aInf q δ := by
+      hcomplete hconn U aInf q δ := by
   classical
   dsimp only [HasSuppCmData] at h ⊢
   rcases h with ⟨hcover, hcm⟩
@@ -269,9 +252,9 @@ theorem HasSuppCmData.subseq
     simpa only [NetLimitData.subseq, Function.comp_apply,
       seqCenterD_subseq, NetLimitData.hatSourceBall_subseq, totalPts] using hsub
 
-/-- Global-ball strict local readout obtained from source-local capstones.  The
-source chart is an existential witness at each point; this definition does not
-select or glue charts or weight families. -/
+
+
+
 def HasSourceCmFin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -281,7 +264,6 @@ def HasSourceCmFin
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    (chart : NormalChartFamily (I := I) X)
     (q : LiveSlot L pb r → NNReal) (δ : LiveSlot L pb r → Real)
     (sourceBall : Set (X.obj (L.φ n)).M)
     (sourcePatch : LiveSlot L pb r → Set (X.obj (L.φ n)).M)
@@ -327,14 +309,11 @@ def HasSourceCmFin
             (fun y => y) x
           ∃ hcm : CenterInput (I := I) Y.metric (mu alpha x) pts join x
               (radSeq alpha a b x),
-            HasChartCmSol (I := I) Y (hcomplete.complete (L.φ n))
-              (hconn (L.φ n)) (seqCenterD hd P L n (alpha.1 : Nat))
-              (chart (L.φ n) (seqCenterD hd P L n (alpha.1 : Nat)))
-              (q := q alpha) (delta := δ alpha)
+            HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn q δ alpha
               (mu alpha x) pts join x (radSeq alpha a b x) hcm
 
-/-- A common local pair-index tail and the finite source cover give the
-global-ball existential-source readout with the same threshold. -/
+
+
 theorem HasSuppCmFin.toSource
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -344,16 +323,15 @@ theorem HasSuppCmFin.toSource
     {hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M}
-    {chart : NormalChartFamily (I := I) X}
     {q : LiveSlot L pb r → NNReal} {δ : LiveSlot L pb r → Real}
     {sourceBall : Set (X.obj (L.φ n)).M}
     {sourcePatch : LiveSlot L pb r → Set (X.obj (L.φ n)).M}
     {mu : LiveSlot L pb r → (X.obj (L.φ n)).M → Fin (pb.A r) → Real}
     {ptsSeq : LiveSlot L pb r → Nat → Nat → (X.obj (L.φ n)).M →
       Fin (pb.A r) → (X.obj (L.φ n)).M}
-    (h : HasSuppCmFin (I := I) hd P L pb r n hcomplete hconn chart q δ
+    (h : HasSuppCmFin (I := I) hd P L pb r n hcomplete hconn q δ
       sourceBall sourcePatch mu ptsSeq) :
-    HasSourceCmFin (I := I) hd P L pb r n hcomplete hconn chart q δ
+    HasSourceCmFin (I := I) hd P L pb r n hcomplete hconn q δ
       sourceBall sourcePatch mu ptsSeq := by
   classical
   dsimp only [HasSuppCmFin] at h
@@ -365,9 +343,9 @@ theorem HasSuppCmFin.toSource
   rcases Set.mem_iUnion.mp (hcover hx) with ⟨alpha, hxalpha⟩
   exact ⟨alpha, hxalpha, hN a ha b hb alpha x hxalpha⟩
 
-/-- Choose the covering divisor once, extract one master subsequence, and
-assemble the finite family of source-local strict center solutions with one
-common pair-index tail.  No chartwise weights are compared or glued. -/
+
+
+
 theorem MetricCompactBase.exists_supp_cm_fin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -397,6 +375,15 @@ theorem MetricCompactBase.exists_supp_cm_fin
         (δ : LiveSlot L inp.pack r → Real),
       let P := inp.properMetrics hcomplete hconn
       let Lphi := L.subseq hphi
+      let beta := fun (n : Nat) (alpha : LiveSlot L inp.pack r) =>
+        seqCenterD inp.decay P Lphi n (alpha.1 : Nat)
+      let weightInf := fun (alpha : LiveSlot L inp.pack r) (z : E)
+          (gamma : Fin (inp.pack.A r)) =>
+        rawWeights
+          (cutRaw
+            (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
+            (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
+          z gamma
       HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1 aInf Jinf Jbarinf ∧
       (∀ a b : Nat,
         (∀ᶠ k in Filter.atTop,
@@ -451,13 +438,55 @@ theorem MetricCompactBase.exists_supp_cm_fin
           rho / 2 ≤ expRadiusGp
             (I := I) (X.obj (Lphi.φ n)).metric x) ∧
       ∀ᶠ n in Filter.atTop,
-        HasSuppCmData (I := I) inp P L r hr phi hphi n
-          hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
+        let Y := X.obj (Lphi.φ n)
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : IsManifold I 1 Y.M := IsManifold.of_le
+          (I := I) (M := Y.M) (n := ∞) (by decide)
+        letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+        letI : T2Space Y.M := Y.t2
+        letI : ConnectedSpace Y.M := hconn (Lphi.φ n)
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        letI : TopologicalSpace.MetrizableSpace Y.M :=
+          Manifold.metrizableSpace I Y.M
+        letI : T3Space Y.M := inferInstance
+        letI : RiemannianBundle (fun z : Y.M => TangentSpace I z) :=
+          Y.riemBundle (I := I)
+        letI : (z : Y.M) → InnerProductSpace Real (TangentSpace I z) :=
+          Y.riemInner (I := I)
+        letI : IsContinuousRiemannianBundle E
+            (fun z : Y.M => TangentSpace I z) := Y.riemBundle_cont (I := I)
+        letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+        letI : CompleteSpace Y.M :=
+          MetricComplete.complete (I := I) Y (hcomplete.complete (Lphi.φ n))
+        letI : MetricSpace Y.M :=
+          HopfRinow.riemMetricSpace (I := I) (M := Y.M)
+        let chi := fun (alpha : LiveSlot L inp.pack r) =>
+          NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
+        let sourceBall := Lphi.hatSourceBall inp.decay P r n
+        let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
+          sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
+        let localWeight := fun (alpha : LiveSlot L inp.pack r)
+            (x : Y.M) (gamma : Fin (inp.pack.A r)) =>
+          weightInf alpha (chi alpha x) gamma
+        let pairPts : (alpha : LiveSlot L inp.pack r) →
+            InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
+          fun alpha target a b x =>
+            (chi alpha).symm
+              (normalTransition (I := I) (X.obj (Lphi.φ b))
+                (beta b target.1) (beta b alpha)
+                (normalTransition (I := I) (X.obj (Lphi.φ a))
+                  (beta a alpha) (beta a target.1) (chi alpha x)))
+        let pts := fun (alpha : LiveSlot L inp.pack r) =>
+          totalPts (X := X) pairPts alpha
+        HasCompactCover sourceBall sourcePatch ∧
+          HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
+            hcomplete hconn q δ sourceBall sourcePatch localWeight pts := by
   classical
   obtain ⟨aMin, haMin, hread⟩ :=
-    exists_hat_cm_min (I := I) (X := X) (hd := b.decay)
-      (hb := b.normalBounds) (hprof := b.normalRadius)
-      (hre := b.realizes) hcomplete hconn
+    exists_hat_cm_min (I := I) b.normalRadius b.realizes
+      hcomplete hconn
   let c0 :=
     (8 * Real.exp b.decay.C / aMin) * b.normalRadius.gpRatio
   obtain ⟨D, hD_one, _hmuD, hc0, h8, _h16, hradD, hradRatio, hcap⟩ :=
@@ -551,7 +580,7 @@ theorem MetricCompactBase.exists_supp_cm_fin
           (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
         z gamma
     let chi := fun (alpha : LiveSlot L inp.pack r) =>
-      NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+      NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
     let sourceBall := Lphi.hatSourceBall inp.decay P r n
     let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
       sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -561,31 +590,20 @@ theorem MetricCompactBase.exists_supp_cm_fin
     let pairPts : (alpha : LiveSlot L inp.pack r) →
         InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
       fun alpha target a b x =>
-        let Ya := X.obj (Lphi.φ a)
-        letI : TopologicalSpace Ya.M := Ya.topology
-        letI : ChartedSpace H Ya.M := Ya.charted
-        letI : IsManifold I ∞ Ya.M := Ya.smooth
-        letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-        let Yb := X.obj (Lphi.φ b)
-        letI : TopologicalSpace Yb.M := Yb.topology
-        letI : ChartedSpace H Yb.M := Yb.charted
-        letI : IsManifold I ∞ Yb.M := Yb.smooth
-        letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
         (chi alpha).symm
-          (NormalCoordinates.framedTransition (I := I) Yb.metric
+          (normalTransition (I := I) (X.obj (Lphi.φ b))
             (beta b target.1) (beta b alpha)
-            (NormalCoordinates.framedTransition (I := I) Ya.metric
+            (normalTransition (I := I) (X.obj (Lphi.φ a))
               (beta a alpha) (beta a target.1) (chi alpha x)))
     let pts := fun (alpha : LiveSlot L inp.pack r) =>
       totalPts (X := X) pairPts alpha
     dsimp only at hn hreadN
     rcases hn with ⟨hcompact, hcover, hhat, hweight, hpts⟩
-    have hold : HasCompactCover sourceBall sourcePatch ∧
-        HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
-          hcomplete hconn (legacyChartFamily (I := I) X) q δ
-            sourceBall sourcePatch localWeight pts := by
-      refine ⟨hcompact, ?_⟩
-      dsimp only [HasSuppCmFin]
+    change HasCompactCover sourceBall sourcePatch ∧
+      HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
+        hcomplete hconn q δ sourceBall sourcePatch localWeight pts
+    refine ⟨hcompact, ?_⟩
+    · dsimp only [HasSuppCmFin]
       have hlocal := fun alpha =>
         hreadN.2 alpha (sourcePatch alpha) (hhat alpha)
           (localWeight alpha) (hweight alpha) (pts alpha) (hpts alpha)
@@ -596,15 +614,12 @@ theorem MetricCompactBase.exists_supp_cm_fin
           (fun alpha a b x => radSeq alpha a b x < epsilon)
           (fun alpha => hsmall alpha epsilon hepsilon)
       · exact finite_cover_two_tail hcover _ hcap
-    simpa only [HasSuppCmData, legacyChartFamily, legacyTarget_eq,
-      legacyInv_eq, legacyTransition_eq, legacyChart_apply,
-      normalTransition] using hold
 
-/-- Refine the finite-support center capstone once more so that the same
-selected minimizing branches carry normal metric, forward-branch, and exact
-inverse-branch convergence.  The frozen source-stage center tail is retained
-at every index of the final subsequence; its pair threshold may still depend
-on that frozen index. -/
+
+
+
+
+
 theorem MetricCompactBase.exists_supp_diag_fin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -717,13 +732,11 @@ theorem MetricCompactBase.exists_supp_diag_fin
         HasDiagPairConv (I := I) (hcomplete.subseq index)
           (PointedRiemannianSeq.connected_subseq hconn index)
           (c alpha) (q alpha) (q alpha / 2)
-          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha)
-          (chart := legacyChartFamily (I := I) Xtheta) ∧
+          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha) ∧
         ∀ n, NormalDiagFence (I := I) (Xtheta.obj n)
-          (c alpha n) (q alpha) (e alpha n)
-          (c := legacyBallChart (I := I) (Xtheta.obj n) (c alpha n))) ∧
+          (c alpha n) (q alpha) (e alpha n)) ∧
       ∀ n, HasSuppCmData (I := I) inp P L r hr theta htheta n
-        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
+        hcomplete hconn U aInf q δ := by
   classical
   obtain ⟨aMin, haMin, inp, L, phi, hphi, U, C0, C1, aInf, Jinf,
       Jbarinf, q, δ, hconv, hstable, hphys, h8, hradD, hradRatio, hqdata, hqWide,
@@ -766,7 +779,7 @@ theorem MetricCompactBase.exists_supp_diag_fin
           (I := I) (X.obj (Lphi.φ n)).metric x
   let Q : Nat → Prop := fun n ↦
     HasSuppCmData (I := I) inp P L r hr phi hphi n
-        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ ∧
+        hcomplete hconn U aInf q δ ∧
       ScaleAt n
   have hQ : ∀ᶠ n in Filter.atTop, Q n := by
     filter_upwards [hcapTail, hscaleTail] with n hcap hscale
@@ -844,18 +857,16 @@ theorem MetricCompactBase.exists_supp_diag_fin
       HasDiagPairConv (I := I) (hcomplete.subseq index)
           (PointedRiemannianSeq.connected_subseq hconn index)
           (c alpha) (q alpha) (q alpha / 2)
-          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha)
-          (chart := legacyChartFamily (I := I) Xtheta) ∧
+          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha) ∧
         ∀ n, NormalDiagFence (I := I) (Xtheta.obj n)
-          (c alpha n) (q alpha) (e alpha n)
-          (c := legacyBallChart (I := I) (Xtheta.obj n) (c alpha n)) := by
+          (c alpha n) (q alpha) (e alpha n) := by
     intro alpha
     simpa only [index, Xtheta, c, Lphi, Ltheta, theta,
       PointedRiemannianSeq.subseq, NetLimitData.subseq,
       Function.comp_apply, seqCenterD_subseq] using hpair0 alpha
   have hcapAll : ∀ n,
       HasSuppCmData (I := I) inp P L r hr theta htheta n
-        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
+        hcomplete hconn U aInf q δ := by
     intro n
     have hQn := hQAll n
     dsimp only [Q] at hQn
@@ -868,10 +879,10 @@ theorem MetricCompactBase.exists_supp_diag_fin
     herr, hinvErr, hcore,
     hcenter, hmetric, hbranchTheta, hscaleAll, hpair, hcapAll⟩
 
-/-- Global-ball corollary of `exists_supp_cm_fin`: on the same pair-index tail,
-each source point has a source patch retaining the selected-branch strict local
-solution.  The witness remains existential and does not define a chart
-selector. -/
+
+
+
+
 theorem MetricCompactBase.exists_cm_on_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -932,7 +943,7 @@ theorem MetricCompactBase.exists_cm_on_source
         letI : MetricSpace Y.M :=
           HopfRinow.riemMetricSpace (I := I) (M := Y.M)
         let chi := fun (alpha : LiveSlot L inp.pack r) =>
-          NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+          NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
         let sourceBall := Lphi.hatSourceBall inp.decay P r n
         let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
           sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -942,26 +953,15 @@ theorem MetricCompactBase.exists_cm_on_source
         let pairPts : (alpha : LiveSlot L inp.pack r) →
             InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
           fun alpha target a b x =>
-            let Ya := X.obj (Lphi.φ a)
-            letI : TopologicalSpace Ya.M := Ya.topology
-            letI : ChartedSpace H Ya.M := Ya.charted
-            letI : IsManifold I ∞ Ya.M := Ya.smooth
-            letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-            let Yb := X.obj (Lphi.φ b)
-            letI : TopologicalSpace Yb.M := Yb.topology
-            letI : ChartedSpace H Yb.M := Yb.charted
-            letI : IsManifold I ∞ Yb.M := Yb.smooth
-            letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
             (chi alpha).symm
-              (NormalCoordinates.framedTransition (I := I) Yb.metric
+              (normalTransition (I := I) (X.obj (Lphi.φ b))
                 (beta b target.1) (beta b alpha)
-                (NormalCoordinates.framedTransition (I := I) Ya.metric
+                (normalTransition (I := I) (X.obj (Lphi.φ a))
                   (beta a alpha) (beta a target.1) (chi alpha x)))
         let pts := fun (alpha : LiveSlot L inp.pack r) =>
           totalPts (X := X) pairPts alpha
         HasSourceCmFin (I := I) inp.decay P Lphi inp.pack r n
-          hcomplete hconn (legacyChartFamily (I := I) X) q δ
-            sourceBall sourcePatch localWeight pts := by
+          hcomplete hconn q δ sourceBall sourcePatch localWeight pts := by
   obtain ⟨aMin, haMin, inp, L, phi, hphi, U, _C0, _C1, aInf, _Jinf,
       _Jbarinf, q, δ, _hconv, _hstable, _hphys, _h8, _hradD, _hradRatio, hqdata,
       _hqWide, _hqAcc, _herr, _hinvErr, _hcore, _hbranch, _hscale, htail⟩ :=
@@ -970,10 +970,7 @@ theorem MetricCompactBase.exists_cm_on_source
   dsimp only
   refine ⟨hqdata, ?_⟩
   filter_upwards [htail] with n hn
-  dsimp only [HasSuppCmData] at hn
-  simpa only [legacyChartFamily, legacyTarget_eq, legacyInv_eq,
-    legacyTransition_eq, legacyChart_apply, normalTransition] using
-      hn.2.toSource
+  exact hn.2.toSource
 
 end HCGCompactness
 end DifferentialGeometry

@@ -195,7 +195,7 @@ theorem H6NormalData.inj_tail
       exact hIntU
         ((hconvex alpha).interior.segment_subset hwInt hzxInt hq)
     have hchart := NormalBallChart.MetricEquivOn.hom_dist_le
-      (I := I) Yk (P (Lphi.φ k)) chiK hEquiv hUsrc hsegU
+      (J := I) Yk (P (Lphi.φ k)) chiK hEquiv hUsrc hsegU
     have hlocal : dist (chiK.hom w) x < rho := by
       rw [← hzxEq]
       calc

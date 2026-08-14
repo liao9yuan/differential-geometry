@@ -33,8 +33,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -48,6 +47,16 @@ lemma metric_inner_self_nonneg
   · have heq : g.inner x v v = 0 := by rw [hv0]; simp
     rw [heq]
   · exact (g.pos x v hv0).le
+
+/-- Scaling both slots of the metric quadratic form multiplies it by the
+square of the scalar. -/
+lemma metric_inner_smul_self
+    (g : SmoothRiemannianMetric I M) (x : M) (c : Real)
+    (v : TangentSpace I x) :
+    g.inner x (c • v) (c • v) = c ^ 2 * g.inner x v v := by
+  rw [(g.inner x).map_smul, ContinuousLinearMap.smul_apply,
+    (g.inner x v).map_smul, smul_eq_mul, smul_eq_mul]
+  ring
 
 /-- Cauchy–Schwarz inequality for the metric inner product (squared form):
 $(g(v, w))^2 \le g(v, v) \cdot g(w, w)$. -/

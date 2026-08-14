@@ -1,16 +1,14 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldSecondGradientRefold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpVWFactorBound
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
+
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -27,7 +25,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,7 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → ℝ) :
     ∑ K : Fin 4 → Fin n, F (K 0) (K 1) =
@@ -64,16 +61,18 @@ private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → 
     rw [Finset.sum_congr rfl (fun l _ => h4 l), ← Finset.mul_sum]
   rw [Finset.sum_congr rfl (fun k _ => h2 k), ← Finset.mul_sum]
 
-set_option linter.unusedSectionVars false in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) :
     g.inner x u (∑ b, c b • v b) = ∑ b, c b * g.inner x u (v b) := by
   rw [map_sum]
   exact Finset.sum_congr rfl (fun b _ => by rw [map_smul, smul_eq_mul])
 
-set_option linter.unusedSectionVars false in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) (u : TangentSpace I x) :
     g.inner x (∑ a, c a • v a) u = ∑ a, c a * g.inner x (v a) u := by
@@ -84,8 +83,9 @@ private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
   exact Finset.sum_congr rfl (fun a _ => by
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul])
 
-set_option linter.unusedSectionVars false in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (B : Fin d → TangentSpace I x)
     (hB : ∀ a b, g₁.inner x (B a) (B b) = if a = b then (1 : ℝ) else 0)
@@ -99,8 +99,9 @@ private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) 
   rw [Finset.sum_ite_eq]
   exact if_pos (Finset.mem_univ a)
 
-set_option linter.unusedSectionVars false in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sum_sq_component_le_of_orthonormal
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {δ : ℝ} (h1mδ : (0 : ℝ) < 1 - δ)
     (hcomp : ∀ u : TangentSpace I x,
@@ -128,20 +129,19 @@ private lemma sum_sq_component_le_of_orthonormal
       ≤ (∑ a, (c a) ^ 2) / (1 - δ) := (le_div_iff₀ h1mδ).mpr h4
     _ = (1 / (1 - δ)) * ∑ a, (c a) ^ 2 := by ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma div_pow_div_arith {t : ℝ} (ht : t ≠ 0) (u : ℝ) :
     (u / t) ^ 2 / t = u ^ 2 / t ^ 3 := by
   field_simp
 
-set_option linter.unusedSectionVars false in
 
 private lemma one_div_mul_pow_arith {t : ℝ} (ht : t ≠ 0) (D u : ℝ) :
     (1 / t) * (D * (u / t ^ 3)) = D * (u / t ^ 4) := by
   field_simp
 
-set_option linter.unusedSectionVars false in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma weight_row_g0norm_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {δ δW : ℝ}
     (h1mδ : (0 : ℝ) < 1 - δ) (hδW0 : 0 ≤ δW)
@@ -240,10 +240,10 @@ private lemma weight_row_g0norm_le
     _ ≤ (δW / (1 - δ)) ^ 2 / (1 - δ) := by gcongr
     _ = δW ^ 2 / (1 - δ) ^ 3 := div_pow_div_arith (ne_of_gt h1mδ) δW
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -259,16 +259,16 @@ theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) 
     fiberNormSqComponent_smul]
   ring
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-theorem rfns_curvatureRefoldMonomialBiContrFib_le
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
+theorem riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     {δ : ℝ} (hδ1 : δ < 1)
-    (hδP : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+    (hδP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
     (W : Π b : M, Tensor0SSpace 2 I b) {δW : ℝ} (hδW0 : 0 ≤ δW)
     (hW : ∀ (y : M) (v w : TangentSpace I y),
       |Tensor0SSpace.toModel (𝕜 := ℝ) (W y) ![(v : E), (w : E)]| ≤
@@ -277,7 +277,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x)) ≤
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x)) ≤
       (deTurckArmFibreConst (Module.finrank ℝ E) * (δW / (1 - δ) ^ 2)) ^ 2 := by
   classical
   have h1mδ : (0 : ℝ) < 1 - δ := by linarith
@@ -328,7 +328,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
       fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J =
         V (K (σ.symm 0)) (K (σ.symm 1)) *
           ((if K (σ.symm 2) = J 0 then (1 : ℝ) else 0) *
@@ -337,17 +337,17 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
     have hcomp_toModel : fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
         (Module.finrank ℝ E) e K J =
         Tensor0SSpace.toModel
-          ((curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x)
+          ((curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x)
             (coframeS (I := I) (M := M) g₀ x 4 e K))
           (fun i => (e (J i) : E)) := by
       unfold fiberNormSqComponent coframeS
       rfl
     rw [hcomp_toModel]
-    rw [show curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x =
-        curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+    rw [show curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x =
+        curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
           (smoothOrthoFrame (I := I) g₁ x) x from rfl]
     rw [curvatureRefoldMonomialFibFixedFrame_toModel]
     have hterm : ∀ a b : Fin (Module.finrank ℝ E),
@@ -435,7 +435,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
         (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J) ^ 2 =
         (V (K (σ.symm 0)) (K (σ.symm 1))) ^ 2 := by
     intro K
@@ -443,7 +443,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
         (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J) ^ 2 =
         (V (K (σ.symm 0)) (K (σ.symm 1))) ^ 2 *
           ((if K (σ.symm 2) = J 0 then (1 : ℝ) else 0) *
@@ -530,19 +530,19 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
   have hrfns_eq := hrfns
     (show TensorRSSpace 4 2 I x from
       TensorRSSpace.ofCLM
-        (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+        (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
   rw [hrfns_eq]
   have hsummand : ∀ (K : Fin 4 → Fin (Module.finrank ℝ E))
       (J : Fin 2 → Fin (Module.finrank ℝ E)),
       fiberNormSqSummand (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
         (Module.finrank ℝ E) e K J =
       (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
         (Module.finrank ℝ E) e K J) ^ 2 :=
     fun K J => fiberNormSqSummand_eq_component_sq (I := I) (M := M) g₀ x 4 2 _ _ e K J
   calc ∑ K : Fin 4 → Fin (Module.finrank ℝ E),
@@ -550,7 +550,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
         fiberNormSqSummand (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J
       = ∑ K : Fin 4 → Fin (Module.finrank ℝ E),
           (V (K (σ.symm 0)) (K (σ.symm 1))) ^ 2 := by
@@ -564,6 +564,32 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
     _ = (deTurckArmFibreConst (Module.finrank ℝ E) * (δW / (1 - δ) ^ 2)) ^ 2 := by
         rw [mul_pow, sq_deTurckArmFibreConst, div_pow]
         ring
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
+/-- Compatibility form of the curvature-refold monomial fibre bound. -/
+theorem rfns_curvatureRefoldMonomialBiContrFib_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    {δ : ℝ} (hδ1 : δ < 1)
+    (hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ P) δ)
+    (W : Π b : M, Tensor0SSpace 2 I b) {δW : ℝ} (hδW0 : 0 ≤ δW)
+    (hW : ∀ (y : M) (v w : TangentSpace I y),
+      |Tensor0SSpace.toModel (𝕜 := ℝ) (W y) ![(v : E), (w : E)]| ≤
+        δW * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w))
+    (σ : Equiv.Perm (Fin 4)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        (show TensorRSSpace 4 2 I x from
+          TensorRSSpace.ofCLM
+            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x)) ≤
+      (deTurckArmFibreConst (Module.finrank ℝ E) * (δW / (1 - δ) ^ 2)) ^ 2 := by
+  simpa only [curvatureRefoldMonomialBiContrFib] using
+    riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le
+      (I := I) (M := M) g₀ g₁ P htie hδ1 hδP W hδW0 hW σ x
 
 end TensorSpectral
 end Parabolic

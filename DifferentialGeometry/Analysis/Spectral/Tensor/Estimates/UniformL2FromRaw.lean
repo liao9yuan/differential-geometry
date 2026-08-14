@@ -1,14 +1,14 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeRawComponents
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 
-/-!
-# Uniform tensor L2 bounds from chart components
 
-A family whose raw chart-frame components are uniformly bounded on every
-active partition-of-unity support is uniformly bounded in the intrinsic
-tensor `L2` norm.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,8 +32,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Uniform bounds for all raw chart-frame components on the active POU
-supports give a uniform intrinsic `L2` bound for a tensor family. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem l2_bdd_of_raw {ι : Type*}
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : ι → SmoothCcTensor g r s) (B : ℝ) (hB : 0 ≤ B)
@@ -126,10 +127,10 @@ theorem l2_bdd_of_raw {ι : Type*}
   refine Finset.sum_le_sum fun Idx _ => ?_
   exact Finset.sum_le_sum fun Jdx _ => hcomponent α hα k Idx Jdx
 
-/-- A uniform raw-component bound by a finite sum of intrinsic pointwise jet
-norms gives an intrinsic `L²` bound by the corresponding sum of `L²` norms.
-The resulting constant is uniform in both the output tensor and the input
-family. -/
+
+
+
+
 theorem l2_le_of_raw_sum [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (c N : ℕ) (v : ℕ → ℕ)
     (B : ℝ) (hB : 0 ≤ B) :

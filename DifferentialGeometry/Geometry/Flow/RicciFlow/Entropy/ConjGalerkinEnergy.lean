@@ -5,13 +5,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkin
 
 set_option autoImplicit false
 
-/-!
-# Uniform scalar Galerkin energy bounds
 
-Finite reversed conjugate-heat solutions are placed on one interval independent
-of the spectral truncation.  The support-independent critical tame estimate then
-feeds the abstract Galerkin energy hierarchy at every Sobolev order.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -37,8 +37,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [BoundarylessManifold I M] in
-/-- The squared Sobolev norm of a finite scalar spectral vector is its finite
-weighted coefficient energy. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem galVec_norm_sq
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -55,6 +55,8 @@ theorem galVec_norm_sq
 
 omit [BoundarylessManifold I M] in
 open scoped Classical in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem gal_crit_nf
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))

@@ -31,25 +31,6 @@ open scoped ENNReal
 
 namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
-/-- Cutting the numerator density by a downward-closed set preserves the
-pointwise cross inequality on an upper interval. -/
-theorem crossIic_indic {α : Type*} [Preorder α]
-    {f g : α → ℝ≥0∞} {R : α} {S : Set α}
-    (hcross : ∀ ⦃a b : α⦄, a ≤ b → b ≤ R →
-      f b * g a ≤ f a * g b)
-    (hS : ∀ ⦃a b : α⦄, a ≤ b → b ∈ S → a ∈ S) :
-    ∀ ⦃a b : α⦄, a ≤ b → b ≤ R →
-      S.indicator f b * g a ≤ S.indicator f a * g b := by
-  intro a b hab hbR
-  by_cases hbS : b ∈ S
-  · have haS : a ∈ S := hS hab hbS
-    rw [Set.indicator_of_mem hbS, Set.indicator_of_mem haS]
-    exact hcross hab hbR
-  · rw [Set.indicator_of_notMem hbS, zero_mul]
-    exact zero_le _
-
-/-- Cross-antitonicity on an upper interval implies the multiplicative
-ratio-of-integrals inequality for two nested upper truncations. -/
 theorem lintegral_Iic_cross {α : Type*} [LinearOrder α]
     [TopologicalSpace α] [MeasurableSpace α] [OpensMeasurableSpace α]
     [ClosedIicTopology α]

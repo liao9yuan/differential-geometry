@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairingPolarized
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 
@@ -14,10 +15,6 @@ monomial keeps one undifferentiated metric difference, hence gains the small
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
-set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace
@@ -32,29 +29,44 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
-open MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-private lemma edge_raised_self (g : SmoothRiemannianMetric I M) (x : M) :
-    gInvRaisedEndo (I := I) g g x =
-      ContinuousLinearMap.id Real (TangentSpace I x) := by
-  apply ContinuousLinearMap.ext
-  intro v
-  rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM,
-    ContinuousLinearMap.id_apply]
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+private local instance edgePartnerTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance edgePartnerTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance edgePartnerTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance edgePartnerTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_symm_eq (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
-      ccTensorBilin (I := I) g S x u w = ccTensorBilin (I := I) g S x w u) :
-    symmS (I := I) (M := M) g S = S := by
+      smoothCcTensorBilinForm (I := I) g S x u w =
+        smoothCcTensorBilinForm (I := I) g S x w u) :
+    ccTensor02Symm (I := I) (M := M) g S = S := by
   have hswap : domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
     rw [domDomCongrSection_unitModel]
@@ -77,9 +89,11 @@ private lemma edge_symm_eq (g : SmoothRiemannianMetric I M)
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
   have htwo : S + S = (2 : Real) • S := (two_smul Real S).symm
-  rw [symmS, hswap, htwo, smul_smul,
+  rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : Real) * 2 = 1 by norm_num, one_smul]
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem edge_full_split
     (g gm : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g gm =
@@ -97,29 +111,31 @@ private theorem edge_full_split
   intro v
   rw [fullRaisedEndoField_apply, ContinuousLinearMap.add_apply]
   rw [show gInvDiffRaisedEndoField (I := I) g gm x =
-      gInvDiffRaisedEndo (I := I) g gm x from rfl]
+      metricComparisonDiffEndo (I := I) g gm x from rfl]
   rw [fullRaisedEndoField_apply,
     gInvRaisedEndo_eq_diff_add_id (I := I) g gm x v]
-  rw [show gInvRaisedEndo (I := I) g g x v = v from by
+  rw [show metricComparisonEndo (I := I) g g x v = v from by
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 private theorem edge_insert_add
     (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : ContMDiffSection I (E →L[Real] E) ∞
       (fun x : M => TangentSpace I x →L[Real] TangentSpace I x)) :
-    slotInsertEndoCc (I := I) (M := M) g s (A + B) =
-      slotInsertEndoCc (I := I) (M := M) g s A +
-        slotInsertEndoCc (I := I) (M := M) g s B := by
+    endoSlotZeroCcTensor (I := I) (M := M) g s (A + B) =
+      endoSlotZeroCcTensor (I := I) (M := M) g s A +
+        endoSlotZeroCcTensor (I := I) (M := M) g s B := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
   apply ContinuousLinearMap.ext
   intro D
-  rw [show ((slotInsertEndoCc (I := I) (M := M) g s A +
-      slotInsertEndoCc (I := I) (M := M) g s B).toSection x) =
-      (slotInsertEndoCc (I := I) (M := M) g s A).toSection x +
-        (slotInsertEndoCc (I := I) (M := M) g s B).toSection x from by
+  rw [show ((endoSlotZeroCcTensor (I := I) (M := M) g s A +
+      endoSlotZeroCcTensor (I := I) (M := M) g s B).toSection x) =
+      (endoSlotZeroCcTensor (I := I) (M := M) g s A).toSection x +
+        (endoSlotZeroCcTensor (I := I) (M := M) g s B).toSection x from by
           rw [SmoothCcTensor.toSection_add]
           rfl]
   rw [ContinuousLinearMap.add_apply]
@@ -129,6 +145,8 @@ private theorem edge_insert_add
     rfl]
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma edge_endo_id_zero (g : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (v : TangentSpace I x) :
@@ -140,16 +158,17 @@ private lemma edge_endo_id_zero (g : SmoothRiemannianMetric I M)
       (fullRaisedEndoField (I := I) (M := M) g g y) (Y y)) =
       (fun y : M => Y y) := by
     funext y
-    rw [fullRaisedEndoField_apply, edge_raised_self,
-      ContinuousLinearMap.id_apply]
+    rw [fullRaisedEndoField_apply, gInvRaisedEndo_apply,
+      inverseMetricSharpFib_g0FlatCLM]
   rw [hLeib, hLambda]
-  rw [fullRaisedEndoField_apply, edge_raised_self,
-    ContinuousLinearMap.id_apply, sub_self]
+  rw [fullRaisedEndoField_apply, gInvRaisedEndo_apply,
+    inverseMetricSharpFib_g0FlatCLM, sub_self]
 
+omit [NeZero (Module.finrank Real E)] in
 set_option backward.isDefEq.respectTransparency false in
 private lemma edge_cov_insert_id (g : SmoothRiemannianMetric I M) (s : Nat) :
     covGrad (I := I) (M := M) g (s + 1) (s + 1)
-        (slotInsertEndoCc (I := I) (M := M) g s
+        (endoSlotZeroCcTensor (I := I) (M := M) g s
           (fullRaisedEndoField (I := I) (M := M) g g)) = 0 := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -159,7 +178,7 @@ private lemma edge_cov_insert_id (g : SmoothRiemannianMetric I M) (s : Nat) :
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun m => ?_)
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g (s + 1) (s + 1)
-    (slotInsertEndoCc (I := I) (M := M) g s
+    (endoSlotZeroCcTensor (I := I) (M := M) g s
       (fullRaisedEndoField (I := I) (M := M) g g)) x D m]
   rw [tensorCovDerivAt_slotInsertEndoCc_eq (I := I) (M := M) g s
     (fullRaisedEndoField (I := I) (M := M) g g) x (m 0)]
@@ -181,14 +200,15 @@ private lemma edge_cov_insert_id (g : SmoothRiemannianMetric I M) (s : Nat) :
       slotInsertEndoFib_smul_left, zero_smul]]
   simp [SmoothCcTensor.toSection_zero]
 
+omit [NeZero (Module.finrank Real E)] in
 set_option backward.isDefEq.respectTransparency false in
 private theorem edge_cov_full_eq
     (g gm : SmoothRiemannianMetric I M) (s : Nat) :
     covGrad (I := I) (M := M) g (s + 1) (s + 1)
-        (slotInsertEndoCc (I := I) (M := M) g s
+        (endoSlotZeroCcTensor (I := I) (M := M) g s
           (fullRaisedEndoField (I := I) (M := M) g gm)) =
       covGrad (I := I) (M := M) g (s + 1) (s + 1)
-        (slotInsertEndoCc (I := I) (M := M) g s
+        (endoSlotZeroCcTensor (I := I) (M := M) g s
           (gInvDiffRaisedEndoField (I := I) g gm)) := by
   rw [edge_full_split (I := I) (M := M) g gm,
     edge_insert_add (I := I) (M := M) g s, covGrad_add,
@@ -203,12 +223,12 @@ theorem edgeFull_one (g : SmoothRiemannianMetric I M) :
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 2 3 x
               ((covGrad (I := I) (M := M) g 2 2
-                (slotInsertEndoCc (I := I) (M := M) g 1
+                (endoSlotZeroCcTensor (I := I) (M := M) g 1
                   (fullRaisedEndoField (I := I) (M := M) g gm))).toSection x) ≤
             A * riemannianFiberNormSq (I := I) (M := M) g 0 3 x
               ((iteratedCovGrad (I := I) g 0 2 1 T).toSection x) := by
@@ -222,6 +242,8 @@ theorem edgeFull_one (g : SmoothRiemannianMetric I M) :
   have h := hgrid gm T htie hdelta hdelta0 hbound 1 x
   simpa [Finset.sum_range_succ, Finset.sum_range_one] using h
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- A relative inverse-metric insertion is uniformly bounded on the half
 operator ball. -/
 theorem edgeFull_zero
@@ -230,10 +252,10 @@ theorem edgeFull_zero
       gm.inner y v w = g.inner y v w +
         ccTensorBilinSymm (I := I) g T y v w)
     {delta : Real} (hdelta : delta ≤ 1 / 2) (hdelta0 : 0 ≤ delta)
-    (hbound : gFibreOpBound (I := I) (M := M) g
+    (hbound : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 2 2 x
-        ((slotInsertEndoCc (I := I) (M := M) g 1
+        ((endoSlotZeroCcTensor (I := I) (M := M) g 1
           (fullRaisedEndoField (I := I) (M := M) g gm)).toSection x) ≤
       (2 * (Module.finrank Real E : Real)) ^ 2 := by
   have hdelta_lt : delta < 1 := lt_of_le_of_lt hdelta (by norm_num)
@@ -253,17 +275,20 @@ theorem edgeFull_zero
   refine hraw.trans ?_
   nlinarith [mul_nonneg hd hfrac0]
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma edge_app_le (g : SmoothRiemannianMetric I M)
     (r s : Nat) (Phi : SmoothCcTensor g r s)
     (W : SmoothCcTensor g 0 r) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x
-        ((appCc (I := I) (M := M) g r s Phi W).toSection x) ≤
+        ((operatorFieldApply (I := I) (M := M) g r s Phi W).toSection x) ≤
       riemannianFiberNormSq (I := I) (M := M) g r s x (Phi.toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
   rw [appCc_toSection]
   exact riemannianFiberNormSq_compRS_le_mul
     (I := I) (M := M) g 0 r s x (Phi.toSection x) (W.toSection x)
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Applying one relative inverse-metric slot map is uniformly bounded in
 fibre norm on the half ball. -/
 theorem edgeSlot_zero
@@ -272,7 +297,7 @@ theorem edgeSlot_zero
       gm.inner y v w = g.inner y v w +
         ccTensorBilinSymm (I := I) g T y v w)
     {delta : Real} (hdelta : delta ≤ 1 / 2) (hdelta0 : 0 ≤ delta)
-    (hbound : gFibreOpBound (I := I) (M := M) g
+    (hbound : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
     (j : Fin 2) (S : SmoothCcTensor g 0 2) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -283,17 +308,17 @@ theorem edgeSlot_zero
   let P : SmoothCcTensor g 0 2 :=
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) j) S
   let Phi : SmoothCcTensor g 2 2 :=
-    slotInsertEndoCc (I := I) (M := M) g 1
+    endoSlotZeroCcTensor (I := I) (M := M) g 1
       (fullRaisedEndoField (I := I) (M := M) g gm)
   have hout := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
     (I := I) (M := M) g (Equiv.swap (0 : Fin 2) j)
-    (appCc (I := I) (M := M) g 2 2 Phi P) 0 x
+    (operatorFieldApply (I := I) (M := M) g 2 2 Phi P) 0 x
   have hout' :
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           ((edgeSlot2 (I := I) (M := M) g
             (fullRaisedEndoField (I := I) (M := M) g gm) j S).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          ((appCc (I := I) (M := M) g 2 2 Phi P).toSection x) := by
+          ((operatorFieldApply (I := I) (M := M) g 2 2 Phi P).toSection x) := by
     simpa only [edgeSlot2, Phi, P, iteratedCovGrad_zero] using hout
   rw [hout']
   have happ := edge_app_le (I := I) (M := M) g 2 2 Phi P x
@@ -321,7 +346,7 @@ theorem edgeSlot_one (g : SmoothRiemannianMetric I M) :
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         ∀ (j : Fin 2) (S : SmoothCcTensor g 0 2) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -346,18 +371,18 @@ theorem edgeSlot_one (g : SmoothRiemannianMetric I M) :
   let P : SmoothCcTensor g 0 2 :=
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) j) S
   let Phi : SmoothCcTensor g 2 2 :=
-    slotInsertEndoCc (I := I) (M := M) g 1
+    endoSlotZeroCcTensor (I := I) (M := M) g 1
       (fullRaisedEndoField (I := I) (M := M) g gm)
   let U : SmoothCcTensor g 0 3 :=
-    appCc (I := I) (M := M) g 2 3
+    operatorFieldApply (I := I) (M := M) g 2 3
       (covGrad (I := I) (M := M) g 2 2 Phi) P
   let V : SmoothCcTensor g 0 3 :=
-    appCc (I := I) (M := M) g 3 3
+    operatorFieldApply (I := I) (M := M) g 3 3
       (slotExtend (I := I) (M := M) g 2 2 Phi)
       (covGrad (I := I) (M := M) g 0 2 P)
   have hout := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
     (I := I) (M := M) g (Equiv.swap (0 : Fin 2) j)
-    (appCc (I := I) (M := M) g 2 2 Phi P) 1 x
+    (operatorFieldApply (I := I) (M := M) g 2 2 Phi P) 1 x
   have hout' :
       riemannianFiberNormSq (I := I) (M := M) g 0 3 x
           ((covGrad (I := I) (M := M) g 0 2
@@ -365,14 +390,14 @@ theorem edgeSlot_one (g : SmoothRiemannianMetric I M) :
               (fullRaisedEndoField (I := I) (M := M) g gm) j S)).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g 0 3 x
           ((covGrad (I := I) (M := M) g 0 2
-            (appCc (I := I) (M := M) g 2 2 Phi P)).toSection x) := by
+            (operatorFieldApply (I := I) (M := M) g 2 2 Phi P)).toSection x) := by
     simpa only [edgeSlot2, Phi, P, iteratedCovGrad_succ,
       iteratedCovGrad_zero] using hout
   rw [hout']
   have hprod : covGrad (I := I) (M := M) g 0 2
-      (appCc (I := I) (M := M) g 2 2 Phi P) = U + V := by
+      (operatorFieldApply (I := I) (M := M) g 2 2 Phi P) = U + V := by
     simpa only [U, V] using
-      covGrad_appCc_eq (I := I) (M := M) g 2 2 Phi P
+      covGrad_operatorFieldApply_eq (I := I) (M := M) g 2 2 Phi P
   rw [hprod]
   have hadd := riemannianFiberNormSq_add_le
     (I := I) (M := M) g 0 3 x (U.toSection x) (V.toSection x)
@@ -409,7 +434,7 @@ theorem edgeSlot_one (g : SmoothRiemannianMetric I M) :
   have hV : riemannianFiberNormSq (I := I) (M := M) g 0 3 x (V.toSection x) ≤
       F * riemannianFiberNormSq (I := I) (M := M) g 0 3 x
         ((covGrad (I := I) (M := M) g 0 2 S).toSection x) := by
-    refine (riemannianFiberNormSq_appCc_slotExtend_le
+    refine (riemannianFiberNormSq_comp_slotExtend_le
       (I := I) (M := M) g 2 2 Phi
       (covGrad (I := I) (M := M) g 0 2 P) x).trans ?_
     rw [hp1]
@@ -444,15 +469,15 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
       ∀ (gm : SmoothRiemannianMetric I M)
         (P T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g P y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g P) delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -492,7 +517,7 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
   let S0 : SmoothCcTensor g 0 2 :=
     edgeSlot2 (I := I) (M := M) g
       (fullRaisedEndoField (I := I) (M := M) g gm) 0 T
-  have hsymm : symmS (I := I) (M := M) g T = T :=
+  have hsymm : ccTensor02Symm (I := I) (M := M) g T = T :=
     edge_symm_eq (I := I) (M := M) g T hTsymm
   have hT0 := symmC0_rfns_le (I := I) (M := M) g T hdelta0 hTbound x
   rw [hsymm] at hT0
@@ -524,8 +549,8 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
     calc
       _ ≤ K * (P1 * T0 + T1) := hraw
       _ ≤ K * (T1 * T0 + T1) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add ?_ le_rfl) hK0
-        exact mul_le_mul_of_nonneg_right hP1T1 hT00
+        refine mul_le_mul_of_nonneg_left ?_ hK0
+        exact add_le_add (mul_le_mul_of_nonneg_right hP1T1 hT00) le_rfl
       _ ≤ K * (T1 * d ^ 2 + T1) := by
         refine mul_le_mul_of_nonneg_left ?_ hK0
         exact add_le_add (mul_le_mul_of_nonneg_left hT0coarse hT10) le_rfl
@@ -569,16 +594,20 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
             (S0.toSection x) +
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x
             ((covGrad (I := I) (M := M) g 0 2 S0).toSection x)) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add ?_ le_rfl) hK0
-        exact mul_le_mul_of_nonneg_right hP1T1
-          (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _)
+        refine mul_le_mul_of_nonneg_left ?_ hK0
+        exact add_le_add
+          (mul_le_mul_of_nonneg_right hP1T1
+            (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _))
+          le_rfl
       _ ≤ K * (T1 * (F * T0) + D0 * T1) := by
         refine mul_le_mul_of_nonneg_left (add_le_add ?_ hS01) hK0
         exact mul_le_mul_of_nonneg_left hS00 hT10
       _ ≤ K * (T1 * (F * d ^ 2) + D0 * T1) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add ?_ le_rfl) hK0
-        exact mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_left hT0coarse hF0) hT10
+        refine mul_le_mul_of_nonneg_left ?_ hK0
+        exact add_le_add
+          (mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hT0coarse hF0) hT10)
+          le_rfl
       _ = D * T1 := by simp only [D]; ring
   exact ⟨hR0', by simpa only [T1] using hR1'⟩
 
@@ -587,13 +616,13 @@ theorem edgeRaise_bds (g : SmoothRiemannianMetric I M) :
     ∃ Z D : Real, 0 ≤ Z ∧ 0 ≤ D ∧
       ∀ (gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -627,633 +656,6 @@ private lemma edge_extend2_one (g : SmoothRiemannianMetric I M)
   rw [rfns_covGrad_slotExtend_scale (I := I) (M := M) g 0 2 T x]
   ring
 
-private lemma edgeRaise_zero_mul (g gm : SmoothRiemannianMetric I M)
-    (W P : SmoothCcTensor g 0 2)
-    (htie : ∀ (y : M) (v w : TangentSpace I y),
-      gm.inner y v w = g.inner y v w +
-        ccTensorBilinSymm (I := I) g W y v w)
-    {delta : Real} (hdelta : delta ≤ 1 / 2) (hdelta0 : 0 ≤ delta)
-    (hWbound : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g W) delta)
-    (x : M) :
-    riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-        ((edgeRaise2 (I := I) (M := M) g gm P).toSection x) ≤
-      ((2 * (Module.finrank Real E : Real)) ^ 2) ^ 2 *
-        riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (P.toSection x) := by
-  let F : Real := (2 * (Module.finrank Real E : Real)) ^ 2
-  let S0 : SmoothCcTensor g 0 2 :=
-    edgeSlot2 (I := I) (M := M) g
-      (fullRaisedEndoField (I := I) (M := M) g gm) 0 P
-  have hS0 := edgeSlot_zero (I := I) (M := M) g gm W htie
-    hdelta hdelta0 hWbound 0 P x
-  have hS0' : riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-      (S0.toSection x) ≤ F *
-        riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (P.toSection x) := by
-    simpa only [S0, F] using hS0
-  have hR0 := edgeSlot_zero (I := I) (M := M) g gm W htie
-    hdelta hdelta0 hWbound 1 S0 x
-  have hR0' : riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-      ((edgeRaise2 (I := I) (M := M) g gm P).toSection x) ≤
-        F * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (S0.toSection x) := by
-    simpa only [edgeRaise2, S0, F] using hR0
-  calc
-    _ ≤ F * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-        (S0.toSection x) := hR0'
-    _ ≤ F * (F * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-        (P.toSection x)) := mul_le_mul_of_nonneg_left hS0' (sq_nonneg _)
-    _ = _ := by simp only [F]; ring
-
-private lemma edgeRaise_one_mul (g : SmoothRiemannianMetric I M) :
-    ∃ D : Real, 0 ≤ D ∧
-      ∀ (gm : SmoothRiemannianMetric I M)
-        (W P : SmoothCcTensor g 0 2)
-        (_htie : ∀ (y : M) (v w : TangentSpace I y),
-          gm.inner y v w = g.inner y v w +
-            ccTensorBilinSymm (I := I) g W y v w)
-        {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g W) delta →
-        ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-              ((covGrad (I := I) (M := M) g 0 2
-                (edgeRaise2 (I := I) (M := M) g gm P)).toSection x) ≤
-            D *
-              (riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-                    ((iteratedCovGrad (I := I) g 0 2 1 W).toSection x) *
-                  riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                    (P.toSection x) +
-                riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-                  ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x)) := by
-  obtain ⟨K, hK0, hK⟩ := edgeSlot_one (I := I) (M := M) g
-  let F : Real := (2 * (Module.finrank Real E : Real)) ^ 2
-  let D : Real := K * (F + K)
-  have hF0 : 0 ≤ F := sq_nonneg _
-  have hD0 : 0 ≤ D := mul_nonneg hK0 (add_nonneg hF0 hK0)
-  refine ⟨D, hD0, ?_⟩
-  intro gm W P htie delta hdelta hdelta0 hWbound x
-  let S0 : SmoothCcTensor g 0 2 :=
-    edgeSlot2 (I := I) (M := M) g
-      (fullRaisedEndoField (I := I) (M := M) g gm) 0 P
-  let W1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-    ((iteratedCovGrad (I := I) g 0 2 1 W).toSection x)
-  let P0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-    (P.toSection x)
-  let P1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-    ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x)
-  have hS0 : riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-      (S0.toSection x) ≤ F * P0 := by
-    simpa only [S0, F, P0] using
-      edgeSlot_zero (I := I) (M := M) g gm W htie
-        hdelta hdelta0 hWbound 0 P x
-  have hS1 : riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-      ((covGrad (I := I) (M := M) g 0 2 S0).toSection x) ≤
-        K * (W1 * P0 + P1) := by
-    simpa only [S0, W1, P0, P1, iteratedCovGrad_succ,
-      iteratedCovGrad_zero] using
-      hK gm W htie hdelta hdelta0 hWbound 0 P x
-  have hR1 : riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-      ((covGrad (I := I) (M := M) g 0 2
-        (edgeRaise2 (I := I) (M := M) g gm P)).toSection x) ≤
-        K *
-          (W1 * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-              (S0.toSection x) +
-            riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-              ((covGrad (I := I) (M := M) g 0 2 S0).toSection x)) := by
-    simpa only [edgeRaise2, S0, W1, iteratedCovGrad_succ,
-      iteratedCovGrad_zero] using
-      hK gm W htie hdelta hdelta0 hWbound 1 S0 x
-  have hW10 : 0 ≤ W1 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 3 x _
-  have hP00 : 0 ≤ P0 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 2 x _
-  have hP10 : 0 ≤ P1 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 3 x _
-  have hKF : K ≤ F + K := by linarith
-  calc
-    _ ≤ K *
-        (W1 * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-            (S0.toSection x) +
-          riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-            ((covGrad (I := I) (M := M) g 0 2 S0).toSection x)) := hR1
-    _ ≤ K * (W1 * (F * P0) + K * (W1 * P0 + P1)) := by
-      refine mul_le_mul_of_nonneg_left (add_le_add ?_ hS1) hK0
-      exact mul_le_mul_of_nonneg_left hS0 hW10
-    _ = K * ((F + K) * (W1 * P0) + K * P1) := by ring
-    _ ≤ K * ((F + K) * (W1 * P0) + (F + K) * P1) := by
-      refine mul_le_mul_of_nonneg_left (add_le_add le_rfl ?_) hK0
-      exact mul_le_mul_of_nonneg_right hKF hP10
-    _ = D * (W1 * P0 + P1) := by simp only [D]; ring
-    _ = _ := rfl
-
-/-- A polarized Palatini formal partner is pointwise bilinear in its raised
-coefficient state and its independent test tensor, with a constant chosen
-before the reference metric varies. -/
-theorem edgeBi_zero_unif :
-    ∃ C : Real, 0 ≤ C ∧
-      ∀ (g gm : SmoothRiemannianMetric I M)
-        (W P V : SmoothCcTensor g 0 2)
-        (_htie : ∀ (y : M) (v w : TangentSpace I y),
-          gm.inner y v w = g.inner y v w +
-            ccTensorBilinSymm (I := I) g W y v w)
-        {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g W) delta →
-        ∀ (sigma : Equiv.Perm (Fin 4)) (x : M),
-          riemannianFiberNormSq (I := I) (M := M) g 0 4 x
-              ((edgePairPartnerBi (I := I) (M := M) g gm P V sigma).toSection x) ≤
-            C * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                (P.toSection x) *
-              riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                (V.toSection x) := by
-  classical
-  let d : Real := Module.finrank Real E
-  let F : Real := (2 * d) ^ 2
-  let C : Real := d ^ 2 * F ^ 2
-  have hC0 : 0 ≤ C := mul_nonneg (sq_nonneg d) (sq_nonneg F)
-  refine ⟨C, hC0, ?_⟩
-  intro g gm W P V htie delta hdelta hdelta0 hWbound sigma x
-  let A : SmoothCcTensor g 0 2 :=
-    edgeRaise2 (I := I) (M := M) g gm P
-  let Phi : SmoothCcTensor g 2 4 :=
-    slotExtendIter (I := I) (M := M) g 0 2 2 V
-  have hA0 : riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-      (A.toSection x) ≤ F ^ 2 *
-        riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (P.toSection x) := by
-    simpa only [A, F, d] using
-      edgeRaise_zero_mul (I := I) (M := M) g gm W P htie
-        hdelta hdelta0 hWbound x
-  have hPhi0 : riemannianFiberNormSq (I := I) (M := M) g 2 4 x
-      (Phi.toSection x) = d ^ 2 *
-        riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (V.toSection x) := by
-    simpa only [Phi, d] using
-      rfns_slotExtendIter_eq (I := I) (M := M) g 0 2 2 V x
-  have hout := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
-    (I := I) (M := M) g sigma.symm
-    (edgeProd4 (I := I) (M := M) g A V) 0 x
-  have hout' :
-      riemannianFiberNormSq (I := I) (M := M) g 0 4 x
-          ((edgePairPartnerBi (I := I) (M := M) g gm P V sigma).toSection x) =
-        riemannianFiberNormSq (I := I) (M := M) g 0 4 x
-          ((edgeProd4 (I := I) (M := M) g A V).toSection x) := by
-    simpa only [edgePairPartnerBi, A, iteratedCovGrad_zero] using hout
-  rw [hout']
-  refine (edge_app_le (I := I) (M := M) g 2 4 Phi A x).trans ?_
-  rw [hPhi0]
-  calc
-    d ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (V.toSection x) *
-        riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (A.toSection x) ≤
-        d ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (V.toSection x) *
-          (F ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-            (P.toSection x)) :=
-      mul_le_mul_of_nonneg_left hA0
-        (mul_nonneg (sq_nonneg d)
-          (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _))
-    _ = C * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (P.toSection x) *
-        riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (V.toSection x) := by simp only [C]; ring
-
-/-- The complete polarized raw top partner is pointwise bilinear in its
-passenger and test tensors, with one constant chosen before the reference
-metric, raw permutations, and realized path parameter vary. -/
-theorem edgeTopBi_zero_unif :
-    ∃ K : Real, 0 ≤ K ∧
-      ∀ (g : SmoothRiemannianMetric I M)
-        (T P V : SmoothCcTensor g 0 2) {delta : Real},
-        0 ≤ delta → delta ≤ 1 / 2 →
-        (hdelta : gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g T) delta) →
-        (hdeltaZ : gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g
-            (0 : SmoothCcTensor g 0 2)) delta) →
-        ∀ (qA qB : Fin 4 → Equiv.Perm (Fin 4))
-          (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
-          (∀ i, |epsilon i| ≤ 1) →
-          ∀ s ∈ Set.Icc (0 : Real) 1, ∀ x : M,
-            fiberLpFun g 0 4
-                (edgeTopPartnerBi (I := I) (M := M) g T P V
-                  hdelta hdeltaZ qA qB q epsilon s) x ≤
-              K * fiberLpFun g 0 2 P x * fiberLpFun g 0 2 V x := by
-  classical
-  obtain ⟨Cb, hCb0, hpair0⟩ := edgeBi_zero_unif (I := I) (M := M)
-  let K : Real := Real.sqrt (52 * Cb)
-  have hcoef0 : 0 ≤ 52 * Cb := mul_nonneg (by norm_num) hCb0
-  refine ⟨K, Real.sqrt_nonneg _, ?_⟩
-  intro g T P V delta hdelta0 hdelta_half hdelta hdeltaZ
-    qA qB q epsilon hepsilon s hs x
-  have hdelta_lt : delta < 1 := lt_of_le_of_lt hdelta_half (by norm_num)
-  have hsSmall : s ∈ realizedSmallSet (δ := delta) (δ' := delta) :=
-    Icc_subset_realizedSmallSet hdelta_lt hdelta_lt hs
-  let gm : SmoothRiemannianMetric I M :=
-    realizedFam (I := I) g T 0 hdelta hdeltaZ s
-  let W : SmoothCcTensor g 0 2 := s • T
-  have htie : ∀ (y : M) (v w : TangentSpace I y),
-      gm.inner y v w = g.inner y v w +
-        ccTensorBilinSymm (I := I) g W y v w := by
-    intro y v w
-    have hpath := realizedFam_inner_of_mem (I := I) (M := M)
-      g T 0 hdelta hdeltaZ hsSmall y v w
-    simpa only [gm, W, convexPerturbation, smul_zero, zero_add] using hpath
-  have hsabs : |s| ≤ 1 := by
-    rw [abs_le]
-    constructor <;> linarith [hs.1, hs.2]
-  have hs2 : s ^ 2 ≤ 1 := by
-    have hprod : 0 ≤ (1 - s) * (1 + s) :=
-      mul_nonneg (sub_nonneg.mpr hs.2) (by linarith [hs.1])
-    nlinarith
-  have hWraw := gFibreOpBound_ccTensorBilinSymm_smul
-    (I := I) (M := M) g s T hdelta
-  have hrad : |s| * delta ≤ delta := by
-    have hprod : 0 ≤ (1 - |s|) * delta :=
-      mul_nonneg (sub_nonneg.mpr hsabs) hdelta0
-    nlinarith
-  have hWscaled : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g W) (|s| * delta) := by
-    simpa only [W] using hWraw
-  have hWbound : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g W) delta := by
-    intro y v w
-    exact (hWscaled y v w).trans
-      (mul_le_mul_of_nonneg_right
-        (mul_le_mul_of_nonneg_right hrad (Real.sqrt_nonneg _))
-        (Real.sqrt_nonneg _))
-  let P0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-    (P.toSection x)
-  let V0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-    (V.toSection x)
-  let B : Real := Cb * P0 * V0
-  have hP0 : 0 ≤ P0 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 2 x _
-  have hV0 : 0 ≤ V0 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 2 x _
-  have hB0 : 0 ≤ B := mul_nonneg (mul_nonneg hCb0 hP0) hV0
-  let N : SmoothCcTensor g 0 4 → Real := fun Q =>
-    riemannianFiberNormSq (I := I) (M := M) g 0 4 x (Q.toSection x)
-  let Pair : Equiv.Perm (Fin 4) → SmoothCcTensor g 0 4 := fun sigma =>
-    edgePairPartnerBi (I := I) (M := M) g gm P V sigma
-  let Kern : (Fin 4 → Equiv.Perm (Fin 4)) → SmoothCcTensor g 0 4 := fun qq =>
-    (1 / 2 : Real) •
-      (Pair (qq 0) + Pair (qq 1) - Pair (qq 2) - Pair (qq 3))
-  let Riem : SmoothCcTensor g 0 4 :=
-    s • ((1 / 2 : Real) • (Kern qA + Kern qB))
-  let LieTerm : Fin 3 → SmoothCcTensor g 0 4 := fun i =>
-    epsilon i • ((1 / 2 : Real) •
-      (Pair (q i) + Pair ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
-  let Lie : SmoothCcTensor g 0 4 :=
-    s • (LieTerm 0 + LieTerm 1 + LieTerm 2)
-  have hpair : ∀ sigma : Equiv.Perm (Fin 4), N (Pair sigma) ≤ B := by
-    intro sigma
-    simpa only [N, Pair, B, P0, V0, gm] using
-      hpair0 g gm W P V htie hdelta_half hdelta0 hWbound sigma x
-  have hNadd : ∀ Q R : SmoothCcTensor g 0 4,
-      N (Q + R) ≤ 2 * N Q + 2 * N R := by
-    intro Q R
-    dsimp only [N]
-    rw [SmoothCcTensor.toSection_add]
-    exact riemannianFiberNormSq_add_le
-      (I := I) (M := M) g 0 4 x _ _
-  have hNsub : ∀ Q R : SmoothCcTensor g 0 4,
-      N (Q - R) ≤ 2 * N Q + 2 * N R := by
-    intro Q R
-    dsimp only [N]
-    rw [SmoothCcTensor.toSection_sub]
-    exact riemannianFiberNormSq_sub_le
-      (I := I) (M := M) g 0 4 x _ _
-  have hNsmul : ∀ (a : Real) (Q : SmoothCcTensor g 0 4),
-      N (a • Q) = a ^ 2 * N Q := by
-    intro a Q
-    dsimp only [N]
-    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
-      Pi.smul_apply, riemannianFiberNormSq_smul]
-  have hkernel : ∀ qq : Fin 4 → Equiv.Perm (Fin 4), N (Kern qq) ≤ 4 * B := by
-    intro qq
-    let Q0 := Pair (qq 0)
-    let Q1 := Pair (qq 1)
-    let Q2 := Pair (qq 2)
-    let Q3 := Pair (qq 3)
-    have h01 : N (Q0 + Q1) ≤ 4 * B := by
-      calc
-        N (Q0 + Q1) ≤ 2 * N Q0 + 2 * N Q1 := hNadd Q0 Q1
-        _ ≤ 2 * B + 2 * B := add_le_add
-          (mul_le_mul_of_nonneg_left (by simpa only [Q0] using hpair (qq 0))
-            (by norm_num))
-          (mul_le_mul_of_nonneg_left (by simpa only [Q1] using hpair (qq 1))
-            (by norm_num))
-        _ = 4 * B := by ring
-    have h23 : N (Q2 + Q3) ≤ 4 * B := by
-      calc
-        N (Q2 + Q3) ≤ 2 * N Q2 + 2 * N Q3 := hNadd Q2 Q3
-        _ ≤ 2 * B + 2 * B := add_le_add
-          (mul_le_mul_of_nonneg_left (by simpa only [Q2] using hpair (qq 2))
-            (by norm_num))
-          (mul_le_mul_of_nonneg_left (by simpa only [Q3] using hpair (qq 3))
-            (by norm_num))
-        _ = 4 * B := by ring
-    have hdiff : N ((Q0 + Q1) - (Q2 + Q3)) ≤ 16 * B := by
-      calc
-        N ((Q0 + Q1) - (Q2 + Q3)) ≤
-            2 * N (Q0 + Q1) + 2 * N (Q2 + Q3) := hNsub _ _
-        _ ≤ 2 * (4 * B) + 2 * (4 * B) := add_le_add
-          (mul_le_mul_of_nonneg_left h01 (by norm_num))
-          (mul_le_mul_of_nonneg_left h23 (by norm_num))
-        _ = 16 * B := by ring
-    have heq : Q0 + Q1 - Q2 - Q3 = (Q0 + Q1) - (Q2 + Q3) := by abel
-    change N ((1 / 2 : Real) • (Q0 + Q1 - Q2 - Q3)) ≤ _
-    rw [hNsmul, heq]
-    norm_num
-    linarith
-  have hriem : N Riem ≤ 4 * B := by
-    let KA := Kern qA
-    let KB := Kern qB
-    have hab : N (KA + KB) ≤ 16 * B := by
-      calc
-        N (KA + KB) ≤ 2 * N KA + 2 * N KB := hNadd KA KB
-        _ ≤ 2 * (4 * B) + 2 * (4 * B) := add_le_add
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [KA] using hkernel qA) (by norm_num))
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [KB] using hkernel qB) (by norm_num))
-        _ = 16 * B := by ring
-    change N (s • ((1 / 2 : Real) • (KA + KB))) ≤ _
-    rw [hNsmul, hNsmul]
-    norm_num
-    nlinarith
-  have hlieTerm : ∀ i : Fin 3, N (LieTerm i) ≤ B := by
-    intro i
-    let QA := Pair (q i)
-    let QB := Pair ((q i).trans (Equiv.swap (0 : Fin 4) 1))
-    have hab : N (QA + QB) ≤ 4 * B := by
-      calc
-        N (QA + QB) ≤ 2 * N QA + 2 * N QB := hNadd QA QB
-        _ ≤ 2 * B + 2 * B := add_le_add
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [QA] using hpair (q i)) (by norm_num))
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [QB] using
-              hpair ((q i).trans (Equiv.swap (0 : Fin 4) 1))) (by norm_num))
-        _ = 4 * B := by ring
-    have heps2 : (epsilon i) ^ 2 ≤ 1 := by
-      have hi := abs_le.mp (hepsilon i)
-      have hprod : 0 ≤ (1 - epsilon i) * (1 + epsilon i) :=
-        mul_nonneg (sub_nonneg.mpr hi.2) (by linarith [hi.1])
-      nlinarith
-    change N (epsilon i • ((1 / 2 : Real) • (QA + QB))) ≤ B
-    rw [hNsmul, hNsmul]
-    norm_num
-    nlinarith
-  have hlie : N Lie ≤ 10 * B := by
-    let L0 := LieTerm 0
-    let L1 := LieTerm 1
-    let L2 := LieTerm 2
-    have h01 : N (L0 + L1) ≤ 4 * B := by
-      calc
-        N (L0 + L1) ≤ 2 * N L0 + 2 * N L1 := hNadd L0 L1
-        _ ≤ 2 * B + 2 * B := add_le_add
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [L0] using hlieTerm 0) (by norm_num))
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [L1] using hlieTerm 1) (by norm_num))
-        _ = 4 * B := by ring
-    have h012 : N (L0 + L1 + L2) ≤ 10 * B := by
-      calc
-        N (L0 + L1 + L2) ≤ 2 * N (L0 + L1) + 2 * N L2 := hNadd _ _
-        _ ≤ 2 * (4 * B) + 2 * B := add_le_add
-          (mul_le_mul_of_nonneg_left h01 (by norm_num))
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [L2] using hlieTerm 2) (by norm_num))
-        _ = 10 * B := by ring
-    change N (s • (L0 + L1 + L2)) ≤ _
-    rw [hNsmul]
-    exact (mul_le_mul_of_nonneg_left h012 (sq_nonneg s)).trans (by
-      nlinarith)
-  have hform :
-      edgeTopPartnerBi (I := I) (M := M) g T P V hdelta hdeltaZ
-          qA qB q epsilon s = (2 : Real) • Riem + Lie := by
-    simp only [edgeTopPartnerBi, Riem, Lie, Kern, LieTerm, Pair, gm,
-      Fin.sum_univ_three]
-  have htop : N (edgeTopPartnerBi (I := I) (M := M) g T P V
-      hdelta hdeltaZ qA qB q epsilon s) ≤ 52 * B := by
-    rw [hform]
-    have hadd := hNadd ((2 : Real) • Riem) Lie
-    rw [hNsmul] at hadd
-    norm_num at hadd
-    calc
-      _ ≤ 2 * (4 * N Riem) + 2 * N Lie := hadd
-      _ ≤ 2 * (4 * (4 * B)) + 2 * (10 * B) := add_le_add
-        (mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_left hriem (by norm_num)) (by norm_num))
-        (mul_le_mul_of_nonneg_left hlie (by norm_num))
-      _ = 52 * B := by ring
-  have hsquare :
-      (fiberLpFun g 0 4
-          (edgeTopPartnerBi (I := I) (M := M) g T P V
-            hdelta hdeltaZ qA qB q epsilon s) x) ^ 2 ≤
-        (K * fiberLpFun g 0 2 P x * fiberLpFun g 0 2 V x) ^ 2 := by
-    simp only [fiberLpFun, K]
-    rw [Real.sq_sqrt (riemannianFiberNormSq_nonneg
-        (I := I) (M := M) g 0 4 x _),
-      mul_pow, mul_pow, Real.sq_sqrt hcoef0,
-      Real.sq_sqrt hP0, Real.sq_sqrt hV0]
-    simpa only [B, P0, V0, mul_assoc] using htop
-  exact le_of_sq_le_sq hsquare
-    (mul_nonneg
-      (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
-      (Real.sqrt_nonneg _))
-
-/-- Metricwise compatibility projection of `edgeBi_zero_unif`. -/
-theorem edgePartnerBi_zero (g : SmoothRiemannianMetric I M) :
-    ∃ C : Real, 0 ≤ C ∧
-      ∀ (gm : SmoothRiemannianMetric I M)
-        (W P V : SmoothCcTensor g 0 2)
-        (_htie : ∀ (y : M) (v w : TangentSpace I y),
-          gm.inner y v w = g.inner y v w +
-            ccTensorBilinSymm (I := I) g W y v w)
-        {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g W) delta →
-        ∀ (sigma : Equiv.Perm (Fin 4)) (x : M),
-          riemannianFiberNormSq (I := I) (M := M) g 0 4 x
-              ((edgePairPartnerBi (I := I) (M := M) g gm P V sigma).toSection x) ≤
-            C * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                (P.toSection x) *
-              riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                (V.toSection x) := by
-  obtain ⟨C, hC, hbound⟩ := edgeBi_zero_unif (I := I) (M := M)
-  exact ⟨C, hC, hbound g⟩
-
-/-- After one covariant derivative, a polarized Palatini formal partner obeys
-the exact trilinear Leibniz bound.  Only the moving metric perturbation is
-controlled in the half fibre ball; the raised state and the independent test
-tensor have no radius hypothesis. -/
-theorem edgePartnerBi_one (g : SmoothRiemannianMetric I M) :
-    ∃ C : Real, 0 ≤ C ∧
-      ∀ (gm : SmoothRiemannianMetric I M)
-        (W P V : SmoothCcTensor g 0 2)
-        (_htie : ∀ (y : M) (v w : TangentSpace I y),
-          gm.inner y v w = g.inner y v w +
-            ccTensorBilinSymm (I := I) g W y v w)
-        {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g W) delta →
-        ∀ (sigma : Equiv.Perm (Fin 4)) (x : M),
-          riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-              ((covGrad (I := I) (M := M) g 0 4
-                (edgePairPartnerBi (I := I) (M := M) g gm P V sigma)).toSection x) ≤
-            C *
-              (riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                    (P.toSection x) *
-                  riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-                    ((iteratedCovGrad (I := I) g 0 2 1 V).toSection x) +
-                riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-                    ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x) *
-                  riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                    (V.toSection x) +
-                riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-                    ((iteratedCovGrad (I := I) g 0 2 1 W).toSection x) *
-                  riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                    (P.toSection x) *
-                  riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-                    (V.toSection x)) := by
-  classical
-  obtain ⟨D, hD0, hraise⟩ := edgeRaise_one_mul (I := I) (M := M) g
-  let d : Real := Module.finrank Real E
-  let F : Real := (2 * d) ^ 2
-  let C : Real := 2 * (d ^ 2 * F ^ 2 + d ^ 2 * D)
-  have hC0 : 0 ≤ C := mul_nonneg (by norm_num)
-    (add_nonneg (mul_nonneg (sq_nonneg d) (sq_nonneg F))
-      (mul_nonneg (sq_nonneg d) hD0))
-  refine ⟨C, hC0, ?_⟩
-  intro gm W P V htie delta hdelta hdelta0 hWbound sigma x
-  let A : SmoothCcTensor g 0 2 :=
-    edgeRaise2 (I := I) (M := M) g gm P
-  let Phi : SmoothCcTensor g 2 4 :=
-    slotExtendIter (I := I) (M := M) g 0 2 2 V
-  let U : SmoothCcTensor g 0 5 :=
-    appCc (I := I) (M := M) g 2 5
-      (covGrad (I := I) (M := M) g 2 4 Phi) A
-  let Q : SmoothCcTensor g 0 5 :=
-    appCc (I := I) (M := M) g 3 5
-      (slotExtend (I := I) (M := M) g 2 4 Phi)
-      (covGrad (I := I) (M := M) g 0 2 A)
-  let P0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-    (P.toSection x)
-  let P1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-    ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x)
-  let W1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-    ((iteratedCovGrad (I := I) g 0 2 1 W).toSection x)
-  let V0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-    (V.toSection x)
-  let V1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-    ((iteratedCovGrad (I := I) g 0 2 1 V).toSection x)
-  have hA0 : riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-      (A.toSection x) ≤ F ^ 2 * P0 := by
-    simpa only [A, F, d, P0] using
-      edgeRaise_zero_mul (I := I) (M := M) g gm W P htie
-        hdelta hdelta0 hWbound x
-  have hA1 : riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-      ((covGrad (I := I) (M := M) g 0 2 A).toSection x) ≤
-        D * (W1 * P0 + P1) := by
-    simpa only [A, W1, P0, P1] using
-      hraise gm W P htie hdelta hdelta0 hWbound x
-  have hPhi0 : riemannianFiberNormSq (I := I) (M := M) g 2 4 x
-      (Phi.toSection x) = d ^ 2 * V0 := by
-    simpa only [Phi, d, V0] using
-      rfns_slotExtendIter_eq (I := I) (M := M) g 0 2 2 V x
-  have hPhi1 : riemannianFiberNormSq (I := I) (M := M) g 2 5 x
-      ((covGrad (I := I) (M := M) g 2 4 Phi).toSection x) =
-        d ^ 2 * V1 := by
-    simpa only [Phi, d, V1, iteratedCovGrad_succ, iteratedCovGrad_zero] using
-      edge_extend2_one (I := I) (M := M) g V x
-  have hprod : covGrad (I := I) (M := M) g 0 4
-      (edgeProd4 (I := I) (M := M) g A V) = U + Q := by
-    simpa only [edgeProd4, Phi, U, Q] using
-      covGrad_appCc_eq (I := I) (M := M) g 2 4 Phi A
-  have hout := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
-    (I := I) (M := M) g sigma.symm
-    (edgeProd4 (I := I) (M := M) g A V) 1 x
-  have hout' :
-      riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-          ((covGrad (I := I) (M := M) g 0 4
-            (edgePairPartnerBi (I := I) (M := M) g gm P V sigma)).toSection x) =
-        riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-          ((covGrad (I := I) (M := M) g 0 4
-            (edgeProd4 (I := I) (M := M) g A V)).toSection x) := by
-    simpa only [edgePairPartnerBi, A, iteratedCovGrad_succ,
-      iteratedCovGrad_zero] using hout
-  rw [hout', hprod]
-  have hadd := riemannianFiberNormSq_add_le
-    (I := I) (M := M) g 0 5 x (U.toSection x) (Q.toSection x)
-  have hP00 : 0 ≤ P0 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 2 x _
-  have hP10 : 0 ≤ P1 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 3 x _
-  have hW10 : 0 ≤ W1 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 3 x _
-  have hV00 : 0 ≤ V0 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 2 x _
-  have hV10 : 0 ≤ V1 := riemannianFiberNormSq_nonneg
-    (I := I) (M := M) g 0 3 x _
-  have hU : riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-      (U.toSection x) ≤ d ^ 2 * F ^ 2 * (P0 * V1) := by
-    refine (edge_app_le (I := I) (M := M) g 2 5
-      (covGrad (I := I) (M := M) g 2 4 Phi) A x).trans ?_
-    rw [hPhi1]
-    calc
-      d ^ 2 * V1 * riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-          (A.toSection x) ≤ d ^ 2 * V1 * (F ^ 2 * P0) :=
-        mul_le_mul_of_nonneg_left hA0 (mul_nonneg (sq_nonneg d) hV10)
-      _ = d ^ 2 * F ^ 2 * (P0 * V1) := by ring
-  have hQ : riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-      (Q.toSection x) ≤ d ^ 2 * D * (P1 * V0 + W1 * P0 * V0) := by
-    refine (riemannianFiberNormSq_appCc_slotExtend_le
-      (I := I) (M := M) g 2 4 Phi
-      (covGrad (I := I) (M := M) g 0 2 A) x).trans ?_
-    rw [hPhi0]
-    calc
-      d ^ 2 * V0 * riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-          ((covGrad (I := I) (M := M) g 0 2 A).toSection x) ≤
-          d ^ 2 * V0 * (D * (W1 * P0 + P1)) :=
-        mul_le_mul_of_nonneg_left hA1 (mul_nonneg (sq_nonneg d) hV00)
-      _ = d ^ 2 * D * (P1 * V0 + W1 * P0 * V0) := by ring
-  let X : Real := P0 * V1
-  let Y : Real := P1 * V0
-  let Z : Real := W1 * P0 * V0
-  have hX0 : 0 ≤ X := mul_nonneg hP00 hV10
-  have hY0 : 0 ≤ Y := mul_nonneg hP10 hV00
-  have hZ0 : 0 ≤ Z := mul_nonneg (mul_nonneg hW10 hP00) hV00
-  have hAcoef0 : 0 ≤ d ^ 2 * F ^ 2 :=
-    mul_nonneg (sq_nonneg d) (sq_nonneg F)
-  have hBcoef0 : 0 ≤ d ^ 2 * D := mul_nonneg (sq_nonneg d) hD0
-  have hAle : d ^ 2 * F ^ 2 ≤ d ^ 2 * F ^ 2 + d ^ 2 * D := by linarith
-  have hBle : d ^ 2 * D ≤ d ^ 2 * F ^ 2 + d ^ 2 * D := by linarith
-  calc
-    _ ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-          (U.toSection x) +
-        2 * riemannianFiberNormSq (I := I) (M := M) g 0 5 x
-          (Q.toSection x) := hadd
-    _ ≤ 2 * (d ^ 2 * F ^ 2 * X) + 2 * (d ^ 2 * D * (Y + Z)) := by
-      exact add_le_add
-        (mul_le_mul_of_nonneg_left (by simpa only [X] using hU) (by norm_num))
-        (mul_le_mul_of_nonneg_left
-          (by simpa only [Y, Z] using hQ) (by norm_num))
-    _ ≤ 2 * ((d ^ 2 * F ^ 2 + d ^ 2 * D) * X) +
-        2 * ((d ^ 2 * F ^ 2 + d ^ 2 * D) * (Y + Z)) := by
-      exact add_le_add
-        (mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_right hAle hX0) (by norm_num))
-        (mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_right hBle (add_nonneg hY0 hZ0)) (by norm_num))
-    _ = C * (X + Y + Z) := by simp only [C]; ring
-    _ = _ := rfl
-
 /-- One explicit Palatini formal partner has the sharp differentiated bound
 `O(delta^2) * |nabla T|^2`. -/
 theorem edgePartner_gen (g : SmoothRiemannianMetric I M) :
@@ -1261,15 +663,15 @@ theorem edgePartner_gen (g : SmoothRiemannianMetric I M) :
       ∀ (gm : SmoothRiemannianMetric I M)
         (P T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g P y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g P) delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -1298,17 +700,17 @@ theorem edgePartner_gen (g : SmoothRiemannianMetric I M) :
   let Phi : SmoothCcTensor g 2 4 :=
     slotExtendIter (I := I) (M := M) g 0 2 2 T
   let U : SmoothCcTensor g 0 5 :=
-    appCc (I := I) (M := M) g 2 5
+    operatorFieldApply (I := I) (M := M) g 2 5
       (covGrad (I := I) (M := M) g 2 4 Phi) A
   let V : SmoothCcTensor g 0 5 :=
-    appCc (I := I) (M := M) g 3 5
+    operatorFieldApply (I := I) (M := M) g 3 5
       (slotExtend (I := I) (M := M) g 2 4 Phi)
       (covGrad (I := I) (M := M) g 0 2 A)
   let T0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
     (T.toSection x)
   let T1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
     ((iteratedCovGrad (I := I) g 0 2 1 T).toSection x)
-  have hsymm : symmS (I := I) (M := M) g T = T :=
+  have hsymm : ccTensor02Symm (I := I) (M := M) g T = T :=
     edge_symm_eq (I := I) (M := M) g T hTsymm
   have hT0raw := symmC0_rfns_le (I := I) (M := M) g T hdelta0 hTbound x
   rw [hsymm] at hT0raw
@@ -1334,7 +736,7 @@ theorem edgePartner_gen (g : SmoothRiemannianMetric I M) :
   have hprod : covGrad (I := I) (M := M) g 0 4
       (edgeProd4 (I := I) (M := M) g A T) = U + V := by
     simpa only [edgeProd4, Phi, U, V] using
-      covGrad_appCc_eq (I := I) (M := M) g 2 4 Phi A
+      covGrad_operatorFieldApply_eq (I := I) (M := M) g 2 4 Phi A
   have hout := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
     (I := I) (M := M) g sigma.symm
     (edgeProd4 (I := I) (M := M) g A T) 1 x
@@ -1362,7 +764,7 @@ theorem edgePartner_gen (g : SmoothRiemannianMetric I M) :
       _ = d ^ 2 * Z * delta ^ 2 * T1 := by ring
   have hV : riemannianFiberNormSq (I := I) (M := M) g 0 5 x (V.toSection x) ≤
       d ^ 4 * D * delta ^ 2 * T1 := by
-    refine (riemannianFiberNormSq_appCc_slotExtend_le
+    refine (riemannianFiberNormSq_comp_slotExtend_le
       (I := I) (M := M) g 2 4 Phi
       (covGrad (I := I) (M := M) g 0 2 A) x).trans ?_
     rw [hPhi0]
@@ -1397,15 +799,15 @@ theorem edgePartner_zero (g : SmoothRiemannianMetric I M) :
       ∀ (gm : SmoothRiemannianMetric I M)
         (P T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g P y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g P) delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -1471,13 +873,13 @@ theorem edgePartner_one (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta →
         ∀ (sigma : Equiv.Perm (Fin 4)) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g 0 5 x
@@ -1493,12 +895,12 @@ theorem edgePartner_one (g : SmoothRiemannianMetric I M) :
     (fun _ => le_rfl) sigma x
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
-    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_bound_mono (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {a b : Real} (hab : a ≤ b)
-    (ha : gFibreOpBound (I := I) (M := M) g
+    (ha : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) a) :
-    gFibreOpBound (I := I) (M := M) g
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) b := by
   intro x v w
   exact (ha x v w).trans (mul_le_mul_of_nonneg_right
@@ -1511,12 +913,12 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         {delta : Real}, 0 ≤ delta → delta ≤ 1 / 2 →
-        (hdelta : gFibreOpBound (I := I) (M := M) g
+        (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta) →
-        (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+        (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta) →
         ∀ (qA qB : Fin 4 → Equiv.Perm (Fin 4))
           (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
@@ -1561,7 +963,7 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
     have hprod : 0 ≤ (1 - |s|) * delta :=
       mul_nonneg (sub_nonneg.mpr hsabs) hdelta0
     nlinarith
-  have hPbound : gFibreOpBound (I := I) (M := M) g
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g P) delta := by
     exact edge_bound_mono (I := I) (M := M) g P hrad
       (by simpa only [P] using hPraw)
@@ -1574,8 +976,7 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
     rw [show iteratedCovGrad (I := I) g 0 2 1 P =
         s • iteratedCovGrad (I := I) g 0 2 1 T from by
       simp only [P, iteratedCovGrad_smul]]
-    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
-      Pi.smul_apply, riemannianFiberNormSq_smul]
+    rw [smoothCcTensor_toSection_smul_apply, riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
   let T0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -1610,8 +1011,7 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
       N (a • Q) = a ^ 2 * N Q := by
     intro a Q
     dsimp only [N]
-    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
-      Pi.smul_apply, riemannianFiberNormSq_smul]
+    rw [smoothCcTensor_toSection_smul_apply, riemannianFiberNormSq_smul]
   have hkernel : ∀ qq : Fin 4 → Equiv.Perm (Fin 4),
       N (edgeKernelPartner (I := I) (M := M) g gm T qq) ≤ 4 * B := by
     intro qq
@@ -1748,12 +1148,12 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g T x v w =
-            ccTensorBilin (I := I) g T x w v)
+          smoothCcTensorBilinForm (I := I) g T x v w =
+            smoothCcTensorBilinForm (I := I) g T x w v)
         {delta : Real}, 0 ≤ delta → delta ≤ 1 / 2 →
-        (hdelta : gFibreOpBound (I := I) (M := M) g
+        (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) delta) →
-        (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+        (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta) →
         ∀ (qA qB : Fin 4 → Equiv.Perm (Fin 4))
           (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
@@ -1799,7 +1199,7 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
     have hprod : 0 ≤ (1 - |s|) * delta :=
       mul_nonneg (sub_nonneg.mpr hsabs) hdelta0
     nlinarith
-  have hPbound : gFibreOpBound (I := I) (M := M) g
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g P) delta := by
     exact edge_bound_mono (I := I) (M := M) g P hrad
       (by simpa only [P] using hPraw)
@@ -1812,8 +1212,7 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
     rw [show iteratedCovGrad (I := I) g 0 2 1 P =
         s • iteratedCovGrad (I := I) g 0 2 1 T from by
       simp only [P, iteratedCovGrad_smul]]
-    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
-      Pi.smul_apply, riemannianFiberNormSq_smul]
+    rw [smoothCcTensor_toSection_smul_apply, riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
   let T1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -1849,8 +1248,8 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
       N (a • Q) = a ^ 2 * N Q := by
     intro a Q
     dsimp only [N]
-    rw [covGrad_smul, SmoothCcTensor.toSection_smul,
-      ContMDiffSection.coe_smul, Pi.smul_apply, riemannianFiberNormSq_smul]
+    rw [covGrad_smul, smoothCcTensor_toSection_smul_apply,
+      riemannianFiberNormSq_smul]
   have hkernel : ∀ qq : Fin 4 → Equiv.Perm (Fin 4),
       N (edgeKernelPartner (I := I) (M := M) g gm T qq) ≤ 4 * B := by
     intro qq

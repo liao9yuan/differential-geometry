@@ -3,19 +3,19 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDef
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricC1Continuity
 
-/-!
-# The vanishing moving scalar Laplacian operator
 
-At a regular time `T`, this file specializes the fixed-metric operator to
-`G.metric (T - s)` and proves its operator norm tends to zero as `s → 0`.
--/
+
+
+
+
+
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff ENNReal BigOperators
+open scoped Manifold Topology ContDiff ENNReal BigOperators InnerProductSpace
 
 namespace DifferentialGeometry
 namespace PDE
@@ -26,7 +26,9 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+section LapDiffOperator
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -39,8 +41,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The actual top-order moving-metric perturbation
-`Delta_(G(T-s)) - Delta_(G(T))` on the fixed spectral scale at `T`. -/
 noncomputable def lapDiffA2
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -50,7 +50,22 @@ noncomputable def lapDiffA2
   lapDiffOp (I := I) (M := M) (G.metric (T : Real))
     (G.metric ((T : Real) - s))
 
+end LapDiffOperator
+
+section MetricShortTime
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
+
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem lapDiff_rho
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -72,15 +87,15 @@ private theorem lapDiff_rho
     (I := I) G hG T).comp hshift
 
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
-/-- Near the frozen time, the moving-minus-frozen metric bilinear form has
-intrinsic fibre operator norm at most `1 / 4` relative to the frozen metric. -/
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lapDiff_fibreSmall
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     (T : D.RegularTime) :
     ∀ᶠ s in 𝓝 (0 : Real),
-      MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+      MetricRealization.metricCauchySchwarzBound (I := I) (G.metric (T : Real))
         (fun x : M =>
           (G.metric ((T : Real) - s)).inner x - (G.metric (T : Real)).inner x)
         (1 / 4 : Real) := by
@@ -112,8 +127,8 @@ theorem lapDiff_fibreSmall
   simpa only [q, ContinuousLinearMap.sub_apply] using hfinal
 
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
-/-- One short backward-time interval stays in the regular set and has
-quarter-size metric perturbation relative to the frozen metric. -/
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lapDiff_short
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -122,7 +137,7 @@ theorem lapDiff_short
     ∃ tau : Real, 0 < tau ∧ tau ≤ 1 ∧
       ∀ s ∈ Set.Icc (0 : Real) tau,
         (T : Real) - s ∈ D.regular ∧
-          MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+          MetricRealization.metricCauchySchwarzBound (I := I) (G.metric (T : Real))
             (fun x : M =>
               (G.metric ((T : Real) - s)).inner x -
                 (G.metric (T : Real)).inner x)
@@ -139,7 +154,7 @@ theorem lapDiff_short
   have hsmall := lapDiff_fibreSmall (I := I) (M := M) G hG T
   let U : Set Real := {s |
     (T : Real) - s ∈ D.regular ∧
-      MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+      MetricRealization.metricCauchySchwarzBound (I := I) (G.metric (T : Real))
         (fun x : M =>
           (G.metric ((T : Real) - s)).inner x -
             (G.metric (T : Real)).inner x)
@@ -147,7 +162,7 @@ theorem lapDiff_short
   have hU : U ∈ 𝓝 (0 : Real) := by
     change ∀ᶠ s in 𝓝 (0 : Real),
       (T : Real) - s ∈ D.regular ∧
-        MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+        MetricRealization.metricCauchySchwarzBound (I := I) (G.metric (T : Real))
           (fun x : M =>
             (G.metric ((T : Real) - s)).inner x -
               (G.metric (T : Real)).inner x)
@@ -169,8 +184,23 @@ theorem lapDiff_short
     exact hs.2.trans_lt htau_delta
   simpa only [U] using hball hsball
 
-/-- Near zero, `lapDiffA2` agrees on every finite spectral vector with the
-genuine smooth Laplacian-difference core action. -/
+end MetricShortTime
+
+section LapDiffOperator
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
 theorem lapDiffA2_core
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -197,8 +227,8 @@ theorem lapDiffA2_core
   exact lapDiffOp_core (I := I) (M := M)
     (G.metric (T : Real)) (G.metric ((T : Real) - s)) v hs.le
 
-/-- A support-independent modulus controls `lapDiffA2` on every finite
-spectral vector and tends to zero as `s → 0`. -/
+
+
 theorem lapDiffA2_bound
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -241,8 +271,8 @@ theorem lapDiffA2_bound
       simpa only [lapDiffA2, omega, rho] using
         hop (G.metric ((T : Real) - s)) hs.le
 
-/-- The genuine moving scalar Laplacian perturbation tends to zero in
-operator norm at the frozen regular time. -/
+
+
 theorem lapDiffA2_zero
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -274,6 +304,8 @@ theorem lapDiffA2_zero
   filter_upwards [hsmall] with s hs
   simpa only [lapDiffA2, rho] using
     hop (G.metric ((T : Real) - s)) hs.le
+
+end LapDiffOperator
 
 end IntrinsicSpectral
 end RicciFlow

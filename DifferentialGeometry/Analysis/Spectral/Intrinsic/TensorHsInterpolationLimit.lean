@@ -1,41 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
-/-!
-# Spectral interpolation of `Hˢ`-convergence with uniform high-order mass
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a spectral
-Sobolev triple of orders `σ < σ' < σ''`, a sequence of tensor sections that
-
-* converges in the *low* norm `Hˢ`, and
-* carries a *uniform* high-order weighted mass bound (a uniform `H^{σ''}`
-  norm bound),
-
-automatically converges in every *intermediate* norm `H^{σ'}`. This is the
-standard spectral interpolation / dominated-convergence brick: the weight ratio
-`(1 + λᵢ)^{σ' - σ''} → 0` as the eigenvalue `λᵢ → ∞`, so the high-mode tail of
-the `H^{σ'}` mass is controlled uniformly by the high-order mass bound, while on
-the finitely many low modes (a finite set below any eigenvalue threshold,
-`tensorEigenIdx_one_add_lambda_lt_finite`) the coordinates converge from the
-`Hˢ` convergence. An `ε/2` split (uniform tail + finite low-mode part) then
-forces `H^{σ'}` convergence.
-
-## Main results
-
-* `tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform` — the core single-
-  sequence interpolation brick: for `d : ℕ → H^{σ''}` with a uniform `H^{σ''}`
-  norm bound and `‖incl_{σ} (d n)‖ → 0`, also `‖incl_{σ'} (d n)‖ → 0`.
-* `tensorHs_tendsto_of_tendsto_of_uniform_weightedMass` — the consumer-facing
-  form: a sequence `u → ulim` in `Hˢ` with uniform high-order weighted mass `B`
-  along the sequence and the same for the limit converges in the intermediate
-  `H^{σ'}` norm of the difference.
-
-## Sign convention
-
-The eigenvalues `λᵢ ≥ 0` are the connection-Laplacian eigenvalues; the weight
-is `tensorSobolevWeight i σ = (1 + λᵢ)^σ`. For `σ < σ' < σ''` the inclusions
-`H^{σ''} → H^{σ'} → Hˢ` are coordinate-preserving contractions.
--/
 
 noncomputable section
 
@@ -48,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -63,12 +28,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Discreteness of the tensor connection-Laplacian spectrum below a
-threshold.** For every threshold `Λ`, only finitely many eigen-indices `i`
-satisfy `1 + λᵢ < Λ`. This is the standard discreteness of the spectrum of the
-compact resolvent `tensorResolventL2 g r s`: the value map `i ↦ μ(i)` factors the
-index set as a finite union over the (finitely many) resolvent eigenvalues
-`μ` with `1/Λ < |μ|`, each with a finite-dimensional eigenspace fibre. -/
+omit [CompleteSpace E] in
 theorem tensorEigenIdx_one_add_lambda_lt_finite
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Λ : ℝ) :
     {i : TensorEigenIdx (I := I) (M := M) g r s |
@@ -83,7 +43,7 @@ theorem tensorEigenIdx_one_add_lambda_lt_finite
           μ.val)
       · refine Set.Finite.subset
           (tensorResolvent_eigenvalues_finite_above (I := I) (M := M) g r s
-            (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
+            (PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
               (I := I) (M := M) g r s)
             (show (0 : ℝ) < 1 / Λ by positivity)) ?_
         rintro x ⟨μ, hμB, rfl⟩
@@ -136,15 +96,12 @@ theorem tensorEigenIdx_one_add_lambda_lt_finite
       linarith
     rw [hempty]; exact Set.finite_empty
 
-/-- The finite set of `(r,s)` tensor eigen-indices below the `n`-th spectral
-threshold. -/
 def eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ) :
     Finset (TensorEigenIdx (I := I) (M := M) g r s) :=
   (tensorEigenIdx_one_add_lambda_lt_finite
     (I := I) (M := M) g r s ((n : ℝ) + 1)).toFinset
 
-/-- Membership in the generic tensor spectral truncation is the corresponding
-strict eigenvalue bound. -/
+omit [CompleteSpace E] in
 lemma mem_eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     i ∈ eigenFinset (I := I) (M := M) g r s n ↔
@@ -153,7 +110,7 @@ lemma mem_eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ)
   rw [Set.Finite.mem_toFinset]
   rfl
 
-/-- Generic tensor spectral truncations are monotone in the threshold. -/
+omit [CompleteSpace E] in
 lemma eigenFinset_mono (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Monotone (eigenFinset (I := I) (M := M) g r s) := by
   intro m n hmn i hi
@@ -163,8 +120,7 @@ lemma eigenFinset_mono (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     linarith
   exact hi.trans_le hcast
 
-/-- Every tensor eigen-index belongs to a sufficiently large generic spectral
-truncation. -/
+omit [CompleteSpace E] in
 lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ∃ n : ℕ, i ∈ eigenFinset (I := I) (M := M) g r s n := by
@@ -174,7 +130,7 @@ lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [mem_eigenFinset]
   linarith
 
-/-- Generic tensor spectral truncations tend to the whole eigen-index type. -/
+omit [CompleteSpace E] in
 lemma eigenFinset_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Tendsto (eigenFinset (I := I) (M := M) g r s) atTop atTop :=
   tendsto_atTop_finset_of_monotone
@@ -186,8 +142,8 @@ namespace tensorHs
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 omit [CompleteSpace E] in
-/-- A single weighted-square coordinate term of `T ∈ Hˢ` is bounded by the
-squared `Hˢ` norm: `(1 + λᵢ)^σ · (coeff i T)² ≤ ‖T‖²`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -199,29 +155,8 @@ lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
   positivity
 
 omit [CompleteSpace E] in
-/-- **Finite-set Bessel truncation in `Hˢ`.**  Every FINITE partial sum of the
-weighted squared spectral coordinates of `T ∈ Hˢ` is bounded by `‖T‖²`:
-`∑_{i ∈ S} (1 + λᵢ)^σ · (coeff i T)² ≤ ‖T‖²`.
-
-The `Finset` form of `weight_mul_coeff_sq_le_normSq`.  It is the step that lets a
-spectrally truncated (Galerkin) energy estimate read an `Hˢ` bound on a function
-that is NOT in the truncation subspace: the projected pairing term is a finite
-sum over `S`, while the jet ladder bounding it speaks about the full `Hˢ` norm. -/
-lemma weight_sum_le_normSq {σ : ℝ}
-    (T : tensorHs (I := I) (M := M) g r s σ)
-    (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) :
-    ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (T.coeff i) ^ 2 ≤
-      ‖T‖ ^ 2 := by
-  rw [norm_sq_eq_tsum (I := I) (M := M) T]
-  refine Summable.sum_le_tsum S (fun i _ => ?_) T.weighted_summable
-  have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
-    tensorSobolevWeight_nonneg (I := I) (M := M) i σ
-  positivity
-
-omit [CompleteSpace E] in
-/-- **Per-mode coordinate continuity from `Hˢ` convergence to zero.** If the
-`Hˢ` norms of `d n` tend to `0`, then each fixed coordinate `(d n).coeff i`
-tends to `0`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
     (d : ℕ → tensorHs (I := I) (M := M) g r s σ)
     (hd : Tendsto (fun n => ‖d n‖) atTop (𝓝 0))
@@ -261,13 +196,7 @@ lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
 
 end tensorHs
 
-/-- Coordinatewise convergence to zero, together with a uniform higher-order
-Sobolev bound, implies convergence to zero after a strict Sobolev downshift.
-
-The high-mode tail of `‖incl_{σ'}(d n)‖²` is bounded, uniformly in `n`, by
-`Λ^{σ'-σ''}·C²` via the weight ratio `(1+λᵢ)^{σ'-σ''} ≤ Λ^{σ'-σ''}` on
-`{Λ ≤ 1+λᵢ}` (negative exponent), which is made small by choosing the threshold
-`Λ` large; the finite low-mode part tends to zero coordinatewise. -/
+omit [CompleteSpace E] in
 theorem tendsto_of_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
     (hσ'σ'' : σ' < σ'')
@@ -280,7 +209,6 @@ theorem tendsto_of_coeff
         hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
   classical
   set ι := TensorEigenIdx (I := I) (M := M) g r s
-
   have hnormsq : ∀ n,
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           hσ'σ''.le (d n)‖ ^ 2 =
@@ -291,16 +219,13 @@ theorem tendsto_of_coeff
       (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n))
     rwa [tensorHsInclusion_coeff] at h
-
   have hsumm' : ∀ n, Summable (fun i : ι =>
       tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) :=
     fun n => tensorHs.weighted_summable_of_le (I := I) (M := M) hσ'σ''.le (d n)
-
   have hmass'' : ∀ n,
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2
         = ‖d n‖ ^ 2 :=
     fun n => (tensorHs.norm_sq_eq_tsum (I := I) (M := M) (d n)).symm
-
   suffices hsq : Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n)‖ ^ 2) atTop (𝓝 0) by
@@ -315,11 +240,9 @@ theorem tendsto_of_coeff
     rw [Real.sqrt_zero] at hsqrt
     refine hsqrt.congr (fun n => ?_)
     rw [Real.sqrt_sq (hnn n)]
-
   rw [Metric.tendsto_atTop]
   intro ε hε
   have hexp : σ' - σ'' < 0 := by linarith
-
   obtain ⟨Λ, hΛgt1, hΛtail⟩ :
       ∃ Λ : ℝ, 1 < Λ ∧ Λ ^ (σ' - σ'') * C ^ 2 < ε / 2 := by
     set δ : ℝ := (ε / 2) / (C ^ 2 + 1) with hδ_def
@@ -343,14 +266,12 @@ theorem tendsto_of_coeff
       have hεpos : 0 < ε / 2 := by linarith
       nlinarith [hεpos, hCsq_nn]
     linarith
-
   set F : Finset ι :=
     (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g r s Λ).toFinset
     with hF_def
   have hmemF : ∀ i : ι, i ∈ F ↔
       1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ := by
     intro i; rw [hF_def, Set.Finite.mem_toFinset]; rfl
-
   have hcompl_bd : ∀ (n : ℕ) (i : ι), i ∉ F →
       tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 ≤
         Λ ^ (σ' - σ'') *
@@ -359,7 +280,6 @@ theorem tendsto_of_coeff
     have hΛle : Λ ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
       by_contra hcon
       exact hi ((hmemF i).2 (lt_of_not_ge hcon))
-
     have hsplit : tensorSobolevWeight (I := I) (M := M) i σ' =
         tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') *
           tensorSobolevWeight (I := I) (M := M) i σ'' := by
@@ -380,7 +300,6 @@ theorem tendsto_of_coeff
       _ ≤ Λ ^ (σ' - σ'') *
               (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) :=
             mul_le_mul_of_nonneg_right hratio (by positivity)
-
   have htail : ∀ n,
       ∑' i : { i : ι // i ∉ F },
           tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 ≤
@@ -421,7 +340,6 @@ theorem tendsto_of_coeff
             apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
             have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
             nlinarith [hCbd n, hnn, hC]
-
   have hfin0 : Tendsto (fun n =>
       ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
       atTop (𝓝 0) := by
@@ -435,11 +353,9 @@ theorem tendsto_of_coeff
         have := hc.const_mul (tensorSobolevWeight (I := I) (M := M) i σ')
         simpa using this)
     simpa using h
-
   rw [Metric.tendsto_atTop] at hfin0
   obtain ⟨N, hN⟩ := hfin0 (ε / 2) (by linarith)
   refine ⟨N, fun n hn => ?_⟩
-
   have hsplit_sum :
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 =
         (∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) +
@@ -461,14 +377,12 @@ theorem tendsto_of_coeff
       hσ'σ''.le (d n)‖ ^ 2 < ε := by
     rw [hnormsq n, hsplit_sum]
     linarith
-
   rw [Real.dist_eq, sub_zero]
   have hnn : 0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
 
-/-- Coordinatewise continuity and a uniform higher-order Sobolev bound imply
-continuity after a strict Sobolev downshift. -/
+omit [CompleteSpace E] in
 theorem cont_of_coeff
     {X : Type*} [TopologicalSpace X] [FirstCountableTopology X]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
@@ -511,8 +425,7 @@ theorem cont_of_coeff
     simp only [d, map_sub]
   exact tendsto_sub_nhds_zero_iff.mp hsub
 
-/-- If a uniformly high-order bounded sequence tends to zero in a lower
-Sobolev norm, then it tends to zero at every strict intermediate order. -/
+omit [CompleteSpace E] in
 theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
     (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
@@ -534,8 +447,8 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
   exact tendsto_of_coeff (I := I) (M := M) hσ'σ'' d hC hCbd hcoeff0
 
 omit [CompleteSpace E] in
-/-- A uniform weighted-mass bound bounds the `H^{σ''}` norm: if
-`∑' i, (1 + λᵢ)^{σ''} · (T.coeff i)² ≤ B`, then `‖T‖_{σ''} ≤ √B`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_le_sqrt_of_weightedMass_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ'' : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ'') {B : ℝ}
@@ -547,18 +460,7 @@ private lemma norm_le_sqrt_of_weightedMass_le
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg T)] at h
 
-/-- **Spectral interpolation of `Hˢ`-convergence with uniform high-order mass.**
-Let `σ ≤ σ' < σ''` be Sobolev orders. Suppose a sequence `u : ℕ → H^{σ''}` of
-tensor sections converges to `ulim : H^{σ''}` in the *low* `Hˢ` topology (i.e.
-the `Hˢ`-inclusions converge), and that both the sequence and its limit satisfy
-a *uniform* high-order weighted-mass bound
-
-  `∑' i, (1 + λᵢ)^{σ''} · (coeff i)² ≤ B`.
-
-Then the differences `u n − ulim` converge to `0` in the *intermediate* `H^{σ'}`
-norm. This is the gate-limit transfer brick: low-norm convergence plus a uniform
-high-order spectral-mass bound upgrades to convergence in every intermediate
-norm. -/
+omit [CompleteSpace E] in
 theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
     (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
@@ -576,15 +478,12 @@ theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
     Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (u n - ulim)‖) atTop (𝓝 0) := by
-
   set d : ℕ → tensorHs (I := I) (M := M) g r s σ'' := fun n => u n - ulim with hd_def
-
   have hBnn : 0 ≤ B :=
     le_trans (tsum_nonneg (fun i => by
       have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ'' :=
         tensorSobolevWeight_nonneg (I := I) (M := M) i σ''
       positivity)) hlmass
-
   have hCbd : ∀ n, ‖d n‖ ≤ 2 * Real.sqrt B := by
     intro n
     have hu : ‖u n‖ ≤ Real.sqrt B :=
@@ -595,7 +494,6 @@ theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
       _ ≤ ‖u n‖ + ‖ulim‖ := norm_sub_le _ _
       _ ≤ Real.sqrt B + Real.sqrt B := add_le_add hu hl
       _ = 2 * Real.sqrt B := by ring
-
   have hlow : Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         (hσσ'.trans hσ'σ''.le) (d n)‖) atTop (𝓝 0) := by

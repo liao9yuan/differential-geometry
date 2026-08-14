@@ -1,13 +1,10 @@
-import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.L2Bound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibniz
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -21,7 +18,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,19 +41,20 @@ theorem sqrt_finset_sum_sq_le_sum {ι : Type*} (s : Finset ι) (f : ι → ℝ)
         Real.sqrt_le_sqrt hsq
     _ = ∑ i ∈ s, f i := Real.sqrt_sq hsum_nn
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appFullSec_iteratedCovGrad_l2_window_bound
     (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
       ∀ (W : SmoothCcTensor g r m) (k : ℕ),
-        ‖iteratedCovGrad g r c k (appFullSec (I := I) (M := M) g r m c Q W)‖ ≤
+        ‖iteratedCovGrad g r c k (homTensorRSFieldApply (I := I) (M := M) g r m c Q W)‖ ≤
           cc k * ∑ i ∈ Finset.range (k + 1), ‖iteratedCovGrad g r m i W‖ := by
   classical
   obtain ⟨cp, hcp_nn, hcp⟩ :=
     exists_appFullSec_iteratedCovGrad_window_bound (I := I) (M := M) g r m c Q
   refine ⟨fun k => Real.sqrt (cp k), fun k => Real.sqrt_nonneg _, fun W k => ?_⟩
   set Z : SmoothCcTensor g r (c + k) :=
-    iteratedCovGrad g r c k (appFullSec (I := I) (M := M) g r m c Q W) with hZ_def
+    iteratedCovGrad g r c k (homTensorRSFieldApply (I := I) (M := M) g r m c Q W) with hZ_def
   have hZsq : ‖Z‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g r (c + k) x (Z.toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -108,15 +106,25 @@ theorem exists_appFullSec_iteratedCovGrad_l2_window_bound
   exact sqrt_finset_sum_sq_le_sum (Finset.range (k + 1))
     (fun i => ‖iteratedCovGrad g r m i W‖) (fun i _ => norm_nonneg _)
 
+section NormedAppCc
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem exists_appCcRS_l2_norm_le (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ V : SmoothCcTensor g 0 b,
-      ‖appCcRS (I := I) (M := M) g 0 b c Φ V‖ ≤ C * ‖V‖ := by
+      ‖ccOperatorFieldComp (I := I) (M := M) g 0 b c Φ V‖ ≤ C * ‖V‖ := by
   classical
   obtain ⟨Cop, hCop_nn, hCop⟩ :=
     exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0 b c Φ
   refine ⟨Real.sqrt Cop, Real.sqrt_nonneg _, fun V => ?_⟩
-  set Z : SmoothCcTensor g 0 c := appCcRS (I := I) (M := M) g 0 b c Φ V with hZ_def
+  set Z : SmoothCcTensor g 0 c := ccOperatorFieldComp (I := I) (M := M) g 0 b c Φ V with hZ_def
   have hZL2 : ‖Z‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 c x (Z.toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -146,11 +154,12 @@ theorem exists_appCcRS_l2_norm_le (g : SmoothRiemannianMetric I M) (b c : ℕ)
   calc Real.sqrt (‖Z‖ ^ 2) ≤ Real.sqrt (Cop * ‖V‖ ^ 2) := Real.sqrt_le_sqrt hZsq_le
     _ = Real.sqrt Cop * ‖V‖ := by rw [Real.sqrt_mul hCop_nn, Real.sqrt_sq hVnn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric I M)
     (b c : ℕ) (Φ : SmoothCcTensor g b c) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
       ∀ (W : SmoothCcTensor g 0 b) (k : ℕ),
-        ‖iteratedCovGrad g 0 c k (appCc (I := I) (M := M) g b c Φ W)‖ ≤
+        ‖iteratedCovGrad g 0 c k (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
           cc k * ∑ i ∈ Finset.range (k + 1), ‖iteratedCovGrad g 0 b i W‖ := by
   classical
   choose CC hCC_nn hCC using fun (k i : ℕ) =>
@@ -158,10 +167,10 @@ theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric
       (appCcLeibnizPsi (I := I) (M := M) g b c Φ k i)
   refine ⟨fun k => ∑ i ∈ Finset.range (k + 1), CC k i,
     fun k => Finset.sum_nonneg (fun i _ => hCC_nn k i), fun W k => ?_⟩
-  rw [iteratedCovGrad_appCc_eq (I := I) (M := M) g b c Φ W k]
+  rw [iteratedCovGrad_operatorFieldApply_eq (I := I) (M := M) g b c Φ W k]
   refine le_trans (norm_sum_le _ _) ?_
   have hterm : ∀ i ∈ Finset.range (k + 1),
-      ‖appCcRS (I := I) (M := M) g 0 (b + i) (c + k)
+      ‖ccOperatorFieldComp (I := I) (M := M) g 0 (b + i) (c + k)
           (appCcLeibnizPsi (I := I) (M := M) g b c Φ k i)
           (iteratedCovGrad (I := I) g 0 b i W)‖ ≤
         CC k i * ∑ j ∈ Finset.range (k + 1), ‖iteratedCovGrad g 0 b j W‖ := by
@@ -174,11 +183,14 @@ theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric
   refine le_trans (Finset.sum_le_sum hterm) ?_
   rw [← Finset.sum_mul]
 
+end NormedAppCc
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appFullSec_norm_le (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ W : SmoothCcTensor g r m,
-        ‖appFullSec (I := I) (M := M) g r m c Q W‖ ≤ C * ‖W‖ := by
+        ‖homTensorRSFieldApply (I := I) (M := M) g r m c Q W‖ ≤ C * ‖W‖ := by
   classical
   obtain ⟨cc, hcc_nn, hcc⟩ :=
     exists_appFullSec_iteratedCovGrad_l2_window_bound (I := I) (M := M) g r m c Q

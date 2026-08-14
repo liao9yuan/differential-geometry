@@ -3,13 +3,13 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option autoImplicit false
 
-/-!
-# Distance under constant metric scaling
 
-This file exposes Mathlib's path-length distance with the Riemannian metric as
-an explicit argument and proves its behavior under positive constant scaling.
-The explicit wrapper keeps the norm-instance choice local to this metric layer.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,7 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Riemannian extended distance with the metric supplied explicitly. -/
 noncomputable def riemannianEDistOf
     (g : SmoothRiemannianMetric I M) (x y : M) : ℝ≥0∞ :=
   letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
@@ -35,9 +34,9 @@ noncomputable def riemannianEDistOf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The explicit-metric Riemannian extended distance vanishes on the
-diagonal. -/
-@[simp] theorem edistOf_self
+/-- The extended distance induced by a fixed Riemannian metric vanishes on
+the diagonal. -/
+theorem riemannianEDistOf_self
     (g : SmoothRiemannianMetric I M) (x : M) :
     riemannianEDistOf (I := I) g x x = 0 := by
   letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=

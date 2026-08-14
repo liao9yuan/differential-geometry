@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.MetricGeodesicSpray
 
 set_option autoImplicit false
 
-/-!
-# Convergence of normal-coordinate geodesic data
 
-This file is the geometric specialization layer between converging coordinate
-metrics and the generic ODE stability API.  The first result exposes convergence
-of the corresponding proof-independent geodesic sprays.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -18,11 +18,12 @@ namespace HCGCompactness
 
 open scoped ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [CompleteSpace E] [FiniteDimensional Real E]
 
-/-- Smooth compact-open convergence of coercive normal-coordinate metrics
-implies smooth compact-open convergence of their geodesic sprays. -/
+
+
+omit [CompleteSpace E] in
 theorem normalGeodesicSpray_conv
     {U : Set E} (hU : IsOpen U)
     {g : ℕ → E → E →L[Real] E →L[Real] Real}
@@ -37,7 +38,7 @@ theorem normalGeodesicSpray_conv
       (MetricKoszul.metricSpray gInf) :=
   MetricKoszul.metricSpray_conv hU hg_cd hgInf_cd hg_co hgInf_co hg_conv
 
-set_option maxHeartbeats 700000 in
+omit [CompleteSpace E] in
 private theorem normalSpray_time_conv
     {U : Set E} (hU : IsOpen U)
     {g : ℕ → E → E →L[Real] E →L[Real] Real}
@@ -64,11 +65,7 @@ private theorem normalSpray_time_conv
     (fun _ => contDiff_snd.contDiffOn) contDiff_snd.contDiffOn
     hspray_cd hsprayInf_cd (fun q hq => hq.2) (fun _ q hq => hq.2)
 
-set_option maxHeartbeats 700000 in
-/-- Selected geodesic-phase solutions for smoothly converging coordinate
-metrics converge smoothly at time one on compact subsets of their initial-data
-domain. Only the limit trajectories are assumed to remain in the metric domain;
-eventual stage containment is supplied by ODE tube stability. -/
+omit [CompleteSpace E] in
 theorem normalPhase_end_conv
     {U : Set E} (hU : IsOpen U)
     {Q : Set (E × E)} (hQ : IsOpen Q)
@@ -116,10 +113,6 @@ theorem normalPhase_end_conv
     (mapCInfConv_const id) hγ hγInf
     (fun q hq t ht => ⟨hstayInf q hq t ht, Set.mem_univ _⟩)
 
-set_option maxHeartbeats 700000 in
-/-- The retained normal-diagonal readout `(initial position, final position)`
-converges smoothly when the selected stage phases stay in the common metric
-domain. The limit-only stability remains delegated to `normalPhase_end_conv`. -/
 theorem normalDiag_end_conv
     {U : Set E} (hU : IsOpen U)
     {Q : Set (E × E)} (hQ : IsOpen Q)

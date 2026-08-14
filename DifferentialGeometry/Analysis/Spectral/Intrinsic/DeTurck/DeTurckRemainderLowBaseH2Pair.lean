@@ -1013,11 +1013,14 @@ private theorem fullPairH3
     appCcRS (I := I) (M := M) g 2 2 2 LU X
   let H3 : ℝ := Kh * (1 + A ^ 2)
   have hsymm : symmS (I := I) (M := M) g (T - U) = T - U := by
-    rw [symmS_sub,
-      symmS_eq_self_of_ccTensorBilin_symm
-        (I := I) (M := M) g T hT,
-      symmS_eq_self_of_ccTensorBilin_symm
-        (I := I) (M := M) g U hU]
+    have hTs := symmS_eq_self_of_ccTensorBilin_symm
+      (I := I) (M := M) g T hT
+    have hUs := symmS_eq_self_of_ccTensorBilin_symm
+      (I := I) (M := M) g U hU
+    change ccTensor02Symm (I := I) (M := M) g T = T at hTs
+    change ccTensor02Symm (I := I) (M := M) g U = U at hUs
+    change ccTensor02Symm (I := I) (M := M) g (T - U) = T - U
+    rw [symmS_sub, hTs, hUs]
   have hLT2 :
       lowJetSq (I := I) (M := M) g 2 LT ≤ (Bh R) ^ 2 := by
     simpa only [LT] using
@@ -1293,11 +1296,14 @@ theorem full_pair_h2
   let Y : SmoothCcTensor g 2 2 :=
     appCcRS (I := I) (M := M) g 2 2 2 LU X
   have hsymm : symmS (I := I) (M := M) g (T - U) = T - U := by
-    rw [symmS_sub,
-      symmS_eq_self_of_ccTensorBilin_symm
-        (I := I) (M := M) g T hT,
-      symmS_eq_self_of_ccTensorBilin_symm
-        (I := I) (M := M) g U hU]
+    have hTs := symmS_eq_self_of_ccTensorBilin_symm
+      (I := I) (M := M) g T hT
+    have hUs := symmS_eq_self_of_ccTensorBilin_symm
+      (I := I) (M := M) g U hU
+    change ccTensor02Symm (I := I) (M := M) g T = T at hTs
+    change ccTensor02Symm (I := I) (M := M) g U = U at hUs
+    change ccTensor02Symm (I := I) (M := M) g (T - U) = T - U
+    rw [symmS_sub, hTs, hUs]
   have hLT2 :
       lowJetSq (I := I) (M := M) g 2 LT ≤ (Bh R) ^ 2 := by
     simpa only [LT] using
@@ -2807,7 +2813,8 @@ private theorem aaKerPairH2
             (permCoeff (I := I) (M := M) g ρ)
             (connDiffContrInsertionInnerField (I := I) g gT -
               connDiffContrInsertionInnerField (I := I) g gU) := by
-      rw [aaInnH2, aaInnH2, appCcRS_sub_right]
+      simp only [aaInnH2, appCcRS]
+      rw [appCcRS_sub_right]
     rw [heq]
     refine (hinnApp _ _).trans ?_
     have hmul :
@@ -3340,7 +3347,8 @@ private theorem inputSymmH2
       _ ≤ Ca * lowJetSq (I := I) (M := M) g 2 C * Ks :=
         happ C (ccSlotSwapField (I := I) (M := M) g)
       _ = (Ca * Ks) * lowJetSq (I := I) (M := M) g 2 C := by ring
-  rw [ccInputSymm, jetSmul]
+  simp only [ccInputSymm, ccInputSlotSymm]
+  rw [jetSmul]
   have hsum := jetAdd (I := I) (M := M) g 2 C
     (appCcRS (I := I) (M := M) g 2 2 2 C
       (ccSlotSwapField (I := I) (M := M) g))
@@ -3872,6 +3880,7 @@ private theorem ricciDAPairH2
           (covGrad (I := I) (M := M) g 0 2 (T - U)) =
         GT - GU := by
     simp only [GT, GU]
+    simp only [appCcRS]
     rw [appCcRS_sub_left, covGrad_sub, appCcRS_sub_right]
     module
   have hGterm1 :
@@ -3997,7 +4006,9 @@ private theorem ricciDAPairH2
             appCcRS (I := I) (M := M) g 2 2 2
               (refoldKernelContractionMonomialField
                 (I := I) (M := M) g g GU σ) (ET - EU) := by
-      rw [hfT, hfU, refoldSubH2, appCcRS_sub_left, appCcRS_sub_right]
+      rw [hfT, hfU, refoldSubH2]
+      simp only [appCcRS]
+      rw [appCcRS_sub_left, appCcRS_sub_right]
       module
     have hrDiff :
         lowJetSq (I := I) (M := M) g 2
@@ -4259,7 +4270,9 @@ private theorem ccSymmSubH2
       (1 / 2 : ℝ) •
         ((C - D) + appCcRS (I := I) (M := M) g 2 2 2 (C - D)
           (ccSlotSwapField (I := I) (M := M) g)) := rfl
-  rw [hC, hD, hCD, appCcRS_sub_left]
+  rw [hC, hD, hCD]
+  simp only [appCcRS]
+  rw [appCcRS_sub_left]
   module
 
 /-! ### The five classes at the `H²` level
@@ -5267,7 +5280,9 @@ private theorem amixHalfH2Pair
         appCcRS (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ)
           (S5T - S5U) := by
-    rw [hS4Tdef, hS4Udef, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hS4Tdef, hS4Udef]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have htrd3 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
@@ -5327,7 +5342,9 @@ private theorem amixHalfH2Pair
   have hdel3 : S3T - S3U =
       appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
         appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
-    rw [hS3Tdef, hS3Udef, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hS3Tdef, hS3Udef]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have hdelE3 : E3T - E3U =
       slotExtend (I := I) (M := M) g 2 5
@@ -5423,7 +5440,9 @@ private theorem amixHalfH2Pair
         appCcRS (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1)
           (S3T - S3U) := by
-    rw [hS2Tdef, hS2Udef, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hS2Tdef, hS2Udef]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have htrd4 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
@@ -5496,7 +5515,9 @@ private theorem amixHalfH2Pair
         appCcRS (I := I) (M := M) g 2 4 2
           (lc0TraceRF (I := I) (M := M) g gmU 2 σlast)
           (S2T - S2U) := by
-    rw [hHalfT, hHalfU, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hHalfT, hHalfU]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have hhalf : lowJetSq (I := I) (M := M) g 2
       (lc0AMixHalfRF (I := I) (M := M) g gmT g σlast -
@@ -6519,6 +6540,7 @@ private theorem ricciDA_h3_pair
           (covGrad (I := I) (M := M) g 0 2 (T - U)) =
         GT - GU := by
     simp only [GT, GU]
+    simp only [appCcRS]
     rw [appCcRS_sub_left, covGrad_sub, appCcRS_sub_right]
     module
   have hGterm1 :
@@ -6638,7 +6660,9 @@ private theorem ricciDA_h3_pair
             appCcRS (I := I) (M := M) g 2 2 2
               (refoldKernelContractionMonomialField
                 (I := I) (M := M) g g GU σ) (ET - EU) := by
-      rw [hfT, hfU, refoldSubH2, appCcRS_sub_left, appCcRS_sub_right]
+      rw [hfT, hfU, refoldSubH2]
+      simp only [appCcRS]
+      rw [appCcRS_sub_left, appCcRS_sub_right]
       module
     have hrDiff :
         lowJetSq (I := I) (M := M) g 2
@@ -7302,6 +7326,7 @@ private theorem lieCov_h3_pair
             rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g 0 4 2
                 (lieCovR4 (I := I) (M := M) g U hδU hδZ s)))) := by
+    simp only [appCcRS]
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   rw [htel, jetSmul, neg_one_sq, one_mul]
@@ -7940,7 +7965,9 @@ private theorem vb_h3_pair
     have hdel : WT - WU =
         appCcRS (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT +
           appCcRS (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU) := by
-      rw [hWTform, hWUform, appCcRS_sub_left, appCcRS_sub_right]
+      rw [hWTform, hWUform]
+      simp only [appCcRS]
+      rw [appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hdel]
     have h1 : lowJetSq (I := I) (M := M) g 2
@@ -8089,7 +8116,9 @@ private theorem vb_h3_pair
     have hdel : InT - InU =
         appCcRS (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT +
           appCcRS (I := I) (M := M) g 2 1 4 VmU (IpT - IpU) := by
-      rw [hInT, hInU, appCcRS_sub_left, appCcRS_sub_right]
+      rw [hInT, hInU]
+      simp only [appCcRS]
+      rw [appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hdel]
     have h1 : lowJetSq (I := I) (M := M) g 2
@@ -8144,7 +8173,9 @@ private theorem vb_h3_pair
       lc0VB (I := I) (M := M) g gmU =
       (2 : ℝ) • (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
         appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) := by
-    rw [hFormT, hFormU, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hFormT, hFormU]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have h1 : lowJetSq (I := I) (M := M) g 2
       (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT) ≤
@@ -8830,7 +8861,9 @@ private theorem amixHalf_h3_pair
         appCcRS (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ)
           (S5T - S5U) := by
-    rw [hS4Tdef, hS4Udef, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hS4Tdef, hS4Udef]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have htrd3 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
@@ -8890,7 +8923,9 @@ private theorem amixHalf_h3_pair
   have hdel3 : S3T - S3U =
       appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
         appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
-    rw [hS3Tdef, hS3Udef, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hS3Tdef, hS3Udef]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have hdelE3 : E3T - E3U =
       slotExtend (I := I) (M := M) g 2 5
@@ -8986,7 +9021,9 @@ private theorem amixHalf_h3_pair
         appCcRS (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1)
           (S3T - S3U) := by
-    rw [hS2Tdef, hS2Udef, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hS2Tdef, hS2Udef]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have htrd4 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
@@ -9059,7 +9096,9 @@ private theorem amixHalf_h3_pair
         appCcRS (I := I) (M := M) g 2 4 2
           (lc0TraceRF (I := I) (M := M) g gmU 2 σlast)
           (S2T - S2U) := by
-    rw [hHalfT, hHalfU, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hHalfT, hHalfU]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have hhalf : lowJetSq (I := I) (M := M) g 2
       (lc0AMixHalfRF (I := I) (M := M) g gmT g σlast -

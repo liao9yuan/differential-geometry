@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricGeodesicSpray
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 /-!
 # Metric-coefficient convergence and component covariant derivatives
@@ -19,7 +18,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.HCGCompactness
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {Idx : Type*} [Fintype Idx]
 
@@ -61,6 +60,7 @@ private noncomputable def christoffelComp
           ((ContinuousLinearMap.apply Real E (e j)).comp
             (ContinuousLinearMap.apply Real (E →L[Real] E) (e i)))
 
+omit [CompleteSpace E] in
 /-- If two smooth bilinear-form families converge to the same coercive metric,
 then every finite component covariant-derivative tower of their difference,
 formed with the first family's Levi--Civita Christoffel coefficients, converges

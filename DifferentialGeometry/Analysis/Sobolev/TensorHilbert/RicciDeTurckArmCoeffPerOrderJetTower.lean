@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
@@ -30,6 +31,7 @@ noncomputable def coeffPerOrderJetBound (R δ₀ : ℝ) (curvWeight : ℕ) (i : 
   (Module.finrank ℝ E : ℝ) ^ (curvWeight + 2) * (1 + R) ^ (2 * i + 6) *
     (1 / (1 - δ₀)) ^ (4 * i + 12)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem coeffPerOrderJetBound_nonneg (R δ₀ : ℝ) (hR : 0 ≤ R) (hδ₀ : δ₀ < 1)
     (curvWeight i : ℕ) : 0 ≤ coeffPerOrderJetBound (E := E) R δ₀ curvWeight i := by
   have hpos : 0 < 1 - δ₀ := by linarith
@@ -40,6 +42,8 @@ theorem coeffPerOrderJetBound_nonneg (R δ₀ : ℝ) (hR : 0 ≤ R) (hδ₀ : δ
   · exact pow_nonneg (by linarith) _
   · exact pow_nonneg hinv_nn _
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem l2_of_pointwise_rfns_iteratedCovGrad_perOrder
     (g₀ : SmoothRiemannianMetric I M) (r i : ℕ)
     (C : SmoothCcTensor g₀ r 2) (Ki : ℝ)

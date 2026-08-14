@@ -27,7 +27,7 @@ shrinking is used.
 noncomputable section
 
 open Bundle Filter Manifold MeasureTheory Set Tensor0SBundle
-open scoped Manifold NNReal Topology ContDiff
+open scoped Manifold ENNReal NNReal Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -36,13 +36,17 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
+
+private local instance : MeasurableSpace M := borel M
+
+private local instance : BorelSpace M := ⟨rfl⟩
 
 /-! ## Finite bilinear reconstruction -/
 
@@ -130,6 +134,8 @@ private theorem hmfBilin_eq_sum
 
 /-! ## Joint pointwise regularity -/
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- On one coefficient ball, the complete pointwise faithful mass operator is
 jointly `C¹` in the coefficient and spatial variables.  The common radius is
 the finite minimum of the radii for the zero direction and all canonical
@@ -149,10 +155,11 @@ theorem hmfSpecMassPt_cd
           hmfSpecMassPt (I := I) (M := M) q S p.1 p.2)
         (Metric.ball 0 R ×ˢ (Set.univ : Set M)) := by
   classical
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
   let ι := {i // i ∈ S}
   let V := EuclideanSpace ℝ ι
   let IV : ModelWithCorners ℝ V V := 𝓘(ℝ, V)
-  let P : ModelWithCorners ℝ (V × E) (V × H) := IV.prod I
+  let P := IV.prod I
   let b : ι → V := fun i ↦ hmfCBasis ι i
   let dir : Option ι → V
     | none => 0
@@ -161,11 +168,9 @@ theorem hmfSpecMassPt_cd
       ContMDiffOn P (I.prod 𝓘(ℝ, E)) (2 : ℕ∞)
         (fun p : V × M ↦
           (TotalSpace.mk' E
-            (hmfAdd (I := I) (M := M) q
-              (hmfSpecIncl (I := I) (M := M) q S p.1) p.2)
+            (hmfSpecMap (I := I) (M := M) q S p.2 p.1)
             (mfderiv IV I
-              (fun u : V ↦ hmfAdd (I := I) (M := M) q
-                (hmfSpecIncl (I := I) (M := M) q S u) p.2)
+              (hmfSpecMap (I := I) (M := M) q S p.2)
               p.1 (dir a)) : TangentBundle I M))
         (Metric.ball 0 R ×ˢ (Set.univ : Set M)) := by
     intro a
@@ -188,18 +193,15 @@ theorem hmfSpecMassPt_cd
       ContMDiffOn P (I.prod 𝓘(ℝ, E)) (2 : ℕ∞)
         (fun p : V × M ↦
           (TotalSpace.mk' E
-            (hmfAdd (I := I) (M := M) q
-              (hmfSpecIncl (I := I) (M := M) q S p.1) p.2)
+            (hmfSpecMap (I := I) (M := M) q S p.2 p.1)
             (mfderiv IV I
-              (fun u : V ↦ hmfAdd (I := I) (M := M) q
-                (hmfSpecIncl (I := I) (M := M) q S u) p.2)
+              (hmfSpecMap (I := I) (M := M) q S p.2)
               p.1 (dir a)) : TangentBundle I M)) D := by
     intro a
     exact (hsec a).mono (Set.prod_mono
       (Metric.ball_subset_ball (hRle a)) (Set.Subset.rfl))
   let F : V × M → M := fun p ↦
-    hmfAdd (I := I) (M := M) q
-      (hmfSpecIncl (I := I) (M := M) q S p.1) p.2
+    hmfSpecMap (I := I) (M := M) q S p.2 p.1
   have hmap : ContMDiffOn P I (2 : ℕ∞) F D := by
     intro p hp
     have hat := hsecR none p hp
@@ -208,7 +210,10 @@ theorem hmfSpecMassPt_cd
   have hmetric : ContMDiffOn P
       (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (1 : ℕ∞)
       (fun p : V × M ↦
-        TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (F p) (q.inner (F p))) D := by
+        TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y : M ↦
+            TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+          (F p) (q.inner (F p))) D := by
     simpa only [Function.comp_apply] using
       (q.contMDiff.of_le (by simp)).comp_contMDiffOn
         (hmap.of_le (by norm_num))
@@ -217,13 +222,17 @@ theorem hmfSpecMassPt_cd
         hmfSpecMassPt (I := I) (M := M) q S p.1 p.2 (b i) (b j)) D := by
     intro i j
     have happ := ContMDiffOn.clm_bundle_apply₂
-      (F₁ := E) (F₂ := E) (F₃ := ℝ) (b := F) hmetric
+      (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (E₁ := fun y : M ↦ TangentSpace I y)
+      (E₂ := fun y : M ↦ TangentSpace I y)
+      (E₃ := fun _ : M ↦ ℝ)
+      (b := F) hmetric
       ((hsecR (some i)).of_le (by norm_num))
       ((hsecR (some j)).of_le (by norm_num))
     intro p hp
     have hat := happ p hp
     rw [Bundle.contMDiffWithinAt_totalSpace] at hat
-    simpa only [hmfSpecMassPt_apply, hmfSpecVar, F, dir] using hat.2
+    simpa only [hmfSpecMassPt_apply, hmfSpecVar_def, F, dir] using hat.2
   have hsum : ContMDiffOn P
       𝓘(ℝ, V →L[ℝ] V →L[ℝ] ℝ) (1 : ℕ∞)
       (fun p : V × M ↦ ∑ i, ∑ j,
@@ -235,11 +244,74 @@ theorem hmfSpecMassPt_cd
   refine ⟨R, hR, ?_⟩
   simpa only [ι, V, IV, P, D] using hsum.congr (by
     intro p hp
-    rw [hmfBilin_eq_sum ι
-      (hmfSpecMassPt (I := I) (M := M) q S p.1 p.2)])
+    simpa only [b] using
+      (hmfBilin_eq_sum ι
+        (hmfSpecMassPt (I := I) (M := M) q S p.1 p.2)))
 
 /-! ## Uniform coefficient Lipschitz bounds -/
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [ConnectedSpace M] in
+/-- Joint continuity gives continuity of every parameter slice whose
+parameter lies in the prescribed set. -/
+private theorem continuous_slice_of_continuousOn_prod
+    {V W : Type*} [TopologicalSpace V] [TopologicalSpace W]
+    (F : V → M → W) {s : Set V}
+    (hF : ContinuousOn (fun p : V × M ↦ F p.1 p.2)
+      (s ×ˢ (Set.univ : Set M)))
+    {u : V} (hu : u ∈ s) :
+    Continuous (F u) := by
+  rw [← continuousOn_univ]
+  exact hF.comp (continuousOn_const.prodMk continuousOn_id)
+    (fun x _ ↦ ⟨hu, Set.mem_univ x⟩)
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+/-- Joint `C¹` regularity gives differentiability of every coefficient slice
+at every coefficient lying in the joint regularity domain. -/
+private theorem mdifferentiable_coeff_slice
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (F : V → M → M) {R : ℝ}
+    (hF : ContMDiffOn (𝓘(ℝ, V).prod I) I (1 : ℕ∞)
+      (fun p : V × M ↦ F p.1 p.2)
+      (Metric.ball 0 R ×ˢ (Set.univ : Set M)))
+    {u : V} (hu : u ∈ Metric.ball 0 R) (x : M) :
+    MDifferentiableAt 𝓘(ℝ, V) I (fun z : V ↦ F z x) u := by
+  have hp : (u, x) ∈
+      Metric.ball (0 : V) R ×ˢ (Set.univ : Set M) :=
+    ⟨hu, Set.mem_univ _⟩
+  have hopen : IsOpen
+      (Metric.ball (0 : V) R ×ˢ (Set.univ : Set M)) :=
+    Metric.isOpen_ball.prod isOpen_univ
+  have hjoint := (hF (u, x) hp).contMDiffAt (hopen.mem_nhds hp)
+  have hincl : ContMDiffAt 𝓘(ℝ, V) (𝓘(ℝ, V).prod I) (1 : ℕ∞)
+      (fun z : V ↦ (z, x)) u :=
+    contMDiffAt_id.prodMk contMDiffAt_const
+  exact (hjoint.comp u hincl).mdifferentiableAt (by norm_num)
+
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
+/-- On the joint regularity ball, every fixed-state pointwise mass field is
+continuous on the whole manifold. -/
+theorem hmfSpecMassPt_continuous
+    (q : SmoothRiemannianMetric I M)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1)) :
+    ∃ R : ℝ, 0 < R ∧
+      ∀ u : EuclideanSpace ℝ {i // i ∈ S}, u ∈ Metric.ball 0 R →
+        Continuous
+          (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) := by
+  obtain ⟨R, hR, hmass⟩ :=
+    hmfSpecMassPt_cd (I := I) (M := M) q S
+  refine ⟨R, hR, ?_⟩
+  intro u hu
+  exact continuous_slice_of_continuousOn_prod
+    (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x)
+    hmass.continuousOn hu
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Joint `C¹` regularity on an open coefficient ball makes the coefficient
 Fréchet derivative jointly continuous on every strictly smaller closed ball.
 Only the coefficient factor is differentiated; the manifold point remains a
@@ -262,7 +334,8 @@ private theorem partialFderiv_cont
   have hpD : p ∈ Metric.ball (0 : V) R ×ˢ (Set.univ : Set M) := by
     refine ⟨?_, Set.mem_univ _⟩
     rw [Metric.mem_ball, dist_zero_right]
-    exact (Metric.mem_closedBall.mp hp.1).trans_lt hrr
+    simpa only [dist_comm, dist_zero_right] using
+      (Metric.mem_closedBall.mp hp.1).trans_lt hrr
   have hopen : IsOpen
       (Metric.ball (0 : V) R ×ˢ (Set.univ : Set M)) :=
     Metric.isOpen_ball.prod isOpen_univ
@@ -283,10 +356,13 @@ private theorem partialFderiv_cont
     (by norm_num)
   have hD' : ContMDiffAt P 𝓘(ℝ, V →L[ℝ] W) (0 : ℕ∞)
       (fun z : V × M ↦ fderiv ℝ (fun u : V ↦ F u z.2) z.1) p := by
-    simpa only [inTangentCoordinates_model_space, mfderiv_eq_fderiv, f]
+    simpa only [inTangentCoordinates_model_space, mfderiv_eq_fderiv, f, IV, IW]
       using hD
   exact hD'.continuousAt.continuousWithinAt
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- A jointly `C¹` Banach-valued family on a coefficient ball is uniformly
 Lipschitz in the coefficient on a smaller closed ball, uniformly in the
 compact manifold parameter. -/
@@ -318,7 +394,8 @@ private theorem point_lip_cball
   have hsub : Metric.closedBall (0 : V) r ⊆ Metric.ball 0 R := by
     intro u hu
     rw [Metric.mem_ball, dist_zero_right]
-    exact (Metric.mem_closedBall.mp hu).trans_lt hrR
+    simpa only [dist_comm, dist_zero_right] using
+      (Metric.mem_closedBall.mp hu).trans_lt hrR
   have hdiff : ∀ x : M, ∀ u ∈ Metric.closedBall (0 : V) r,
       DifferentiableAt ℝ (fun z : V ↦ F z x) u := by
     intro x u hu
@@ -341,12 +418,14 @@ private theorem point_lip_cball
       (fun u hu ↦ hdiff x u hu)
     · intro u hu
       rw [← NNReal.coe_le_coe]
-      exact (hC (u, x) ⟨hu, Set.mem_univ _⟩).trans
-        (le_max_left C 0)
+      simpa only [L, NNReal.coe_mk, coe_nnnorm, norm_norm] using
+        (hC (u, x) ⟨hu, Set.mem_univ _⟩).trans (le_max_left C 0)
     · exact convex_closedBall (0 : V) r
   refine ⟨r, hr, L, hlip, ?_⟩
   exact hF.continuousOn.mono (Set.prod_mono hsub Set.Subset.rfl)
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- The pointwise faithful mass is uniformly Lipschitz in the state on one
 closed coefficient ball, with one Lipschitz constant valid at every spatial
 point. -/
@@ -364,6 +443,8 @@ theorem hmfSpecMassPt_lip
       (fun u x ↦ hmfSpecMassPt (I := I) (M := M) q S u x) hR hmass
   exact ⟨r, hr, L, hlip⟩
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- For every fixed domain metric, the integrated faithful mass is Lipschitz
 in the state on one coefficient closed ball.  The radius depends only on the
 pointwise local-addition regularity; the Lipschitz constant additionally
@@ -389,14 +470,12 @@ theorem hmfSpecMass_lip
   intro u hu v hv
   have hcont_u : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) := by
-    rw [← continuousOn_univ]
-    exact hpCont.comp (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hu, Set.mem_univ x⟩)
+    exact continuous_slice_of_continuousOn_prod
+      (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x) hpCont hu
   have hcont_v : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S v x) := by
-    rw [← continuousOn_univ]
-    exact hpCont.comp (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hv, Set.mem_univ x⟩)
+    exact continuous_slice_of_continuousOn_prod
+      (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x) hpCont hv
   have hint_u : Integrable
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) μ :=
     integrableOn_univ.mp
@@ -426,6 +505,8 @@ theorem hmfSpecMass_lip
       simp only [L, vol, NNReal.coe_mul, NNReal.coe_mk]
       ring
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- A uniform upper bound for the total volumes of a metric family turns the
 pointwise state estimate into one common state-Lipschitz estimate for all
 times in `K`.  The coefficient radius and the pointwise derivative constant
@@ -455,14 +536,12 @@ theorem hmfMassFam_lip
   intro u hu v hv
   have hcont_u : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) := by
-    rw [← continuousOn_univ]
-    exact hpCont.comp (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hu, Set.mem_univ x⟩)
+    exact continuous_slice_of_continuousOn_prod
+      (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x) hpCont hu
   have hcont_v : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S v x) := by
-    rw [← continuousOn_univ]
-    exact hpCont.comp (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hv, Set.mem_univ x⟩)
+    exact continuous_slice_of_continuousOn_prod
+      (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x) hpCont hv
   have hint_u : Integrable
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) μ :=
     integrableOn_univ.mp
@@ -495,6 +574,8 @@ theorem hmfMassFam_lip
       simp only [L, NNReal.coe_mul]
       ring
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- The fixed-background specialization requested by the finite HMF solver.
 It has exactly the same state radius as the arbitrary-fixed-volume theorem. -/
 theorem hmfSpecMassQ_lip
@@ -508,6 +589,7 @@ theorem hmfSpecMassQ_lip
 
 /-! ## Zero-state identification and coercivity -/
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- At state zero, the faithful finite mass operator is exactly the older
 finite HMF mass restricted along the canonical spectral inclusion. -/
 theorem hmfSpecMass_zero
@@ -519,19 +601,22 @@ theorem hmfSpecMass_zero
   obtain ⟨Rm, hRm, hmass⟩ := hmfSpecMassPt_cd (I := I) (M := M) q S
   obtain ⟨Ra, hRa, hmap⟩ :=
     hmfSpecMap_cd (I := I) (M := M) q S 1 (by norm_num)
+  let μ := riemannianVolumeMeasure (I := I) (M := M) h
+  haveI : IsFiniteMeasure μ :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) h
   have hzero_m : (0 : EuclideanSpace ℝ {i // i ∈ S}) ∈ Metric.ball 0 Rm := by
     simpa only [Metric.mem_ball, dist_self] using hRm
   have hzero_a : (0 : EuclideanSpace ℝ {i // i ∈ S}) ∈ Metric.ball 0 Ra := by
     simpa only [Metric.mem_ball, dist_self] using hRa
   have hcont : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S 0 x) := by
-    rw [← continuousOn_univ]
-    exact hmass.continuousOn.comp
-      (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hzero_m, Set.mem_univ x⟩)
+    exact continuous_slice_of_continuousOn_prod
+      (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x)
+      hmass.continuousOn hzero_m
   have hint : Integrable
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S 0 x)
-      (riemannianVolumeMeasure (I := I) (M := M) h) :=
+      μ :=
     integrableOn_univ.mp
       (hcont.continuousOn.integrableOn_compact isCompact_univ)
   have hmd : ∀ x : M,
@@ -540,19 +625,10 @@ theorem hmfSpecMass_zero
           hmfAdd (I := I) (M := M) q
             (hmfSpecIncl (I := I) (M := M) q S z) x) 0 := by
     intro x
-    have hp : ((0 : EuclideanSpace ℝ {i // i ∈ S}), x) ∈
-        Metric.ball 0 Ra ×ˢ (Set.univ : Set M) :=
-      ⟨hzero_a, Set.mem_univ _⟩
-    have hopen : IsOpen
-        (Metric.ball (0 : EuclideanSpace ℝ {i // i ∈ S}) Ra ×ˢ
-          (Set.univ : Set M)) := Metric.isOpen_ball.prod isOpen_univ
-    have hjoint := (hmap (0, x) hp).contMDiffAt (hopen.mem_nhds hp)
-    have hincl : ContMDiffAt
-        𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S})
-        (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) (1 : ℕ∞)
-        (fun z : EuclideanSpace ℝ {i // i ∈ S} ↦ (z, x)) 0 :=
-      contMDiffAt_id.prodMk contMDiffAt_const
-    exact (hjoint.comp 0 hincl).mdifferentiableAt (by norm_num)
+    simpa only [hmfSpecMap_apply] using
+      mdifferentiable_coeff_slice
+        (fun z y ↦ hmfSpecMap (I := I) (M := M) q S y z)
+        hmap hzero_a x
   ext v w
   calc
     hmfSpecMassOp (I := I) (M := M) q h S 0 v w =
@@ -569,6 +645,7 @@ theorem hmfSpecMass_zero
           (hmfSpecIncl (I := I) (M := M) q S) v w := by
       rw [hmfFinMass_apply]
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Reverse volume domination gives the exact common zero-state lower bound
 needed by `coerOn_of_lip`.  In particular, a time-uniform comparison constant
 immediately gives a time-uniform zero-state coercivity constant. -/
@@ -588,6 +665,8 @@ theorem hmfSpecMass_lower
 
 /-! ## Real-time moving-volume continuity -/
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- On one state ball chosen independently of the metric family, every fixed
 faithful state-mass coefficient is continuous in real time.  Only the volume
 measure moves, so `integral_family_cont` applies directly; no parameterized
@@ -622,10 +701,9 @@ theorem hmfStateTime_cont
     Metric.ball_subset_ball (min_le_right Rm Ra) hu
   have hpt : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) := by
-    rw [← continuousOn_univ]
-    exact hmass.continuousOn.comp
-      (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hu_m, Set.mem_univ x⟩)
+    exact continuous_slice_of_continuousOn_prod
+      (fun z x ↦ hmfSpecMassPt (I := I) (M := M) q S z x)
+      hmass.continuousOn hu_m
   have hscalar : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x v w) :=
     (hpt.clm_apply continuous_const).clm_apply continuous_const
@@ -635,19 +713,10 @@ theorem hmfStateTime_cont
           hmfAdd (I := I) (M := M) q
             (hmfSpecIncl (I := I) (M := M) q S z) x) u := by
     intro x
-    have hp : (u, x) ∈
-        Metric.ball (0 : EuclideanSpace ℝ {i // i ∈ S}) Ra ×ˢ
-          (Set.univ : Set M) := ⟨hu_a, Set.mem_univ _⟩
-    have hopen : IsOpen
-        (Metric.ball (0 : EuclideanSpace ℝ {i // i ∈ S}) Ra ×ˢ
-          (Set.univ : Set M)) := Metric.isOpen_ball.prod isOpen_univ
-    have hjoint := (hmap (u, x) hp).contMDiffAt (hopen.mem_nhds hp)
-    have hincl : ContMDiffAt
-        𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S})
-        (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) (1 : ℕ∞)
-        (fun z : EuclideanSpace ℝ {i // i ∈ S} ↦ (z, x)) u :=
-      contMDiffAt_id.prodMk contMDiffAt_const
-    exact (hjoint.comp u hincl).mdifferentiableAt (by norm_num)
+    simpa only [hmfSpecMap_apply] using
+      mdifferentiable_coeff_slice
+        (fun z y ↦ hmfSpecMap (I := I) (M := M) q S y z)
+        hmap hu_a x
   have heq : (fun x : M ↦
       q.inner
         (hmfAdd (I := I) (M := M) q
@@ -662,7 +731,7 @@ theorem hmfStateTime_cont
     funext x
     rw [hmfSpecVar_state (I := I) (M := M) q S u v x (hmd x),
       hmfSpecVar_state (I := I) (M := M) q S u w x (hmd x),
-      hmfSpecMassPt_apply]
+      hmfSpecMassPt_apply, hmfSpecMap_apply]
   unfold hmfStateMass
   apply integral_family_cont (I := I) (M := M) hK hgram
   have hspace : Continuous (fun x : M ↦

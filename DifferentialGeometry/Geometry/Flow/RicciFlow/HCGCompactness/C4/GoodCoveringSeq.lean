@@ -2,18 +2,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.DiagonalSubseq
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4: net diagonalization over the sequence (`lbl389` → `lbl390`)
 
-Per-manifold ordered nets (`seqCenter`, `seqRadius`) and the diagonal subsequence along
-which every net radius converges and every aliveness Boolean stabilizes
-(`NetLimitData`, produced by `exists_netLimitData`).  The `lbl389` bound
-`r_k^α ∈ [0, 2αλ(0)]` makes Bolzano--Weierstrass applicable; the extraction engine is
-`DiagonalSubseq` (compact products), not a hand-rolled diagonal.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +30,7 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- The `α`-th center `x_k^α` of the `k`-th ordered net (in the realized metric). -/
+
 noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) :
     Option ((X.obj k).M) :=
@@ -40,7 +38,7 @@ noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netCenter (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
-/-- The zeroth center of every sequence net is the pointed-manifold basepoint. -/
+
 @[simp] theorem seqCenter_zero (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :
     seqCenter hd D P k 0 = some (X.obj k).basepoint := by
@@ -48,8 +46,8 @@ noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   exact OrderedNet.netCenter_zero _ _ _
 
-/-- Every nonzero live sequence-net center is at least `λ(0)` from the basepoint
-in the realized proper metric. -/
+
+
 theorem seqCenter_dist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) {α : Nat}
     (hα : α ≠ 0) {c : (X.obj k).M} (hc : seqCenter hd D P k α = some c) :
@@ -69,9 +67,9 @@ theorem seqCenter_dist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD :
     (OrderedNet.netCenter_mem (X.obj k).basepoint (hd.lambda D)
       (hd.lambda_continuous D) α hc') hcO
 
-/-- Riemannian-emetric form of `seqCenter_dist_ge`, using the realization stored
-by `ProperMetricOn`.  This is the separation input used by the Step-B
-basepoint-concentration argument. -/
+
+
+
 theorem seqCenter_edist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) {α : Nat}
     (hα : α ≠ 0) {c : (X.obj k).M} (hc : seqCenter hd D P k α = some c) :
@@ -82,14 +80,14 @@ theorem seqCenter_edist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD 
   rw [(P k).realizes c (X.obj k).basepoint]
   exact ENNReal.ofReal_le_ofReal (seqCenter_dist_ge hd hD P k hα hc)
 
-/-- The `α`-th net radius `r_k^α = d(x_k^α, O_k)` (junk value `0` when dead). -/
+
 noncomputable def seqRadius (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) : Real :=
   letI : MetricSpace (X.obj k).M := (P k).ms
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netRadius (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
-/-- MSM135 `lbl389` window for the sequence radii. -/
+
 theorem seqRadius_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) :
     seqRadius hd D P k α ∈ Set.Icc (0 : Real) (2 * hd.lambda D 0 * (α : Real)) := by
@@ -99,8 +97,8 @@ theorem seqRadius_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 <
   exact OrderedNet.netRadius_mem (X.obj k).basepoint (hd.lambda_continuous D)
     (hd.lambda_antitone hD) (fun s => hd.lambda_pos hD s) (P k).hint α
 
-/-- A live `alpha`-th ordered-net center has a sequence-uniform injectivity
-radius floor at the explicit `lbl389` distance bound. -/
+
+
 theorem seqCenter_mu_hasInj (hd : InjRadiusDecayInput (I := I) X)
     {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -118,9 +116,9 @@ theorem seqCenter_mu_hasInj (hd : InjRadiusDecayInput (I := I) X)
   rw [← hr]
   exact (seqRadius_mem hd hD P k α).2
 
-/-- Output of the `lbl389` → `lbl390` diagonalization: one strictly monotone
-subsequence `φ` along which every net radius converges (`r_{φ k}^α → rInf α`) and every
-aliveness Boolean stabilizes (the limit net-size profile `alive`). -/
+
+
+
 structure NetLimitData (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) where
   φ : Nat → Nat
@@ -135,7 +133,7 @@ structure NetLimitData (hd : InjRadiusDecayInput (I := I) X) (D : Real)
 
 namespace NetLimitData
 
-/-- Refine a net-limit datum along a further strict subsequence. -/
+
 def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
@@ -159,9 +157,9 @@ def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
 
 end NetLimitData
 
-/-- The diagonalization exists: `lbl389` boundedness + Bolzano--Weierstrass over the
-compact product, then Boolean stabilization.  A genuine proof — no axioms beyond the
-standing Hopf--Rinow black box carried by `P`. -/
+
+
+
 theorem exists_netLimitData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) :
     Nonempty (NetLimitData hd D P) := by
@@ -178,9 +176,9 @@ theorem exists_netLimitData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   · have h := (hrInftendsto α).comp hφ₂.tendsto_atTop
     simpa [Function.comp] using h
 
-/-- MSM135 `lbl390`: along the diagonal subsequence the radii `λ[r_{φ k}^α]` eventually
-lie in the factor-2 window around `λ^α := λ[rInf α]`.  (Extract the book's `K(α)` via
-`Filter.eventually_atTop`.) -/
+
+
+
 theorem NetLimitData.lambda_window (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (α : Nat) :
@@ -196,7 +194,7 @@ theorem NetLimitData.lambda_window (hd : InjRadiusDecayInput (I := I) X) {D : Re
       (by linarith : hd.lambda D (L.rInf α) < 2 * hd.lambda D (L.rInf α)))
   exact hmem.mono fun k hk => ⟨hk.1.le, hk.2.le⟩
 
-/-- The book's `λ^α := λ[r_∞^α]` — the k-uniform limit radii of `lbl391`. -/
+
 noncomputable def NetLimitData.lamInf {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)} (L : NetLimitData hd D P)
     (α : Nat) : Real :=
@@ -207,9 +205,9 @@ noncomputable def NetLimitData.lamInf {hd : InjRadiusDecayInput (I := I) X} {D :
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
     (L.subseq hψ).lamInf = L.lamInf := rfl
 
-/-- MSM135 `lbl383` item 2 (with the `lbl391` radii): for `k` large, the
-`B̃ = B(x^α, λ^α/2)` balls at distinct indices are disjoint — the k-uniform tilde
-radius fits under the per-k net radius by the `lbl390` window. -/
+
+
+
 theorem NetLimitData.tilde_disjoint (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) {α β : Nat} (hαβ : α ≠ β) :
@@ -245,9 +243,9 @@ theorem NetLimitData.tilde_disjoint (hd : InjRadiusDecayInput (I := I) X) {D : R
     exact h
   exact hdisj.mono (Metric.ball_subset_ball h1) (Metric.ball_subset_ball h2)
 
-/-- The ordered-net cover fits eventually inside every fixed enlargement
-`a * λ^γ` with `2 < a`.  The net construction gives radius `2 * λ[r_k^γ]`,
-while the diagonal subsequence makes `λ[r_k^γ]` converge to `λ^γ`. -/
+
+
+
 theorem NetLimitData.scaled_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -312,8 +310,8 @@ theorem NetLimitData.scaled_cover (hd : InjRadiusDecayInput (I := I) X) {D : Rea
     nlinarith
   exact hcb.trans hscale
 
-/-- MSM135 `lbl383` item 4 (with the `lbl391` radii, `B̂ = B(x^γ, 4λ^γ)`): for `k`
-large, every point of `B(O_k, r)` lies in some `B̂` ball of index `γ < A r`. -/
+
+
 theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -328,9 +326,9 @@ theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
            dist p c < 4 * L.lamInf γ) :=
   L.scaled_cover hd hD P hre pb r 4 (by norm_num)
 
-/-- A strict inner version of the finite cover.  It leaves one `λ^γ` of room
-between the covering ball and the existing `4 * λ^γ` hat, so a smooth bump can
-be one on the inner ball while its topological support stays inside the hat. -/
+
+
+
 theorem NetLimitData.inner_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -345,8 +343,8 @@ theorem NetLimitData.inner_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real
            dist p c < 3 * L.lamInf γ) :=
   L.scaled_cover hd hD P hre pb r 3 (by norm_num)
 
-/-- The `B`-balls (radius `5λ^·`, MSM135 `lbl391`) of indices `α, β` meet in the
-`k`-th manifold. -/
+
+
 def BInter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (lamInf : Nat → Real)
     (α β k : Nat) : Prop :=
@@ -355,7 +353,7 @@ def BInter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (letI : MetricSpace (X.obj k).M := (P k).ms
      ¬ Disjoint (Metric.ball x (5 * lamInf α)) (Metric.ball y (5 * lamInf β)))
 
-/-- Intersection of the stabilized `B`-balls is symmetric in the two slots. -/
+
 theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (lamInf : Nat → Real)
     {a b k : Nat} (h : BInter hd D P lamInf a b k) :
@@ -365,8 +363,8 @@ theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   intro hdisj
   exact hinter hdisj.symm
 
-/-- On one common finite tail, every currently intersecting pair belongs to
-the eventually-intersecting branch of a stabilized net. -/
+
+
 theorem NetLimitData.binter_stable_tail
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -387,10 +385,10 @@ theorem NetLimitData.binter_stable_tail
   · filter_upwards [hdisjoint] with k hk
     exact fun hmeet => (hk hmeet).elim
 
-/-- MSM135 `lbl383` item 6 (intersection stability): a further refinement of the
-diagonal subsequence on which every pairwise `B`-ball intersection pattern is
-eventually constant — for each pair, the balls eventually always meet or eventually
-never meet.  The limit radii are unchanged. -/
+
+
+
+
 theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) :
@@ -412,8 +410,8 @@ theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     | true => exact Or.inl (hv.mono fun k hk => of_decide_eq_true hk)
     | false => exact Or.inr (hv.mono fun k hk => of_decide_eq_false hk)
 
-/-- Pairwise `B`-intersection stability is preserved by refining the master
-subsequence. -/
+
+
 theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
@@ -435,9 +433,9 @@ theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Re
       simpa [NetLimitData.subseq, Function.comp_apply] using
         hψ.tendsto_atTop.eventually h)
 
-/-- If the `B`-balls of `α, β` meet frequently along the subsequence, the limit radii
-are close: `r∞^β ≤ r∞^α + (5λ^α + 5λ^β)` (per-k triangle inequality passed to the
-limit along the meeting subfilter). -/
+
+
+
 theorem NetLimitData.rInf_close (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
     {α β : Nat}
@@ -472,10 +470,10 @@ theorem NetLimitData.rInf_close (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact le_of_tendsto_of_tendsto ((L.tendsto β).mono_left inf_le_left)
     (((L.tendsto α).mono_left inf_le_left).add_const _) hev
 
-/-- MSM135 `lbl383` item 7 (book constants): once the `B = B(·, 5λ)` balls of `α, β`
-meet frequently along the subsequence, at every `k` where they meet the nesting holds:
-`B^α ⊆ B̄^β` and `B̄^α ⊆ B⃗^β`, with `B̄ = B(·, 45·e^{C·10λ(0)}·λ)` and
-`B⃗ = B(·, 205·e^{C·20λ(0)}·λ)` (the book's `45e^{10cC}`, `205e^{20cC}`, `c = λ(0)`). -/
+
+
+
+
 theorem NetLimitData.nesting (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) {α β : Nat}
@@ -537,15 +535,8 @@ theorem NetLimitData.nesting (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     have h3 : (5 : Real) * L.lamInf β ≤ 5 * E2 * L.lamInf β := by nlinarith
     nlinarith [mul_pos (lt_of_lt_of_le zero_lt_one (hE1ge1.trans hE12)) hlamβpos]
 
--- The declaration was already near the default heartbeat budget (nlinarith chains);
--- the `r0`-cap threading (2026-07-05) pushed it over.  Genuinely heavy, not looping.
-set_option maxHeartbeats 800000 in
-/-- MSM135 `lbl383` item 5 (α-independent multiplicity `I(n,C₀)`): for `k` large, at
-most `Imult (50·e^{C·20λ(0)})` indices `β` have their `B`-ball meeting `B^α`.  The
-meeting centers are `λ[R_k]`-separated (`R_k = r_k^α + 10λ(0)`) and lie within
-`m₀·λ[R_k]` of `x^α`, with the α-free ratio `m₀ = 50·e^{C·20λ(0)}` obtained from the
-per-k radius comparability and the `lbl390` windows (licensed by the a-priori index
-cap `β < A(2αλ(0)+10λ(0))`). -/
+
+
 theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -694,7 +685,7 @@ theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real
     have h6 : L.lamInf α ≤ 2 * E1 * lRk := by nlinarith
     have h7 : (25 : Real) * E1 * L.lamInf α ≤ 50 * (E1 * E1) * lRk := by nlinarith
     rw [← hEmul]
-    nlinarith
+    exact le_of_lt (lt_of_lt_of_le h5 h7)
   have hr0 : 0 < hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0) :=
     hd.lambda_pos hD _
   have hcapr :
@@ -726,14 +717,14 @@ theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real
       exact hcont b.down)
   rwa [Finset.card_univ, Fintype.card_ulift, Fintype.card_coe] at hmul
 
-/-- **Step A capstone (MSM135 `lbl383`, metric core).**  Given the Chapter 4 honest
-inputs (A0 `InjRadiusDecayInput`, the packing/volume inputs) and the realized proper
-metrics `P` (Hopf--Rinow black box), there is a diagonal subsequence datum `L` whose
-ordered nets satisfy the `lbl383` items with the `lbl391` radii `λ^α = λ[r∞^α]`:
-item 1 `netCenter_zero`, item 2 `L.tilde_disjoint`, item 4 `L.hat_cover`, item 5
-`L.inter_count`, item 6 (the stability below), item 7 `L.nesting`.  Item 3
-(exp-diffeomorphism and geodesic convexity) is the §5 frontier and is intentionally
-not part of this bundle. -/
+
+
+
+
+
+
+
+
 theorem exists_stableNetData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) :
     ∃ L : NetLimitData hd D P,

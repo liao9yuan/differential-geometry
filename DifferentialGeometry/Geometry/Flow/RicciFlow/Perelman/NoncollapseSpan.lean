@@ -26,12 +26,12 @@ open DifferentialGeometry.PDE.RicciFlow.Entropy
 universe u uE uH
 
 variable {M : Type u}
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [T3Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompactSpace M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 

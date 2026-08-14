@@ -4,13 +4,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalLimi
 
 set_option autoImplicit false
 
-/-!
-# Exact inverse convergence for selected normal branches
 
-This file is the HCG-facing adapter from full normal-metric and endpoint
-convergence to the generic moving exact-inverse theorem.  The limiting phase
-and its endpoint branch remain explicit producer data.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +28,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- The checked output package for a stage family of normal diagonal branches,
-its limiting branch, and forward/exact-inverse convergence on common balls. -/
+
+
 def HasDiagPairConv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -72,8 +72,8 @@ def HasDiagPairConv
     MapCInfConvOnCompacts (Metric.ball 0 delta₀)
       (fun n ↦ ((e n).symm : E × E → E × E)) eInf.symm
 
-/-- Exact-inverse diagonal-branch convergence persists under any index map
-tending to infinity. -/
+
+
 theorem HasDiagPairConv.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hcomplete : SeqMetricComplete (I := I) X}
@@ -106,8 +106,8 @@ theorem HasDiagPairConv.subseq
   intro n
   simpa only [PointedRiemannianSeq.subseq] using hnormal (f n)
 
-/-- Convergence of a fenced stage branch transfers to any other fenced
-normal-diagonal branch with the same stage source ball. -/
+
+
 theorem HasDiagPairConv.congr_stage
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hcomplete : SeqMetricComplete (I := I) X}
@@ -217,8 +217,8 @@ theorem HasDiagPairConv.congr_stage
     hInfDiag, hInfApprox, hforward', delta1, hdelta1,
     lt_min hdelta1ltStage' hdelta1ltInf, himage', hstageMap', hinv'⟩
 
-/-- Project the common exact-inverse domain, smoothness, and convergence from
-a selected diagonal-branch package. -/
+
+
 theorem HasDiagPairConv.inv_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hcomplete : SeqMetricComplete (I := I) X}
@@ -265,8 +265,8 @@ theorem HasDiagPairConv.inv_data
     fun n ↦ (hnormal n).2.2.2.2.1.mono (hstageTarget n),
     hInfSymmC.mono hInfTarget0, hinv⟩
 
-/-- Exact inverse branches converge on a common neighborhood of the compact
-diagonal over any compact subset of the limiting source ball. -/
+
+
 theorem HasDiagPairConv.exists_diag_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hcomplete : SeqMetricComplete (I := I) X}
@@ -346,9 +346,9 @@ theorem HasDiagPairConv.exists_diag_inv
 
 namespace NormalRadiusProfile
 
-/-- Exact inverse branches of selected normal diagonal maps converge on a
-smaller common target ball once a confined limiting phase and endpoint branch
-have been produced. -/
+
+
+
 theorem exists_diagInv_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -487,9 +487,9 @@ theorem exists_diagInv_conv
     hforward hsource hstage_cd (lt_min hdelta hdeltaInf) htarget
     htargetInf hInf_cd' hInf_symm_cd' hbase
 
-/-- A prescribed stage radius satisfying the retained phase budgets admits a
-matched limiting branch at half that radius, with forward and exact-inverse
-convergence on common balls. -/
+
+
+
 theorem exists_diagPair_at
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -610,9 +610,9 @@ theorem exists_diagPair_at
         hInfDiag, ⟨η, hη, hInfApproxη⟩, hforward,
         delta₀, hdelta₀, hdelta₀lt, hInfMaps, hstageMaps, hinverse⟩)
 
-/-- A convergent normal-coordinate metric family admits matched stage and
-limit diagonal branches whose forward and exact inverse maps converge on
-common balls. -/
+
+
+
 theorem exists_diagPair_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

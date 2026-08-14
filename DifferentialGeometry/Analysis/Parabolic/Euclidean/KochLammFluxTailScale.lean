@@ -56,7 +56,7 @@ theorem klFluxHalf_scale {R : ℝ} (hR : 0 < R) :
     klFluxHalfCore (V := V) (R ^ 2) =
       (klLpScaleR (V := V) R) ^ klPDual V *
         klFluxHalfCore (V := V) 1 := by
-  have hp : 0 < klPDual V := (klP_holder (V := V)).pos
+  have hp : 0 < klPDual V := (klPDual_holder (V := V)).pos
   have hexp :
       2 * (klD1Exp V + 1) =
         (2 / (Module.finrank ℝ V + 4 : ℝ)) * klPDual V := by
@@ -92,7 +92,7 @@ omit [Nontrivial V] in
 theorem klFluxHRoot_scale {R : ℝ} (hR : 0 < R) :
     klFluxHalfRoot (V := V) (R ^ 2) =
       klFluxTailC V * klLpScaleR (V := V) R := by
-  have hp : 0 < klPDual V := (klP_holder (V := V)).pos
+  have hp : 0 < klPDual V := (klPDual_holder (V := V)).pos
   have hs : 0 < klLpScaleR (V := V) R :=
     Real.rpow_pos_of_pos hR _
   have hc : 0 ≤ klFluxHalfCore (V := V) 1 :=
@@ -105,6 +105,7 @@ theorem klFluxHRoot_scale {R : ℝ} (hR : 0 < R) :
   rw [← Real.rpow_mul hs.le, hpinv, Real.rpow_one]
   ring
 
+omit [Nontrivial V] in
 /-- Every selected terminal flux-tail power mass is nonnegative. -/
 theorem klFluxTailPow_nn (R : ℝ) (x : V) (S : Set V) :
     0 ≤ klFluxTailPow (V := V) R x S := by
@@ -121,7 +122,7 @@ theorem klFluxTail_fac {R k : ℝ} (hR : 0 < R) (hk : 0 ≤ k)
         (klFluxTailC V * klLpScaleR (V := V) R) := by
   let p : ℝ := klPDual V
   let E : ℝ := Real.exp (-(8 : ℝ)⁻¹ * k ^ 2)
-  have hp : 0 < p := (klP_holder (V := V)).pos
+  have hp : 0 < p := (klPDual_holder (V := V)).pos
   have hE : 0 < E := Real.exp_pos _
   have hcore : 0 ≤ klFluxHalfCore (V := V) (R ^ 2) :=
     klFluxHalf_nonneg (V := V) (sq_pos_of_pos hR)

@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothStrongPair
 import Mathlib.Analysis.ODE.Gronwall
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Initial-edge strong Ricci--DeTurck data
@@ -35,7 +33,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -97,12 +95,15 @@ theorem edgeGronwall_zero {T K : ℝ} (hT : 0 < T)
       have hxT : x ∈ Ioo (0 : ℝ) T :=
         ⟨lt_of_lt_of_le hε.1 hx.1, lt_of_lt_of_le hx.2 ht.2⟩
       exact (hderiv x hxT).hasDerivWithinAt.liminf_right_slope_le hr
-    have hgr := le_gronwallBound_of_liminf_deriv_right_le hcontε hslope le_rfl
-      (fun x hx => hbound x
-        ⟨lt_of_lt_of_le hε.1 hx.1, lt_of_lt_of_le hx.2 ht.2⟩) t
+    have hgr := le_gronwallBound_of_liminf_deriv_right_le
+      (δ := energy ε) (K := K) (ε := 0) (a := ε) (b := t)
+      hcontε hslope le_rfl
+      (fun x hx => by
+        simpa only [add_zero] using hbound x
+          ⟨lt_of_lt_of_le hε.1 hx.1, lt_of_lt_of_le hx.2 ht.2⟩) t
       ⟨hε.2.le, le_rfl⟩
     simpa only [gronwallBound_ε0] using hgr
-  exact le_antisymm (le_of_tendsto hrhs hev) (hnonneg t ht)
+  exact le_antisymm (ge_of_tendsto hrhs hev) (hnonneg t ht)
 
 /-- Exact maximal-regularity output required from one initial-edge geometric
 Ricci--DeTurck perturbation.  `lo` is the continuous low-scale representative;
@@ -144,7 +145,7 @@ identities are used on the open positive-time interval.
 
 Thus the remaining geometric edge estimate is exactly
 `L²_t H^(a+2) ∩ H¹_t H^a`, not an equality or fixed-point assumption. -/
-theorem edgePath_strong
+noncomputable def edgePath_strong
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
@@ -170,7 +171,7 @@ theorem edgePath_strong
             ((a : ℝ) + 2) (Phi t)) +
         Nfun (smoothCcToTensorHs (I := I) (M := M) g₀
           ((a : ℝ) + 2) (Phi t))) :
-    EdgeStrongData (I := I) (M := M) g₀ a Nfun hLip Phi := by
+    EdgeStrongData (I := I) (M := M) (T := T) g₀ a Nfun hLip Phi := by
   let Fhi : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) := fun t =>
     smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Phi t)
   let Flow : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) := fun t =>
@@ -186,11 +187,11 @@ theorem edgePath_strong
   have hhiRep :
       (hi : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
         =ᵐ[timeMeasure T] Fhi := by
-    simpa only [hi] using hhi.coeFn_toLp Fhi
+    simpa only [hi, Fhi] using hhi.coeFn_toLp
   have hDRep :
       (derivL2 : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
         =ᵐ[timeMeasure T] D := by
-    simpa only [derivL2] using hD.coeFn_toLp D
+    simpa only [derivL2] using hD.coeFn_toLp
   have hmem : ∀ᵐ t ∂(timeMeasure T), t ∈ Ioo (0 : ℝ) T := by
     have hrestrict : timeMeasure T = volume.restrict (Ioo (0 : ℝ) T) := by
       rw [timeMeasure,
@@ -202,9 +203,7 @@ theorem edgePath_strong
     have hzeroMem : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, hT.le⟩
     have hrepVol : ∀ᵐ s ∂volume,
         s ∈ Icc (0 : ℝ) T → derivL2 s = D s := by
-      have hrep := hDRep
-      rw [timeMeasure] at hrep
-      exact (ae_restrict_iff' measurableSet_Icc).1 hrep
+      exact (ae_restrict_iff' measurableSet_Icc).1 hDRep
     have hintEq : (∫ s in (0 : ℝ)..t, derivL2 s) = ∫ s in (0 : ℝ)..t, D s := by
       refine intervalIntegral.integral_congr_ae ?_
       filter_upwards [hrepVol] with s hs hsI
@@ -247,7 +246,8 @@ theorem edgePath_strong
         ⇑(timeH1.toTimeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T lo)
             =ᵐ[timeMeasure T] lo.toFun := by
       simpa only [timeH1.toTimeL2_apply] using
-        TimeSobolev.coeFn_ofContinuousOn lo.continuousOn_toFun
+        DifferentialGeometry.Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn
+          lo.continuousOn_toFun
     filter_upwards [hinclAE, hhiRep, hloAE, hmem] with t hit hhit hlot ht
     rw [hit, hhit, hlot, htoFun t (Set.mem_Icc_of_Ioo ht)]
     exact tensorHsInclusion_smoothCcToTensorHs (I := I) (M := M) g₀
@@ -256,14 +256,16 @@ theorem edgePath_strong
     have hderivAE :
         ⇑(timeH1.timeDeriv (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T lo)
             =ᵐ[timeMeasure T] D := by
-      simpa only [lo, derivL2, timeH1.timeDeriv_mk] using hD.coeFn_toLp D
+      simpa only [lo, derivL2, timeH1.timeDeriv_mk] using hD.coeFn_toLp
     have hLap := timeScaleLaplacian_coeFn (I := I) (M := M) (τ := (a : ℝ)) hi
     have hforce := nemytskii_coeFn (I := I) (M := M) hLip hi
     have hadd := Lp.coeFn_add
       (timeScaleLaplacian (I := I) (M := M) (a : ℝ) hi) force
     filter_upwards [hderivAE, hhiRep, hLap, hforce, hadd, hmem]
       with t hdt hhit hLapt hft haddt ht
-    rw [hdt, haddt, hLapt, hhit, force, hft, hhit, hpde t ht]
+    have hforce_t : force t = Nfun (hi t) := by
+      simpa only [force] using hft
+    rw [hdt, haddt, Pi.add_apply, hLapt, hhit, hforce_t, hhit, hpde t ht]
 
 /-- Two geometric perturbations carrying the exact initial-edge strong data
 are pointwise equal on the closed window whenever the existing mixed forcing
@@ -289,8 +291,8 @@ theorem edgeStrong_unique
       (C₁ : ℝ) * Real.sqrt (1 + T) * ρ * (1 + T) +
           (C₂ : ℝ) * (2 * Real.sqrt T) < 1)
     (Phi₁ Phi₂ : ℝ → SmoothCcTensor g₀ 0 2)
-    (d₁ : EdgeStrongData (I := I) (M := M) g₀ a Nfun hLip Phi₁)
-    (d₂ : EdgeStrongData (I := I) (M := M) g₀ a Nfun hLip Phi₂)
+    (d₁ : EdgeStrongData (I := I) (M := M) (T := T) g₀ a Nfun hLip Phi₁)
+    (d₂ : EdgeStrongData (I := I) (M := M) (T := T) g₀ a Nfun hLip Phi₂)
     (hball₁ : ‖d₁.force‖ ≤ ρ) (hball₂ : ‖d₂.force‖ ≤ ρ) :
     ∀ t ∈ Icc (0 : ℝ) T, Phi₁ t = Phi₂ t := by
   have huniq := deTurckStrong_unique (I := I) (M := M) g₀ a hLip hsingle
@@ -301,6 +303,7 @@ theorem edgeStrong_unique
   have hu := congrArg
     (fun u : timeH1 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T =>
       u.toFun t) huniq.2.2
+  change d₁.lo.toFun t = d₂.lo.toFun t at hu
   rw [d₁.path_rep t ht, d₂.path_rep t ht] at hu
   apply ccToHs_injective (I := I) (M := M) g₀ 2 (a : ℝ)
   simpa only [ccHs_eq_smoothHs] using hu

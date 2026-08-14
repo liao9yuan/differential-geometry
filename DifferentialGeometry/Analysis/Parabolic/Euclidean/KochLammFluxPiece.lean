@@ -37,7 +37,7 @@ theorem klFluxTailKern {R k : ℝ} (hR : 0 < R) (hk : 0 ≤ k)
         (klFluxTailC V * klLpScaleR (V := V) R)) := by
   let μ := klTailMeasure (V := V) R S
   let p : ℝ := klPDual V
-  have hp : 0 < p := (klP_holder (V := V)).pos
+  have hp : 0 < p := (klPDual_holder (V := V)).pos
   have hμ : μ ≤ klTermMeasure (V := V) (R ^ 2) := by
     exact klTailTerm_le (V := V) R S
   have hkint : Integrable
@@ -46,7 +46,7 @@ theorem klFluxTailKern {R k : ℝ} (hR : 0 < R) (hk : 0 ≤ k)
       (klFluxKernel_memLp (V := V) (sq_pos_of_pos hR) w x).mono_measure hμ
     have hm := hmLp.integrable_norm_rpow
       (ENNReal.ofReal_pos.mpr hp).ne' ENNReal.ofReal_ne_top
-    simpa only [ENNReal.toReal_ofReal hp.le] using hm
+    simpa only [p, ENNReal.toReal_ofReal hp.le] using hm
   have hmint : Integrable
       (fun z : ℝ × V ↦ (‖w‖ * klFluxMajor (R ^ 2) x z) ^ p) μ := by
     have hmLp0 :=
@@ -54,7 +54,7 @@ theorem klFluxTailKern {R k : ℝ} (hR : 0 < R) (hk : 0 ≤ k)
     have hmLp := hmLp0.const_mul ‖w‖
     have hm := hmLp.integrable_norm_rpow
         (ENNReal.ofReal_pos.mpr hp).ne' ENNReal.ofReal_ne_top
-    simpa only [ENNReal.toReal_ofReal hp.le,
+    simpa only [p, ENNReal.toReal_ofReal hp.le,
       Real.norm_of_nonneg (norm_nonneg w),
       Real.norm_of_nonneg
         (klFluxMajor_nonneg (V := V) (R ^ 2) x _), norm_mul] using hm
@@ -76,6 +76,7 @@ theorem klFluxTailKern {R k : ℝ} (hR : 0 < R) (hk : 0 ≤ k)
     unfold klFluxTailPow
     simp_rw [Real.norm_of_nonneg
       (klFluxMajor_nonneg (V := V) (R ^ 2) x _)]
+    rfl
   have hmono :
       (∫ z : ℝ × V, ‖klFluxKernel (R ^ 2) w x z‖ ^ p ∂μ) ≤
         ‖w‖ ^ p * klFluxTailPow (V := V) R x S := by
@@ -125,7 +126,7 @@ theorem klFluxPiece_src {T R : ℝ} {A₂ Aₚ : ℝ≥0}
         ∂klTailMeasure (V := V) R S) ^ (1 / klPReal V) ≤
       (klLpScaleR (V := V) R)⁻¹ * (Aₚ : ℝ) := by
   let μ := klTailMeasure (V := V) R S
-  have hp : 0 < klPReal V := (klP_holder (V := V)).symm.pos
+  have hp : 0 < klPReal V := (klPDual_holder (V := V)).symm.pos
   have hf : MemLp f (ENNReal.ofReal (klPReal V)) μ := by
     simpa only [klPReal_ofReal] using
       (klFluxPiece_mem (V := V) h c hR hRT hS)
@@ -173,7 +174,7 @@ theorem klFluxPiece_hold {T R : ℝ} {A₂ Aₚ : ℝ≥0}
     simpa only [klPReal_ofReal] using
       (klFluxPiece_mem (V := V) h c hR hRT hS)
   simpa only [klFluxPiece1, μ] using
-    (integral_holder (klP_holder (V := V))
+    (integral_holder (klPDual_holder (V := V))
       (klFluxKernel (R ^ 2) w x) f hk hf)
 
 omit [CompleteSpace F] in

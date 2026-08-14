@@ -1,29 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartGramRealizeDiffJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedCovGradChartJetPeel
 
-/-!
-# The chart-component Euclidean coordinate bridge: `EuclN`-jets versus `E`-jets
-
-The forward covariant Faà-di-Bruno peel (`IteratedCovGradChartJetPeel`) lives in the
-`toEuclidean`-image `EuclN` (plain Fréchet jets of `rawPullR`), while the chart-Gram / Ricci–DeTurck
-tower bounds (`ChartGramRealizeDiffJet`, `ChartDeTurckRicciRHSRealizeJet`) live in the raw chart
-target `E` (`iteratedFDerivWithin` jets of `rawCompOnE` on the chart-target interior).  The two
-families of chart components are related by the canonical continuous-linear equivalence
-`toEuclidean : E ≃L[ℝ] EuclN`:
-
-`rawPullR g 0 2 S α ![] Jdx = rawCompOnE g S α Jdx ∘ toEuclidean.symm` (as functions on `EuclN`).
-
-This file proves the **chart-component Euclidean coordinate bridge**: on the partition-of-unity
-kernel, the order-`m` plain `EuclN` Fréchet jet of `rawPullR` is bounded by `‖toEuclidean.symm‖^m`
-times the order-`m` `iteratedFDerivWithin` jet of `rawCompOnE` (within the chart-target interior),
-at the corresponding chart-preimage point.  Summed and supremised over the jet window, this yields a
-single uniform bound of the `EuclN` bare chart-jet content by the `E` bare chart-jet content.
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
 
 open Manifold Set Filter Topology
 open scoped Manifold Topology ContDiff BigOperators
@@ -37,7 +17,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,76 +26,74 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The plain `EuclN` raw chart component `rawPullR g 0 2 S α ![] Jdx` equals the `E`-coordinate raw
-chart component `rawCompOnE g S α Jdx` precomposed with the continuous-linear equivalence
-`toEuclidean.symm : EuclN → E`. -/
-lemma rawPullR_eq_rawCompOnE_comp (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+lemma rawPullR_eq_rawCompOnE_comp (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
+    (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
-    rawPullR (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx =
-      rawCompOnE (I := I) (M := M) g S α Jdx ∘ (toEuclidean (E := E)).symm := by
+    tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
+      (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx =
+      tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ (toEuclidean (E := E)).symm := by
   funext y
-  rw [rawPullR, Function.comp_apply, Function.comp_apply, Function.comp_apply, rawCompOnE]
+  rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, Function.comp_apply,
+    tensorChartComponentOnModel]
 
-/-- **The chart-component Euclidean coordinate bridge (pointwise order-`m` jet).**
-For `S : SmoothCcTensor g 0 2`, chart `α`, target multi-index `Jdx`, order `m`, and a point `y`
-of `EuclN` whose `toEuclidean.symm`-image lies in the chart-target interior, the order-`m` plain
-Fréchet jet of `rawPullR` is bounded by `‖toEuclidean.symm‖^m` times the order-`m`
-`iteratedFDerivWithin` jet of `rawCompOnE` at the corresponding `E`-point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma norm_iteratedFDeriv_rawPullR_le_iteratedFDerivWithin_rawCompOnE
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : EuclN}
     (hy : (toEuclidean (E := E)).symm y ∈ interior (extChartAt I α).target) :
-    ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 S α
+    ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
         (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx) y‖ ≤
       ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ ^ m *
-        ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx)
+        ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
           (interior (extChartAt I α).target) ((toEuclidean (E := E)).symm y)‖ := by
   classical
   set e : EuclN ≃L[ℝ] E := (toEuclidean (E := E)).symm with he_def
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hO_open : IsOpen O := isOpen_interior
   have hUD : UniqueDiffOn ℝ O := hO_open.uniqueDiffOn
-
   rw [rawPullR_eq_rawCompOnE_comp (I := I) (M := M) g S α Jdx]
-
   have hpre_open : IsOpen (e ⁻¹' O) := hO_open.preimage e.continuous
   have hy_pre : y ∈ e ⁻¹' O := hy
-
-  have hplain : iteratedFDeriv ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx ∘ ⇑e) y =
-      iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx ∘ ⇑e) (e ⁻¹' O) y :=
+  have hplain : iteratedFDeriv ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e) y
+    =
+      iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e)
+        (e ⁻¹' O) y :=
     (iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
-      (f := rawCompOnE (I := I) (M := M) g S α Jdx ∘ ⇑e) m hpre_open hy_pre).symm
+      (f := tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e) m hpre_open hy_pre).symm
   rw [hplain]
-
-  have hcomp := e.iteratedFDerivWithin_comp_right (f := rawCompOnE (I := I) (M := M) g S α Jdx)
+  have hcomp := e.iteratedFDerivWithin_comp_right
+    (f := tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
     hUD (x := y) hy m
   rw [hcomp]
-
   refine (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans ?_
   rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
-
   have he_norm : ‖(e : EuclN →L[ℝ] E)‖ = ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ := rfl
   rw [he_norm, mul_comm]
 
-/-- The reverse Euclidean-coordinate bridge: an `E`-coordinate chart-component
-jet is controlled by the corresponding `rawPullR` jet after applying
-`toEuclidean`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma rawCompJet_le
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
-    ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx)
+    ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
         (interior (extChartAt I α).target) y‖ ≤
       ‖(toEuclidean (E := E) : E →L[ℝ] EuclN)‖ ^ m *
-        ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 S α
+        ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
           (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
           (toEuclidean (E := E) y)‖ := by
   classical
   set e : E ≃L[ℝ] EuclN := toEuclidean (E := E) with he_def
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hO_open : IsOpen O := isOpen_interior
-  have hcompose : rawCompOnE (I := I) (M := M) g S α Jdx =
-      rawPullR (I := I) (M := M) g 0 2 S α
+  have hcompose : tensorChartComponentOnModel (I := I) (M := M) g S α Jdx =
+      tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
         (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx ∘ ⇑e := by
     have h := rawPullR_eq_rawCompOnE_comp (I := I) (M := M) g S α Jdx
     funext z
@@ -130,7 +108,7 @@ lemma rawCompJet_le
     rw [hOe_def, Set.preimage_image_eq _ e.injective]
   have hey : e y ∈ Oe := ⟨y, hy, rfl⟩
   have hcr := e.iteratedFDerivWithin_comp_right
-    (f := rawPullR (I := I) (M := M) g 0 2 S α
+    (f := tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
       (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
     hUDe (x := y) hey m
   rw [hpre] at hcr
@@ -139,14 +117,16 @@ lemma rawCompJet_le
   refine (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans ?_
   rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin, mul_comm]
 
-/-- The full `E`-coordinate bare jet content is controlled by the existing
-Euclidean `rawPullR` bare jet content, uniformly over the chart-target
-interior. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem bareOnE_le_bare
     (g : SmoothRiemannianMetric I M) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensor g 0 2) {y : E},
       y ∈ interior (extChartAt I α).target →
-      bareChartJetContentOnE (I := I) (M := M) g S α N y ≤
+      chartComponentJetSeminormSum (I := I) (M := M) g S α N y ≤
         C * bareChartJetContent (I := I) (M := M) g 0 2 S α N
           (toEuclidean (E := E) y) := by
   classical
@@ -170,7 +150,7 @@ theorem bareOnE_le_bare
     exact bareChartJetContent_nonneg (I := I) (M := M) g 0 2 S α N _
   have hterm : ∀ (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
       (m : ℕ), m ∈ Finset.range (N + 1) →
-      ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx)
+      ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
           (interior (extChartAt I α).target) y‖ ≤ A * B := by
     intro Jdx m hm
     have hmN : m ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
@@ -184,11 +164,11 @@ theorem bareOnE_le_bare
       (toEuclidean (E := E) y)
     refine (rawCompJet_le (I := I) (M := M) g S α Jdx m hy).trans ?_
     exact mul_le_mul hpow (hB_def ▸ hraw) (norm_nonneg _) hA
-  unfold bareChartJetContentOnE
+  unfold chartComponentJetSeminormSum
   calc
     (∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E),
         ∑ m ∈ Finset.range (N + 1),
-          ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx)
+          ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
             (interior (extChartAt I α).target) y‖)
         ≤ ∑ _Jdx : Fin 2 → Fin (Module.finrank ℝ E),
             ∑ _m ∈ Finset.range (N + 1), A * B :=

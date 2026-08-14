@@ -11,7 +11,7 @@ both source estimates are used on the same original horizon.
 -/
 
 noncomputable section
-
+set_option backward.isDefEq.respectTransparency false
 open MeasureTheory Set
 open scoped ENNReal NNReal RealInnerProductSpace
 
@@ -31,6 +31,7 @@ potentials. -/
 def klHeat0 (t : ℝ) (f : ℝ × V → F) (x : V) : F :=
   heatEarly0 t f x + klLateFull0 (Real.sqrt t) f x
 
+omit [CompleteSpace F] in
 /-- The ordinary heat integrand is Bochner integrable on the complete early
 half-slab.  This is the integrability statement needed to identify the split
 potential with the usual Duhamel integral. -/
@@ -84,6 +85,7 @@ theorem klEarly0_int {T t : ℝ} {A₁ A_q : ℝ≥0}
   refine ⟨hmeas, hasFiniteIntegral_iff_enorm.2 ?_⟩
   simpa only [q] using hfinite
 
+omit [CompleteSpace F] in
 /-- The same ordinary heat integrand is Bochner integrable on the terminal
 half-slab, with the terminal radius chosen as `sqrt t`. -/
 theorem klLate0_int {T t : ℝ} {A₁ A_q : ℝ≥0}
@@ -99,6 +101,7 @@ theorem klLate0_int {T t : ℝ} {A₁ A_q : ℝ≥0}
     simpa only [Real.sq_sqrt ht.le] using htT) s hcard hcover
   simpa only [Real.sq_sqrt ht.le] using hi
 
+omit [CompleteSpace F] in
 /-- The split ordinary potential is exactly the original Duhamel heat
 potential.  Thus the early/terminal estimates apply to the canonical linear
 solution operator, rather than to a separately defined surrogate. -/
@@ -150,6 +153,7 @@ theorem klHeat0_eq_heatPot {T t : ℝ} {A₁ A_q : ℝ≥0}
       ∫ s in 0..t, ∫ y : V, g (s, y)
   rw [intervalIntegral.integral_of_le ht.le, ← hprod, hsplit, hlateEq]
 
+omit [CompleteSpace F] in
 /-- The full ordinary-source value potential is bounded by the sum of the
 local `L¹` and terminal `L^((n+4)/2)` Koch--Lamm radii. -/
 theorem klHeat0_norm {T t : ℝ} {A₁ A_q : ℝ≥0}
@@ -168,8 +172,8 @@ theorem klHeat0_norm {T t : ℝ} {A₁ A_q : ℝ≥0}
         ENNReal.ofReal
           (klLateSeries (Module.finrank ℝ V) *
             (klLateTailC V * (A_q : ℝ))) := by
-    rw [← ofReal_norm_eq_enorm]
-    exact ENNReal.ofReal_le_ofReal hlate
+    simpa only [ofReal_norm_eq_enorm, enorm_eq_nnnorm] using
+      ENNReal.ofReal_le_ofReal hlate
   have hearly := kl0_early_norm (V := V) ht htT f x h
   unfold klHeat0
   calc
@@ -177,10 +181,9 @@ theorem klHeat0_norm {T t : ℝ} {A₁ A_q : ℝ≥0}
         ℝ≥0∞) ≤
         (↑‖heatEarly0 t f x‖₊ : ℝ≥0∞) +
           (↑‖klLateFull0 (V := V) (Real.sqrt t) f x‖₊ : ℝ≥0∞) := by
-      rw [← ofReal_norm_eq_enorm, ← ofReal_norm_eq_enorm,
-        ← ofReal_norm_eq_enorm,
-        ENNReal.ofReal_add (norm_nonneg _) (norm_nonneg _)]
-      exact ENNReal.ofReal_le_ofReal (norm_add_le _ _)
+      simpa only [enorm_eq_nnnorm] using
+        enorm_add_le (heatEarly0 t f x)
+          (klLateFull0 (V := V) (Real.sqrt t) f x)
     _ ≤ earlyHeatC V * (A₁ : ℝ≥0∞) +
         ENNReal.ofReal
           (klLateSeries (Module.finrank ℝ V) *

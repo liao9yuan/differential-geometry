@@ -46,7 +46,8 @@ private lemma trace42_apply
               (ContinuousMultilinearMap.domDomCongr koszulSlotPerm D)
               (fun j : Fin 2 => m ((Equiv.swap (0 : Fin 2) 1) j))
           - modelDoubleTrace (E := E) 2 L D m) := by
-  rw [combinedTrace42Model, ContinuousLinearMap.smul_apply,
+  change ricciPrincipalCoeffDoubleTraceModel (E := E) L D m = _
+  rw [ricciPrincipalCoeffDoubleTraceModel, ContinuousLinearMap.smul_apply,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 

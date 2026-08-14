@@ -1,17 +1,17 @@
-import Mathlib
+import Mathlib.Algebra.BigOperators.Fin
+import Mathlib.Data.Real.Basic
+import Mathlib.Tactic.Ring
 
-/-!
-# Curvature blocks in the zeroth-order DeTurck normal form
 
-This module proves the finite-dimensional normal forms for the curvature and
-second-background-covariant-derivative blocks.  It has no geometric regularity
-or Sobolev assumptions.
--/
+
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option maxHeartbeats 3200000
 
 open scoped BigOperators
 
@@ -19,19 +19,19 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficien
 
 variable {n : ℕ}
 
-/-- The coordinate curvature expression built from a background connection. -/
+
 def rchB (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ) (l i j ρ : Fin n) : ℝ :=
   dga0 i l j ρ - dga0 j l i ρ +
     ∑ c, (ga0 i c ρ * ga0 l j c - ga0 j c ρ * ga0 l i c)
 
-/-- The curvature contraction block in the zeroth-order DeTurck expansion. -/
+
 def p5B (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   -(∑ m, ∑ ml, ig m ml * ∑ ρ, rchB ga0 dga0 ml i j ρ * f ρ m)
 
-/-- The curvature contraction expands into its derivative and quadratic connection terms. -/
+
 theorem nf_p5 (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ)
@@ -99,7 +99,7 @@ theorem nf_p5 (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n �
   rw [h1, h2, h3, h4]
   ring
 
-/-- A background second-covariant-derivative coordinate block. -/
+
 def r4F (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (f3 : Fin n → Fin n → Fin n → ℝ)
@@ -113,13 +113,13 @@ def r4F (ga0 : Fin n → Fin n → Fin n → ℝ)
         (- ∑ r, ga0 a d r * (f3 b c r +
           ((- ∑ t, ga0 b c t * f t r) + (- ∑ t, ga0 b r t * f c t))))))
 
-/-- The first-derivative principal part of `r4F`. -/
+
 def r4pfB (ga0 : Fin n → Fin n → Fin n → ℝ)
     (f3 : Fin n → Fin n → Fin n → ℝ) (d a b c : Fin n) : ℝ :=
   - ∑ r, (ga0 a b r * f3 d r c + ga0 a c r * f3 d b r + ga0 d a r * f3 r b c +
       ga0 d b r * f3 a r c + ga0 d c r * f3 a b r)
 
-/-- The lower-order remainder after removing `r4pfB` from `r4F`. -/
+
 def r4hB (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (a b c d : Fin n) : ℝ :=
@@ -131,7 +131,7 @@ def r4hB (ga0 : Fin n → Fin n → Fin n → ℝ)
       (∑ r, ∑ t, ga0 a d r * (ga0 b c t * f t r)) +
       (∑ r, ∑ t, ga0 a d r * (ga0 b r t * f c t)))
 
-/-- The traced symmetrized `r4F` block. -/
+
 def t2F (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (f3 : Fin n → Fin n → Fin n → ℝ)
@@ -139,7 +139,7 @@ def t2F (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
   ∑ k1, ∑ l, ig k1 l * (r4F ga0 dga0 f f3 i l j k1 + r4F ga0 dga0 f f3 j l i k1 -
     r4F ga0 dga0 f f3 i j l k1)
 
-/-- The traced symmetrized principal part of `t2F`. -/
+
 def tpfF (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (f3 : Fin n → Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   ∑ k1, ∑ l, ig k1 l * (r4pfB ga0 f3 i l j k1 + r4pfB ga0 f3 j l i k1 -
@@ -210,7 +210,7 @@ private lemma t2_block (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n →
   rw [r4_split ga0 dga0 f f3 hga0s i l j k1, r4_split ga0 dga0 f f3 hga0s j l i k1,
     r4_split ga0 dga0 f f3 hga0s i j l k1]
 
-/-- The traced second-covariant-derivative remainder has the stated lower-order normal form. -/
+
 theorem nf_t2h (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (f3 : Fin n → Fin n → Fin n → ℝ)
@@ -264,243 +264,375 @@ theorem nf_t2h (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n �
   simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
   have ht1 : (∑ k1, ∑ l, ig k1 l * (∑ r, dga0 i j l r * f r k1)) =
       (∑ a, ∑ b, ∑ c, dga0 i j a b * f b c * ig a c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_)))
+    refine Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_)))
     rw [higs k1 l]
     ring
   have ht2 : (∑ k1, ∑ l, ig k1 l * (∑ r, dga0 i k1 l r * f j r)) =
       (∑ a, ∑ b, ∑ c, dga0 i a b c * f j c * ig a b) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    refine Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_)))
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    refine Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_)))
     ring
   have ht3 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i l r * (ga0 r j t * f t k1))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c d * ga0 j d a * ig b c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_))))
     rw [hga0s r j t]
     ring
   have ht4 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i l r * (ga0 r k1 t * f j t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f j a * ga0 i b c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
     rw [higs k1 l]
     ring
   have ht5 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i j r * (ga0 l r t * f t k1))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s l r t]
     ring
   have ht6 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i j r * (ga0 l k1 t * f r t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j a * ga0 c d b * ig c d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun r _ => Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s l k1 t]
     ring
   have ht7 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i k1 r * (ga0 l j t * f t r))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c a * ga0 j d b * ig c d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun r _ => Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s l j t, hfs t r]
     ring
   have ht8 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i k1 r * (ga0 l r t * f j t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f j a * ga0 i b c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s l r t]
     ring
   have ht9 : (∑ k1, ∑ l, ig k1 l * (∑ r, dga0 j i l r * f r k1)) =
       (∑ a, ∑ b, ∑ c, dga0 j i a b * f b c * ig a c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_)))
+    refine Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_)))
     rw [higs k1 l]
     ring
   have ht10 : (∑ k1, ∑ l, ig k1 l * (∑ r, dga0 j k1 l r * f i r)) =
       (∑ a, ∑ b, ∑ c, dga0 j a b c * f i c * ig a b) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    refine Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_)))
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    refine Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_)))
     ring
   have ht11 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 j l r * (ga0 r i t * f t k1))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c a * ga0 j d c * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s r i t]
     ring
   have ht12 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 j l r * (ga0 r k1 t * f i t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f i a * ga0 j b c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
     rw [higs k1 l]
     ring
   have ht13 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 j i r * (ga0 l r t * f t k1))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s j i r, hga0s l r t]
     ring
   have ht14 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 j i r * (ga0 l k1 t * f r t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j a * ga0 c d b * ig c d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun r _ => Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s j i r, hga0s l k1 t]
     ring
   have ht15 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 j k1 r * (ga0 l i t * f t r))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c a * ga0 j d b * ig c d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun r _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
     rw [higs k1 l, hga0s l i t]
     ring
   have ht16 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 j k1 r * (ga0 l r t * f i t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f i a * ga0 j b c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hga0s l r t]
     ring
   have ht17 : (∑ k1, ∑ l, ig k1 l * (∑ r, dga0 i l j r * f r k1)) =
       (∑ a, ∑ b, ∑ c, dga0 i j a b * f b c * ig a c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_)))
+    refine Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_)))
     rw [higs k1 l, hdga0s i l j r]
     ring
   have ht18 : (∑ k1, ∑ l, ig k1 l * (∑ r, dga0 i k1 j r * f l r)) =
       (∑ a, ∑ b, ∑ c, dga0 i j a b * f b c * ig a c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_)))
+    refine Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_)))
     rw [hdga0s i k1 j r, hfs l r]
     ring
   have ht19 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i j r * (ga0 r l t * f t k1))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun l _ => ?_))))
     ring
   have ht20 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i j r * (ga0 r k1 t * f l t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j c * ga0 c d a * ig b d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
     rw [higs k1 l, hfs l t]
     ring
   have ht21 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i l r * (ga0 j r t * f t k1))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c d * ga0 j d a * ig b c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun k1 _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => ?_))))
     ring
   have ht22 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i l r * (ga0 j k1 t * f r t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c a * ga0 j d b * ig c d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
-    refine Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    refine Finset.sum_congr rfl
+      (fun r _ => Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun k1 _ => ?_))))
     rw [higs k1 l]
     ring
   have ht23 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i k1 r * (ga0 j l t * f t r))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c a * ga0 j d b * ig c d) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun r _ => Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun r _ => Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun l _ => ?_))))
     rw [hfs t r]
     ring
   have ht24 : (∑ k1, ∑ l, ig k1 l * (∑ r, ∑ t, ga0 i k1 r * (ga0 j r t * f l t))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i c d * ga0 j d a * ig b c) := by
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
-    rw [Finset.sum_congr rfl (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
-    rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl (fun l _ => Finset.mul_sum _ _ _))]
+    rw [Finset.sum_congr rfl
+      (fun k1 (_ : k1 ∈ Finset.univ) => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun r _ => Finset.mul_sum _ _ _)))]
+    rw [Finset.sum_congr rfl
+      (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_congr rfl (fun x1 _ => Finset.sum_comm))]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
     rw [Finset.sum_comm]
     rw [Finset.sum_congr rfl (fun x0 (_ : x0 ∈ Finset.univ) => Finset.sum_comm)]
-    refine Finset.sum_congr rfl (fun t _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => ?_))))
+    refine Finset.sum_congr rfl
+      (fun t _ => Finset.sum_congr rfl
+      (fun l _ => Finset.sum_congr rfl (fun k1 _ => Finset.sum_congr rfl (fun r _ => ?_))))
     rw [higs k1 l, hfs l t]
     ring
   rw [ht1, ht2, ht3, ht4, ht5, ht6, ht7, ht8, ht9, ht10, ht11, ht12, ht13, ht14, ht15,

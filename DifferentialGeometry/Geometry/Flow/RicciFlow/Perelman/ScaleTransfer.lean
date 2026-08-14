@@ -5,13 +5,13 @@ import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
 
-/-!
-# Scale transfer for Perelman flow balls
 
-This file connects parabolic rescaling to the genuine metric-ball,
-Riemannian-volume, and curvature-control predicates used by the Perelman
-noncollapsing interface.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,10 +29,9 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [T2Space M] [SigmaCompactSpace M]
 
-/-- A rescaled flow time viewed at the corresponding original time. -/
+
 def paraFlowTime
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -50,7 +49,7 @@ namespace Perelman
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
-/-- Rescale an original flow ball, multiplying its radius by `sqrt R`. -/
+
 def paraBall
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -61,8 +60,10 @@ def paraBall
   radius := Real.sqrt R * B.radius
   radius_pos := mul_pos (Real.sqrt_pos.2 hR) B.radius_pos
 
-/-- At corresponding times, a ball and its parabolic rescaling have the same
-point-set carrier. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem paraBall_setAt
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -75,8 +76,10 @@ theorem paraBall_setAt
     (_root_.DifferentialGeometry.edistBall_scale (I := I) R hR
       (S.base.metric (paraTime tau R q)) B.center B.radius)
 
-/-- A ball and its parabolic rescaling have the same carrier at their
-distinguished times. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem paraBall_set
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -87,7 +90,8 @@ theorem paraBall_set
   simpa only [paraFlowTime_coe] using
     paraBall_setAt (I := I) S tau R hR htau s B (s : Real)
 
-/-- Parabolic rescaling multiplies a flow-ball volume by `sqrt(R)^n`. -/
+
+omit [CompleteSpace E] in
 theorem paraBall_volume
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -110,8 +114,9 @@ theorem paraBall_volume
     (I := I) (M := M) R hR
       (S.base.metric (paraTime tau R (s : Real))) B.set
 
-/-- `kappa`-noncollapsing of one flow ball is preserved by parabolic
-rescaling. -/
+
+
+omit [CompleteSpace E] in
 theorem paraBall_kappa
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -156,7 +161,8 @@ private theorem paraWindow
   unfold paraTime
   constructor <;> linarith
 
-/-- Curvature control of one flow ball is preserved by parabolic rescaling. -/
+
+omit [SigmaCompactSpace M] in
 theorem paraBall_rm
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -202,8 +208,8 @@ theorem paraBall_rm
               (S.base.rm04 (paraTime tau R q) x) := by rw [hscale]
       _ ≤ 1 := hold
 
-/-- Convert a ball in a parabolically rescaled flow back to the corresponding
-original-flow ball. -/
+
+
 def backBall
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -214,8 +220,9 @@ def backBall
   radius := B.radius / Real.sqrt R
   radius_pos := div_pos B.radius_pos (Real.sqrt_pos.2 hR)
 
-set_option linter.unusedSectionVars false in
-/-- Rescaling a `backBall` recovers the original rescaled ball. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem paraBall_back
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -228,8 +235,10 @@ theorem paraBall_back
       congr
       field_simp [ne_of_gt (Real.sqrt_pos.2 hR)]
 
-/-- The original-time carrier of a `backBall` equals the corresponding
-rescaled-time carrier. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem backBall_setAt
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -243,8 +252,9 @@ theorem backBall_setAt
   rw [paraBall_back (I := I) S tau R hR htau s B] at h
   exact h.symm
 
-/-- A rescaled ball's volume is `sqrt(R)^n` times the volume of its
-corresponding `backBall`. -/
+
+
+omit [CompleteSpace E] in
 theorem backBall_volume
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -257,8 +267,9 @@ theorem backBall_volume
   rw [paraBall_back (I := I) S tau R hR htau s B] at h
   exact h
 
-/-- `kappa`-noncollapsing transfers from a rescaled ball back to the
-corresponding original-flow ball. -/
+
+
+omit [CompleteSpace E] in
 theorem backBall_kappa
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -311,8 +322,9 @@ private theorem backWindow
   · simpa [paraBack, mul_comm] using hlo
   · simpa [paraBack, mul_comm] using hhi
 
-/-- Curvature control transfers from a rescaled ball back to the corresponding
-original-flow ball. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem backBall_rm
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -355,9 +367,10 @@ theorem backBall_rm
     rw [hscale]
     simpa only [mul_assoc] using hold
 
-set_option linter.unusedSectionVars false in
-/-- Passing an original ball through `paraBall` and then `backBall` recovers
-the original ball. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem backBall_para
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -370,7 +383,8 @@ theorem backBall_para
       congr
       field_simp [ne_of_gt (Real.sqrt_pos.2 hR)]
 
-/-- Curvature control of a flow ball is invariant under parabolic rescaling. -/
+
+omit [SigmaCompactSpace M] in
 theorem paraBall_rm_iff
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -385,8 +399,9 @@ theorem paraBall_rm_iff
     exact hback
   · exact paraBall_rm (I := I) S tau R hR htau s B
 
-/-- `kappa`-noncollapsing of a flow ball is invariant under parabolic
-rescaling. -/
+
+
+omit [CompleteSpace E] in
 theorem paraBall_kappa_iff
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -403,8 +418,8 @@ theorem paraBall_kappa_iff
     exact hback
   · exact paraBall_kappa (I := I) S tau R hR htau s B kappa
 
-/-- Noncollapsing below scale `rho` transfers to noncollapsing below scale
-`sqrt(R) * rho` on the parabolically rescaled flow. -/
+
+
 theorem para_noncollapse
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -427,8 +442,8 @@ theorem para_noncollapse
   rw [paraBall_back (I := I) S tau R hR htau s B] at hk
   exact hk
 
-/-- A no-local-collapsing statement transfers to a parabolically rescaled
-flow with the radius scale multiplied by `sqrt R`. -/
+
+
 theorem para_no_local
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)

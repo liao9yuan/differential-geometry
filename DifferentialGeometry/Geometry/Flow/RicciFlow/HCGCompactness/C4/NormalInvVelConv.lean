@@ -3,14 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 
 set_option autoImplicit false
 
-/-!
-# Convergence of inverse-velocity center equations
 
-This file is the generic convergence adapter for the finite weighted inverse
-velocity used by the normal-branch center equation.  It combines convergence
-of the weights, target tuple, and moving inverse branch without introducing
-any HCG subsequence or support data.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,8 +26,6 @@ variable [FiniteDimensional Real E]
 variable {Q : Type*} [NormedAddCommGroup Q] [NormedSpace Real Q]
 
 omit [FiniteDimensional Real E] in
-/-- Smooth weights, targets, centers, and one inverse branch give a smooth
-finite weighted inverse-velocity equation. -/
 theorem invVelSum_contDiff
     {ι : Type*} [Fintype ι]
     {U : Set Q} {V : Set (E × E)}
@@ -48,8 +46,8 @@ theorem invVelSum_contDiff
     ((he.comp (hctr.prodMk (contDiffOn_pi.mp hxi i))
       (fun z hz => hmap z hz i)).snd)
 
-/-- Smooth convergence of weights, target tuples, and inverse diagonal
-branches implies smooth convergence of their weighted inverse velocities. -/
+
+
 theorem invVelSum_conv
     {ι : Type*} [Fintype ι]
     {U : Set Q} (hU : IsOpen U)
@@ -178,9 +176,9 @@ theorem invVelSum_conv
   simpa only [invVelSum, Lsum, ContinuousLinearMap.sum_apply,
     ContinuousLinearMap.proj_apply] using hsum
 
-/-- Smooth convergence of the paired weight/target configuration and the
-moving inverse branch implies smooth convergence of its inverse-velocity
-equation. -/
+
+
+
 theorem invVelCfg_conv
     {ι : Type*} [Fintype ι]
     {U : Set Q} (hU : IsOpen U)
@@ -222,9 +220,9 @@ theorem invVelCfg_conv
     (fun n ↦ (hcfgC n).snd) hcfgInfC.snd
     hctrC hctrInfC hmap hmapInf
 
-/-- The inverse-velocity configuration convergence theorem only needs the
-inverse smoothness and configuration-domain containment on a common tail.
-The finite prefix is filled by the limiting inverse and configuration. -/
+
+
+
 theorem invVelCfg_tail
     {ι : Type*} [Fintype ι]
     {U : Set Q} (hU : IsOpen U)

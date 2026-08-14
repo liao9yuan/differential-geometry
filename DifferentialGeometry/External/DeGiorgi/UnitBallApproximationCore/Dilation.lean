@@ -95,7 +95,8 @@ private lemma unitBallDilate_map_measure {lam : ℝ} (hlam : 0 < lam) :
         (s := Metric.ball (0 : E) 1) measurableSet_ball).symm
   calc
     Measure.map (fun x : E => lam⁻¹ • x) (volume.restrict (Metric.ball (0 : E) lam))
-        = (Measure.map (fun x : E => lam⁻¹ • x) volume).restrict (Metric.ball (0 : E) 1) := hrestrict
+        = (Measure.map (fun x : E => lam⁻¹ • x) volume).restrict (Metric.ball (0 : E) 1) :=
+          hrestrict
     _ = (ENNReal.ofReal (|lam⁻¹ ^ Module.finrank ℝ E|⁻¹) • (volume : Measure E)).restrict
           (Metric.ball (0 : E) 1) := by
             have hpow_pos : 0 < lam⁻¹ ^ Module.finrank ℝ E := by
@@ -201,11 +202,14 @@ noncomputable def MemW1pWitness.unitBallDilate_largeBall
     {u : E → ℝ} {lam : ℝ}
     (hlam : 1 < lam)
     (hw : MemW1pWitness (ENNReal.ofReal p) u (Metric.ball (0 : E) 1)) :
-    MemW1pWitness (ENNReal.ofReal p) (DeGiorgi.unitBallDilate (d := d) lam u) (Metric.ball (0 : E) lam) where
+    MemW1pWitness (ENNReal.ofReal p) (DeGiorgi.unitBallDilate (d := d) lam u)
+      (Metric.ball (0 : E) lam) where
   memLp := by
     let S : E → E := fun x => lam⁻¹ • x
     have hS_emb : MeasurableEmbedding S :=
-      (Homeomorph.smulOfNeZero lam⁻¹ (inv_ne_zero (show lam ≠ 0 from ne_of_gt (lt_trans zero_lt_one hlam)))).toMeasurableEquiv.measurableEmbedding
+      (Homeomorph.smulOfNeZero lam⁻¹
+        (inv_ne_zero (show lam ≠ 0 from ne_of_gt
+        (lt_trans zero_lt_one hlam)))).toMeasurableEquiv.measurableEmbedding
     have hmap := unitBallDilate_map_measure (d := d) (show 0 < lam from lt_trans zero_lt_one hlam)
     have hu_map :
         MemLp u (ENNReal.ofReal p)
@@ -218,7 +222,9 @@ noncomputable def MemW1pWitness.unitBallDilate_largeBall
     intro i
     let S : E → E := fun x => lam⁻¹ • x
     have hS_emb : MeasurableEmbedding S :=
-      (Homeomorph.smulOfNeZero lam⁻¹ (inv_ne_zero (show lam ≠ 0 from ne_of_gt (lt_trans zero_lt_one hlam)))).toMeasurableEquiv.measurableEmbedding
+      (Homeomorph.smulOfNeZero lam⁻¹
+        (inv_ne_zero (show lam ≠ 0 from ne_of_gt
+        (lt_trans zero_lt_one hlam)))).toMeasurableEquiv.measurableEmbedding
     have hmap := unitBallDilate_map_measure (d := d) (show 0 < lam from lt_trans zero_lt_one hlam)
     have hgi_map :
         MemLp (fun x => lam⁻¹ * hw.weakGrad x i) (ENNReal.ofReal p)

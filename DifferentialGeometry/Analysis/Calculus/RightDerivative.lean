@@ -2,13 +2,13 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
-/-!
-# Interior differentiability from continuous right derivatives
 
-This file upgrades a continuous right-derivative equation on a compact real
-interval to an ordinary derivative at every interior point.  It is useful for
-ODE constructions whose public interface records one-sided derivatives.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -20,8 +20,8 @@ namespace DifferentialGeometry
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F]
   [CompleteSpace F]
 
-/-- A continuous right-derivative equation with a continuous right-hand side
-is an ordinary derivative equation at every interior point. -/
+
+
 theorem hasDerivAt_of_right
     {f f' : Real -> F} {a b t : Real} (hab : a < b)
     (hf : ContinuousOn f (Icc a b)) (hf' : ContinuousOn f' (Icc a b))
@@ -68,8 +68,8 @@ theorem hasDerivAt_of_right
     exact (hgderivIcc t htIcc).hasDerivAt (Icc_mem_nhds ht.1 ht.2)
   exact hgAt.congr_of_eventuallyEq hfg_ev
 
-/-- A continuous solution of an autonomous smooth ODE, presented through
-right derivatives on a compact interval, is smooth on the open interior. -/
+
+
 theorem contDiffOn_of_right
     {v : F → F} {f : Real → F} {a b : Real} (hab : a < b)
     (hv : ContDiff Real ∞ v) (hf : ContinuousOn f (Icc a b))

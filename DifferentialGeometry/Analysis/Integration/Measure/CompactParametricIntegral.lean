@@ -21,9 +21,10 @@ namespace DifferentialGeometry.Integral.Measure
 /-- A jointly continuous Banach-valued integrand on a compact parameter set
 and compact finite measured space has a continuous parameter integral. -/
 theorem integral_contOn_cpt
-    {P X W : Type*} [TopologicalSpace P]
+    {P X W : Type*} [TopologicalSpace P] [FirstCountableTopology P]
     [TopologicalSpace X] [CompactSpace X] [MeasurableSpace X] [BorelSpace X]
     [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
+    [SecondCountableTopologyEither X W]
     (μ : Measure X) [IsFiniteMeasure μ]
     (F : P → X → W) {K : Set P} (hK : IsCompact K)
     (hF : ContinuousOn (fun p : P × X => F p.1 p.2)
@@ -49,7 +50,8 @@ theorem integral_contOn_cpt
       ∀ᵐ x ∂μ, ‖F q x‖ ≤ (fun _ : X => C₀) x := by
     filter_upwards [self_mem_nhdsWithin] with q hq
     filter_upwards with x
-    exact (hC (q, x) ⟨hq, Set.mem_univ x⟩).trans (le_max_left C 0)
+    simpa only [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _), C₀] using
+      (hC (q, x) ⟨hq, Set.mem_univ x⟩).trans (le_max_left C 0)
   have hlim : ∀ᵐ x ∂μ,
       Tendsto (fun q => F q x) (𝓝[K] p) (𝓝 (F p x)) := by
     filter_upwards with x
@@ -58,8 +60,7 @@ theorem integral_contOn_cpt
         (fun q hq => ⟨hq, Set.mem_univ x⟩)
     exact hx p hp
   exact tendsto_integral_filter_of_dominated_convergence
-    hmeas hbound hCint hlim
-
+    (fun _ : X => C₀) hmeas hbound hCint hlim
 end DifferentialGeometry.Integral.Measure
 
 end

@@ -2,19 +2,17 @@ import DifferentialGeometry.Tensor.RSTensor.Components
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Connection-Difference Tensor
 
-The difference of two tangent-bundle covariant derivatives is tensorial.  This
-file packages Mathlib's pointwise `CovariantDerivative.difference` as a
-mixed `(1,2)` tensor and records its basis components.
 
-This is the invariant object behind the MSM135 shorthand
-`nabla - nabla_k = Gamma - Gamma_k`.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable {x : M}
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_one_apply_add
     (α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
     (X Y : TangentSpace I x) :
@@ -61,6 +60,7 @@ private theorem tensor0S_one_apply_add
   rw [← hleft, ← hX, ← hY]
   exact h
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_one_apply_smul
     (α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
     (c : Real) (X : TangentSpace I x) :
@@ -105,10 +105,10 @@ private noncomputable def connDiffSlotCLM
         rw [map_smul]
         exact tensor0S_one_apply_smul (I := I) α c ((A Y) X) }
 
-/-- For a fixed connection-difference bilinear map `A`, convert its contraction
-with a covector into a `(0,2)` tensor.  The lower slot convention is:
-slot `0` is the connection direction and slot `1` is the vector being
-differentiated, so the value is `α (A Y X)`. -/
+
+
+
+
 noncomputable def connectionDifferenceOutput
     (A :
       TangentSpace I x →L[Real]
@@ -173,9 +173,9 @@ theorem connectionDifferenceOutput_apply_slots
   rw [connectionDifferenceOutput_apply]
   simp
 
-/-- The connection-difference tensor of two tangent-bundle covariant
-derivatives.  It is a mixed `(1,2)` tensor whose value on a covector `α` and
-vectors `(X,Y)` is `α ((cov - cov')_X Y)`. -/
+
+
+
 noncomputable def connectionDifferenceTensorAt
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -243,8 +243,8 @@ theorem connectionDifferenceTensorAt_apply_slots
   rw [connectionDifferenceTensorAt_apply]
   simp
 
-/-- Basis components of `connectionDifferenceTensorAt` are the components of
-the pointwise connection-difference map. -/
+
+
 theorem componentRS_connectionDifferenceTensorAt
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]

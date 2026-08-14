@@ -104,7 +104,8 @@ lemma ball_subset_fivefold_of_inter_nonempty
 /-- Iterating one-step level-set decay gives a geometric bound. -/
 lemma john_nirenberg_iteration_decay_iterate
     {E_lam : ℝ → Set E} {A : ℝ} (hA : 0 < A) {θ : ℝ}
-    (h_decay : ∀ lam : ℝ, 0 < lam → volume (E_lam (lam + A)) ≤ ENNReal.ofReal θ * volume (E_lam lam))
+    (h_decay : ∀ lam : ℝ, 0 < lam → volume (E_lam (lam + A)) ≤ ENNReal.ofReal θ * volume
+      (E_lam lam))
     (lam : ℝ) (hlam : 0 < lam) (n : ℕ) :
     volume (E_lam (lam + n * A)) ≤ ENNReal.ofReal θ ^ n * volume (E_lam lam) := by
   induction n with
@@ -164,7 +165,8 @@ theorem john_nirenberg_iteration
     (_hE_anti : ∀ lam₁ lam₂, lam₁ ≤ lam₂ → E_lam lam₂ ⊆ E_lam lam₁)
     {A : ℝ} (hA : 0 < A)
     {θ : ℝ} (hθ_pos : 0 < θ) (hθ_lt : θ < 1)
-    (h_decay : ∀ lam : ℝ, 0 < lam → volume (E_lam (lam + A)) ≤ ENNReal.ofReal θ * volume (E_lam lam)) :
+    (h_decay : ∀ lam : ℝ, 0 < lam → volume (E_lam (lam + A)) ≤ ENNReal.ofReal θ * volume
+      (E_lam lam)) :
     ∀ lam : ℝ, 0 < lam →
       volume (E_lam lam) ≤ ENNReal.ofReal (1 / θ) * volume B *
         ENNReal.ofReal (Real.exp (-lam * (-Real.log θ / A))) := by
@@ -198,10 +200,12 @@ theorem john_nirenberg_iteration
         gcongr
     _ = ENNReal.ofReal (θ ^ n) * volume B := by
         rw [john_nirenberg_iteration_ofReal_pow θ (le_of_lt hθ_pos) n]
-    _ ≤ (ENNReal.ofReal (1 / θ) * ENNReal.ofReal (Real.exp (-lam * (-Real.log θ / A)))) * volume B := by
+    _ ≤ (ENNReal.ofReal (1 / θ) * ENNReal.ofReal (Real.exp (-lam * (-Real.log θ / A)))) * volume
+      B := by
         gcongr
         exact john_nirenberg_iteration_rpow_bound θ lam A hθ_pos hθ_lt n hn_ge
-    _ = ENNReal.ofReal (1 / θ) * volume B * ENNReal.ofReal (Real.exp (-lam * (-Real.log θ / A))) := by
+    _ = ENNReal.ofReal (1 / θ) * volume B * ENNReal.ofReal
+      (Real.exp (-lam * (-Real.log θ / A))) := by
         ring
 
 /-- John-Nirenberg exponential decay from a one-step decay hypothesis on pointwise level sets. -/

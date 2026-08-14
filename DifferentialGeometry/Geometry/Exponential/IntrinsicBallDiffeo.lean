@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoOpen
+import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedJacobi
 import DifferentialGeometry.Geometry.Exponential.NormalBallChart
 
@@ -199,7 +199,7 @@ theorem exists_intrBallChart
       (Metric.ball (0 : E) r)) :
     Nonempty (IntrinsicBallChart (I := I) g hEnorm p r) := by
   obtain ⟨Φ, hsource, htarget, hEq⟩ :=
-    DifferentialGeometry.exists_diffeo_of_injOn
+    Geometry.Riemannian.exists_diffeo_of_injOn
       hloc Metric.isOpen_ball hinj
   exact ⟨⟨Φ, hsource, htarget, hEq⟩⟩
 

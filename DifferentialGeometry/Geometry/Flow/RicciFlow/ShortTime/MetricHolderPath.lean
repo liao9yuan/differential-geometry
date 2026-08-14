@@ -20,10 +20,13 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.HCGCompactness
+open DifferentialGeometry.Integral.Measure
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -64,6 +67,7 @@ def MetricInHolderBall
   InHolderBall (metricChartIdx (I := I) (M := M)) τ C
     (metricCompPath (I := I) (M := M) gBase gPath)
 
+omit [BoundarylessManifold I M] in
 /-- One order-at-most-three intrinsic family bound places all constant
 initial paths in one finite-chart parabolic Holder ball.  The same ball works
 for every time horizon. -/
@@ -103,6 +107,7 @@ theorem metricConst_ball
       rw [eSupNorm_le]
       intro x
       rw [ENNReal.ofReal_le_coe]
+      have hj' := Finset.mem_range.mp hj
       exact hjet j (by omega) x
     have hsum :
         (∑ j ∈ Finset.range 3, eSupNorm (iteratedFDeriv ℝ j u)) ≤
@@ -122,18 +127,36 @@ theorem metricConst_ball
               eHolderNorm (1 / 2 : ℝ≥0) (iteratedFDeriv ℝ 2 u)
             ≤ (3 : ℝ≥0∞) * C₀n + Cα := add_le_add hsum hholder
         _ = (Ce : ℝ≥0∞) := by simp [Ce, C₀n]
-    simpa only [eParC2Half, metricCompPath, u, iSup_const, eHolderNorm_const,
-      add_zero] using hspace
+    change eParC2Half τ (fun _ : ℝ => u) ≤ (Ce : ℝ≥0∞)
+    have htime :
+        (⨆ x : EuclN, eHolderNorm (1 / 4 : ℝ≥0)
+          (Function.const (Set.Icc (0 : ℝ) τ)
+            (iteratedFDeriv ℝ 2 u x))) = 0 := by
+      apply le_antisymm
+      · refine iSup_le fun x => ?_
+        rw [eHolderNorm_const]
+      · exact bot_le
+    unfold eParC2Half
+    change
+      (⨆ _ : Set.Icc (0 : ℝ) τ, eC2Half u) +
+          (⨆ x : EuclN, eHolderNorm (1 / 4 : ℝ≥0)
+            (Function.const (Set.Icc (0 : ℝ) τ)
+              (iteratedFDeriv ℝ 2 u x))) ≤
+        (Ce : ℝ≥0∞)
+    rw [htime, add_zero]
+    exact iSup_le fun _ => hspace
   have hreg : ∀ a ∈ A,
       IsParC2Half τ
         (metricCompPath (I := I) (M := M) gBase (fun _ => gSeq k) a) := by
     intro a ha
     constructor
     · intro t _ht
-      dsimp only [metricCompPath]
-      exact (tensorChartComp_contDiff (I := I) (M := M) gBase 0 2
-        (metricDifferenceCcTensor (I := I) (M := M) gBase (gSeq k))
-        a.1 (![] : Fin 0 → Fin (Module.finrank ℝ E)) a.2).of_le (by simp)
+      simpa only [metricCompPath] using
+        (tensorChartComp_contDiff (I := I) (M := M) gBase 0 2
+          (metricDifferenceCcTensor (I := I) (M := M) gBase (gSeq k))
+          a.1 (![] : Fin 0 → Fin (Module.finrank ℝ E)) a.2).of_le
+            (WithTop.coe_le_coe.mpr
+              (show (2 : ENat) ≤ ⊤ from le_top))
     · intro j hj x
       have hconst : Continuous
           (fun _ : ℝ => iteratedFDeriv ℝ j

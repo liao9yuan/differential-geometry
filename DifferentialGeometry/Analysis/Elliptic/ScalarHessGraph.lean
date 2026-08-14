@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Elliptic.Lichnerowicz
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
-/-!
-# The scalar Hessian graph estimate
 
-On a closed Riemannian manifold, the integrated scalar Bochner identity and a
-metric-only global Ricci bound control the Hessian energy by the Laplacian and
-gradient energies.  The constant is independent of the scalar field.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -35,9 +35,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The integrated scalar Hessian energy is bounded by the Laplacian energy
-plus a fixed-metric multiple of the gradient energy.  The constant depends
-only on `g`, not on `f`. -/
+
+
+
 theorem scalar_hess_graph
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧

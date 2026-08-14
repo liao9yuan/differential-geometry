@@ -2,14 +2,13 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Norm Bound for a Connection-Difference Contraction
 
-This file applies the mixed-tensor Hilbert--Schmidt estimate to the contraction
-of a connection-difference tensor with a covector.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,8 +23,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-/-- Contracting a connection-difference tensor with a covector is bounded by
-the mixed Hilbert--Schmidt norm times the covector norm. -/
+
+
 theorem connOut_norm_le
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]

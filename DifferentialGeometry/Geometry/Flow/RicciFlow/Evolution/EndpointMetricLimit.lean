@@ -6,15 +6,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Topology.Order.IsLUB
 
-/-!
-# Endpoint metric from bounded Ricci-flow geometry
 
-This module combines fixed-reference spatial precompactness with scalar
-one-sided time limits. A subsequential smooth metric supplied by
-`metricPreconvFull` is identified with every chart-Gram left limit, producing a
-single smooth endpoint metric for the original flow rather than only for a
-chosen time subsequence.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,20 +27,19 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
     [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M]
 
-/-- A bounded-curvature dimension-three Ricci flow with uniform tail metric
-equivalence has a smooth metric whose chart-Gram entries are the full left
-limits at the finite endpoint. -/
+
+
+
 theorem exists_endMetric
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     (S : SolutionOn (I := I) (M := M)

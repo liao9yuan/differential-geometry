@@ -3,38 +3,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
+
+
+
+
+
+
 
 /-!
-# The window limit of Ricci-flow solutions satisfies the Ricci-flow equation
-
-MSM135 chapter3.tex:853–856 (inside the proof of Theorem 3.10 ⇐ 3.9): "since all
-derivatives of the metric converge, the Ricci curvature of `g_k(t)` converges to
-the Ricci curvature of `g_∞(t)` and hence the limit is a solution."  This file is
-the generic fixed-manifold form of that sentence — P4 Brick 6's `equation` bridge.
-
-Two-step route:
-
-1. **Derivative passage** (`hasDerivWithinAt_lim`, proved): a sequence of real
-   functions with derivatives on a convex set (here the window `Icc β ψ`),
-   derivatives converging uniformly on the set and values converging pointwise,
-   has a limit function differentiable with the limit derivative.  Mathlib's
-   `hasDerivAt_of_tendstoUniformlyOn` needs an OPEN set, so this convex-set
-   `HasDerivWithinAt` version (endpoints included) is proved here from the mean
-   value inequality `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`.
-
-2. **Ricci convergence** (`hRicConv`, an explicit INPUT): uniform-in-time
-   convergence `ricciTensor (g_k t) x v w → ricciTensor (gInf t) x v w` on the
-   window.  Producing it from `metricDerivNorm`-smallness at orders `≤ 2` is a
-   genuinely missing conversion lemma (see `LimitSolutionEquation.md` for the
-   precise diagnosis); it is therefore taken as a hypothesis, NOT hidden behind
-   a `sorry`.
-
-The per-`k` equation is extracted from `IsSolutionOn.equation` via
-`metric_derivWithin_eq_neg_two_ricci` (`Basic/Core.lean`), with the data-field
-Ricci `S.ricciAt` identified with the canonical `ricciTensor` by the two-worlds
-bridge `metricRicciAt_apply_eq_ricciTensor` (`MetricLeviCivitaReconcile.lean`).
+# Limits of Ricci-flow solutions
 
 Main statements:
 * `hasDerivWithinAt_lim` — generic 1-D uniform-limit derivative passage on a
@@ -64,15 +41,15 @@ open Tensor0SBundle
 open Filter Topology Asymptotics
 open DifferentialGeometry.PDE.RicciFlow
 
-/-! ## Generic 1-D uniform-limit derivative passage on a convex set -/
 
-/-- **Uniform-limit derivative passage on a convex set.**  If every `f k` has
-derivative `f' k u` within a convex `s ⊆ ℝ` at every `u ∈ s`, the derivatives
-converge to `h` uniformly on `s`, and the values converge to `g` pointwise on
-`s`, then `g` has derivative `h t` within `s` at every `t ∈ s` — endpoints of an
-interval included.  (Mathlib's `hasDerivAt_of_tendstoUniformlyOn` requires an
-open set; this closed/convex version follows from the 1-D mean value
-inequality.) -/
+
+
+
+
+
+
+
+
 theorem hasDerivWithinAt_lim
     {s : Set Real} (hs : Convex Real s) {t : Real} (ht : t ∈ s)
     (f f' : Nat → Real → Real) (g h : Real → Real)
@@ -85,8 +62,6 @@ theorem hasDerivWithinAt_lim
   intro c hc
   have hc4 : (0 : Real) < c / 4 := by positivity
   obtain ⟨k0, hk0⟩ := hunif (c / 4) hc4
-  -- Mean-value bound between `f k0` and the pointwise limit `g`:
-  -- `|(f k0 - g) u - (f k0 - g) t| ≤ 2·(c/4)·|u - t|` on `s`.
   have hA : ∀ u ∈ s, |f k0 u - g u - (f k0 t - g t)| ≤ 2 * (c / 4) * |u - t| := by
     intro u hu
     have hAm : ∀ m : Nat, k0 ≤ m →
@@ -115,7 +90,6 @@ theorem hasDerivWithinAt_lim
     refine le_of_tendsto hlim ?_
     filter_upwards [Filter.eventually_ge_atTop k0] with m hm
     exact hAm m hm
-  -- Taylor smallness of `f k0` at `t` with constant `c/4`.
   have hB := hderiv k0 t ht
   rw [hasDerivWithinAt_iff_isLittleO, isLittleO_iff] at hB
   have hBev := hB hc4
@@ -171,22 +145,27 @@ theorem hasDeriv_lim_tail
 
 /-! ## Manifold layer -/
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-/-- **Pointwise metric-coefficient convergence from order-`0` seminorm
-smallness.**  If the MSM135 `C⁰` seminorm `metricDerivNorm 0 (gk k) gLim gRef x`
-tends to `0`, then every fixed coefficient `(gk k).inner x v w` converges to
-`gLim.inner x v w` (by the polarization bound `metricInnerApply_diff_le`). -/
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricInner_tendsto
+    [Module.Finite ℝ E]
     (gk : Nat → SmoothRiemannianMetric I M)
     (gLim gRef : SmoothRiemannianMetric I M) (x : M)
     (hconv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
@@ -226,6 +205,9 @@ theorem metricInner_tendsto
   rw [tendsto_iff_dist_tendsto_zero]
   exact squeeze_zero (fun k => dist_nonneg) hbound hb
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- **Plain-sequence tail consumer for the limit Ricci-flow equation.**  If the
 metric sequence satisfies the coefficientwise Ricci-flow equation after a fixed
 index, its coefficients converge pointwise, and its Ricci coefficients converge
@@ -267,17 +249,16 @@ theorem metricLimit_pde'
   rw [hfactor, abs_mul, show |(-2 : Real)| = 2 by norm_num]
   linarith
 
+omit [Module.Finite ℝ E] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 /-- **The window limit of Ricci-flow solutions satisfies the Ricci-flow
 equation** (core bridge, fixed manifold `M`, fixed `x, v, w`).
 
-Given solutions `S k` whose regular times contain the window `[β, ψ]`, a limit
-family `gInf` with pointwise coefficient convergence on the window (`hinner`),
-and uniform-in-time convergence of the canonical Ricci coefficients on the
-window (`hRicConv` — the "Ricci curvature converges" step of MSM135
-chapter3.tex:853–856, an explicit input; see the module docstring), the limit
-family satisfies `∂ₜ (g_∞)ₓ(v,w) = -2 Ric(g_∞(t))ₓ(v,w)` within the closed
-window at every window time — endpoints included. -/
+The derivative identities, pointwise metric convergence, and uniform Ricci
+convergence imply the Ricci-flow equation for the limit on the closed window. -/
 theorem metricLimit_pde
+    [Module.Finite ℝ E]
     [NeZero (Module.finrank Real E)]
     {D : Nat → RealTimeInterval}
     (S : (k : Nat) → SolutionOn (I := I) (M := M) (D k))
@@ -296,8 +277,6 @@ theorem metricLimit_pde
     {t : Real} (ht : t ∈ Set.Icc β ψ) :
     HasDerivWithinAt (fun s : Real => (gInf s).inner x v w)
       (-2 * ricciTensor (I := I) (gInf t) x v w) (Set.Icc β ψ) t := by
-  -- per-`k` equation on the window, with the data-field Ricci converted to the
-  -- canonical `ricciTensor`
   have hkder : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ,
       HasDerivWithinAt (fun s : Real => ((S k).family.metric s).inner x v w)
         (-2 * ricciTensor (I := I) ((S k).family.metric u) x v w)
@@ -317,14 +296,19 @@ theorem metricLimit_pde
     ?_ hinner hRicConv ht
   exact ⟨0, fun k _ => hkder k⟩
 
-/-- **Brick-6 endpoint, `windowGInfAll` consumption shape.**  Same conclusion
-as `metricLimit_pde`, with the pointwise coefficient convergence produced from
-the pointwise form of the window seminorm convergence on a compact `K ∋ x`
-(orders `a ≤ p`, all points of `K`, uniform on the window — the quantitative
-content behind `windowGInfAll`'s `metricDerivNormSupOn` conclusion).  Only the
-`p = 0`, `z = x` instance is consumed here; the Ricci-convergence step remains
-the explicit input `hRicConv`. -/
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricLimit_pdeOn
+    [Module.Finite ℝ E]
     [NeZero (Module.finrank Real E)]
     {D : Nat → RealTimeInterval}
     (S : (k : Nat) → SolutionOn (I := I) (M := M) (D k))

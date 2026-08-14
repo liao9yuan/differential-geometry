@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPhiDevH2
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
 
 /-!
 # Class-first integrated top-path deviation

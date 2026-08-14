@@ -97,7 +97,8 @@ lemma HasCampanatoBound.campanatoSeminorm_le
     exact hcamp.ballValue_le b⟩
   have hS_nonempty : (Set.range f).Nonempty := by
     have hhalf : 0 < R / 2 := by positivity
-    let b : CampanatoBall x₀ R := ⟨(x₀, R / 2), ⟨hhalf, by linarith, Metric.ball_subset_ball (by linarith)⟩⟩
+    let b : CampanatoBall x₀ R :=
+      ⟨(x₀, R / 2), ⟨hhalf, by linarith, Metric.ball_subset_ball (by linarith)⟩⟩
     exact ⟨f b, ⟨b, rfl⟩⟩
   simpa [campanatoSeminorm, f] using (csSup_le_iff hS_bdd hS_nonempty).2 (by
     rintro t ⟨b, rfl⟩
@@ -273,7 +274,8 @@ lemma abs_ballAverage_half_sub_ballAverage_le
         = |⨍ z in S, (u z - avg) ∂volume| := by rw [hdiff]
     _ ≤ ⨍ z in S, |u z - avg| ∂volume := hnorm
     _ = (volume.real S)⁻¹ * ∫ z in S, |u z - avg| ∂volume := by
-      rw [MeasureTheory.setAverage_eq (μ := volume) (f := fun z => |u z - avg|) (s := S), smul_eq_mul]
+      rw [MeasureTheory.setAverage_eq (μ := volume) (f := fun z => |u z - avg|) (s := S),
+        smul_eq_mul]
     _ ≤ (volume.real S)⁻¹ * ∫ z in B, |u z - avg| ∂volume := by
       gcongr
     _ = (2 : ℝ) ^ d * ((volume.real B)⁻¹ * ∫ z in B, |u z - avg| ∂volume) := by
@@ -351,7 +353,8 @@ lemma abs_halfSubballAverage_sub_ballAverage_le
         = |⨍ z in S, (u z - avg) ∂volume| := by rw [hdiff]
     _ ≤ ⨍ z in S, |u z - avg| ∂volume := hnorm
     _ = (volume.real S)⁻¹ * ∫ z in S, |u z - avg| ∂volume := by
-      rw [MeasureTheory.setAverage_eq (μ := volume) (f := fun z => |u z - avg|) (s := S), smul_eq_mul]
+      rw [MeasureTheory.setAverage_eq (μ := volume) (f := fun z => |u z - avg|) (s := S),
+        smul_eq_mul]
     _ ≤ (volume.real S)⁻¹ * ∫ z in B, |u z - avg| ∂volume := by
       gcongr
     _ = (2 : ℝ) ^ d * ((volume.real B)⁻¹ * ∫ z in B, |u z - avg| ∂volume) := by
@@ -539,7 +542,8 @@ lemma abs_halfSubballAverage_sub_ballAverage_le_campanato
     {c : E} (hsub : Metric.ball c (R / 2) ⊆ Metric.ball x₀ R) :
     |⨍ z in Metric.ball c (R / 2), u z ∂volume - ⨍ z in Metric.ball x₀ R, u z ∂volume|
       ≤ (2 : ℝ) ^ d * C * R ^ α := by
-  rcases hasCampanatoBound_of_ballSubset hcamp hR le_rfl (Set.Subset.rfl : Metric.ball x₀ R ⊆ Metric.ball x₀ R)
+  rcases hasCampanatoBound_of_ballSubset hcamp hR le_rfl
+    (Set.Subset.rfl : Metric.ball x₀ R ⊆ Metric.ball x₀ R)
     with ⟨hu_int, hball⟩
   have hosc :
       ⨍ z in Metric.ball x₀ R,

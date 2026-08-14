@@ -21,8 +21,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
 variable {X Y : Type*}
-  [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-  [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
+  [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+  [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
 
 /-- Compositional strong measurability for a time-dependent state-set map on
 all slabs lying below a fixed horizon.  This is deliberately stronger than
@@ -34,6 +34,7 @@ def TimeNemyMeas {S : Set X} (hzero : (0 : X) ∈ S)
     (∀ᵐ t ∂(timeMeasure T), f t ∈ S) →
       AEStronglyMeasurable (fun t => N t (aeSetLift hzero f t)) (timeMeasure T)
 
+omit [NormedSpace ℝ Y] [CompleteSpace Y] in
 /-- Joint continuity of the time-state map is a sufficient producer for the
 compositional measurability used by `TimeNemyMeas`. -/
 theorem timeNemy_of_cont {S : Set X} (hzero : (0 : X) ∈ S)
@@ -44,6 +45,7 @@ theorem timeNemy_of_cont {S : Set X} (hzero : (0 : X) ∈ S)
   exact hN.comp_aestronglyMeasurable
     (aestronglyMeasurable_id.prodMk (aeSetLift_aesm hzero f hf))
 
+omit [NormedSpace ℝ Y] [CompleteSpace Y] in
 /-- A composition-measurable time-dependent map satisfying a uniform
 three-arm estimate sends an `L²` field in the state set to an `L²` forcing
 field.  The zero bound and the tame estimate need hold only almost everywhere

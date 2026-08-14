@@ -11,24 +11,6 @@ open DifferentialGeometry.Analysis.ODE.Flow
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
-/-!
-# Coproduct block decomposition of the variational equation
-
-This file decomposes the joint Fréchet derivative `fderiv ℝ Φ (x, t)` of a local
-flow `Φ` into its spatial and time blocks via the coproduct structure of
-`(E × ℝ) →L[ℝ] E`, and identifies the initial condition of the spatial slice.
-
-## Main results
-
-* `time_block_eq_comp_inr` — the time block `fderiv ℝ Φ (x, t) ∘ inr` equals the
-  time-piece CLM `timePieceFn f Φ (x, t)`.
-* `fderiv_flow_eq_spatialBlock_coprod_timePiece` — the full derivative is the
-  coproduct of its spatial block and its time piece.
-* `fderiv_spatialSlice_initial_eq_id` — the spatial slice is the identity at `t₀`.
-* `variationalEquation_spatialDerivative_of_contDiff` — the spatial block solves the
-  variational (linearized) equation.
--/
-
 theorem time_block_eq_comp_inr
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     [FiniteDimensional ℝ E] {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0}

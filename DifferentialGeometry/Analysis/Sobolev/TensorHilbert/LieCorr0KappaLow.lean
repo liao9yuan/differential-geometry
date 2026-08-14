@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionKappaBounds
 
 /-!
 # Low-regularity lowered connection-difference identities
@@ -37,28 +38,13 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The moving connection difference lowered by the moving metric, viewed over
-the frozen Sobolev background. -/
-abbrev lc0Kappa (g₀ g₁ gB : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g₀ 0 3 :=
-  metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gB
-
 /-- Fibre evaluation of the moving lowered connection difference. -/
 theorem kappa_unit (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3
         (lc0Kappa (I := I) (M := M) g₀ g₁ gB) x m =
-      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ gB x (m 0) (m 1)) (m 2) := by
-  rw [unitModel]
-  rw [show (lc0Kappa (I := I) (M := M) g₀ g₁ gB).toSection x
-      (unitTensor (I := I) (M := M) x) =
-      (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
-        (metricConnDiffLoweredFib (I := I) g₁ g₁ gB x)
-        (ContinuousMultilinearMap.constOfIsEmpty ℝ
-          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
-  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
-    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
-  exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ gB x m
+      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ gB x (m 0) (m 1)) (m 2) :=
+  lc0Kappa_unitModel_apply (I := I) (M := M) g₀ g₁ gB x m
 
 set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
@@ -85,43 +71,16 @@ theorem kappa_self (g₀ g₁ : SmoothRiemannianMetric I M)
         ccTensorBilinSymm (I := I) g₀ P y v w) :
     lc0Kappa (I := I) (M := M) g₀ g₁ g₀ =
       domDomCongrSection (I := I) g₀ (finRotate 3).symm
-        (koszulCovecCc (I := I) g₀ P) := by
-  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀
-  intro x
-  apply ContinuousMultilinearMap.ext
-  intro m
-  rw [kappa_unit (I := I) (M := M) g₀ g₁ g₀ x m]
-  rw [domDomCongrSection_unitModel (I := I) g₀ (finRotate 3).symm
-    (koszulCovecCc (I := I) g₀ P) x]
-  rw [ContinuousMultilinearMap.domDomCongr_apply]
-  have hτ0 : (finRotate 3).symm (0 : Fin 3) = (2 : Fin 3) := by decide
-  have hτ1 : (finRotate 3).symm (1 : Fin 3) = (0 : Fin 3) := by decide
-  have hτ2 : (finRotate 3).symm (2 : Fin 3) = (1 : Fin 3) := by decide
-  rw [show (fun i => m ((finRotate 3).symm i)) = ![m 2, m 0, m 1] from by
-    funext i
-    fin_cases i
-    · exact congrArg m hτ0
-    · exact congrArg m hτ1
-    · exact congrArg m hτ2]
-  exact (koszul_g1 (I := I) (M := M) g₀ g₁ P htie x (m 0) (m 1) (m 2)).symm
+        (koszulCovecCc (I := I) g₀ P) :=
+  lc0Kappa_self_eq_koszulCovecCc (I := I) (M := M) g₀ g₁ P htie
 
-private def lc0PbLowField (g₀ : SmoothRiemannianMetric I M)
+private def pbLowCompatField (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) :
     Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 3 :=
   letI := Tensor0SBundle.tensor0SBundle_topology
     (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 3
   ⟨fun x => ccBilinConnDiffLoweredFib (I := I) g₀ P gA gB x,
     ccBilinConnDiffLoweredFib_contMDiff (I := I) g₀ P gA gB⟩
-
-/-- The perturbation paired with a fixed connection difference, viewed as a
-covariant rank-three tensor over the frozen metric. -/
-def lc0PbLow (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-    (gA gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 where
-  toSection :=
-    MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
-      (E := (TangentSpace I : M → Type _)) ∞
-      (lc0PbLowField (I := I) (M := M) g₀ P gA gB)
-  hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 /-- Fibre evaluation of the perturbative lowered connection difference. -/
 theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
@@ -135,7 +94,7 @@ theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
   rw [show (lc0PbLow (I := I) (M := M) g₀ P gA gB).toSection x
       (unitTensor (I := I) (M := M) x) =
       (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
-        (lc0PbLowField (I := I) (M := M) g₀ P gA gB x)
+        (pbLowCompatField (I := I) (M := M) g₀ P gA gB x)
         (ContinuousMultilinearMap.constOfIsEmpty ℝ
           (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
   rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,

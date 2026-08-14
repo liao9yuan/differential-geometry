@@ -19,7 +19,7 @@ open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -28,6 +28,7 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M]
 variable {D : RealTimeInterval}
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The canonical level-zero reaction field has the exact residual cost and
 realizes the curvature heat equation in every finite orthonormal basis. -/
 theorem e0Residual
@@ -85,6 +86,7 @@ theorem e0Residual
     simpa only [rmBaseReact, nablaKRm04Field_zero] using
       rm04Base_of_solution_any (I := I) S hS t x basis _horth m
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Compatibility wrapper exposing the canonical level-zero residual as an
 existential field. -/
 theorem rmResidual_zero

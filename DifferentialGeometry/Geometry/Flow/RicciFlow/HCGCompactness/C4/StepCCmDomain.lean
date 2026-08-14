@@ -3,18 +3,17 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchMin
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
-/-!
-# Admissible configurations and ambient Step-C center extensions
 
-The full configuration space contains negative and identically-zero weight
-vectors, so it cannot carry `CenterInput` at every point.  The actual selected
-center is therefore defined only on an admissible set (and harmlessly filled
-outside it).  Smoothness on an ambient open set belongs instead to an implicit
-solution extension, which later must be proved to agree with the actual center
-along the finite-hat configuration image.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,8 +28,8 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -38,51 +37,51 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
 
-/-- The selected center of mass on an admissible configuration region, filled
-by the chart base outside that region. -/
+
+
 noncomputable def centerCfgOn
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
     (join : M -> M -> Real -> M) (r : Real)
     (V : Set ((ι -> Real) × (ι -> E)))
     (h : forall params, params ∈ V ->
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
         join p r) :
     ((ι -> Real) × (ι -> E)) -> M :=
   centerAverageOn (I := I) g V (fun params => params.1)
-    (fun params i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
+    (fun params i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
     join (fun _ => p) (fun _ => r) (fun _ => p) h
 
-/-- The chart readout of `centerCfgOn`. -/
+
 noncomputable def chartCenterOn
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
     (join : M -> M -> Real -> M) (r : Real)
     (V : Set ((ι -> Real) × (ι -> E)))
     (h : forall params, params ∈ V ->
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
         join p r)
     (params : (ι -> Real) × (ι -> E)) : E :=
-  NormalCoordinates.framedChartAt (I := I) g p (centerCfgOn (I := I) g p join r V h params)
+  NormalCoordinates.normalChartAt (I := I) g p (centerCfgOn (I := I) g p join r V h params)
 
-/-- On the admissible region, `centerCfgOn` is the genuine selected center of
-mass rather than its outside-domain filler. -/
+
+
 theorem centerCfgOn_eq
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
     (join : M -> M -> Real -> M) (r : Real)
     {V : Set ((ι -> Real) × (ι -> E))}
     (h : forall params, params ∈ V ->
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
         join p r)
     {params : (ι -> Real) × (ι -> E)} (hparams : params ∈ V) :
     centerCfgOn (I := I) g p join r V h params =
       centerOfMass (I := I) g params.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
         join p r (h params hparams) := by
   exact centerAverage.on_eq (I := I) (g := g)
     (μ := fun q : (ι -> Real) × (ι -> E) => q.1)
-    (pts := fun q i => (NormalCoordinates.framedChartAt (I := I) g p).symm (q.2 i))
+    (pts := fun q i => (NormalCoordinates.normalChartAt (I := I) g p).symm (q.2 i))
     (join := join) (p := fun _ => p) (r := fun _ => r) (qstar := fun _ => p)
     h hparams
 
@@ -90,8 +89,8 @@ section RootExtension
 
 variable {P₀ : Type*} [TopologicalSpace P₀] [T2Space P₀]
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
-  [CompleteSpace E] [NeZero (Module.finrank Real E)] in
+omit [NormedSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)] in
 /-- Local pinned inverses along a compact graph glue to one continuous ambient
 root extension.  The common injectivity neighborhood is returned explicitly;
 agreement with the original root on `B` follows from injectivity, not merely
@@ -253,9 +252,6 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The actual selected center satisfies the readout equation on an explicit
-branch readout domain once its inverse vectors lie in the named realized-exp
-radius. -/
 theorem centerReadoutB_zero
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -265,11 +261,11 @@ theorem centerReadoutB_zero
     {ι : Type} [Fintype ι] (mu : ι -> Real) (xi : ι -> E)
     (join : M -> M -> Real -> M) (r : Real)
     (h : CenterInput (I := I) g mu
-      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
       join p r)
     (hcenter : centerOfMass (I := I) g mu
-      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
-      join p r h ∈ (NormalCoordinates.framedChartAt (I := I) g p).source)
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+      join p r h ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
     (hdiff :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
         ⟨g.toRiemannianMetric⟩
@@ -278,9 +274,9 @@ theorem centerReadoutB_zero
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
       ∀ i : ι, MDifferentiableAt I 𝓘(Real, Real)
         (CenterOfMass.halfSqDist
-          ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)))
+          ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)))
         (centerOfMass (I := I) g mu
-          (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
           join p r h))
     (hsrc :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -288,10 +284,10 @@ theorem centerReadoutB_zero
       letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
         ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ∀ i : ι, (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i) ∈
+      ∀ i : ι, (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i) ∈
         (NormalCoordinates.normalChartAt (I := I) g
           (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h)).source)
     (hsmall :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -300,87 +296,83 @@ theorem centerReadoutB_zero
         ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
       ∀ i : ι,
-        (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i) ≠
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i) ≠
           centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h ->
         Real.sqrt
           (g.inner
             (centerOfMass (I := I) g mu
-              (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+              (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
               join p r h)
             (NormalCoordinates.normalChartAt (I := I) g
               (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h)
-              ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) : E)
+              ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E)
             (NormalCoordinates.normalChartAt (I := I) g
               (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h)
-              ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) : E)) <
+              ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E)) <
           centerOfMass.eqnRadius (I := I) h)
     (hread : ∀ i,
       (centerOfMass (I := I) g mu
-          (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
           join p r h,
-        (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) ∈ B.readDom)
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) ∈ B.readDom)
     (hreal : ∀ i,
       Real.sqrt
         (g.inner
           (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h)
           (B.inv
             (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h,
-              (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))).snd
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd
           (B.inv
             (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h,
-              (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))).snd) <
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd) <
         expDiffeoRadius (I := I) g hEnorm
           (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h)) :
     chartCmEqnB (I := I) g hEnorm p B
-      (NormalCoordinates.framedChartAt (I := I) g p
+      (NormalCoordinates.normalChartAt (I := I) g p
         (centerOfMass (I := I) g mu
-          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
           join p r h))
       (mu, xi) = 0 := by
   let c := centerOfMass (I := I) g mu
-    (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+    (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
     join p r h
   obtain ⟨i₀, _⟩ := h.μ_pos
   have hbase : c ∈ (trivializationAt E (TangentSpace I) p).baseSet := by
     simpa only [c] using (hread i₀).2
   have hpt (i : ι) :
-      B.inv (c, (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) =
+      B.inv (c, (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) =
         (⟨c, (show TangentSpace I c from
           (NormalCoordinates.normalChartAt (I := I) g c
-            ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) : E))⟩ :
+            ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E))⟩ :
           TangentBundle I M) := by
     exact B.inv_eq_normal_lt (hread i).1 (hreal i)
   have hbook := centerOfMass.expInv_eqn_of_lt (I := I) h hdiff hsrc hsmall
   have hreadout := (readoutB_zero_iff (I := I) g hEnorm p B mu c
-    (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+    (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
     hbase hpt).2 hbook
-  have hdecode : (NormalCoordinates.framedChartAt (I := I) g p).symm
-      (NormalCoordinates.framedChartAt (I := I) g p c) = c :=
-    (NormalCoordinates.framedChartAt (I := I) g p).left_inv hcenter
+  have hdecode : (NormalCoordinates.normalChartAt (I := I) g p).symm
+      (NormalCoordinates.normalChartAt (I := I) g p c) = c :=
+    (NormalCoordinates.normalChartAt (I := I) g p).left_inv hcenter
   unfold chartCmEqnB
   rw [hdecode]
   exact hreadout
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The actual selected center satisfies the chart readout equation under the
-named geometric small-domain conditions.  The equation is produced by
-`centerOfMass.expInv_eqn_of_lt` and transported to the fixed trivialization by
-`readout_sum_eq_zero_iff`; it is not assumed as an abstract root predicate. -/
 theorem centerReadout_zero
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -389,11 +381,11 @@ theorem centerReadout_zero
     (p : M) {ι : Type} [Fintype ι] (mu : ι -> Real) (xi : ι -> E)
     (join : M -> M -> Real -> M) (r : Real)
     (h : CenterInput (I := I) g mu
-      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
       join p r)
     (hcenter : centerOfMass (I := I) g mu
-      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
-      join p r h ∈ (NormalCoordinates.framedChartAt (I := I) g p).source)
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+      join p r h ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
     (hdiff :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
         ⟨g.toRiemannianMetric⟩
@@ -402,9 +394,9 @@ theorem centerReadout_zero
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
       ∀ i : ι, MDifferentiableAt I 𝓘(Real, Real)
         (CenterOfMass.halfSqDist
-          ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)))
+          ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)))
         (centerOfMass (I := I) g mu
-          (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
           join p r h))
     (hsrc :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -412,10 +404,10 @@ theorem centerReadout_zero
       letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
         ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ∀ i : ι, (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i) ∈
+      ∀ i : ι, (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i) ∈
         (NormalCoordinates.normalChartAt (I := I) g
           (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h)).source)
     (hsmall :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -424,88 +416,88 @@ theorem centerReadout_zero
         ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
       ∀ i : ι,
-        (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i) ≠
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i) ≠
           centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h ->
         Real.sqrt
           (g.inner
             (centerOfMass (I := I) g mu
-              (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+              (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
               join p r h)
             (NormalCoordinates.normalChartAt (I := I) g
               (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h)
-              ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) : E)
+              ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E)
             (NormalCoordinates.normalChartAt (I := I) g
               (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h)
-              ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i)) : E)) <
+              ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E)) <
           centerOfMass.eqnRadius (I := I) h)
     (hbase : centerOfMass (I := I) g mu
-      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
       join p r h ∈ (trivializationAt E (TangentSpace I) p).baseSet)
     (hproj : ∀ i,
       (diagExpInv (I := I) g hEnorm p
         (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h,
-          (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))).proj =
+          (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).proj =
         centerOfMass (I := I) g mu
-          (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
           join p r h)
     (hintr : ∀ i,
       expMapIntrinsic (I := I) g hEnorm
         (centerOfMass (I := I) g mu
-          (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
           join p r h)
         (diagExpInv (I := I) g hEnorm p
           (centerOfMass (I := I) g mu
-              (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+              (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
               join p r h,
-            (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))).snd =
-          (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+            (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd =
+          (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
     (hreal : ∀ i,
       Real.sqrt
         (g.inner
           (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h)
           (diagExpInv (I := I) g hEnorm p
             (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h,
-              (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))).snd
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd
           (diagExpInv (I := I) g hEnorm p
             (centerOfMass (I := I) g mu
-                (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
                 join p r h,
-              (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))).snd) <
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd) <
         expDiffeoRadius (I := I) g hEnorm
           (centerOfMass (I := I) g mu
-            (fun j => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi j))
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
             join p r h)) :
     chartCmEqn' (I := I) g hEnorm p
-      (NormalCoordinates.framedChartAt (I := I) g p
+      (NormalCoordinates.normalChartAt (I := I) g p
         (centerOfMass (I := I) g mu
-          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
           join p r h))
       (mu, xi) = 0 := by
   let c := centerOfMass (I := I) g mu
-    (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+    (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
     join p r h
   have hbook := centerOfMass.expInv_eqn_of_lt (I := I) h hdiff hsrc hsmall
   have hpt (i : ι) := diagInv_eq_normal_lt (I := I) g hEnorm p c
-    ((NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+    ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
     (hproj i) (hintr i) (hreal i)
   have hreadout := (readout_sum_eq_zero_iff (I := I) g hEnorm p mu c
-    (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (xi i))
+    (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
     hbase hpt).2 hbook
-  have hdecode : (NormalCoordinates.framedChartAt (I := I) g p).symm
-      (NormalCoordinates.framedChartAt (I := I) g p c) = c :=
-    (NormalCoordinates.framedChartAt (I := I) g p).left_inv hcenter
+  have hdecode : (NormalCoordinates.normalChartAt (I := I) g p).symm
+      (NormalCoordinates.normalChartAt (I := I) g p c) = c :=
+    (NormalCoordinates.normalChartAt (I := I) g p).left_inv hcenter
   unfold chartCmEqn'
   rw [hdecode]
   exact hreadout
@@ -513,8 +505,7 @@ theorem centerReadout_zero
 omit [T3Space M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Specialize compact pinned-root gluing to the center equation associated to
-an explicit selected inverse branch. -/
+omit [ConnectedSpace M] in
 theorem existsCmExtensionB
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -555,11 +546,7 @@ theorem existsCmExtensionB
 omit [T3Space M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Specialize the compact pinned-root gluing theorem to the readout
-center-of-mass equation.  Joint `C¹` regularity and Hessian invertibility are
-needed only along the compact actual-configuration set `A`; the resulting root
-extends continuously to an ambient open neighborhood and agrees with `c` on
-the admissible locus. -/
+omit [ConnectedSpace M] in
 theorem existsCmExtension
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -599,11 +586,6 @@ theorem existsCmExtension
 omit [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The actual chart center is continuous on an admissible parameter set once
-the chart-realized point tuple is continuous and every selected center stays in
-the fixed readout chart.  The proof runs `centerOfMassChart_cont` on the
-parameter subtype and then removes the outside-domain filler by
-`centerCfgOn_eq`. -/
 theorem chartCenterOn_cont
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
@@ -611,25 +593,25 @@ theorem chartCenterOn_cont
     (V : Set ((ι -> Real) × (ι -> E)))
     (h : ∀ params, params ∈ V ->
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
         join p r)
     (hpts : Continuous (fun params : V => fun i =>
-      (NormalCoordinates.framedChartAt (I := I) g p).symm (params.1.2 i)))
+      (NormalCoordinates.normalChartAt (I := I) g p).symm (params.1.2 i)))
     (hsrc : ∀ params : V,
       centerOfMass (I := I) g params.1.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.1.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.1.2 i))
         join p r (h params params.2) ∈
-          (NormalCoordinates.framedChartAt (I := I) g p).source) :
+          (NormalCoordinates.normalChartAt (I := I) g p).source) :
     ContinuousOn (chartCenterOn (I := I) g p join r V h) V := by
   rw [continuousOn_iff_continuous_restrict]
   let H : ∀ params : V,
       CenterInput (I := I) g params.1.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.1.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.1.2 i))
         join p r := fun params => h params params.2
   let f : V -> E := fun params =>
-    NormalCoordinates.framedChartAt (I := I) g p
+    NormalCoordinates.normalChartAt (I := I) g p
       (centerOfMass (I := I) g params.1.1
-        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.1.2 i))
+        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.1.2 i))
         join p r (H params))
   have hf : Continuous f := by
     rw [continuous_iff_continuousAt]
@@ -639,20 +621,20 @@ theorem chartCenterOn_cont
     have hcm := centerOfMass_cont (I := I) g
       (fun q : V => q.1.1)
       (fun q : V => fun i =>
-        (NormalCoordinates.framedChartAt (I := I) g p).symm (q.1.2 i))
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (q.1.2 i))
       join p r params H hμ hpts
     have hchart : ContinuousAt
-        (fun q : M => (NormalCoordinates.framedChartAt (I := I) g p q : E))
+        (fun q : M => (NormalCoordinates.normalChartAt (I := I) g p q : E))
         (centerOfMass (I := I) g params.1.1
-          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm
+          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm
             (params.1.2 i)) join p r (H params)) :=
-      (NormalCoordinates.framedChartAt (I := I) g p).contMDiffOn_toFun.continuousOn.continuousAt
-        ((NormalCoordinates.framedChartAt (I := I) g p).open_source.mem_nhds
+      (NormalCoordinates.normalChartAt (I := I) g p).contMDiffOn_toFun.continuousOn.continuousAt
+        ((NormalCoordinates.normalChartAt (I := I) g p).open_source.mem_nhds
           (hsrc params))
     exact hchart.tendsto.comp hcm
   have heq : V.restrict (chartCenterOn (I := I) g p join r V h) = f := by
     funext params
-    change NormalCoordinates.framedChartAt (I := I) g p
+    change NormalCoordinates.normalChartAt (I := I) g p
       (centerCfgOn (I := I) g p join r V h params) = f params
     rw [centerCfgOn_eq (I := I) g p join r h params.2]
   rw [heq]
@@ -660,8 +642,8 @@ theorem chartCenterOn_cont
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A continuous ambient solution extension of the selected-branch center
-equation is smooth on its open parameter domain. -/
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem cmExtB_contDiffOn
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -672,16 +654,16 @@ theorem cmExtB_contDiffOn
     (z : ((ι -> Real) × (ι -> E)) -> E)
     {V : Set ((ι -> Real) × (ι -> E))} (hV : IsOpen V)
     (hchz : ∀ params0 ∈ V, forall n : Nat, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z)
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z)
       (z params0))
     (hchxi : ∀ params0 ∈ V, forall n : Nat, forall i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun xi : E => (NormalCoordinates.framedChartAt (I := I) g p).symm xi)
+      (fun xi : E => (NormalCoordinates.normalChartAt (I := I) g p).symm xi)
       (params0.2 i))
     (hsm : ∀ params0 ∈ V, forall n : Nat, forall i,
       ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
         (fun yq : M × M => B.diagReadout yq)
-        ((NormalCoordinates.framedChartAt (I := I) g p).symm (z params0),
-          (NormalCoordinates.framedChartAt (I := I) g p).symm (params0.2 i)))
+        ((NormalCoordinates.normalChartAt (I := I) g p).symm (z params0),
+          (NormalCoordinates.normalChartAt (I := I) g p).symm (params0.2 i)))
     (hinv : ∀ params0 ∈ V, exists L : E ≃L[Real] E,
       HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params0)
         (L : E →L[Real] E) (z params0))
@@ -713,11 +695,8 @@ theorem cmExtB_contDiffOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local-to-global-on-an-open-set form of the finite-order implicit-center
-regularity theorem for an ambient chart-valued solution extension.  A pointwise
-readout equation automatically supplies the neighborhood equation because `V`
-is open, and `ContinuousOn` supplies the pointwise `Tendsto` input.  The theorem
-does not claim that `z` is the selected center of mass on signed weights. -/
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem cmExt_contDiffOn
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -727,17 +706,17 @@ theorem cmExt_contDiffOn
     (z : ((ι -> Real) × (ι -> E)) -> E)
     {V : Set ((ι -> Real) × (ι -> E))} (hV : IsOpen V)
     (hchz : ∀ params0 ∈ V, forall n : Nat, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z)
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z)
       (z params0))
     (hchxi : ∀ params0 ∈ V, forall n : Nat, forall i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun xi : E => (NormalCoordinates.framedChartAt (I := I) g p).symm xi)
+      (fun xi : E => (NormalCoordinates.normalChartAt (I := I) g p).symm xi)
       (params0.2 i))
     (hsm : ∀ params0 ∈ V, forall n : Nat, forall i,
       ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
         (fun yq : M × M => (trivializationAt E (TangentSpace I) p
           (diagExpInv (I := I) g hEnorm p yq)).2)
-        ((NormalCoordinates.framedChartAt (I := I) g p).symm (z params0),
-          (NormalCoordinates.framedChartAt (I := I) g p).symm (params0.2 i)))
+        ((NormalCoordinates.normalChartAt (I := I) g p).symm (z params0),
+          (NormalCoordinates.normalChartAt (I := I) g p).symm (params0.2 i)))
     (hinv : ∀ params0 ∈ V, exists L : E ≃L[Real] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params0)
         (L : E →L[Real] E) (z params0))
@@ -790,8 +769,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- The center selected from a controlled configuration is a zero of the
-selected minimizing-branch readout equation. -/
+
+
 theorem centerReadoutB_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -801,10 +780,8 @@ theorem centerReadoutB_min
     (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
     (hq : 0 < q)
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
-      (c := legacyBallChart (I := I) (X.obj k) x))
-    (hf : NormalDiagFence (I := I) (X.obj k) x q e
-      (c := legacyBallChart (I := I) (X.obj k) x))
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
     {ι : Type} [Fintype ι] (mu : ι → Real) (xi : ι → E)
     (join : (X.obj k).M → (X.obj k).M → Real → (X.obj k).M)
     (p : (X.obj k).M) (r : Real) :
@@ -835,7 +812,7 @@ theorem centerReadoutB_min
     letI : MetricSpace (X.obj k).M :=
       HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
     let pts : ι → (X.obj k).M := fun i ↦
-      (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x).symm (xi i)
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm (xi i)
     ∀ h : CenterInput (I := I) (X.obj k).metric mu pts join p r,
       0 < ρ →
       2 * ρ < (q : Real) →
@@ -844,10 +821,14 @@ theorem centerReadoutB_min
       let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
       (∀ i, max (riemannianEDist I x c) (riemannianEDist I x (pts i)) <
         ENNReal.ofReal (ρ / 2)) →
-      let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
+      let B : DiagInvBranch (I := I) (X.obj k).metric
+          (normal_enorm (I := I) (X.obj k)) x :=
+        IsNormalDiag.toBranch (I := I) (Y := X.obj k)
+          (hcomplete := hcomplete) (hconn := hconn) (x := x)
+          (q := q) (δ := δ) (e := e) (hq := hq) (h := he)
       chartCmEqnB (I := I) (X.obj k).metric
         (normal_enorm (I := I) (X.obj k)) x B
-        (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c)
+        (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
         (mu, xi) = 0 := by
   classical
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
@@ -878,7 +859,7 @@ theorem centerReadoutB_min
   dsimp only
   intro h hρ hρq hρmetric hρexp hpairs
   let pts : ι → (X.obj k).M := fun i ↦
-    (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x).symm (xi i)
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm (xi i)
   let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
   let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
   change ∀ i, max (riemannianEDist I x c) (riemannianEDist I x (pts i)) <
@@ -924,8 +905,7 @@ theorem centerReadoutB_min
   have hbase : c ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     apply NormalCoordinates.exp_target_sub_chart (I := I) (X.obj k).metric x
-    simpa only [NormalCoordinates.framedChartAt,
-      NormalCoordinates.framedExp_target] using hcSource
+    rwa [← NormalCoordinates.normalChartAt_source_eq]
   have hdom (i : ι) : (c, pts i) ∈ B.dom := by
     exact (IsNormalDiag.inv_is_min (I := I) hb k hcomplete hconn x hq he hf
       hρ hρq hρmetric hρexp (hpairs i)).choose_spec.1
@@ -957,12 +937,12 @@ theorem centerReadoutB_min
         congrArg _ hbook
       _ = 0 := map_zero _
   have hdecode :
-      (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x).symm
-          (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c) = c :=
-    (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x).left_inv hcSource
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm
+          (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c) = c :=
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).left_inv hcSource
   change chartCmEqnB (I := I) (X.obj k).metric
     (normal_enorm (I := I) (X.obj k)) x B
-    (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c) (mu, xi) = 0
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c) (mu, xi) = 0
   unfold chartCmEqnB
   rw [hdecode]
   exact hreadout

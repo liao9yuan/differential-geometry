@@ -3,78 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Bundle.SmoothScalarGerm
 import Mathlib.Analysis.Calculus.FDeriv.Congr
 
-/-!
-# Bridge between the chart Hessian carrier and the Levi-Civita Hessian
-
-The chart Hessian carrier `hessFun g f : pointwiseBilin I` (defined in
-`Geometry.Operator.Hessian`) is the bilinear form on the tangent bundle whose
-matrix in the chart basis is the chart Hessian tensor
-$$
-  (\operatorname{Hess} f)_{ij}(x) = \partial_i \partial_j (f \circ \varphi_x^{-1})(\varphi_x x)
-    - \sum_k \Gamma^k{}_{ij}(g, x)(\varphi_x x) \cdot
-        \partial_k (f \circ \varphi_x^{-1})(\varphi_x x).
-$$
-
-The abstract Hessian `abstractHessian g f x v w` (defined in
-`Geometry.Connection.TensorNabla.TensorExtension`) is the (0,2)-tensor at `x` obtained by applying the
-cotangent extension of the Levi-Civita connection to the differential `df = extDerivFun f`:
-$$
-  \operatorname{Hess}_{LC} f(x)(v, w) :=
-    \bigl((\nabla^*_v\,(\mathrm{d} f))_x\bigr)(w) =
-    \bigl((\mathrm{cotangentCov}\,(\nabla^{LC})\,(\mathrm{d} f))(x, v)\bigr)(w).
-$$
-
-The abstract Hessian is symmetric (`abstractHessian_symm`, proved in `TensorExtension`) and
-agrees on smooth tangent sections with the inner product of the gradient's Levi-Civita
-covariant derivative against a test vector
-(`inner_cov_gradFun_eq_abstractHessian`, proved in `RicciIdentity`).
-
-This bridge file packages the abstract Hessian as a `pointwiseBilin` and exposes the
-identification with the chart Hessian carrier through the inner-product / gradient
-connection. The key statement is the **pointwise gradient–Hessian identity**:
-$$
-  g_x\bigl(\nabla^{LC}_v\,(\nabla f),\, w\bigr) = \mathrm{abstractHessian}\,g\,f\,x\,v\,w
-$$
-for *arbitrary* tangent vectors `v, w ∈ T_x M`. Together with `abstractHessian_symm` this is
-the engine identity feeding the downstream consumers (Laplacian = trace bridge, Hessian
-Frobenius bridge, Bochner identity).
-
-## Main definitions
-
-* `abstractHessianLin g f x : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ` —
-  the LinearMap form of `abstractHessian g f x`. Definitionally, `LinearMap.toContinuousLinearMap`
-  in reverse, so the two are pointwise equal.
-* `abstractHessianBilin g f` — the bundled `pointwiseBilin I` carrier built from
-  `abstractHessianLin g f`. Suitable for direct consumption by `traceFun`, `frobeniusSqFun`,
-  and the Cauchy-Schwarz Bochner inequality.
-
-## Main theorems
-
-* `abstractHessianLin_apply` — pointwise equality `abstractHessianLin g f x v w =
-  abstractHessian g f x v w`.
-* `abstractHessianLin_symm` — the bilinear-form symmetry
-  `abstractHessianLin g f x v w = abstractHessianLin g f x w v` for `f` of class `C²`.
-* `abstractHessianBilin_isPointwiseSymm` — the carrier-level symmetry, ready for clients
-  that consume `IsPointwiseSymm` predicates.
-* `abstractHessian_eq_inner_cov_gradFun_extend` — for any `v w : TangentSpace I x` and
-  smooth `f`, `abstractHessian g f x v w = g.inner x ((LeviCivita g) (gradFun g f) x v) w`
-  (using `FiberBundle.extend` to provide local smooth extensions). This is the
-  arbitrary-`v`-`w` form of `inner_cov_gradFun_eq_abstractHessian`.
-* `abstractHessian_eq_inner_cov_gradFun_smooth` — the smooth-section form:
-  `inner_cov_gradFun_eq_abstractHessian` re-exported.
-* `traceFun_abstractHessianBilin_def` — unfolding identity for `traceFun
-  (abstractHessianBilin g f)` in terms of the model-basis sum.
-* `frobeniusSqFun_abstractHessianBilin_def` — unfolding identity for `frobeniusSqFun
-  (abstractHessianBilin g f)` in terms of the model-basis sum of squares.
-* `traceFun_abstractHessianBilin_sq_le_dim_mul_frobeniusSqFun` — the Cauchy-Schwarz
-  Bochner-Lichnerowicz inequality for the abstract Hessian.
-
-The chart-coordinate identification `chartHessianTensor g x f i j x` of the matrix entries
-`abstractHessianLin g f x e_i e_j` (where `e := chartModelBasis E`) requires unfolding the
-chart Christoffel formula for the Levi-Civita connection at the chart base point. That deep
-chart-formula identification is the subject of a separate downstream development; this file
-provides the bridge layer that consumes it once available.
--/
 
 noncomputable section
 
@@ -86,7 +14,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -95,9 +23,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- **`LinearMap` form of `abstractHessian`.** Strips the continuity tags on the two outer
-arguments of `abstractHessian g f x`, leaving a pure bilinear LinearMap suitable for the
-`pointwiseBilin` carrier. -/
 def abstractHessianLin (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ :=
   let L : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ) :=
@@ -115,24 +40,26 @@ def abstractHessianLin (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) 
       change L (c • v) w = c * L v w
       rw [map_smul]; rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma abstractHessianLin_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) (v w : TangentSpace I x) :
     abstractHessianLin (I := I) g f x v w =
       abstractHessian (I := I) g f x v w := rfl
 
-/-- **Bundled `pointwiseBilin` carrier of the abstract Hessian.** -/
 def abstractHessianBilin (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     pointwiseBilin (M := M) I :=
   fun x => abstractHessianLin (I := I) g f x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma abstractHessianBilin_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) (v w : TangentSpace I x) :
     abstractHessianBilin (I := I) g f x v w =
       abstractHessian (I := I) g f x v w := rfl
 
-/-- **Symmetry of `abstractHessianLin`.** For a function `f : M → ℝ` of class `C²` at `x`,
-the LinearMap form of the abstract Hessian is symmetric in its two slots:
-`abstractHessianLin g f x v w = abstractHessianLin g f x w v`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessianLin_symm
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} {x : M} (hf : ContMDiffAt I 𝓘(ℝ) 2 f x) (v w : TangentSpace I x) :
@@ -140,7 +67,8 @@ theorem abstractHessianLin_symm
       abstractHessianLin (I := I) g f x w v :=
   abstractHessian_symm (I := I) g hf v w
 
-/-- **Carrier-level symmetry of `abstractHessianBilin`** for `f : M → ℝ` of class `C²`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessianBilin_isPointwiseSymm
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) :
@@ -152,11 +80,8 @@ theorem abstractHessianBilin_isPointwiseSymm
       exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
     simpa using h1)
 
-/-- **Pointwise inner-product / gradient-flow identity for `abstractHessian`.**
-For any tangent vectors `v, w ∈ T_x M`,
-`g.inner x ((LeviCivita g) (gradFun g f) x v) w = abstractHessian g f x v w`.
-This is the arbitrary-input form of `inner_cov_gradFun_eq_abstractHessian`; the smooth
-extensions are constructed internally via `FiberBundle.extend`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessian_eq_inner_cov_gradFun_extend [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M) (v w : TangentSpace I x) :
@@ -217,9 +142,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_extend [I.Boundaryless]
   rw [hkey]
   rfl
 
-/-- **Smooth-section form of the gradient-flow identity** (re-export of
-`inner_cov_gradFun_eq_abstractHessian`). For smooth tangent fields `X, Y` and any `x : M`,
-`g.inner x ((LeviCivita g) (gradFun g f) x (X x)) (Y x) = abstractHessian g f x (X x) (Y x)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -231,7 +155,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
       abstractHessian (I := I) g f x (X x) (Y x) :=
   inner_cov_gradFun_eq_abstractHessian (I := I) g hf hX hY
 
-/-- The basis-naive trace of the abstract Hessian carrier in the canonical model basis. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma traceFun_abstractHessianBilin_def
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x =
@@ -241,8 +166,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
   unfold traceFun
   rfl
 
-/-- The basis-naive Frobenius norm squared of the abstract Hessian carrier in the canonical
-model basis. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma frobeniusSqFun_abstractHessianBilin_def
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     frobeniusSqFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x =
@@ -253,10 +178,8 @@ model basis. -/
   unfold frobeniusSqFun
   rfl
 
-/-- **Cauchy-Schwarz Bochner inequality for the abstract Hessian (basis-naive form).** The
-square of the basis-naive trace is bounded by the dimension times the basis-naive Frobenius
-norm squared. The inequality holds with no orthonormality hypothesis on the basis: this is
-a pure linear-algebra Cauchy-Schwarz. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem traceFun_abstractHessianBilin_sq_le_dim_mul_frobeniusSqFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     (traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x)^2 ≤
@@ -265,7 +188,8 @@ theorem traceFun_abstractHessianBilin_sq_le_dim_mul_frobeniusSqFun
   traceFun_sq_le_dim_mul_frobeniusSqFun
     (I := I) (M := M) (abstractHessianBilin (I := I) g f) x
 
-/-- **Divided form** of the Cauchy-Schwarz Bochner inequality for the abstract Hessian. -/
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem traceFun_abstractHessianBilin_sq_div_dim_le_frobeniusSqFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     (traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x)^2 /
@@ -274,9 +198,6 @@ theorem traceFun_abstractHessianBilin_sq_div_dim_le_frobeniusSqFun
   traceFun_sq_div_dim_le_frobeniusSqFun
     (I := I) (M := M) (abstractHessianBilin (I := I) g f) x
 
-/-- The matrix-entry identity bridging the abstract Hessian and the chart Hessian
-tensor on the canonical model basis: `abstractHessian g f x e_i e_j = chartHessianTensor g
-x f i j x` for all `i, j`. -/
 def chartHessianMatrixIdentity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : Prop :=
   ∀ i j : Fin (Module.finrank ℝ E),
@@ -284,9 +205,8 @@ def chartHessianMatrixIdentity
         ((chartModelBasis E) i) ((chartModelBasis E) j) =
       chartHessianTensor (I := I) g x f i j x
 
-/-- Under `chartHessianMatrixIdentity g f x`, the chart Hessian carrier `hessFun g f x`
-agrees with the abstract Hessian carrier `abstractHessianBilin g f x` as bilinear forms on
-the tangent space at `x`. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem hessFun_eq_abstractHessianBilin_of_matrix_identity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (hM : chartHessianMatrixIdentity (I := I) g f x)
@@ -354,9 +274,8 @@ theorem hessFun_eq_abstractHessianBilin_of_matrix_identity
   intro j _
   rw [hM i j, mul_assoc]
 
-/-- Under `chartHessianMatrixIdentity g f x`, the chart trace of the chart Hessian carrier
-`traceFun (hessFun g f) x` agrees with the basis-naive trace of the abstract Hessian
-carrier `traceFun (abstractHessianBilin g f) x`. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem traceFun_hessFun_eq_traceFun_abstractHessianBilin_of_matrix_identity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (hM : chartHessianMatrixIdentity (I := I) g f x) :
@@ -369,10 +288,8 @@ theorem traceFun_hessFun_eq_traceFun_abstractHessianBilin_of_matrix_identity
   exact hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x hM
     ((chartModelBasis E) i) ((chartModelBasis E) i)
 
-/-- Under `chartHessianMatrixIdentity g f x`, the basis-naive Frobenius squared of the
-chart Hessian carrier `frobeniusSqFun (hessFun g f) x` agrees with the basis-naive
-Frobenius squared of the abstract Hessian carrier
-`frobeniusSqFun (abstractHessianBilin g f) x`. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (hM : chartHessianMatrixIdentity (I := I) g f x) :
@@ -387,9 +304,8 @@ theorem frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_
   rw [hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x hM
     ((chartModelBasis E) i) ((chartModelBasis E) j)]
 
-/-- Under `chartHessianMatrixIdentity`, the chart Hessian matrix entry equals the inner
-product of the Levi-Civita gradient-derivative against the corresponding model-basis
-vector. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartHessianTensor_eq_inner_cov_gradFun_basis_of_matrix_identity
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -404,9 +320,8 @@ theorem chartHessianTensor_eq_inner_cov_gradFun_basis_of_matrix_identity
   exact (abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x
     ((chartModelBasis E) i) ((chartModelBasis E) j)).symm
 
-/-- At the chart basepoint, the canonical tangent-bundle trivialization is the identity
-on `E` (using the defeq `TangentSpace I x = E`). This combines
-`TangentBundle.continuousLinearMapAt_trivializationAt` with `mfderiv_extChartAt_self`. -/
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma trivToE_self_eq_id (x : M) :
     (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -418,14 +333,15 @@ lemma trivToE_self_eq_id (x : M) :
   rw [h]
   exact mfderiv_extChartAt_self (I := I) (x := x)
 
-/-- Pointwise form of `trivToE_self_eq_id`. -/
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma trivToE_self_apply (x : M) (v : TangentSpace I x) :
     trivToE (I := I) x x v = v := by
   rw [trivToE_self_eq_id (I := I) x]
   rfl
 
-/-- At the chart basepoint, the canonical tangent-bundle inverse trivialization is the
-identity on `E`. This follows from `trivToE_self_eq_id` and the round-trip identity. -/
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical
@@ -434,8 +350,7 @@ lemma trivFromE_self_apply (x : M) (w : E) :
   have h := trivToE_trivFromE (I := I) x hbase w
   rwa [trivToE_self_apply (I := I) x (trivFromE (I := I) x x w)] at h
 
-/-- At the chart basepoint, the `i`-th chart-basis fibre vector equals the `i`-th
-model-space basis vector. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_self
     (x : M) (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) x i x = (chartModelBasis E) i := by
@@ -443,9 +358,7 @@ lemma chartBasisVecFiber_self
   change trivFromE (I := I) x x ((chartModelBasis E) i) = (chartModelBasis E) i
   exact trivFromE_self_apply (I := I) x ((chartModelBasis E) i)
 
-/-- For `b` in the trivialization base set at `x`, the chart-trivialised representation
-of the chart-basis section `chartBasisVec x j` evaluates to the constant model-basis
-vector `e_j`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_apply
     (x : M) (j : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
@@ -462,9 +375,7 @@ private lemma chartE_section_repr_chartBasisVec_apply
   rw [heq]
   exact h
 
-/-- The chart-trivialised representation of the chart-basis section as a function on
-`E`, pulled back through `extChartAt I x` inverse, is locally constant on
-`(extChartAt I x).target` (when restricted to `φ.symm`-image of the base set). -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_pullback_constOn
     (x : M) (j : Fin (Module.finrank ℝ E)) {y : E}
     (hy : (extChartAt I x).symm y ∈
@@ -478,9 +389,7 @@ private lemma chartE_section_repr_chartBasisVec_pullback_constOn
     (chartModelBasis E) j
   exact chartE_section_repr_chartBasisVec_apply (I := I) x j hy
 
-/-- The chart-basis section `chartBasisVec x j`, viewed as a tangent-bundle section,
-is `MDifferentiableAt I (I.prod 𝓘(ℝ, E))` at every point of the trivialization base set,
-in particular at the basepoint `x`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartBasisVec_mdifferentiableAt_self
     (x : M) (j : Fin (Module.finrank ℝ E)) :
     MDiffAt (T% (fun b : M => chartBasisVecFiber (I := I) x j b)) x := by
@@ -496,9 +405,7 @@ private lemma chartBasisVec_mdifferentiableAt_self
     (hcontMDiff_on x hbase).contMDiffAt (hopen.mem_nhds hbase)
   exact hcontMDiff_at.mdifferentiableAt (by simp)
 
-/-- For `b` in the chart source at `x`, the dual-pairing scalar
-`(extDerivFun f) b (chartBasisVecFiber x j b)` equals
-`partialDeriv j (scalarOnE x f) (extChartAt I x b)`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_apply_of_mem
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
     (j : Fin (Module.finrank ℝ E)) {b : M}
@@ -513,9 +420,7 @@ private lemma extDerivFun_chartBasisVec_apply_of_mem
   exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) x hf_at
     hb_chart hb_int j
 
-/-- The function `b ↦ (extDerivFun f) b (chartBasisVecFiber x j b)` is eventually
-equal (around `x`) to `(partialDeriv j (scalarOnE x f)) ∘ (extChartAt I x)` on the chart
-source intersected with the chart-target-interior preimage. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_eventuallyEq
     [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -552,9 +457,7 @@ private lemma extDerivFun_chartBasisVec_eventuallyEq
   obtain ⟨hb_chart, hb_int⟩ := hb
   exact extDerivFun_chartBasisVec_apply_of_mem (I := I) hf x j hb_chart hb_int
 
-/-- The directional derivative of the dual-pairing scalar `b ↦ (extDerivFun f) b
-(chartBasisVecFiber x j b)` along the model-basis vector `e_i`, at the basepoint `x`,
-equals the chart-iterated partial derivative `∂_i ∂_j (scalarOnE x f)(φ x)`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_pairing_chartBasisVec_apply_basis
     [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -639,7 +542,7 @@ private lemma extDerivFun_pairing_chartBasisVec_apply_basis
   rw [Filter.EventuallyEq.mfderiv_eq hev]
   exact hg_value
 
-/-- The fderiv at `(φ x)` of the chart-pulled-back chart-basis section vanishes. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma fderiv_chartE_chartBasisVec_self_eq_zero
     [I.Boundaryless]
     (x : M) (j : Fin (Module.finrank ℝ E)) :
@@ -690,9 +593,7 @@ private lemma fderiv_chartE_chartBasisVec_self_eq_zero
   rw [hev.fderiv_eq]
   exact fderiv_const_apply ((chartModelBasis E) j)
 
-/-- The Christoffel correction at the basepoint `(α, x) = (x, x)` applied to the
-constant section component `e_j` and the model-basis input `e_i` collapses to the
-Christoffel sum `∑_k Γ^k{}_{ij}(φ x) • e_k`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma christoffelCorrection_self_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -747,9 +648,8 @@ private lemma christoffelCorrection_self_basis_apply
     simp
   · exact (hi_mem (Finset.mem_univ i)).elim
 
-/-- The bundled Levi-Civita derivative of the chart-basis section `chartBasisVec x j`
-at the basepoint `x` along the model-basis vector `e_i`, evaluated to a tangent vector,
-equals the Christoffel sum `∑_k Γ^k{}_{ij}(φ x) • e_k`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma LeviCivita_chartBasisVec_self_basis_apply
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -784,9 +684,8 @@ private lemma LeviCivita_chartBasisVec_self_basis_apply
   rw [trivFromE_self_apply (I := I) x ((chartModelBasis E) k)]
   rfl
 
-/-- The cotangent-section pairing `θ x (LeviCivita g (chartBasisVec x j) x e_i)` for
-`θ = extDerivFun f`, at the basepoint, equals the Christoffel-weighted sum of
-chart-pullback partial derivatives `∑_k Γ^k{}_{ij}(φ x) * ∂_k (scalarOnE x f)(φ x)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma extDerivFun_LeviCivita_chartBasisVec_self_basis
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -841,15 +740,8 @@ private lemma extDerivFun_LeviCivita_chartBasisVec_self_basis
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [h_summand k]
 
-/-- **Discharge of `chartHessianMatrixIdentity`.** The matrix identity
-`abstractHessian g f x e_i e_j = chartHessianTensor g x f i j x` holds unconditionally
-for every smooth scalar function `f` on a smooth boundaryless Riemannian manifold.
-
-The proof unfolds the abstract Hessian via `cotangentCov_dualPairing`, identifies the
-chart-pulled-back form of each ingredient using the chart-local Levi-Civita formula
-(`chartLeviCivita_apply`) and the basepoint-trivialization identities
-(`trivToE x x = id`, `trivFromE x x = id`), and matches the resulting expression with
-`chartHessianTensor`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M) :
@@ -881,8 +773,8 @@ theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
   rw [hLHS, hRHS_2]
   rw [chartHessianTensor_def]
 
-/-- For a globally smooth scalar function, the chart Hessian agrees pointwise
-with the abstract Levi-Civita Hessian. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessFun_eq_abstract [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -893,21 +785,21 @@ theorem hessFun_eq_abstract [I.Boundaryless]
     hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x
       (chartHessianMatrixIdentity_holds (I := I) g hf x) v w
 
-/-- For a globally smooth scalar function, the chart Hessian is the metric
-pairing with the Levi-Civita derivative of `gradientFun`. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessFun_eq_cov_grad [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
     (v w : TangentSpace I x) :
     hessFun (I := I) g f x v w =
       g.inner x ((LeviCivita (I := I) g).toFun
-        (fun b => gradientFun (I := I) g f b) x v) w := by
+        (fun b => gradFun (I := I) g f b) x v) w := by
   rw [hessFun_eq_abstract (I := I) g hf x v w]
-  simpa only [gradient_eq_gradFun] using
-    (abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x v w).symm
+  exact (abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x v w).symm
 
-/-- The chart Hessian at a point depends only on the germ of the scalar
-function at that point. -/
+
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem hessFun_congr
     (g : SmoothRiemannianMetric I M) {f f' : M → ℝ} {x : M}
     (h : f =ᶠ[𝓝 x] f') :
@@ -964,8 +856,9 @@ theorem hessFun_congr
   intro j _
   rw [htensor i j]
 
-/-- On an open set where a scalar function is smooth, its chart Hessian is the
-metric pairing with the Levi-Civita derivative of its gradient. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessFun_eq_cov_local [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U)
@@ -973,35 +866,34 @@ theorem hessFun_eq_cov_local [I.Boundaryless]
     (v w : TangentSpace I x) :
     hessFun (I := I) g f x v w =
       g.inner x ((LeviCivita (I := I) g).toFun
-        (fun b => gradientFun (I := I) g f b) x v) w := by
+        (fun b => gradFun (I := I) g f b) x v) w := by
   obtain ⟨F, hF, hFf⟩ :=
     DifferentialGeometry.exists_smooth_germ (I := I) hU hx hf
-  have hgrad : (fun b => gradientFun (I := I) g F b) =ᶠ[𝓝 x]
-      (fun b => gradientFun (I := I) g f b) := by
+  have hgrad : (fun b => gradFun (I := I) g F b) =ᶠ[𝓝 x]
+      (fun b => gradFun (I := I) g f b) := by
     filter_upwards [hFf.eventuallyEq_nhds] with y hy
-    unfold gradientFun
+    unfold gradFun
     rw [hy.mfderiv_eq]
   have hgrad_total :
-      (T% fun b => gradientFun (I := I) g F b) =ᶠ[𝓝 x]
-        (T% fun b => gradientFun (I := I) g f b) := by
+      (T% fun b => gradFun (I := I) g F b) =ᶠ[𝓝 x]
+        (T% fun b => gradFun (I := I) g f b) := by
     filter_upwards [hgrad] with y hy
-    change TotalSpace.mk' E y (gradientFun (I := I) g F y) =
-      TotalSpace.mk' E y (gradientFun (I := I) g f y)
+    change TotalSpace.mk' E y (gradFun (I := I) g F y) =
+      TotalSpace.mk' E y (gradFun (I := I) g f y)
     rw [hy]
   have hgradF_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (T% fun b => gradientFun (I := I) g F b) := by
-    simpa only [gradient_eq_gradFun] using
-      gradFun_contMDiff_total_section (I := I) g hF
+      (T% fun b => gradFun (I := I) g F b) := by
+    exact gradFun_contMDiff_total_section (I := I) g hF
   have hgradF_at : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
-      (T% fun b => gradientFun (I := I) g F b) x := hgradF_smooth x
+      (T% fun b => gradFun (I := I) g F b) x := hgradF_smooth x
   have hgradf_at : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
-      (T% fun b => gradientFun (I := I) g f b) x :=
+      (T% fun b => gradFun (I := I) g f b) x :=
     hgradF_at.congr_of_eventuallyEq hgrad_total.symm
   have hcov :
       (LeviCivita (I := I) g).toFun
-          (fun b => gradientFun (I := I) g F b) x =
+          (fun b => gradFun (I := I) g F b) x =
         (LeviCivita (I := I) g).toFun
-          (fun b => gradientFun (I := I) g f b) x :=
+          (fun b => gradFun (I := I) g f b) x :=
     (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
       (hgradF_at.mdifferentiableAt (by simp))
       (hgradf_at.mdifferentiableAt (by simp)) Filter.univ_mem hgrad
@@ -1009,14 +901,12 @@ theorem hessFun_eq_cov_local [I.Boundaryless]
     hessFun (I := I) g f x v w = hessFun (I := I) g F x v w := by
       exact congrArg (fun B => B v w) (hessFun_congr (I := I) g hFf.symm)
     _ = g.inner x ((LeviCivita (I := I) g).toFun
-          (fun b => gradientFun (I := I) g F b) x v) w :=
+          (fun b => gradFun (I := I) g F b) x v) w :=
       hessFun_eq_cov_grad (I := I) g hF x v w
     _ = g.inner x ((LeviCivita (I := I) g).toFun
-          (fun b => gradientFun (I := I) g f b) x v) w := by rw [hcov]
+          (fun b => gradFun (I := I) g f b) x v) w := by rw [hcov]
 
-/-- For `b` in the chart-α good set, the dual-pairing scalar
-`(extDerivFun f) b (chartBasisVecFiber α j b)` equals
-`partialDeriv j (scalarOnE α f) (extChartAt α b)`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (j : Fin (Module.finrank ℝ E)) {b : M}
@@ -1034,9 +924,7 @@ private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
   exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) α hf_at
     hb_chart hb_int j
 
-/-- The function `b ↦ (extDerivFun f) b (chartBasisVecFiber α j b)` is eventually
-equal (around `x`) to `(partialDeriv j (scalarOnE α f)) ∘ (extChartAt α)` on
-the chart-α good set (an open neighborhood of `x`). -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (j : Fin (Module.finrank ℝ E)) {x : M}
@@ -1052,9 +940,7 @@ private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
   filter_upwards [hnhd] with b hb
   exact extDerivFun_chartBasisVec_alpha_apply_of_mem (I := I) hf α j hb
 
-/-- The directional derivative of the dual-pairing scalar along
-`chartBasisVecFiber α i x`, at a chart-α good-set point `x`, equals the
-chart-iterated partial derivative. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -1152,6 +1038,7 @@ private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
   rw [Filter.EventuallyEq.mfderiv_eq hev]
   exact hg_value
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVec_alpha_mdifferentiableAt
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -1167,6 +1054,7 @@ lemma chartBasisVec_alpha_mdifferentiableAt
     (hcontMDiff_on x hbase).contMDiffAt (hopen.mem_nhds hbase)
   exact hcontMDiff_at.mdifferentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -1221,6 +1109,7 @@ lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
   rw [hev.fderiv_eq]
   exact fderiv_const_apply ((chartModelBasis E) j)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartE_section_repr_chartBasisVec_alpha_apply
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -1238,6 +1127,7 @@ lemma chartE_section_repr_chartBasisVec_alpha_apply
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
   exact trivToE_trivFromE (I := I) α hbase ((chartModelBasis E) j)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma christoffelCorrection_alpha_basis_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -1290,6 +1180,9 @@ private lemma christoffelCorrection_alpha_basis_apply
     simp
   · exact (hi_mem (Finset.mem_univ i)).elim
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -1321,6 +1214,9 @@ lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
   rw [(trivFromE (I := I) α x).map_smul]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma extDerivFun_LeviCivita_chartBasisVec_alpha_basis [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
@@ -1363,11 +1259,9 @@ private lemma extDerivFun_LeviCivita_chartBasisVec_alpha_basis [I.Boundaryless]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [h_summand k]
 
-/-- **Chart-α matrix identity (unconditional, on the chart-α good set).** For
-a chart base point `α : M`, a smooth scalar `f : M → ℝ`, and a manifold point
-`x ∈ chartLeviCivitaGoodSet α`, the abstract Hessian evaluated on the chart-α
-basis pair `(chartBasisVecFiber α i x, chartBasisVecFiber α j x)` equals the
-chart-α tensor Hessian entry `chartHessianTensor g α f i j x`. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartAlphaMatrixIdentity_holds_on_goodSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -1406,8 +1300,9 @@ theorem chartAlphaMatrixIdentity_holds_on_goodSet [I.Boundaryless]
   rw [hLHS, hRHS_2]
   rw [chartHessianTensor_def]
 
-/-- **Chart-α matrix identity (unconditional, on the chart-α source).** For
-`x ∈ (chartAt H α).source`, the chart-α matrix identity holds. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartAlphaMatrixIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}

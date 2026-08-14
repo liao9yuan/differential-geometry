@@ -8,24 +8,6 @@ open DifferentialGeometry.Analysis.ODE.Flow
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
-/-!
-# Parametric `C^∞` smooth dependence of the local flow
-
-For a parametrised time-dependent vector field `f : ℝ → P → E → E` (parameter space
-`P`), this file establishes that the local flow depends jointly smoothly on the
-parameter by augmenting the state with the (constant-in-time) parameter and applying
-the Euclidean smooth-dependence theory to the augmented field.
-
-## Main results
-
-* `augmented_field_contDiff` — the augmented field `(t, (x, p)) ↦ (f t p x, 0)` is `C^∞`.
-* `orbit_param_invariant` — the parameter component of the augmented orbit is constant.
-* `projected_ode_initial` / `projected_contDiffOn` / `reindex_contDiff_top` — the
-  projection of the augmented flow onto the state component.
-* `exists_isLocalFlow_param_contDiffOn_top` — existence of a local flow jointly
-  `C^∞` in state, time, and parameter.
--/
-
 theorem augmented_field_contDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]

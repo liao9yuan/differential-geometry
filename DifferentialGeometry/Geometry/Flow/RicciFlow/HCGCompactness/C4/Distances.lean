@@ -5,13 +5,13 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 
 set_option autoImplicit false
 
-/-!
-# Distance Consequence Of Approximate Isometries
 
-This file contains MSM135 Chapter 4, Proposition "Distances": the path-length
-comparison, its ball-inclusion consequences, and the book-facing producer from
-localized pre-approximate-isometry data.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -24,16 +24,16 @@ section RiemannianNorm
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-/-- MSM135 Chapter 4, Proposition "Distances", length-infimum bridge.
 
-If every smooth source path from `x` to `y` can be sent to a smooth target path
-from `F x` to `F y` whose Riemannian length is at most `K` times the source
-length, then the Riemannian extended distance between the images is at most
-`K` times the source Riemannian extended distance.
 
-The remaining geometric producer for the book-facing map statement is the
-tangent-vector speed comparison coming from the `(eps,0)` pre-approximate
-isometry metric bound. -/
+
+
+
+
+
+
+
+
 theorem edist_le_of_path_comp
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -69,8 +69,8 @@ theorem edist_le_of_path_comp
       exact (iInf_le _ η).trans (iInf_le _ hη)
   exact htarget.trans hlen
 
-/-- Pointwise path-speed comparison implies the path-length comparison consumed
-by MSM135 Chapter 4, Proposition "Distances". -/
+
+
 theorem pathComp_tangent
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -101,8 +101,8 @@ theorem pathComp_tangent
     _ = A * (∫⁻ t, ‖mfderiv% γ t 1‖ₑ) := by
           rw [MeasureTheory.lintegral_const_mul' A _ hA_ne_top]
 
-/-- MSM135 Chapter 4, Proposition "Distances", pointwise distance estimate from
-the checked path-length comparison layer. -/
+
+
 theorem dist_le_of_path_comp
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -132,8 +132,8 @@ theorem dist_le_of_path_comp
       simpa [ENNReal.ofReal, Real.toNNReal_of_nonneg (Real.sqrt_nonneg (1 + eps))] using hraw
   simpa using hF.dist_le_mul x y
 
-/-- MSM135 Chapter 4, Proposition "Distances", pointwise distance estimate from
-a checked path-speed comparison layer. -/
+
+
 theorem dist_le_tangent
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -157,11 +157,11 @@ theorem dist_le_tangent
   exact dist_le_of_path_comp (I := I) F heps
     (pathComp_tangent (I := I) F ENNReal.ofReal_ne_top hspeed) x y
 
-/-- Package the pointwise distance estimate in the proof of MSM135 Chapter 4,
-Proposition "Distances", as a Lipschitz bound with constant `sqrt (1 + eps)`.
 
-The remaining Riemannian step is to prove the hypothesis `hdist` from the
-metric comparison along curves. -/
+
+
+
+
 theorem lipschitz_sqrt_of_dist_le
     {X Y : Type*} [PseudoMetricSpace X] [PseudoMetricSpace Y]
     (F : X -> Y) {eps : Real}
@@ -170,12 +170,12 @@ theorem lipschitz_sqrt_of_dist_le
     LipschitzWith ⟨Real.sqrt (1 + eps), Real.sqrt_nonneg (1 + eps)⟩ F := by
   exact LipschitzWith.of_dist_le_mul hdist
 
-/-- MSM135 Chapter 4, Proposition "Distances", metric-space endpoint:
-if the map has Lipschitz constant `sqrt (1 + eps)`, then it sends a metric ball
-of radius `r` into the corresponding enlarged metric ball.
 
-This is the final set-theoretic step of the book proof after the length
-comparison has produced the Lipschitz estimate. -/
+
+
+
+
+
 theorem image_ball_subset_of_lipschitz_sqrt
     {X Y : Type*} [PseudoMetricSpace X] [PseudoMetricSpace Y]
     (F : X -> Y) {eps : Real} (heps : 0 < 1 + eps)
@@ -190,12 +190,12 @@ theorem image_ball_subset_of_lipschitz_sqrt
   rcases hy with ⟨x, hx, rfl⟩
   exact hF.mapsTo_ball (ne_of_gt hKpos) x0 r hx
 
-/-- F2 endpoint from the checked path-length comparison layer:
-if smooth source paths have image paths with length multiplied by at most
-`sqrt (1 + eps)`, then balls map into the corresponding enlarged balls.
 
-The remaining producer is to derive `hpath` from the `(eps,0)`
-pre-approximate-isometry tangent-vector metric comparison. -/
+
+
+
+
+
 theorem image_ball_subset_of_path_comp
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -226,8 +226,8 @@ theorem image_ball_subset_of_path_comp
       simpa [ENNReal.ofReal, Real.toNNReal_of_nonneg (Real.sqrt_nonneg (1 + eps))] using hraw
   exact image_ball_subset_of_lipschitz_sqrt F heps hF x0 r
 
-/-- MSM135 Chapter 4, Proposition "Distances", ball inclusion from the
-path-speed comparison layer. -/
+
+
 theorem image_ball_tangent
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -252,13 +252,13 @@ theorem image_ball_tangent
   exact image_ball_subset_of_path_comp (I := I) F heps
     (pathComp_tangent (I := I) F ENNReal.ofReal_ne_top hspeed) x0 r
 
-/-- **Localized image-ball control from a partial map's path-speed bound** (the lbl367
-form the D1b recursion needs; STEPD_PLAN coda 43).  If every `C¹` path from `x0` of
-`eLength < r` stays where `F` is defined and admits a pushed path of pointwise speed
-`≤ √(1+eps)`, then `F` maps `B(x0, r)` into `B(F x0, √(1+eps)·r)`.  Unlike
-`image_ball_tangent`, the speed hypothesis is only demanded for paths from `x0` of small
-length — a partial diffeomorphism with data on `closedBall x0 r₂`, `r < r₂`, supplies it
-(the path localizes into the closed ball by `pathELength_mono`). -/
+
+
+
+
+
+
+
 theorem image_ball_local
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -301,14 +301,13 @@ open DifferentialGeometry.Integral.Connection Tensor0SBundle
 
 section Speed
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A `C⁰` pullback-tensor error controls the image speed squared. -/
+
 theorem speed_le_of_c0
     (P : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
@@ -355,19 +354,19 @@ end Speed
 
 section BookData
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
   [IsManifold I ∞ M] [SigmaCompactSpace M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 
-/-- MSM135 Chapter 4, Proposition "Distances", for localized partial-map data.
 
-A partial map carrying pre-approximate-isometry data on a closed `r₂`-ball maps
-the open `r`-ball into the closed `sqrt (1 + ε) * r`-ball whenever `r ≤ r₂`. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem data_image_ball
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M]

@@ -7,12 +7,10 @@ import Mathlib.Analysis.Convex.Mul
 import Mathlib.Analysis.Seminorm
 import Mathlib.MeasureTheory.Integral.Prod
 
+
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Bundle Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -25,12 +23,14 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (pathIntegralCoeffField
   pathIntegralCoeffField_toSection pathIntegralFib pathIntegralFib_toModel)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_add_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :
@@ -66,6 +66,8 @@ theorem tensorPointwiseNorm_add_le
   rw [hsq]
   nlinarith [hqST_le]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a : ℝ) (S : TensorRSModel r s ℝ E) :
@@ -79,6 +81,8 @@ theorem tensorPointwiseNorm_smul
       a ^ 2 * tensorInnerPointwise (I := I) (M := M) g r s x S S from by ring]
   rw [Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -93,12 +97,16 @@ def tensorPointwiseSeminorm
     (fun a S => by
       rw [tensorPointwiseNorm_smul (I := I) (M := M) g r s x a S, Real.norm_eq_abs])
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem tensorPointwiseSeminorm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
     tensorPointwiseSeminorm (I := I) (M := M) g r s x S =
       tensorPointwiseNorm (I := I) (M := M) g r s x S := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     Continuous (tensorPointwiseNorm (I := I) (M := M) g r s x) := by
@@ -130,6 +138,8 @@ theorem tensorPointwiseNorm_continuous
   unfold tensorPointwiseNorm
   exact Real.continuous_sqrt.comp hdiag
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_intervalIntegral_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (f : ℝ → TensorRSModel r s ℝ E)
@@ -161,10 +171,11 @@ theorem tensorPointwiseNorm_intervalIntegral_le
   rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
   exact hjensen
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_pathIntegralCoeffField_le_sq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
-    (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
@@ -175,7 +186,8 @@ theorem riemannianFiberNormSq_pathIntegralCoeffField_le_sq
     (hsup : ∀ t ∈ Set.Icc (0 : ℝ) 1,
       Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x)) ≤ Λ) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x
-        ((pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection x) ≤ Λ ^ 2 := by
+        ((pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection x) ≤ Λ ^
+          2 := by
   classical
   set f : ℝ → TensorRSModel r s ℝ E :=
     fun t => TensorRSSpace.toModel ((Φ t).toSection x) with hf_def
@@ -235,10 +247,11 @@ private theorem sq_intervalIntegral_le_intervalIntegral_sq
     intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
   exact hjensen
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_pathIntegralCoeffField_le_intervalIntegral
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
-    (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
@@ -300,11 +313,11 @@ theorem riemannianFiberNormSq_pathIntegralCoeffField_le_intervalIntegral
           riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x) := heqint
 
 open DifferentialGeometry.Integral.Measure in
-
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem tensorL2NormSq_pathIntegralCoeffField_le_intervalIntegral_normSq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
-    (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
@@ -417,10 +430,12 @@ theorem tensorL2NormSq_pathIntegralCoeffField_le_intervalIntegral_normSq
 
 open DifferentialGeometry.PDE.RicciFlow (iteratedCovGrad)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_pathIntegralCoeffField_jetL2_le
     (g₀ : SmoothRiemannianMetric I M) (r sIdx a : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (B : ℝ) (_hB : 0 ≤ B)
-    (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r sIdx ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r sIdx ℝ E)
         (E := fun z : M => TensorRSSpace r sIdx I z) q.1 ((Φ q.2).toSection q.1))

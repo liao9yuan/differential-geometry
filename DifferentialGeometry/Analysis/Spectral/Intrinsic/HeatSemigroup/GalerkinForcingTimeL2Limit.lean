@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeL2Eige
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import Mathlib.Analysis.ODE.Gronwall
 
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -27,7 +28,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable {T : ℝ}
 
+omit [BoundarylessManifold I M] in
 theorem galerkinForcing_eq_galerkinCoordEmbed
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ) (t : ℝ) :
@@ -51,6 +53,7 @@ theorem galerkinForcing_eq_galerkinCoordEmbed
     rfl
   · rw [if_neg hi, dif_neg hi]
 
+omit [BoundarylessManifold I M] in
 theorem continuousOn_galerkinForcing_field
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ)
@@ -90,20 +93,20 @@ theorem continuousOn_galerkinForcing
   by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g₀ N
   · have hfield := continuousOn_galerkinForcing_field (I := I) (M := M) g₀ a U N hUcont
     have hcoeff : ContinuousOn
-        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (fun t => (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (finiteEigenComboHs (I := I) (M := M) g₀
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i)
         (Set.Icc (0 : ℝ) T) := by
       obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
       have hN_cont : ContinuousOn
-          (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (fun t => deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2)))
           (Set.Icc (0 : ℝ) T) :=
         hK.continuous.comp_continuousOn hfield
       have hcoeff_cont : ContinuousOn
           (fun t => tensorHsCoeffL (I := I) (M := M) (a := (a : ℝ)) i
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀
                 (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))))
           (Set.Icc (0 : ℝ) T) :=
@@ -280,6 +283,192 @@ theorem unifIntegrable_of_uniform_norm_bound {α β : Type*} {m : MeasurableSpac
   rw [eLpNorm_congr_ae hzero, eLpNorm_zero]
   exact zero_le _
 
+omit [BoundarylessManifold I M] in
+private theorem tensorHs_norm_tendsto_zero_of_coeff_tendsto_of_uniform
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
+    (hσ'σ'' : σ' < σ'')
+    (d : ℕ → tensorHs (I := I) (M := M) g r s σ'')
+    {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ n, ‖d n‖ ≤ C)
+    (hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0)) :
+    Tendsto (fun n => ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
+  classical
+  set ι := TensorEigenIdx (I := I) (M := M) g r s
+  have hnormsq : ∀ n,
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (d n)‖ ^ 2 =
+        ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' *
+          ((d n).coeff i) ^ 2 := by
+    intro n
+    have h := tensorHs.norm_sq_eq_tsum (I := I) (M := M)
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n))
+    rwa [tensorHsInclusion_coeff] at h
+  have hsumm' : ∀ n, Summable (fun i : ι =>
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) :=
+    fun n => tensorHs.weighted_summable_of_le (I := I) (M := M) hσ'σ''.le (d n)
+  have hmass'' : ∀ n,
+      ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2
+        = ‖d n‖ ^ 2 :=
+    fun n => (tensorHs.norm_sq_eq_tsum (I := I) (M := M) (d n)).symm
+  suffices hsq : Tendsto (fun n =>
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)‖ ^ 2) atTop (𝓝 0) by
+    have hnn : ∀ n,
+        0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (d n)‖ := fun n => norm_nonneg _
+    have hsqrt :
+        Tendsto (fun n => Real.sqrt
+          (‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+            hσ'σ''.le (d n)‖ ^ 2)) atTop (𝓝 (Real.sqrt 0)) :=
+      (Real.continuous_sqrt.tendsto 0).comp hsq
+    rw [Real.sqrt_zero] at hsqrt
+    refine hsqrt.congr (fun n => ?_)
+    rw [Real.sqrt_sq (hnn n)]
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  have hexp : σ' - σ'' < 0 := by linarith
+  obtain ⟨Λ, hΛgt1, hΛtail⟩ :
+      ∃ Λ : ℝ, 1 < Λ ∧ Λ ^ (σ' - σ'') * C ^ 2 < ε / 2 := by
+    set δ : ℝ := (ε / 2) / (C ^ 2 + 1) with hδ_def
+    have hδ_pos : 0 < δ := by
+      have : (0 : ℝ) < C ^ 2 + 1 := by positivity
+      rw [hδ_def]; positivity
+    have htend : Tendsto (fun x : ℝ => x ^ (σ' - σ'')) atTop (𝓝 0) := by
+      have h := tendsto_rpow_neg_atTop (y := σ'' - σ') (by linarith)
+      rwa [show -(σ'' - σ') = σ' - σ'' by ring] at h
+    have hev : ∀ᶠ x : ℝ in atTop, x ^ (σ' - σ'') < δ :=
+      htend.eventually_lt_const hδ_pos
+    obtain ⟨Λ, hΛ1, hΛδ⟩ := ((eventually_gt_atTop 1).and hev).exists
+    refine ⟨Λ, hΛ1, ?_⟩
+    have hΛδ_nn : 0 ≤ Λ ^ (σ' - σ'') := Real.rpow_nonneg (by linarith) _
+    have hCsq_nn : 0 ≤ C ^ 2 := sq_nonneg C
+    have h1 : Λ ^ (σ' - σ'') * C ^ 2 ≤ δ * C ^ 2 :=
+      mul_le_mul_of_nonneg_right hΛδ.le hCsq_nn
+    have h2 : δ * C ^ 2 < ε / 2 := by
+      rw [hδ_def]
+      rw [div_mul_eq_mul_div, div_lt_iff₀ (by positivity : (0 : ℝ) < C ^ 2 + 1)]
+      have hεpos : 0 < ε / 2 := by linarith
+      nlinarith [hεpos, hCsq_nn]
+    linarith
+  set F : Finset ι :=
+    (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g r s Λ).toFinset
+    with hF_def
+  have hmemF : ∀ i : ι, i ∈ F ↔
+      1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ := by
+    intro i; rw [hF_def, Set.Finite.mem_toFinset]; rfl
+  have hcompl_bd : ∀ (n : ℕ) (i : ι), i ∉ F →
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 ≤
+        Λ ^ (σ' - σ'') *
+          (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) := by
+    intro n i hi
+    have hΛle : Λ ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+      by_contra hcon
+      exact hi ((hmemF i).2 (lt_of_not_ge hcon))
+    have hsplit : tensorSobolevWeight (I := I) (M := M) i σ' =
+        tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') *
+          tensorSobolevWeight (I := I) (M := M) i σ'' := by
+      rw [← tensorHs.tensorSobolevWeight_add (I := I) (M := M)]
+      congr 1; ring
+    have hratio : tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') ≤
+        Λ ^ (σ' - σ'') := by
+      unfold tensorSobolevWeight
+      exact Real.rpow_le_rpow_of_nonpos (by linarith) hΛle hexp.le
+    have hw''_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ'' :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i σ''
+    have hcoeff_nn : 0 ≤ ((d n).coeff i) ^ 2 := sq_nonneg _
+    calc
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2
+          = tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') *
+              (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) := by
+            rw [hsplit]; ring
+      _ ≤ Λ ^ (σ' - σ'') *
+              (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) :=
+            mul_le_mul_of_nonneg_right hratio (by positivity)
+  have htail : ∀ n,
+      ∑' i : { i : ι // i ∉ F },
+          tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 ≤
+        Λ ^ (σ' - σ'') * C ^ 2 := by
+    intro n
+    have hsub_summ' : Summable (fun i : { i : ι // i ∉ F } =>
+        tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2) :=
+      (hsumm' n).subtype _
+    have hsub_summ'' : Summable (fun i : { i : ι // i ∉ F } =>
+        Λ ^ (σ' - σ'') *
+          (tensorSobolevWeight (I := I) (M := M) (i : ι) σ'' * ((d n).coeff i) ^ 2)) :=
+      ((d n).weighted_summable.subtype _).mul_left _
+    calc
+      ∑' i : { i : ι // i ∉ F },
+            tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2
+          ≤ ∑' i : { i : ι // i ∉ F },
+              Λ ^ (σ' - σ'') *
+                (tensorSobolevWeight (I := I) (M := M) (i : ι) σ'' *
+                  ((d n).coeff i) ^ 2) :=
+            hsub_summ'.tsum_le_tsum
+              (fun i => hcompl_bd n i.1 i.2) hsub_summ''
+      _ = Λ ^ (σ' - σ'') *
+            ∑' i : { i : ι // i ∉ F },
+              tensorSobolevWeight (I := I) (M := M) (i : ι) σ'' * ((d n).coeff i) ^ 2 :=
+            (tsum_mul_left)
+      _ ≤ Λ ^ (σ' - σ'') *
+            ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' *
+              ((d n).coeff i) ^ 2 := by
+            apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
+            refine ((d n).weighted_summable.subtype _).tsum_le_tsum_of_inj
+              Subtype.val Subtype.val_injective (fun i _ => ?_) (fun i => le_refl _)
+              (d n).weighted_summable
+            have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ'' :=
+              tensorSobolevWeight_nonneg (I := I) (M := M) i σ''
+            positivity
+      _ ≤ Λ ^ (σ' - σ'') * C ^ 2 := by
+            rw [hmass'' n]
+            apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
+            have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
+            nlinarith [hCbd n, hnn, hC]
+  have hfin0 : Tendsto (fun n =>
+      ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
+      atTop (𝓝 0) := by
+    have h := tendsto_finset_sum (s := F)
+      (f := fun i n => tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
+      (a := fun _ : ι => (0 : ℝ))
+      (fun i _ => by
+        have hc : Tendsto (fun n => ((d n).coeff i) ^ 2) atTop (𝓝 (0 ^ 2)) :=
+          (hcoeff0 i).pow 2
+        rw [show (0 : ℝ) ^ 2 = 0 by ring] at hc
+        have := hc.const_mul (tensorSobolevWeight (I := I) (M := M) i σ')
+        simpa using this)
+    simpa using h
+  rw [Metric.tendsto_atTop] at hfin0
+  obtain ⟨N, hN⟩ := hfin0 (ε / 2) (by linarith)
+  refine ⟨N, fun n hn => ?_⟩
+  have hsplit_sum :
+      ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 =
+        (∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) +
+          ∑' i : { i : ι // i ∉ F },
+            tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 :=
+    ((hsumm' n).sum_add_tsum_subtype_compl F).symm
+  have hfin_lt : ∑ i ∈ F,
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 < ε / 2 := by
+    have hd := hN n hn
+    rw [Real.dist_eq, sub_zero] at hd
+    calc ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2
+        ≤ |∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2| :=
+          le_abs_self _
+      _ < ε / 2 := hd
+  have htail_lt : ∑' i : { i : ι // i ∉ F },
+      tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 < ε / 2 :=
+    lt_of_le_of_lt (htail n) hΛtail
+  have hbound : ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+      hσ'σ''.le (d n)‖ ^ 2 < ε := by
+    rw [hnormsq n, hsplit_sum]
+    linarith
+  rw [Real.dist_eq, sub_zero]
+  have hnn : 0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+      hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
+  rwa [abs_of_nonneg hnn]
+
+omit [BoundarylessManifold I M] in
 theorem tendsto_finiteEigenComboHs_of_coeff_tendsto_of_succWeighted_bound
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (S : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -380,7 +569,7 @@ theorem tendsto_finiteEigenComboHs_of_coeff_tendsto_of_succWeighted_bound
     rw [hsubcoeff (u N) Wp i, hWp_coeff i]
   have hlt : (σ : ℝ) < σ + 1 := by linarith
   have hsqrtB_nn : (0 : ℝ) ≤ 2 * Real.sqrt B := by positivity
-  have hhelper := tendsto_of_coeff
+  have hhelper := tensorHs_norm_tendsto_zero_of_coeff_tendsto_of_uniform
     (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ' := σ) (σ'' := σ + 1)
     hlt (fun N => u N - Wp) hsqrtB_nn hCbd hcoeff0
   have hincl_uN : ∀ N,
@@ -428,7 +617,7 @@ theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncation
         (continuousOn_galerkinForcing_field (I := I) (M := M) g₀ a U N (hUcont N)) =
       maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-        (timeL2EigenProj (I := I) (M := M) g₀ (a : ℝ) T N
+        (timeL2EigenProj (I := I) (M := M) (g := g₀) (a : ℝ) T N
           (nemytskii (I := I) (M := M)
             (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
               a ha_super)
@@ -461,7 +650,7 @@ theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncation
       fun s => spatialEigenProj (I := I) (M := M) g₀ (a : ℝ) N (gforceN s) :=
     ContinuousLinearMap.coeFn_compLpL _ gforceN
   have hgco : ⇑gforceN =ᵐ[timeMeasure T]
-      (fun s => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (VN s)) :=
+      (fun s => deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (VN s)) :=
     nemytskii_coeFn (I := I) (M := M) hLipC VN
   have hPNforcing : ⇑(timeModeCoeff (I := I) (M := M)
         (timeL2EigenProj (I := I) (M := M) g₀ (a : ℝ) T N gforceN) i) =ᵐ[timeMeasure T]
@@ -521,14 +710,14 @@ theorem galerkinODE_solution_unique
     (hVderiv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
       HasDerivWithinAt (fun r => V r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S (V t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t)
     (hV'cont : ∀ i ∈ S, ContinuousOn (fun t => V' t i) (Set.Icc (0 : ℝ) T))
     (hV'deriv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
       HasDerivWithinAt (fun r => V' r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V' t i +
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S (V' t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t)
     (hinit : ∀ i ∈ S, V 0 i = V' 0 i)
@@ -564,7 +753,7 @@ theorem galerkinODE_solution_unique
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
         HasDerivWithinAt (fun r => W r i)
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * W t i +
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff i)
           (Set.Ici t) t) →
       ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -574,17 +763,18 @@ theorem galerkinODE_solution_unique
     have hpi : HasDerivWithinAt (fun s => (fun j : {i // i ∈ S} => W s j.1))
         (fun j : {i // i ∈ S} =>
           -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * W t j.1 +
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1)
         (Set.Ici t) t :=
       hasDerivWithinAt_pi.mpr (fun j => hWderiv t ht j.1 j.2)
-    have hcomp := (e.symm.hasFDerivAt (x := (fun j : {i // i ∈ S} => W t j.1))).comp_hasDerivWithinAt
+    have hcomp := (e.symm.hasFDerivAt
+      (x := (fun j : {i // i ∈ S} => W t j.1))).comp_hasDerivWithinAt
       t hpi
     rw [ContinuousLinearEquiv.coe_coe] at hcomp
     have hval : e.symm
         (fun j : {i // i ∈ S} =>
           -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * W t j.1 +
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1) =
         galerkinCoordField (I := I) (M := M) g₀ g_bg a S (γ W t) := by
       apply e.injective

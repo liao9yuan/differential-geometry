@@ -5,26 +5,24 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Restricting a Ricci-flow solution to an open subtype
 
-For a Ricci-flow solution `S` on `M` and an open submanifold `U`, the fixed-`U`
-restriction `t ↦ (S.metric t).restrictOpen U` is a Ricci-flow solution on `U`.
-This is the missing transport link (Brick 1 of the P4 conv engine): it mirrors
-`SolutionPullback.lean` field by field, using the germ-locality of curvature
-(`metricRm04StdAt_restrictOpen`, `metricCov_restrictOpen_*`) and the seminorm
-restriction bridges instead of the diffeomorphism-pullback lemmas.
 
-## Curvature restriction lemmas (this section)
 
-* `ricciTensor_restrictOpen` — Ricci is unchanged by restriction (trace of the
-  banked `metricRm04StdAt_restrictOpen`).
-* `metricRicci_restrictOpen_eval` — the bundled `(0,2)` Ricci section restricts.
-* `metricScalarAt_restrictOpen` — scalar curvature is unchanged by restriction.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,20 +35,23 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn MetricVariation
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
-  [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+  [IsManifold I 1 M] [IsManifold I 2 M]
 
-/-- **Germ-locality of the Ricci tensor.**  Restricting a metric to an open
-submanifold does not change its Ricci tensor at interior points.  Proved from the
-orthonormal-basis trace form `ricciTensor_eq_orthonormal_trace`, the banked
-`(0,4)` germ-locality `metricRm04StdAt_restrictOpen`, and the `Rm04 ↔ riemannOp`
-bridge `metricRm04StdAt_eq_inner_riemannOp`.  Unlike the pullback case there is no
-`mfderiv`: the tangent vectors are literally shared between `U` and `M`. -/
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 theorem ricciTensor_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -76,8 +77,10 @@ theorem ricciTensor_restrictOpen
     metricRm04StdAt_eq_inner_riemannOp (I := I) (M := M) g (x : M) (B i) v w (B i),
     g.symm (x : M) (B i) (riemannOp (LeviCivita (I := I) g) (x : M) (B i) v w)]
 
-/-- The bundled `(0,2)` Ricci section restricts: `metricRicci (g.restrictOpen U) x slots
-= metricRicci g x slots` (shared slots).  Mirrors `metricRicci_pullback_eval`. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRicci_restrictOpen_eval
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -88,10 +91,12 @@ theorem metricRicci_restrictOpen_eval
   have hLHS : metricRicci (I := I) (M := U) (g.restrictOpen (I := I) U) x slots
       = ricciTensor (I := I) (M := U) (g.restrictOpen (I := I) U) x (slots 0) (slots 1) := by
     have hcmm : metricRicciAt (I := I) (M := U) (g.restrictOpen (I := I) U) x slots
-        = metricRicciAt (I := I) (M := U) (g.restrictOpen (I := I) U) x (vec2 (slots 0) (slots 1)) :=
+        = metricRicciAt (I := I) (M := U) (g.restrictOpen (I := I) U) x
+          (vec2 (slots 0) (slots 1)) :=
       congrArg _ (by funext i; fin_cases i <;> rfl)
     rw [metricRicci_apply, hcmm]
-    exact metricRicciAt_apply_eq_ricciTensor (I := I) (g.restrictOpen (I := I) U) x (slots 0) (slots 1)
+    exact metricRicciAt_apply_eq_ricciTensor (I := I) (g.restrictOpen (I := I) U) x (slots 0)
+      (slots 1)
   have hRHS : metricRicci (I := I) (M := M) g (x : M) slots
       = ricciTensor (I := I) (M := M) g (x : M) (slots 0) (slots 1) := by
     have hcmm : metricRicciAt (I := I) (M := M) g (x : M) slots
@@ -102,9 +107,11 @@ theorem metricRicci_restrictOpen_eval
   rw [hLHS, hRHS]
   exact ricciTensor_restrictOpen (I := I) g U x (slots 0) (slots 1)
 
-/-- **Germ-locality of scalar curvature.**  Scalar curvature is unchanged by
-restricting the metric to an open submanifold.  Mirrors `metricScalarAt_pullback`
-via the orthonormal-basis trace of Ricci and `ricciTensor_restrictOpen`. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricScalarAt_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -148,11 +155,14 @@ theorem metricScalarAt_restrictOpen
     exact ricciTensor_restrictOpen (I := I) g U x (basis i) (basis j)
   exact congrArg (fun r => identityInvMetric i j * r) hric
 
-/-- The bundled lowered Riemann `(0,4)` section restricts (evaluated form):
-`metricRm04 (g.restrictOpen U) x slots = metricRm04 g ↑x slots` (shared slots).  The `(0,4)`
-analog of `metricRicci_restrictOpen_eval`, using the banked germ-locality
-`metricRm04StdAt_restrictOpen` after the `metricRm04_apply`/`metricRm04StdAt_apply` bridge to
-`metricRm04StdAt` on `vec4` slots. -/
+
+
+
+
+
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metricRm04_restrictOpen_eval
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -183,16 +193,16 @@ theorem metricRm04_restrictOpen_eval
   rw [hLHS, hRHS]
   exact metricRm04StdAt_restrictOpen (I := I) g U x (slots 0) (slots 1) (slots 2) (slots 3)
 
-/-! ## The restricted Ricci-flow solution (9-field assembly)
 
-`solutionOn_restrictOpen S U : SolutionOn (M := U) D` with
-`base.metric t = (S.base.metric t).restrictOpen U`, together with the nine
-`IsSolutionOn` fields.  Mirrors `SolutionPullback.isSolutionOn_pullback` along the
-open inclusion `U ↪ M`. -/
+
+
+
+
+
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
-/-- The restricted Ricci-flow solution data: `t ↦ (S.metric t).restrictOpen U`. -/
+
 def solutionOn_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] :
@@ -200,9 +210,9 @@ def solutionOn_restrictOpen
   base := { metric := fun t => (S.base.metric t).restrictOpen (I := I) U }
 
 open Classical in
-/-- Smoothness of the inclusion-pushed frame section at a point of the image
-`Subtype.val '' u`.  The section value is `tangentMap Subtype.val` on the `C∞` frame section on
-`U`, reindexed by the `C∞` corestriction. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [IsManifold I 2 M] in
 theorem restrictOpenPush_contMDiffWithinAt
     {Idx : Type} (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U]
@@ -212,10 +222,7 @@ theorem restrictOpenPush_contMDiffWithinAt
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
         (if h : y ∈ U then frame i ⟨y, h⟩ else 0)) (Subtype.val '' u) (x : M) := by
   haveI : Inhabited U := ⟨x⟩
-  -- Total corestriction `cor : M → U`, equal to `y ↦ ⟨y, ·⟩` on `U`.
   set cor : M → U := fun y => if h : y ∈ U then ⟨y, h⟩ else default with hcor_def
-  -- `cor` is `C∞` at `↑x`: precomposed with `Subtype.val` it is the identity on `U`
-  -- (`contMDiffAt_subtype_iff`).
   have hcorval : ∀ z : U, cor (z : M) = z := by
     intro z; rw [hcor_def]; simp only [dif_pos z.2, Subtype.coe_eta]
   have hcor : ContMDiffAt I I (∞ : WithTop ℕ∞) cor (x : M) := by
@@ -223,22 +230,18 @@ theorem restrictOpenPush_contMDiffWithinAt
     have hid : (fun z : U => cor (z : M)) = id := by funext z; simpa using hcorval z
     rw [hid]
     exact contMDiffAt_id
-  -- The pushed frame section on `U` (`tangentMap Subtype.val ∘ (T% frame i)`), as a within-`u` fact.
   have hpush : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
       (fun z : U => tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) z (frame i z))) u x :=
     ((contMDiff_subtype_val (I := I) (U := U) (n := ∞)).contMDiff_tangentMap
       (by simp)).contMDiffAt.comp_contMDiffWithinAt x (hframe.contMDiffOn i x hxu)
-  -- `cor` maps `Subtype.val '' u` into `u`.
   have hmaps : Set.MapsTo cor (Subtype.val '' u) u := by
     rintro y ⟨z, hz, rfl⟩
     rw [hcorval z]; exact hz
-  -- `hpush` transported to the point `cor ↑x`.
   have hpush' : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
       (fun z : U => tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) z (frame i z))) u (cor (x : M)) := by
     rw [hcorval x]; exact hpush
-  -- On `U`, `(g ∘ cor) z = ⟨z, frame i ⟨z, ·⟩⟩` (mfderiv Subtype.val = id), matching the target.
   have hgcor : ∀ z : M, (hz : z ∈ U) →
       (fun z : U => tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) z (frame i z))) (cor z)
@@ -247,26 +250,22 @@ theorem restrictOpenPush_contMDiffWithinAt
     intro z hz
     have hcz : cor z = ⟨z, hz⟩ := by simp only [hcor_def, dif_pos hz]
     rw [dif_pos hz, hcz]
-    show tangentMap I I (Subtype.val : U → M)
+    change tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) (⟨z, hz⟩ : U) (frame i ⟨z, hz⟩))
       = TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (frame i ⟨z, hz⟩)
-    show TotalSpace.mk' E (E := fun w : M => TangentSpace I w) ((⟨z, hz⟩ : U) : M)
+    change TotalSpace.mk' E (E := fun w : M => TangentSpace I w) ((⟨z, hz⟩ : U) : M)
         (mfderiv I I (Subtype.val : U → M) (⟨z, hz⟩ : U) (frame i ⟨z, hz⟩))
       = TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (frame i ⟨z, hz⟩)
     rw [mfderiv_subtype_val_apply]
-  -- Compose: `s_M = (pushed section) ∘ cor` on `Subtype.val '' u`.
   refine (hpush'.comp (x : M) hcor.contMDiffWithinAt hmaps).congr_of_eventuallyEq ?_ ?_
   · filter_upwards [nhdsWithin_le_nhds ((U.isOpen).mem_nhds x.2)] with z hz
     exact (hgcor z hz).symm
   · exact (hgcor (x : M) x.2).symm
 
 open Classical in
-/-- **Pushforward of a `C∞` local frame under the open inclusion `U ↪ M`.**  For a `C∞` local
-frame `frame` on `u ⊆ U`, the family `y ↦ frame · ⟨y, ·⟩` (padded with `0` off `U`) is a `C∞`
-local frame on `Subtype.val '' u ⊆ M`.  Basis-ness transports because `frameM k ↑x = frame k x`
-(the fibers `TangentSpace I x` / `TangentSpace I ↑x` are the shared model fiber `E`); smoothness is
-`tangentMap Subtype.val` applied to the frame section, precomposed with the `C∞` corestriction
-`y ↦ ⟨y, ·⟩` (`contMDiffAt_subtype_iff`). -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [IsManifold I 2 M] in
 theorem isLocalFrameOn_restrictOpenPush
     {Idx : Type} (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U]
@@ -289,25 +288,25 @@ theorem isLocalFrameOn_restrictOpenPush
       funext i; rw [dif_pos hxU]
     exact hval ▸ hframe.generating hxu
   contMDiffOn i := by
-    -- On `Subtype.val '' u`, the pushed section equals `tangentMap Subtype.val` applied to the
-    -- `C∞` frame section on `U`, reindexed by the corestriction `cores y = ⟨y, ·⟩`.  `cores` is
-    -- `C∞` on `Subtype.val '' u` (Mathlib `contMDiffAt_subtype_iff`).
     intro y hy
     obtain ⟨x, hxu, rfl⟩ := hy
     exact restrictOpenPush_contMDiffWithinAt (I := I) U hframe i x hxu
 
-/-- **`frameCompSmooth` transport under the open inclusion.**  For a `C∞` frame `frame` on
-`u ⊆ U`, the restricted metric coefficient `(t, x) ↦ ((S.metric t).restrictOpen U).inner x
-(frame i x) (frame j x)` is jointly `C∞` on `D.regular ×ˢ u`.  Route: push `frame` to the `C∞`
-frame `frameM` on `Subtype.val '' u ⊆ M` (`isLocalFrameOn_restrictOpenPush`); apply
-`hS.smoothMetric.frameCompSmooth frameM`; precompose with the `C∞` spacetime inclusion
-`(t, x) ↦ (t, ↑x)` and collapse `frameM ↑x = frame x` (`restrictOpen_inner`). -/
+
+
+
+
+
+
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem frameCompSmooth_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
     [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U]
-    {Idx : Type} [Fintype Idx] (frame : Idx → (x : U) → TangentSpace I x) {u : Set U}
+    {Idx : Type} [Finite Idx] (frame : Idx → (x : U) → TangentSpace I x) {u : Set U}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × U =>
@@ -315,13 +314,12 @@ theorem frameCompSmooth_restrictOpen
           (frame i p.2) (frame j p.2))
       (D.regular ×ˢ u) := by
   classical
-  -- The pushed frame on `Subtype.val '' u ⊆ M` and `M`'s frameCompSmooth against it.
+  letI := Fintype.ofFinite Idx
   set frameM : Idx → (y : M) → TangentSpace I y :=
     fun k (y : M) => if h : y ∈ U then frame k ⟨y, h⟩ else 0 with hframeM_def
   have hframeM : IsLocalFrameOn (V := (TangentSpace I : M → Type _)) I E (∞ : WithTop ℕ∞)
       frameM (Subtype.val '' u) := isLocalFrameOn_restrictOpenPush (I := I) U hframe
   have hpf := hS.smoothMetric.frameCompSmooth frameM hframeM i j
-  -- The `C∞` spacetime inclusion `ρ (t, x) = (t, ↑x)`.
   have hmap : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) (∞ : WithTop ℕ∞)
       (fun p : ℝ × U => (p.1, (p.2 : M))) :=
     contMDiff_fst.prodMk ((contMDiff_subtype_val (I := I) (U := U)).comp contMDiff_snd)
@@ -339,10 +337,13 @@ theorem frameCompSmooth_restrictOpen
   simp only [Function.comp_apply, hval]
   rfl
 
-/-- **Smoothness of the restricted metric family.**  The scalar coefficient fields
-transport by the definitional rewrite `restrictOpen_inner` (the point/vectors are literally
-shared with `↑x`); `metricTensor_cont` is `Tensor0SFamilyContinuousOnSet.restrictOpen`; and
-`frameCompSmooth` transports the C∞ frame components along the open inclusion. -/
+
+
+
+
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metricFamilySmoothOn_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
@@ -363,9 +364,11 @@ theorem metricFamilySmoothOn_restrictOpen
     intro Idx _ frame u hframe i j
     exact frameCompSmooth_restrictOpen (I := I) S hS U frame hframe i j
 
-/-- **The restricted flow satisfies the Ricci-flow metric equation.**
-`∂ₜ(g.restrictOpen U) = -2 Ric(g.restrictOpen U)`, from `S`'s equation via `restrictOpen_inner`
-(coefficient) and `ricciTensor_restrictOpen` (Ricci germ-locality). -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricVariationEquation_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
@@ -386,7 +389,9 @@ theorem metricVariationEquation_restrictOpen
   rw [hric]
   exact hS.equation t (x : M) X Y
 
-/-- The restricted scalar curvature equals the original at `↑x` (`metricScalarAt_restrictOpen`). -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalar_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -396,8 +401,10 @@ theorem scalar_restrictOpen
   simp only [SolutionOn.scalar, SolutionFamily.scalar, solutionOn_restrictOpen]
   exact metricScalarAt_restrictOpen (I := I) (S.base.metric t) U x
 
-/-- **Spacetime continuity of the restricted scalar curvature** (`scalarCont`): transport
-`hS.scalarCont` along the continuous inclusion `(t, x) ↦ (t, ↑x)` via `scalar_restrictOpen`. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarCont_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
@@ -414,9 +421,11 @@ theorem scalarCont_restrictOpen
     (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)).continuousOn
     (fun q hq => ⟨hq.1, Set.mem_univ _⟩)
 
-/-- **Within-time differentiability of the restricted scalar curvature** (`scalarTime`): for
-fixed `x` only the time varies, so it transports from `hS.scalarTime` at `↑x` via
-`scalar_restrictOpen`. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarTime_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
@@ -431,9 +440,11 @@ theorem scalarTime_restrictOpen
   rw [heq]
   exact hS.scalarTime htK hKsub (x : M)
 
-/-- **Total-space continuity of the restricted Ricci tensor family** (`ricciCont`): transport
-`hS.ricciCont` by `Tensor0SFamilyContinuousOnSet.restrictOpen`, then identify with
-`(solutionOn_restrictOpen S U).ricci` via `metricRicci_restrictOpen_eval`. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciCont_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
@@ -448,9 +459,12 @@ theorem ricciCont_restrictOpen
   ext slots
   exact (metricRicci_restrictOpen_eval (I := I) (S.base.metric t) U x slots).symm
 
-/-- **Total-space continuity of the restricted lowered Riemann tensor family** (`rm04Cont`):
-transport `hS.rm04Cont` by `Tensor0SFamilyContinuousOnSet.restrictOpen`, then identify with
-`(solutionOn_restrictOpen S U).base.rm04` via `metricRm04_restrictOpen_eval`. -/
+
+
+
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem rm04Cont_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)
@@ -465,8 +479,10 @@ theorem rm04Cont_restrictOpen
   ext slots
   exact (metricRm04_restrictOpen_eval (I := I) (S.base.metric t) U x slots).symm
 
-/-- The restricted Ricci norm `|Ric|²` equals the original at `↑x` (isometry/germ invariant): via
-`normSq0S_restrictOpen_apply` (banked tensor-norm invariance) with `metricRicci_restrictOpen_eval`. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciNorm_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -474,9 +490,6 @@ theorem ricciNorm_restrictOpen
     (t : ℝ) (x : U) :
     ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t x
       = ricciNorm (I := I) S t (x : M) := by
-  -- `ricciNorm` unfolds to `normSq0S` of the (restricted) Ricci section; the tensor-norm is
-  -- unchanged by restriction (`normSq0S_restrictOpen_apply`), and the two Ricci sections agree
-  -- slotwise (`metricRicci_restrictOpen_eval`).
   have hsec : metricRicci (I := I) (M := U) ((S.base.metric t).restrictOpen (I := I) U) x
       = metricRicci (I := I) (M := M) (S.base.metric t) (x : M) := by
     ext slots
@@ -487,8 +500,10 @@ theorem ricciNorm_restrictOpen
     SolutionFamily.ricciAt, metricRicci_apply, solutionOn_restrictOpen] at *
   rw [hnorm, hsec]
 
-/-- **Fixed-time spatial differentiability of the restricted Ricci norm** (`ricciNormSpace`):
-`ricciNorm (restrictOpen S) t` is `C∞` on `U` (`normSq02_smooth`), hence `MDifferentiableAt`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem ricciNormSpace_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -507,9 +522,11 @@ theorem ricciNormSpace_restrictOpen
       SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
   exact hsmooth.contMDiffAt.mdifferentiableAt (by simp)
 
-/-- **Smoothness of the restricted connection family** (`smoothConnection`): no transport needed —
-the family connection is the Levi-Civita connection of `(S.metric t).restrictOpen U`, whose
-smoothness is the general `leviCivitaConnectionOfMetric_contMDiffCovariantDerivative`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem smoothConnection_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -519,11 +536,13 @@ theorem smoothConnection_restrictOpen
   exact leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I)
     ((solutionOn_restrictOpen (I := I) S U).base.metric (t : ℝ))
 
-/-- **The restricted metric family is a Ricci-flow solution.**  For an open submanifold `U ↪ M`
-and an `IsSolutionOn` candidate `S` on `M`, the fixed-`U` restriction
-`t ↦ (S.metric t).restrictOpen U` satisfies all nine `IsSolutionOn` fields on `U`.  This is
-Brick 1 of the P4 conv engine: the restriction-analog of `SolutionPullback.isSolutionOn_pullback`,
-along the open inclusion instead of a diffeomorphism. -/
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isSolutionOn_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (U : TopologicalSpace.Opens M)

@@ -4,12 +4,12 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.OpensRestrict
 
 set_option autoImplicit false
 
-/-!
-# Geodesics in open subtypes
 
-This file records that restricting a Riemannian metric to an open subtype does
-not change the geodesic equation for curves whose values lie in that subtype.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,13 +24,13 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+omit [NeZero (Module.finrank Real E)]
     in
 private theorem chartBasisVec_open
     (U : Opens M)
@@ -54,7 +54,7 @@ private theorem chartBasisVec_open
     tangentCoordChange_opens (I := I) a x x hx]
   rfl
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+omit [NeZero (Module.finrank Real E)]
     in
 /-- Restricting a metric to an open subtype leaves its chart-Gram entries unchanged
 where the corresponding ambient chart is defined. -/
@@ -70,7 +70,7 @@ theorem chartGram_open
     chartBasisVec_open (I := I) U a x hx i,
     chartBasisVec_open (I := I) U a x hx j]
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+omit [NeZero (Module.finrank Real E)]
     in
 private theorem chartGramOnE_open [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
@@ -105,8 +105,9 @@ private theorem chartGramOnE_open [I.Boundaryless]
   rw [← hval]
   exact chartGram_open (I := I) g U a ((extChartAt I a).symm y) hzM i j
 
-/-- At the center of a chart, restricting a metric to an open subtype leaves
-its chart Christoffel symbols unchanged. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffel_open [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : U)
@@ -176,8 +177,9 @@ theorem christoffel_open [I.Boundaryless]
     rw [(chartGramOnE_open (I := I) g U a i j).fderiv_eq]
   rw [hP_ij_lj, hP_ji_li, hP_lij]
 
-/-- At a point of an open subtype, the centered Christoffel contraction of
-the restricted metric is the ambient centered contraction. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem contr_open [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : U) (v w : E) :
@@ -196,6 +198,7 @@ theorem contr_open [I.Boundaryless]
   intro j _
   rw [christoffel_open (I := I) g U a i j k]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem geodesicEq_open_iff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (gamma : Real → U) (t : Real) :
@@ -228,8 +231,9 @@ private theorem geodesicEq_open_iff [I.Boundaryless]
         congrArg (fun z => a + z) (contr_open (I := I) g U (gamma t) v v)
       _ = 0 := hid
 
-/-- On any set of times, a curve in an open subtype is a geodesic for the
-restricted metric exactly when its ambient-value curve is a geodesic. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem geodesicOn_open_iff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (gamma : Real → U) (s : Set Real) :
@@ -241,8 +245,9 @@ theorem geodesicOn_open_iff [I.Boundaryless]
   · intro hgamma t ht
     exact (geodesicEq_open_iff (I := I) g U gamma t).mpr (hgamma t ht)
 
-/-- A curve in an open subtype is a geodesic for the restricted metric if
-and only if its ambient-value curve is a geodesic for the original metric. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem geodesic_open_iff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (gamma : Real → U) :

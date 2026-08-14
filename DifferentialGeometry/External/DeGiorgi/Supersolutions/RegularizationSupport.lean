@@ -312,7 +312,8 @@ theorem power_half_memLp_of_integrableOn
       AEStronglyMeasurable (fun x => |u x| ^ (p / 2)) (volume.restrict Ω) := by
     exact
       (hpow_cont.measurable.comp_aemeasurable
-        (measurable_abs.comp_aemeasurable hu.memLp.aestronglyMeasurable.aemeasurable)).aestronglyMeasurable
+        (measurable_abs.comp_aemeasurable
+          hu.memLp.aestronglyMeasurable.aemeasurable)).aestronglyMeasurable
   refine (MeasureTheory.memLp_two_iff_integrable_sq hmeas).2 ?_
   simpa [IntegrableOn] using hpInt.congr (by
     filter_upwards with x

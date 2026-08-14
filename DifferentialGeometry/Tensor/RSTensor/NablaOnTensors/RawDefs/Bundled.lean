@@ -2,9 +2,9 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.RawDefs.MCovariant
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Raw and bundled tensor covariant derivative APIs
--/
+
+
+
 namespace Tensor0SBundle
 
 noncomputable section
@@ -22,9 +22,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [CompleteSpace 𝕜]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
+omit [IsManifold I ∞ M] in
 theorem nabla0SFun_apply_selfChart_slots (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -64,23 +64,23 @@ open Bundle
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace Real E₀]
-variable [Module.Finite Real E₀] [FiniteDimensional Real E₀]
+variable [FiniteDimensional Real E₀]
 variable {H₀ : Type*} [TopologicalSpace H₀]
 variable {I₀ : ModelWithCorners Real E₀ H₀}
 variable {M₀ : Type*} [TopologicalSpace M₀] [ChartedSpace H₀ M₀]
 variable [IsManifold I₀ ∞ M₀]
 
-/-- Smoothness of one correction term in the tensor derivation formula.
 
-If `α` is a smooth `(0,s)` tensor field, `X` and all `Yᵢ` are smooth vector
-fields, and `cov` is a smooth tangent-bundle connection, then the scalar
-function
 
-`p ↦ α_p(Y₁(p), ..., (∇_X Y_a)(p), ..., Y_s(p))`
 
-is smooth.  This is the direct `(0,s)` analogue of the vector-field smoothness
-lemma `CovariantDerivative.ContMDiffCovariantDerivative.contMDiff_apply`; it
-uses that tensor evaluation on smooth vector fields is smooth. -/
+
+
+
+
+
+
+
+
 theorem tensor0S_eval_covariantDerivative_slot_contMDiff {s : ℕ}
     (cov : CovariantDerivative I₀ E₀ (TangentSpace I₀ : M₀ → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞)

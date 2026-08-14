@@ -4,28 +4,26 @@ import Mathlib.Topology.Instances.Matrix
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# The good-frame producer for `ric_bound` (brick 1 + brick 2 wiring)
 
-For the keystone frame (`exists_trivFrame_orthonormal_basis`: the trivialization
-frame `e₀.localFrame basisE`, `gRef`-orthonormal at the centre `x`), this file
-produces the data that converts intrinsic `gRef`-norm bounds over a small domain
-into raw frame-component `ℓ²` bounds:
 
-* `gramInv_inverse` — the inverse Gram matrix realizes the inverse metric in the
-  frame basis at every point of the trivialization domain
-  (`MetricInverseInBasis_gen`).
-* `gramInv_symm` — the inverse Gram is symmetric.
-* `gramE_eq_one` — at a point where the frame is `g`-orthonormal the Gram is `1`.
 
-Downstream, `quad_lb_of_near_id` + `sum_comp_sq_le_pow_normSq0S`
-(`KroneckerQuadForm.lean` / `Comparison.lean`) turn entrywise closeness of the
-inverse Gram to `1` (continuity near the centre) into
-`∑ comp² ≤ 2^s · normSq0S gRef`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -43,14 +41,15 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- The inverse Gram matrix realizes the inverse metric of `g` in the
-trivialization-frame basis, at every point of the trivialization domain. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem gramInv_inverse
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -96,7 +95,9 @@ theorem gramInv_inverse
           Finset.sum_congr rfl fun k _ => by rw [hco]
       _ = if i = j then 1 else 0 := h
 
-/-- The inverse Gram matrix is symmetric. -/
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem gramInv_symm
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -106,8 +107,11 @@ theorem gramInv_symm
   have h := congr_fun (congr_fun ((gramE_herm (I := I) e₀ g basisE y).inv.eq) i) j
   simpa [Matrix.conjTranspose_apply] using h.symm
 
-/-- At a point where the trivialization frame is `g`-orthonormal, the Gram
-matrix is the identity. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [Fintype Idx] in
 theorem gramE_eq_one
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -120,9 +124,11 @@ theorem gramE_eq_one
   simp only [gramE, Matrix.of_apply, Matrix.one_apply]
   exact hON i j
 
-/-- **The entrywise-continuity producer.**  Near a point of the trivialization
-domain where the frame is `g`-orthonormal (`gramE = 1`), the inverse Gram is
-entrywise within `ε` of the identity kernel on an open sub-neighborhood. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem gramInv_near_id
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -135,7 +141,6 @@ theorem gramInv_near_id
         |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε ∧
         |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
   classical
-  -- entrywise continuity of the Gram on the trivialization domain
   have hentry : ∀ i j : Idx, ContinuousWithinAt
       (fun z => gramE (I := I) e₀ g basisE z i j) e₀.baseSet x := by
     intro i j
@@ -152,7 +157,6 @@ theorem gramInv_near_id
       rw [frameComp0S_apply, metricTensorField_apply, h0, h1]
       rfl
     exact ((h.congr fun z _ => (heq z)).continuousWithinAt hx)
-  -- the matrix-valued Gram map is continuous-within at `x`
   have hmat : ContinuousWithinAt
       (fun z => gramE (I := I) e₀ g basisE z) e₀.baseSet x := by
     have hpi : ContinuousWithinAt
@@ -164,7 +168,6 @@ theorem gramInv_near_id
       intro j
       exact hentry i j
     exact hpi
-  -- the matrix inverse is continuous at `gramE x = 1`
   have hdet1 : (gramE (I := I) e₀ g basisE x).det = 1 := by
     rw [hONx, Matrix.det_one]
   have hinvc : ContinuousAt Inv.inv (gramE (I := I) e₀ g basisE x) := by
@@ -177,7 +180,6 @@ theorem gramInv_near_id
   have hone : (gramE (I := I) e₀ g basisE x)⁻¹ = 1 := by
     rw [hONx]
     exact Matrix.inv_eq_left_inv (by rw [one_mul])
-  -- per-entry eventual closeness
   have hev1 : ∀ i j : Idx, ∀ᶠ z in nhdsWithin x e₀.baseSet,
       |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε := by
     intro i j
@@ -194,7 +196,6 @@ theorem gramInv_near_id
       refine Filter.eventually_of_mem hball fun t ht => ?_
       simpa [Metric.mem_closedBall, Real.dist_eq] using ht
     exact hcwa.eventually hb
-  -- the Gram entries themselves are also eventually near the identity
   have hevG1 : ∀ i j : Idx, ∀ᶠ z in nhdsWithin x e₀.baseSet,
       |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
     intro i j
@@ -207,7 +208,6 @@ theorem gramInv_near_id
       refine Filter.eventually_of_mem hball fun t ht => ?_
       simpa [Metric.mem_closedBall, Real.dist_eq] using ht
     exact (hentry i j).eventually hb
-  -- combine the finitely many entries and extract an open neighborhood
   have hev : ∀ᶠ z in nhdsWithin x e₀.baseSet, ∀ i j : Idx,
       |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε ∧
       |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
@@ -220,10 +220,10 @@ theorem gramInv_near_id
   exact ⟨t ∩ e₀.baseSet, htopen.inter e₀.open_baseSet, ⟨hxt, hx⟩,
     Set.inter_subset_right, fun z hz => hsub hz⟩
 
-/-- A finite-dimensional real vector space carrying a symmetric positive-definite
-bilinear form admits a basis orthonormal for that form.  (Ported from
-`ApproximateIsometry.lean`, which is currently not buildable against the tree;
-dedup once that file is repaired.) -/
+
+
+
+
 private theorem exists_orthonormalBasis_of_posDef
     {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     (B : LinearMap.BilinForm Real V) (hsymm : LinearMap.IsSymm B)
@@ -262,11 +262,13 @@ private theorem exists_orthonormalBasis_of_posDef
     have horth : B (v i) (v j) = 0 := (LinearMap.isOrthoᵢ_def.mp hv) i j hij
     rw [horth, mul_zero]
 
-/-- **The keystone**: at each point, the canonical tangent trivialization carries
-a model-fibre basis whose induced local frame is `g`-orthonormal at that point.
-(Raw-values restatement of `exists_trivFrame_orthonormal_basis` from
-`ApproximateIsometry.lean`, ported because that file is currently not buildable;
-dedup once it is repaired.) -/
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_trivONBasis
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
@@ -308,14 +310,15 @@ theorem exists_trivONBasis
   rw [← hsymmL i, ← hsymmL j]
   simpa [Q, LinearMap.mk₂_apply] using hb i j
 
-/-- **The good-frame producer** (the per-point input of the `ric_bound`
-assembly).  Every `x` has a basis `basisE` of the model fibre whose tangent
-trivialization frame is `gRef`-orthonormal at `x`, together with an open
-`u' ∋ x` inside the trivialization domain on which the raw frame-component `ℓ²`
-of every `(0,s)`-tensor is bounded by `2^s` times its intrinsic squared
-`gRef`-norm.  Chain: `exists_trivONBasis` (keystone) →
-`gramE_eq_one` → `gramInv_near_id` (continuity) → `quad_lb_of_near_id` →
-`sum_comp_sq_le_pow_normSq0S`. -/
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_goodFrame_compBound
     (gRef : SmoothRiemannianMetric I M) (x : M) :
     ∃ basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
@@ -335,7 +338,8 @@ theorem exists_goodFrame_compBound
           z ∈ u' → ∀ (s : ℕ) (A : Tensor0SSpace s I z),
             (∑ I0 : Fin s → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) A I0 ^ 2) ≤
               2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A) ∧
         ∀ z, ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
@@ -344,7 +348,8 @@ theorem exists_goodFrame_compBound
               ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ s *
               (∑ I0 : Fin s → Fin (Module.finrank Real E),
                 Tensor0SBundle.component0S (I := I)
-                  (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                  (((trivializationAt E (TangentSpace I : M → Type _)
+                    x).isLocalFrameOn_localFrame_baseSet
                       I 1 basisE).toBasisAt hz) A I0 ^ 2) := by
   classical
   obtain ⟨basisE, hONraw⟩ := exists_trivONBasis (I := I) gRef x
@@ -352,7 +357,6 @@ theorem exists_goodFrame_compBound
   have hxbase : x ∈ e₀.baseSet := mem_baseSet_trivializationAt E (TangentSpace I : M → Type _) x
   have hONx : gramE (I := I) e₀ gRef basisE x = 1 :=
     gramE_eq_one (I := I) e₀ gRef basisE hONraw
-  -- the entrywise-closeness radius
   set n : ℕ := Fintype.card (Fin (Module.finrank Real E)) with hn
   set ε : Real := 1 / (2 * ((n : Real) + 1)) with hε_def
   have hε : 0 < ε := by
@@ -367,18 +371,15 @@ theorem exists_goodFrame_compBound
   refine ⟨basisE, u', ε, hopen, hxu', hsub, hε.le, hsmall,
     (fun z hz i j => (hnear z hz i j).2), hONraw, ?_, ?_⟩
   · intro z hz hzu' s A
-    -- the quadratic-form lower bound for the inverse Gram at `z`
     have hQlb := quad_lb_of_near_id
       (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) ε hε.le
       (fun i j => (hnear z hzu' i j).1) hsmall
-    -- the component-versus-norm bound from `Comparison.lean`
     have hkey := Tensor0SBundle.sum_comp_sq_le_pow_normSq0S (I := I) gRef z s
       (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz)
       (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) 2 two_pos
       (gramInv_inverse (I := I) e₀ gRef basisE hz)
       (fun i j => gramInv_symm (I := I) e₀ gRef basisE z i j)
       hQlb A
-    -- bridge `component0S` ↔ `tensor0SComponent`
     calc (∑ I0 : Fin s → Fin (Module.finrank Real E),
           Tensor0SBundle.component0S (I := I)
             (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2)
@@ -439,12 +440,16 @@ theorem exists_goodFrame_compBound
                 (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 :=
           mul_le_mul_of_nonneg_right hmono hcomp0
 
-/-- **The tower bound at a good-frame point** (the non-orthonormal sibling of
-`B5 = compL2_tower_eq`).  At a point `y` of the frame domain where the raw
-frame-component `ℓ²` of `(0,s)`-tensors is bounded by `2^s` times the intrinsic
-squared `gRef`-norm (the `exists_goodFrame_compBound` output), the component
-`ℓ²` of the order-`j` `gRef`-derivative tower of a `(0,r)` field is bounded by
-`2^(r+j)` times the intrinsic norm of the `iterCov` tower. -/
+
+
+
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem compL2_tower_le
     (gM gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -464,7 +469,6 @@ theorem compL2_tower_le
       2 ^ (r + j) *
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
           (iterCov (I := I) gM r T j y)) := by
-  -- the component-sum restatement of the tower `ℓ²` (the ON-free half of B5)
   have hsq : compL2Sq (iterCovComp (I := I) frame
       (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gM)
         frame hframe y')
@@ -481,7 +485,6 @@ theorem compL2_tower_le
     funext q
     rw [IsLocalFrameOn.toBasisAt_coe]
     rfl
-  -- apply the good-frame component bound and absorb the `√(2^s)` factor
   have hbound := hcomp (r + j) (iterCov (I := I) gM r T j y)
   have hs : Real.sqrt ((2 : Real) ^ (r + j)) ≤ (2 : Real) ^ (r + j) := by
     have h2 : ((2 : Real) ^ (r + j)) ≤ ((2 : Real) ^ (r + j)) ^ 2 := by
@@ -512,11 +515,15 @@ theorem compL2_tower_le
             (iterCov (I := I) gM r T j y)) :=
         mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
 
-/-- At a good-frame point, an intrinsic bound on the `gRef`-covariant
-derivatives of the metric tensor gives the corresponding frame-component bound,
-with the explicit good-frame factor `2^(2+j)`.  This is the honest bridge needed
-before feeding intrinsic metric-derivative hypotheses into component estimates
-such as MSM135 Lemma 4.5. -/
+
+
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricComp_le
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
@@ -539,9 +546,13 @@ theorem metricComp_le
   exact le_trans h
     (mul_le_mul_of_nonneg_left hbound (by positivity : (0 : Real) ≤ 2 ^ (2 + j)))
 
-/-- At a frame controlled by `g`, an intrinsic `gRef`-bound for the
-`gRef`-covariant derivatives of `g` gives a component bound with the uniform
-loss `4^(2+p)` for all orders `j ≤ p`, provided `g ≤ C gRef` and `C ≤ 2`. -/
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricComp_mul
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
@@ -607,10 +618,14 @@ theorem metricComp_mul
     _ ≤ 4 ^ (2 + j) * eps := mul_le_mul_of_nonneg_right hcoef heps0
     _ ≤ 4 ^ (2 + p) * eps := mul_le_mul_of_nonneg_right hpow heps0
 
-/-- **The reverse tower bound at a good-frame point**: from the
-norm-versus-component upper bound (`exists_goodFrame_compBound`'s second
-output, with constant `Cu ≥ 1`), the intrinsic norm of the `iterCov` tower is
-bounded by `Cu^{r+j}` times the component `ℓ²` of the tower. -/
+
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem sqrt_tower_le_compL2
     (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -683,10 +698,13 @@ theorem sqrt_tower_le_compL2
             (frameComp0S (I := I) T frame) j y)) from rfl, hsq]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The Ricci-component smoothness producer** (the `hRicSm`/`hT` input of the
-`ric_bound` engine): the frame components of the realized Ricci section of
-`LC g` are `C^∞` on the trivialization domain.  Same engine as
-`gCompField_mdiffOn` (B2). -/
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem ricCompField_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -724,9 +742,13 @@ theorem ricCompField_mdiffOn
     (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
 
-/-- Christoffel symbols in a frame do not depend on the frame-domain proof:
-the `hframe.mono`-restricted spelling agrees with the original on the smaller
-domain (the `coeff` `dif`s both fire, and `toBasisAt` is proof-irrelevant). -/
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem chrInFrame_mono
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (frame : Idx → (x : M) → TangentSpace I x) {u u' : Set M}
@@ -738,10 +760,12 @@ theorem chrInFrame_mono
   simp only [IsLocalFrameOn.coeff, dif_pos hz, dif_pos (hsub hz)]
   rfl
 
-/-- **The moving-metric inverse-Gram bound** (the uniform `C0` producer): if `g`
-dominates `Beq⁻¹·gRef` pointwise at `z` (eq. 3.3) and the `gRef`-Gram is
-entrywise within `ε` of the identity with `card·ε ≤ 1/2`, then the inverse-Gram
-array of `g` has `ℓ²` norm at most `√card·(2·Beq)`. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem movingGinv_le
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]

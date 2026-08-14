@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJet1Diff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDeriv2Bound
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 
 /-!
 # The order-`1` curvature-jet envelope: the Palatini term (brick 2a-hi, stage 3)
@@ -46,14 +47,12 @@ namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
-
-private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
 /-- **The order-`1` curvature jet is the lowered pointwise curvature derivative.**
@@ -243,13 +242,9 @@ private theorem cov_apply_sub
     {S T : Π b : M, TangentSpace I b} {x : M}
     (hS : MDiffAt (T% S) x) (hT : MDiffAt (T% T) x) (v : TangentSpace I x) :
     cov.toFun (fun p => S p - T p) x v = cov.toFun S x v - cov.toFun T x v := by
-  have hST : (fun p => S p - T p) = S + (-T) := by
-    funext p; simp [sub_eq_add_neg]
-  have hneg : cov.toFun (-T) x = (-1 : ℝ) • cov.toFun T x := by
-    simpa using cov.isCovariantDerivativeOnUniv.smul_const (-1 : ℝ) hT
-  rw [hST, cov.isCovariantDerivativeOnUniv.add hS (mdifferentiableAt_neg_section hT),
-    hneg]
-  simp
+  have h := DifferentialGeometry.Integral.Connection.cov_toFun_sub
+    (I := I) cov hS hT
+  exact congrArg (fun L => L v) h
 
 /-- **The mixed curvature derivative `(∇^{covD} R^{covR})(X,Y)Z`.**
 

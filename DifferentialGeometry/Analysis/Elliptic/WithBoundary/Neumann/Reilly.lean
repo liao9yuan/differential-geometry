@@ -3,87 +3,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.
 import DifferentialGeometry.Geometry.Boundary.SecondFundamentalForm
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.BoundaryLaplacian
 
-/-!
-# Reilly's identity on a compact Riemannian manifold-with-boundary
-(half-space model)
-
-For a smooth scalar `f : M → ℝ` on a compact half-space-modelled smooth
-Riemannian manifold-with-boundary `(M, g)`, **Reilly's identity** reads
-$$
-\int_M \bigl[(\Delta_g f)^2 - |\nabla^2 f|^2\bigr]\,d\mu_g
-  = \int_M \mathrm{Rc}(\nabla f, \nabla f)\,d\mu_g
-    + \int_{\partial M} \mathrm{II}(\nabla^\partial f, \nabla^\partial f)\,dS
-    - 2 \int_{\partial M} (\partial_\nu f)\,(\Delta^\partial f)\,dS,
-$$
-where:
-
-* `Δ_g f` is the ambient Laplace–Beltrami operator (concretely, the
-  `Δ_g_classical` of `GreenFull.lean`);
-* `|\nabla^2 f|^2 = \mathrm{frobeniusSqFun}(\mathrm{hessFun}\,g\,f)` is the
-  Frobenius norm squared of the pointwise Hessian;
-* `\mathrm{Rc}(\nabla f, \nabla f) = \mathrm{ricciFun}\,g\,x\,(\nabla f)\,(\nabla f)`
-  is the pointwise Ricci tensor evaluated on the gradient;
-* `\nu := \mathrm{outwardNormal}\,g` is the outward unit normal at
-  boundary points;
-* `\partial_\nu f := g(\nu, \nabla f)` is the normal derivative;
-* `\nabla^\partial f` is the gradient of `f|_{\partial M}` taken with
-  respect to the induced boundary metric;
-* `\mathrm{II}` is the second fundamental form (specified by a chart-
-  coordinate normal-field extension `νChart`);
-* `\Delta^\partial f` is the boundary Laplacian (the Laplace–Beltrami
-  operator of the induced metric on the boundary submanifold);
-* `dS := \mathrm{surfaceMeasure}\,g` is the canonical surface measure on
-  `∂M`.
-
-## Strategy
-
-Reilly's identity is the integrated form of the pointwise Bochner-Weitzenböck
-identity, combined with two applications of Green's first identity (the
-divergence theorem for `|\nabla f|^2`, and Green's identity applied to the
-pair `f, \Delta f`), together with a boundary Codazzi-style identity that
-identifies the integrated normal derivative of `|\nabla f|^2` over `\partial M`
-with the second-fundamental-form expression. Concretely:
-
-1. **Pointwise Bochner identity**:
-   `Δ |∇f|² = 2 |∇²f|² + 2 Rc(∇f, ∇f) + 2 g(∇f, ∇(Δf))`.
-
-2. Integrating (1) over `M`:
-   `∫_M Δ |∇f|² dμ = 2 ∫_M |∇²f|² dμ + 2 ∫_M Rc(∇f, ∇f) dμ
-                  + 2 ∫_M g(∇f, ∇(Δf)) dμ`.
-
-3. **Divergence theorem** for `|∇f|²` (Green's first identity with the
-   constant function `1` and `|\nabla f|^2`):
-   `∫_M Δ |∇f|² dμ = ∫_{∂M} g(ν, ∇|∇f|²) dS`.
-
-4. **Green's first identity** for the pair `f, Δf`:
-   `∫_M (Δf)² dμ + ∫_M g(∇(Δf), ∇f) dμ = ∫_{∂M} (Δf) · g(ν, ∇f) dS`.
-
-5. **Boundary Codazzi identity** (the relationship of the integrated normal
-   derivative of `|\nabla f|^2` to the second fundamental form and the
-   boundary Laplacian):
-   `∫_{∂M} g(ν, ∇|∇f|²) dS = 2 ∫_{∂M} (Δf) · (∂_ν f) dS
-                            - 2 ∫_{∂M} II(∇^∂ f, ∇^∂ f) dS
-                            + 4 ∫_{∂M} (∂_ν f) · (Δ^∂ f) dS`.
-
-Combining (2)–(5) by linear algebra yields the headline identity.
-
-## Hypothesis-bearing form
-
-Each of the five geometric facts above involves substantial chart-level
-algebra (chart-Christoffel manipulation for Bochner, Stokes' theorem and
-chart-by-chart identification for the Green's identities, Codazzi-Mainardi
-algebra for the boundary identification). They are exposed as explicit
-hypotheses, so that a downstream client whose data discharges them — by
-direct chart computation, by appeal to the abstract Bochner identity bridged
-through the Realisation framework, or by a separate boundary-Codazzi
-proof — can apply the theorem directly.
-
-## Main result
-
-* `reilly_identity` — the headline identity in hypothesis-bearing form, on
-  a compact half-space-modelled smooth Riemannian manifold-with-boundary.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -115,52 +34,12 @@ private local instance instMeasurableSpaceModel :
 private local instance instBorelSpaceModel :
     @BorelSpace (EuclideanSpace ℝ (Fin n)) _ (borel _) := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- **Reilly's identity (hypothesis-bearing form).**
-
-For a smooth scalar `f` on a compact half-space-modelled smooth Riemannian
-manifold-with-boundary `(M, g)`, given as hypotheses:
-
-* the **pointwise Bochner-Weitzenböck identity** for `f`,
-* the **divergence theorem** applied to `|\nabla f|^2` (Green's identity
-  with the constant function `1` as test function),
-* **Green's first identity** for the pair `f, Δf`, and
-* the **boundary Codazzi identity** identifying the integrated normal
-  derivative of `|\nabla f|^2` over `∂M` with the Reilly boundary terms,
-
-Reilly's identity holds:
-$$
-\int_M \bigl[(\Delta_g f)^2 - |\nabla^2 f|^2\bigr]\,d\mu_g
-  = \int_M \mathrm{Rc}(\nabla f, \nabla f)\,d\mu_g
-    + \int_{\partial M} \mathrm{II}(\nabla^\partial f, \nabla^\partial f)\,dS
-    - 2\int_{\partial M} (\partial_\nu f)\,(\Delta^\partial f)\,dS,
-$$
-where the symbols are unpacked in the file docstring.
-
-**Symbols:**
-
-* `μ_g := riemannianVolumeMeasure g` (the canonical volume measure).
-* `dS := surfaceMeasure g` (the boundary surface measure).
-* `νChart : EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n)` is a
-  chart-coordinate extension of the outward unit normal field, used to
-  evaluate `secondFundamentalFormBoundary` (the second fundamental form on
-  boundary tangent vectors).
-* `bdryGrad : ∀ b : BoundaryManifold _ M, hI.boundaryE` is the
-  intrinsic boundary gradient `∇^∂ f`, supplied by the user (typically
-  `gradFun` of the induced metric on the boundary submanifold; the theorem
-  only requires the value at each boundary point).
-* `bdryLap : BoundaryManifold _ M → ℝ` is the intrinsic boundary
-  Laplacian `Δ^∂ f`, supplied by the user (typically `boundaryLaplacian`
-  applied to the boundary restriction of `f`).
-* `boundaryNormalDeriv : BoundaryManifold _ M → ℝ`, the normal derivative
-  `∂_ν f := g(ν, ∇f)`, supplied by the user.
--/
 theorem reilly_identity
     (g : SmoothRiemannianMetric (I_half n) M)
     {f : M → ℝ} (hf : ContMDiff (I_half n) 𝓘(ℝ, ℝ) ∞ f)

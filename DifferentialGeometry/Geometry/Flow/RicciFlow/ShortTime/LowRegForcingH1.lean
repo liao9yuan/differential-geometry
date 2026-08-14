@@ -5,12 +5,12 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Metr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 
-/-!
-# Uniform low-regularity Ricci--DeTurck forcing bound
 
-The chart coefficient package `IsLowRegCoeff` gives a uniform spectral `H1`
-bound for the realized Ricci--DeTurck right-hand-side sections.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -41,6 +41,8 @@ variable
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem rhs_raw_eq
     (gBase g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -54,6 +56,7 @@ private theorem rhs_raw_eq
     tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie
       (I := I) (M := M) gBase g α hb Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rhs_raw_sub_eq
     (gBase g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -73,6 +76,7 @@ private theorem rhs_raw_sub_eq
     rhs_raw_eq (I := I) (M := M) gBase g₂ α hb]
   simp only [smul_eq_mul, neg_one_mul, sub_eq_add_neg]
 
+omit [SigmaCompactSpace M] in
 private theorem rhs_pull_eq
     (gBase g : SmoothRiemannianMetric I M) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -100,6 +104,7 @@ private theorem rhs_pull_eq
   rw [rhs_raw_eq (I := I) (M := M) gBase g α hb_good]
   simp only [Function.comp_apply, hφ]
 
+omit [SigmaCompactSpace M] in
 private theorem rhs_partial_eq
     (gBase g : SmoothRiemannianMetric I M) (α : M)
     (d : Fin (Module.finrank ℝ E))
@@ -134,6 +139,7 @@ private theorem rhs_partial_eq
     _ = _ := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem rawComp_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -147,6 +153,7 @@ private theorem rawComp_sub
   simp only [smul_eq_mul, neg_one_mul, sub_eq_add_neg]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem lowerTerm_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -202,8 +209,8 @@ private theorem rhs_cov_raw_eq
   rw [hderiv] at hinv
   simpa only [d, Jdx, y] using (eq_sub_iff_add_eq.mp hinv).symm
 
-/-- The raw chart components of a Ricci--DeTurck RHS difference are controlled
-uniformly by the intrinsic background-covariant metric `2`-jet difference. -/
+
+
 theorem rhs_raw_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -283,8 +290,8 @@ theorem rhs_raw_lip {ι : Type*}
       dsimp [B]
       ring
 
-/-- The raw chart components of the background covariant derivative of an RHS
-difference satisfy the same intrinsic metric `3`-jet Lipschitz control. -/
+
+
 theorem rhs_cov_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -508,8 +515,8 @@ theorem rhs_cov_lip {ι : Type*}
       dsimp [B]
       ring
 
-/-- A low-regularity coefficient package gives a uniform spectral `H2` to
-`H0` Lipschitz estimate for the Ricci--DeTurck right-hand side. -/
+
+
 theorem rhs_h0_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -565,8 +572,8 @@ theorem rhs_h0_lip {ι : Type*}
     _ = (Csp * C₀ * Cin) *
           ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by ring
 
-/-- A low-regularity coefficient package gives one uniform spectral `H1`
-bound for the Ricci--DeTurck right-hand side over the whole metric family. -/
+
+
 theorem rhs_h1_bdd {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -596,7 +603,6 @@ theorem rhs_h1_bdd {ι : Type*}
     exact hD.rhs_bound α hα k b hb (Jdx 0) (Jdx 1)
   obtain ⟨C₀, hC₀, hL2₀⟩ := l2_bdd_of_raw
     (I := I) (M := M) gBase 0 2 S D.rhsBound hD.rhsBound_pos.le hraw0
-
   choose Cα hCα hCα_bd using fun α : M =>
     exists_lowerOrderCoeff_uniform_boundR
       (I := I) (M := M) gBase 0 2 α 0
@@ -754,8 +760,8 @@ theorem rhs_h1_bdd {ι : Type*}
     _ ≤ Csp * (C₀ + C₁) :=
       mul_le_mul_of_nonneg_left (add_le_add (hL2₀ k) (hL2₁ k)) hCsp
 
-/-- A low-regularity coefficient package makes the Ricci--DeTurck forcing
-uniformly Lipschitz from the intrinsic spectral metric `H3` norm to `H1`. -/
+
+
 theorem rhs_h1_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)

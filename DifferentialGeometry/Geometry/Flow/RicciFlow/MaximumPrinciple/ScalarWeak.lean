@@ -7,19 +7,17 @@ import Mathlib.Topology.Order.Compact
 import Mathlib.Tactic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Scalar Weak Maximum Principle
 
-This file starts the realized formalization of Hamilton's scalar weak maximum
-principle for supersolutions. The proved part is the algebra that reduces the
-supersolution and ODE hypotheses to a negative-region inequality, together
-with the compact strict-barrier argument. The main WMP interfaces support both
-a constant Lipschitz coefficient and a supplied time-dependent coefficient with
-the corresponding positive weight.
--/
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -34,11 +32,11 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The compact spacetime slab `[0,T] × M`. -/
+
 def spacetimeSlab (T : Real) : Set (Real × M) :=
   Set.Icc 0 T ×ˢ Set.univ
 
-/-- The scalar parabolic operator `∂ₜ - Δ_g - <X,∇·>` on a realized metric family. -/
+
 def parabolicOperatorWithDrift
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
@@ -55,7 +53,7 @@ def parabolicOperatorWithDrift
         heatOperatorWithDrift (I := I) G t (X t) (u t) x := by
   rfl
 
-/-- The drifted parabolic operator changes sign under `u ↦ C - u`. -/
+
 theorem parabolic_const_sub
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -500,8 +498,9 @@ theorem parabolic_comp
 
 /-! ## Algebraic core of the negative-region estimate -/
 
-/-- Lipschitz control converts the reaction difference into a lower bound on
-the negative region `u - c < 0`. -/
+
+
+
 theorem reaction_difference_lower_bound_on_negative_region
     {uval cval Fu Fc L : Real}
     (hlip : |Fu - Fc| <= L * |uval - cval|)
@@ -516,8 +515,8 @@ theorem reaction_difference_lower_bound_on_negative_region
       ring
     _ <= Fu - Fc := hlow_abs
 
-/-- Supersolution, ODE, and Lipschitz hypotheses imply `L v <= P v` on the
-negative region, where `v = u - c`. -/
+
+
 theorem negative_region_parabolic_lower_bound
     {uval cval Pu Pv cderiv Fu Fc L : Real}
     (hsuper : Fu <= Pu)
@@ -536,16 +535,16 @@ theorem negative_region_parabolic_lower_bound
       _ = Pv := hsub.symm
   exact le_trans hlow hupper
 
-/-! ## Calculus interfaces used by the maximum-principle assembly -/
 
-/-- Spatial constants and the ordinary one-variable time derivative give
-`P(u-c)=Pu-c'`.
 
-Expected proof: use `derivWithin_sub` for the time derivative, then prove the
-spatial identity from linearity of `gradientFun`, `divergence`, and the already
-proved `gradientFun_const` / `laplacian_const` facts. The current realized
-operator layer has the constant lemmas but not yet the full linearity API for
-divergence and Laplacian. -/
+
+
+
+
+
+
+
+
 theorem parabolic_sub_time_curve_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -572,11 +571,11 @@ theorem parabolic_sub_time_curve_identity
   rw [htime, hheat]
   ring
 
-/-- Exponential rescaling identity for `w = exp(-Lt) v`.
 
-Expected proof: use `derivWithin_mul`, the derivative of `exp (-L*t)`, and the
-spatial fact that the exponential factor is constant in the `M` variable, so the
-heat operator scales by that factor. -/
+
+
+
+
 theorem parabolic_exp_rescale_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -631,7 +630,6 @@ theorem parabolic_exp_rescale_identity
   rw [htime, hheat]
   ring
 
-/-! ## Strict barrier maximum principle -/
 
 /-- A smooth local upper support for a spacetime scalar function at one point,
 with the parabolic inequality needed by the weak maximum principle. -/
@@ -663,8 +661,8 @@ private theorem spacetimeSlab_isCompact
   unfold spacetimeSlab
   exact isCompact_Icc.prod isCompact_univ
 
-/-- At a positive-time minimum on `[0,T]`, the time derivative from within
-`[0,T]` is nonpositive. -/
+
+
 private theorem derivWithin_nonpos_at_Icc_min_of_pos
     {φ : Real -> Real} {T t : Real}
     (hmin : IsLocalMinOn φ (Set.Icc 0 T) t)
@@ -692,7 +690,8 @@ private theorem derivWithin_nonpos_at_Icc_min_of_pos
   rw [hlin] at hnonneg
   exact nonpos_of_mul_nonneg_right hnonneg htneg
 
-/-- Differentiating the strict time barrier `ε t` inside `[0,T]`. -/
+
+omit [TopologicalSpace M] in
 private theorem derivWithin_add_eps_mul_time
     {w : Real -> M -> Real} {T t ε : Real} {x : M}
     (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t)
@@ -712,7 +711,7 @@ private theorem derivWithin_add_eps_mul_time
   rw [derivWithin_fun_add hw hlinear]
   rw [hderiv_linear]
 
-/-- Strict-barrier form of the scalar weak maximum principle. -/
+
 theorem strict_barrier_nonnegative_of_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -825,12 +824,12 @@ theorem strict_barrier_nonnegative_of_positive_time
       linarith
     exact not_lt_of_ge hbarrier hbarrier_neg
 
-/-- Strict-barrier scalar WMP with regularity required only at positive times.
 
-The compact-minimum proof never differentiates at the initial slice: a negative
-barrier minimum cannot occur at `t = 0`.  This variant exposes that fact for
-Ricci-flow applications whose evolution identities are naturally regular only
-on the open positive-time interval. -/
+
+
+
+
+
 theorem strict_barrier_posReg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1256,12 +1255,12 @@ theorem strict_barrier_nonnegative
     hw_cont hw0 hw_time hw_mdiff hw_grad
     (fun t ht _htpos x hwneg => hnegative t ht x hwneg)
 
-/-- Constant-upper-bound scalar WMP for drifted subsolutions.
 
-This is the form used by the Hamilton pinching estimate: apply the existing
-strict-barrier nonnegativity theorem to `w = C - u`.  The final operator
-linearity is supplied explicitly as `hoperator_neg`, so this wrapper does not
-open any additional spatial-calculus frontier. -/
+
+
+
+
+
 theorem scalar_wmp_sub_const_of_parabolic_nonpos
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1313,8 +1312,8 @@ theorem scalar_wmp_sub_const_of_parabolic_nonpos
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
 
-/-- Constant-upper-bound scalar WMP for drifted subsolutions, requiring
-time/spatial regularity only at positive times. -/
+
+
 theorem scalar_sub_const_posReg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1367,13 +1366,13 @@ theorem scalar_sub_const_posReg
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
 
-/-! ## Hamilton Theorem 7.1, first realized core -/
 
-/-- Hamilton Theorem 7.1, realized core form with an already chosen Lipschitz
-constant on the values of `u` and `c`.
 
-The theorem is fully synthetic after the two explicit calculus identities and
-the strict-barrier theorem: no global Ricci-flow black box is used. -/
+
+
+
+
+
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1467,9 +1466,9 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-/-- Hamilton Theorem 7.1 core with the supersolution inequality required only
-at positive times.  The strict-barrier proof never uses the inequality at the
-initial time. -/
+
+
+
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1563,14 +1562,14 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-/-! ## MSM110 Chapter 4 scalar wrappers -/
 
-/-- MSM110, Chapter 4, label `thm:scalar_maximum_principle_supersolutions`.
 
-Book-facing lower-bound wrapper for scalar heat supersolutions. The calculus
-showing that `u - alpha` satisfies the needed parabolic inequality is supplied
-as `hnegative`; the maximum-principle step is discharged by
-`strict_barrier_nonnegative`. -/
+
+
+
+
+
+
 theorem msm110_ch4_scalar_supersolutions
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1615,10 +1614,10 @@ theorem msm110_ch4_scalar_supersolutions
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
 
-/-- MSM110, Chapter 4, label `prop:scalar_maximum_principle_pointwise`.
 
-Pointwise lower and upper bounds are proved by applying the scalar
-supersolution wrapper to `u - C1` and `C2 - u`. -/
+
+
+
 theorem msm110_ch4_scalar_pointwise_bounds
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1680,11 +1679,11 @@ theorem msm110_ch4_scalar_pointwise_bounds
   intro t ht x
   exact ⟨hlower t ht x, sub_nonneg.mp (hupper_nonneg t ht x)⟩
 
-/-- MSM110, Chapter 4, label `prop:scalar_maximum_principle_linear_reaction`.
 
-Linear reaction wrapper using the book's rescaled function
-`J(t,x) = exp (-C*t) * u(t,x)`. The calculation that `J` is a heat
-supersolution on its negative set is supplied as `hJ_negative`. -/
+
+
+
+
 theorem msm110_ch4_scalar_linear_reaction
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1730,11 +1729,11 @@ theorem msm110_ch4_scalar_linear_reaction
     simpa [J] using hJ_nonneg t ht x
   exact (mul_nonneg_iff_of_pos_left (Real.exp_pos (-C * t))).mp hprod
 
-/-- A scalar field with reaction equation `P u = beta * u` stays nonnegative
-when `beta` has a uniform upper bound and the initial field is nonnegative.
 
-Unlike `msm110_ch4_scalar_linear_reaction`, this theorem performs the
-negative-region calculation from the equation and the coefficient bound. -/
+
+
+
+
 theorem linear_react_nonneg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1807,15 +1806,15 @@ theorem linear_react_nonneg
         (Real.exp_pos (-C * 0)).le
     exact False.elim (not_lt_of_ge (hinit x) hu_neg)
 
-/-- Hamilton Theorem 7.1 with a time-dependent reaction bound and a supplied
-positive weight.
 
-This is the core interface for non-uniform Lipschitz constants. Instead of a
-single constant `L`, it assumes the negative-region estimate with a coefficient
-`A t` and a weighted parabolic identity for `ρ(t) * (u-c)`. For example, when
-`ρ' = -Aρ`, the identity is the variable-coefficient analog of the exponential
-rescaling used by
-`scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values`. -/
+
+
+
+
+
+
+
+
 theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_values
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1925,13 +1924,13 @@ theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_va
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-/-- Hamilton Theorem 7.1, realized core form where the two pointwise calculus
-identities are produced from ordinary time/spatial regularity hypotheses.
 
-This keeps
-`scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values` as the
-small algebraic assembly theorem, but removes the need for callers to supply
-`P(u-c)=Pu-c'` and the exponential rescaling identity by hand. -/
+
+
+
+
+
+
 theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2019,8 +2018,8 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
 
-/-- Hamilton Theorem 7.1 regular wrapper with the supersolution inequality
-required only at positive times. -/
+
+
 theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2108,13 +2107,13 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_tim
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
 
-/-! ## Slice-local Lipschitz extraction -/
 
-/-- The scalar values seen by the comparison pair at one time slice. -/
+
+
 def scalarValueSet (u : Real -> M -> Real) (c : Real -> Real) (t : Real) : Set Real :=
   Set.range (fun x : M => u t x) ∪ {c t}
 
-/-- The time-slice value set is compact when the spatial slice of `u` is continuous. -/
+
 theorem scalarValueSet_isCompact_of_continuous
     [CompactSpace M]
     (u : Real -> M -> Real) (c : Real -> Real) (t : Real)
@@ -2124,8 +2123,8 @@ theorem scalarValueSet_isCompact_of_continuous
     simpa using (isCompact_univ.image hu)
   exact hrange.union isCompact_singleton
 
-/-- A compact locally-Lipschitz-on-set real function admits an absolute-value
-Lipschitz estimate on that set. -/
+
+
 theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
     {f : Real -> Real} {s : Set Real}
     (hs : IsCompact s)
@@ -2137,8 +2136,9 @@ theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
   intro a ha b hb
   simpa [Real.dist_eq] using hK.dist_le_mul a ha b hb
 
-/-- Slice-local Lipschitz control on compact value sets produces a
-time-dependent coefficient for the reaction estimate. -/
+
+
+omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values
     (F : Real -> Real -> Real)
     (u : Real -> M -> Real) (c : Real -> Real) (T : Real)
@@ -2181,7 +2181,8 @@ theorem exists_time_dependent_lipschitz_bound_on_values
       rfl
     exact Classical.choose_spec (hExists t ht) (u t x) hu_mem (c t) hc_mem
 
-/-- User-facing corollary from globally locally-Lipschitz time slices. -/
+
+omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
     (F : Real -> Real -> Real)
     (u : Real -> M -> Real) (c : Real -> Real) (T : Real)
@@ -2196,11 +2197,12 @@ theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
   exact exists_time_dependent_lipschitz_bound_on_values (M := M) F u c T
     (fun t ht => (hF t ht).locallyLipschitzOn) hcompact
 
-/-- The real values seen by the comparison pair on the compact spacetime slab. -/
+
 def scalarWMPValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Set Real :=
   (fun p : Real × M => u p.1 p.2) '' spacetimeSlab (M := M) T ∪ c '' Set.Icc 0 T
 
-/-- `u(t,x)` belongs to the scalar-WMP value set. -/
+
+omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_u_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) (x : M) :
@@ -2209,7 +2211,8 @@ theorem scalarWMPValueSet_u_mem
   refine ⟨(t, x), ?_, rfl⟩
   exact ⟨ht, trivial⟩
 
-/-- `c(t)` belongs to the scalar-WMP value set. -/
+
+omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_c_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) :
@@ -2217,8 +2220,8 @@ theorem scalarWMPValueSet_c_mem
   right
   exact ⟨t, ht, rfl⟩
 
-/-- The scalar-WMP value set is compact when the comparison functions are
-continuous on their natural domains. -/
+
+
 theorem scalarWMPValueSet_isCompact
     [CompactSpace M]
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
@@ -2230,8 +2233,9 @@ theorem scalarWMPValueSet_isCompact
     simpa [spacetimeSlab] using (isCompact_Icc.prod (isCompact_univ : IsCompact (Set.univ : Set M)))
   exact (hslab.image_of_continuousOn hu_cont).union (isCompact_Icc.image_of_continuousOn hc_cont)
 
-/-- A uniform Lipschitz bound on the compact scalar-WMP value set gives the
-pointwise Lipschitz inequality needed by the algebraic WMP core. -/
+
+
+omit [TopologicalSpace M] in
 theorem scalarWMP_lipschitz_on_valueSet_bound
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     (F : Real -> Real -> Real) (K : NNReal)
@@ -2247,13 +2251,13 @@ theorem scalarWMP_lipschitz_on_valueSet_bound
     scalarWMPValueSet_c_mem (M := M) T u c ht
   simpa [Real.dist_eq] using (hF_lip t ht).dist_le_mul (u t x) hu_mem (c t) hc_mem
 
-/-- Hamilton Theorem 7.1 with a uniform Lipschitz constant on the compact
-value set of the comparison functions.
 
-The pointwise-in-time `LocallyLipschitz` hypothesis is not enough by itself:
-the WMP core needs one constant that works for every `t ∈ [0,T]` and every
-value attained by `u` or `c`. This theorem records that uniform-on-values
-interface and delegates the parabolic argument to the proved regular core. -/
+
+
+
+
+
+
 theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2300,8 +2304,8 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     hsuper hode hinit
     (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
 
-/-- Hamilton Theorem 7.1 with a uniform Lipschitz constant and with the
-supersolution inequality required only at positive times. -/
+
+
 theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2348,13 +2352,13 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_
     hsuper hode hinit
     (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
 
-/-- LaTeX Theorem 7.1, label `thm:scalar-wmp-super`.
 
-This is the native compact-value-set Lipschitz formulation of Hamilton's scalar
-weak maximum principle for supersolutions.  The monotonicity hypothesis is kept
-because it is part of the book statement; the proved core uses the direct
-supersolution inequality, the ODE equality, and the Lipschitz estimate on the
-compact value set of the comparison pair. -/
+
+
+
+
+
+
 theorem scalar_wmp_super_theorem_7_1
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2400,13 +2404,13 @@ theorem scalar_wmp_super_theorem_7_1
     (I := I) G T hT X u c F K hw_cont hw_mdiff hw_grad hu_time hc_time
     hu_space hv_space hv_grad hsuper hode hinit hF_lip
 
-/-- LaTeX Theorem 7.2, label `thm:scalar-wmp-sub`.
 
-The scalar subsolution weak maximum principle is the supersolution theorem
-applied to the sign-changed data `-u`, `-c`, and `fun a t => -F (-a) t`.  The
-regularity and operator inequality hypotheses are stated for these
-sign-changed functions, so this wrapper only performs the logical
-sign-change and delegates the maximum-principle argument to Theorem 7.1. -/
+
+
+
+
+
+
 theorem scalar_wmp_sub_theorem_7_2
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2472,12 +2476,12 @@ theorem scalar_wmp_sub_theorem_7_2
   intro t ht x
   linarith [hneg t ht x]
 
-/-- MSM110, Chapter 4, label `thm:scalar_maximum_principle_ode`.
 
-Lower-bound half of the nonlinear reaction theorem. This is the uniform
-compact-value Lipschitz route used for the book companion; monotonicity is kept
-as a book-facing hypothesis, although the current core proof only consumes the
-Lipschitz estimate on the values of `u` and `c`. -/
+
+
+
+
+
 theorem msm110_ch4_scalar_ode_lower
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]

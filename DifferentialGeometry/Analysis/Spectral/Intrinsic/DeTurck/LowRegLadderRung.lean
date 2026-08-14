@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegC2JetTower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegC01JetTower
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNorm
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmFibreSmallness
 
 /-!
 # The `k`-uniform ladder for the low-base second-order arm
@@ -54,6 +54,48 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+theorem appCc_cap_hs_affine_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : max 2 (Module.finrank ℝ E / 2 * 2 + 1) ≤ a)
+    (εC : ℝ) (hεC_nn : 0 ≤ εC) (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
+    ∃ Cop : ℕ → ℝ, (∀ m, 0 ≤ Cop m) ∧
+      ∀ {R₀ : ℝ}, 0 ≤ R₀ → ∀
+        (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 2) 2 x
+            (C₂.toSection x) ≤ εC ^ 2) →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + 2) 2 i C₂‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
+        ∀ m : ℕ,
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+              (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂
+                (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ ≤
+            εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
+              Cop m * (1 + R₀) *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
+  classical
+  obtain ⟨Clower, hCl_nn, hfam⟩ :=
+    exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_affine_le
+      (I := I) (M := M) g₀ a ha εC hεC_nn Kc hKc_nn
+  refine ⟨Clower, hCl_nn, ?_⟩
+  intro R₀ hR₀ C₂ T₀ hball hsup hjets m
+  have h := hfam hR₀ C₂ T₀ hball hsup hjets m T₀ ⟨0, rfl⟩
+  have hshift : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 : ℕ) : ℝ) T₀‖ =
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
+    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+      (by push_cast; ring) T₀
+  rw [hshift] at h
+  have hmul : εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+      εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ :=
+    mul_le_mul_of_nonneg_left
+      (smoothCcToTensorHs_rawTensorConnLapSmooth_le
+        (I := I) (M := M) g₀ (m : ℝ) T₀) hεC_nn
+  exact le_trans h (add_le_add hmul (le_refl _))
+
 /-- The `m`-form of the order-generic, coefficient-abstract operator-norm
 engine, at the engine's **own** derivative budget
 `max 2 (finrank ℝ E / 2 * 2 + 1) ≤ a` (in dimension three: `3 ≤ a`):
@@ -98,7 +140,7 @@ theorem appCc_cap_hs_le
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
   classical
   obtain ⟨Clower, hCl_nn, hfam⟩ :=
-    exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le
+    exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
       (I := I) (M := M) g₀ a ha hR₀ εC hεC_nn Kc hKc_nn
   refine ⟨Clower, hCl_nn, ?_⟩
   intro C₂ T₀ hball hsup hjets m
@@ -311,6 +353,70 @@ theorem c2_jet_tower
   refine ⟨Kc, hKc_nn, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ _ i
   exact h T hT hδ0 hδ_le hδg hδZ i
+
+theorem a2LadderQBgAffine
+    (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
+    ∃ κ : ℝ, 0 ≤ κ ∧
+      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
+      ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (m : ℕ),
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g_bg T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2
+                  (I := I) (M := M) T)‖ ≤
+            κ * (δ / (1 - δ) ^ 2) *
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 2) T‖ +
+              Clower m *
+                (1 + ‖smoothCcToTensorHs (I := I) (M := M) g (5 : ℝ) T‖) *
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ := by
+  classical
+  obtain ⟨K, hK, hsplit⟩ := lowData_split (I := I) (M := M) g g_bg
+  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerQ (I := I) (M := M) hDim g g_bg
+  refine ⟨K, hK, ?_⟩
+  intro δ hδ0 hδ_le
+  have hεC_nn : (0 : ℝ) ≤ K * (δ / (1 - δ) ^ 2) :=
+    mul_nonneg hK (div_nonneg hδ0 (sq_nonneg _))
+  obtain ⟨Cop, hCop_nn, hop⟩ :=
+    appCc_cap_hs_affine_le (I := I) (M := M) g 3 (by omega)
+      (K * (δ / (1 - δ) ^ 2)) hεC_nn Kc hKc_nn
+  refine ⟨Cop, hCop_nn, ?_⟩
+  intro T hT hδg hδZ m
+  have hball : ‖smoothCcToTensorHs (I := I) (M := M) g (((3 : ℕ) : ℝ) + 2) T‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g (5 : ℝ) T‖ := by
+    exact le_of_eq (smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g
+      (by push_cast; norm_num) T)
+  obtain ⟨A, hAdef, hc2pt, hc2jet⟩ :
+      ∃ A : LowBaseActionData g,
+        lowBaseData (I := I) (M := M) g g_bg T
+            (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ = A ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+              (A.C2.toSection x) ≤ (K * (δ / (1 - δ) ^ 2)) ^ 2) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g 4 2 i A.C2‖ ^ 2 ≤
+              Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) :=
+    ⟨lowBaseData (I := I) (M := M) g g_bg T
+        (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ, rfl,
+      (hsplit T hT hδ_le hδ0 hδg hδZ).2,
+      htower T hT hδ0 hδ_le hδg hδZ⟩
+  rw [hAdef]
+  clear hAdef
+  have hshape : A.a2 (I := I) (M := M) T =
+      appCc (I := I) (M := M) g (2 + 2) 2 A.C2
+        (iteratedCovGrad (I := I) g 0 2 2 T) := rfl
+  rw [hshape]
+  exact le_trans (hop (norm_nonneg _) A.C2 T hball hc2pt hc2jet m) (le_of_eq (by ring))
 
 set_option linter.unusedVariables false in
 /-- **The `k`-uniform ladder for the low-base second-order arm, ball-free.**
@@ -666,10 +772,10 @@ theorem a1_ladder_bg
   obtain ⟨Λ1, hΛ1_nn, hcap1⟩ :=
     coeffCap (I := I) (M := M) g 3 a (by omega) (R₀ := R₀) Kc1 hKc1_nn
   obtain ⟨Cm0, hCm0_nn, heng0⟩ :=
-    exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
+    exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
       (I := I) (M := M) g a (by omega) hR₀ Kc0 hKc0_nn Λ0 hΛ0_nn
   obtain ⟨Cm1, hCm1_nn, heng1⟩ :=
-    exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
+    exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
       (I := I) (M := M) g a (by omega) hR₀ Kc1 hKc1_nn Λ1 hΛ1_nn
   choose Chs hChs_nn hhs using fun n : ℕ =>
     exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general (I := I) (M := M) g n

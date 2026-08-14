@@ -653,7 +653,7 @@ theorem HasSuppConvData.weightSub_ev
   letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
   let beta := fun j => seqCenterD inp.decay P Lphi j (alpha.1 : Nat)
   let f : E → Y.M := fun z =>
-    NormalCoordinates.framedExpDiffeo (I := I) Y.metric (beta k) z
+    NormalCoordinates.expMapDiffeo (I := I) Y.metric (beta k) z
   let i0 := baseIndex inp.decay inp.realizes inp.pack hr
   let s : Set Y.M := ⋃ gamma : Fin (inp.pack.A r),
     Lphi.innerBall inp.decay inp.D P inp.pack r k gamma
@@ -679,7 +679,7 @@ theorem stageWeight_small
     (alpha : LiveSlot L inp.pack r) (k : Nat)
     (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack r k)
     (gamma : Fin (inp.pack.A r))
-    (hGp :
+    (hC2 :
       letI : TopologicalSpace (X.obj (L.φ k)).M :=
         (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M :=
@@ -689,7 +689,7 @@ theorem stageWeight_small
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       8 * L.lamInf (gamma : Nat) ≤
-        expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        expMapC2Radius (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (gamma : Nat)))
     (z : E) (hweight : stageWeight inp P L hr alpha k z gamma ≠ 0) :
     letI : TopologicalSpace (X.obj (L.φ k)).M :=
@@ -707,7 +707,7 @@ theorem stageWeight_small
   let beta := fun j => seqCenterD inp.decay P L j (alpha.1 : Nat)
   let i0 := baseIndex inp.decay inp.realizes inp.pack hr
   apply Metric.ball_subset_closedBall
-  apply inp.weight_trans_small P L r k hgp beta i0 gamma hGp z
+  apply inp.weight_trans_small P L r k hgp beta i0 gamma hC2 z
   simpa only [stageWeight, beta, i0] using hweight
 
 /-- Projection of `HasAtomWeightLim` to the actual chart-weight family used by
@@ -953,7 +953,7 @@ theorem stagePts_eq_weight
     (alpha : LiveSlot L inp.pack r)
     (target : InterSlot L inp.pack r alpha) (k l : Nat)
     (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack r k)
-    (hGp :
+    (hC2 :
       letI : TopologicalSpace (X.obj (L.φ k)).M :=
         (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M :=
@@ -963,7 +963,7 @@ theorem stagePts_eq_weight
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       8 * L.lamInf (target.1.1 : Nat) ≤
-        expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        expMapC2Radius (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (target.1.1 : Nat)))
     (z : E)
     (hweight : stageWeight inp P L hr alpha k z target.1.1 ≠ 0) :
@@ -975,7 +975,7 @@ theorem stagePts_eq_weight
           (seqCenterD inp.decay P L k (alpha.1 : Nat))
           (seqCenterD inp.decay P L k (target.1.1 : Nat)) z) := by
   exact stagePts_eq_raw inp P L alpha target k l z
-    (stageWeight_small inp P L hr alpha k hgp target.1.1 hGp z hweight)
+    (stageWeight_small inp P L hr alpha k hgp target.1.1 hC2 z hweight)
 
 /-- On a refined sequence, source-transition membership in the active
 six-lambda ball makes the safety-totalized target equal the raw two-transition
@@ -1075,14 +1075,14 @@ theorem stagePtsSub_eq_ne
     (target : InterSlot L inp.pack r alpha) (k l : Nat)
     (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P
       (L.subseq hphi) inp.pack r k)
-    (hGp :
+    (hC2 :
       let Y := X.obj ((L.subseq hphi).φ k)
       letI : TopologicalSpace Y.M := Y.topology
       letI : ChartedSpace H Y.M := Y.charted
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       8 * L.lamInf (target.1.1 : Nat) ≤
-        expRadiusGp (I := I) Y.metric
+        expMapC2Radius (I := I) Y.metric
           (seqCenterD inp.decay P (L.subseq hphi) k
             (target.1.1 : Nat)))
     (z : E)
@@ -1109,7 +1109,7 @@ theorem stagePtsSub_eq_ne
         Metric.closedBall 0 (6 * L.lamInf (target.1.1 : Nat)) := by
     have h := stageWeight_small inp P Lphi hr alphaPhi k hgp
       target.1.1 (by
-        simpa only [Lphi, NetLimitData.subseq_lamInf] using hGp) z (by
+        simpa only [Lphi, NetLimitData.subseq_lamInf] using hC2) z (by
         simpa only [stageWeightSub, stageWeight, alphaPhi, Lphi] using hweight)
     simpa only [Lphi, NetLimitData.subseq_lamInf] using h
   set_option maxRecDepth 2048 in
@@ -1982,7 +1982,7 @@ theorem HasSuppConvData.pts_eq_ne
   letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
   intro alpha l z hz gamma hweight
   let beta := fun j => seqCenterD inp.decay P Lphi j (alpha.1 : Nat)
-  let q := NormalCoordinates.framedExpDiffeo (I := I) Y.metric (beta k) z
+  let q := NormalCoordinates.expMapDiffeo (I := I) Y.metric (beta k) z
   have hhatAlpha : q ∈
       Lphi.hatBall inp.decay inp.D P inp.pack r k alpha.1 := by
     have hmem := ((hgeom k).1 alpha).2.2 hz
@@ -1998,8 +1998,8 @@ theorem HasSuppConvData.pts_eq_ne
   have hcurrent := Lphi.binter_of_mem_hat inp.decay inp.hD P inp.pack r k
     hhatAlpha hhatGamma
   obtain ⟨target, htarget⟩ := hslotsK alpha gamma hcurrent
-  have hGpgamma : 8 * L.lamInf (gamma : Nat) ≤
-      expRadiusGp (I := I) Y.metric
+  have hC2gamma : 8 * L.lamInf (gamma : Nat) ≤
+      expMapC2Radius (I := I) Y.metric
         (seqCenterD inp.decay P Lphi k (gamma : Nat)) := by
     have hscale : 8 * Lphi.lamInf (gamma : Nat) ≤
         item3RadiusFactor inp.decay inp.D * Lphi.lamInf (gamma : Nat) :=
@@ -2014,7 +2014,7 @@ theorem HasSuppConvData.pts_eq_ne
   refine ⟨target, htarget, ?_⟩
   simpa only [htarget] using
     (stagePtsSub_eq_ne inp P L hr phi hphi alpha target k l hgpK (by
-      simpa only [htarget] using hGpgamma) z (by
+      simpa only [htarget] using hC2gamma) z (by
       simpa only [htarget] using hweight))
 
 /-- Existing two-sided overlap tails make the Route-A filler smooth for every

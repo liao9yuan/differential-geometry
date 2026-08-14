@@ -8,16 +8,14 @@ import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Metric compatibility as `nabla g = 0`
 
-This file turns the pointwise definition of a metric-compatible connection into
-the covariant-tensor statement that the induced covariant derivative of the
-metric `(0,2)` tensor vanishes.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -28,12 +26,12 @@ set_option backward.isDefEq.respectTransparency false
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The smooth metric as a `(0,2)` tensor field at the regularity level used by
-the tensor covariant-derivative API. -/
+
+
 def metricTensorField
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) :
@@ -57,10 +55,10 @@ theorem metricTensorField_apply
     metricTensorField (I := I) g x v = g.inner x (v 0) (v 1) := by
   simp [metricTensorField]
 
-/-- Evaluation form of `∇ g = 0` on smooth tangent-field slots.
 
-This is exactly the metric-compatibility identity rewritten through
-`nabla0SFun_eval_smooth_slots`. -/
+
+
+
 theorem nabla_metric_eval
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -113,7 +111,7 @@ theorem nabla_metric_eval
   rw [heval, hsum, hderiv]
   ring
 
-/-- Tensor form of `∇ g = 0` for a metric-compatible connection. -/
+
 theorem nabla_metric_zero
     [T2Space M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -147,7 +145,7 @@ theorem nabla_metric_zero
   ext a
   exact (hV a).symm
 
-/-- The covariant derivative of the zero covariant tensor field is zero. -/
+
 theorem nabla_zero
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -195,7 +193,7 @@ theorem nabla_zero
   ext a
   exact (hV a).symm
 
-/-- The zero `(0,s+1)` tensor field realizes `∇0 = 0`. -/
+
 theorem zero_realizes_nabla
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -212,8 +210,8 @@ theorem zero_realizes_nabla
   change (0 : Real) = 0
   rfl
 
-/-- The zero `(0,3)` tensor field realizes the first covariant derivative of
-the metric tensor for a metric-compatible connection. -/
+
+
 theorem zero_realizes_metric
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -229,8 +227,9 @@ theorem zero_realizes_metric
   change (0 : Real) = 0
   rfl
 
-/-- Directional derivative product rule for scalar functions, kept private here
-to avoid adding a higher-level scalar-operator import to the tensor layer. -/
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem extDerivFun_mul_real
     {f h : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -246,11 +245,11 @@ private theorem extDerivFun_mul_real
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm,
     mul_assoc] using hprod
 
-/-- Product rule for a scalar multiple of a parallel metric tensor:
-`∇(f g) = df ⊗ g`.
 
-The one-form section `df` is supplied by a realization property, so this lemma
-stays below the scalar Hessian/realized-operator layer. -/
+
+
+
+
 theorem nabla_smul_metric
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -400,8 +399,8 @@ theorem nabla_smul_metric
           rw [show mfun x = metricSec x (fun a : Fin 2 => V a x) from rfl, hdm]
           ring
 
-/-- Canonical zero first and second covariant derivatives of the metric tensor
-for a metric-compatible connection. -/
+
+
 noncomputable def metricDerivsZero
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]

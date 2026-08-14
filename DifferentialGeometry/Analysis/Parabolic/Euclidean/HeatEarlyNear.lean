@@ -23,19 +23,24 @@ namespace Euclidean
 
 variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [Nontrivial V]
+  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 /-- The near spatial part of the early Duhamel cylinder. -/
 def earlyCyl (t : ℝ) (x : V) : Set (ℝ × V) :=
   Set.Ioc 0 (t / 2) ×ˢ Metric.ball x (heatScale t)
 
+omit [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [Nontrivial V] in
 private theorem earlyCyl_meas (t : ℝ) (x : V) :
     MeasurableSet (earlyCyl t x) :=
-  measurableSet_Ioc.prod Metric.measurableSet_ball
-
-/-- The early near cylinder is contained in the Carleson cylinder of radius
-`sqrt t`. -/
+  measurableSet_Ioc.prod measurableSet_ball
+omit [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V] in
 theorem earlyCyl_sub {t : ℝ} (ht : 0 ≤ t) (x : V) :
     earlyCyl t x ⊆ paraCyl x (heatScale t) := by
   rintro z ⟨hzs, hzy⟩
@@ -55,6 +60,10 @@ def nearHeatC (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
   ENNReal.ofReal
     ((Real.sqrt 2) ^ Module.finrank ℝ V * (baseHeatMass V)⁻¹)
 
+omit [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V] in
 /-- The heat-scale ratio between `t` and `t / 2`; this is the exact
 cancellation behind the uniform near-field estimate. -/
 theorem halfScale_cancel {t : ℝ} (ht : 0 < t) :
@@ -64,8 +73,11 @@ theorem halfScale_cancel {t : ℝ} (ht : 0 < t) :
   have hhalf : 0 < t / 2 := half_pos ht
   have hscale :
       heatScale t = Real.sqrt 2 * heatScale (t / 2) := by
-    rw [heatScale, heatScale, show t = 2 * (t / 2) by ring]
-    exact Real.sqrt_mul (by norm_num) _
+    unfold heatScale
+    calc
+      Real.sqrt t = Real.sqrt (2 * (t / 2)) := by ring_nf
+      _ = Real.sqrt 2 * Real.sqrt (t / 2) :=
+        Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2) _
   rw [hscale, mul_pow]
   calc
     ((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
@@ -78,6 +90,8 @@ theorem halfScale_cancel {t : ℝ} (ht : 0 < t) :
       rw [inv_mul_cancel₀
         (pow_ne_zero _ (heatScale_pos hhalf).ne'), mul_one]
 
+omit [CompleteSpace F]
+  [Nontrivial V] in
 /-- The actual near early heat potential is bounded in `C⁰` by the source
 Carleson constant, uniformly in the observation time. -/
 theorem heatEarlyNear_norm {T t : ℝ} {C : ℝ≥0∞}
@@ -153,11 +167,11 @@ theorem heatEarlyNear_norm {T t : ℝ} {C : ℝ≥0∞}
             ∂(stVolume : Measure (ℝ × V))) := by
         rw [lintegral_const_mul'' _ hm]
       _ ≤ ENNReal.ofReal K * srcMass f x (heatScale t) :=
-        mul_le_mul_left' hlocal _
+        mul_le_mul_right hlocal _
       _ ≤ ENNReal.ofReal K *
           (C * ENNReal.ofReal
             ((heatScale t) ^ Module.finrank ℝ V)) :=
-        mul_le_mul_left' hcarl _
+        mul_le_mul_right hcarl _
   refine hmass.trans_eq ?_
   have hreal : K * (heatScale t) ^ Module.finrank ℝ V =
       (Real.sqrt 2) ^ Module.finrank ℝ V *

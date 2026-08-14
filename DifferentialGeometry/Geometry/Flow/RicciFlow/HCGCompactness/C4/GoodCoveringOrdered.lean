@@ -4,21 +4,19 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCovering
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 §2 Step A — faithful (book-ordered) net, abstract core
 
-The book's distance-ordered greedy net (MSM135 L897–955) is built here **abstractly in
-a proper metric space** `[MetricSpace M] [ProperSpace M]`, using Mathlib's clean metric
-API (`infDist`, `isCompact_closedBall`).  This avoids the `ℝ≥0∞`/`toReal` friction of
-the Riemannian emetric.  The greedy minimiser `r^α = d(S^α,O)` is then a *genuine*
-theorem (`exists_min_dist_base`, from `ProperSpace`), not a black box.
 
-The geometric Hopf--Rinow instantiation is isolated to the instantiation layer;
-the abstract ordered-net core below is a pure proper-metric-space argument.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,13 +29,14 @@ open scoped Bundle Manifold ContDiff
 
 variable {M : Type*} [MetricSpace M] [ProperSpace M]
 
-/-- The available set (book `S^α`): points whose `λ`-ball `B(x, λ(d(x,O)))` misses the
-forbidden open set `U` (the union of previously chosen balls). -/
+
+
 def availSet (O : M) (lam : ℝ → ℝ) (U : Set M) : Set M :=
   {x | Disjoint (Metric.ball x (lam (dist x O))) U}
 
-/-- `S^α` is closed (book: "balls open ⟹ `S^α` closed").  For nonempty `U`,
-`availSet = {x | λ(d(x,O)) ≤ infDist x U}`, which is closed by continuity of both sides. -/
+
+
+omit [ProperSpace M] in
 theorem isClosed_availSet (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (U : Set M) :
     IsClosed (availSet O lam U) := by
   rcases U.eq_empty_or_nonempty with rfl | hUne
@@ -60,9 +59,9 @@ theorem isClosed_availSet (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (U
   exact isClosed_le (hlam.comp (continuous_id.dist continuous_const))
     (Metric.continuous_infDist_pt U)
 
-/-- In a proper metric space, the distance to a fixed point `O` attains its minimum over
-any nonempty closed set `S`.  This is the greedy-net minimiser `r^α = d(S^α,O)`: a
-minimising point exists in the compact slice `S ∩ closedBall O (d(s₀,O))`. -/
+
+
+
 theorem exists_min_dist_base (O : M) {S : Set M} (hScl : IsClosed S) (hSne : S.Nonempty) :
     ∃ x ∈ S, ∀ y ∈ S, dist x O ≤ dist y O := by
   obtain ⟨s₀, hs₀⟩ := hSne
@@ -79,14 +78,11 @@ theorem exists_min_dist_base (O : M) {S : Set M} (hScl : IsClosed S) (hSne : S.N
     have hx_le : dist x O ≤ dist s₀ O := Metric.mem_closedBall.mp hxball
     linarith
 
-/-- The forbidden region after choosing `prior`: the union of their `λ`-balls. -/
+
 def forbidden (O : M) (lam : ℝ → ℝ) (prior : List M) : Set M :=
   ⋃ c ∈ prior, Metric.ball c (lam (dist c O))
 
 open Classical in
-/-- The book's greedy ordered net (MSM135 L897–955) as an accumulating list of centers:
-`x^0 = O`, each step appends the `d(·,O)`-minimiser of `availSet` over the prior balls,
-stopping (the list stays put) once `availSet` is empty. -/
 def netList (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) : ℕ → List M
   | 0 => [O]
   | (α + 1) =>
@@ -106,8 +102,8 @@ theorem O_mem_netList (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : 
       · exact List.mem_append_left _ ih
       · exact ih
 
-/-- When `availSet` is nonempty at step `α`, `netList (α+1)` appends a center lying in
-`availSet` (its `λ`-ball misses every prior ball) and minimising `d(·,O)` there. -/
+
+
 theorem netList_succ_spec (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ)
     (h : (availSet O lam (forbidden O lam (netList O lam hlam α))).Nonempty) :
     ∃ x, netList O lam hlam (α + 1) = netList O lam hlam α ++ [x] ∧
@@ -122,13 +118,13 @@ theorem netList_succ_spec (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (�
         (isClosed_availSet O hlam (forbidden O lam (netList O lam hlam α))) h).choose_spec.2⟩
   rw [netList, dif_pos h]
 
-/-- The `λ`-balls of a list of centers are pairwise disjoint. -/
+
 def ballsDisjoint (O : M) (lam : ℝ → ℝ) (l : List M) : Prop :=
   l.Pairwise fun a b =>
     Disjoint (Metric.ball a (lam (dist a O))) (Metric.ball b (lam (dist b O)))
 
-/-- MSM135 net packing property: the `λ`-balls of the greedy net are pairwise disjoint.
-By induction: the appended center lies in `availSet`, so its ball misses every prior ball. -/
+
+
 theorem netList_ballsDisjoint (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     ballsDisjoint O lam (netList O lam hlam α) := by
   classical
@@ -165,8 +161,9 @@ theorem mem_netList_succ (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α
   · rw [netList_succ_stop O lam hlam α h]
     exact ha
 
-/-- A point outside `availSet` has its `λ`-ball meeting the `λ`-ball of some listed
-center. -/
+
+
+omit [ProperSpace M] in
 theorem meets_of_not_avail (O : M) (lam : ℝ → ℝ) {l : List M} {p : M}
     (hp : p ∉ availSet O lam (forbidden O lam l)) :
     ∃ c ∈ l,
@@ -176,8 +173,9 @@ theorem meets_of_not_avail (O : M) (lam : ℝ → ℝ) {l : List M} {p : M}
   obtain ⟨c, hc, hmeet⟩ := hp
   exact ⟨c, hc, hmeet⟩
 
-/-- If the meeting center is no farther from `O` than `p`, the meeting upgrades to the
-book's doubled-ball estimate `dist p c < 2λ(d(c,O))` (using that `λ` is antitone). -/
+
+
+omit [ProperSpace M] in
 theorem dist_lt_two_lam {lam : ℝ → ℝ} (hanti : Antitone lam) {O p c : M}
     (hcd : dist c O ≤ dist p O)
     (hmeet : ¬ Disjoint (Metric.ball p (lam (dist p O))) (Metric.ball c (lam (dist c O)))) :
@@ -189,12 +187,12 @@ theorem dist_lt_two_lam {lam : ℝ → ℝ} (hanti : Antitone lam) {O p c : M}
   rw [dist_comm q p] at hqp
   linarith
 
-/-- MSM135 `lbl387` cover core (book L974–1004): if the greedy net at stage `α` has
-stopped (`availSet = ∅`), or has already chosen a center farther from `O` than `p`,
-then `p` lies within `2λ(d(c,O))` of some center `c` with `d(c,O) ≤ d(p,O)`.  This is
-the pointwise form of the book's doubled-ball cover `B(O,r) ⊆ ⋃ B(x^α, 2λ[r^α])`,
-with the exact factor `2`; the book's minimality reductio is the `hxmin`/`hpastα`
-case analysis. -/
+
+
+
+
+
+
 theorem netList_cover (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (hanti : Antitone lam)
     (p : M) :
     ∀ α : ℕ,
@@ -267,12 +265,14 @@ theorem netList_cover (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (hanti
           rw [netList_succ_stop O lam hlam α h]
           exact hc
 
-/-- `availSet` is antitone in the forbidden region. -/
+
+omit [ProperSpace M] in
 theorem availSet_antitone (O : M) (lam : ℝ → ℝ) {U V : Set M} (hUV : U ⊆ V) :
     availSet O lam V ⊆ availSet O lam U :=
   fun _ hx => hx.mono_right hUV
 
-/-- `forbidden` is monotone in the (membership of the) center list. -/
+
+omit [ProperSpace M] in
 theorem forbidden_mono (O : M) (lam : ℝ → ℝ) {l l' : List M} (h : ∀ a ∈ l, a ∈ l') :
     forbidden O lam l ⊆ forbidden O lam l' := by
   intro z hz
@@ -280,14 +280,14 @@ theorem forbidden_mono (O : M) (lam : ℝ → ℝ) {l l' : List M} (h : ∀ a �
   obtain ⟨c, hc, hzc⟩ := hz
   exact ⟨c, h c hc, hzc⟩
 
-/-- Along the greedy recursion, `availSet` shrinks (book: `S^{α+1} ⊆ S^α`). -/
+
 theorem availSet_succ_subset (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     availSet O lam (forbidden O lam (netList O lam hlam (α + 1))) ⊆
       availSet O lam (forbidden O lam (netList O lam hlam α)) :=
   availSet_antitone O lam
     (forbidden_mono O lam fun _ ha => mem_netList_succ O lam hlam α ha)
 
-/-- Every chosen center lies no farther from `O` than any still-available point. -/
+
 theorem netList_dist_le_avail (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     ∀ c ∈ netList O lam hlam α,
       ∀ y ∈ availSet O lam (forbidden O lam (netList O lam hlam α)),
@@ -312,8 +312,8 @@ theorem netList_dist_le_avail (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam
       · rw [netList_succ_stop O lam hlam α h] at hc
         exact ih c hc y hyα
 
-/-- MSM135 (book L897–955): the greedy net is sorted by distance to the basepoint —
-the radii `r^α = d(x^α, O)` are non-decreasing along the order of choice. -/
+
+
 theorem netList_sorted (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     (netList O lam hlam α).Pairwise fun a b => dist a O ≤ dist b O := by
   induction α with
@@ -332,9 +332,9 @@ theorem netList_sorted (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α :
       · rw [netList_succ_stop O lam hlam α h]
         exact ih
 
-/-- Distinct centers of the greedy net are `λ`-separated: if `d(x,O) ≤ r` then
-`λ(r) ≤ d(x,y)`.  The `λ`-balls are pairwise disjoint, so two centers are at least one
-ball-radius apart. -/
+
+
+
 theorem netList_separated (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) (α : ℕ)
     {x y : M} (hx : x ∈ netList O lam hlam α) (hy : y ∈ netList O lam hlam α)
@@ -354,9 +354,9 @@ theorem netList_separated (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     exact lt_of_lt_of_le hlt (hanti hxr)
   exact Set.disjoint_left.mp hdisj hyx (Metric.mem_ball_self (hpos _))
 
-/-- MSM135 `lbl387` count (second half) on the ordered net: given the abstract
-volume/packing input `pack` (Bishop--Gromov, supplied at instantiation), any finite
-set of net centers within distance `r` of `O` has at most `A r` elements. -/
+
+
+
 theorem netList_count_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) {A : ℝ → ℕ}
     (pack : ∀ (r : ℝ) (J : Finset M), (∀ x ∈ J, dist x O ≤ r) →
@@ -368,8 +368,8 @@ theorem netList_count_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
   pack r J hJr fun x hx y hy hxy =>
     netList_separated O hlam hanti hpos α (hJl x hx) (hJl y hy) hxy (hJr x hx)
 
-/-- MSM135 `lbl389` lower bound: every center other than the basepoint is at distance
-at least `λ(0)` from it (its `λ`-ball is disjoint from the basepoint's). -/
+
+
 theorem netList_dist_ge (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) (α : ℕ)
     {c : M} (hc : c ∈ netList O lam hlam α) (hcO : c ≠ O) :
@@ -378,13 +378,13 @@ theorem netList_dist_ge (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     hcO.symm (le_of_eq (dist_self O))
   rwa [dist_comm] at h
 
-/-- MSM135 `lbl389` upper bound (center-distance bound `r^α ≤ 2αλ[0]`): if every
-distance value in `[0, d(p,O)]` is attained (`hint`, the intermediate-distance input
-supplied by Hopf--Rinow minimizing geodesics at instantiation), then every center of
-the stage-`α` net is within `2αλ(0)` of the basepoint.  The book's "string of balls"
-sketch is made rigorous as the jump bound `r^{α+1} ≤ r^α + 2λ(0)`: any attained
-distance below the new center's is non-available, hence within `2λ(0)` of an earlier
-center. -/
+
+
+
+
+
+
+
 theorem netList_dist_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s)
     (hint : ∀ p : M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p O → ∃ q : M, dist q O = t)
@@ -436,8 +436,8 @@ theorem netList_dist_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
         push_cast
         nlinarith
 
-/-- MSM135 `lbl391` smaller-ball disjointness: shrinking the radii (e.g. to `λ/2` for
-the `B̃` balls) preserves the pairwise disjointness of the net balls. -/
+
+
 theorem netList_disjoint_of_le (O : M) {lam lam' : ℝ → ℝ} (hlam : Continuous lam)
     (hle : ∀ s : ℝ, lam' s ≤ lam s) (α : ℕ) :
     (netList O lam hlam α).Pairwise fun a b =>
@@ -448,7 +448,7 @@ theorem netList_disjoint_of_le (O : M) {lam lam' : ℝ → ℝ} (hlam : Continuo
   exact h.imp fun hd =>
     hd.mono (Metric.ball_subset_ball (hle _)) (Metric.ball_subset_ball (hle _))
 
-/-! ### Index API: the book's `x^α`, `r^α` -/
+
 
 theorem netList_prefix (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α β : ℕ}
     (h : α ≤ β) : netList O lam hlam α <+: netList O lam hlam β := by
@@ -462,7 +462,7 @@ theorem netList_prefix (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α �
         exact List.prefix_append _ _
       · rw [netList_succ_stop O lam hlam β hav]
 
-/-- Once the available set is empty, the net never changes again. -/
+
 theorem netList_stall (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α β : ℕ} (h : α ≤ β)
     (hav : ¬ (availSet O lam (forbidden O lam (netList O lam hlam α))).Nonempty) :
     netList O lam hlam β = netList O lam hlam α := by
@@ -487,7 +487,7 @@ theorem netList_length_le (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (�
       · rw [netList_succ_stop O lam hlam α h]
         omega
 
-/-- If the net fired at every stage below `α`, its stage-`α` list is full. -/
+
 theorem netList_length_full (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ)
     (h : ∀ γ < α, (availSet O lam (forbidden O lam (netList O lam hlam γ))).Nonempty) :
     (netList O lam hlam α).length = α + 1 := by
@@ -498,8 +498,8 @@ theorem netList_length_full (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
       rw [hxeq, List.length_append, List.length_singleton,
         ih fun γ hγ => h γ (hγ.trans (Nat.lt_succ_self α))]
 
-/-- Aliveness propagates downward: a position visible at a later stage was already
-alive at its own stage. -/
+
+
 theorem netList_alive_of_le (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {γ β : ℕ}
     (h : γ ≤ β) (hβ : γ < (netList O lam hlam β).length) :
     γ < (netList O lam hlam γ).length := by
@@ -516,7 +516,7 @@ theorem netList_alive_of_le (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
   rw [hstall] at hβ
   omega
 
-/-- The centers are pairwise distinct (their disjoint `λ`-balls are nonempty). -/
+
 theorem netList_nodup (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hpos : ∀ s : ℝ, 0 < lam s) (α : ℕ) : (netList O lam hlam α).Nodup := by
   have h := netList_ballsDisjoint O lam hlam α
@@ -525,7 +525,7 @@ theorem netList_nodup (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     exact Set.disjoint_left.mp hd (Metric.mem_ball_self (hpos _))
       (Metric.mem_ball_self (hpos _))
 
-/-- The book's `x^α`: the `α`-th net center, when the net is still alive at stage `α`. -/
+
 noncomputable def netCenter (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     Option M :=
   (netList O lam hlam α)[α]?
@@ -533,11 +533,11 @@ noncomputable def netCenter (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
 theorem netCenter_eq (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     netCenter O lam hlam α = (netList O lam hlam α)[α]? := rfl
 
-/-- MSM135 `lbl383` item 1: the zeroth center is the basepoint, `x^0 = O`. -/
+
 theorem netCenter_zero (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) :
     netCenter O lam hlam 0 = some O := rfl
 
-/-- An existing `α`-th center witnesses that the stage-`α` list is full at `α`. -/
+
 theorem netCenter_lt_length (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α : ℕ}
     {x : M} (hx : netCenter O lam hlam α = some x) :
     α < (netList O lam hlam α).length := by
@@ -546,7 +546,7 @@ theorem netCenter_lt_length (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
   rw [netCenter_eq, List.getElem?_eq_none h] at hx
   simp at hx
 
-/-- The book's `r^α = d(x^α, O)` (junk value `0` when the net has died). -/
+
 noncomputable def netRadius (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) : ℝ :=
   match netCenter O lam hlam α with
   | some x => dist x O
@@ -563,8 +563,8 @@ theorem netCenter_mem (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : 
   rw [netCenter_eq] at hx
   exact List.mem_of_getElem? hx
 
-/-- The `α`-th radius lies in `[0, 2αλ(0)]` (the `lbl389` window; junk `0` when dead).
-This is the boundedness input for the Bolzano--Weierstrass diagonalization. -/
+
+
 theorem netRadius_mem (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s)
     (hint : ∀ p : M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p O → ∃ q : M, dist q O = t) (α : ℕ) :
@@ -578,7 +578,7 @@ theorem netRadius_mem (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
       exact ⟨dist_nonneg,
         netList_dist_le O hlam hanti hpos hint α x (netCenter_mem O lam hlam α hc)⟩
 
-/-- The `α`-th center read at any later stage agrees with `netCenter`. -/
+
 theorem netCenter_of_stage (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {γ β : ℕ}
     (h : γ ≤ β) (hβ : γ < (netList O lam hlam β).length) :
     netCenter O lam hlam γ = (netList O lam hlam β)[γ]? := by
@@ -586,7 +586,7 @@ theorem netCenter_of_stage (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {
   obtain ⟨t, ht⟩ := netList_prefix O lam hlam h
   rw [netCenter_eq, ← ht, List.getElem?_append_left hγ]
 
-/-- Stage stability: an existing center persists to all later stages. -/
+
 theorem netCenter_stable (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α β : ℕ}
     (h : α ≤ β) {x : M} (hx : netCenter O lam hlam α = some x) :
     (netList O lam hlam β)[α]? = some x := by
@@ -595,7 +595,7 @@ theorem netCenter_stable (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α
   rw [← ht, List.getElem?_append_left hlen, ← netCenter_eq]
   exact hx
 
-/-- Distinct indices carry distinct centers (the net list has no duplicates). -/
+
 theorem netCenter_ne (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hpos : ∀ s : ℝ, 0 < lam s) {α β : ℕ} (hαβ : α ≠ β) {x y : M}
     (hx : netCenter O lam hlam α = some x) (hy : netCenter O lam hlam β = some y) :
@@ -622,7 +622,7 @@ theorem netCenter_ne (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
   · exact hαβ h
   · exact (List.pairwise_iff_getElem.mp hnd) β α hβl hαl h (hgβ.trans hgα.symm)
 
-/-- The `λ`-balls of two distinct-index centers are disjoint. -/
+
 theorem netCenter_disjoint (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hpos : ∀ s : ℝ, 0 < lam s) {α β : ℕ} (hαβ : α ≠ β) {x y : M}
     (hx : netCenter O lam hlam α = some x) (hy : netCenter O lam hlam β = some y) :
@@ -640,9 +640,9 @@ theorem netCenter_disjoint (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     fun a b h => h.symm
   exact hpd.forall hsymm hxm hym hxy
 
-/-- Index-vs-count (book's `α ≤ A(r)` indexing): if the `α`-th center exists within
-distance `r` of `O`, then `α < A r`.  Sortedness makes `{γ : r^γ ≤ r}` a prefix, and
-the packing input bounds its cardinality. -/
+
+
+
 theorem netCenter_index_lt (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) {A : ℝ → ℕ}
     (pack : ∀ (r : ℝ) (J : Finset M), (∀ x ∈ J, dist x O ≤ r) →
@@ -678,9 +678,9 @@ theorem netCenter_index_lt (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (fun y hy => List.mem_toFinset.mp hy) hmemr
   omega
 
-/-- Saturation: for every radius `r` some stage is past-`r` or stopped (else the sorted
-net would put more than `A r` distinct centers inside `B(O,r)`).  This feeds the cover
-hypothesis of `netList_cover`. -/
+
+
+
 theorem netList_passes (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) {A : ℝ → ℕ}
     (pack : ∀ (r : ℝ) (J : Finset M), (∀ x ∈ J, dist x O ≤ r) →
@@ -711,14 +711,13 @@ section Instantiation
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
-    (ip : InnerProductSpace Real E)
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
@@ -750,7 +749,6 @@ private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
   letI rb := Y.riemBundle (I := I)
   letI hInner := Y.riemInner (I := I)
   haveI hCont := Y.riemBundle_cont (I := I)
-  letI : InnerProductSpace Real E := ip
   have hcomplete :
       (letI : EMetricSpace Y.M := EMetricSpace.ofRiemannianMetric I Y.M
        CompleteSpace Y.M) := by
@@ -779,14 +777,14 @@ private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
               (I := I) Y.metric x v)) Y.basepoint
     simpa using hhint
 
-/-- A complete, connected pointed Riemannian
-manifold carries a proper metric-space structure realizing its Riemannian emetric
-(`PointedRiemannianManifold.emetricSpace`), in which moreover every value in
-`[0, d(p,O)]` is attained as a distance to the basepoint (along a minimizing
-geodesic).  These are the `[ProperSpace]` and `hint` inputs of the abstract
-`OrderedNet` layer. -/
+
+
+
+
+
+
+omit [CompleteSpace E] in
 theorem exists_proper_realization {I : ModelWithCorners Real E H}
-    [InnerProductSpace Real E]
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
@@ -802,11 +800,11 @@ theorem exists_proper_realization {I : ModelWithCorners Real E H}
       (letI : MetricSpace Y.M := ms
        ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
          ∃ q : Y.M, dist q Y.basepoint = t) := by
-  exact exists_proper_realization_aux (I := I) (ip := inferInstance) Y hc hconn
+  exact exists_proper_realization_aux (I := I) Y hc hconn
 
-/-- The realized proper metric package on one pointed Riemannian manifold: the
-`MetricSpace` realizing the Riemannian emetric, its properness, and the
-intermediate-distance property.  Produced from the checked Hopf--Rinow adapter by choice. -/
+
+
+
 structure ProperMetricOn {I : ModelWithCorners Real E H}
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) where
   ms : MetricSpace Y.M
@@ -821,8 +819,9 @@ structure ProperMetricOn {I : ModelWithCorners Real E H}
     ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
       ∃ q : Y.M, dist q Y.basepoint = t
 
-/-- The topology induced by a realized proper metric is the stored manifold
-topology. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) :
@@ -860,9 +859,8 @@ theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
   change P.ms.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace = Y.topology
   rw [htop, hcan]
 
-/-- Choice form of Hopf--Rinow proper metric realization. -/
+
 noncomputable def properMetricOn {I : ModelWithCorners Real E H}
-    [InnerProductSpace Real E]
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
@@ -885,9 +883,9 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u', uE', uH'} (I := I)}
 
-/-- The book's per-manifold ordered net: the abstract greedy net run in the realized
-proper metric of the `k`-th manifold, with the covering radius `λ` of MSM135
-eq (`lbl386`). -/
+
+
+
 noncomputable def orderedNet (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) :
     List ((X.obj k).M) :=
@@ -895,8 +893,8 @@ noncomputable def orderedNet (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netList (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
-/-- The realized metric agrees with the supplied sequence distance (both realize the
-Riemannian emetric). -/
+
+
 theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (k : Nat) (x y : (X.obj k).M) :
@@ -909,8 +907,8 @@ theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
     (letI : MetricSpace (X.obj k).M := (P k).ms
      dist_nonneg) (hre.dist_nonneg k x y)).mp h2
 
-/-- The Bishop--Gromov packing input (`PackingBound`) transferred to the realized
-metric: the abstract `pack` hypothesis of the ordered-net layer. -/
+
+
 theorem packingBound_pack (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) {D : Real} (pb : hd.PackingBound D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :

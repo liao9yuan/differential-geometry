@@ -10,25 +10,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 
-/-!
-# The smooth Ricci–DeTurck remainder and the smooth-tensor spectral embedding (shared defs)
-
-This file hosts the two **shared** definitions used by both the smooth-ball Lipschitz tower
-(`DeTurckRemainderTameLipschitz.lean`) and the Sobolev nonlinearity existence assembly
-(`SobolevNonlinearityExistence.lean`):
-
-* `deTurckSmoothRemainder` — the genuine Ricci–DeTurck remainder of a smooth fibre-small
-  perturbation, as a smooth `(0,2)`-tensor
-  `deTurckRHSSection g_bg (g₀ + T) − rawTensorConnLapSmooth g₀ 0 2 T`.
-* `smoothCcToTensorHs` — the canonical embedding of smooth compactly-supported tensors into
-  the spectral Sobolev scale `tensorHs g₀ 0 2 σ` (the `L²`-coordinate read-off).
-
-Both definitions use the **sorry-free intrinsic objects directly** — no chart-rough evaluation
-and no finite-support / `realizableAt` gating.  They live here, upstream of the tame-Lipschitz
-tower, so that the tower (which consumes them) does not import the existence assembly that
-consumes the tower's ball-uniform bound.
--/
-
 noncomputable section
 
 open Bundle MeasureTheory Set Filter
@@ -48,30 +29,16 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The genuine Ricci–DeTurck remainder of a SMOOTH fibre-small perturbation, as a smooth
-`(0,2)`-tensor.**
-
-For the initial metric `g₀`, DeTurck background `g_bg`, and a smooth compactly-supported
-`(0,2)`-tensor `T` whose symmetrization is `g₀`-fibre small with constant `δ < 1` (so
-`g₀ + T` is a genuine `SmoothRiemannianMetric` via `tensorSectionRealizeMetric`), this is
-the smooth tensor
-
-  `deTurckRHSSection g_bg (g₀ + T) − rawTensorConnLapSmooth g₀ 0 2 T`
-
-(the intrinsic Ricci–DeTurck right-hand side of the realized metric, minus the connection
-Laplacian of the perturbation — the gauge-cancelled first-order remainder).  Because the
-input is smooth this uses the **sorry-free intrinsic objects directly**: no chart-rough
-evaluation, no finite-support / `realizableAt` gating. -/
 def deTurckSmoothRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     SmoothCcTensor g₀ 0 2 :=
   { toSection :=
       (deTurckRHSSection (I := I) g_bg
@@ -81,12 +48,6 @@ def deTurckSmoothRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
         (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).hasCompactSupport }
   - rawTensorConnLapSmooth (I := I) g₀ 0 2 T
 
-/-- **The canonical embedding of smooth tensors into the spectral Sobolev scale.**
-
-A smooth compactly-supported `(0,2)`-tensor `T` is sent to the order-`σ` spectral element
-whose eigenbasis coordinates are the `L²` coordinates of `T` (`SmoothCcTensor.toL2 T`).  Its
-`H^σ` membership is `smoothCcTensor_tensorL2Coeff_weighted_summable` (smooth data is in every
-`H^σ`).  This is the genuine, total, non-gating inclusion `SmoothCcTensor g₀ 0 2 → H^σ`. -/
 def smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (T : SmoothCcTensor g₀ 0 2) :
     tensorHs (I := I) (M := M) g₀ 0 2 σ where
@@ -98,7 +59,6 @@ def smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ σ T
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
 
-/-- The eigenbasis coordinate of the smooth-tensor embedding is the `L²` coordinate of `T`. -/
 @[simp] theorem smoothCcToTensorHs_coeff (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (T : SmoothCcTensor g₀ 0 2)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -176,40 +136,40 @@ lemma deTurckArmContractionThreshold_lt_one' (n : ℕ) [NeZero n] :
     deTurckArmContractionThreshold n < 1 :=
   deTurckArmContractionThreshold_lt_one (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
 
-def deTurckArmContractionThreshold'' (n : ℕ) : ℝ :=
+def deTurckArmContractionThresholdSharp (n : ℕ) : ℝ :=
   1 / (1 + 2 * (deTurckArmFibreConst n + 32 * deTurckArmFibreConst n ^ 3))
 
 lemma deTurckArmContractionThreshold''_pos (n : ℕ) :
-    0 < deTurckArmContractionThreshold'' n := by
-  unfold deTurckArmContractionThreshold''
+    0 < deTurckArmContractionThresholdSharp n := by
+  unfold deTurckArmContractionThresholdSharp
   have hf : 0 ≤ deTurckArmFibreConst n := deTurckArmFibreConst_nonneg n
   have hf3 : 0 ≤ deTurckArmFibreConst n ^ 3 := by positivity
   exact one_div_pos.mpr (by linarith)
 
 lemma deTurckArmContractionThreshold''_le {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n ≤ deTurckArmContractionThreshold n := by
+    deTurckArmContractionThresholdSharp n ≤ deTurckArmContractionThreshold n := by
   have hC := one_le_deTurckArmFibreConst hn
-  unfold deTurckArmContractionThreshold'' deTurckArmContractionThreshold
+  unfold deTurckArmContractionThresholdSharp deTurckArmContractionThreshold
   have hC3 : 0 ≤ deTurckArmFibreConst n ^ 3 := by positivity
   apply one_div_le_one_div_of_le (by linarith)
   linarith
 
 lemma deTurckArmContractionThreshold''_le_third {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n ≤ 1 / 3 :=
+    deTurckArmContractionThresholdSharp n ≤ 1 / 3 :=
   le_trans (deTurckArmContractionThreshold''_le hn)
     (deTurckArmContractionThreshold_le_third hn)
 
 lemma deTurckArmContractionThreshold''_lt_one {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n < 1 :=
+    deTurckArmContractionThresholdSharp n < 1 :=
   lt_of_le_of_lt (deTurckArmContractionThreshold''_le_third hn)
     (by norm_num : (1 : ℝ) / 3 < 1)
 
 lemma deTurckArmContractionThreshold''_le_third' (n : ℕ) [NeZero n] :
-    deTurckArmContractionThreshold'' n ≤ 1 / 3 :=
+    deTurckArmContractionThresholdSharp n ≤ 1 / 3 :=
   deTurckArmContractionThreshold''_le_third (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
 
 lemma deTurckArmContractionThreshold''_lt_one' (n : ℕ) [NeZero n] :
-    deTurckArmContractionThreshold'' n < 1 :=
+    deTurckArmContractionThresholdSharp n < 1 :=
   deTurckArmContractionThreshold''_lt_one (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
 
 lemma deTurckArmFibreConst_mul_div_le_half {n : ℕ} (hn : 1 ≤ n) {δ : ℝ}

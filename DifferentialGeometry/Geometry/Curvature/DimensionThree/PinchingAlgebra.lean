@@ -3,34 +3,34 @@ import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Positivity
 
-/-!
-# Three-dimensional pinching algebra
 
-This file contains the pure eigenvalue algebra used in Hamilton's three
-dimensional pinching argument.  It is intentionally independent of the synthetic
-Ricci-flow layer and of geometric realization data.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
 variable {R : Type*}
 
-/-- Scalar curvature written as the sum of three Ricci eigenvalues. -/
+
 def ricciEigenScalar3 [CommRing R] (l1 l2 l3 : R) : R :=
   l1 + l2 + l3
 
-/-- Squared Ricci norm written in Ricci eigenvalues. -/
+
 def ricciEigenNormSq3 [CommRing R] (l1 l2 l3 : R) : R :=
   l1 ^ 2 + l2 ^ 2 + l3 ^ 2
 
-/-- Squared Ricci norm in eigenvalue variables is nonnegative. -/
+
 theorem ricciEigenNormSq3_nonneg
     [Field R] [LinearOrder R] [IsStrictOrderedRing R] (l1 l2 l3 : R) :
     0 <= ricciEigenNormSq3 l1 l2 l3 := by
   unfold ricciEigenNormSq3
   positivity
 
-/-- If the Ricci eigenvalues are nonnegative, then `|Ric|^2 <= R^2`. -/
+
 theorem ricciEigenNormSq3_le_scalar_sq_of_nonnegative
     [Field R] [LinearOrder R] [IsStrictOrderedRing R]
     (l1 l2 l3 : R) (h1 : 0 <= l1) (h2 : 0 <= l2) (h3 : 0 <= l3) :
@@ -38,31 +38,31 @@ theorem ricciEigenNormSq3_le_scalar_sq_of_nonnegative
   unfold ricciEigenNormSq3 ricciEigenScalar3
   nlinarith
 
-/-- Cubic trace `tr(Ric^3)` written in Ricci eigenvalues. -/
+
 def ricciEigenTraceCube3 [CommRing R] (l1 l2 l3 : R) : R :=
   l1 ^ 3 + l2 ^ 3 + l3 ^ 3
 
-/-- Hamilton's cubic reaction quantity `Q` in dimension three, in Ricci eigenvalues. -/
+
 def hamiltonCubicQ3 [CommRing R] (l1 l2 l3 : R) : R :=
   2 * ricciEigenNormSq3 l1 l2 l3 ^ 2 +
     ricciEigenScalar3 l1 l2 l3 ^ 4 -
     5 * ricciEigenScalar3 l1 l2 l3 ^ 2 * ricciEigenNormSq3 l1 l2 l3 +
     4 * ricciEigenScalar3 l1 l2 l3 * ricciEigenTraceCube3 l1 l2 l3
 
-/-- Factorized form of Hamilton's cubic `Q`, Lemma 10.7 in eigenvalue form. -/
+
 def hamiltonCubicQFactorized3 [CommRing R] (l1 l2 l3 : R) : R :=
   (l1 - l2) ^ 2 * (ricciEigenScalar3 l1 l2 l3 - 2 * l3) ^ 2 +
     (l1 - l3) ^ 2 * (ricciEigenScalar3 l1 l2 l3 - 2 * l2) ^ 2 +
     (l2 - l3) ^ 2 * (ricciEigenScalar3 l1 l2 l3 - 2 * l1) ^ 2
 
-/-- LaTeX Lemma 10.7: Hamilton's cubic `Q` factorizes into eigenvalue gaps. -/
+
 theorem hamiltonCubicQ3_factorized [CommRing R] (l1 l2 l3 : R) :
     hamiltonCubicQ3 l1 l2 l3 = hamiltonCubicQFactorized3 l1 l2 l3 := by
   unfold hamiltonCubicQ3 hamiltonCubicQFactorized3 ricciEigenScalar3 ricciEigenNormSq3
     ricciEigenTraceCube3
   ring
 
-/-- Hamilton's cubic `Q` is nonnegative in dimension three. -/
+
 theorem hamiltonCubicQ3_nonneg
     [Field R] [LinearOrder R] [IsStrictOrderedRing R] (l1 l2 l3 : R) :
     0 <= hamiltonCubicQ3 l1 l2 l3 := by
@@ -70,15 +70,15 @@ theorem hamiltonCubicQ3_nonneg
   unfold hamiltonCubicQFactorized3
   positivity
 
-/-- Pairwise eigenvalue-gap square sum. -/
+
 def ricciEigenPairwiseGapSq3 [CommRing R] (l1 l2 l3 : R) : R :=
   (l1 - l2) ^ 2 + (l1 - l3) ^ 2 + (l2 - l3) ^ 2
 
-/-- Trace-free Ricci norm in dimension three, written in eigenvalue gaps. -/
+
 def tracefreeRicciEigenNormSq3 [Field R] (l1 l2 l3 : R) : R :=
   ricciEigenPairwiseGapSq3 l1 l2 l3 / 3
 
-/-- Trace-free Ricci norm in eigenvalue variables is nonnegative. -/
+
 theorem tracefreeRicciEigenNormSq3_nonneg
     [Field R] [LinearOrder R] [IsStrictOrderedRing R] (l1 l2 l3 : R) :
     0 <= tracefreeRicciEigenNormSq3 l1 l2 l3 := by
@@ -88,8 +88,8 @@ theorem tracefreeRicciEigenNormSq3_nonneg
   unfold tracefreeRicciEigenNormSq3
   exact div_nonneg hpair (by norm_num)
 
-/-- Vanishing trace-free Ricci norm in eigenvalue variables is exactly equality
-of all three eigenvalues. -/
+
+
 theorem tracefreeRicciEigenNormSq3_eq_zero_iff
     (l1 l2 l3 : Real) :
     tracefreeRicciEigenNormSq3 l1 l2 l3 = 0 <->
@@ -115,14 +115,14 @@ theorem tracefreeRicciEigenNormSq3_eq_zero_iff
     subst l3
     simp [tracefreeRicciEigenNormSq3, ricciEigenPairwiseGapSq3]
 
-/-- Hamilton's factorized `Q` after setting
-`l1 = z + b + a`, `l2 = z + b`, `l3 = z`. -/
+
+
 def hamiltonCubicQOrderedGaps3 [CommRing R] (a b z : R) : R :=
   a ^ 2 * (z + a + 2 * b) ^ 2 +
     (a + b) ^ 2 * (z + a) ^ 2 +
     b ^ 2 * (z - a) ^ 2
 
-/-- Pairwise eigenvalue-gap square sum in ordered-gap variables. -/
+
 def orderedEigenPairwiseGapSq3 [CommRing R] (a b : R) : R :=
   a ^ 2 + (a + b) ^ 2 + b ^ 2
 
@@ -155,8 +155,8 @@ theorem hamiltonCubicQOrderedGaps3_ge_zSq_pairwise
     positivity
   nlinarith
 
-/-- Lemma 10.8 in ordered-gap variables. The hypotheses are the algebraic
-content of `Ric >= delta R g` after diagonalizing and ordering eigenvalues. -/
+
+
 theorem hamiltonCubicQOrderedGaps3_lower_bound
     [Field R] [LinearOrder R] [IsStrictOrderedRing R]
     (a b z delta scalar ricciNormSq : R)
@@ -191,10 +191,10 @@ theorem hamiltonCubicQOrderedGaps3_lower_bound
   rw [hthree] at hscaled
   exact le_trans hscaled hgap_ge
 
-/-- Lemma 10.8 in ordered Ricci eigenvalues. This is the polynomial/inequality
-core of the lower bound `Q >= 2 delta^2 |Ric|^2 |Ric°|^2`; the geometric
-diagonalization and translation of `Ric >= delta R g` are separate realization
-steps. -/
+
+
+
+
 theorem hamiltonCubicQ3_lower_bound_ordered_eigenvalues
     [Field R] [LinearOrder R] [IsStrictOrderedRing R]
     (l1 l2 l3 delta : R)
@@ -240,8 +240,8 @@ theorem hamiltonCubicQ3_lower_bound_ordered_eigenvalues
   rw [htf_gap, hQ_gap]
   exact hgap_lower
 
-/-- LaTeX Lemma 10.8 with `|Ric|^2 <= R^2` derived from nonnegative Ricci
-eigenvalues instead of supplied as a separate hypothesis. -/
+
+
 theorem hamiltonCubicQ3_lower_bound_ordered_nonnegative_eigenvalues
     [Field R] [LinearOrder R] [IsStrictOrderedRing R]
     (l1 l2 l3 delta : R)
@@ -259,10 +259,10 @@ theorem hamiltonCubicQ3_lower_bound_ordered_nonnegative_eigenvalues
     hpinch
     (ricciEigenNormSq3_le_scalar_sq_of_nonnegative l1 l2 l3 h1 h2 h3)
 
-/-- Hamilton-ready form of Lemma 10.8: if `epsilon <= 2 delta^2`, then the
-reaction bracket from Lemma 10.6 is nonnegative.  This version keeps the
-`|Ric|^2 <= R^2` input explicit, so it can be used with either nonnegative
-eigenvalues or a separate geometric norm bound. -/
+
+
+
+
 theorem hamQ3_sub_nonneg
     (l1 l2 l3 delta epsilon : Real)
     (h12 : l2 <= l1) (h23 : l3 <= l2)
@@ -310,9 +310,9 @@ theorem hamQ3_sub_nonneg
           tracefreeRicciEigenNormSq3 l1 l2 l3 := by ring
   nlinarith
 
-/-- Pointwise eigenvalue context for the algebraic inputs to Hamilton's later
-pinching estimate: ordered nonnegative Ricci eigenvalues and the lower Ricci
-pinch `delta * R <= l3`. -/
+
+
+
 structure PinchEigen3 (l1 l2 l3 delta : Real) : Prop where
   ord12 : l2 <= l1
   ord23 : l3 <= l2
@@ -336,7 +336,7 @@ theorem norm_le_scalar_sq {l1 l2 l3 delta : Real}
   ricciEigenNormSq3_le_scalar_sq_of_nonnegative
     l1 l2 l3 h.nonneg1 h.nonneg2 h.nonneg3
 
-/-- Packaged Lemma 10.8 for Hamilton-positive-Ricci consumers. -/
+
 theorem q_lower {l1 l2 l3 delta : Real}
     (h : PinchEigen3 l1 l2 l3 delta) :
     2 * delta ^ 2 * ricciEigenNormSq3 l1 l2 l3 *
@@ -346,7 +346,7 @@ theorem q_lower {l1 l2 l3 delta : Real}
     l1 l2 l3 delta h.ord12 h.ord23 h.nonneg1 h.nonneg2 h.nonneg3
     h.delta_nonneg h.lower
 
-/-- Packaged reaction-bracket nonnegativity for the Lemma 10.6 RHS. -/
+
 theorem q_sub_nonneg {l1 l2 l3 delta epsilon : Real}
     (h : PinchEigen3 l1 l2 l3 delta)
     (hepsilon : epsilon <= 2 * delta ^ 2) :
@@ -358,9 +358,9 @@ theorem q_sub_nonneg {l1 l2 l3 delta epsilon : Real}
 
 end PinchEigen3
 
-/-- Pointwise eigenvalue context for Section 9 pinching before choosing an
-ordering of the Ricci eigenvalues.  Geometry supplies these inequalities by
-evaluating `Ric >= 0` and `Ric >= delta R g` on an orthonormal eigenbasis. -/
+
+
+
 structure PinchEigen3Unordered (l1 l2 l3 delta : Real) : Prop where
   nonneg1 : 0 <= l1
   nonneg2 : 0 <= l2
@@ -460,7 +460,7 @@ private theorem q_expr_perm_123_321
     ricciEigenPairwiseGapSq3 ricciEigenScalar3 ricciEigenTraceCube3
   ring
 
-/-- Packaged Lemma 10.8 for unordered pointwise eigenvalues. -/
+
 theorem q_sub_nonneg {l1 l2 l3 delta epsilon : Real}
     (h : PinchEigen3Unordered l1 l2 l3 delta)
     (hepsilon : epsilon <= 2 * delta ^ 2) :

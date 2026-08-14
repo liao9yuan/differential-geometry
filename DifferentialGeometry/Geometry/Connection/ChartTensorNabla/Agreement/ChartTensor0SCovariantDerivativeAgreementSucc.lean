@@ -4,39 +4,10 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-/-!
-# Headline agreement of the chart-frame `(0, s + 1)`-tensor covariant derivative
-with the abstract bundled one
-
-Given a smooth Riemannian manifold `(M, g)`, a chart center `α : M`, a
-`(0, s + 1)`-tensor section `T` and a tangent vector field `X` (both smooth),
-this file proves the agreement
-`chartTensor0SCovariantDerivative g α (s + 1) T X b
-  = tensor0SCovariantDerivative I M (s + 1) (LeviCivita g) T b (X b)`
-at every point `b` of the chart-α Levi-Civita good set.
-
-The proof is by induction on `s`. The base case at `s = 0` (rank 1) reduces
-to the rank-0 agreement `chartTensor0SCovariantDerivative_eq_abstract_zero`
-applied to the partial evaluation of `T` along the chart-parallel extension.
-The inductive step `s ↦ s + 1` (rank `s + 2`) uses the same partial-eval
-decomposition with the inductive hypothesis at rank `s + 1`.
-
-## Main results
-
-* `chartTensor0SCovariantDerivative_eq_abstract_succ_aux` — the technical
-  auxiliary form, with raw functions and pointwise differentiability
-  hypotheses. Carries the induction.
-* `chartTensor0SCovariantDerivative_eq_abstract_succ` — the headline,
-  packaged for smooth `Cₛ^∞` sections.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
@@ -47,7 +18,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -58,9 +29,8 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
-/-- Round-trip of the un-curry inverse applied to a `Fin.cons` tuple equals
-the CLM-then-CMLM evaluation. This is a thin packaging of
-`tensor0S_curry_apply_eval`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
     (Φ : TangentSpace I b →L[ℝ] Tensor0SSpace s I b)
     (v : TangentSpace I b) (m : Fin s → TangentSpace I b) :
@@ -87,10 +57,10 @@ private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
   rw [hroundtrip] at this
   exact this.symm
 
-/-- **`LeviCivita` on a chart-parallel-extended vector.** For `b` in the
-chart-α Levi-Civita good set, the bundled Levi-Civita derivative of
-`chartParallelExtend α b v` at `b` along `X b` equals
-`chartLeviCivitaParallelCLM g α b X v`. -/
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma LeviCivita_chartParallelExtend_eq_parallelCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -110,11 +80,8 @@ private lemma LeviCivita_chartParallelExtend_eq_parallelCLM
   rw [chartLeviCivita_chartParallelExtend_symm (I := I) g α hb v X]
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X v]
 
-/-- **Auxiliary induction theorem.** For a `(0, s + 1)`-tensor section `T`
-with pointwise-differentiable total-space form at `b`, and a tangent vector
-field `X` with pointwise-differentiable total-space form at `b`, the
-chart-frame and bundled covariant derivatives at the chart-α Levi-Civita
-good-set point `b` agree. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ) (T : Π b' : M, Tensor0SSpace (s + 1) I b')
@@ -515,10 +482,8 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     rw [hCurryFactor]
     abel
 
-/-- **Headline agreement.** For a smooth Riemannian manifold `(M, g)`, a
-chart center `α : M`, a smooth `(0, s + 1)`-tensor section `T`, a smooth
-tangent vector field `X`, and any point `b` on the chart-α Levi-Civita good
-set, the chart-frame and bundled covariant derivatives at `b` agree. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTensor0SCovariantDerivative_eq_abstract_succ
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T :

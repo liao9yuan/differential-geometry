@@ -1,23 +1,20 @@
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyLocal
-import DifferentialGeometry.Analysis.ODE.ClosedEdgeGronwall
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeDifferenceEnergy
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDiffJoint
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.FibreOpBoundUnit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeStrongData
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDiffSmallC0
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFields
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.Geometry.Connection.ChartBridge.MetricInverse
-import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
-import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricContinuity
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 /-!
@@ -49,13 +46,13 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -73,6 +70,13 @@ def tensor02Bilin {x : M} (A : Tensor0SSpace 2 I x) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real :=
   (bilinFormToModel (TangentSpace I x)).symm (Tensor0SSpace.toModel A)
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 @[simp] theorem tensor02Bilin_apply {x : M} (A : Tensor0SSpace 2 I x)
     (v w : TangentSpace I x) :
     tensor02Bilin (I := I) (M := M) A v w =
@@ -96,6 +100,9 @@ def carrierQBilin (g_bg : SmoothRiemannianMetric I M)
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real :=
   tensor02Bilin (I := I) (M := M) (carrierQ (I := I) (M := M) g_bg g t x)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [SigmaCompactSpace M] in
 @[simp] theorem carrierQBilin_apply
     (g_bg : SmoothRiemannianMetric I M)
     (g : Real → SmoothRiemannianMetric I M) (t : Real) (x : M)
@@ -103,15 +110,16 @@ def carrierQBilin (g_bg : SmoothRiemannianMetric I M)
     carrierQBilin (I := I) (M := M) g_bg g t x v w =
       (-1 / 2 : Real) * deTurckRicciRHS (I := I) g_bg (g t) x v w := by
   rw [carrierQBilin, tensor02Bilin_apply]
-  unfold carrierQ eval02
-  rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-  change (-1 / 2 : Real) *
-      Tensor0SSpace.toModel (deTurckRHSField (I := I) g_bg (g t) x)
-        (fun i : Fin 2 => if i = 0 then v else w) =
-    (-1 / 2 : Real) * deTurckRicciRHS (I := I) g_bg (g t) x v w
-  rw [deTurckRHSField_toModel_apply]
+  change Tensor0SSpace.toModel
+      ((-1 / 2 : Real) • deTurckRHSField (I := I) g_bg (g t) x)
+      (fun i : Fin 2 => if i = 0 then v else w) = _
+  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
+    deTurckRHSField_toModel_apply]
   simp
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [SigmaCompactSpace M] in
 /-- The carrier half-speed is symmetric. -/
 theorem carrierQBilin_symm
     (g_bg : SmoothRiemannianMetric I M)
@@ -122,7 +130,9 @@ theorem carrierQBilin_symm
   rw [carrierQBilin_apply, carrierQBilin_apply,
     deTurckRicciRHS_symm (I := I) g_bg (g t) x v w]
 
-set_option maxHeartbeats 800000 in
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [SigmaCompactSpace M] in
 /-- Joint closed-slab tensor continuity of the Ricci--DeTurck right-hand side
 along a `JointChartGramSmooth` metric family.  The proof reads the intrinsic
 field in the canonical chart frame and uses the already proved joint chart
@@ -139,40 +149,30 @@ theorem deTurckRHS_cont
     (hN := fun α => (chartLeviCivitaGoodSet_isOpen (I := I) α).mem_nhds
       (self_mem_chartLeviCivitaGoodSet (I := I) α))
   intro α idx
-  let incl : {t : Real // t ∈ Set.Icc 0 T} × M → Real × M :=
-    fun q => ((q.1 : Real), q.2)
-  have hincl : Continuous incl := by
-    exact (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
+  have hincl : Continuous
+      (fun q : {t : Real // t ∈ Set.Icc 0 T} × M => ((q.1 : Real), q.2)) :=
+    (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
   have hchart : ContinuousOn
       (fun q : {t : Real // t ∈ Set.Icc 0 T} × M =>
         DeTurckCoefficients.chartDeTurckRicciRHS
           (I := I) (g q.1.1) g_bg α (idx 0) (idx 1) (extChartAt I α q.2))
       {q : {t : Real // t ∈ Set.Icc 0 T} × M |
         q.2 ∈ chartLeviCivitaGoodSet (I := I) α} := by
-    have hsrc : ContinuousOn
-        (fun q : Real × M =>
-          DeTurckCoefficients.chartDeTurckRicciRHS
-            (I := I) (g q.1) g_bg α (idx 0) (idx 1) (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
-      (jointChartDeTurckRicciRHS_alongChart_contMDiffOn
-        (I := I) g_bg T g hJ α (idx 0) (idx 1)).continuousOn
-    have hmaps : MapsTo incl
-        {q : {t : Real // t ∈ Set.Icc 0 T} × M |
-          q.2 ∈ chartLeviCivitaGoodSet (I := I) α}
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
-      fun q hq => ⟨q.1.2, hq⟩
-    have hcomp := hsrc.comp hincl.continuousOn hmaps
-    simpa only [Function.comp_apply, incl] using hcomp
+    have hraw := jointChartDeTurckRicciRHS_alongChart_contMDiffOn
+      (I := I) g_bg T g hJ α (idx 0) (idx 1)
+    have hcomp := hraw.continuousOn.comp hincl.continuousOn
+      (fun q hq => ⟨q.1.2, hq⟩)
+    simpa only [Function.comp_apply] using hcomp
   refine hchart.congr ?_
   intro q hq
   change Tensor0SSpace.toModel
       (deTurckRHSField (I := I) g_bg (g q.1.1) q.2)
       (fun k : Fin 2 => chartBasisVecFiber (I := I) α (idx k) q.2) = _
   rw [deTurckRHSField_toModel_apply]
-  exact DeTurckCoefficients.deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS
+  exact deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS
     (I := I) (g q.1.1) g_bg α (idx 0) (idx 1) hq
 
-set_option maxHeartbeats 800000 in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The canonical carrier half-speed is bounded in one fibre-operator norm on
 the whole closed time slab.  The constant is extracted from compactness of the
 moving unit tangent slab, so it is uniform down to `t = 0`. -/
@@ -181,7 +181,7 @@ theorem carrierEdge_bounds
     (g : Real → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g) :
     ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Set.Icc 0 T,
-      gFibreOpBound (I := I) (M := M) (g t)
+      metricCauchySchwarzBound (I := I) (M := M) (g t)
         (carrierQBilin (I := I) (M := M) g_bg g t) B := by
   classical
   have hgram : ∀ (α : M) (i j : Fin (Module.finrank Real E)),
@@ -191,14 +191,12 @@ theorem carrierEdge_bounds
         {q : {t : Real // t ∈ Set.Icc 0 T} × M |
           q.2 ∈ (trivializationAt E (TangentSpace I) α).baseSet} := by
     intro α i j
-    have htcont : Continuous
-        (fun q : {t : Real // t ∈ Set.Icc 0 T} × M => (q.1 : Real)) :=
-      continuous_subtype_val.comp continuous_fst
-    have hxcont : Continuous
-        (fun q : {t : Real // t ∈ Set.Icc 0 T} × M => q.2) :=
-      continuous_snd
-    exact (hJ α i j).continuousOn.comp' (htcont.prodMk hxcont).continuousOn
+    have hincl : Continuous
+        (fun q : {t : Real // t ∈ Set.Icc 0 T} × M => ((q.1 : Real), q.2)) :=
+      (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
+    have hcomp := (hJ α i j).continuousOn.comp hincl.continuousOn
       (fun q hq => ⟨q.1.2, hq⟩)
+    simpa only [Function.comp_apply] using hcomp
   have hmetric : Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
       (Set.Icc 0 T)
       (fun t x => metricTensorField (I := I) (g t) x) :=
@@ -234,6 +232,12 @@ theorem carrierEdge_bounds
 
 /-! ## Joint continuity of a moving covariant-tensor norm -/
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A jointly continuous covariant tensor family has a jointly continuous
 squared fibre norm when the carrier metric has jointly continuous chart-Gram
 entries.  The time domain is already restricted to `K`; this is the exact form
@@ -378,7 +382,11 @@ theorem normSq_family_cont
       funext a
       exact (e.localFrame_apply_of_mem_baseSet (b := b) (i := J₀ a) hq).symm
     rw [hI, hJ]
-    simp [e.localFrame_apply_of_mem_baseSet b hq, Trivialization.basisAt]
+    have hframe (i : Fin (Module.finrank Real E)) :
+        e.localFrame b i q.2 = e.symmL Real q.2 (b i) := by
+      rw [e.localFrame_apply_of_mem_baseSet (b := b) (i := i) hq]
+      simp [Bundle.Trivialization.basisAt, Trivialization.symmL_apply]
+    simp only [hframe]
   exact hF.congr hev.symm
 
 /-! ## The closed-edge metric-difference energy -/
@@ -413,6 +421,12 @@ def movingMetricReact
     Module.finBasis Real (TangentSpace I x)
   reactInBasis (I := I) (M := M) g x Q W basis
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- In any fixed tangent basis, `reactInBasis` is the derivative of the same
 intrinsic squared norm under the metric variation `-2Q`.  This is the
 basis-free route to comparing the canonical finite basis with an orthonormal
@@ -451,9 +465,10 @@ theorem reactInBasis_deriv
       HasDerivWithinAt
         (fun _ : Real => tensor0SComponent (I := I) W (fun i => basis i) I₀)
         (Tdt I₀) Set.univ t := by
-    simpa [Tdt] using
-      hasDerivAt_const t
-        (tensor0SComponent (I := I) W (fun i => basis i) I₀)
+    dsimp only [Tdt]
+    exact
+      (hasDerivAt_const t
+        (tensor0SComponent (I := I) W (fun i => basis i) I₀)).hasDerivWithinAt
   have hTdot (I₀ : Fin 2 → Idx) :
       tensor0SComponent (I := I) (0 : Tensor0SSpace 2 I x)
           (fun i => basis i) I₀ = Tdt I₀ := by
@@ -486,19 +501,24 @@ theorem reactInBasis_deriv
     g gInv gInvDt ric (fun _ => W) Tdt (0 : Tensor0SSpace 2 I x)
     basis hinvAll hgInv hT hTdot hflow
   have hat := hbase.hasDerivAt (by simp)
-  have hzero :
+  have hinnerZero :
       inner0S (I := I) (g t) x 2 (0 : Tensor0SSpace 2 I x) W = 0 := by
-    change (tensor0SMetricData (I := I) (g t) x 2).flat 0 W = 0
-    rw [(tensor0SMetricData (I := I) (g t) x 2).flat.map_zero]
-    rfl
-  simpa [reactInBasis, gInv, ric, hzero] using hat
+    simp [inner0S, MetricFiberData.inner]
+  simpa [reactInBasis, gInv, ric, hinnerZero] using hat
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- `reactInBasis` is independent of the chosen basis whenever `Q` is the
 actual half-speed of the displayed metric family.  Both sides are identified
 as the derivative of one intrinsic norm. -/
 theorem reactInBasis_eq
     {Idx₁ Idx₂ : Type*}
-    [Fintype Idx₁] [Fintype Idx₂]
+    [Fintype Idx₁]
+    [Fintype Idx₂]
     {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
     (Q W : Tensor0SSpace 2 I x)
@@ -513,6 +533,12 @@ theorem reactInBasis_eq
   exact (reactInBasis_deriv (I := I) (M := M) g Q W basis₁ hg).unique
     (reactInBasis_deriv (I := I) (M := M) g Q W basis₂ hg)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Rewrite the canonical moving reaction in any basis, without a raw
 change-of-components proof. -/
 theorem movingReact_basis
@@ -532,6 +558,8 @@ theorem movingReact_basis
   exact reactInBasis_eq (I := I) (M := M) g Q W
     (Module.finBasis Real (TangentSpace I x)) basis hg
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Two arrays satisfying the two-sided inverse-metric equations in the same
 basis agree. -/
 private theorem metricInv_unique
@@ -575,6 +603,8 @@ private theorem metricInv_unique
       · intro hi
         exact absurd (Finset.mem_univ i) hi
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 /-- Orthonormal-component realization of the canonical moving reaction.  The
 only basis change is `movingReact_basis`; after that the inverse metric is the
 Kronecker delta and the standard reaction collapse applies verbatim. -/
@@ -670,6 +700,8 @@ theorem ricReactArray_le
           ((2 : Real) * (Fintype.card Idx : Real) * B) *
             compNormSqMulti Wc := by simp only [N]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Pointwise reaction bound in intrinsic norm.  It assumes only the carrier
 metric equation at the time in question and an operator bound for `Q`; no
 spatial derivative of the comparison path occurs. -/
@@ -729,17 +761,19 @@ theorem movingReact_le
     (I := I) (M := M) g Q W basis horth' hg
   rw [hreact]
   refine le_trans harray' ?_
-  have hnorm :
-      compNormSqMulti Wc = normSq0S (I := I) (g t) x 2 W := by
-    simpa only [Wc, tensor0SComponent_apply] using
-      compNormSqMulti_orthoBasis_eq_normSq0S
-        (I := I) (g t) basis horth' W
-  rw [hnorm]
+  simp only [Wc, tensor0SComponent_apply]
+  rw [compNormSqMulti_orthoBasis_eq_normSq0S
+    (I := I) (g t) basis horth' W]
   simp only [Fintype.card_fin]
   exact le_rfl
 
 /-! ## The moving-volume trace from the same carrier bound -/
 
+omit [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A fibre-operator bound for a covariant two-tensor controls its intrinsic
 metric trace by one factor of the tangent dimension. -/
 theorem metricTrace_op_le
@@ -789,15 +823,20 @@ theorem metricTrace_op_le
       have hunit : g.inner x (basis i) (basis i) = 1 := by
         simpa using horth' i i
       have hvec :
-          vec2 (I := I) (basis i) (basis i) =
-            fun _ : Fin 2 => basis i := by
+          vec2 (I := I) (basis i) (basis i) = fun _ : Fin 2 => basis i := by
         funext a
-        fin_cases a <;> rfl
-      simpa only [eval02, hvec, hunit, Real.sqrt_one, mul_one, ite_self] using
-        hQ (basis i) (basis i)
+        simp [vec2]
+      rw [hvec]
+      simpa [eval02, hunit] using hQ (basis i) (basis i)
     _ = (Module.finrank Real E : Real) * B := by
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Under the metric variation `∂ₜg = -2Q`, the chart-defined volume trace is
 the intrinsic metric trace of `-2Q`. -/
 theorem traceTime_rd
@@ -885,6 +924,8 @@ theorem traceTime_rd
     _ = (-2 : Real) * metricTracePair0SAt (I := I) (g t) Q := by
       rw [hscalar]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The inverse-metric and moving-volume reactions are controlled together by
 the same closed-slab carrier half-speed bound. -/
 theorem movingReactVol_le
@@ -951,7 +992,7 @@ theorem movingReactVol_le
           normSq0S (I := I) (g t) x 2 W| ≤
         |movingMetricReact (I := I) (M := M) (g t) x Q W| +
           |(1 / 2 : Real) * traceTimeDerivMetric (I := I) g t x *
-            normSq0S (I := I) (g t) x 2 W| := abs_add_le _ _
+          normSq0S (I := I) (g t) x 2 W| := abs_add_le _ _
     _ ≤ (2 * (Fintype.card
           (Fin 2 → Fin (Module.finrank Real E)) : Real) *
         ((2 : Real) * (Module.finrank Real E : Real) * B)) *
@@ -971,9 +1012,11 @@ def movingDiffEnergy
   ∫ x, movingDiffNorm (I := I) (M := M) g₀ g₁ t x
     ∂(riemannianMeasureFamily (I := I) (M := M) g₀ t)
 
-set_option maxHeartbeats 800000 in
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- Closed-edge continuity of the moving metric-difference energy.  This is
-the continuity input of `gronwall_zero_on`; it follows from the two chart-Gram
+the continuity input of `edgeGronwall_zero`; it follows from the two chart-Gram
 `C⁰` hypotheses and compactness, without any derivative at the edge. -/
 theorem movingEnergy_cont
     (g₀ g₁ : Real → SmoothRiemannianMetric I M) {K : Set Real}
@@ -997,9 +1040,12 @@ theorem movingEnergy_cont
         {q : {t : Real // t ∈ K} × M |
           q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} := by
     intro x₀ i j
-    exact (h₀ x₀ i j).comp'
-      ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
+    have hincl : Continuous
+        (fun q : {t : Real // t ∈ K} × M => ((q.1 : Real), q.2)) :=
+      (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
+    have hcomp := (h₀ x₀ i j).comp hincl.continuousOn
       (fun q hq ↦ ⟨q.1.2, hq⟩)
+    simpa only [Function.comp_apply] using hcomp
   have h₁' : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContinuousOn
         (fun q : {t : Real // t ∈ K} × M ↦
@@ -1007,9 +1053,12 @@ theorem movingEnergy_cont
         {q : {t : Real // t ∈ K} × M |
           q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} := by
     intro x₀ i j
-    exact (h₁ x₀ i j).comp'
-      ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
+    have hincl : Continuous
+        (fun q : {t : Real // t ∈ K} × M => ((q.1 : Real), q.2)) :=
+      (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
+    have hcomp := (h₁ x₀ i j).comp hincl.continuousOn
       (fun q hq ↦ ⟨q.1.2, hq⟩)
+    simpa only [Function.comp_apply] using hcomp
   have hmetric₀ := metricTensorCont_of_chartGram (I := I) (M := M) g₀ h₀'
   have hmetric₁ := metricTensorCont_of_chartGram (I := I) (M := M) g₁ h₁'
   have hdiffRaw := hmetric₁.add
@@ -1018,20 +1067,14 @@ theorem movingEnergy_cont
       (fun t x ↦ metricDiff02Field (I := I) (g₁ t) (g₀ t) x) := by
     refine Tensor0SFamilyContinuousOnSet.congr (I := I) (M := M) hdiffRaw ?_
     intro t ht x
-    refine Tensor0SSpace.toModel_injective ?_
-    change Tensor0SSpace.toModel
-        ((metricTensorField (I := I) (g₁ t) x) +
-          (-1 : Real) • metricTensorField (I := I) (g₀ t) x) =
-      Tensor0SSpace.toModel
-        (metricDiff02Field (I := I) (g₁ t) (g₀ t) x)
-    refine ContinuousMultilinearMap.ext fun v => ?_
-    rw [Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_smul,
-      ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply,
-      metricDiff02Field_toModel_apply]
-    change metricTensorField (I := I) (g₁ t) x v +
-        (-1 : Real) * metricTensorField (I := I) (g₀ t) x v =
-      metricDiff02 (I := I) (g₁ t) (g₀ t) x (v 0) (v 1)
-    rw [metricTensorField_apply, metricTensorField_apply, metricDiff02_apply]
+    apply Tensor0SSpace.toModel_injective
+    refine ContinuousMultilinearMap.ext (fun v => ?_)
+    rw [metricDiff02Field_toModel_apply]
+    simp only [neg_one_smul, Tensor0SSpace.toModel_add,
+      Tensor0SSpace.toModel_neg, metricDiff02_apply]
+    rw [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.neg_apply]
+    change (g₁ t).inner x (v 0) (v 1) + -(g₀ t).inner x (v 0) (v 1) =
+      (g₁ t).inner x (v 0) (v 1) - (g₀ t).inner x (v 0) (v 1)
     ring
   have hnormSub := normSq_family_cont (I := I) (M := M) g₀
     (fun t x ↦ metricDiff02Field (I := I) (g₁ t) (g₀ t) x) h₀' hdiff
@@ -1051,6 +1094,11 @@ theorem movingEnergy_cont
 
 /-! ## Interior smoothness and exact first variation -/
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- On an open regular time set, joint smoothness of the two chart-Gram
 families implies joint smoothness of the moving pointwise difference norm.
 
@@ -1061,16 +1109,16 @@ theorem movingNorm_smooth
     (g₀ g₁ : Real → SmoothRiemannianMetric I M) {U : Set Real}
     (hU : IsOpen U)
     (h₀ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₀ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M ↦
         movingDiffNorm (I := I) (M := M) g₀ g₁ p.1 p.2)
       (U ×ˢ (Set.univ : Set M)) := by
@@ -1089,13 +1137,13 @@ theorem movingNorm_smooth
       Matrix (Fin (Module.finrank Real E)) (Fin (Module.finrank Real E)) Real :=
     fun q ↦ chartGramMatrix (I := I) (g₁ q.1) x₀ q.2
   have hG₀ (i j : Fin (Module.finrank Real E)) :
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ G₀ q i j) p := by
     simpa only [G₀] using
       (h₀ x₀ i j).contMDiffAt
         ((hU.prod e.open_baseSet).mem_nhds ⟨hp.1, hx⟩)
   have hG₁ (i j : Fin (Module.finrank Real E)) :
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ G₁ q i j) p := by
     simpa only [G₁] using
       (h₁ x₀ i j).contMDiffAt
@@ -1104,9 +1152,9 @@ theorem movingNorm_smooth
       (G : Real × M →
         Matrix (Fin (Module.finrank Real E)) (Fin (Module.finrank Real E)) Real)
       (hG : ∀ i j : Fin (Module.finrank Real E),
-        ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun q ↦ G q i j) p) :
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ (G q).det) p := by
     have heq : (fun q ↦ (G q).det) = fun q ↦
         ∑ σ : Equiv.Perm (Fin (Module.finrank Real E)),
@@ -1116,11 +1164,11 @@ theorem movingNorm_smooth
       simp [Units.smul_def]
     rw [heq]
     refine ContMDiffAt.sum fun σ _ ↦ ?_
-    exact (contMDiffAt_const (c := (((Equiv.Perm.sign σ : ℤ) : Real))).mul
-      (ContMDiffAt.prod fun i _ ↦ hG (σ i) i))
+    exact (contMDiffAt_const (c := ((Equiv.Perm.sign σ : ℤ) : Real))).mul
+      (ContMDiffAt.prod fun i _ ↦ hG (σ i) i)
   have hdet := det_smooth G₀ hG₀
   have hadj (i j : Fin (Module.finrank Real E)) :
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ (G₀ q).adjugate i j) p := by
     simp_rw [Matrix.adjugate_apply]
     apply det_smooth
@@ -1135,7 +1183,7 @@ theorem movingNorm_smooth
     exact ne_of_gt
       (chartGramMatrix_det_pos (I := I) (g₀ p.1) x₀ hx)
   have hInv (i j : Fin (Module.finrank Real E)) :
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ (G₀ q)⁻¹ i j) p := by
     have heq : (fun q ↦ (G₀ q)⁻¹ i j) =
         fun q ↦ ((G₀ q).det)⁻¹ * (G₀ q).adjugate i j := by
@@ -1147,16 +1195,16 @@ theorem movingNorm_smooth
       (Fin 2 → Fin (Module.finrank Real E)) → Real := fun q I₀ ↦
     G₁ q (I₀ 0) (I₀ 1) - G₀ q (I₀ 0) (I₀ 1)
   have hW (I₀ : Fin 2 → Fin (Module.finrank Real E)) :
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ W q I₀) p := by
     exact (hG₁ (I₀ 0) (I₀ 1)).sub (hG₀ (I₀ 0) (I₀ 1))
   let rhs : Real × M → Real := fun q ↦
     ∑ I₀ : Fin 2 → Fin (Module.finrank Real E),
       ∑ J₀ : Fin 2 → Fin (Module.finrank Real E),
         (∏ a : Fin 2, (G₀ q)⁻¹ (I₀ a) (J₀ a)) * W q I₀ * W q J₀
-  have hrhs : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ rhs p := by
+  have hrhs : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞ rhs p := by
     refine ContMDiffAt.sum fun I₀ _ ↦ ContMDiffAt.sum fun J₀ _ ↦ ?_
-    have hpInv : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    have hpInv : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q ↦ ∏ a : Fin 2, (G₀ q)⁻¹ (I₀ a) (J₀ a)) p :=
       ContMDiffAt.prod fun a _ ↦ hInv (I₀ a) (J₀ a)
     exact (hpInv.mul (hW I₀)).mul (hW J₀)
@@ -1183,23 +1231,21 @@ theorem movingNorm_smooth
           (metricDiff02Field (I := I) (g₁ q.1) (g₀ q.1) q.2)
           (fun a ↦ e.basisAt b hq.2 (K₀ a)) = _
       rw [metricDiff02Field_toModel_apply, metricDiff02_apply]
-      simp only [e, b, G₀, G₁, W, x₀]
+      simp only [G₀, G₁, W]
       have hslot (a : Fin 2) :
-          (e.basisAt b hq.2) (K₀ a) = e.localFrame b (K₀ a) q.2 :=
-        (e.localFrame_apply_of_mem_baseSet (b := b) (i := K₀ a) hq.2).symm
-      rw [hslot 0, hslot 1]
-      have hbridge (k : Fin (Module.finrank Real E)) :
-          e.localFrame b k q.2 =
-            chartBasisVecFiber (I := I) p.2 k q.2 := by
-        simp only [e, b, x₀]
-        rw [(trivializationAt E (TangentSpace I) p.2).localFrame_apply_of_mem_baseSet
-          (chartModelBasis E) hq.2]
-        rfl
-      rw [chartGramMatrix_apply, chartGramMatrix_apply,
-        ← hbridge (K₀ 0), ← hbridge (K₀ 1)]
+          (e.basisAt b hq.2) (K₀ a) =
+            chartBasisVecFiber (I := I) p.2 (K₀ a) q.2 := by
+        simpa only [e, b, x₀] using
+          chartBasisFamily_apply (I := I) p.2 hq.2 (K₀ a)
+      rw [hslot 0, hslot 1, ← chartGramMatrix_apply, ← chartGramMatrix_apply]
     rw [hcomp I₀, hcomp J₀]
   exact (hrhs.congr_of_eventuallyEq heq).contMDiffWithinAt
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Exact pointwise time derivative of the moving squared norm.  Only
 interior-time derivatives occur: the carrier has variation `-2Q` and the
 metric difference has variation `Wdot`.  Thus this theorem can be applied on
@@ -1264,12 +1310,10 @@ theorem movingNorm_time {x : M} {t : Real}
       fin_cases a <;> simp
     change HasDerivWithinAt
       (fun r : Real ↦
-        metricDiff02 (I := I) (g₁ r) (g₀ r) x
-          (basis (I₀ 0)) (basis (I₀ 1)))
-      (Tensor0SSpace.toModel Wdot (fun a : Fin 2 ↦ basis (I₀ a)))
-      Set.univ t
-    simpa only [hslots] using
-      (hW (basis (I₀ 0)) (basis (I₀ 1))).hasDerivWithinAt
+        metricDiff02 (I := I) (g₁ r) (g₀ r) x (basis (I₀ 0)) (basis (I₀ 1)))
+      (Tensor0SSpace.toModel Wdot (fun a : Fin 2 ↦ basis (I₀ a))) Set.univ t
+    rw [hslots]
+    exact (hW (basis (I₀ 0)) (basis (I₀ 1))).hasDerivWithinAt
   have hTdot (I₀ : Fin 2 → Fin (Module.finrank Real (TangentSpace I x))) :
       tensor0SComponent (I := I) Wdot (fun i ↦ basis i) I₀ = Tdt I₀ := by
     rfl
@@ -1303,6 +1347,9 @@ theorem movingNorm_time {x : M} {t : Real}
   have hat := hbase.hasDerivAt (by simp)
   simpa only [movingDiffNorm, movingMetricReact, T, gInv, ric] using hat
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [SigmaCompactSpace M] in
 /-- The pointwise moving-norm derivative specialized to two genuine
 Ricci--DeTurck equations.  The carrier reaction uses
 `Q = -(1/2) RD(g₀)`, while the tensor derivative is exactly
@@ -1330,19 +1377,18 @@ theorem movingNorm_rd {x : M} {t : Real}
   apply movingNorm_time (I := I) (M := M) g₀ g₁
   · intro X Y
     convert hPDE₀ X Y using 1
-    change (-2 : Real) * ((-1 / 2 : Real) *
-        Tensor0SSpace.toModel
-          (deTurckRHSField (I := I) g_bg (g₀ t) x)
-          (fun a : Fin 2 => if a = 0 then X else Y)) =
+    change (-2 : Real) *
+        ((-1 / 2 : Real) * deTurckRicciRHS (I := I) g_bg (g₀ t) x X Y) =
       deTurckRicciRHS (I := I) g_bg (g₀ t) x X Y
-    rw [deTurckRHSField_toModel_apply]
-    simp
     ring
   · intro X Y
     have hsub := (hPDE₁ X Y).sub (hPDE₀ X Y)
     simpa only [metricDiff02_apply, Tensor0SSpace.toModel_sub,
       ContinuousMultilinearMap.sub_apply, deTurckRHSField_toModel_apply] using hsub
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- Exact first variation of the moving metric-difference energy at an interior
 regular time.  The first summand is the pointwise moving-norm derivative and
 the second is the moving-volume trace term. -/
@@ -1350,12 +1396,12 @@ theorem movingEnergy_deriv
     (g₀ g₁ : Real → SmoothRiemannianMetric I M) {U : Set Real} {t : Real}
     (hU : IsOpen U) (ht : t ∈ U)
     (h₀ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₀ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
@@ -1372,6 +1418,7 @@ theorem movingEnergy_deriv
   simpa only [movingDiffEnergy] using
     first_var_joint (I := I) (M := M) hU ht h₀ hsmooth
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Exact interior first variation for two Ricci--DeTurck solutions.  This is
 the energy-level form consumed by the boundary estimate: the three displayed
 terms are respectively the carrier inverse-metric reaction, the pairing with
@@ -1381,12 +1428,12 @@ theorem movingEnergy_rd
     (g₀ g₁ : Real → SmoothRiemannianMetric I M) {U : Set Real} {t : Real}
     (hU : IsOpen U) (ht : t ∈ U)
     (h₀ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₀ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
@@ -1422,7 +1469,7 @@ theorem movingEnergy_rd
 /-! ## Grönwall-ready Ricci--DeTurck energy rate -/
 
 /-- The exact scalar rate in `movingEnergy_rd`, packaged so that the analytic
-pairing estimate can target one expression and `gronwall_zero_on` can consume
+pairing estimate can target one expression and `edgeGronwall_zero` can consume
 it without any endpoint derivative. -/
 def movingRate
     (g_bg : SmoothRiemannianMetric I M)
@@ -1439,6 +1486,7 @@ def movingRate
         movingDiffNorm (I := I) (M := M) g₀ g₁ t x
     ∂(riemannianMeasureFamily (I := I) (M := M) g₀ t)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the open regular window, the moving difference energy has derivative
 `movingRate`. -/
 theorem movingEnergy_rate
@@ -1446,12 +1494,12 @@ theorem movingEnergy_rate
     (g₀ g₁ : Real → SmoothRiemannianMetric I M) {U : Set Real} {t : Real}
     (hU : IsOpen U) (ht : t ∈ U)
     (h₀ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₀ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
@@ -1470,6 +1518,7 @@ theorem movingEnergy_rate
     movingEnergy_rd (I := I) (M := M) g_bg g₀ g₁
       hU ht h₀ h₁ hPDE₀ hPDE₁
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Exact closed-edge Grönwall closure for two Ricci--DeTurck paths.  The
 metric paths need only be jointly smooth on `Ioo 0 T` and jointly continuous
 on `Icc 0 T`; all time differentiation occurs in the open interval.  Thus the
@@ -1480,13 +1529,13 @@ theorem movingEnergy_zero
     (g₀ g₁ : Real → SmoothRiemannianMetric I M) {T K : Real}
     (hT : 0 < T)
     (h₀s : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₀ p.1) x₀ p.2 i j)
         (Ioo (0 : Real) T ×ˢ
           (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h₁s : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M ↦
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (Ioo (0 : Real) T ×ˢ
@@ -1527,11 +1576,8 @@ theorem movingEnergy_zero
         metricDiff02Field (I := I) (g₁ 0) (g₀ 0) x = 0 := by
       intro x
       rw [hinit]
-      refine Tensor0SSpace.toModel_injective ?_
-      change Tensor0SSpace.toModel
-          (metricDiff02Field (I := I) (g₀ 0) (g₀ 0) x) =
-        Tensor0SSpace.toModel (0 : Tensor0SSpace 2 I x)
-      refine ContinuousMultilinearMap.ext fun v => ?_
+      apply Tensor0SSpace.toModel_injective
+      refine ContinuousMultilinearMap.ext (fun v => ?_)
       rw [metricDiff02Field_toModel_apply, metricDiff02_apply]
       simp
     unfold movingDiffEnergy movingDiffNorm
@@ -1549,7 +1595,7 @@ theorem movingEnergy_zero
     intro t ht
     exact movingEnergy_rate (I := I) (M := M) g_bg g₀ g₁
       isOpen_Ioo ht h₀s h₁s (hPDE₀ t ht) (hPDE₁ t ht)
-  exact gronwall_zero_on hT
+  exact edgeGronwall_zero hT
     (movingDiffEnergy (I := I) (M := M) g₀ g₁)
     (movingRate (I := I) (M := M) g_bg g₀ g₁)
     hcont hzero hnonneg hderiv hbound

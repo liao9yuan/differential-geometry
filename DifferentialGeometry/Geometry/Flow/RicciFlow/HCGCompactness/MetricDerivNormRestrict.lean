@@ -6,16 +6,14 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Restricting metric derivative norms to open subtypes
 
-This file isolates the open-subtype locality bridge needed to compare the
-fixed-manifold window convergence seminorm with the source-domain seminorm used
-in the pointed Cheeger--Gromov upgrade.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,17 +24,18 @@ open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+variable {I : ModelWithCorners Real E H}
 
 section FixedManifold
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-/-- Order-zero metric covariant derivatives commute with open-subtype
-restriction.  This is the base case of the intended all-orders induction. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_zero_restrictOpen_apply
     (g gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (x : U)
@@ -46,8 +45,9 @@ theorem metricCovDeriv_zero_restrictOpen_apply
       metricCovDeriv (I := I) g gRef 0 (x : M) slots := by
   simp [metricCovDeriv, Tensor0SBundle.metricTensorField]
 
-/-- All orders of the background metric-covariant derivative commute with
-restriction to an open subtype. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_restrictOpen_apply
     (h gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] :
@@ -225,7 +225,8 @@ theorem metricCovDeriv_restrictOpen_apply
             (Fin.cons (slots 0) (fun q : Fin (a + 2) => slots q.succ)) := by
             rw [hrightSlots]
 
-/-- The pointwise difference tower commutes with open-subtype restriction. -/
+
+omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_restrictOpen_apply
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : Nat) (x : U) :
@@ -251,8 +252,9 @@ theorem metricDiffCovDerivAt_restrictOpen_apply
           metricCovDeriv (I := I) gInf gRef a (x : M)) slots :=
       (Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) (x : M) _ _ slots).symm
 
-/-- The metric-induced squared norm of a covariant tensor is unchanged by
-restricting the metric to an open subtype. -/
+
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSq0S_restrictOpen_apply
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (s : Nat) (x : U)
@@ -293,8 +295,9 @@ theorem normSq0S_restrictOpen_apply
       (I := I) (M := M) g (x : M) s basis hinvM A]
   rfl
 
-/-- The pointwise metric derivative norm is local with respect to restriction to
-an open subtype. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_restrictOpen
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : Nat) (x : U) :
@@ -306,11 +309,12 @@ theorem metricDerivNorm_restrictOpen
   rw [metricDiffCovDerivAt_restrictOpen_apply]
   rw [normSq0S_restrictOpen_apply]
 
-/-- **Supremum-level restriction invariance.**  The displayed `C^p` seminorm on
-a set of the open subtype `U` equals the corresponding seminorm of the ambient
-metrics on the image of that set in `M`.  This is the sup-level companion of
-`metricDerivNorm_restrictOpen`, used to identify the source-domain seminorm
-`derivNormSupOn` with the fixed-manifold window seminorm. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricDerivNormSupOn_restrictOpen
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (K : Set U) (p : Nat) :
@@ -343,6 +347,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {Idx : Type*} [Fintype Idx]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 /-- A constant-frame component tower commutes with restriction to an open
 subtype of its model space.  The differentiability premise is exactly what is
 needed to restrict the scalar directional derivative at each recursive level. -/

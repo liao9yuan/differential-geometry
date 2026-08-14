@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridH2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Lowered
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0TraceRadiusFree
 
 /-!
 # Class-first H2 coefficient packages

@@ -4,54 +4,50 @@ import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# `StarSum2` — the inductive class of `∇ᵃRm ∗ ∇ᵇRm` star sums
 
-This file defines the BBS "star-sum" class `StarSum2 S t k T`, the predicate that a
-rank-`(4+k)` field `T` is a finite sum of metric contractions of `∇ᵃRm ⊗ ∇ᵇRm`.
-This is the formalization of Hamilton's schematic `T = Σ ∇ᵃRm ∗ ∇ᵇRm` notation
-(Hamilton / Morgan–Tian "Lemma 6.1"-style curvature algebra), specialized to the
-**two-factor** star products that appear in the iterated curvature evolution
-`E_k = (∂ₜ − Δ)∇ᵏRm`.
 
-## The `base` term
 
-Every `∇ᵃRm ∗ ∇ᵇRm` landing in rank `4 + k` is, up to a slot permutation `σ`, a
-**double metric trace** of the tensor product `∇ᵃRm ⊗ ∇ᵇRm`:
 
-`starBaseField S t k a b σ
-  = metricTrace₁₂ (metricTrace₁₂ (domDomCongr σ (∇ᵃRm ⊗ ∇ᵇRm)))`,
 
-mirroring the concrete `knRicT` / `knField` constructions in
-`Evolution/UhlenbeckBaseProducer.lean`.  The level `k` is **decoupled** from `a + b`
-in the signature: the output rank is pinned by `σ`'s codomain `(((4+k)+2)+2)`, and
-the cardinality of `σ` forces `a + b = k` semantically.  This decoupling is what
-lets `.nabla` send `base k a b` to `base (k+1) (a+1) b + base (k+1) a (b+1)` without
-any `(a+1)+b = (a+b)+1` dependent-rank casts.
 
-## Closure properties (the BBS bricks)
 
-* **`.add` / `.zero` / `.smul`** — the constructors.
-* **`.nabla`** (this file) — `T ∈ StarSum2 k ⟹ ∇T ∈ StarSum2 (k+1)`: `∇` commutes
-  through both traces (`nablaRealizes_metricTraceFirstTwo`, the keystone realizer in
-  `MetricTrace/NablaTraceGen.lean`) and through `domDomCongr`
-  (`totalNabla0SRealizes_domDomCongr`); the product Leibniz rule
-  (`nabla0S_product_realizes`) then splits `∇(∇ᵃRm ⊗ ∇ᵇRm)` into the two daughter
-  `base` terms.
-* **`.bound`** (next) — `T ∈ StarSum2 k ⟹ ∃C, ‖T‖ ≤ C·Σⱼ√wⱼ√w_{k−j}` by
-  Cauchy–Schwarz on the traces.
 
-## The Lean instance wall (resolved)
 
-Generic-rank `0` / `+` / `•` on `Tensor0SField (4+k)` trigger a `whnf`-timeout in
-instance synthesis in this heavy import context; the fix is the codebase-standard
-`set_option backward.isDefEq.respectTransparency false in` on each declaration.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -62,7 +58,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -71,9 +67,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
-/-- Metric compatibility of the solution's Levi-Civita connection at time `t`
-(local copy of the `UhlenbeckBaseProducer.metricCompatSol` handle, which lives in a
-sibling import branch). -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem stMetricCompat
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
@@ -83,12 +81,12 @@ private theorem stMetricCompat
       (I := I) (S.base.metric t)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The star generator** `∇ᵃRm ⊗ ∇ᵇRm ⊗ g^{⊗r}`: the two iterated-curvature factors
-with `r` metric factors appended one at a time on the right.  This appending order keeps
-every rank step definitional (`(R + 2r) + 2 ≡ R + 2(r+1)`), avoiding the cast in
-`metricPow`'s successor.  The metric factors are required: the dim-3 reaction
-(`B# = KN(C, −|R|², δ)`, `C = 2R² − (3S/2)R + (S²/2−|R|²)δ`) contains terms with free
-`g`-slots, which no pure `∇ᵃRm ⊗ ∇ᵇRm` contraction can produce. -/
+
+
+
+
+
+
 def starProd (S : SolutionOn (I := I) (M := M) D) (t : Real) (a b : ℕ) :
     (r : ℕ) → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (((4 + a) + (4 + b)) + 2 * r)
@@ -101,7 +99,7 @@ def starProd (S : SolutionOn (I := I) (M := M) D) (t : Real) (a b : ℕ) :
       (starProd S t a b r) (metricTensorField (I := I) (S.family.metric t))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The `τ`-fold first-two metric trace `Field (s + 2τ) → Field s`. -/
+
 def mtIter (g : SmoothRiemannianMetric I M) {s : ℕ} :
     (τ : ℕ) → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 2 * τ) →
@@ -112,7 +110,9 @@ def mtIter (g : SmoothRiemannianMetric I M) {s : ℕ} :
       (metricTraceFirstTwoField (I := I) (M := M) (s := s + 2 * τ) g A)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The iterated trace is additive. -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem mtIter_add (g : SmoothRiemannianMetric I M) {s : ℕ} (τ : ℕ) :
     ∀ A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 2 * τ),
@@ -127,9 +127,9 @@ theorem mtIter_add (g : SmoothRiemannianMetric I M) {s : ℕ} (τ : ℕ) :
       rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The generating star term** `∇ᵃRm ∗ ∇ᵇRm ∗ g^{⊗r}` at level `k`: the `(2+r)`-fold
-metric trace of the slot-permuted generator `domDomCongr σ (starProd a b r)`.  The output
-rank `4 + k` is pinned by `σ`'s codomain; `σ`'s existence forces `a + b = k`. -/
+
+
+
 def starBaseField
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k a b r : ℕ)
     (σ : Fin (((4 + a) + (4 + b)) + 2 * r) ≃ Fin ((4 + k) + 2 * (2 + r))) :
@@ -140,16 +140,16 @@ def starBaseField
       (E := TangentSpace I) (∞ : WithTop ℕ∞) σ (starProd (I := I) S t a b r))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The BBS star-sum class.**  `StarSum2 S t k T` holds when the rank-`(4+k)` field
-`T` is a finite linear combination of `base` star terms `∇ᵃRm ∗ ∇ᵇRm`.
 
-* `zero` / `add` / `smul`: the field operations generating finite linear combinations.
-* `base k a b σ`: the generating two-factor star product `starBaseField S t k a b σ`
-  (with `a + b = k` forced by `σ`'s cardinality).
 
-This is the smallest class containing the two-factor star products and closed under
-sums and scalar multiples — exactly enough to host the reaction `E_0 = Rm ∗ Rm`
-(`base 0 0 0 σ` terms) and to be closed under `∇` (`StarSum2.nabla` below). -/
+
+
+
+
+
+
+
+
 inductive StarSum2 (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     (k : ℕ) → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k) → Prop
@@ -170,10 +170,10 @@ inductive StarSum2 (S : SolutionOn (I := I) (M := M) D) (t : Real) :
       StarSum2 S t k (starBaseField (I := I) S t k a b r σ)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A quantitative `StarSum2` derivation.  The final real parameter records the
-constant produced by the constructor tree: sums add costs, scalar multiples
-multiply by the absolute scalar, and a base term costs one dimension factor
-for each metric trace. -/
+
+
+
+
 inductive StarSum2Cost (Idx : Type*) [Fintype Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     (k : ℕ) → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -196,7 +196,9 @@ inductive StarSum2Cost (Idx : Type*) [Fintype Idx]
       StarSum2Cost Idx S t k (starBaseField (I := I) S t k a b r σ)
         ((Fintype.card Idx : Real) ^ (2 + r))
 
-/-- Forgetting the quantitative cost recovers ordinary `StarSum2` membership. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.mem {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -209,7 +211,9 @@ theorem StarSum2Cost.mem {Idx : Type*} [Fintype Idx]
   | smul c _ ih => exact StarSum2.smul c ih
   | base a b r σ => exact StarSum2.base _ a b r σ
 
-/-- Every quantitative star-sum cost is nonnegative. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.nonneg {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -221,7 +225,9 @@ theorem StarSum2Cost.nonneg {Idx : Type*} [Fintype Idx]
   | smul _ _ ih => exact mul_nonneg (abs_nonneg _) ih
   | base => positivity
 
-/-- Every ordinary star-sum derivation admits its constructor-tree cost. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem StarSum2.cost {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -240,7 +246,9 @@ theorem StarSum2.cost {Idx : Type*} [Fintype Idx]
   | base a b r σ => exact ⟨_, StarSum2Cost.base _ a b r σ⟩
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `StarSum2` is closed under finite sums. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem starSum2_sum {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {ι : Type*} (s : Finset ι)
     (T : ι → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -258,8 +266,10 @@ theorem starSum2_sum {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
         (ih (fun q hq => h q (Finset.mem_insert_of_mem hq)))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Quantitative star-sum certificates are closed under finite sums, with the
-costs summed over the same finite set. -/
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem starSum2Cost_sum {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {ι : Type*} (s : Finset ι)
@@ -277,17 +287,17 @@ theorem starSum2Cost_sum {Idx : Type*} [Fintype Idx]
       exact StarSum2Cost.add (h a (Finset.mem_insert_self a s))
         (ih (fun q hq => h q (Finset.mem_insert_of_mem hq)))
 
-/-! ## The canonical `∇` operator and its linearity
 
-`stNabla` is the canonical total covariant derivative `totalNabla0S` of the solution's
-Levi-Civita connection, with the regularity certificate auto-supplied by
-`totalNabla0S_reg` + `connSmoothInf`.  Its linearity follows from realizer uniqueness
-(`totalNabla0SRealizes_unique`) against the `TotalNabla0SRealizes.add` / `.smul`
-closures. -/
+
+
+
+
+
+
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The canonical total covariant derivative of a rank-`(4+k)` field, for the
-solution's connection at time `t`. -/
+
+
 def stNabla (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k)) :
@@ -299,7 +309,9 @@ def stNabla (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
       (4 + k) (S.family.connection t) (connSmoothInf (I := I) S t) T)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `stNabla` realizes the total covariant derivative. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem stNabla_realizes (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k)) :
@@ -311,8 +323,13 @@ theorem stNabla_realizes (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : �
       (4 + k) (S.family.connection t) (connSmoothInf (I := I) S t) T)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `∇0 = 0` for the canonical operator. -/
-theorem stNabla_zero (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ} :
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem stNabla_zero
+    [Module.Finite ℝ E]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ} :
     stNabla (I := I) S t
         (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           (n := (∞ : WithTop ℕ∞)) (4 + k))
@@ -326,8 +343,13 @@ theorem stNabla_zero (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ} :
   rw [h3, zero_smul]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `∇(A + B) = ∇A + ∇B` for the canonical operator. -/
-theorem stNabla_add (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem stNabla_add
+    [Module.Finite ℝ E]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k)) :
     stNabla (I := I) S t (A + B) = stNabla (I := I) S t A + stNabla (I := I) S t B :=
@@ -335,27 +357,35 @@ theorem stNabla_add (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
     ((stNabla_realizes (I := I) S t A).add (stNabla_realizes (I := I) S t B))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `∇(c • A) = c • ∇A` for the canonical operator. -/
-theorem stNabla_smul (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ} (c : Real)
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem stNabla_smul
+    [Module.Finite ℝ E]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ} (c : Real)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k)) :
     stNabla (I := I) S t (c • A) = c • stNabla (I := I) S t A :=
   totalNabla0SRealizes_unique (I := I) (stNabla_realizes (I := I) S t (c • A))
     ((stNabla_realizes (I := I) S t A).smul c)
 
-/-! ## `∇` of a base term
 
-The keystone chain: the product Leibniz realizer (`nabla0S_product_realizes`), pushed
-through `domDomCongr σ` (`totalNabla0SRealizes_domDomCongr`) and through both metric
-traces (`nablaRealizes_metricTraceFirstTwo`, twice), realizes `∇(starBaseField)`.  By
-realizer uniqueness the canonical `stNabla` equals that chain, and distributing the
-sums/reindexings lands exactly on two daughter base terms. -/
+
+
+
+
+
+
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- **The generator Leibniz rule**: `∇(∇ᵃRm ⊗ ∇ᵇRm ⊗ g^{⊗r})` is realized by the two
-daughter generators (the metric factors are parallel, so their Leibniz branches vanish). -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem starProdNabla
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (a b : ℕ) :
     ∀ r : ℕ,
       ∃ (e₁ : Fin (((4 + (a + 1)) + (4 + b)) + 2 * r)
@@ -394,8 +424,9 @@ theorem starProdNabla
       exact ⟨_, _, hp⟩
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The iterated-trace keystone**: a realizer of `∇A` pushes through `τ` metric traces,
-up to a slot reindexing `ρ` of the realizer. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem stNablaMtIter
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -438,11 +469,13 @@ theorem stNablaMtIter
       exact ⟨_, h2⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- **`∇(∇ᵃRm ∗ ∇ᵇRm ∗ g^{⊗r}) = ∇^{a+1}Rm ∗ ∇ᵇRm ∗ g^{⊗r} + ∇ᵃRm ∗ ∇^{b+1}Rm ∗ g^{⊗r}`**:
-the canonical derivative of a base star term is the sum of the two daughter base star
-terms at level `k+1`. -/
+
+
+
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem stNabla_starBase
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (k a b r : ℕ)
     (σ : Fin (((4 + a) + (4 + b)) + 2 * r) ≃ Fin ((4 + k) + 2 * (2 + r))) :
@@ -471,8 +504,11 @@ theorem stNabla_starBase
   rw [mtIter_add]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Brick 3: the star-sum class is closed under `∇`.**  The level steps `k ↦ k+1`. -/
+
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem StarSum2.nabla
+    [Module.Finite ℝ E]
     {S : SolutionOn (I := I) (M := M) D} {t : Real}
     {k : ℕ}
     {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -496,10 +532,14 @@ theorem StarSum2.nabla
         (StarSum2.base _ a (b + 1) r σR)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Covariant differentiation doubles the constructor-tree cost: each base
-term splits into its two Leibniz daughters, while addition and scalar
-multiplication preserve that factor. -/
-theorem StarSum2Cost.nabla {Idx : Type*} [Fintype Idx]
+
+
+
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
+theorem StarSum2Cost.nabla
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k)} {C : Real}
@@ -525,26 +565,26 @@ theorem StarSum2Cost.nabla {Idx : Type*} [Fintype Idx]
           (StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := t)
             _ a (b + 1) r σR))
 
-/-! ## Brick 2: the Cauchy–Schwarz star bound
 
-Every `T ∈ StarSum2 S t k` is bounded, at any `g_t`-orthonormal basis, by
-`C·Σⱼ √(wⱼ)·√(w_{k−j})` with `wⱼ = |∇ʲRm|²` (the orthonormal-component squared norm).
-Induction on the derivation: `zero/add/smul` are constant bookkeeping; the `base` case
-is the double-trace δ-collapse (each metric trace costs one `card` factor) followed by
-the single-component Cauchy–Schwarz `abs_le_sqrt_compNormSqMulti` on the two product
-factors, landing on the `j := a` term of the sum (`a + b = k` is forced by `σ`'s
-cardinality). -/
+
+
+
+
+
+
+
+
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The squared orthonormal-component norm `wⱼ = |∇ʲRm|²` of the `j`-th iterated
-curvature derivative at `x`, in a tangent basis. -/
+
+
 def stNormSq (S : SolutionOn (I := I) (M := M) D) (t : Real) (j : ℕ) (x : M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x)) : Real :=
   compNormSqMulti (fun m : Fin (4 + j) → Idx =>
     nablaKRm04Field (I := I) S t j x (fun p => basis (m p)))
 
-/-- Kronecker-delta double-sum collapse: `Σᵢⱼ δᵢⱼ·Xᵢⱼ = Σᵢ Xᵢᵢ`. -/
+
 private theorem sumIdentityDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (X : Idx → Idx → Real) :
     (∑ i : Idx, ∑ j : Idx, identityInvMetric (Idx := Idx) i j * X i j)
@@ -557,8 +597,10 @@ private theorem sumIdentityDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hj h.symm), zero_mul]
   · intro h; exact absurd (Finset.mem_univ i) h
 
-/-- A trace input built from basis vectors is the basis composed with an index-level
-tuple. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mtInputBasis {x : M} {Idx : Type*} {s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (r r' : Idx) (mm : Fin s' → Idx) :
@@ -572,10 +614,15 @@ private theorem mtInputBasis {x : M} {Idx : Type*} {s' : ℕ}
   split_ifs <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Orthonormal trace bound**: if every basis-component of `X` is bounded by `c`,
-every basis-component of its first-two metric trace is bounded by `card·c` (the
-δ-collapsed trace is a single `card`-fold sum of components of `X`). -/
-private theorem mtfOrthoBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
+private theorem mtfOrthoBd
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -604,9 +651,14 @@ private theorem mtfOrthoBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   exact hX _
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Iterated orthonormal trace bound**: a componentwise bound `c` survives `τ` metric
-traces at the cost of one `card` factor per trace. -/
-private theorem mtIterOrthoBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
+private theorem mtIterOrthoBd
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -633,9 +685,11 @@ private theorem mtIterOrthoBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       ring
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Componentwise Cauchy–Schwarz for the star generator**: every basis-component of
-`∇ᵃRm ⊗ ∇ᵇRm ⊗ g^{⊗r}` is bounded by `√(wₐ)·√(w_b)` (metric components are `δ ≤ 1` at an
-orthonormal basis). -/
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (a b : ℕ) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -682,10 +736,13 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       split_ifs <;> simp
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- The constructor-tree cost is an explicit valid constant in the
-orthonormal component bound. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.bound
+    [Module.Finite ℝ E]
     {S : SolutionOn (I := I) (M := M) D} {t : Real}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {k : ℕ}
@@ -753,15 +810,18 @@ theorem StarSum2Cost.bound
       exact le_trans htop (mul_le_mul_of_nonneg_left hsingle (by positivity))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- **Brick 2: the star-sum Cauchy–Schwarz bound.**  Every `T ∈ StarSum2 S t k` admits a
-constant `C ≥ 0` (uniform in the point and the orthonormal basis) with
 
-`|T(basis-components)| ≤ C · Σ_{j ≤ k} √(wⱼ)·√(w_{k−j})`,    `wⱼ = |∇ʲRm|²`.
 
-`zero → 0`, `add → C₁+C₂`, `smul c → |c|·C`, `base → card²` (one `card` per metric
-trace, then componentwise Cauchy–Schwarz on the two factors of `∇ᵃRm ⊗ ∇ᵇRm`). -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem StarSum2.bound
+    [Module.Finite ℝ E]
     {S : SolutionOn (I := I) (M := M) D} {t : Real}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {k : ℕ}
@@ -806,7 +866,6 @@ theorem StarSum2.bound
       have hab : a + b = k := by omega
       refine ⟨(Fintype.card Idx : Real) ^ (2 + r), by positivity,
         fun x basis horth m => ?_⟩
-      -- componentwise Cauchy–Schwarz on the reindexed generator
       have hinner : ∀ mm : Fin ((4 + k) + 2 * (2 + r)) → Idx,
           |(MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
               (E := TangentSpace I) (∞ : WithTop ℕ∞) σ
@@ -817,7 +876,6 @@ theorem StarSum2.bound
         rw [MultilinearSection.domDomCongr_apply,
           ContinuousMultilinearMap.domDomCongr_apply]
         exact starProdBd (I := I) S t a b basis horth r (fun p => mm (σ p))
-      -- the `(2+r)`-fold trace: one `card` factor per trace
       have htop := mtIterOrthoBd (I := I) (S.family.metric t) basis horth
         (s' := 4 + k) (2 + r) _ _ hinner m
       have hmem : a ∈ Finset.range (k + 1) := Finset.mem_range.mpr (by omega)
@@ -835,19 +893,24 @@ theorem StarSum2.bound
         exact hs
       exact le_trans htop (mul_le_mul_of_nonneg_left hsingle (by positivity))
 
-/-! ## `starBase_comp_eq`: the diagonal evaluation of a base star term (P1)
 
-The shared evaluation tool: at a `g`-orthonormal basis, the components of a base star
-term are the **diagonal sum** of the reindexed generator's components.  `mtfDiag` is the
-single-trace atom (the equality underlying `mtfOrthoBd`); `starBase_comp_eq` is its
-double iterate at `r = 0` — exactly the `∑ i ∑ j` shape that matches the dim-3 reaction
-algebra (`Bt a b c d = ∑ e ∑ f rm_aebf rm_cedf`). -/
+
+
+
+
+
+
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Single metric trace, diagonal form** (the equality underlying `mtfOrthoBd`): at a
-`g`-orthonormal basis, the first-two metric trace of `X` is the diagonal sum
-`∑ i, X(metricTraceInput (basis i) (basis i) ·)` of its components. -/
-private theorem mtfDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
+private theorem mtfDiag
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -868,13 +931,18 @@ private theorem mtfDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (metricTraceInput (I := I) (basis i) (basis j) (fun q => basis (mm q))))]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **`starBase_comp_eq` (r = 0): the double-trace diagonal evaluation.**  At a
-`g_t`-orthonormal basis, the components of the base star term `starBaseField k a b 0 σ`
-are the double diagonal sum of the reindexed generator's components.  THE shared
-evaluation tool for P1/P2: with `metricTraceInput_apply` and
-`MultilinearSection.domDomCongr_apply`, this rewrites `∇ᵃRm ∗ ∇ᵇRm` components into
-`∑ i ∑ j (∇ᵃRm ⊗ ∇ᵇRm)(σ-routed; i,i,j,j on the trace slots)`, matching `Bt`/`drift`. -/
-theorem starBase_comp_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem starBase_comp_eq
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k a b : ℕ) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -892,26 +960,27 @@ theorem starBase_comp_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [starBaseField]
   set A := MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
     (E := TangentSpace I) (∞ : WithTop ℕ∞) σ (starProd (I := I) S t a b 0) with hA
-  -- `mtIter g (2+0) A` is the concrete double trace (rewrite the whole field, so the
-  -- rank `2+0` stays out of the motive).
   rw [show mtIter (I := I) (S.family.metric t) (2 + 0) A
       = metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
           (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t) A) from rfl]
-  -- outer trace → `∑ j`
   rw [mtfDiag (I := I) (S.family.metric t) basis horth
     (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t) A) m]
   refine Finset.sum_congr rfl fun j _ => ?_
-  -- fold the `j`-trace input as `basis ∘ mIdx`, apply the inner trace, then unfold back
   obtain ⟨mIdx, hmIdx⟩ := mtInputBasis (I := I) basis j j m
   rw [hmIdx, mtfDiag (I := I) (S.family.metric t) basis horth A mIdx, ← hmIdx]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Product evaluation of a base star term** (r = 0): the double-trace diagonal sum with
-the generator's product `∇ᵃRm ⊗ ∇ᵇRm` split into its two factors (`product_fun_apply`).
-The slot routing `σ` selects which slots contract; downstream (`e0Field`, P2) instantiate
-`σ` to match `Bt`/`drift`/`∇ᵃRm ∗ ∇ᵇRm`.  Reusable consequence of `starBase_comp_eq`. -/
-theorem starBaseProd_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem starBaseProd_eq
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k a b : ℕ) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -931,30 +1000,33 @@ theorem starBaseProd_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [starBase_comp_eq (I := I) S t k a b basis horth σ m]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun i _ => ?_
   rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
-  -- `starProd a b 0 x = product_fun (∇ᵃRm x) (∇ᵇRm x)` (defeq); `exact` absorbs the `2*0`
-  -- rank cast that blocks `rw [product_fun_apply]`.
   exact Bundle.continuousMultilinearMap.product_fun_apply
     (nablaKRm04Field (I := I) S t a x) (nablaKRm04Field (I := I) S t b x)
     (fun p => metricTraceInput (I := I) (basis i) (basis i)
       (metricTraceInput (I := I) (basis j) (basis j) (fun p => basis (m p))) (σ p))
 
-/-! ## The `Bt`-routing star term (P1, one `e0Field` building block)
 
-`btPermE` routes the double-trace generator so that `base 0 0 0 0 btPermE` evaluates to the
-Uhlenbeck `B`-tensor contraction `∑ e ∑ f Rm(a,e,b,f)·Rm(c,e,d,f)` (`= Bt R` at a dim-3
-orthonormal frame via `rm04CompknOrtho`).  Routing (input-position ↦ product-slot):
-`![4,0,5,2,6,1,7,3]` — slot 1,5 (the two `e`s) ← the `i`-trace pair, slot 3,7 (the two `f`s)
-← the `j`-trace pair, slots 0,2,4,6 ← the free `a,b,c,d`. -/
 
-/-- The `Bt`-contraction slot routing, `Fin 8 ≃ Fin 8`. -/
+
+
+
+
+
+
+
 def btPermE : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![4, 0, 5, 2, 6, 1, 7, 3] (by decide)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The `Bt`-routing base star term** at an orthonormal basis equals the `B`-tensor
-double contraction of `Rm` (`= ∇⁰Rm`).  One `e0Field` building block; the dim-3
-identification with `Bt R` is `rm04CompknOrtho` (applied at assembly). -/
-theorem btStar_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem btStar_eq
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -983,46 +1055,46 @@ theorem btStar_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       simp [btPermE, Equiv.ofBijective, Fin.natAdd, metricTraceInput_apply]
   rw [hL, hR]
 
-/-! ## `e0Field`: the dim-3 reaction `−2·B# − drift` as a star sum (P1.2)
 
-The eight contraction routings (`Fin 8 ≃ Fin 8`) realizing the four `Bt` terms of `B#` and the
-four `drift` terms; `e0Field` is their signed combination, and `e0Field_mem` is its `StarSum2`
-membership (by constructors).  Routings are recorded in `StarSum2.md`; correctness of each
-routing (its components) is the P1.3 identity. -/
 
-/-- `Bt(s0s1s3s2)` routing. -/
+
+
+
+
+
+
 def σBt2 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![4, 0, 5, 2, 7, 1, 6, 3] (by decide)
 
-/-- `Bt(s0s2s1s3)` routing. -/
+
 def σBt3 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![4, 0, 6, 2, 5, 1, 7, 3] (by decide)
 
-/-- `Bt(s0s3s1s2)` routing. -/
+
 def σBt4 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![4, 0, 7, 2, 5, 1, 6, 3] (by decide)
 
-/-- `drift` term-1 routing `R a p · rm(p,b,c,d)`. -/
+
 def σD1 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![4, 0, 2, 1, 3, 5, 6, 7] (by decide)
 
-/-- `drift` term-2 routing `R b p · rm(a,p,c,d)`. -/
+
 def σD2 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![5, 0, 2, 1, 4, 3, 6, 7] (by decide)
 
-/-- `drift` term-3 routing `R c p · rm(a,b,p,d)`. -/
+
 def σD3 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![6, 0, 2, 1, 4, 5, 3, 7] (by decide)
 
-/-- `drift` term-4 routing `R d p · rm(a,b,c,p)`. -/
+
 def σD4 : Fin (((4 + 0) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + 0) + 2 * (2 + 0)) :=
   Equiv.ofBijective ![7, 0, 2, 1, 4, 5, 6, 3] (by decide)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **`e0Field`** — the dim-3 Uhlenbeck reaction `−2·B# − drift` written as a star sum:
-`−2·(Bt₁ − Bt₂ + Bt₃ − Bt₄)` (the `B#` antisymmetrization) plus `+(drift₁..₄)` (the four
-drift bases sum to `−drift`, the `R = −trace` sign folded in).  Its `g_t`-orthonormal
-components are `−2·B#(R) − drift(R)` (P1.3). -/
+
+
+
+
 def e0Field (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + 0) :=
@@ -1036,7 +1108,9 @@ def e0Field (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     + starBaseField (I := I) S t 0 0 0 0 σD4
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **`e0Field ∈ StarSum2 S t 0`** (P1.2, membership by constructors). -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem e0Field_mem (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     StarSum2 (I := I) S t 0 (e0Field (I := I) S t) := by
   unfold e0Field
@@ -1052,8 +1126,10 @@ theorem e0Field_mem (S : SolutionOn (I := I) (M := M) D) (t : Real) :
   · exact StarSum2.base 0 0 0 0 σD4
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The canonical level-zero residual has the explicit `Fin 3` constructor
-cost `108 = (2 + 2 + 2 + 2 + 1 + 1 + 1 + 1) * 3^2`. -/
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem e0Field_cost (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     StarSum2Cost (I := I) (Fin 3) S t 0 (e0Field (I := I) S t) 108 := by
   unfold e0Field
@@ -1069,22 +1145,25 @@ theorem e0Field_cost (S : SolutionOn (I := I) (M := M) D) (t : Real) :
       (StarSum2Cost.base 0 0 0 0 σD4) using 1
   norm_num
 
-/-! ## P1.3: the component identity `e0Field`-comps `= −2·B# − drift`
 
-At a `g_t`-orthonormal `Fin 3` frame, the curvature components are the dim-3
-Kulkarni–Nomizu form `rm R` (`R` = the frame Ricci); the eight `base` terms of `e0Field`
-then evaluate to the `Bt`/`drift` contractions, and assemble (with the Ricci-trace identity
-`∑_b rm a b c b = −R a c`) to the bare reaction `−2·B# − drift`. -/
+
+
+
+
+
 
 section ComponentIdentity
 
 open DifferentialGeometry.Dim3Reaction
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Orthonormal curvature components are `rm R`** (the dim-3 Kulkarni–Nomizu form): at a
-`g_t`-orthonormal `Fin 3` frame, `∇⁰Rm`-components equal `rm R`.  Via `solution_rm04_kn_all`
-(`∇⁰Rm = S.base.rm04`) + `δ` inner products + `R = Ric`-frame-components + `S = sc R`. -/
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
 theorem rmComp_eq_rm
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M}
     (hdim : Module.finrank Real (TangentSpace I x) = 3)
     (basis : Fin 3 → TangentSpace I x)
@@ -1102,8 +1181,8 @@ theorem rmComp_eq_rm
     solution_rm04_kn_all (I := I) S t x hdim (fun p => basis (n p))]
   simp only [← hR, horth, htr, rm, sc, kd]
 
-/-- **The Ricci-trace identity** (dim 3): `∑_b rm R a b c b = −R a c` (the first trace of the
-Kulkarni–Nomizu lowered curvature). -/
+
+
 theorem ricTrace (R : Fin 3 → Fin 3 → Real) (a c : Fin 3) :
     ∑ b : Fin 3, rm R a b c b = - R a c := by
   fin_cases a <;> fin_cases c <;>
@@ -1111,9 +1190,9 @@ theorem ricTrace (R : Fin 3 → Fin 3 → Real) (a c : Fin 3) :
       reduceIte] <;>
     ring
 
-/-- **Drift-piece collapse**: a double `rm`-contraction whose first factor carries the
-Ricci-trace pattern `rm a e f e` collapses (by `ricTrace`) to `−∑_p R a p · g p` — the negated
-`drift` sub-term (`g` = the second `rm` factor as a function of the contracted slot). -/
+
+
+
 theorem driftPiece (R : Fin 3 → Fin 3 → Real) (a : Fin 3) (g : Fin 3 → Real) :
     (∑ e : Fin 3, ∑ f : Fin 3, rm R a e f e * g f) = - ∑ p : Fin 3, R a p * g p := by
   rw [Finset.sum_comm]
@@ -1122,10 +1201,10 @@ theorem driftPiece (R : Fin 3 → Fin 3 → Real) (a : Fin 3) (g : Fin 3 → Rea
     rw [← Finset.sum_mul, ricTrace, neg_mul]
   simp only [h, Finset.sum_neg_distrib]
 
-/-! The seven remaining `btStar_eq`-template term identities (one per `e0Field` routing); each
-evaluates a base star term to its double `Rm`-contraction.  `btStar2/3/4` are the other three
-`Bt` terms of `B#`; `drStar1..4` are the four `drift` terms (their factor-1 carries the
-Ricci-trace pattern `(·,e,·,e)`). -/
+
+
+
+
 
 section TermIdentities
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1138,8 +1217,12 @@ variable (m : Fin (4 + 0) → Idx)
 include horth
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `Bt(s0s1s3s2)` routing star term. -/
-theorem btStar2 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem btStar2
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σBt2 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 0, e, m 1, f] p))
@@ -1162,8 +1245,12 @@ theorem btStar2 :
   rw [hL, hR]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `Bt(s0s2s1s3)` routing star term. -/
-theorem btStar3 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem btStar3
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σBt3 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 0, e, m 2, f] p))
@@ -1186,8 +1273,12 @@ theorem btStar3 :
   rw [hL, hR]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `Bt(s0s3s1s2)` routing star term. -/
-theorem btStar4 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem btStar4
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σBt4 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 0, e, m 3, f] p))
@@ -1210,8 +1301,12 @@ theorem btStar4 :
   rw [hL, hR]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `drift` term-1 routing star term (factor 1 carries the Ricci-trace `(n0,e,f,e)`). -/
-theorem drStar1 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem drStar1
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σD1 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 0, e, f, e] p))
@@ -1234,8 +1329,12 @@ theorem drStar1 :
   rw [hL, hR]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `drift` term-2 routing star term. -/
-theorem drStar2 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem drStar2
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σD2 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 1, e, f, e] p))
@@ -1258,8 +1357,12 @@ theorem drStar2 :
   rw [hL, hR]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `drift` term-3 routing star term. -/
-theorem drStar3 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem drStar3
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σD3 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 2, e, f, e] p))
@@ -1282,8 +1385,12 @@ theorem drStar3 :
   rw [hL, hR]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `drift` term-4 routing star term. -/
-theorem drStar4 :
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem drStar4
+    [Module.Finite ℝ E]
+    :
     starBaseField (I := I) S t 0 0 0 0 σD4 x (fun p => basis (m p))
       = ∑ e : Idx, ∑ f : Idx,
           nablaKRm04Field (I := I) S t 0 x (fun p => basis (![m 3, e, f, e] p))
@@ -1308,10 +1415,12 @@ theorem drStar4 :
 end TermIdentities
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- **P1.3: the `e0Field` component identity.**  At a `g_t`-orthonormal `Fin 3` frame, the
-components of `e0Field` are exactly the bare dim-3 Uhlenbeck reaction `−2·B# − drift`. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
 theorem e0Field_comp
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M}
     (hdim : Module.finrank Real (TangentSpace I x) = 3)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1326,7 +1435,6 @@ theorem e0Field_comp
             + Bt R (n 0) (n 2) (n 1) (n 3) - Bt R (n 0) (n 3) (n 1) (n 2))
         - drift R (n 0) (n 1) (n 2) (n 3) := by
   classical
-  -- distribute the field evaluation (definitional), then expand the eight base terms
   have hev : e0Field (I := I) S t x (fun p => basis (n p))
       = -2 * starBaseField (I := I) S t 0 0 0 0 btPermE x (fun p => basis (n p))
         + 2 * starBaseField (I := I) S t 0 0 0 0 σBt2 x (fun p => basis (n p))
@@ -1340,11 +1448,9 @@ theorem e0Field_comp
     btStar3 (I := I) S t basis horth n, btStar4 (I := I) S t basis horth n,
     drStar1 (I := I) S t basis horth n, drStar2 (I := I) S t basis horth n,
     drStar3 (I := I) S t basis horth n, drStar4 (I := I) S t basis horth n]
-  -- curvature components are `rm R`; reduce the literal slot tuples
   simp only [rmComp_eq_rm (I := I) S t hdim basis horth R hR htr,
     Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two,
     Matrix.tail_cons, Matrix.cons_val_three]
-  -- collapse the four drift pieces (Ricci-trace), then match `Bt`/`drift` by definition
   rw [driftPiece R (n 0) (fun f => rm R f (n 1) (n 2) (n 3)),
     driftPiece R (n 1) (fun f => rm R (n 0) f (n 2) (n 3)),
     driftPiece R (n 2) (fun f => rm R (n 0) (n 1) f (n 3)),
@@ -1354,24 +1460,22 @@ theorem e0Field_comp
 
 end ComponentIdentity
 
-/-! ## Brick 4 at `k = 0` (P1.4): `residualStarSum_zero`
 
-The `k = 0` heat residual `(∂ₜ − Δ)Rm` is a star sum, proved at the orthonormal frame.
-The standing input `hbase` is the per-`(x, frame)` `g_t`-orthonormal `∂ₜRm04` evolution — the
-orthonormal-frame analogue of `rm04HrmProducer`'s output (Laplacian realized as the `δ`-trace of
-`∇²Rm04`, reaction in bare `Bt`/`drift` form), bottoming out on the project's standing
-`hlich`/scalar DeTurck layer (coworker's lane).  The genuine content here is the bridge from the
-bare reaction to the star sum: `e0Field_comp` rewrites the `−2·B# − drift` reaction into the
-components of `e0Field ∈ StarSum2 S t 0`, closing the frozen statement. -/
+
+
+
+
+
+
+
+
 
 open DifferentialGeometry.Dim3Reaction in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- **Brick 4, `k = 0` instance (GREEN, 0 sorry).**  The heat residual `(∂ₜ − Δ)Rm = e0Field`
-is a star sum; the time derivative of `Rm`'s orthonormal components is the rough Laplacian plus
-the components of the star-sum element `e0Field`.  `hbase` is the standing orthonormal `∂ₜRm04`
-evolution (the `hlich`/scalar DeTurck-layer input). -/
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
 theorem residualStarSum_zero
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D)
     (t : RealTimeInterval.RegularTime D)
     (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3)
@@ -1420,11 +1524,9 @@ theorem residualStarSum_zero
       = sc (fun i j => S.ricciAt (t : Real) x (vec2 (I := I) (basis i) (basis j))) := by
     rw [scalar_eq_trace_ortho (I := I) S (t : Real) x horth]
     simp only [sc]
-  -- the level-0 component array is `S.base.rm04` (`nablaKRm04Field_zero`, `rfl`)
   have hlhs : (fun r : Real => tensor0SComponent (I := I) (nablaKRm04Field (I := I) S r 0 x)
         (fun i => basis i) I0)
       = (fun r : Real => S.base.rm04 r x (fun p => basis (I0 p))) := rfl
-  -- split off `e0Field` and rewrite its components as the bare reaction (`e0Field_comp`)
   have hval : tensor0SComponent (I := I)
         (metricTrace0S2TensorInBasis (I := I) basis (identityInvMetric (Idx := Fin 3))
             (nablaKRm04Field (I := I) S (t : Real) (0 + 2) x) + (e0Field (I := I) S (t : Real)) x)

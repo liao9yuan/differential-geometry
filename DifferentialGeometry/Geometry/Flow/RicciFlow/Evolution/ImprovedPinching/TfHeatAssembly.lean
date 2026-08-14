@@ -1,14 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.HamiltonRHS
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching TfHeatAssembly
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.ImprovedPinching`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -18,15 +16,16 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-/-- Eigenvalue-facing form of Lemma 10.4.  This consumes Section 6 scalar and
-Ricci-norm heat equations plus pointwise Ricci eigenvalue data for the scalar,
-norm, cubic trace, and reaction term. -/
+
+
+
+omit [TopologicalSpace M] in
 theorem tfHeat_eigen
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap
@@ -63,8 +62,9 @@ theorem tfHeat_eigen
       scalar ricciNormSq ricciTraceCube reaction
       l1 l2 l3 hscalar hnorm hcube hreaction)
 
-/-- Diagonal-eigenframe form of Lemma 10.4, using the standard 3D diagonal
-curvature contraction for the reaction term. -/
+
+
+omit [TopologicalSpace M] in
 theorem tfHeat_diag
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap
@@ -101,10 +101,12 @@ theorem tfHeat_diag
       (M := M)
       scalar ricciNormSq ricciTraceCube l1 l2 l3 hscalar hnorm hcube)
 
-/-- Section 6 consumer for Lemma 10.4.  It uses the canonical Ricci-norm heat
-equation route; the remaining geometric input is exactly the reaction relation
-for the chosen three-dimensional convention. -/
+
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_sec6
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     {Idx : Type*} [Fintype Idx]
@@ -154,9 +156,11 @@ theorem tfHeat_sec6
       h_inv h_ricci hInvSym hRicSym h_lap)
     hRel
 
-/-- Section 10.4 from Section 6 heat equations, with an arbitrary orthonormal
-heat frame and a separate pointwise Ricci eigenbasis for the reaction algebra. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_point
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -226,9 +230,11 @@ theorem tfHeat_point
       ricciTraceCube)
     hscalarHeat h_inv h_ricci hInvSym hRicSym h_lap hRel
 
-/-- Section 10.4 arbitrary-heat-frame consumer with signed trace data produced
-from first-trace Ricci/scalar realizations at the separate Ricci eigenbasis. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_pfirst
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -261,9 +267,11 @@ theorem tfHeat_pfirst
         (I := I) (S.base.metric t) x (eigBasis t x))
     (hcurv : ∀ (t : Real) (x : M),
       DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
-        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) (eigBasis t x) (Rm04 t x)))
+        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) (eigBasis t x)
+          (Rm04 t x)))
     (hRicFirst : ∀ (t : Real) (x : M),
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricciAt t x)
         (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 (eigBasis t x))
     (hScalarTrace : ∀ (t : Real) (x : M),
       DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (scalar t x)
@@ -296,12 +304,14 @@ theorem tfHeat_pfirst
   exact DifferentialGeometry.Integral.Connection.traceDataOfFirst (I := I) (M := M) (heig t x)
     (hcurv t x) (hRicFirst t x) (hScalarTrace t x)
 
-/-- Section 10.4 with the Ricci eigenbasis chosen pointwise from symmetry.
 
-The conclusion returns the chosen eigenbasis/eigenvalue package and the
-corresponding eigenvalue definition of `tr(Ric^3)`.  No smooth eigenframe is
-asserted or needed. -/
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_eig
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -334,17 +344,21 @@ theorem tfHeat_eig
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x))
     (hcurv : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
           (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (Rm04 t x)))
     (hRicFirst : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hScalarTrace : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (scalar t x)
           (S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hInv : ∀ (t : Real) (x : M) (i j : Fin 3),
@@ -363,7 +377,8 @@ theorem tfHeat_eig
           (scalar t x) (l1 t x) (l2 t x) (l3 t x) (eigBasis t x)) ∧
       (∀ t x,
         ricciTraceCube t x =
-          DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x)) ∧
+          DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x))
+            ∧
       tfRicHeatOn
         (D := D)
         (tfRicNormSq scalar (ricciNormSqInFrame (I := I) S gInv frame))
@@ -380,7 +395,8 @@ theorem tfHeat_eig
           DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
             (I := I) (S.base.metric t) x basis ∧
           DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) (S.ricciAt t x)
-            (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) l1 l2 l3 basis := by
+            (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) l1 l2 l3
+              basis := by
     intro t x
     exact DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (S.base.metric t)
       (S.ricciAt t x) (hdim t x) (hRicSymAt t x)
@@ -411,7 +427,8 @@ theorem tfHeat_eig
     exact ⟨hscalar, hric⟩
   have hcube : ∀ t x,
       cube t x =
-        DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x) := by
+        DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x)
+          (l3 t x) := by
     intro t x
     exact ricciCubeInv_diag (I := I) (S.base.metric t)
       (heigOn t x) (hdiag0 t x)
@@ -424,9 +441,11 @@ theorem tfHeat_eig
     (fun t x => hScalarTrace t x (eigBasis t x) (heigOn t x))
     hdiag hcube hInv hRicSym
 
-/-- Section 10.4 with pointwise eigenbasis selection and the canonical cubic
-trace `tr((Ric^#)^3)` scalar. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_can
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -459,17 +478,21 @@ theorem tfHeat_can
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x))
     (hcurv : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
           (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (Rm04 t x)))
     (hRicFirst : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hScalarTrace : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (scalar t x)
           (S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hInv : ∀ (t : Real) (x : M) (i j : Fin 3),
@@ -505,7 +528,8 @@ theorem tfHeat_can
     funext t x
     calc
       cube t x =
-          DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x) :=
+          DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x)
+            (l3 t x) :=
             hcube t x
       _ = ricciCube (I := I) S t x := by
             simpa [ricciCube] using
@@ -514,11 +538,13 @@ theorem tfHeat_can
   refine ⟨eigBasis, l1, l2, l3, heig, hdiag, ?_⟩
   simpa [hcubeEq] using hheatEq
 
-/-- Canonical Section 10.4 consumer from an already packaged Ricci-norm heat
-equation.  This is the entry point to use after Lemma 6.7 has been produced
-elsewhere, avoiding another expansion of the inverse-metric/Ricci evolution and
-Bochner inputs in this file. -/
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_canR
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -550,17 +576,21 @@ theorem tfHeat_canR
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x))
     (hcurv : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
           (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (Rm04 t x)))
     (hRicFirst : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hScalarTrace : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (scalar t x)
           (S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hInv : ∀ (t : Real) (x : M) (i j : Fin 3),
@@ -590,7 +620,8 @@ theorem tfHeat_canR
           DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
             (I := I) (S.base.metric t) x basis ∧
           DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) (S.ricciAt t x)
-            (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) l1 l2 l3 basis := by
+            (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) l1 l2 l3
+              basis := by
     intro t x
     exact DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (S.base.metric t)
       (S.ricciAt t x) (hdim t x) (hRicSymAt t x)
@@ -619,7 +650,8 @@ theorem tfHeat_canR
     exact ⟨hscalar, hric⟩
   have hcube : ∀ t x,
       ricciCube (I := I) S t x =
-        DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x) := by
+        DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x)
+          (l3 t x) := by
     intro t x
     exact ricciCubeInv_diag (I := I) (S.base.metric t)
       (heigOn t x) (hdiag0 t x)
@@ -650,10 +682,12 @@ theorem tfHeat_canR
     (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame)
     hscalarHeat hRicHeat hRel
 
-/-- Canonical Section 10.4 wrapper using `SolutionOn.scalar` as the scalar
-curvature, so scalar trace realization is produced from the intrinsic metric
-trace instead of supplied separately. -/
+
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_scalar
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -686,13 +720,16 @@ theorem tfHeat_scalar
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x))
     (hcurv : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
           (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (Rm04 t x)))
     (hRicFirst : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 basis)
     (hInv : ∀ (t : Real) (x : M) (i j : Fin 3),
       gInv t x i j = DifferentialGeometry.Integral.Connection.delta3 i j)
@@ -726,9 +763,11 @@ theorem tfHeat_scalar
     (S.ricciAt t x) horth
   simpa [SolutionOn.scalar_eq_metricTrace] using htr
 
-/-- Canonical Section 10.4 wrapper that also produces the first-trace Ricci
-realization from an intrinsic `Rm13` trace and lowering relation. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_trace
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -762,7 +801,8 @@ theorem tfHeat_trace
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x))
     (hcurv : ∀ (t : Real) (x : M)
       (basis : Module.Basis (Fin 3) Real (TangentSpace I x)),
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis ->
+      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) (S.base.metric t) x basis
+        ->
         DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
           (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (Rm04 t x)))
     (hRic13 : ∀ t x,
@@ -801,9 +841,11 @@ theorem tfHeat_trace
     simpa [ricciCompInFrame] using
       hRicSymAt t x (frame i x) (frame j x)
 
-/-- Section 10.4 wrapper where the algebraic curvature symmetries and lowering
-relation are produced from Levi-Civita `Rm13`/`Rm04` realization data. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_lc
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -878,7 +920,8 @@ theorem tfHeat_lc
         (Rm13 := Rm13 t) (Rm04 := Rm04 t)
         (hRm13 t) (hRm04 t) x
     have hTrace :
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 (heatBasis t x) :=
       firstTrace_delta (I := I) (S.base.metric t) (hheat t x)
         (S.ricciAt t x) (Rm13 t x) (Rm04 t x) (hRic13 t x) hLowerAt
@@ -899,7 +942,7 @@ theorem tfHeat_lc
     h_ricci h_lap hheatBasis hheat hdim hRicSymAt ?_ hRic13 ?_ hInv
   · intro t x basis _horth
     exact
-      DifferentialGeometry.Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
+      Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := Rm04 t) (hRm04 := hRm04 t) basis
   · intro t x
@@ -910,9 +953,11 @@ theorem tfHeat_lc
       (Rm13 := Rm13 t) (Rm04 := Rm04 t)
       (hRm13 t) (hRm04 t) x
 
-/-- Section 10.4 using the canonical metric-derived Riemann curvature sections
-of the solution candidate. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_metric
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -974,9 +1019,11 @@ theorem tfHeat_metric
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
 
-/-- Section 10.4 using the canonical metric-derived curvature sections, with
-the required order-one Levi-Civita smoothness produced from the metric. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_metric_smooth
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1029,10 +1076,12 @@ theorem tfHeat_metric_smooth
     ricciNormLap nablaRic scalarLap gradScalarNormSq hscalarHeat h_inv
     h_ricci h_lap hheatBasis hheat hdim hInv
 
-/-- Section 10.4 using the canonical metric-derived curvature sections and an
-already packaged Section 6 Ricci-norm heat equation.  This is the shortest
-current entry point once Lemma 6.7 has been proved separately. -/
+
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_ricci
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1088,7 +1137,7 @@ theorem tfHeat_ricci
           (S.base.metric t)) (1 : WithTop ℕ∞) := by
     intro t
     exact
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
   have hRm13 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -1106,7 +1155,8 @@ theorem tfHeat_ricci
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
   have hRic13 : ∀ t x,
       S.ricciAt t x =
-        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M) (S.base.rm13 t x) := by
+        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M)
+          (S.base.rm13 t x) := by
     intro t x
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
@@ -1123,7 +1173,8 @@ theorem tfHeat_ricci
         (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
         (hRm13 t) (hRm04 t) x
     have hTrace :
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (S.base.rm04 t x) DifferentialGeometry.Integral.Connection.delta3 (heatBasis t x) :=
       firstTrace_delta (I := I) (S.base.metric t) (hheat t x)
         (S.ricciAt t x) (S.base.rm13 t x) (S.base.rm04 t x)
@@ -1145,7 +1196,7 @@ theorem tfHeat_ricci
     hscalarHeat hRicHeat hheatBasis hheat hdim hRicSymAt ?_ ?_ ?_ hInv
   · intro t x basis _horth
     exact
-      DifferentialGeometry.Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
+      Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t) basis
   · intro t x basis horth
@@ -1166,10 +1217,12 @@ theorem tfHeat_ricci
       (S.ricciAt t x) horth
     simpa [SolutionOn.scalar_eq_metricTrace] using htr
 
-/-- Section 10.4 packaged with the canonical metric-compatible producer for
-Lemma 6.7.  This theorem supplies the Ricci-norm heat equation by calling
-`ricci_heat_mc`, then applies `tfHeat_ricci`. -/
+
+
+
+omit [Module.Finite ℝ E] in
 theorem tfHeat_mc
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1229,10 +1282,12 @@ theorem tfHeat_mc
         (M := M) 3 (S.base.connection t) (nablaA t) (nabla2A t))
     (hdu : ∀ t,
       DifferentialGeometry.Integral.Connection.DuFieldRealizes (I := I)
-        (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y (A t y))
+        (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y
+          (A t y))
         (du t))
     (hHess : ∀ t x,
-      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I) (S.base.connection t) (du t)
+      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I)
+        (S.base.connection t) (du t)
         (normSecond t) x)
     (hrough : ∀ t x,
       DifferentialGeometry.Integral.Connection.RoughLap0SRealizesMetricTraceInBasis (I := I)
@@ -1244,7 +1299,8 @@ theorem tfHeat_mc
       roughA t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
         roughLapRic t x i j)
     (hnablaComp : ∀ t x a i j,
-      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+        (frame j x)) =
         nablaRic t x a i j) :
     ∃ (eigBasis : (t : Real) -> (x : M) ->
         Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1276,7 +1332,7 @@ theorem tfHeat_mc
           (S.base.metric t)) (1 : WithTop ℕ∞) := by
     intro t
     exact
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
   have hRm13 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -1294,7 +1350,8 @@ theorem tfHeat_mc
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
   have hRic13 : ∀ t x,
       S.ricciAt t x =
-        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M) (S.base.rm13 t x) := by
+        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M)
+          (S.base.rm13 t x) := by
     intro t x
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
@@ -1311,7 +1368,8 @@ theorem tfHeat_mc
         (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
         (hRm13 t) (hRm04 t) x
     have hTrace :
-        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+        DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+          (S.ricciAt t x)
           (S.base.rm04 t x) DifferentialGeometry.Integral.Connection.delta3 (heatBasis t x) :=
       firstTrace_delta (I := I) (S.base.metric t) (hheat t x)
         (S.ricciAt t x) (S.base.rm13 t x) (S.base.rm04 t x)

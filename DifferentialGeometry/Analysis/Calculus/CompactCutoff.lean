@@ -58,7 +58,7 @@ and supported in the open set. -/
 theorem exists_mfd_bump
     {E H M : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [CompleteSpace E] [TopologicalSpace H]
+    [TopologicalSpace H]
     {I : ModelWithCorners ℝ E H}
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]

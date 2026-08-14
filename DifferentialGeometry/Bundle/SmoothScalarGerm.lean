@@ -1,12 +1,12 @@
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.Algebra.Structures
 
-/-!
-# Global representatives of smooth scalar germs
 
-This file gives a globally smooth representative of a scalar function which is
-smooth on an open neighborhood of a point.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -21,8 +21,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M]
 
-/-- A scalar function smooth on an open neighborhood of a point has a globally
-smooth representative with the same germ at that point. -/
+
+
 theorem exists_smooth_germ
     {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U) (hx : x ∈ U)
     (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U) :

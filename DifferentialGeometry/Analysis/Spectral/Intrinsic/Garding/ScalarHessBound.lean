@@ -4,14 +4,14 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInne
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 
-/-!
-# Support-independent scalar Hessian bounds
 
-This file joins the invariant scalar Bochner--Green graph estimate to the
-rank-zero spectral realization.  For every finite-support spectral `H²` vector,
-the scalar Laplacian, gradient, and Hessian energies are controlled by constants
-independent of the chosen spectral support.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -45,8 +45,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The pointwise rank-zero realization, rewritten into the divergence-form
-Laplace--Beltrami normal form used by the scalar energy estimates. -/
+
+
 private theorem rawLap_repr_delta
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -61,8 +61,8 @@ private theorem rawLap_repr_delta
   rw [laplacian_levi_eq (I := I) g
     (reprScalar0_smooth (I := I) (M := M) v hv) x]
 
-/-- The scalar Laplacian energy of a finite spectral representative is the
-squared mixed-tensor `L²` norm of its realized rough Laplacian. -/
+
+
 theorem lap_energy_eq
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -93,8 +93,8 @@ theorem lap_energy_eq
   rw [inner_toRS0_scalar (I := I) (M := M) g x]
   ring
 
-/-- Pairing the realized rough Laplacian with the spectral representative is
-the integral of the scalar Laplacian times the scalar representative. -/
+
+
 private theorem repr_lap_inner
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -146,8 +146,8 @@ private theorem repr_lap_inner
       (reprScalar0_smooth (I := I) (M := M) v hv) x Fin.elim0
   rw [hlap, hrepr]
 
-/-- The scalar gradient energy equals the squared mixed-tensor `L²` norm of
-the covariant gradient of the finite spectral representative. -/
+
+
 theorem grad_energy_eq
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -203,8 +203,8 @@ theorem grad_energy_eq
       rw [← repr_lap_inner (I := I) (M := M) g v hv]
     _ = ‖covGrad (I := I) (M := M) g 0 0 S‖ ^ 2 := htensor.symm
 
-/-- The scalar Laplacian energy is bounded by the spectral `H²` norm with a
-constant independent of the finite support. -/
+
+
 theorem lap_energy_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -219,8 +219,8 @@ theorem lap_energy_le
     (rawTensorConnLapSmooth (I := I) g 0 0
       (tensorHsSmoothRepr (I := I) (M := M) v hv)), norm_nonneg v]
 
-/-- The scalar gradient energy is bounded by the spectral `H²` norm with a
-constant independent of the finite support. -/
+
+
 theorem grad_energy_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -246,8 +246,8 @@ private theorem du_normSq
     inner0S_differential1FormFun_pair_eq_grad_inner]
   rfl
 
-/-- The intrinsic squared norm of `du` is bounded by the spectral `H²` norm,
-with a constant independent of the finite support. -/
+
+
 theorem du_energy_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -259,9 +259,9 @@ theorem du_energy_le
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤ ‖v‖ ^ 2 := by
   simpa only [du_normSq] using grad_energy_le (I := I) (M := M) g v hv
 
-/-- The scalar Hessian energy of every finite spectral representative is
-bounded by its spectral `H²` norm, with a metric-only constant independent of
-the finite support. -/
+
+
+
 theorem hess_energy_le
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -295,8 +295,8 @@ theorem hess_energy_le
       add_le_add hlap (mul_le_mul_of_nonneg_left hgrad hC)
     _ = (1 + C) * ‖v‖ ^ 2 := by ring
 
-/-- The intrinsic Levi-Civita Hessian energy is bounded by the spectral `H²`
-norm, with a metric-only constant independent of the finite support. -/
+
+
 theorem hessSec_energy_le
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧

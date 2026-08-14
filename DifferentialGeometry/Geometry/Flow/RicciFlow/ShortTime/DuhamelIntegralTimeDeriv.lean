@@ -8,11 +8,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-! # Time derivative of the per-mode Duhamel convolution
 
-`duhamel_integral_time_deriv`: for `λ ≥ 0` and a continuous forcing `f`, the per-mode
-Duhamel convolution `s ↦ perModeConv λ f s` is differentiable with derivative
-`-λ · perModeConv λ f t + f t`, the scalar ODE underlying each spectral mode. -/
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -34,16 +34,15 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
 theorem duhamel_integral_time_deriv
-    (lam : ℝ) (hlam : 0 ≤ lam) (f : ℝ → ℝ) {T : ℝ}
+    (lam : ℝ) (_hlam : 0 ≤ lam) (f : ℝ → ℝ) {T : ℝ}
     (hf : ContinuousOn f (Set.Icc 0 T)) {t : ℝ} (ht : t ∈ Set.Ioo (0 : ℝ) T) :
     HasDerivAt (fun s : ℝ => perModeConv lam f s)
       (-lam * perModeConv lam f t + f t) t := by

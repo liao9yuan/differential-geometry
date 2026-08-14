@@ -2,12 +2,12 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGra
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 
-/-!
-# Smooth tensors in the spectral Sobolev scale
 
-This file packages the generic spectral embedding of smooth covariant tensors
-as a linear map and proves that its range is dense at every nonnegative order.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,7 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The generic spectral embedding of smooth covariant tensors, as a linear map. -/
+
 noncomputable def ccToHsLin
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ) :
     SmoothCcTensor g 0 s →ₗ[ℝ] tensorHs (I := I) (M := M) g 0 s σ where
@@ -40,7 +40,7 @@ noncomputable def ccToHsLin
   map_add' := ccTensorToHs_add (I := I) (M := M) g s σ
   map_smul' := ccTensorToHs_smul (I := I) (M := M) g s σ
 
-/-- Applying `ccToHsLin` is the existing generic spectral embedding. -/
+
 @[simp] theorem ccToHsLin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (S : SmoothCcTensor g 0 s) :
@@ -48,8 +48,8 @@ noncomputable def ccToHsLin
       ccTensorToHs (I := I) (M := M) g s σ S :=
   rfl
 
-/-- The smooth representative of a finitely supported spectral vector maps
-back to that vector at every nonnegative order. -/
+
+
 theorem ccToHsLin_repr
     (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ)
     (v : tensorHs (I := I) (M := M) g 0 s σ)
@@ -63,8 +63,8 @@ theorem ccToHsLin_repr
     tensorHsSmoothRepr_toL2 (I := I) (M := M) hσ v hv,
     tensorHsToL2_tensorL2Coeff (I := I) (M := M) hσ]
 
-/-- The smooth eigensection embeds as the corresponding spectral Sobolev
-basis vector at every nonnegative order. -/
+
+
 theorem ccToHs_eigen
     (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -94,8 +94,8 @@ theorem ccToHs_eigen
   rw [← hre, ← ccToHsLin_apply]
   exact ccToHsLin_repr (I := I) (M := M) g s hσ v hv
 
-/-- For nonnegative order, smooth covariant tensors are dense in the spectral
-Sobolev space. -/
+
+
 theorem ccToHsLin_dense
     (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ) :
     DenseRange (ccToHsLin (I := I) (M := M) g s σ) := by

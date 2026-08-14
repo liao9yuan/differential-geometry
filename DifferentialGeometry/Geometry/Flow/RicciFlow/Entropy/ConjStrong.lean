@@ -4,12 +4,12 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
-/-!
-# Strong reversed conjugate heat
 
-This file assembles the genuine moving-Laplacian and scalar-potential operator
-families on one short interval and applies non-autonomous maximal regularity.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -44,8 +44,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The moving-Laplacian perturbation in the literal `a + 2` domain normal
-form consumed by maximal regularity at `a = 0`. -/
+
+
 noncomputable def conjA2MR
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) :
@@ -57,8 +57,8 @@ noncomputable def conjA2MR
       (g := S.family.metric (T : Real)) (r := 0) (s := 0)
       (show (2 : Real) ≤ 0 + 2 by norm_num))
 
-/-- The scalar-potential perturbation in the literal `a + 1` domain normal
-form consumed by maximal regularity at `a = 0`. -/
+
+
 noncomputable def conjA1MR
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) :
@@ -70,9 +70,9 @@ noncomputable def conjA1MR
       (g := S.family.metric (T : Real)) (r := 0) (s := 0)
       (show (1 : Real) ≤ 0 + 1 by norm_num))
 
-/-- The genuine reversed-conjugate-heat operators satisfy the combined
-non-autonomous contraction bound on one positive short interval, where the
-applied moving-Laplacian graph also lies in the smooth-core graph closure. -/
+
+
+
 theorem conj_inputs
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -257,10 +257,10 @@ theorem conj_inputs
   exact ⟨tau, C2, C1, htau, htauone, hmeas2', hbound2', hmeas1',
     hbound1', hf_tau, hgraphAE⟩
 
-/-- A genuine short-time spectral strong solution of the time-reversed
-conjugate-heat equation.  All measurability and norm-bound proofs are produced
-inside the existential conclusion, so this theorem adds no consumer
-assumptions. -/
+
+
+
+
 theorem conj_strong_exists
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
@@ -390,9 +390,9 @@ theorem conj_strong_exists
   exact ⟨tau, htau, htau1, C2, C1, hA2', hC2', hA1', hC1', u,
     force, hu, hforce, htrace, hderiv, hgraph, hfield2', hfield1'⟩
 
-/-- A short-time scalar weak equation for the reversed conjugate heat flow.
-The moving-Laplacian residual is characterized by the closed genuine
-smooth-core graph, while the lower-order multiplier is tested exactly. -/
+
+
+
 theorem conj_weak_ae
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)

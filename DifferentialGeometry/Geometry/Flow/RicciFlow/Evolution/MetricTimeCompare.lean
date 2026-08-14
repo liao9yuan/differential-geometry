@@ -21,13 +21,12 @@ open Bundle Set Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Bundle Topology
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [I.Boundaryless]
@@ -71,6 +70,8 @@ private theorem deriv_Ici_start
   · exact hecont.tendsto.congr'
       (Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hab) hderiv).symm
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- A Ricci-flow solution satisfies the metric PDE on a closed slab, with a
 one-sided derivative at its left endpoint. -/
 theorem metricPDE_Icc
@@ -155,7 +156,10 @@ theorem exp_bounds_log
       fb = (fb / fa) * fa := by field_simp
       _ ≤ Real.exp R * fa := mul_le_mul_of_nonneg_right hratio hfa.le
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)]
+  [CompleteSpace E]
+  [IsManifold I 1 M]
+  [SigmaCompactSpace M] in
 /-- A quadratic Ricci bound gives pointwise exponential comparison with the
 metric at the left endpoint of a closed time slab. -/
 theorem metricEquiv_Icc
@@ -211,6 +215,7 @@ theorem metricEquiv_Icc
     exact hmvt
   exact exp_bounds_log (hpos a) (hpos s) hlog
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [IsManifold I 1 M] [SigmaCompactSpace M] in
 private theorem metric_pair_Icc
     (g : Real → SmoothRiemannianMetric I M)
     {a b K s t : Real}
@@ -270,6 +275,7 @@ private theorem metric_pair_Icc
     simpa only [abs_of_nonpos (sub_nonpos.mpr hst), neg_sub] using
       And.intro hleft hright
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- On a Ricci-bounded closed time slab, Riemannian extended distance from a
 fixed point is jointly continuous in time and the moving endpoint. -/
 theorem edistCont_Icc
@@ -347,6 +353,7 @@ theorem edistCont_Icc
       (I := I) (S.base.metric p.1) (S.base.metric q.1)
       (Real.exp_pos _) (fun y v ↦ (hpair y v).2) O q.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- A globally Ricci-bounded solution remains complete on every slice of a
 closed time slab when its left endpoint is complete. -/
 theorem complete_of_ricBound
@@ -381,37 +388,5 @@ theorem complete_of_ricBound
     refine RiemannianMetricComplete.of_uniformEquiv ha hC ?_
     intro x v
     simpa only [Real.exp_neg] using hequiv x v
-
-/-- A solution with a uniform lowered-curvature norm bound remains complete
-on every slice of a closed time slab when its left endpoint is complete. -/
-theorem complete_of_rmBound
-    {D : RealTimeInterval}
-    (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
-    {a b C : Real}
-    (hslab : Set.Icc a b ⊆ D.carrier)
-    (hreg : Set.Ioc a b ⊆ D.regular)
-    (hcurv : ∀ t ∈ Set.Icc a b, ∀ x : M,
-      Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4
-        (S.base.rm04 t x) ≤ C)
-    (ha : RiemannianMetricComplete (I := I) (S.base.metric a))
-    {s : Real} (hs : s ∈ Set.Icc a b) :
-    RiemannianMetricComplete (I := I) (S.base.metric s) := by
-  let K : Real :=
-    (Module.finrank Real E : Real) ^ 2 * Real.sqrt C
-  have hK : 0 ≤ K := by
-    dsimp only [K]
-    exact mul_nonneg (sq_nonneg _) (Real.sqrt_nonneg C)
-  have hric : ∀ t ∈ Set.Icc a b, ∀ x : M,
-      ∀ v : TangentSpace I x,
-        |ricciTensor (I := I) (S.base.metric t) x v v| ≤
-          K * (S.base.metric t).inner x v v := by
-    intro t ht x v
-    simpa only [K] using
-      (ricci_quad_sol (I := I) S x v (hcurv t ht x))
-  exact
-    complete_of_ricBound
-      (I := I) (D := D) (a := a) (b := b) (K := K) (s := s)
-      S hS hslab hreg hK hric ha hs
 
 end DifferentialGeometry.PDE.RicciFlow

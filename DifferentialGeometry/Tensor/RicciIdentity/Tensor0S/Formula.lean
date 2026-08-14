@@ -1,17 +1,13 @@
 import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# General `(0,s)` Ricci identity formula
 
-This file contains the main commutator expansion and public `(0,s)` Ricci
-identity wrappers.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -27,13 +23,13 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Section-level expansion frontier for the invariant `(0,s)` Ricci identity.
 
-All pointwise extension choices have already been made here.  The remaining
-content is the finite-sum moving-slot calculation: expand both second
-covariant derivatives by Definition 14.5, apply the scalar Lie-bracket
-commutator, cancel off-diagonal slot updates, and identify the diagonal terms
-with connection curvature. -/
+
+
+
+
+
+
 private theorem tensor0S_commutator_expansion_from_realizes
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -275,10 +271,6 @@ private theorem tensor0S_commutator_expansion_from_realizes
             (Fin.cons ((cov Yf x) (Xsec x)) slots) +
           nablaAlpha
             (Fin.cons ((cov Xf x) (Ysec x)) slots)) := by
-    -- This is the remaining expansion/cancellation core:
-    -- use `hXY`/`hYX`, `hFY`/`hFX`, `hDX_corrY`/`hDY_corrX`,
-    -- `Nabla0SSectionRealizes.eval_point_vector_smooth_slots`, and
-    -- `double_update_sum_cancel_diag`.
     rw [metricTraceInput_eq_finCons (I := I) (Xsec x) (Ysec x)
       (fun q : Fin s => Vsec q x)]
     rw [metricTraceInput_eq_finCons (I := I) (Ysec x) (Xsec x)
@@ -861,7 +853,6 @@ private theorem tensor0S_commutator_expansion_from_realizes
     simp_rw [finCons_update_tail_eq_update_finCons_succ]
     repeat rw [Finset.sum_add_distrib]
     linarith [hDoubleCancel, hDiagCurv]
-
   calc
     nabla2Alpha
         (metricTraceInput (I := I) (Xsec x) (Ysec x)
@@ -917,9 +908,9 @@ private theorem tensor0S_commutator_expansion_from_realizes
           (fun q : Fin s => Vsec q x) := by
           ring
 
-/-- General invariant Ricci identity for `(0,s)` tensors, with the torsion
-correction retained.  This is the single remaining producer frontier for
-Theorem 14.12 beyond the checked one-form case. -/
+
+
+
 theorem tensor0S_ricciIdentity_with_torsion
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -1008,15 +999,16 @@ theorem tensor0S_ricciIdentity_of_torsionFree
   simp [hzero, torsionCorrection0SAt, ht] at h
   simpa using h
 
-/-- General covariant tensor Ricci-identity interface at one point.  The
-left-hand tensor is the realized commutator of two covariant derivatives, and
-the right-hand tensor is the slotwise curvature action. -/
+
+
+
 def RicciIdentity0SAt {x : M} {s : ℕ}
     (comm curvatureAction :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x) :
     Prop :=
   comm = curvatureAction
 
+omit [FiniteDimensional ℝ E] in
 theorem ricci_identity_0s {x : M} {s : ℕ}
     (comm curvatureAction :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x)

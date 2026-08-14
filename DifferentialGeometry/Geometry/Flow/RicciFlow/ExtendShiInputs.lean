@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendViaUniqueness
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CovOrderTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
@@ -7,18 +7,17 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGra
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
-/-!
-# `ExtendShiInputs` — Shi/Lemma-3.11 inputs for the interior-restart extension route (Brick Y1)
 
-This is the first file where the extension branch (`Evolution.ExtendViaUniqueness`, consumed by
-`MaximalTime.extends_of_rmBounded`) imports the HCGCompactness Lemma-3.11 engine
-(`AllTimesBounds`/`RicBound`).  The import is cycle-free (HCGCompactness does not depend on the
-`CinftyLimitGlue`/`MaximalTime` branch); this file exists to discharge `ricci_flow_interior_restart`'s
-`hell` + `hC3` hypotheses from a bounded-curvature solution, reusing Lemma 3.11 instead of the retired
-bespoke chart-C³ producer (Brick W).  See `ExtendShiInputs.md` and `Evolution/ChartTailBounds.md`.
--/
 
-set_option linter.unusedSectionVars false
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -38,8 +37,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
--- Two small analysis helpers, ported down from `MaximalTime` (where they are private, above this
--- file) so `ricciFlowPDE_Ici_of_soln` can be stated here; both are self-contained.
+
+
 private theorem hasDerivWithinAt_Ici_boundary {a b : ℝ} (hab : a < b) (f e : ℝ → ℝ)
     (h_cont : ContinuousOn f (Set.Ico a b))
     (h_e_cont : ContinuousWithinAt e (Set.Ioi a) a)
@@ -61,6 +60,8 @@ private theorem hasDerivWithinAt_Ici_boundary {a b : ℝ} (hab : a < b) (f e : �
   · exact (h_e_cont.tendsto).congr'
       (Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hab) h_derivEq).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor2_eval_contOn {K : Set ℝ}
     {A : (t : ℝ) → (x : M) →
       Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2 x}
@@ -72,12 +73,14 @@ private theorem tensor2_eval_contOn {K : Set ℝ}
     (b := fun _ => x) continuous_subtype_val (fun p => p.2) continuous_const
     (v := fun i _ => vec2 v w i) (fun _ => continuous_const)
 
-/-- **The Ricci-flow metric PDE of a solution, as a one-sided right-derivative on `Ico α ω`.**
-Ported down from `MaximalTime.ricciFlowPDE_Ici_of_solution` (which is private and above this file) so
-both the `hell` producer here and the Y2 rewiring can consume it. This is exactly Brick X's `hpde`
-input for `g_fam := S.base.metric`. Proof route: interior right-derivative from `metricDerivAt` on the
-regular times, extended to the closed endpoint `α` by `hasDerivWithinAt_Ici_boundary` using scalar
-continuity of the metric and Ricci evaluations. -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ricciFlowPDE_Ici_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -118,12 +121,14 @@ theorem ricciFlowPDE_Ici_of_soln
         hmem).const_mul (-2)
   · exact hinterior t ⟨hlt, ht.2⟩ x v w
 
-/-- **`hell` for `ricci_flow_interior_restart`, from a solution.** A bounded-Ricci solution's metric
-stays uniformly equivalent to its initial slice `S.base.metric α` on the tail — exactly (A)'s `hell`
-hypothesis. This is the Brick X producer `metricEquiv_of_ricBound` fed by the solution's PDE
-(`ricciFlowPDE_Ici_of_soln`); the pointwise Ricci-vs-metric bound `hric` (from `|Ric| ≤ c|Rm|` and the
-solution's curvature bound) is the remaining input, taken as a hypothesis here (its discharge from
-`Rm04NormSqBoundedAt` is Y2-level curvature algebra). -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem hell_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -138,10 +143,12 @@ theorem hell_of_soln
   metricEquiv_of_ricBound (fun t => S.base.metric t) hαω hK
     (ricciFlowPDE_Ici_of_soln hS) hric
 
-/-- **Cauchy–Schwarz for a Riemannian metric's pointwise inner product.**  `(g(u,v))² ≤ g(u,u)·g(v,v)`.
-Not available as a Mathlib `InnerProductSpace` fact here (the tangent space's registered inner product is
-the ambient one, not `g`), so proved directly from positive-semidefiniteness via the nonnegative
-quadratic `t ↦ g(u+tv, u+tv)`. Used for the off-diagonal chart-Gram entry bound (adapter `k = 0`). -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem metricInnerSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     (g.inner x u v) ^ 2 ≤ g.inner x u u * g.inner x v v := by
@@ -174,17 +181,19 @@ private theorem metricInnerSq_le (g : SmoothRiemannianMetric I M) (x : M)
       rwa [div_mul_cancel₀ _ hc.ne'] at this
     linarith
 
--- BANKED / UNCONSUMED (2026-07-04).  The four chart-`k=0` lemmas below (`chartGramEntry_le_of_equiv`,
--- `exists_gRefDiag_bound`, `goodSet_subset_chartSource`, `chartJet0_le_of_equiv`) were the base case of
--- the retired chart-C³ adapter.  After the covariant restatement (Y1-COV) they have no current consumer
--- — the (N)/(A) tail bound now speaks `MetricCovDerivOrderBoundOn` directly.  Kept (not deleted) as
--- verified building blocks: `metricInnerSq_le` (metric Cauchy–Schwarz) is generally reusable, and these
--- may serve a future coordinate-side bound.  See `ExtendShiInputs.md` §Y1b-FINAL / RULING.
 
-/-- **Chart-`k=0` entry bound (banked, unconsumed).**  From metric equivalence `g ≈_C gRef` on `Q` and a
-bound `M0` on the `gRef` chart-Gram diagonal entries over `Q`, every chart-Gram entry of `g` is bounded
-by `C·M0` — uniformly in `g`.  Diagonal via equivalence + the `gRef` bound; off-diagonal via
-`metricInnerSq_le` (Cauchy–Schwarz). -/
+
+
+
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem chartGramEntry_le_of_equiv
     (gRef g : SmoothRiemannianMetric I M) {C M0 : ℝ} (hC0 : 0 ≤ C) (hM0 : 0 ≤ M0) (α₀ : M)
     {Q : Set M} (hequiv : MetricUniformEquivalentOn Q gRef g C)
@@ -192,10 +201,10 @@ private theorem chartGramEntry_le_of_equiv
       chartGramMatrix gRef α₀ b a a ≤ M0)
     (i j : Fin (Module.finrank ℝ E)) {x : M} (hx : x ∈ Q) :
     |chartGramMatrix g α₀ x i j| ≤ C * M0 := by
-  -- diagonal `g`-quadratics bounded by `C·M0`
   have hdiag : ∀ a : Fin (Module.finrank ℝ E),
       0 ≤ g.inner x (chartBasisVecFiber (I := I) α₀ a x) (chartBasisVecFiber (I := I) α₀ a x) ∧
-        g.inner x (chartBasisVecFiber (I := I) α₀ a x) (chartBasisVecFiber (I := I) α₀ a x) ≤ C * M0 := by
+        g.inner x (chartBasisVecFiber (I := I) α₀ a x) (chartBasisVecFiber (I := I) α₀ a x) ≤ C *
+          M0 := by
     intro a
     set e := chartBasisVecFiber (I := I) α₀ a x with he
     have hnn : 0 ≤ g.inner x e e := by
@@ -210,7 +219,6 @@ private theorem chartGramEntry_le_of_equiv
       _ = C * chartGramMatrix gRef α₀ x a a := by rw [hg]
       _ ≤ C * M0 := by
         apply mul_le_mul_of_nonneg_left (hgRef a x hx) hC0
-  -- off-diagonal via Cauchy–Schwarz
   rw [chartGramMatrix_apply]
   set ei := chartBasisVecFiber (I := I) α₀ i x
   set ej := chartBasisVecFiber (I := I) α₀ j x
@@ -223,9 +231,11 @@ private theorem chartGramEntry_le_of_equiv
     nlinarith [abs_nonneg (g.inner x ei ej), sq_abs (g.inner x ei ej), hcs, hCM]
   exact habs
 
-/-- The fixed reference metric's chart-Gram diagonal entries are uniformly bounded on a compact
-`Q ⊆ chartSource` — a single constant `M0` over all diagonal indices (finite sum of the per-index
-`chartGramMatrix_entry_isBounded_on_compact` bounds). -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀ : M)
     {Q : Set M} (hQc : IsCompact Q) (hQs : Q ⊆ (chartAt H α₀).source) :
     ∃ M0 : ℝ, 0 ≤ M0 ∧ ∀ (a : Fin (Module.finrank ℝ E)) (b : M), b ∈ Q →
@@ -241,13 +251,17 @@ private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀
     _ ≤ ∑ a' : Fin (Module.finrank ℝ E), Ci a' :=
         Finset.single_le_sum (fun i _ => (hCi_pos i).le) (Finset.mem_univ a)
 
-/-- Goodset points lie in the chart source. -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem goodSet_subset_chartSource (α₀ : M) :
     chartLeviCivitaGoodSet (I := I) α₀ ⊆ (chartAt H α₀).source :=
   fun _ hz => extChartAt_source I α₀ ▸ hz.1.1
 
-/-- **Chart-`k=0` conjunct (banked, unconsumed).**  The 0-th entry bound, from equivalence + the fixed
-`gRef` diagonal bound `M0`: `|chartGramOnE g α₀ i j (extChartAt I α₀ x)| ≤ C·M0` on `Q`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem chartJet0_le_of_equiv
     (gRef g : SmoothRiemannianMetric I M) {C M0 : ℝ} (hC0 : 0 ≤ C) (hM0 : 0 ≤ M0) (α₀ : M)
     {Q : Set M} (hQ : Q ⊆ chartLeviCivitaGoodSet (I := I) α₀)
@@ -264,11 +278,13 @@ private theorem chartJet0_le_of_equiv
   rw [hred]
   exact chartGramEntry_le_of_equiv gRef g hC0 hM0 α₀ hequiv hgRef i j hx
 
-/-- **`hric` core (the one real Y1c proof).**  In a `g`-orthonormal basis where the Ricci tensor is the
-metric trace of a lowered Riemann tensor `Rm04` (`htrace`), a bound `normSq0S Rm04 ≤ C` on `|Rm|²`
-controls the Ricci quadratic form by the metric: `|Ric(v,v)| ≤ (n²√C)·g(v,v)`.  Composes the Ricci
-operator-norm-from-`‖Rm‖` bound (`ricci_unitQuad_le_of_trace`) with the quadratic-form extension
-(`tensor02_quadForm_abs_le_of_unit_bound`).  This is exactly Brick X's `hric` input, `K := n²√C`. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ric_quad_le_of_rm04
     (g : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
     (basis : Module.Basis (Fin n) ℝ (TangentSpace I x))
@@ -289,13 +305,14 @@ private theorem ric_quad_le_of_rm04
   rw [← metricRicciAt_apply_eq_ricciTensor g x v v]
   exact hquad
 
-/-- **`hric` from the curvature realization.**  If `Rm04sec` realizes the Levi-Civita connection
-curvature of `g`, and its metric squared norm at `x` is bounded by `C`, then the Ricci quadratic
-form is controlled by the metric: `|Ric(v,v)| ≤ (n²√C)·g(v,v)` with `n = finrank`.  This discharges
-the `htrace` hypothesis of `ric_quad_le_of_rm04` directly from the realization: in a `g`-orthonormal
-basis the inverse metric is the identity, so `ricciFromRm13_comp_eq_rm04_trace` (via
-`rm04LowersRm13At_of_realizes`) collapses to `Ric = ∑ₐ Rm04(eₐ,·,·,eₐ)`.  Brick X's `hric` bound is
-`K := n²√C`. -/
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ric_quad_le_of_realizes
     (g : SmoothRiemannianMetric I M) (x : M)
     (Rm04sec : Tensor04Section (I := I) (M := M))
@@ -335,11 +352,13 @@ theorem ric_quad_le_of_realizes
       Finset.mem_univ, if_true]
   exact ric_quad_le_of_rm04 (I := I) g x basis hON hinv (Rm04sec x) htrace hnorm v
 
-/-- **`hsmooth_left` from the solution.**  The interior joint `C∞` chart-Gram regularity of the
-solution's metric family on `Ioo α ω`, recovered from `MetricFamilySmoothOn.frameCompSmooth` fed the
-trivialization local frame `e.localFrame (chartModelBasis E)` — whose inner products are exactly the
-`chartGramMatrix` entries (`chartGramMatrix_apply` + `localFrame_apply_of_mem_baseSet`).  This is Brick
-U/(B)'s `hsmooth_left`/`h1smooth` for `g_fam := S.base.metric`. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 theorem chartGram_smooth_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -364,11 +383,13 @@ theorem chartGram_smooth_of_soln
   simp only [Integral.Measure.chartGramMatrix_apply, hbridge hx i, hbridge hx j,
     SolutionOn.family]
 
-/-- **`hcont_left` from the solution.**  Joint chart-Gram continuity of the solution's metric family
-up to the closed initial endpoint, on `Ico α ω`, from `MetricFamilySmoothOn.metricTensor_cont`
-(carrier-level tensor continuity) evaluated on the continuous chart frame via
-`Tensor0SFamilyContinuousOnSet.eval_continuous` (`chartGramMatrix = metricTensorField` on that frame).
-This is Brick U/(B)'s `hcont_left`/`h1cont` for `g_fam := S.base.metric`; mirrors `coordMetricContOn`. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 theorem chartGram_cont_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -411,14 +432,15 @@ theorem chartGram_cont_of_soln
   rw [Tensor0SBundle.metricTensorField_apply]
   simp [Integral.Measure.chartGramMatrix_apply, SolutionOn.family]
 
-/-- **`hric` from the solution's realization + curvature bound.**  Packages `ric_quad_le_of_realizes`
-over the solution: for every flow time `t ∈ Ico α ω` and point `x`, the Ricci quadratic form of
-`g_fam t = S.base.metric t` is controlled by the metric, with the *uniform* constant
-`(finrank E)² √K'` coming from the `|Rm|²`-bound `K'`.  This is exactly `extendInputs_of_soln`'s
-`hric` input (with `K := (finrank E)² √K'`).  Uses `hRm` at the flow time `⟨t, ht⟩`, bridging
-`finrank (TangentSpace I x) = finrank E` (`rfl`).  The realization is taken in raw per-time form
-`Rm04RealizesConnection (g_fam t) (metricCov (g_fam t)) (Rm04 t)`; the consumer bridges its solution
-realization (`Rm04RealizesSolutionConnectionOn`, `S.family.connection = metricCov`) to this. -/
+
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ric_quad_le_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -437,8 +459,8 @@ theorem ric_quad_le_of_soln
     (hbound t x ht.1 ht.2) v
   rwa [show Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E from rfl] at h
 
-/-- Moving-metric Shi estimates on all upper-truncated tail windows of a
-bounded-curvature Ricci-flow solution. -/
+
+
 theorem movingShi_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -452,9 +474,9 @@ theorem movingShi_of_soln
           (fun _ t => S.base.metric t) 3 KShi := by
   exact movingShiBoundSol (I := I) _hdim _hS _hbound
 
-/-- Interior fixed-background covariant metric bounds obtained from uniform
-metric equivalence, moving Shi estimates, and the constants-first Lemma 3.11
-tower. -/
+
+
+
 theorem shiCovBound_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -554,11 +576,11 @@ theorem shiCovBound_of_soln
     exact le_trans (hposAll s hs a ha1 ha3 x hx)
       (le_trans (le_max_right _ _) (le_max_right _ _))
 
-/-- **Y1 endpoint: the two `ricci_flow_interior_restart` inputs from a solution.**  Produces
-`⟨hell, hcov⟩` for `g_fam := S.base.metric`, in RAW-hypothesis form so that Y2 (in `MaximalTime`)
-bridges `_hS`/`_hRm`/`_hbound` at the call site.  `hell` is Brick X's `hell_of_soln` fed the pointwise
-Ricci-vs-metric bound `hric` (which Y2 discharges from the raw `|Rm|²` bound via `ric_quad_le_of_rm04`
-+ the curvature realization); `hcov` is the cited Shi producer. -/
+
+
+
+
+
 theorem extendInputs_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}

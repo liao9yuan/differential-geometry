@@ -1,18 +1,16 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.JetProductIntegral
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 
-/-!
-# Low-regularity DeTurck principal coefficient estimates
 
-This file derives the three-dimensional `H2` coefficient bounds used by the
-mixed `H2 × H3 → H1` Ricci--DeTurck remainder estimate.  The second inverse
-metric derivative is handled by the `L4 × L4` antidiagonal product estimate,
-not by a pointwise first-derivative bound.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +30,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -62,7 +60,7 @@ private theorem h2_grid_two
   obtain ⟨Cpt, hCpt, hpt⟩ := hs2_fiber_sq (I := I) (M := M) hDim g 2
   obtain ⟨Cjet, hCjet, hjet⟩ := hs2_low2 (I := I) (M := M) g 2
   obtain ⟨Cgn, hCgn, hgn⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       (I := I) (M := M) g 0 2 2 (by omega)
   let B : ℝ := max Cpt (max Cgn 1)
   let Q : ℝ := ∑ n ∈ Finset.range 3,
@@ -195,10 +193,9 @@ private theorem h2_grid_two
             _ = (Real.sqrt K) ^ 2 * N ^ 2 := by rw [Real.sq_sqrt hK]
             _ = (Real.sqrt K * N) ^ 2 := by ring
 
-set_option maxHeartbeats 1600000 in
-/-- On a three-dimensional spectral `H2` ball, the inverse-metric difference
-coefficient has pointwise order-zero and `L²` order-zero-through-two bounds
-which vanish linearly with the perturbation. -/
+
+
+
 theorem inv_coeff_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -224,7 +221,7 @@ theorem inv_coeff_h2
     riemannianFiberNormSq_covGrad_gInvDiffSlotCoeff_le
       (I := I) (M := M) g₀
   obtain ⟨Cinv, hCinv, hinv⟩ :=
-    rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
       (I := I) (M := M) g₀ (show (1 / 2 : ℝ) < 1 by norm_num)
   let ρ : ℝ := min 1 (4 * Cop)⁻¹
   let vol : ℝ :=
@@ -264,7 +261,7 @@ theorem inv_coeff_h2
       _ = 1 / 4 := by field_simp [ne_of_gt hCop]
   have hδhalf : δ < 1 / 2 := by linarith
   have hδone : δ < 1 := by linarith
-  have hbound : gFibreOpBound (I := I) (M := M) g₀
+  have hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ := by
     simpa [δ, N] using hop T
   have hratio : δ / (1 - δ) ≤ 2 * δ := by
@@ -412,9 +409,9 @@ theorem inv_coeff_h2
     mul_nonneg hK₀ (sq_nonneg N), mul_nonneg hK₁ (sq_nonneg N),
     mul_nonneg hK₂ (sq_nonneg N)]
 
-/-- On a three-dimensional spectral `H2` ball, the DeTurck principal-cometric
-coefficient has exactly the pointwise and two-jet `L²` bounds required by the
-mixed `H2 × H3 → H1` product estimate. -/
+
+
+
 theorem principal_coeff_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -435,7 +432,7 @@ theorem principal_coeff_h2
   classical
   obtain ⟨ρ, Cinv, hρ, hCinv, hinv⟩ := inv_coeff_h2 (I := I) (M := M) hDim g₀
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
+    deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
       (I := I) (M := M) g₀
   obtain ⟨Cl2, hCl2, hl2⟩ :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.coeff_jet_l2_sq
@@ -532,20 +529,19 @@ private theorem convex_hs_le
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
 
-set_option linter.unusedVariables false in
-/-- Along a convex realization path inside a three-dimensional spectral `H2`
-ball, the DeTurck principal coefficient has a uniform pointwise and two-jet
-bound proportional to the ball radius. -/
+
+
+
 theorem principal_path_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ rho C : ℝ, 0 < rho ∧ 0 ≤ C ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {delta : ℝ} (hdelta_lt : delta < 1)
-        (hdelta : gFibreOpBound (I := I) (M := M) g₀
+        {delta : ℝ} (_hdelta_lt : delta < 1)
+        (hdelta : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) delta)
-        {delta' : ℝ} (hdelta'_lt : delta' < 1)
-        (hdelta' : gFibreOpBound (I := I) (M := M) g₀
+        {delta' : ℝ} (_hdelta'_lt : delta' < 1)
+        (hdelta' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') delta')
         {R : ℝ}, 0 ≤ R → R ≤ rho →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
@@ -584,8 +580,8 @@ theorem principal_path_h2
       (mul_le_mul_of_nonneg_left hP hC) 2
   exact ⟨fun x => (hpt x).trans hscale, hjet.trans hscale⟩
 
-/-- On a three-dimensional spectral `H2` ball, the DeTurck principal-cometric
-arm is a small operator from spectral `H3` to spectral `H1`. -/
+
+
 theorem principal_arm_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -614,39 +610,6 @@ theorem principal_arm_h2
   have hbound := happ
     (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) U A
     hA (by simpa [A, N] using hpt) (by simpa [A, N] using hjet)
-  simpa [deTurckPrincipalCometricArm, A, N, mul_assoc] using hbound
-
-/-- On a three-dimensional spectral `H2` metric ball, the DeTurck
-principal-cometric arm is a small operator from spectral `H4` to spectral
-`H2`. -/
-theorem principal_arm_h4_h2
-    (hDim : Module.finrank ℝ E = 3)
-    (g₀ : SmoothRiemannianMetric I M) :
-    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
-      ∀ (T : SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M)
-        (U : SmoothCcTensor g₀ 0 2),
-        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ ρ →
-        (∀ (y : M) (v w : TangentSpace I y),
-          g₁.inner y v w = g₀.inner y v w +
-            ccTensorBilinSymm (I := I) g₀ T y v w) →
-        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ)
-            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ U)‖ ≤
-          C * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ *
-            ‖ccTensorToHs (I := I) (M := M) g₀ 2 (4 : ℝ) U‖ := by
-  obtain ⟨ρ, Ccoeff, hρ, hCcoeff, hcoeff⟩ :=
-    principal_coeff_h2 (I := I) (M := M) hDim g₀
-  obtain ⟨Capp, hCapp, happ⟩ :=
-    appCc_h2_h4_h2 (I := I) (M := M) hDim g₀ 2 2
-  refine ⟨ρ, Capp * Ccoeff, hρ, mul_nonneg hCapp hCcoeff, ?_⟩
-  intro T g₁ U hT htie
-  let N : ℝ := ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖
-  let A : ℝ := Ccoeff * N
-  have hN : 0 ≤ N := norm_nonneg _
-  have hA : 0 ≤ A := mul_nonneg hCcoeff hN
-  obtain ⟨_, hjet⟩ := hcoeff T g₁ (by simpa only [N] using hT) htie
-  have hbound := happ
-    (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) U A
-    hA (by simpa only [A, N] using hjet)
   simpa [deTurckPrincipalCometricArm, A, N, mul_assoc] using hbound
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

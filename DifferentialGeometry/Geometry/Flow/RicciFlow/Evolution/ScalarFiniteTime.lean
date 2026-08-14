@@ -1,18 +1,16 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Positive Scalar Curvature Forces Finite Time
 
-This file records the native Corollary 7.4 route.  The analytic input is the
-Corollary 7.3 lower barrier on every compact time slab before the pole.  The
-new content is the endpoint argument: a smooth scalar function is bounded above
-on the compact pole slab, while the lower barrier becomes arbitrarily large
-before its pole.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,21 +24,20 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Scalar blow-up time and slab bounds -/
 
-/-- The pole time of the Corollary 7.3 scalar lower barrier. -/
+
+
 def scalarBlowupTime (n c0 : Real) : Real :=
   n / (2 * c0)
 
-/-- The scalar function is bounded above on the closed time slab `[0,T]`. -/
+
 def ScalarBoundedAboveOnSlab (scalar : Real -> M -> Real) (T : Real) : Prop :=
   exists B : Real, forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, scalar t x <= B
 
-/-- The Corollary 7.3 lower barrier is available on every finite slab before
-the endpoint and before its pole. -/
+
+
 def ScalarLowerBarrierBoundUpToPole
     (scalar : Real -> M -> Real) (n c0 omega : Real) : Prop :=
   forall T : Real, 0 < T -> T < omega -> T < scalarBlowupTime n c0 ->
@@ -113,6 +110,7 @@ theorem exists_lt_scalarLowerBarrier_before_blowup
     field_simp [ne_of_gt hc0, ne_of_gt hC_pos]
   exact ⟨T, hT_pos, hT_lt, by simpa [hbar_eq] using hB_lt_C⟩
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_endpoint_le_blowupTime_of_lower_barrier_bound
     [Nonempty M]
     {scalar : Real -> M -> Real} {n c0 omega : Real}
@@ -137,6 +135,7 @@ theorem scalar_endpoint_le_blowupTime_of_lower_barrier_bound
 
 namespace InitialScalarMinimum
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem pos_of_forall_pos
     {scalar : Real -> M -> Real} {c0 : Real}
     (hmin : InitialScalarMinimum (M := M) scalar c0)
@@ -149,6 +148,7 @@ end InitialScalarMinimum
 
 namespace ScalarBoundedAboveOnSlab
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem of_continuousOn
     [CompactSpace M]
     {scalar : Real -> M -> Real} {T : Real}
@@ -156,7 +156,8 @@ theorem of_continuousOn
       (fun p : Real × M => scalar p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
     ScalarBoundedAboveOnSlab (M := M) scalar T := by
-  have hcompact : IsCompact (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+  have hcompact : IsCompact
+    (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
     unfold DifferentialGeometry.Integral.Connection.spacetimeSlab
     exact isCompact_Icc.prod isCompact_univ
   have himage :
@@ -171,7 +172,7 @@ theorem of_continuousOn
 
 end ScalarBoundedAboveOnSlab
 
-/-! ## Corollary 7.4 wrappers -/
+
 
 theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
@@ -218,9 +219,9 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       hinit (hF_lip T hT_pos hT_omega hT_blow)
   exact hbound T ⟨le_of_lt hT_pos, le_rfl⟩ x
 
-/-- Corollary 7.4 in scalar-evolution form: a positive initial scalar minimum
-forces the right endpoint of a closed-open solution interval to lie no later
-than the scalar lower-barrier pole. -/
+
+
+
 theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -274,11 +275,11 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     (M := M) hn hc0 hlower hbounded
   exact hnot hle
 
-/-- Lemma 11.1 in the normalized scalar-evolution form.
 
-This is exactly Corollary 7.4 specialized to dimension three: if the scalar
-curvature has positive initial minimum `c0`, then the right endpoint of the
-maximal `[0, omega)` flow is bounded by `3 / (2 * c0)`. -/
+
+
+
+
 theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

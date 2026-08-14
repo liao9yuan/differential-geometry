@@ -1,17 +1,17 @@
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
+import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Evolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionResidual
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerProducer
 
-/-!
-# The intrinsic tower heat bound for a Ricci-flow solution
 
-At each spacetime point on a positive-time tail, a smooth local frame that is
-orthonormal at the target time supplies the component data required by the
-StarSum residual estimate.  The inverse-metric evolution and the pointwise
-norm heat equation then give the intrinsic Bernstein tower inequality.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -20,7 +20,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -51,18 +51,17 @@ private theorem localFrame_reindex
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable [I.Boundaryless]
 variable [IsManifold I ∞ M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
-/-- The reaction coefficient produced by the canonical dimension-three
-StarSum residual at derivative level `k`. -/
+
+
 def towerSolConst (k : Nat) : Real :=
   2 * Real.sqrt (Fintype.card (Fin (4 + k) -> Fin 3) : Real) *
     (((4 + k : Nat) : Real) * (3 : Real) ^ 2 + resStarCost k)
 
-/-- On a positive-time tail of a dimension-three Ricci-flow solution, the
-intrinsic curvature-derivative norm satisfies the Bernstein tower heat
-inequality at every fixed derivative level. -/
+
+
+
 theorem towerHeatSol
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

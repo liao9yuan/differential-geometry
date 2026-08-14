@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectralPairing
 
-/-!
-# Scalar potential Galerkin pairing
 
-This file converts a compact-slab scalar-multiplier pairing estimate into the
-finite spectral energy inequality used by the scalar Galerkin hierarchy.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -22,7 +22,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -31,9 +31,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- A jointly smooth scalar coefficient has one finite-core energy bound on a
-compact parameter set.  The top coefficient is the fixed number `1/4`; the
-lower constant is independent of the parameter and of the spectral support. -/
+
+
+
 theorem cc_a1_unif
     (q : SmoothRiemannianMetric I M)
     (ζ : ℝ → C^∞⟮I, M; ℝ⟯) {R K : Set ℝ}

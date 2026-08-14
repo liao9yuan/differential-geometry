@@ -21,12 +21,9 @@ segment `P = s W`.  No `H2` or higher jet of the edge tensor is used.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 6400000
 
 open Bundle Manifold MeasureTheory Tensor0SBundle
-open scoped BigOperators Manifold ContDiff RealInnerProductSpace
+open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
 namespace PDE
@@ -40,9 +37,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
-open MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -51,11 +49,37 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+private local instance oneTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance oneTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance oneTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance oneTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
+private local instance oneTensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma one_symm_eq (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
-      ccTensorBilin (I := I) g S x u w = ccTensorBilin (I := I) g S x w u) :
-    symmS (I := I) (M := M) g S = S := by
+      smoothCcTensorBilinForm (I := I) g S x u w =
+        smoothCcTensorBilinForm (I := I) g S x w u) :
+    ccTensor02Symm (I := I) (M := M) g S = S := by
   have hswap : domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
     rw [domDomCongrSection_unitModel]
@@ -78,7 +102,7 @@ private lemma one_symm_eq (g : SmoothRiemannianMetric I M)
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
   have htwo : S + S = (2 : Real) • S := (two_smul Real S).symm
-  rw [symmS, hswap, htwo, smul_smul,
+  rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : Real) * 2 = 1 by norm_num, one_smul]
 
 /-! ## The five-arm kernel split -/
@@ -104,68 +128,73 @@ private def oneIn102 : Equiv.Perm (Fin 3) :=
 private def oneIn120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-private def onePerm
-    (g : SmoothRiemannianMetric I M) {d : Nat}
-    (rho : Equiv.Perm (Fin d)) : SmoothCcTensor g d d :=
-  permCoeff (I := I) (M := M) g rho
-
 private def oneArm0 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 3 4 :=
   reindexCoeffGen (I := I) (M := M) g 3 4
-    (appCcRS (I := I) (M := M) g 3 4 4
-      (onePerm (I := I) (M := M) g oneOut0312)
+    (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+      (permCoeff (I := I) (M := M) g oneOut0312)
       (connDiffContrInsertionField (I := I) g gm)) oneIn102
 
 private def oneArm1 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 3 4 :=
   reindexCoeffGen (I := I) (M := M) g 3 4
-    (appCcRS (I := I) (M := M) g 3 4 4
-      (onePerm (I := I) (M := M) g oneOut0213)
+    (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+      (permCoeff (I := I) (M := M) g oneOut0213)
       (connDiffContrInsertionField (I := I) g gm)) oneIn120
 
 private def oneArm2 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 3 4 :=
-  appCcRS (I := I) (M := M) g 3 4 4
-    (onePerm (I := I) (M := M) g oneOut2301)
+  ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+    (permCoeff (I := I) (M := M) g oneOut2301)
     (connDiffContrInsertionField (I := I) g gm)
 
 private def oneArm3 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 3 4 :=
   reindexCoeffGen (I := I) (M := M) g 3 4
-    (appCcRS (I := I) (M := M) g 3 4 4
-      (onePerm (I := I) (M := M) g oneOut1302)
+    (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+      (permCoeff (I := I) (M := M) g oneOut1302)
       (connDiffContrInsertionField (I := I) g gm)) oneIn102
 
 private def oneArm4 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 3 4 :=
   reindexCoeffGen (I := I) (M := M) g 3 4
-    (appCcRS (I := I) (M := M) g 3 4 4
-      (onePerm (I := I) (M := M) g oneOut1203)
+    (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+      (permCoeff (I := I) (M := M) g oneOut1203)
       (connDiffContrInsertionField (I := I) g gm)) oneIn120
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+private theorem oneKer_split
+    (g gm : SmoothRiemannianMetric I M) :
+    linearizedRicciConnDiffOrder1KernelField (I := I) g gm =
+      -(oneArm0 (I := I) (M := M) g gm +
+        oneArm1 (I := I) (M := M) g gm +
+        oneArm2 (I := I) (M := M) g gm +
+        oneArm3 (I := I) (M := M) g gm +
+        oneArm4 (I := I) (M := M) g gm) := rfl
 
 private theorem oneArm_rfns
     (g gm : SmoothRiemannianMetric I M)
     (sigma : Equiv.Perm (Fin 4)) (q : Nat) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 3 (4 + q) x
         ((iteratedCovGrad (I := I) g 3 4 q
-          (appCcRS (I := I) (M := M) g 3 4 4
-            (onePerm (I := I) (M := M) g sigma)
+          (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+            (permCoeff (I := I) (M := M) g sigma)
             (connDiffContrInsertionField (I := I) g gm))).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g 3 (4 + q) x
         ((iteratedCovGrad (I := I) g 3 4 q
           (connDiffContrInsertionField (I := I) g gm)).toSection x) := by
-  refine rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
+  refine riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
     (I := I) (M := M) g 3 4 sigma
     (connDiffContrInsertionField (I := I) g gm)
-    (appCcRS (I := I) (M := M) g 3 4 4
-      (onePerm (I := I) (M := M) g sigma)
+    (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+      (permCoeff (I := I) (M := M) g sigma)
       (connDiffContrInsertionField (I := I) g gm))
     (fun y d => ?_) q x
   have hy :
       (show Tensor0SBundle.Tensor0SSpace 3 I y →L[Real]
           Tensor0SBundle.Tensor0SSpace 4 I y from
-        (appCcRS (I := I) (M := M) g 3 4 4
-          (onePerm (I := I) (M := M) g sigma)
+        (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+          (permCoeff (I := I) (M := M) g sigma)
           (connDiffContrInsertionField (I := I) g gm)).toSection y) d =
         slotPermCLM (I := I) sigma y
           ((show Tensor0SBundle.Tensor0SSpace 3 I y →L[Real]
@@ -180,21 +209,21 @@ private theorem oneFull_rfns
     riemannianFiberNormSq (I := I) (M := M) g 3 (4 + q) x
         ((iteratedCovGrad (I := I) g 3 4 q
           (reindexCoeffGen (I := I) (M := M) g 3 4
-            (appCcRS (I := I) (M := M) g 3 4 4
-              (onePerm (I := I) (M := M) g sigma)
+            (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+              (permCoeff (I := I) (M := M) g sigma)
               (connDiffContrInsertionField (I := I) g gm)) rho)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g 3 (4 + q) x
         ((iteratedCovGrad (I := I) g 3 4 q
           (connDiffContrInsertionField (I := I) g gm)).toSection x) := by
-  rw [rfns_iteratedCovGrad_reindexCoeffGen_eq
+  rw [riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     (I := I) (M := M) g 3 4
-    (appCcRS (I := I) (M := M) g 3 4 4
-      (onePerm (I := I) (M := M) g sigma)
+    (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
+      (permCoeff (I := I) (M := M) g sigma)
       (connDiffContrInsertionField (I := I) g gm)) rho q x]
   exact oneArm_rfns (I := I) (M := M) g gm sigma q x
 
-omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
-    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private theorem one_rfns_neg
     (g : SmoothRiemannianMetric I M) (r s : Nat)
     (x : M) (v : TensorRSSpace r s I x) :
@@ -258,13 +287,7 @@ theorem ricci1Ker_rfns
     have h0123' : riemannianFiberNormSq (I := I) (M := M) g 3 4 x
         (A0 + A1 + A2 + A3) ≤ 22 * Q := by linarith
     linarith
-  rw [show
-    (linearizedRicciConnDiffOrder1KernelField (I := I) g gm).toSection x =
-      (-(oneArm0 (I := I) (M := M) g gm +
-        oneArm1 (I := I) (M := M) g gm +
-        oneArm2 (I := I) (M := M) g gm +
-        oneArm3 (I := I) (M := M) g gm +
-        oneArm4 (I := I) (M := M) g gm)).toSection x from rfl,
+  rw [oneKer_split (I := I) (M := M) g gm,
     SmoothCcTensor.toSection_neg]
   change riemannianFiberNormSq (I := I) (M := M) g 3 4 x
       (-(A0 + A1 + A2 + A3 + A4)) ≤ 46 * Q
@@ -290,9 +313,10 @@ private theorem one_insert_rfns
     rw [connDiffContrInsertionField_eq_reindex_slotExtend_two
       (I := I) (M := M) g gm]
     simpa only [A, B, iteratedCovGrad_zero, Nat.add_zero] using
-      rfns_iteratedCovGrad_reindexCoeffGen_eq
+      riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
         (I := I) (M := M) g 3 4
-        (slotExtend (I := I) (M := M) g 2 3 B) coreInPerm201 0 x
+        (slotExtend (I := I) (M := M) g 2 3 B)
+        connDiffContrInsertionReindexPerm 0 x
   have houter := rfns_iteratedCovGrad_slotExtend_le
     (I := I) (M := M) g 2 3 B 0 x
   have hinner := rfns_iteratedCovGrad_slotExtend_le
@@ -314,6 +338,7 @@ private theorem one_insert_rfns
       simp only [A]
       ring
 
+-- Elaborating the tensor-contraction instance chain requires the larger synthesis budget.
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- The order-one Ricci coefficient is pointwise linear in the first
@@ -325,7 +350,7 @@ theorem ricci1Coeff_rfns (g : SmoothRiemannianMetric I M) :
           gm.inner y u v = g.inner y u v +
             ccTensorBilinSymm (I := I) g P y u v)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g P) delta →
         ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 3 2 x
@@ -381,7 +406,7 @@ theorem ricci1Coeff_rfns (g : SmoothRiemannianMetric I M) :
     simpa only [Kr, Ai] using ricci1Ker_rfns (I := I) (M := M) g gm x
   have hTr : Tr ≤ Ct 0 := by
     have hraw := htrace gm P htie hdelta hdelta0 hPbound 0 x
-    simpa only [Tr, iteratedCovGrad_zero, Nat.add_zero, Nat.zero_add,
+    simpa only [Tr, iteratedCovGrad_zero, Nat.zero_add, Nat.add_zero,
       Finset.sum_range_one, Combinatorics.antidiagonalTupleGrid_zero,
       mul_one] using hraw
   have hcomp := riemannianFiberNormSq_compRS_le_mul
@@ -416,6 +441,7 @@ theorem ricci1Coeff_rfns (g : SmoothRiemannianMetric I M) :
 
 /-! ## Energy pairing on the genuine segment -/
 
+omit [BoundarylessManifold I M] in
 private theorem onePair_point
     (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (F : SmoothCcTensor g 3 2)
@@ -432,7 +458,7 @@ private theorem onePair_point
     (x : M) :
     |tensorInnerPointwise (I := I) (M := M) g 0 2 x
         (W.toFun x)
-        ((appCc (I := I) (M := M) g 3 2 F
+        ((operatorFieldApply (I := I) (M := M) g 3 2 F
           (iteratedCovGrad (I := I) g 0 2 1 W)).toFun x)| ≤
       (Module.finrank Real E : Real) * C * delta *
         riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -440,7 +466,7 @@ private theorem onePair_point
   classical
   let S := W.toSection x
   let D := (iteratedCovGrad (I := I) g 0 2 1 W).toSection x
-  let U := (appCc (I := I) (M := M) g 3 2 F
+  let U := (operatorFieldApply (I := I) (M := M) g 3 2 F
     (iteratedCovGrad (I := I) g 0 2 1 W)).toSection x
   let d : Real := Module.finrank Real E
   let q : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x D
@@ -492,14 +518,14 @@ private theorem onePair_point
     abs_nonneg (tensorInnerPointwise (I := I) (M := M) g 0 2 x
       (TensorRSSpace.toModel S) (TensorRSSpace.toModel U))]
 
-omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
-    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma one_bound_mono
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {a b : Real} (hab : a ≤ b)
-    (ha : gFibreOpBound (I := I) (M := M) g
+    (ha : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) a) :
-    gFibreOpBound (I := I) (M := M) g
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) b := by
   intro x u v
   exact (ha x u v).trans (mul_le_mul_of_nonneg_right
@@ -512,14 +538,14 @@ theorem ricci1_path_le (g : SmoothRiemannianMetric I M) :
     ∃ delta0 : Real, 0 < delta0 ∧ delta0 < 1 / 2 ∧
       ∀ (W : SmoothCcTensor g 0 2)
         (_hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-          ccTensorBilin (I := I) g W x u v =
-            ccTensorBilin (I := I) g W x v u)
+          smoothCcTensorBilinForm (I := I) g W x u v =
+            smoothCcTensorBilinForm (I := I) g W x v u)
         {delta s : Real}, 0 ≤ delta → delta ≤ delta0 →
-        (hWbound : gFibreOpBound (I := I) (M := M) g
+        (hWbound : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g W) delta) →
         s ∈ Set.Icc (0 : Real) 1 →
         (-2 : Real) * tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-            (appCc (I := I) (M := M) g 3 2
+            (operatorFieldApply (I := I) (M := M) g 3 2
               (linearizedRicciConnDiffOrder1CoeffField
                 (I := I) (M := M) g
                 (edgeMetric (I := I) (M := M) g W hWbound s))
@@ -550,7 +576,7 @@ theorem ricci1_path_le (g : SmoothRiemannianMetric I M) :
   let F : SmoothCcTensor g 3 2 :=
     linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g gm
   let U : SmoothCcTensor g 0 2 :=
-    appCc (I := I) (M := M) g 3 2 F D
+    operatorFieldApply (I := I) (M := M) g 3 2 F D
   let mu := riemannianVolumeMeasure (I := I) (M := M) g
   have hdeltaHalf : delta ≤ 1 / 2 :=
     hdeltaCap.trans hdelta0half.le
@@ -578,7 +604,7 @@ theorem ricci1_path_le (g : SmoothRiemannianMetric I M) :
     (I := I) (M := M) g s W hWbound
   have hrad : |s| * delta ≤ delta := by
     nlinarith [mul_nonneg (sub_nonneg.mpr hsabs) hdelta0']
-  have hPbound : gFibreOpBound (I := I) (M := M) g
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g P) delta :=
     one_bound_mono (I := I) (M := M) g P hrad
       (by simpa only [P] using hPraw)
@@ -588,12 +614,11 @@ theorem ricci1_path_le (g : SmoothRiemannianMetric I M) :
         riemannianFiberNormSq (I := I) (M := M) g 0 3 y
           (D.toSection y) := by
     intro y
-    rw [show iteratedCovGrad (I := I) g 0 2 1 P =
-        (s • D : SmoothCcTensor g 0 3) from by
+    rw [show iteratedCovGrad (I := I) g 0 2 1 P = s • D from by
       simp only [P, D, iteratedCovGrad_smul]]
+    rw [SmoothCcTensor.toSection_smul]
     change riemannianFiberNormSq (I := I) (M := M) g 0 3 y
-        (s • D.toSection y) ≤
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 y (D.toSection y)
+        (s • D.toSection y) ≤ _
     rw [riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
@@ -610,7 +635,7 @@ theorem ricci1_path_le (g : SmoothRiemannianMetric I M) :
         simpa only [F, gm] using hFraw x
       _ ≤ C0 ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 3 x
           (D.toSection x) := mul_le_mul_of_nonneg_left (hgrad x) (sq_nonneg C0)
-  have hWfix : symmS (I := I) (M := M) g W = W :=
+  have hWfix : ccTensor02Symm (I := I) (M := M) g W = W :=
     one_symm_eq (I := I) (M := M) g W hWsymm
   have hWpt := symmC0_rfns_le
     (I := I) (M := M) g W hdelta0' hWbound
@@ -660,34 +685,31 @@ theorem ricci1_path_le (g : SmoothRiemannianMetric I M) :
         mul_le_mul_of_nonneg_left hdeltaCap (mul_nonneg (by norm_num) hC)
       _ = C / (8 * (1 + C)) := by
         dsimp only [delta0]
-        have h8 : 8 * (1 + C) ≠ 0 := ne_of_gt (by positivity)
-        have h16 : 16 * (1 + C) ≠ 0 := ne_of_gt hden
-        field_simp [h8, h16]
-        ring
+        field_simp [ne_of_gt (show 0 < 1 + C by positivity)]
+        ; ring
       _ ≤ 1 / 8 := by
         apply (div_le_iff₀ (by positivity : (0 : Real) < 8 * (1 + C))).2
         nlinarith
   dsimp only [U, F, gm, D] at habs ⊢
   calc
     (-2 : Real) * tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-        (appCc (I := I) (M := M) g 3 2
+        (operatorFieldApply (I := I) (M := M) g 3 2
           (linearizedRicciConnDiffOrder1CoeffField
             (I := I) (M := M) g
             (edgeMetric (I := I) (M := M) g W hWbound s))
           (iteratedCovGrad (I := I) g 0 2 1 W)).toFun ≤
       2 * |tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-        (appCc (I := I) (M := M) g 3 2
+        (operatorFieldApply (I := I) (M := M) g 3 2
           (linearizedRicciConnDiffOrder1CoeffField
             (I := I) (M := M) g
             (edgeMetric (I := I) (M := M) g W hWbound s))
           (iteratedCovGrad (I := I) g 0 2 1 W)).toFun| := by
-        have hneg := neg_le_abs (tensorL2Inner (I := I) (M := M) g 0 2
-          W.toFun (appCc (I := I) (M := M) g 3 2
+        nlinarith [neg_le_abs (tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
+          (operatorFieldApply (I := I) (M := M) g 3 2
             (linearizedRicciConnDiffOrder1CoeffField
               (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hWbound s))
-            (iteratedCovGrad (I := I) g 0 2 1 W)).toFun)
-        nlinarith
+            (iteratedCovGrad (I := I) g 0 2 1 W)).toFun)]
     _ ≤ 2 * (C * delta *
         ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2) :=
       mul_le_mul_of_nonneg_left habs (by norm_num)

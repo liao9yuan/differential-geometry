@@ -505,3 +505,4 @@ theorem stageCompare_base
 
 end HCGCompactness
 end DifferentialGeometry
+

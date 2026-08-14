@@ -425,6 +425,17 @@ theorem lowreg_N_affine
     set F := refoldCore (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S with hF
     set S' := lowRadial (I := I) (M := M) g₀ ρ S with hS'
     -- left-hand side on the smooth core
+    have hsmoothN :
+        deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g₀ 1
+            (symmS (I := I) (M := M) g₀ S) hδ
+            (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hball)) =
+          smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ)
+            (deTurckSmoothRemainder (I := I) g₀ g₀
+              (symmS (I := I) (M := M) g₀ S) hδ
+              (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hball))) := by
+      exact deTurckSmoothN_eq (I := I) (M := M) g₀ g₀ 1
+        (symmS (I := I) (M := M) g₀ S) hδ
+        (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hball))
     have hLHS : tensorHsCongr (I := I) (M := M) g₀ 0 2
           (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
           (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal v) =
@@ -434,7 +445,7 @@ theorem lowreg_N_affine
             (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hball))) := by
       rw [hveq,
         lowRegN_on_smooth (I := I) (M := M) g₀ g₀ hR hδ hreal hcore S hball,
-        deTurckSmoothN_eq, tensorHsCongr_smoothCc,
+        hsmoothN, tensorHsCongr_smoothCc,
         smoothCcToTensorHs_eq_ccToHs]
     -- the transported state is the smooth spectral embedding at order three
     have hu : tensorHsCongr (I := I) (M := M) g₀ 0 2

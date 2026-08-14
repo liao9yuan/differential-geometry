@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelSecondDerivative
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSAbsoluteBound
 
-/-!
-# First chart derivatives of the Ricci--DeTurck right-hand side
 
-This file develops absolute bounds for one spatial chart derivative of the
-Ricci tensor, the DeTurck vector field, the DeTurck Lie term, and the combined
-Ricci--DeTurck right-hand side.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
@@ -20,7 +20,7 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -52,6 +52,7 @@ private lemma abs_sum2_mul_le {n : ℕ} (A B C D : Fin n → ℝ)
     _ = (n : ℝ) * (CA * CB + CC * CD) := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christ_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -60,6 +61,7 @@ private lemma christ_diffAt
   exact ((chartChristoffel_contDiffOn_interior (I := I) g α i j k).contDiffAt
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (d i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -70,6 +72,7 @@ private lemma christD_diffAt
     (chartChristoffel_contDiffOn_interior (I := I) g α i j k) d
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inv_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -78,6 +81,7 @@ private lemma inv_diffAt
   have h := (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma invD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (d a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -88,6 +92,7 @@ private lemma invD_diffAt
     ((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset) d
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemann_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) {y : E}
@@ -116,8 +121,9 @@ private lemma riemann_diffAt
         funext z; rw [chartRiemannTensor_def]]
   exact (h1.sub h2).add (DifferentiableAt.fun_sum fun m _ => hquad m)
 
-/-- The first chart partial of a Riemann component is the differentiated
-Christoffel formula. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartRiemann
     (g : SmoothRiemannianMetric I M) (α : M)
     (d i j k l : Fin (Module.finrank ℝ E)) {y : E}
@@ -199,8 +205,9 @@ theorem partial_chartRiemann
       (christ_diffAt (I := I) g α k m l hy)
       (christ_diffAt (I := I) g α i j m hy)]
 
-/-- The first chart partial of Ricci is the contraction of the first chart
-partial of Riemann. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartRicci
     (g : SmoothRiemannianMetric I M) (α : M)
     (d i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -215,8 +222,9 @@ theorem partial_chartRicci
     partialDeriv_sum (i := d) Finset.univ _
       (fun j _ => riemann_diffAt (I := I) g α i j k j hy)]
 
-/-- Christoffel bounds through second partials control one chart partial of a
-Riemann component. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannD_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -267,8 +275,9 @@ theorem chartRiemannD_le
       add_le_add (add_le_add (hd2Γ d j i k l) (hd2Γ d k i j l)) hquad
     _ = 2 * Cd2Γ + 4 * (Module.finrank ℝ E : ℝ) * (CΓ * CdΓ) := by ring
 
-/-- Christoffel bounds through second partials control one chart partial of a
-Ricci component. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciD_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -298,8 +307,9 @@ theorem chartRicciD_abs_le
         (2 * Cd2Γ + 4 * (Module.finrank ℝ E : ℝ) * (CΓ * CdΓ)) := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
-/-- The second chart partial of a DeTurck-vector-field component is the
-four-term Leibniz expansion of the inverse-Gram/connection-difference formula. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial2_deTurckVF
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (d m k : Fin (Module.finrank ℝ E)) {y : E}
@@ -393,8 +403,9 @@ theorem partial2_deTurckVF
       (christD_diffAt (I := I) g_bg α m a b k hy)]
   ring
 
-/-- Inverse-Gram derivatives and connection-difference derivatives through
-order two control a second chart partial of the DeTurck vector field. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD2_le
     (g g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -459,6 +470,7 @@ theorem deTurckVFD2_le
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gram_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -467,6 +479,7 @@ private lemma gram_diffAt
   exact (((chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset).contDiffAt
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (d i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -477,6 +490,7 @@ private lemma gramD_diffAt
     ((chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset) d
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma vf_diffAt
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) {y : E}
@@ -492,6 +506,7 @@ private lemma vf_diffAt
       ((christ_diffAt (I := I) g α a b k hy).sub
         (christ_diffAt (I := I) g_bg α a b k hy))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma vfD_diffAt
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {y : E}
@@ -522,6 +537,7 @@ private lemma vfD_diffAt
     exact (partialDeriv_chartDeTurckVFComp_eq (I := I) g g_bg α m k hz).symm
   exact hF.congr_of_eventuallyEq hEq.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ricci_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -533,6 +549,7 @@ private lemma ricci_diffAt
         funext z; rw [chartRicciTensor_def]]
   exact DifferentiableAt.fun_sum fun k _ => riemann_diffAt (I := I) g α i k j k hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lie_diffAt
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -565,8 +582,9 @@ private lemma lie_diffAt
     (DifferentiableAt.fun_sum fun k _ => hB k)).add
       (DifferentiableAt.fun_sum fun k _ => hC k)
 
-/-- One chart partial of the DeTurck Lie term has the six-term Leibniz
-expansion involving metric and vector-field derivatives through order two. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartLie
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (d i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -669,8 +687,9 @@ theorem partial_chartLie
       (gram_diffAt (I := I) g α i k hy)
       (vfD_diffAt (I := I) g g_bg α j k hy)]
 
-/-- Metric and vector-field bounds through order two control one chart partial
-of the DeTurck Lie term. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLieD_abs_le
     (g g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -731,8 +750,9 @@ theorem chartLieD_abs_le
     _ = (Module.finrank ℝ E : ℝ) *
         (3 * DV * Q₁ + V * Q₂ + 2 * Q₀ * D2V) := by ring
 
-/-- One chart partial of the Ricci--DeTurck right-hand side is the sum of the
-corresponding Ricci and DeTurck-Lie partials. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartRHS
     (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (d i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -752,8 +772,9 @@ theorem partial_chartRHS
     partialDeriv_const_mul (i := d) (-2 : ℝ)
       (chartRicciTensor (I := I) g α i j) hRic]
 
-/-- Absolute first-derivative bounds for Ricci and the DeTurck Lie term control
-one chart partial of the full Ricci--DeTurck right-hand side. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHSD_abs_le
     (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (d i j : Fin (Module.finrank ℝ E)) {y : E}

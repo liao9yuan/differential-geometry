@@ -1,15 +1,15 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.InverseGramSecondDerivative
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.MetricJet3Difference
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.PartialDerivIteratedFDerivOrderBridge
+import DifferentialGeometry.Analysis.Calculus.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.PartialDerivWithin
 
-/-!
-# Second chart derivatives of Christoffel symbols
 
-This file differentiates the first-partial Christoffel formula and gives
-entrywise and partition-of-unity-family bounds from chart Gram derivatives
-through order three.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
@@ -21,12 +21,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The second derivative of the metric bracket in two chart directions. -/
+
 noncomputable def gramBracketDeriv2 (g : SmoothRiemannianMetric I M) (α : M)
     (d m i j l : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   partialDeriv (E := E) d
@@ -40,8 +40,6 @@ noncomputable def gramBracketDeriv2 (g : SmoothRiemannianMetric I M) (α : M)
         (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j))) y
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Uniform third-partial Gram entry bounds control the twice-differentiated
-metric bracket. -/
 theorem gramBracketD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) (y : E) {Q : ℝ}
     (hQ : ∀ d m c a b, |partialDeriv (E := E) d
@@ -58,8 +56,6 @@ theorem gramBracketD2_abs_le
     _ = 3 * Q := by ring
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The twice-differentiated metric bracket is Lipschitz in the third Gram
-partials. -/
 theorem gramBracketD2_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (d m i j l : Fin (Module.finrank ℝ E)) :
@@ -117,6 +113,7 @@ private lemma abs_prod_sub_lip
       (mul_le_mul ha₂ hb (abs_nonneg _) hA_nn)
     _ = (Cₐ * B + A * Cb) * J := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma invD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -127,6 +124,7 @@ private lemma invD_diffAt
     ((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset) m
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inv_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -135,6 +133,7 @@ private lemma inv_diffAt
   have h := (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramD1_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -145,6 +144,7 @@ private lemma gramD1_diffAt
     ((chartGramOnE_contDiffOn (I := I) g α a b).mono interior_subset) m
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramD2_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (d m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -157,6 +157,7 @@ private lemma gramD2_diffAt
   have h2 := partialDeriv_contDiffOn_of_isOpen isOpen_interior h1 d
   exact (h2.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bracket_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -166,6 +167,7 @@ private lemma bracket_diffAt
     (gramD1_diffAt (I := I) g α j l i hy)).sub
       (gramD1_diffAt (I := I) g α l i j hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bracketD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (m i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -175,7 +177,8 @@ private lemma bracketD_diffAt
     (gramD2_diffAt (I := I) g α m j l i hy)).sub
       (gramD2_diffAt (I := I) g α m l i j hy)
 
-/-- Differentiating `gramBracketDeriv` produces `gramBracketDeriv2`. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partial_gramBracketD
     (g : SmoothRiemannianMetric I M) (α : M)
     (d m i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -200,8 +203,9 @@ lemma partial_gramBracketD
       (partialDeriv (E := E) m
         (partialDeriv (E := E) j (chartGramOnE (I := I) g α l i))) h1 h2]
 
-/-- The second chart partial of a Christoffel symbol is the four-term
-Leibniz expansion of its inverse-Gram/bracket formula. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial2_christ_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (d m i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -274,8 +278,9 @@ theorem partial2_christ_eq
     partial_gramBracketD (I := I) g α d m i j l hy]
   ring
 
-/-- Second Christoffel partials are quantitatively Lipschitz in the metric
-chart `3`-jet, given matching inverse-Gram bounds through order two. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_sub_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -485,8 +490,9 @@ theorem christD2_sub_le
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     _ = (Module.finrank ℝ E : ℝ) * K * J₃ := by ring
 
-/-- Entrywise bounds for inverse-Gram derivatives and metric brackets control
-a second chart partial of a Christoffel symbol. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -553,8 +559,9 @@ theorem christD2_abs_le
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
-/-- Uniform ellipticity and chart Gram bounds through order three give one
-second-Christoffel-partial bound on all active POU chart supports. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_pou_bnd
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -659,8 +666,9 @@ theorem christD2_pou_bnd
     (fun a => hMbOnE l a) (fun e a => hDOnE e l a) (fun e r a => hTOnE e r l a)
     hPOnE hROnE hUOnE
 
-/-- A metric-equivalent family with chart Gram bounds through order three has
-one second-partial Christoffel Lipschitz constant on every active POU support. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_pou_lip
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

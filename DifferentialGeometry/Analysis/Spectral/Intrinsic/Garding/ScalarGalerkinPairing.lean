@@ -2,13 +2,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTame
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.DirichletSpectralBochnerGap
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectralPairing
 
-/-!
-# Scalar Galerkin pairing
 
-This file converts the smooth scalar moving-Laplacian pairing estimate into
-the finite spectral dissipation inequality consumed by the Galerkin energy
-hierarchy.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,17 +33,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- On the finite scalar spectral core, quarter-size metric perturbation gives
-the strict `5/3 < 2` top-energy coefficient required by the Galerkin hierarchy.
-The lower-energy constant depends on the derivative order and the fixed pair of
-metrics, but not on the finite spectral support. -/
+
+
+
+
 theorem cc_finite_diss
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     (hsmall :
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+      MetricRealization.metricCauchySchwarzBound
         (I := I) q k ((1 : ℝ) / 4)) (n : ℕ) :
     ∃ Cmid : ℝ, 0 ≤ Cmid ∧
       ∀ (T : tensorHs (I := I) (M := M) q 0 0 0)
@@ -88,13 +88,13 @@ theorem cc_finite_diss
   let Hhi : ℝ := ‖ccTensorToHs (I := I) (M := M) q 0 ((n + 1 : ℕ) : ℝ) U‖
   have hcastNorm :
       ‖SmoothCcTensor.toL2
-          (castRankCc_db (I := I) (M := M) q 0
+          (castCcTensorRank (I := I) (M := M) q 0
             (by omega : 0 + (n + 1) = 1 + n)
             (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ =
         ‖SmoothCcTensor.toL2
           (iteratedCovGrad (I := I) q 0 0 (n + 1) U)‖ := by
     rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2,
-      norm_castRankCc_db]
+      DiffBilinOp.norm_castCcTensorRank]
   have hlapU :
       tensorL2Inner (I := I) (M := M) q 0 0
           (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun A.toFun ≤
@@ -189,17 +189,17 @@ theorem cc_finite_diss
   rw [hpair]
   simpa only [U, A] using hmain'
 
-/-- The A2 part of the scalar Galerkin closure on an arbitrary finite mode
-set.  The strict top coefficient is the fixed number `5/3`; the lower constant
-is chosen before the mode set and therefore is independent of its size and of
-any Galerkin cutoff. -/
+
+
+
+
 theorem cc_a2_closure
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     (hsmall :
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+      MetricRealization.metricCauchySchwarzBound
         (I := I) q k ((1 : ℝ) / 4)) (n : ℕ) :
     ∃ Cmid : ℝ, 0 ≤ Cmid ∧
       ∀ (S : Finset

@@ -5,14 +5,14 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppH
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricScalarSmul
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Smooth scalar potential operators on the spectral scale
 
-This file constructs multiplication by a fixed smooth real coefficient as a
-genuine bounded operator from scalar spectral `H¹` to fixed-metric `L²`, then
-postcomposes it with the canonical `L² ≃ H⁰` identification.  The construction
-extends the pointwise product on the dense finite spectral core.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -45,7 +45,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The dense finite-support scalar spectral `H¹` core. -/
+
 abbrev ScalarH1Core (q : SmoothRiemannianMetric I M) :=
   tensorHs.finiteSupportSubmodule
     (I := I) (M := M) (g := q) (r := 0) (s := 0) 1
@@ -72,8 +72,8 @@ private noncomputable def scalarSmulLin
       c • ((ζ : M → Real) x • S.toSection x)
     rw [smul_smul, smul_smul, mul_comm]
 
-/-- Multiplication by a smooth scalar coefficient on the finite `H¹` core,
-realized as a smooth compactly supported rank-zero tensor section. -/
+
+
 noncomputable def scalarPotSec
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) :
     ScalarH1Core (I := I) (M := M) q →ₗ[Real] SmoothCcTensor q 0 0 :=
@@ -81,7 +81,6 @@ noncomputable def scalarPotSec
     (finiteReprLin (I := I) (M := M) q 0 0 1)
 
 omit [BoundarylessManifold I M] in
-/-- Pointwise realization of the finite-core scalar potential section. -/
 theorem scalarPotSec_apply
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : ScalarH1Core (I := I) (M := M) q) (x : M) :
@@ -90,8 +89,8 @@ theorem scalarPotSec_apply
         (tensorHsSmoothRepr (I := I) (M := M) v.1 v.2).toSection x := by
   rfl
 
-/-- The genuine fixed-metric `L²` realization of multiplication by a smooth
-scalar coefficient on the finite spectral core. -/
+
+
 noncomputable def scalarPotCore
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) :
     ScalarH1Core (I := I) (M := M) q →ₗ[Real] TensorL2 0 0 q :=
@@ -99,7 +98,6 @@ noncomputable def scalarPotCore
     (scalarPotSec (I := I) (M := M) q ζ)
 
 omit [BoundarylessManifold I M] in
-/-- Applied realization of the finite-core scalar potential in `L²`. -/
 theorem scalarPotCore_apply
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : ScalarH1Core (I := I) (M := M) q) :
@@ -109,6 +107,7 @@ theorem scalarPotCore_apply
           (tensorHsSmoothRepr (I := I) (M := M) v.1 v.2)) := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem scalarSmul_norm_le
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C) (hζ : ∀ x : M, |(ζ : M → Real) x| ≤ C)
@@ -164,8 +163,9 @@ private theorem finiteRepr_norm
     (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
     (show (0 : Real) ≤ 1 by norm_num) v.1
 
-/-- A pointwise coefficient bound controls the finite-core multiplier norm,
-uniformly in the spectral support. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPotCore_norm
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C) (hζ : ∀ x : M, |(ζ : M → Real) x| ≤ C)
@@ -192,16 +192,17 @@ private theorem exists_pot_bound
   refine ⟨max C₀ 0, le_max_right _ _, fun x => ?_⟩
   exact (hC₀ ⟨x, Set.mem_univ _, rfl⟩).trans (le_max_left _ _)
 
-/-- Multiplication by a fixed smooth scalar coefficient, extended uniquely
-from the dense finite spectral core to a bounded map `H¹(q) → L²(q)`. -/
+
+
 noncomputable def scalarPotOp
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) :
     tensorHs (I := I) (M := M) q 0 0 1 →L[Real] TensorL2 0 0 q :=
   (scalarPotCore (I := I) (M := M) q ζ).extendOfNorm
     (ScalarH1Core (I := I) (M := M) q).subtype
 
-/-- On the finite spectral core, the bounded scalar potential operator is the
-genuine pointwise smooth multiplier. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPotOp_core
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : ScalarH1Core (I := I) (M := M) q) :
@@ -217,8 +218,9 @@ theorem scalarPotOp_core
   simpa only [Submodule.coe_subtype] using
     scalarPotCore_norm (I := I) (M := M) q ζ hC hζ w
 
-/-- A pointwise coefficient bound controls the operator norm of the genuine
-scalar potential multiplier. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPotOp_norm
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C) (hζ : ∀ x : M, |(ζ : M → Real) x| ≤ C) :
@@ -238,8 +240,8 @@ private noncomputable def scalarL2ToH0
     (tensorResolventL2_isCompactOperator
       (I := I) (M := M) q 0 0)).symm.toLinearIsometry
 
-/-- The scalar potential multiplier with its `L²(q)` output identified
-canonically and isometrically with spectral `H⁰(q)`. -/
+
+
 noncomputable def scalarPotH0
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) :
     tensorHs (I := I) (M := M) q 0 0 1 →L[Real]
@@ -248,7 +250,6 @@ noncomputable def scalarPotH0
     (scalarPotOp (I := I) (M := M) q ζ)
 
 omit [BoundarylessManifold I M] in
-/-- Evaluation of the canonical `H¹(q) → H⁰(q)` scalar potential operator. -/
 @[simp] theorem scalarPotH0_apply
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : tensorHs (I := I) (M := M) q 0 0 1) :
@@ -258,8 +259,9 @@ omit [BoundarylessManifold I M] in
           (I := I) (M := M) q 0 0)).symm
         (scalarPotOp (I := I) (M := M) q ζ v) := rfl
 
-/-- Testing the applied `H¹ → H⁰` multiplier against a finite spectral
-vector is the same as moving the real scalar multiplier to the test vector. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPotH0_test
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (u : tensorHs (I := I) (M := M) q 0 0 1)
@@ -331,7 +333,6 @@ theorem scalarPotH0_test
       tensorInnerPointwise_smul_right]
 
 omit [BoundarylessManifold I M] in
-/-- The canonical `L² ≃ H⁰` postcomposition preserves the multiplier norm. -/
 theorem scalarPotH0_norm
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) :
     ‖scalarPotH0 (I := I) (M := M) q ζ‖ =
@@ -359,8 +360,9 @@ private theorem scalarPotCore_sub
       (tensorHsSmoothRepr (I := I) (M := M) v.1 v.2).toSection x
   exact (sub_smul _ _ _).symm
 
-/-- A pointwise bound on the coefficient difference controls the finite-core
-pairwise multiplier difference. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPot_pair_core
     (q : SmoothRiemannianMetric I M) (ζ η : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C)
@@ -374,8 +376,9 @@ theorem scalarPot_pair_core
   change |(ζ : M → Real) x - (η : M → Real) x| ≤ C
   exact hζη x
 
-/-- The operator norm of a pairwise scalar-potential difference is controlled
-by the pointwise coefficient difference, without whole-operator equality. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPot_pair_norm
     (q : SmoothRiemannianMetric I M) (ζ η : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C)
@@ -400,8 +403,9 @@ theorem scalarPot_pair_norm
       scalarPotOp_core (I := I) (M := M) q η v]
     exact scalarPot_pair_core (I := I) (M := M) q ζ η hC hζη v
 
-/-- The same pointwise coefficient-difference bound controls the canonical
-`H¹(q) → H⁰(q)` scalar-potential difference. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalarPotH0_pair
     (q : SmoothRiemannianMetric I M) (ζ η : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C)
@@ -448,8 +452,8 @@ private theorem smulHs_bound
   intro U
   simpa only [zeta] using hbound 0 (Set.mem_singleton 0) U
 
-/-- Multiplication by a fixed smooth scalar coefficient, completed from smooth
-tensors as a bounded map on the natural spectral Sobolev space `H^m(q)`. -/
+
+
 noncomputable def scalarPotHs
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ) :
     tensorHs (I := I) (M := M) q 0 0 (m : Real) →L[Real]
@@ -458,8 +462,8 @@ noncomputable def scalarPotHs
       (scalarSmulLin (I := I) (M := M) q ζ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) q 0 (m : Real))
 
-/-- On every smooth spectral embedding, `scalarPotHs` is the genuine
-pointwise scalar multiplier. -/
+
+
 theorem scalarPotHs_core
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ)
     (U : SmoothCcTensor q 0 0) :
@@ -483,8 +487,8 @@ theorem scalarPotHs_core
   intro W
   simpa only [ccToHsLin_apply, scalarSmulLin, LinearMap.comp_apply] using hbound W
 
-/-- The completed scalar potential is the fully applied rank-zero tensor
-coefficient action. -/
+
+
 theorem scalarPotHs_app
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ)
     (U : tensorHs (I := I) (M := M) q 0 0 (m : Real)) :
@@ -599,8 +603,8 @@ private theorem scalarPotH0_cc
         (scalarSmul (I := I) (M := M) q 0 0 ζ U) :=
       ccHs_inc (I := I) (M := M) q h0n _
 
-/-- The natural-order scalar multiplier agrees with the legacy `H¹ → H⁰`
-multiplier after both outputs are included into `H⁰(q)`. -/
+
+
 theorem scalarPotHs_inc
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (m : ℕ) (hm : (1 : Real) ≤ (m : Real))
@@ -631,8 +635,8 @@ theorem scalarPotHs_inc
       ccHs_inc (I := I) (M := M) q hm,
       scalarPotH0_cc]
 
-/-- A jointly smooth scalar family has uniformly bounded completed
-`H^m(q) → H^m(q)` multipliers on each compact parameter set. -/
+
+
 theorem scalarPotHs_unif
     (q : SmoothRiemannianMetric I M)
     (zeta : Real → C^∞⟮I, M; Real⟯) {S K : Set Real}

@@ -8,25 +8,6 @@ open DifferentialGeometry.Analysis.ODE.Flow
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
-/-!
-# Euclidean `C^k` smooth dependence of the local flow
-
-For a time-dependent vector field `f : ℝ → E → E` on a finite-dimensional Banach
-space `E`, this file assembles the `C^k` smooth-dependence of the local Picard
-flow on a flow box `closedBall x₀ r ×ˢ Icc (t₀ - ε) (t₀ + ε)` around `(x₀, t₀)`.
-
-## Main results
-
-* `linearizationNorm_continuousOn_box` — continuity of `(x, t) ↦ ‖fderiv ℝ (f t) (Φ q)‖`
-  along the flow on the box.
-* `exists_uniform_norm_fderiv_le_on_flow_box` — a uniform bound on the linearization
-  norm over the box.
-* `isVariationalFlowProjection_mono_box` — monotonicity of the variational-flow
-  projection predicate under box shrinking.
-* `exists_isLocalFlow_contDiffOn_Ck` — existence of a local flow that is jointly
-  `ContDiffOn ℝ k` when `f` is jointly `C^k`.
--/
-
 theorem linearizationNorm_continuousOn_box
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {f : ℝ → E → E}
     {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {ε : ℝ} {Φ : E × ℝ → E}
@@ -88,20 +69,6 @@ theorem isVariationalFlowProjection_mono_box
     { contDiffOn := hY.contDiffOn.mono hbox
       fderiv_eq := fun q hq => hY.fderiv_eq q (hbox hq) }
 
-/-- **Finite-`C^k` clean unconditional Euclidean smooth dependence.**
-
-For a jointly `C^k` (`1 ≤ k ≤ ∞`) time-dependent vector field on a finite-dimensional
-complete Banach space and any base point `(t₀, x₀)`, there exists a Picard–Lindelöf local
-flow `Φ` and a strictly interior open neighbourhood on which `Φ` is jointly `C^k` in
-`(initial condition, time)`.
-
-The proof case-splits on the regularity exponent `k : ℕ∞`.  The `⊤`-case is the existing
-`C^∞` theorem `exists_isLocalFlow_contDiffOn_top` applied verbatim.  The finite case
-`k = (n : ℕ)` with `n = m + 1` runs the Picard local-flow producer, the level-`m`
-variational-flow projection producer, a uniform operator-norm bound on the linearisation,
-selects nested geometric parameters (with caps reconciling the projection's own
-`(T_Y, ρ_Y)`), shrinks the projection onto the geometric box, and assembles the finite-`C^k`
-flow via `contDiffOn_flow_of_isVariationalFlowProjection_top`. -/
 theorem exists_isLocalFlow_contDiffOn_Ck
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
       [FiniteDimensional ℝ E]

@@ -13,39 +13,10 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
-import DifferentialGeometry.Geometry.Exponential.RadialSeminormFencing
+import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Gauss's lemma and the radial-minimiser package
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`,
-this file packages the radial-minimiser cluster built on Gauss's lemma:
-
-* `subArc_of_minimizer_is_minimizer` — a sub-arc of a length-minimising
-  curve is itself a length-minimiser between its restricted endpoints.
-
-* `normalBall_radial_length_le_riemannianEDist` — inside a normal ball at `p`,
-  every `C¹` curve from `p` to `expMap g p v` has `pathELength ≥ √(g_p(v, v))`;
-  the matching equality case (monotone radial reparametrisation) is the
-  separate sibling `normalBall_radial_minimizer_equality`.
-
-* `local_radial_identification_of_minimizer` — at any interior parameter
-  of a length-minimising curve there is a `δ`-neighbourhood on which the
-  curve is a monotone radial geodesic in normal coordinates at `γ(t₀)`.
-
-* `metricBall_subset_normalBall` — a point at Riemannian distance
-  `< expRadiusGp g c` from `c` lies in the normal ball at `c` and is the
-  radial-exponential image `expMap g c v` of a chart vector `v` whose
-  `g_c`-length equals that distance.
-
-Gauss's lemma proper (`gauss_lemma_pullback`) and the radial speed lower bound
-are developed in `DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback`;
-the positive-semidefinite seminorm and fundamental-theorem-of-calculus fencing
-machinery are in `DifferentialGeometry.Geometry.Exponential.RadialSeminormFencing`.
--/
 
 noncomputable section
 
@@ -60,10 +31,16 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+private lemma real_eq_zero_of_sqrt_eq_zero {y : ℝ} (hy : 0 ≤ y) (h : Real.sqrt y = 0) :
+    y = 0 := by
+  have hsq := Real.sq_sqrt hy
+  rw [h] at hsq
+  simpa using hsq.symm
 
 section RadialMinimizerConvention
 
@@ -75,21 +52,13 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 section LengthBookkeeping
 
 
-set_option linter.unusedVariables false in
-/-- **A sub-arc of a length-minimising `C¹` curve is itself a
-length-minimiser between its restricted endpoints.** That is, if a
-curve `γ : ℝ → M` realises `riemannianEDist I (γ a) (γ b) = pathELength I γ a b`
-on `[a, b]`, then on every sub-interval `[s, t] ⊆ [a, b]` the sub-arc
-realises `riemannianEDist I (γ s) (γ t) = pathELength I γ s t`.
-The hypothesis `hfin` records finiteness of the parent length: it is what
-allows cancelling `pathELength I γ a s + pathELength I γ t b` from the
-`ENNReal` squeeze. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
     (hfin : pathELength I γ a b ≠ ⊤)
-    (hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
+    (_hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
     riemannianEDist I (γ s) (γ t) = pathELength I γ s t := by
   set L_left := pathELength I γ a s with hL_left_def
   set L_mid := pathELength I γ s t with hL_mid_def
@@ -162,15 +131,6 @@ section RadialUniqueMinimizer
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
-/-- **Endpoint-generic radial length lower bound.** For a `C¹` curve `γ` on
-`[a, b]` starting at `p` and confined to the normal chart's source with chart
-image inside the `C²` ball, the `g_p`-radial distance of the *endpoint*
-`γ b` is bounded above by `pathELength I γ a b`.  This is the radial fencing
-core of Gauss's lemma exposed for an arbitrary in-ball endpoint: it integrates
-the pointwise radial speed estimate `gauss_pointwise_speed_lower_bound` against
-the radial distance `ρ(t) = √(g_p(ψ(γt), ψ(γt)))` via the fundamental theorem
-of calculus, with the corner of `ρ` at the centre `ψ(γt) = 0` handled by the
-seminorm-continuity limit of the difference quotient. -/
 private theorem radialDist_endpoint_le_pathELength
     (g : SmoothRiemannianMetric I M) (p : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -400,17 +360,6 @@ private theorem radialDist_endpoint_le_pathELength
         ≤ ENNReal.ofReal (∫ t in a..b, φ t) := ENNReal.ofReal_le_ofReal hftc
     _ ≤ pathELength I γ a b := hpath
 
-/-- **Ball-wide injectivity of the exponential differential.** For a vector
-`u` inside the `C²`-ball `‖u‖ < expMapC2Radius g p`, the manifold differential
-`mfderiv (fun y ↦ expMap g p y) u` is injective.  The normal chart is the
-inverse of `expMap g p` (as a partial diffeomorphism), so the chart-image left
-inverse `normalChartAt g p` produces, via the chain rule on the composite
-`normalChartAt ∘ expMap = id` valid on a neighbourhood of `u`, a continuous
-linear left inverse of the exponential differential; a linear map with a left
-inverse is injective.  This is the keystone of the equality-case rigidity: it
-lets the annihilation of the `g_p`-orthogonal part under `dexp` (the content of
-`gauss_radial_lower_bound_eq_iff`) be lifted to the annihilation of the
-orthogonal part itself. -/
 private theorem mfderiv_expMap_injective_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {u : E}
     (hu : ‖u‖ < expMapC2Radius (I := I) g p) :
@@ -467,27 +416,11 @@ private theorem mfderiv_expMap_injective_of_norm_lt_radius
   rw [hA_eq]
   exact hΦinj
 
-set_option linter.unusedVariables false in
-/-- **Inside the normal ball, the radial `g_p`-length is a lower bound for
-the Riemannian distance to the radial endpoint.** Concretely
-`√(g_p(v, v)) ≤ riemannianEDist p (expMap g p v)`, i.e. every `C¹` curve
-from `p` to `expMap g p v` has length at least `√(g_p(v, v))`. This is the
-length lower bound delivered by Gauss's lemma; the matching equality case
-(the radial geodesic as the unique minimiser) is the separate sibling
-`normalBall_radial_minimizer_equality`. The bound uses the intrinsic
-`g`-norm `√(g_p(v, v))`, not the model-space Euclidean norm `‖v‖_E`
-(which has no a-priori relation to `g_p`).
-
-The hypothesis `hv : v ∈ expDomain` records the natural precondition that
-`expMap g p v` is the genuine geodesic value (not the junk value `p`); it is
-kept for API symmetry with the equality-case sibling, even though the
-first-exit argument re-derives domain membership for the candidate paths
-internally. -/
 theorem normalBall_radial_length_le_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p) :
     ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
@@ -745,15 +678,6 @@ theorem normalBall_radial_length_le_riemannianEDist
       _ ≤ pathELength I γ (0:ℝ) 1 := hpath_mono
       _ < r := hγ_len
 
-/-- **A minimiser of exact radial length stays inside the `C²`-ball.** A `C¹`
-curve `γ` on `[a, b]` from `p`, confined to the normal-chart source, whose total
-`pathELength` is at most the `g_p`-radial bound `S = √(g_p(v, v)) < expRadiusGp`,
-has chart image inside the Euclidean `C²`-ball at every parameter.  This is the
-first-exit confinement underlying the equality case: were the chart radial
-distance to reach a level `δ ∈ (S, expRadiusGp)` at some first time `t₀`, the
-radial fencing on `[a, t₀]` would force `δ ≤ pathELength γ a t₀ ≤ pathELength
-γ a b ≤ S < δ`, a contradiction.  The output ball bound feeds the pointwise
-Gauss estimates that are only available on the `C²`-ball. -/
 private theorem minimizer_confined_to_C2_ball
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -878,18 +802,6 @@ private theorem minimizer_confined_to_C2_ball
   have hδS' : δ ≤ S := (ENNReal.ofReal_le_ofReal_iff hS_nn).mp hδS
   exact absurd hδS' (not_le.mpr hSδ)
 
-/-- **Radial-distance identity and chart-velocity radiality for an exact
-minimiser.** Under the `C²`-ball confinement (`hbball`), a `C¹` curve `γ` from
-`p` confined to the chart with exact radial length `√(g_p(v,v))` has chart
-radial distance `ρ(t) = √(g_p(ψ(γt), ψ(γt)))` equal to the running speed
-integral `∫_a^t √(g(γs)(γ's)(γ's)) ds` at every parameter, so `ρ` is monotone;
-and at every *interior* parameter where the chart image `ψ(γt)` is nonzero, the
-chart velocity `mfderiv (ψ∘γ) t 1` is `g_p`-parallel to `ψ(γt)`.  The radiality
-is the rigidity extracted from the tightness of Gauss's bound:
-the running integral makes `ρ` differentiable with `ρ'(t)` equal to the
-intrinsic speed, which forces the pointwise Gauss estimate to be an equality and
-hence (via `gauss_radial_lower_bound_eq_iff` and the ball-wide injectivity of
-the exponential differential) the chart velocity to be radial. -/
 private theorem radial_minimizer_radiality
     (g : SmoothRiemannianMetric I M) (p : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1300,24 +1212,11 @@ private theorem radial_minimizer_radiality
     rw [hcv₂_eq] at hradial
     exact hradial
 
-set_option linter.unusedVariables false in
-set_option maxHeartbeats 1600000 in
-/-- **Equality case of the radial unique-minimiser bound.** Inside the
-normal ball at `p`, a `C¹` curve `γ` on `[a, b]` from `p` to
-`expMap g p v` that stays in the normal-chart source and whose
-`pathELength` equals the minimum `√(g_p(v, v))` (the lower bound of
-`normalBall_radial_length_le_riemannianEDist`) is a monotone radial
-reparametrisation: there is a monotone reparametrisation function
-`φ : ℝ → ℝ` with `φ a = 0`, `φ b = 1` such that `γ` coincides with the
-radial geodesic `t ↦ expMap g p (φ t • v)` on `[a, b]`. This is the
-equality-characterisation sibling of `normalBall_radial_length_le_riemannianEDist`
-(which gives only the inequality), consumed by the local radial
-identification of a minimiser and by the radial-image openness step. -/
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
     {γ : ℝ → M} {a b : ℝ} (hab : a < b)
@@ -1387,8 +1286,7 @@ theorem normalBall_radial_minimizer_equality
       intro t ht
       have : B (c t) (c t) = 0 := by
         have h := hρ0 t ht; rw [hρ_def] at h; simp only at h
-        nlinarith [Real.sq_sqrt (hBnn (c t)), Real.sqrt_nonneg (B (c t) (c t)), h,
-          Real.sq_sqrt (hBnn (c t))]
+        exact real_eq_zero_of_sqrt_eq_zero (hBnn (c t)) h
       by_contra hc0
       exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
     refine ⟨fun t => (t - a) / (b - a), ?_, ?_, ?_, ?_⟩
@@ -1486,7 +1384,7 @@ theorem normalBall_radial_minimizer_equality
           have : B (c t) (c t) = 0 := by
             have h : ρ t = 0 := hρt0.symm
             rw [hρ_def] at h; simp only at h
-            nlinarith [Real.sq_sqrt (hBnn (c t)), Real.sqrt_nonneg (B (c t) (c t)), h]
+            exact real_eq_zero_of_sqrt_eq_zero (hBnn (c t)) h
           by_contra hc0
           exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
         rw [hct0, ← hρt0, zero_div, zero_smul]
@@ -1532,11 +1430,7 @@ section LocalRadialIdentification
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
-/-- **`C¹` smoothness of the central radial curve on `[0, 1]`.** For
-`‖a‖ < expMapC2Radius g p`, the curve `t ↦ expMap g p (t • a)` is `C¹` on
-`[0, 1]`.  Each parameter `t ∈ [0, 1]` has `‖t • a‖ ≤ ‖a‖`, so
-`radialCurve_contMDiffAt2` provides `C²`-smoothness pointwise; we downgrade to
-the `C¹`-on-set form needed for `pathELength` / `riemannianEDist`. -/
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma radialCurve_contMDiffOn_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
@@ -1553,12 +1447,6 @@ private lemma radialCurve_contMDiffOn_Icc
   exact ((radialCurve_contMDiffAt2 (I := I) g p a t hnorm).of_le
     (by norm_num)).contMDiffWithinAt
 
-/-- **Central radial path length equals the radius.** For
-`‖a‖ < expMapC2Radius g p`, the `pathELength` of `t ↦ expMap g p (t • a)` over
-`[0, 1]` is exactly `ofReal √(g_p(a, a))`.  The velocity has constant `g`-speed
-`√(g_p(a, a))` on the interior `(0, 1)` (`radialSpeedSq_eq_inner`), so via
-`hEnorm` the integrand `‖mfderiv‖ₑ` is the constant `ofReal √(g_p(a, a))` there,
-and the lintegral over `(0, 1)` (measure `1`) returns that constant. -/
 private lemma radialCurve_pathELength_eq
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1583,10 +1471,6 @@ private lemma radialCurve_pathELength_eq
   rw [MeasureTheory.setLIntegral_const, Real.volume_Ioo, sub_zero,
     ENNReal.ofReal_one, mul_one]
 
-/-- The radial exponential curve bounds the Riemannian distance by the
-Riemannian length of its launch vector.  This direction only needs the launch
-vector to lie in the `C²` exponential ball; it does not require radial
-minimality or injectivity. -/
 theorem edist_exp_le_radius
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1614,13 +1498,6 @@ theorem edist_exp_le_radius
     radialCurve_pathELength_eq (I := I) g p a hEnorm ha] at hdist
   exact hdist
 
-/-- **Radial distance equals the radius (inside the `C²` ball).** For a chart
-endpoint `a` with `√(g_p(a, a)) < expRadiusGp g p` (equivalently `a` in the
-normal-chart target and in the natural exponential domain), the Riemannian
-distance from `p` to the radial point `expMap g p a` equals `ofReal √(g_p(a, a))`.
-The `≤` direction is the radial path length bound `radialCurve_pathELength_eq`
-(the radial geodesic realises the distance); the `≥` direction is the Gauss-lemma
-radial lower bound `normalBall_radial_length_le_riemannianEDist`. -/
 private theorem radial_riemannianEDist_eq_radius
     (g : SmoothRiemannianMetric I M) (p : M) {a : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1655,10 +1532,6 @@ private theorem radial_riemannianEDist_eq_radius
     rw [radialCurve_pathELength_eq (I := I) g p a hEnorm ha_eucl]
   exact le_antisymm hle hge
 
-/-- Inside the intrinsic exponential radius, the Riemannian distance to a
-radial exponential point equals the `g_p`-length of its launch vector.  The
-small-radius hypothesis supplies the normal-chart and exponential-domain
-memberships needed by the underlying radial-distance identity. -/
 theorem edist_exp_eq_radius
     (g : SmoothRiemannianMetric I M) (p : M) {a : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1672,14 +1545,7 @@ theorem edist_exp_eq_radius
     (mem_expDomain_of_norm_lt_radius (I := I) g p ha_eucl)
     (ball_subset_normalChartAt_target (I := I) g p ha_eucl) ha_small
 
-/-- **Short-time confinement of a curve to the small normal ball at its
-launch point.** If `γ` is `C¹` on `[a, b]` with `γ t₀ = q` at an interior
-parameter `t₀ ∈ (a, b)`, then there is a `δ > 0` such that the forward sub-arc
-`γ |[t₀, t₀ + δ]` lies inside `q`'s normal-chart source with `g_q`-chart radius
-below `expRadiusGp g q`.  This is pure continuity: the chart-radial value
-`t ↦ √(g_q(ψ_q(γ t), ψ_q(γ t)))` is continuous and vanishes at `t₀`, so it stays
-below the positive threshold `expRadiusGp g q` on a forward neighbourhood; the
-source-membership is the openness of the chart source at `q = γ t₀`. -/
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem exists_forward_confinement_to_smallBall
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} {t₀ : ℝ}
     (hγ : CMDiff[Set.Icc a b] 1 γ) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -1766,23 +1632,6 @@ private theorem exists_forward_confinement_to_smallBall
   · intro t ht; exact (hmemS t ht).1
   · intro t ht; exact (hmemS t ht).2
 
-/-- **Forward local radial identification of a minimiser.** Let `γ : ℝ → M` be
-a length-minimising `C¹` curve on `[a, b]` (`riemannianEDist (γ a) (γ b) =
-pathELength γ a b`, with finite length `hfin`).  At every interior parameter
-`t₀ ∈ (a, b)` there is a `δ > 0` such that the forward sub-arc
-`γ |[t₀, t₀ + δ]` is, after a monotone rescaling, the radial geodesic
-`s ↦ expMap g (γ t₀) (σ s • v)` in normal coordinates centred at `γ t₀`, for a
-launch vector `v : T_{γ t₀} M` and a monotone `σ` with `σ 0 = 0`.
-
-This is the moving-foot no-corner regularity: re-based at the foot `γ t₀`, the
-restricted minimiser realises the chart-radial distance to its forward endpoint,
-hence — by the endpoint-generic radial rigidity `normalBall_radial_minimizer_equality`
-applied with base `γ t₀` — coincides with a monotone radial reparametrisation.
-The sub-arc minimality is `subArc_of_minimizer_is_minimizer`; the equality
-`pathELength = ofReal √(g_{γ t₀}(v, v))` feeding the rigidity is
-`radial_riemannianEDist_eq_radius` (distance equals radius inside the small
-normal ball) composed with the sub-arc minimality; the short-time ball
-confinement is `exists_forward_confinement_to_smallBall`. -/
 theorem local_radial_identification_of_minimizer
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1858,8 +1707,8 @@ theorem local_radial_identification_of_minimizer
     rw [hq_def]; exact this
 
 
-/-- **Coercivity upper bound.** The Euclidean norm is controlled by the
-`g_c`-length divided by the square root of the coercivity constant. -/
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma norm_le_sqrt_inner_div_sqrt_coercive
     (g : SmoothRiemannianMetric I M) (c : M) (x : E) :
     ‖x‖ ≤ Real.sqrt (g.inner c x x) / Real.sqrt (gpCoerciveConst (I := I) g c) := by
@@ -1877,10 +1726,6 @@ private lemma norm_le_sqrt_inner_div_sqrt_coercive
   rw [le_div_iff₀ hsc_pos, mul_comm]
   exact hkey
 
-/-- **First-exit confinement of a short path to the normal ball.** A `C¹` path
-`γ` on `[0, 1]` starting at `c` with total length below `R := expRadiusGp g c`
-stays, at every parameter, inside the chart source `ψ.source` with `g_c`-chart
-radius strictly below `R`. -/
 private theorem path_confined_to_normalBall
     (g : SmoothRiemannianMetric I M) (c : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1911,7 +1756,8 @@ private theorem path_confined_to_normalBall
   have hL₀_lt_R : L₀ < R := by
     rw [hL₀_def]; exact (ENNReal.lt_ofReal_iff_toReal_lt hlen_ne_top).mp hlen
   have hL₀_nn : 0 ≤ L₀ := ENNReal.toReal_nonneg
-  have hcsrc : c ∈ ψ.source := by rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g c
+  have hcsrc : c ∈ ψ.source := by
+    rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g c
   have hψc : ψ c = 0 := by rw [hψ_def]; exact NormalCoordinates.normalChartAt_centre (I := I) g c
   have hopen_src : IsOpen ψ.source := by
     rw [hψ_def]; exact NormalCoordinates.normalChartAt_open_source (I := I) g c
@@ -2060,7 +1906,8 @@ private theorem path_confined_to_normalBall
             have hmaps : Set.MapsTo γ (Set.Ioo 0 t₀) ψ.source :=
               fun z hz => (hpre z ⟨hz.1.le, hz.2.le⟩ hz.2).1
             exact (hψcont _ hγt₀_src).comp h1 hmaps
-          exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+          exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt
+            hcomp)
         have htend : Filter.Tendsto ρ (nhdsWithin t₀ (Set.Ioo 0 t₀)) (nhds (ρ t₀)) :=
           hρcontWithin
         have hev : ∀ᶠ s in nhdsWithin t₀ (Set.Ioo 0 t₀), ρ s ≤ L₀ := by
@@ -2089,7 +1936,8 @@ private theorem path_confined_to_normalBall
         have hmaps : Set.MapsTo γ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) ψ.source :=
           fun s hs => hs.2
         exact (hψcont _ hγt₀_src).comp h1 hmaps
-      exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+      exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt
+        hcomp)
     have hρ_small_nhds : {s | ρ s < R} ∈
         nhdsWithin t₀ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) := by
       have : Set.Iio R ∈ nhds (ρ t₀) := isOpen_Iio.mem_nhds hρt₀_lt
@@ -2136,20 +1984,6 @@ private theorem path_confined_to_normalBall
     exact absurd (le_csSup hSbdd ht₁S) (not_le.mpr ht₁_gt)
   rw [← ht₀_eq_one]; exact ht₀S
 
-/-- **The metric ball is contained in the normal ball.** A point `y` at finite
-Riemannian distance `< expRadiusGp g c` from `c` lies in the source of the normal
-chart at `c` and equals the radial exponential image `expMap g c v` of the chart
-coordinate `v := normalChartAt g c y`, which lies in the chart target and in the
-natural exponential domain, and whose `g_c`-length equals the Riemannian distance
-from `c` to `y`. The hypothesis `hEnorm` supplies the standing identification of
-the tangent-norm `‖·‖ₑ` with the `g`-induced norm `√(g_x(·, ·))`, which is what
-ties the metric (path-length) distance to the intrinsic `g_c`-radius.
-
-The proof exhibits a near-minimising `C¹` path from `c` to `y` of length below
-`R := expRadiusGp g c` (`exists_lt_of_riemannianEDist_lt`), confines it to the
-normal ball by the first-exit argument `path_confined_to_normalBall`, reads off
-`y = expMap g c v` from the chart round-trip, and identifies the `g_c`-radius with
-the distance via the radial distance identity `radial_riemannianEDist_eq_radius`. -/
 theorem metricBall_subset_normalBall
     (g : SmoothRiemannianMetric I M) (c : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -2193,10 +2027,6 @@ theorem metricBall_subset_normalBall
     rw [hy_eq]; exact hdist_eq
   rw [hdy, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
 
-/-- A point whose Riemannian distance from `c` is below `expRadiusGp g c`
-belongs to the source of the normal chart at `c`. This is the source-membership
-projection of `metricBall_subset_normalBall`; use the stronger theorem when the
-radial vector or radius identity is also needed. -/
 theorem memNChartSrcOfDist
     (g : SmoothRiemannianMetric I M) (c : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

@@ -75,7 +75,7 @@ theorem bilin_coer_near
     _ ≤ B 0 v v + D v v := add_le_add (hB v) hDlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -83,24 +83,73 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
 
+private local instance : MeasurableSpace M := borel M
+
+private local instance : BorelSpace M := ⟨rfl⟩
+
 /-! ## Coefficient derivative of the local addition -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [ConnectedSpace M] in
+private theorem mfderiv_affine_line_apply
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (f : V → M) (u v : V)
+    (hmd : MDifferentiableAt 𝓘(ℝ, V) I f u) :
+    mfderiv 𝓘(ℝ) I (fun a : ℝ ↦ f (u + a • v)) 0 1 =
+      mfderiv 𝓘(ℝ, V) I f u v := by
+  let line : ℝ → V := fun a ↦ u + a • v
+  have hline_md : MDifferentiableAt 𝓘(ℝ) 𝓘(ℝ, V) line 0 := by
+    have hline_cd : ContMDiff 𝓘(ℝ) 𝓘(ℝ, V) ∞ line :=
+      contMDiff_const.add (contMDiff_id.smul contMDiff_const)
+    exact hline_cd.contMDiffAt.mdifferentiableAt (by decide)
+  have hline_zero : line 0 = u := by
+    simp only [line, zero_smul, add_zero]
+  have hline_deriv : mfderiv 𝓘(ℝ) 𝓘(ℝ, V) line 0 1 = v := by
+    rw [mfderiv_eq_fderiv]
+    have h : HasFDerivAt line
+        (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) v) 0 := by
+      simpa only [line] using
+        ((hasFDerivAt_id (0 : ℝ)).smul_const v).const_add u
+    rw [h.fderiv]
+    change (1 : ℝ) • v = v
+    exact one_smul ℝ v
+  have hcomp := mfderiv_comp_apply (f := line) (x := (0 : ℝ))
+    (hline_zero ▸ hmd) hline_md (1 : ℝ)
+  change mfderiv 𝓘(ℝ) I (f ∘ line) 0 1 =
+    mfderiv 𝓘(ℝ, V) I f u v
+  have hgoal :
+      mfderiv 𝓘(ℝ, V) I f (line 0)
+          (mfderiv 𝓘(ℝ) 𝓘(ℝ, V) line 0 1) =
+        mfderiv 𝓘(ℝ, V) I f u v := by
+    rw [hline_zero]
+    exact congrArg (mfderiv 𝓘(ℝ, V) I f u) hline_deriv
+  exact hcomp.trans hgoal
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [ConnectedSpace M] in
+private theorem mfderiv_euclidean_affine_line_apply
+    {J : Type*} [Fintype J]
+    (f : EuclideanSpace ℝ J → M) (u v : EuclideanSpace ℝ J)
+    (hmd : MDifferentiableAt 𝓘(ℝ, EuclideanSpace ℝ J) I f u) :
+    mfderiv 𝓘(ℝ) I (fun a : ℝ ↦ f (u + a • v)) 0 1 =
+      mfderiv 𝓘(ℝ, EuclideanSpace ℝ J) I f u v :=
+  mfderiv_affine_line_apply (E := E) (I := I) (M := M) f u v hmd
 
 /-- The derivative, in the finite spectral coefficient, of the local-addition
 map at a fixed spatial point.  Its value is a tangent vector at the represented
 map value, exactly as required for the harmonic-map time velocity. -/
-noncomputable def hmfSpecVar
+noncomputable irreducible_def hmfSpecVar
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
     (u : EuclideanSpace ℝ {i // i ∈ S}) (x : M) :
     EuclideanSpace ℝ {i // i ∈ S} →L[ℝ]
-      TangentSpace I
-        (hmfAdd (I := I) (M := M) q
-          (hmfSpecIncl (I := I) (M := M) q S u) x) :=
+      TangentSpace I (hmfSpecMap (I := I) (M := M) q S x u) :=
   mfderiv 𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) I
-    (fun z : EuclideanSpace ℝ {i // i ∈ S} =>
-      hmfAdd (I := I) (M := M) q
-        (hmfSpecIncl (I := I) (M := M) q S z) x) u
+    (hmfSpecMap (I := I) (M := M) q S x) u
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Applying `hmfSpecVar` to a direction is the derivative of the corresponding
 one-dimensional coefficient line.  This is the chain-rule bridge between the
 finite-dimensional Fréchet derivative and `hmfStateVar`. -/
@@ -109,40 +158,16 @@ theorem hmfSpecVar_line
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
     (u v : EuclideanSpace ℝ {i // i ∈ S}) (x : M)
     (hmd : MDifferentiableAt 𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) I
-      (fun z : EuclideanSpace ℝ {i // i ∈ S} =>
-        hmfAdd (I := I) (M := M) q
-          (hmfSpecIncl (I := I) (M := M) q S z) x) u) :
+      (hmfSpecMap (I := I) (M := M) q S x) u) :
     mfderiv 𝓘(ℝ) I
         (fun a : ℝ =>
-          hmfAdd (I := I) (M := M) q
-            (hmfSpecIncl (I := I) (M := M) q S (u + a • v)) x) 0 1 =
+          hmfSpecMap (I := I) (M := M) q S x (u + a • v)) 0 1 =
       hmfSpecVar (I := I) (M := M) q S u x v := by
-  let f : EuclideanSpace ℝ {i // i ∈ S} → M := fun z =>
-    hmfAdd (I := I) (M := M) q
-      (hmfSpecIncl (I := I) (M := M) q S z) x
-  let line : ℝ → EuclideanSpace ℝ {i // i ∈ S} := fun a => u + a • v
-  have hline_md : MDifferentiableAt 𝓘(ℝ)
-      𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) line 0 := by
-    have hline_cd : ContMDiff 𝓘(ℝ)
-        𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) ∞ line :=
-      contMDiff_const.add (contMDiff_id.smul contMDiff_const)
-    exact hline_cd.contMDiffAt.mdifferentiableAt (by decide)
-  have hline : mfderiv 𝓘(ℝ)
-      𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) line 0 1 = v := by
-    rw [mfderiv_eq_fderiv]
-    have h : HasFDerivAt line
-        (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) v) 0 := by
-      simpa only [line] using
-        ((hasFDerivAt_id (0 : ℝ)).smul_const v).const_add u
-    rw [h.fderiv]
-    simp only [ContinuousLinearMap.smulRight_apply,
-      ContinuousLinearMap.one_apply, one_smul]
-  have hcomp := mfderiv_comp_apply (f := line) (x := (0 : ℝ))
-    (show MDifferentiableAt 𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) I f (line 0) by
-      simpa only [line, zero_smul, add_zero, f] using hmd)
-    hline_md (1 : ℝ)
-  simpa only [Function.comp_apply, line, f, hline, hmfSpecVar] using hcomp
+  rw [hmfSpecVar_def]
+  exact mfderiv_euclidean_affine_line_apply (E := E) (I := I) (M := M)
+    (hmfSpecMap (I := I) (M := M) q S x) u v hmd
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- On a differentiability point, the finite coefficient derivative agrees
 with the intrinsic one-dimensional state variation. -/
 theorem hmfSpecVar_state
@@ -163,12 +188,23 @@ theorem hmfSpecVar_state
           (hmfSpecIncl (I := I) (M := M) q S u +
             a • hmfSpecIncl (I := I) (M := M) q S v) x) =
       (fun a : ℝ =>
-        hmfAdd (I := I) (M := M) q
-          (hmfSpecIncl (I := I) (M := M) q S (u + a • v)) x) := by
+        hmfSpecMap (I := I) (M := M) q S x (u + a • v)) := by
     funext a
-    rw [map_add, map_smul]
+    simp only [hmfSpecMap_def, map_add, map_smul]
   rw [hmfStateVar, hcurve]
-  exact hmfSpecVar_line (I := I) (M := M) q S u v x hmd
+  have hmdMap : MDifferentiableAt
+      𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) I
+      (hmfSpecMap (I := I) (M := M) q S x) u := by
+    have hmap :
+        hmfSpecMap (I := I) (M := M) q S x =
+          fun z : EuclideanSpace ℝ {i // i ∈ S} =>
+            hmfAdd (I := I) (M := M) q
+              (hmfSpecIncl (I := I) (M := M) q S z) x := by
+      funext z
+      rw [hmfSpecMap_def]
+    rw [hmap]
+    exact hmd
+  exact hmfSpecVar_line (I := I) (M := M) q S u v x hmdMap
 
 /-! ## The faithful finite mass -/
 
@@ -183,17 +219,16 @@ noncomputable def hmfSpecMassPt
   let L := hmfSpecVar (I := I) (M := M) q S u x
   (ContinuousLinearMap.precomp ℝ L).comp
     ((q.inner
-      (hmfAdd (I := I) (M := M) q
-        (hmfSpecIncl (I := I) (M := M) q S u) x)).comp L)
+      (hmfSpecMap (I := I) (M := M) q S x u)).comp L)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfSpecMassPt_apply
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
     (u v w : EuclideanSpace ℝ {i // i ∈ S}) (x : M) :
     hmfSpecMassPt (I := I) (M := M) q S u x v w =
       q.inner
-        (hmfAdd (I := I) (M := M) q
-          (hmfSpecIncl (I := I) (M := M) q S u) x)
+        (hmfSpecMap (I := I) (M := M) q S x u)
         (hmfSpecVar (I := I) (M := M) q S u x v)
         (hmfSpecVar (I := I) (M := M) q S u x w) := by
   rfl
@@ -210,6 +245,7 @@ noncomputable def hmfSpecMassOp
   ∫ x, hmfSpecMassPt (I := I) (M := M) q S u x
     ∂(riemannianVolumeMeasure (I := I) (M := M) h)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Joint continuity of the pointwise faithful mass on a coefficient ball
 implies operator-norm continuity of the integrated finite mass for a fixed
 domain metric. -/
@@ -225,6 +261,8 @@ theorem hmfSpecMass_cont
     ContinuousOn
       (hmfSpecMassOp (I := I) (M := M) q h S)
       (Metric.closedBall (0 : EuclideanSpace ℝ {i // i ∈ S}) R) := by
+  letI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) h) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace h
   simpa only [hmfSpecMassOp] using
     (integral_contOn_cpt
       (riemannianVolumeMeasure (I := I) (M := M) h)
@@ -232,6 +270,7 @@ theorem hmfSpecMass_cont
       (isCompact_closedBall
         (0 : EuclideanSpace ℝ {i // i ∈ S}) R) hmass)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Evaluation of the integrated mass operator can be moved inside the
 integral once the pointwise bilinear-map field is integrable. -/
 theorem hmfSpecMass_apply
@@ -243,8 +282,7 @@ theorem hmfSpecMass_apply
       (riemannianVolumeMeasure (I := I) (M := M) h)) :
     hmfSpecMassOp (I := I) (M := M) q h S u v w =
       ∫ x, q.inner
-          (hmfAdd (I := I) (M := M) q
-            (hmfSpecIncl (I := I) (M := M) q S u) x)
+          (hmfSpecMap (I := I) (M := M) q S x u)
           (hmfSpecVar (I := I) (M := M) q S u x v)
           (hmfSpecVar (I := I) (M := M) q S u x w)
         ∂(riemannianVolumeMeasure (I := I) (M := M) h) := by
@@ -257,6 +295,7 @@ theorem hmfSpecMass_apply
     ContinuousLinearMap.integral_apply hintv w]
   simp only [hmfSpecMassPt_apply]
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The finite operator is exactly the faithful state mass restricted to the
 spectral trial space whenever the local-addition coefficient slice is
 differentiable. -/
@@ -282,7 +321,8 @@ theorem hmfSpecMass_state
   apply integral_congr_ae
   filter_upwards with x
   rw [hmfSpecVar_state (I := I) (M := M) q S u v x (hmd x),
-    hmfSpecVar_state (I := I) (M := M) q S u w x (hmd x)]
+    hmfSpecVar_state (I := I) (M := M) q S u w x (hmd x),
+    hmfSpecMap_apply]
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback
 

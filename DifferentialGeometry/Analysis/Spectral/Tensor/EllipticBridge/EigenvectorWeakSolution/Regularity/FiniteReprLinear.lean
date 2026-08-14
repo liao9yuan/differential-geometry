@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 
-/-!
-# Linear finite-support spectral representatives
 
-This file packages the existing finite spectral representative as a linear map
-from the finite-support submodule of `tensorHs` to `SmoothCcTensor`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,8 +34,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The finitely-supported coefficient family of a finite-support spectral
-Sobolev vector. -/
+
+
 private noncomputable def finiteCoeffLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
     tensorHs.finiteSupportSubmodule
@@ -49,8 +49,8 @@ private noncomputable def finiteCoeffLin
     ext i
     rfl
 
-/-- The smooth representative of a finite-support spectral Sobolev vector,
-as a linear map. -/
+
+
 noncomputable def finiteReprLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
     tensorHs.finiteSupportSubmodule
@@ -60,7 +60,8 @@ noncomputable def finiteReprLin
       (eigenvectorSmooth (I := I) (M := M) g r s)).comp
     (finiteCoeffLin (I := I) (M := M) g r s σ)
 
-/-- Applying `finiteReprLin` gives the existing smooth representative. -/
+
+omit [CompleteSpace E] in
 @[simp] theorem finiteReprLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
     (v : tensorHs.finiteSupportSubmodule

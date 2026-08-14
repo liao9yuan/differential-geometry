@@ -12,65 +12,6 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Adjugate
 
-/-!
-# Gradient of a smooth function on a Riemannian manifold
-
-Given a smooth Riemannian metric `g` on the tangent bundle of a smooth manifold
-`M` and a smooth scalar function `f : M → ℝ`, this file defines the gradient
-`grad_g g hf` (where `hf` is a smoothness witness) as a smooth tangent
-section, and establishes its defining duality with the differential of `f` and
-basic algebraic properties.
-
-## Construction
-
-At each point `x : M`, the metric `g.inner x : E →L[ℝ] E →L[ℝ] ℝ` (where
-`E := TangentSpace I x` definitionally) is a positive-definite continuous
-bilinear form. The "musical flat" map `v ↦ g.inner x v` is an `ℝ`-linear map
-from `E` into `E →ₗ[ℝ] ℝ`. By positive-definiteness it is injective; since `E`
-is finite-dimensional, the spaces `E` and `E →ₗ[ℝ] ℝ` have the same dimension,
-so the flat map is a linear equivalence.
-
-The gradient at `x` is then defined as the preimage under this equivalence of
-the differential `mfderiv I 𝓘(ℝ) f x`, viewed as a linear functional on
-`TangentSpace I x`. This gives the duality identity
-$$g(\nabla_g f, v) = (\mathrm{d}f)(v)$$
-for all tangent vectors `v` at `x`.
-
-## Smoothness
-
-Smoothness of `grad_g g hf` is established by exhibiting it pointwise on each
-chart base set as the linear combination
-$$(\nabla_g f)(x) = \sum_{i,j} G^{ij}(x)\, \partial_j \tilde f(\varphi(x))\,
-    e_i(x),$$
-where `G^{ij}` is the entrywise inverse of the chart Gram matrix `G_{ij} =
-g.inner x (e_i, e_j)`, the `e_i` are the chart-basis frame vectors, and
-$\tilde f = f \circ \varphi^{-1}$ is the chart-pullback of `f`. The inverse
-Gram matrix is smooth on the chart base set since the Gram matrix is smooth
-and positive-definite there.
-
-## Compact support
-
-If `f : M → ℝ` has compact support, so does `grad_g g hf`: the gradient
-vanishes wherever `mfderiv f x` does (in particular, off `tsupport f` where
-`f` is locally zero).
-
-## Main definitions
-
-* `metricFlatMap g x` : the flat linear equivalence
-  `TangentSpace I x ≃ₗ[ℝ] (TangentSpace I x →ₗ[ℝ] ℝ)` induced by `g.inner x`.
-* `metricSharp g x α` : the gradient (sharp) of a covector `α` at `x`, defined
-  as the inverse of `metricFlatMap g x`.
-* `gradFun g f` : the underlying pointwise gradient function.
-* `grad_g g hf` : the smooth gradient of a smooth scalar `f` (with smoothness
-  proof `hf`) as a smooth tangent section.
-
-## Main results
-
-* `tangentSectionAction_eq_inner_grad_g` : duality with the differential.
-* `inner_grad_g_symm` : symmetry of the metric on two gradients.
-* `hasCompactSupport_grad_g` : compact support of the gradient when `f` has
-  compact support.
--/
 
 noncomputable section
 
@@ -81,37 +22,57 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/- The musical-flat map, its `_apply`/`_injective` lemmas, and the sharp map
-(`metricSharp`, `inner_metricSharp`, `inner_metricSharp_right`) are the canonical ones from
-`Integral.Connection` (`Operator/Operators.lean`).  They are **re-exported** here — rather than
-re-defined — so the divergence-theorem layer and its consumers reference a single, unambiguous
-declaration (opening both `Integral.Connection` and `Integral.DivergenceTheorem` no longer makes
-these names `Ambiguous`).  The `metricFlatMap`/`gradFun`/divergence-theorem API below builds on
-these exported maps. -/
-export DifferentialGeometry.Integral.Connection
-  (metricFlatLinear metricFlatLinear_apply metricFlatLinear_injective
-   metricSharp inner_metricSharp inner_metricSharp_right)
+def metricFlatLinear (g : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →ₗ[ℝ] (TangentSpace I x →ₗ[ℝ] ℝ) where
+  toFun v := (g.inner x v).toLinearMap
+  map_add' v w := by
+    ext u
+    change g.inner x (v + w) u = g.inner x v u + g.inner x w u
+    rw [map_add, ContinuousLinearMap.add_apply]
+  map_smul' c v := by
+    ext u
+    change g.inner x (c • v) u = c • g.inner x v u
+    rw [map_smul, ContinuousLinearMap.smul_apply]
 
-/-- `TangentSpace I x` is finite-dimensional over `ℝ`. -/
+omit [Module.Finite ℝ E] in
+@[simp] lemma metricFlatLinear_apply (g : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    metricFlatLinear (I := I) g x v w = g.inner x v w := rfl
+
+omit [Module.Finite ℝ E] in
+lemma metricFlatLinear_injective (g : SmoothRiemannianMetric I M) (x : M) :
+    Function.Injective (metricFlatLinear (I := I) g x) := by
+  intro v w hvw
+  have hzero : ∀ z : TangentSpace I x, g.inner x (v - w) z = 0 := by
+    intro z
+    have h := congrArg (fun L : TangentSpace I x →ₗ[ℝ] ℝ => L z) hvw
+    simp only [metricFlatLinear_apply] at h
+    have hsub : g.inner x (v - w) z = g.inner x v z - g.inner x w z := by
+      rw [map_sub, ContinuousLinearMap.sub_apply]
+    rw [hsub, sub_eq_zero]
+    exact h
+  by_contra hne
+  have hvw_ne : v - w ≠ 0 := sub_ne_zero.mpr hne
+  have hpos : 0 < g.inner x (v - w) (v - w) := g.pos x (v - w) hvw_ne
+  exact (lt_irrefl 0) (hzero (v - w) ▸ hpos)
+
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional ℝ (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional ℝ E)
 
-/-- The flat map's domain and codomain have the same finite dimension over `ℝ`. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma metricFlatLinear_finrank_eq (x : M) :
     Module.finrank ℝ (TangentSpace I x) =
       Module.finrank ℝ (TangentSpace I x →ₗ[ℝ] ℝ) :=
   Subspace.dual_finrank_eq.symm
 
-/-- The flat linear equivalence `TangentSpace I x ≃ₗ[ℝ] (TangentSpace I x →ₗ[ℝ] ℝ)`
-induced by the metric `g` at `x`. -/
 def metricFlatMap (g : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x ≃ₗ[ℝ] (TangentSpace I x →ₗ[ℝ] ℝ) :=
   LinearMap.linearEquivOfInjective
@@ -123,8 +84,6 @@ def metricFlatMap (g : SmoothRiemannianMetric I M) (x : M) :
     (v w : TangentSpace I x) :
     metricFlatMap (I := I) g x v w = g.inner x v w := rfl
 
-/-- Defining property of `metricFlatMap.symm`: it sends a covector `α` to the
-unique `v` with `g.inner x v w = α w` for all `w`. -/
 lemma metricFlatMap_apply_symm (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) (w : TangentSpace I x) :
     g.inner x ((metricFlatMap (I := I) g x).symm α) w = α w := by
@@ -134,11 +93,25 @@ lemma metricFlatMap_apply_symm (g : SmoothRiemannianMetric I M) (x : M)
   rw [metricFlatMap_apply] at hh
   exact hh
 
+def metricSharp (g : SmoothRiemannianMetric I M) (x : M)
+    (α : TangentSpace I x →ₗ[ℝ] ℝ) : TangentSpace I x :=
+  (metricFlatMap (I := I) g x).symm α
+
 @[simp] lemma metricSharp_def (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) :
     metricSharp (I := I) g x α = (metricFlatMap (I := I) g x).symm α := rfl
 
-/-- The pointwise gradient of a function `f : M → ℝ` at `x : M`. -/
+lemma inner_metricSharp (g : SmoothRiemannianMetric I M) (x : M)
+    (α : TangentSpace I x →ₗ[ℝ] ℝ) (w : TangentSpace I x) :
+    g.inner x (metricSharp (I := I) g x α) w = α w :=
+  metricFlatMap_apply_symm (I := I) g x α w
+
+lemma inner_metricSharp_right (g : SmoothRiemannianMetric I M) (x : M)
+    (α : TangentSpace I x →ₗ[ℝ] ℝ) (w : TangentSpace I x) :
+    g.inner x w (metricSharp (I := I) g x α) = α w := by
+  rw [g.symm x w (metricSharp (I := I) g x α)]
+  exact inner_metricSharp (I := I) g x α w
+
 def gradFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     TangentSpace I x :=
   metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap
@@ -147,21 +120,18 @@ def gradFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     gradFun (I := I) g f x =
       metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap := rfl
 
-/-- Defining identity: `g.inner x (gradFun g f x) v = mfderiv f x v`. -/
 lemma inner_gradFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x (gradFun (I := I) g f x) v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   rw [gradFun_def]
   exact inner_metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap v
 
-/-- Symmetric form: `g.inner x v (gradFun g f x) = mfderiv f x v`. -/
 lemma inner_gradFun_right (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x v (gradFun (I := I) g f x) = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   rw [g.symm x v (gradFun (I := I) g f x)]
   exact inner_gradFun (I := I) g f x v
 
-/-- The gradient vanishes wherever the differential vanishes. -/
 lemma gradFun_eq_zero_of_mfderiv_eq_zero
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) {x : M}
     (hf : mfderiv I 𝓘(ℝ, ℝ) f x = 0) :
@@ -173,14 +143,10 @@ lemma gradFun_eq_zero_of_mfderiv_eq_zero
   rw [htoLM]
   exact LinearEquiv.map_zero _
 
-/-- The inverse Gram matrix at `(α, x)`. On the chart base set this is the
-matrix inverse of the (positive-definite) Gram matrix; off the base set it is a
-default value. -/
 def chartInvGramMatrix (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   (chartGramMatrix (I := I) g α x)⁻¹
 
-/-- On the chart base set, the inverse Gram matrix is a one-sided inverse. -/
 lemma chartInvGramMatrix_mul_chartGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -191,7 +157,6 @@ lemma chartInvGramMatrix_mul_chartGramMatrix
   unfold chartInvGramMatrix
   exact Matrix.nonsing_inv_mul _ hdet_unit
 
-/-- Symmetric form. -/
 lemma chartGramMatrix_mul_chartInvGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -202,9 +167,6 @@ lemma chartGramMatrix_mul_chartInvGramMatrix
   unfold chartInvGramMatrix
   exact Matrix.mul_nonsing_inv _ hdet_unit
 
-/-- Each adjugate entry of the Gram matrix is smooth on the trivialization base
-set. The adjugate entry is the determinant of an updated submatrix, hence a
-polynomial expression in the (smooth) Gram-matrix entries. -/
 lemma chartGramMatrix_adjugate_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -248,7 +210,6 @@ lemma chartGramMatrix_adjugate_entry_contMDiffOn
     rw [heq]
     exact chartGramMatrix_entry_contMDiffOn (I := I) g α (σ k) k
 
-/-- Each entry of the inverse Gram matrix is smooth on the chart base set. -/
 lemma chartInvGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -287,21 +248,17 @@ lemma chartInvGramMatrix_entry_contMDiffOn
     exact hsmooth_inv.contMDiffAt.comp_contMDiffWithinAt x h_at
   · exact chartGramMatrix_adjugate_entry_contMDiffOn (I := I) g α i j
 
-/-- The chart-`α` inverse-Gram-matrix `L¹` entry sum at `x : M`. This is the
-sum of absolute values of all entries of the inverse Gram matrix. -/
 noncomputable def chartInvGramMatrix_l1Sum
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) : ℝ :=
   ∑ ij : (Fin (Module.finrank ℝ E)) × (Fin (Module.finrank ℝ E)),
     |chartInvGramMatrix (I := I) g α x ij.1 ij.2|
 
-/-- `chartInvGramMatrix_l1Sum` is non-negative pointwise. -/
 lemma chartInvGramMatrix_l1Sum_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α x := by
   unfold chartInvGramMatrix_l1Sum
   exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-/-- `chartInvGramMatrix_l1Sum g α` is continuous on `(chartAt H α).source`. -/
 lemma chartInvGramMatrix_l1Sum_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (chartInvGramMatrix_l1Sum (I := I) (M := M) g α)
@@ -324,8 +281,6 @@ lemma chartInvGramMatrix_l1Sum_continuousOn
     exact this
   exact h_cont.abs
 
-/-- The `i`-th chart-basis component of the gradient at `x`, in the chart at `α`.
-This is `∑_j G^{ij}(x) · ∂_j f̃(φ x)`. -/
 def gradChartCoeff (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (x : M) : ℝ :=
   ∑ j : Fin (Module.finrank ℝ E),
@@ -340,16 +295,12 @@ def gradChartCoeff (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
         chartInvGramMatrix (I := I) g α x i j *
           partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x) := rfl
 
-/-- The chart-local representation of the gradient as a linear combination of
-the chart-basis frame at `α`. -/
 def gradChartLocal (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     TangentSpace I x :=
   ∑ i : Fin (Module.finrank ℝ E),
     gradChartCoeff (I := I) g α f i x •
       chartBasisVecFiber (I := I) α i x
 
-/-- A version of `mfderiv_chartBasisVecFiber` that requires only
-`MDifferentiableAt I 𝓘(ℝ, ℝ) f x` rather than full smoothness of `f`. -/
 lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
     (α : M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -434,8 +385,6 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
   rw [hmfderiv_chartBasis]
   rfl
 
-/-- The inner product of `gradChartLocal` with a chart-basis frame vector `e_k` is
-the `k`-th chart-pullback partial derivative of `f`. Pure linear-algebra step. -/
 lemma inner_gradChartLocal_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -539,9 +488,6 @@ lemma inner_gradChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-/-- The chart-local representation `gradChartLocal` agrees with `gradFun` at every
-chart-base-set point where `f` is differentiable and the chart map lands in the
-interior of the chart target. -/
 lemma gradChartLocal_eq_gradFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} {x : M} (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -806,8 +752,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     exact mul_le_mul_of_nonneg_left (h_dj_dk_le_D j k) (abs_nonneg _)
   exact h_main_le
 
-/-- `gradChartCoeff g α f i` is `C^∞` on the smoothness domain (the chart base
-set restricted to where the chart map lands in the interior of the chart target). -/
 private lemma gradChartCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -861,8 +805,6 @@ private lemma gradChartCoeff_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
-/-- The chart-local representation `gradChartLocal g α f` is smooth as a
-tangent-bundle section on the smoothness domain. -/
 private lemma gradChartLocal_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -902,8 +844,6 @@ private lemma gradChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-/-- Under `[I.Boundaryless]`, the smoothness domain of `gradChartLocal` reduces to the
-chart base set. -/
 private lemma gradChartLocal_contMDiffOn_total_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -921,7 +861,6 @@ private lemma gradChartLocal_contMDiffOn_total_baseSet [I.Boundaryless]
     · congr 1
       exact (isOpen_extChartAt_target (I := I) α).interior_eq
 
-/-- Under `[I.Boundaryless]`, `gradFun g f` is smooth as a tangent-bundle section. -/
 lemma gradFun_contMDiff_total [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -959,8 +898,6 @@ lemma gradFun_contMDiff_total [I.Boundaryless]
     rw [h]
   exact (hsmooth_local2 x hx_src).contMDiffAt (hsrc_open.mem_nhds hx_src)
 
-/-- The smooth gradient of a smooth scalar function `f` (with smoothness proof
-`hf`) as a smooth tangent-bundle section. -/
 def grad_g [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -973,10 +910,6 @@ def grad_g [I.Boundaryless]
     (grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       gradFun (I := I) g f x := rfl
 
-/-- **Duality of gradient and directional derivative.** The action of a smooth
-tangent section `X` on a smooth scalar `f` at `x` — the directional derivative
-`mfderiv I 𝓘(ℝ) f x (X x)` — equals the metric inner product `g.inner x (X x)`
-of `X x` with the gradient `grad_g g hf x`. The manifold is boundaryless. -/
 theorem tangentSectionAction_eq_inner_grad_g [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -988,7 +921,6 @@ theorem tangentSectionAction_eq_inner_grad_g [I.Boundaryless]
   rw [inner_gradFun_right (I := I) g f x (X x)]
   rfl
 
-/-- The metric inner product on two gradients is symmetric. -/
 theorem inner_grad_g_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
@@ -999,7 +931,6 @@ theorem inner_grad_g_symm [I.Boundaryless]
         ((grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) :=
   g.symm x _ _
 
-/-- If `f` is locally zero near `x`, then the gradient of `f` vanishes at `x`. -/
 lemma gradFun_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : f =ᶠ[𝓝 x] (fun _ : M => (0 : ℝ))) :
@@ -1009,7 +940,6 @@ lemma gradFun_eq_zero_of_eventuallyEq_zero
   rw [mfderiv_const]
   rfl
 
-/-- The support of `gradFun g f` is contained in the topological support of `f`. -/
 lemma support_gradFun_subset
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     Function.support (fun x : M => gradFun (I := I) g f x) ⊆ tsupport f := by
@@ -1022,7 +952,6 @@ lemma support_gradFun_subset
     exact hy (subset_tsupport _ hne)
   exact hx (gradFun_eq_zero_of_eventuallyEq_zero (I := I) g hev)
 
-/-- If `f` has compact support, then so does the section `grad_g g hf`. -/
 lemma hasCompactSupport_grad_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hf_cs : HasCompactSupport f) :

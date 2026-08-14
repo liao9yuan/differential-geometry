@@ -22,77 +22,7 @@ import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.EndpointContinuation
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Hopf-Rinow: metric-completeness implies geodesic-completeness and the
-existence of minimising geodesics
-
-For a smooth Riemannian metric `g` on a connected, sigma-compact,
-boundaryless smooth manifold `M` that is metric-complete as a
-`PseudoEMetricSpace`, this file packages the classical Hopf-Rinow chain.
-
-> **Sorry status (audited 2026-07-05):** this file carries 4 `sorry`s in 3
-> statement-level frontiers (`exists_continuous_path_realizing_riemannianEDist`,
-> `minimizing_path_is_smooth_geodesic`, `unit_speed_rescale`).  A reference scan
-> found **no downstream consumers** of these three declarations — they are dead
-> `sorry`s and do NOT poison the HCG/C4 chain, whose proper-realization needs are
-> served sorry-free by `HopfRinowProper.lean` (a separate route through
-> `MinimizingGeodesic`).  Keep them as recorded frontiers for the intrinsic
-> Hopf–Rinow completion, or discharge them; do not cite this file's presence in
-> an import closure as evidence of a sorry-tainted capstone without checking
-> `#print axioms` on the capstone itself.
-
-## Geodesic-completeness chain
-
-* `gc_constant_speed` -- a geodesic has constant `g`-speed.
-* `isGeodesicOn_speedSq_const` -- constant `g`-speed of an intrinsic
-  moving-foot geodesic on an open interval.
-* `gc_length_distance_bound` -- `riemannianEDist` is Lipschitz in
-  the parameter along a geodesic with constant speed bound.
-* `gc_escape_cauchy` -- if the maximal interval of a geodesic
-  escapes to a finite right endpoint, the values form a Cauchy
-  sequence in `riemannianEDist`.
-* `gc_velocity_limit` -- the velocity speed is preserved at the
-  metric limit point.
-* `gc_position_limit` -- a bounded-speed curve converges to a single
-  limit point as the parameter approaches a finite endpoint.
-* `hasEndpointContinuation_of_complete` -- metric completeness furnishes
-  endpoint-continuation data at a finite right endpoint.
-* `isGeodesicOn_extends_past_finite_endpoint` -- a geodesic glues to a
-  fresh local geodesic launched at its endpoint limit point.
-* `isGeodesicOn_Ici_of_complete` / `isGeodesicOn_Ici_of_complete_Ioo` --
-  the intrinsic cross-chart right-completeness, assembling the iterated
-  single-step extensions into a geodesic on `Ici 0` (resp. `Ioi a₀`).
-
-## Hopf-Rinow existence of minimisers
-
-* `exists_continuous_path_realizing_riemannianEDist` -- the infimum `riemannianEDist I p q`
-  is attained by a continuous curve.
-* `minimizing_path_is_smooth_geodesic` -- a length-minimising curve coincides
-  after arclength rescale with a smooth geodesic.
-* `unit_speed_rescale` -- affine reparametrisation rescales a geodesic
-  to unit-speed.
-* `exists_unit_speed_minimizing_geodesic_between_points` -- existence of a
-  unit-speed minimising geodesic between any two points.
-
-## File layout
-
-The upstream geodesic-completeness machinery is split into sibling files that
-this headline imports and re-exports:
-
-* `Comparison.GeodesicSpeedBound` -- constant speed, length bounds, metric limits.
-* `Comparison.ChartVelocityConvergence` -- chart-velocity convergence and the
-  chart-Gram positive-definiteness bound.
-* `Comparison.LocalGeodesicSeed` -- local geodesic seeded at a point and velocity.
-* `Comparison.EndpointContinuation` -- endpoint-continuation data under metric
-  completeness.
-
-This file holds the geodesic-completeness colimit conclusions
-(`isGeodesicOn_Ici_of_complete`, `isGeodesicOn_Ici_of_complete_Ioo`) and the
-downstream Hopf-Rinow headlines (exponential-map totality, existence of
-minimising geodesics, exponential surjectivity).
--/
 
 noncomputable section
 
@@ -109,7 +39,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -125,10 +55,10 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-/-- **Single-step intrinsic right-extension.** A geodesic on `Iio b` with
-endpoint-continuation data at `b` extends to a geodesic on `Iio b'` for
-some `b' > b`, agreeing with the original below `b`. Direct corollary of
-`isGeodesicOn_extends_past_finite_endpoint`. -/
+omit [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_Iio_extend
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b : ℝ}
     (hγ : IsGeodesicOn (I := I) g γ (Set.Iio b))
@@ -141,11 +71,9 @@ theorem isGeodesicOn_Iio_extend
     isGeodesicOn_extends_past_finite_endpoint (I := I) g hδ hγ hη hmatch
   exact ⟨γ', b + δ, by linarith, hgeo', hagree⟩
 
-/-- **Locality of the moving-foot geodesic equation.** If two curves agree on
-a neighbourhood of `t`, then either satisfies the geodesic equation at `t` iff
-the other does. A thin wrapper around
-`HasGeodesicEquationAt.congr_of_eventuallyEq_at` extracting the basepoint
-equality from the eventual equality at `t`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+ [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t : ℝ}
     (heq : γ =ᶠ[nhds t] γ') (h : HasGeodesicEquationAt (I := I) g γ' t) :
@@ -154,30 +82,10 @@ private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at (I := I) (g := g)
     (heq.eq_of_nhds) heq h
 
-/-- **Intrinsic right-completeness.** Suppose that for every geodesic on a
-half-open interval `Iio b` (`b > 0`) extending the initial geodesic `γ₀`,
-endpoint-continuation data is available at `b`. Then the initial geodesic
-on `Iio b₀` extends to a geodesic on all of `Ici 0` — equivalently, on
-`Iio b` for arbitrarily large `b`.
-
-This is the *true* geodesic-completeness statement, replacing the (false
-on multi-chart manifolds) fixed-basepoint `maximalGeodesicInterval =
-univ`. Each extension step is `isGeodesicOn_Iio_extend`
-(fully proven above, axiom-clean). The colimit of the iterated single-step
-extensions is assembled by a maximal-chain argument: order the
-extension records `(b, γ)` (geodesic on `Iio b`, agreeing with `γ₀` below
-`b₀`) by interval inclusion together with agreement below the shorter
-endpoint, and pass to a maximal chain `Mc` (Hausdorff maximality). The
-chain order forces mutual agreement of its members, so their union curve
-`Γ` is single-valued; on a neighbourhood of any time `t` below a chain
-endpoint, `Γ` agrees with a genuine geodesic, so the moving-foot equation
-transfers by locality
-(`hasGeodesicEquationAt_congr_of_eventuallyEq`). If the chain's endpoint
-set were bounded above, `Γ` would be a geodesic on `Iio (sSup …)` admitting
-endpoint continuation, hence a strict single-step extension whose record is
-chain-comparable above every member — a super-chain contradicting
-maximality. Therefore the endpoints are unbounded and `Γ` is a geodesic on
-all of `ℝ ⊇ Ici 0`. -/
+omit [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_Ici_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
     (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Iio b₀))
@@ -285,10 +193,9 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
     obtain ⟨a, ha, hab⟩ := hbS
     exact hΓ_geo_at a ha t (lt_of_lt_of_eq htb hab.symm)
 
-/-- **Chart-coordinate `C¹` regularity.**  If `γ` satisfies the moving-foot
-geodesic equation at every point of an open set `s ∋ t` and is continuous on
-`s`, then the fixed-chart curve `chartCurve (γ t) γ = φ_{γ t} ∘ γ` is
-`ContDiffAt ℝ 1` at `t`. -/
+omit [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartCurve_contDiffAt_one_of_isGeodesicOn
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -302,7 +209,8 @@ theorem chartCurve_contDiffAt_one_of_isGeodesicOn
     hcont.continuousAt (hs.mem_nhds ht)
   have hsrc_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∈ 𝓝 t := by
     have : α ∈ (chartAt H α).source := hα_src
-    exact hcontAt_t.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds (by rw [hα_def] at this ⊢; exact this))
+    exact hcontAt_t.preimage_mem_nhds
+      ((chartAt H α).open_source.mem_nhds (by rw [hα_def] at this ⊢; exact this))
   obtain ⟨V, hV_nhds, hV_src⟩ := Filter.eventually_iff_exists_mem.mp
     (Filter.eventually_of_mem hsrc_nhds (fun _ h => h))
   set W : Set ℝ := V ∩ s with hW_def
@@ -343,17 +251,9 @@ theorem chartCurve_contDiffAt_one_of_isGeodesicOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`C¹`-in-time regularity of a moving-foot geodesic (pointwise).**  An
-intrinsic moving-foot geodesic `γ` on an open set `s` that is continuous on `s`
-is `ContMDiffAt 𝓘(ℝ, ℝ) I 1` at every `t ∈ s`.
-
-This is the analytic engine supplying the `C¹` regularity conjunct of the
-`hreg` hypothesis of `isGeodesicOn_Ici_of_complete`.  The proof works in the
-fixed chart `α = γ t`: the fixed-chart curve `u = φ_α ∘ γ` is `ContDiffAt 1`
-in time (`chartCurve_contDiffAt_one_of_isGeodesicOn`), `(extChartAt I α).symm`
-is `C^∞` on the chart target, and `γ` agrees with `(extChartAt I α).symm ∘ u`
-on a neighbourhood of `t` (chart round-trip on the chart source), so `γ` is
-`ContMDiffAt 1` at `t`. -/
+omit [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem isGeodesicOn_contMDiffAt_one
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -400,11 +300,9 @@ theorem isGeodesicOn_contMDiffAt_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`C¹`-in-time regularity of a moving-foot geodesic (on an open set).**  An
-intrinsic moving-foot geodesic `γ` on an open set `s`, continuous on `s`, is
-`ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`.  This is the exact shape of the `C¹`
-regularity conjunct fed (with `s = Set.Iio b`) to the `hreg` hypothesis of
-`isGeodesicOn_Ici_of_complete`. -/
+omit [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem isGeodesicOn_contMDiffOn_one
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
     (hs : IsOpen s)
@@ -414,21 +312,6 @@ theorem isGeodesicOn_contMDiffOn_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Intrinsic right-completeness from metric completeness.**  A geodesic
-`γ₀` on `Set.Iio b₀` (`b₀ > 0`) on a metrically complete manifold extends,
-across charts, to a geodesic on all of `Set.Ici 0` that agrees with `γ₀`
-below `b₀`.
-
-The hypothesis `hreg` is the per-extension analytic regularity of any
-geodesic extending `γ₀` past a finite right endpoint `b`: such a geodesic is
-`C¹` on `Set.Iio b`, and its velocity has `g`-speed bounded by a nonnegative
-constant `c` (both as a bundle-enorm bound and as an inner-product bound by
-`c ^ 2`).  These are the facts a constant-speed geodesic always satisfies;
-they are NOT the extension conclusion (the geodesic equation on a strictly
-larger interval).  Metric completeness supplies endpoint-continuation data
-at `b` via `hasEndpointContinuation_of_complete`, and the colimit of the
-iterated single-step extensions (`isGeodesicOn_Ici_of_endpointContinuation`)
-assembles the global geodesic. -/
 theorem isGeodesicOn_Ici_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
@@ -454,11 +337,10 @@ theorem isGeodesicOn_Ici_of_complete
     hc_nonneg (hγ_smooth.mono hsub) (fun τ hτ => hSpeedBound τ (hsub hτ))
     (fun s hs => hSpeedSq s (hsub hs)) (hγ.mono hsub)
 
-/-- **Single-step bounded-left right-extension.** A geodesic on a bounded
-interval `Ioo a₀ b` (`a₀ < b`) with endpoint-continuation data at `b` extends to
-a geodesic on `Ioo a₀ b'` for some `b' > b`, agreeing with the original below
-`b`.  Bounded-left analogue of `isGeodesicOn_Iio_extend`, built on the
-bounded-left glue. -/
+omit [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_Ioo_extend
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a₀ b : ℝ} (ha₀b : a₀ < b)
     (hγ : IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b))
@@ -529,19 +411,9 @@ theorem isGeodesicOn_Ioo_extend
   intro t ht
   simp only [hG_def, if_pos ht]
 
-/-- **`Ioo`-seeded intrinsic right-completeness.** Suppose that for every
-geodesic on a bounded interval `Ioo a₀ b` (`b > 0`) extending the initial
-geodesic `γ₀` (which is a geodesic on `Ioo a₀ b₀`), endpoint-continuation data is
-available at `b`.  Then the initial geodesic extends to a geodesic on the
-right-unbounded interval `Ioi a₀`, agreeing with `γ₀` below `b₀`.
-
-Bounded-left analogue of `isGeodesicOn_Ici_of_endpointContinuation`: the
-extension records are geodesics on `Ioo a₀ b` with the fixed left endpoint `a₀`,
-ordered by interval inclusion plus agreement below the shorter endpoint, and the
-union over a maximal chain is the colimit geodesic on `Ioi a₀`.  Each step is the
-bounded-left `isGeodesicOn_Ioo_extend`; the maximal-chain colimit assembly is
-identical to the `Iio` engine since both only inspect left-neighbourhoods of the
-growing right endpoint. -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem isGeodesicOn_Ioi_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
     (ha₀ : a₀ < 0) (hb₀ : 0 < b₀)
@@ -682,21 +554,6 @@ theorem isGeodesicOn_Ioi_of_endpointContinuation
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`Ioo`-seeded forward geodesic completeness from metric completeness.**
-A moving-foot geodesic `γ₀` on a bounded interval `Ioo a₀ b₀` (`a₀ < 0 < b₀`)
-extends, across charts, to a geodesic on the right-unbounded interval `Ioi a₀`,
-agreeing with `γ₀` below `b₀`.
-
-This is the bounded-left analogue of `isGeodesicOn_Ici_of_complete`, seeded by
-the *bounded* interval `Ioo a₀ b₀` produced by the local seed
-`exists_isGeodesicOn_Ioo_at_velocity` (rather than a left-unbounded `Iio b₀`).
-The per-extension analytic data `hreg` is the minimal separable regularity a
-constant-speed geodesic supplies: `C¹`-in-time on `Ioo a₀ b`, with constant
-`g`-speed bounded by a nonnegative `c`.  Metric completeness furnishes
-endpoint-continuation data at each finite right endpoint `b`
-(`hasEndpointContinuation_of_complete`, in its bounded-left form), and the colimit
-assembly (`isGeodesicOn_Ioi_of_endpointContinuation`) produces the global forward
-geodesic. -/
 theorem isGeodesicOn_Ici_of_complete_Ioo
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
@@ -706,10 +563,10 @@ theorem isGeodesicOn_Ici_of_complete_Ioo
     (hreg : ∀ (γ : ℝ → M) (b : ℝ), 0 < b → IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
       ContinuousOn γ (Set.Ioo a₀ b) →
       (∀ t, a₀ < t → t < b₀ → t < b → γ t = γ₀ t) →
-      ∃ c : ℝ, 0 ≤ c ∧ ContMDiffOn 𝓘(ℝ,ℝ) I 1 γ (Set.Ioo a₀ b) ∧
-        (∀ τ ∈ Set.Ioo a₀ b, ‖mfderiv 𝓘(ℝ,ℝ) I γ τ 1‖ₑ ≤ ENNReal.ofReal c) ∧
-        (∀ s ∈ Set.Ioo a₀ b, (g.inner (γ s)) (mfderiv 𝓘(ℝ,ℝ) I γ s 1)
-          (mfderiv 𝓘(ℝ,ℝ) I γ s 1) ≤ c^2)) :
+      ∃ c : ℝ, 0 ≤ c ∧ ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo a₀ b) ∧
+        (∀ τ ∈ Set.Ioo a₀ b, ‖mfderiv 𝓘(ℝ, ℝ) I γ τ 1‖ₑ ≤ ENNReal.ofReal c) ∧
+        (∀ s ∈ Set.Ioo a₀ b, (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1)
+          (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2)) :
     ∃ γ : ℝ → M, IsGeodesicOn (I := I) g γ (Set.Ioi a₀) ∧
       (∀ t, t < b₀ → γ t = γ₀ t) := by
   have hcont : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
@@ -728,17 +585,20 @@ theorem isGeodesicOn_Ici_of_complete_Ioo
 
 end GeodesicCompleteness
 
+section ExpMapTotality
+
+variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+
+end ExpMapTotality
+
 section MinimiserExistence
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-/-- **Minimising sequence of `C¹` paths.** For any `p q : M` there is a
-sequence of `C¹` curves `γₙ : ℝ → M` on `[0, 1]` from `p` to `q` whose
-`pathELength`s converge from above to `riemannianEDist I p q`, provided
-the latter is finite. The bound `pathELength I (γ n) 0 1 < d + 1/(n+1)`
-is produced by the Mathlib infimum-approximation lemma
-`exists_lt_of_riemannianEDist_lt`, and the lower bound
-`d ≤ pathELength I (γ n) 0 1` by `riemannianEDist_le_pathELength`. -/
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 private theorem path_length_minimising_sequence
     (p q : M) (hd : riemannianEDist I p q ≠ ⊤) :
     ∃ γ : ℕ → ℝ → M,
@@ -769,13 +629,11 @@ private theorem path_length_minimising_sequence
       (a := 0) (b := 1) (hγ_smooth n) (hγ0 n) (hγ1 n) zero_le_one
   · intro n; rw [hd_def] at hγ_len ⊢; exact hγ_len n
 
-/-- **Path-length infimum is attained.** On a complete Riemannian manifold
-(`IsRiemannianManifold I M`, `CompleteSpace M`), for every `p q : M` there
-is a continuous curve `γ : ℝ → M` with `γ 0 = p`, `γ 1 = q` whose
-`pathELength I γ 0 1` equals `riemannianEDist I p q` (the distance infimum
-over paths is attained). The proof builds a length-minimising sequence of
-`C¹` paths whose lengths converge to `riemannianEDist I p q` and extracts a
-continuous limit curve. -/
+end MinimiserExistence
+
+section ExpMapSurjectivity
+
+variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 theorem exists_continuous_path_realizing_riemannianEDist
     [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ γ : ℝ → M,
@@ -807,14 +665,6 @@ theorem exists_continuous_path_realizing_riemannianEDist
     clear hLen_tendsto
     sorry
 
-/-- **A length minimiser is, after reparametrisation, a smooth geodesic.**
-If a continuous curve `γ` on `[a, b]` is length-minimising
-(`pathELength I γ a b = riemannianEDist I (γ a) (γ b)`), then there is a
-parameter length `L ≥ 0` and a reparametrisation `η : ℝ → M` with the same
-endpoints (`η 0 = γ a`, `η L = γ b`) that is `C^∞` and `IsGeodesicAt` on the
-open interval `(0, L)`, is `C¹` and `IsGeodesicOn` on `[0, L]`, has
-`pathELength I η 0 L = ENNReal.ofReal L`, and whose length parameter realises
-the endpoint distance, `ENNReal.ofReal L = riemannianEDist I (γ a) (γ b)`. -/
 theorem minimizing_path_is_smooth_geodesic
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b) (hγ : Continuous γ)
@@ -830,14 +680,10 @@ theorem minimizing_path_is_smooth_geodesic
         IsGeodesicOn (I := I) g η (Set.Icc 0 L) := by
   sorry
 
-/-- **Auxiliary: `IsGeodesicOn` is preserved under affine
-reparametrisation.** If `γ` is a geodesic on `[a, b]` and `c, d : ℝ`, then
-`s ↦ γ (c · s + d)` is a geodesic on the preimage interval.  This is the
-moving-foot reading of the second-order chain rule: at each time the chart
-velocity scales by `c`, the chart acceleration by `c²`, and the Christoffel
-contraction by `c²` (`Γ(c v, c v) = c² · Γ(v, v)`), so the geodesic identity
-carries over after factoring out `c²`.  Proved generally in
-`Geodesic.Equation.isGeodesicOn_comp_affine`. -/
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem isGeodesicOn_affineReparam
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b c d : ℝ}
     (hγ_geod : IsGeodesicOn (I := I) g γ (Set.Icc a b)) :
@@ -845,12 +691,6 @@ private theorem isGeodesicOn_affineReparam
       {s : ℝ | c * s + d ∈ Set.Icc a b} :=
   isGeodesicOn_comp_affine (I := I) hγ_geod
 
-/-- **Unit-speed reparametrisation of a geodesic of positive length.**
-A geodesic `\gamma : [a, b] \to M` whose `pathELength` equals
-`ENNReal.ofReal L` with `L > 0` becomes unit-speed under the affine
-reparametrisation `\eta(s) := \gamma(a + s \cdot (b - a)/L)` on
-`[0, L]`. The `IsGeodesicOn` predicate is preserved under affine
-reparametrisation. -/
 theorem unit_speed_rescale
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b L : ℝ}
     (hab : a ≤ b) (hL : 0 < L)
@@ -929,14 +769,6 @@ theorem unit_speed_rescale
   · intro t _ht
     sorry
 
-/-- **Hopf-Rinow existence (unit-speed minimising geodesic).** On a complete
-Riemannian manifold (`IsRiemannianManifold I M`, `CompleteSpace M`), any two
-points `p q : M` are joined by a curve `γ` and a parameter length `L ≥ 0`
-with `γ 0 = p`, `γ L = q`, where `γ` is `C¹` and `IsGeodesicOn` on `[0, L]`,
-has unit `g`-speed at every `t ∈ [0, L]`, and whose length realises the
-distance, `riemannianEDist I p q = ENNReal.ofReal L`. Assembled from
-`exists_continuous_path_realizing_riemannianEDist`, `minimizing_path_is_smooth_geodesic`, and
-`unit_speed_rescale`. -/
 theorem exists_unit_speed_minimizing_geodesic_between_points
     [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ (γ : ℝ → M) (L : ℝ),
@@ -1052,7 +884,8 @@ theorem exists_unit_speed_minimizing_geodesic_between_points
     · rw [← hpq, ENNReal.ofReal_zero]
       exact riemannianEDist_self
 
-end MinimiserExistence
+
+end ExpMapSurjectivity
 
 end HopfRinow
 end Riemannian

@@ -2,17 +2,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricComp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Conditional MSM135 Theorem 3.10
 
-This module is the honest Chapter 4 to Chapter 3 handoff.  It first invokes the
-conditional Theorem 3.9 endpoint and then consumes concrete `FlowUpgradeData`.
-It does not call the unconditional `metricCompactness` frontier or the legacy
-exact-conclusion field `SmoothFlowLimitInput.upgrade`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,16 +22,18 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-/-- **MSM135 Theorem 3.10, conditional form.**  Apply the conditional
-Theorem 3.9 endpoint at time zero, then assemble the concrete P4 upgrade data
-over the resulting metric compactness conclusion. -/
+
+
+
+omit [Module.Finite ℝ E] in
 theorem solutionComp_cond
+    [Module.Finite ℝ E]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (inp : MetricCompactnessInputs (I := I) (X.atZero (I := I)))
     (hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)))

@@ -17,39 +17,6 @@ import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Real
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-/-! # Chart-regularity conjuncts of the DeTurck short-time bundle from a single joint datum
-
-The headline `deturck_ricci_flow_parabolic_short_time_existence`
-(`Geometry/Flow/RicciFlow/ShortTime/DeTurckInitialDataExistence.lean`) bundles, besides
-the existence of a parabolic DeTurck–Ricci solution, six regularity conjuncts about the
-solution family `g_DT : ℝ → SmoothRiemannianMetric I M` and the horizon `T`:
-
-* `C2`/`C3` — the DeTurck vector field `(t, x) ↦ deTurckVF (g_DT t) g_bg x` is jointly
-  `C∞` as a tangent-bundle section on `Ioo 0 T ×ˢ univ` / `Icc 0 T ×ˢ univ`;
-* `C4` — joint `C∞` of the chart-Gram entries on `Ioo 0 T ×ˢ baseSet`;
-* `C5` — joint `C⁰` of the chart-Gram entries on `Ico 0 T ×ˢ baseSet`;
-* `C6` — joint `C⁰` of the Euclidean-pulled-back Gram entry `chartGramOnE` on
-  `Icc 0 T ×ˢ source`;
-* `C7` — joint `C⁰` of the `k ≤ 2` spatial iterated Fréchet derivatives of `chartGramOnE`
-  on `Icc 0 T ×ˢ chartLeviCivitaGoodSet`.
-
-This file derives the whole conjunction abstractly from a **single** consumer-minimal
-joint-smoothness datum: joint `C∞` (up to `t = 0`) of the chart-Gram matrix entries
-`(t, x) ↦ chartGramMatrix (g_DT t) α x i j` on `Icc 0 T ×ˢ (baseSet at α)`.  The family
-`g_DT`/the time `T` are abstract inputs; no flow is constructed here.
-
-`C4`, `C5`, `C6` are derived in full.  `C7` (the spatial iterated-derivative joint
-continuity, a genuine Euclidean-analysis lift of the joint datum to partial spatial
-jets) and `C2`/`C3` (the joint `C∞` of the DeTurck vector field, which is assembled from
-the metric components and their first chart-coordinate derivatives via the
-Christoffel/cometric chart formula) are isolated as named lemmas
-`deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram` and
-`deTurckVF_jointContMDiffOn_of_jointChartGram`, each with a precise true signature and
-each taking exactly the same joint datum `hJ`.  Both are proved here in full: `C7` by
-pulling the joint datum to a Euclidean joint `ContDiffOn` through the chart and taking the
-jointly-continuous spatial iterated jet on the closed time slab; `C2`/`C3` by assembling
-the chart-coordinate DeTurck components (inverse Gram by Cramer's rule, Christoffel symbols
-by first chart-partials) jointly and patching the bundled section over the manifold. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -65,23 +32,13 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The single consumer-minimal joint datum.**
-
-Joint `C∞` (up to `t = 0`) of the chart-Gram matrix entries of the family `g_DT` against
-the fixed anchor chart at `α`, on the product of the closed time interval `Icc 0 T` with
-the trivialization base set at `α`.  This is the weakest joint regularity the chart-Gram
-conjuncts `C4`–`C7` (and, through the Christoffel/cometric chart formula, the DeTurck
-vector field conjuncts `C2`/`C3`) jointly consume.
-
-It uses only the fixed anchor chart `α` and its model frame, so it is free of any
-locally-constant-chart hypothesis (T1-safe). -/
 def JointChartGramSmooth (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M) : Prop :=
   ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -89,12 +46,8 @@ def JointChartGramSmooth (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M) :
         Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) α p.2 i j)
       (Set.Icc 0 T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet)
 
-/-- **Manifold-joint to Euclidean-joint chart bridge.**
-
-A family of scalar functions `F : ℝ → M → ℝ` that is jointly `C∞` in `(t, x)` on
-`Icc 0 T ×ˢ baseSet_α` pulls back, through the inverse chart at `α`, to a Euclidean
-function `(t, y) ↦ F t ((extChartAt I α).symm y)` that is jointly `C∞` in `(t, y)` on
-`Icc 0 T ×ˢ interior (extChartAt I α).target`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointScalar_manifold_to_euclidean
     (F : ℝ → M → ℝ) (α : M) (T : ℝ)
     (h : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -132,12 +85,7 @@ private theorem jointScalar_manifold_to_euclidean
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp
 
-/-- **Closed-slab joint spatial-jet continuity (Euclidean core).**
-
-For a function `G : ℝ × E → ℝ` jointly `C∞` on the closed slab `Icc 0 T ×ˢ V` with `V`
-open, the partial spatial order-`k` iterated Fréchet derivative of the time-slice,
-evaluated at the moving point, is jointly continuous on `Icc 0 T ×ˢ V`.  The time
-parameter `t` ranges over the *closed* interval; the derivative is taken spatially. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem param_spatial_jet_continuity_closed
     (G : ℝ × E → ℝ) (T : ℝ) (V : Set E) (hV : IsOpen V)
     (hG : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ V)) (k : ℕ) :
@@ -218,21 +166,8 @@ private theorem param_spatial_jet_continuity_closed
         ← iteratedFDerivWithin_of_isOpen k hV hy]
     exact hspatial_within_eq_joint t ht hT_pos y hy
 
-/-- **`C7` lift.**
-
-From the joint chart-Gram smoothness datum, the `k ≤ 2` spatial iterated Fréchet
-derivatives of the Euclidean-pulled-back Gram entry `chartGramOnE (g_DT t) α i j`,
-evaluated along the chart at the moving point, are jointly continuous on
-`Icc 0 T ×ˢ chartLeviCivitaGoodSet α`.
-
-This is the genuine analytic content: a function jointly `C∞` in `(t, x)` has its partial
-spatial order-`k` iterated Fréchet derivative `(t, x) ↦ iteratedFDeriv ℝ k (G t) x`
-jointly continuous — the partial spatial jets of a jointly-smooth family vary continuously
-in the parameter together with the base point.  The joint datum `hJ` is exactly its
-hypothesis: it furnishes the Euclidean joint smoothness of the chart-pulled-back Gram
-entry through `jointScalar_manifold_to_euclidean`, whence
-`param_spatial_jet_continuity_closed` produces the spatial-jet continuity on the open
-chart-target slab, which is finally precomposed with the smooth moving chart point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) :
@@ -276,8 +211,8 @@ theorem deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
   rintro ⟨t, x⟩ _
   simp only [Function.comp, hslice_eq]
 
-/-- For `y ∈ interior (extChartAt I α).target`, the chart-inverse image lies in the
-trivialization base set at `α`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma symm_of_interior_target_mem_baseSet (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     (extChartAt I α).symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -287,10 +222,8 @@ private lemma symm_of_interior_target_mem_baseSet (α : M) {y : E}
   rw [Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I)]
   exact hsource
 
-/-- The joint chart-Gram-entry datum, pulled back through the inverse chart at `α`, is
-jointly `C∞` on the closed-time-slab over the interior of the chart target.  This is the
-common Euclidean joint-smoothness input from which every chart-coordinate ingredient of the
-DeTurck vector field inherits joint smoothness. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramEntry_euclidean_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -301,7 +234,7 @@ private lemma jointGramEntry_euclidean_contDiffOn
   jointScalar_manifold_to_euclidean
     (fun t x => Integral.Measure.chartGramMatrix (I := I) (g_DT t) α x l j) α T (hJ α l j)
 
-/-- `HasFDerivAt` of the constant-first-component embedding `y ↦ (t, y)`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasFDerivAt_prodMk_const_left (t : ℝ) (y : E) :
     HasFDerivAt (𝕜 := ℝ) (fun y' : E => (t, y'))
       (ContinuousLinearMap.inr ℝ ℝ E) y := by
@@ -314,8 +247,7 @@ private lemma hasFDerivAt_prodMk_const_left (t : ℝ) (y : E) :
   simp only [add_zero] at h
   exact h
 
-/-- The spatial slice `fderivWithin` equals the joint `fderivWithin` postcomposed with the
-inclusion of the spatial directions. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderivWithin_spatial_slice_eq
     (G : ℝ × E → ℝ) (t : ℝ) (y : E)
     {V : Set E} (hVopen : IsOpen V) (hy : y ∈ V)
@@ -333,7 +265,8 @@ private lemma fderivWithin_spatial_slice_eq
 private lemma infty_ne_zero_withTop : (∞ : WithTop ℕ∞) ≠ 0 :=
   WithTop.coe_ne_zero.mpr ENat.top_ne_zero
 
-/-- Joint `C∞` of the chart-Gram determinant on the closed-time-slab. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramDet_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M) :
@@ -356,7 +289,8 @@ private lemma jointGramDet_contDiffOn
     contDiffOn_const.mul
       (contDiffOn_prod (fun k _ => jointGramEntry_euclidean_contDiffOn T g_DT hJ α (σ k) k)))
 
-/-- Joint `C∞` of a chart-Gram adjugate entry on the closed-time-slab. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramAdjugate_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -401,12 +335,8 @@ private lemma jointGramAdjugate_contDiffOn
         funext q; rw [Matrix.updateRow_ne hσk]
     rw [heq]; exact jointGramEntry_euclidean_contDiffOn T g_DT hJ α (σ k) k
 
-/-- **Joint spatial partial derivative of a chart-Gram entry, Euclidean.**
-
-The partial spatial derivative `(t, y) ↦ partialDeriv m (chartGramOnE (g_DT t) α l j) y`
-inherits joint `C∞`-smoothness from the joint datum.  At `T < 0` the slab is empty; at
-`T = 0` it is the single `t = 0` spatial slice; at `T > 0` the joint spatial Fréchet
-derivative is itself jointly `C∞` and is evaluated in the fixed model-basis direction. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma gramOnE_partialDeriv_joint_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -451,10 +381,8 @@ private lemma gramOnE_partialDeriv_joint_contDiffOn
           (fun y' hy' => Set.mk_mem_prod ht hy')
           (hGV.differentiableOn infty_ne_zero_withTop (t, y) ⟨ht, hy⟩) _)
 
-/-- **Joint inverse-Gram entry, Euclidean.**  Cramer's rule writes the inverse-Gram entry
-as `det⁻¹ · adjugate`; both factors are jointly `C∞` (polynomial in the Gram entries) and
-the determinant is nonzero on the slab by positive definiteness, so the entry is jointly
-`C∞`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma invGramOnE_joint_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -483,9 +411,8 @@ private lemma invGramOnE_joint_contDiffOn
       (symm_of_interior_target_mem_baseSet α hy))
   exact (hdet_smooth.inv hdet_ne).mul (jointGramAdjugate_contDiffOn T g_DT hJ α a b)
 
-/-- **Joint chart-Christoffel symbol, Euclidean.**  Assembled from the joint inverse-Gram
-entries and the joint spatial partials of the Gram entries through the chart-Christoffel
-formula `Γ^k_{ij} = ½ ∑_l G^{kl}(∂_i G_{lj} + ∂_j G_{li} − ∂_l G_{ij})`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChristoffel_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -513,11 +440,8 @@ private lemma jointChristoffel_contDiffOn
     (gramOnE_partialDeriv_joint_contDiffOn T g_DT hJ α j l i)).sub
     (gramOnE_partialDeriv_joint_contDiffOn T g_DT hJ α l i j)
 
-/-- **Joint chart DeTurck-vector-field component, Euclidean.**  The chart component
-`(t, y) ↦ chartDeTurckVFComp (g_DT t) g_bg α k y` is jointly `C∞` on the closed-time-slab:
-the inverse-Gram factor and the Christoffel symbols of the evolving metric are jointly
-`C∞` (from the joint datum), while the background-metric Christoffel symbols are `C∞` in
-`y` (constant in `t`). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointDeTurckVFComp_contDiffOn
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -545,12 +469,8 @@ private lemma jointDeTurckVFComp_contDiffOn
     chartChristoffel_contDiffOn_interior (I := I) g_bg α a b k
   exact (hbg.comp contDiffOn_snd (fun q hq => hq.2))
 
-/-- **Joint smoothness of the chart DeTurck-vector-field component along the moving chart
-point.**  The scalar chart component `(t, x) ↦ chartDeTurckVFComp (g_DT t) g_bg α k
-(extChartAt I α x)` is jointly `C∞` on the anchor's good set, obtained by composing the
-joint-Euclidean chart component (a scalar function on `ℝ × E`) with the smooth moving
-`(t, x) ↦ (t, extChartAt I α x)`.  The composition is carried out pointwise through the
-single normed-space model `𝓘(ℝ, ℝ × E)` to avoid the product-model defeq blow-up. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointDeTurckVFComp_alongChart_contMDiffOn
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -561,13 +481,11 @@ private lemma jointDeTurckVFComp_alongChart_contMDiffOn
         DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k
           (extChartAt I α q.2))
       (s ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
-
   set G : ℝ × E → ℝ :=
     fun q : ℝ × E => DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k q.2
     with hG_def
   have hGEuclid : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
     jointDeTurckVFComp_contDiffOn g_bg T g_DT hJ α k
-
   set f : ℝ × M → ℝ × E := fun q : ℝ × M => (q.1, extChartAt I α q.2) with hf_def
   have hf_smooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ × E) ∞ f
       (s ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
@@ -579,16 +497,14 @@ private lemma jointDeTurckVFComp_alongChart_contMDiffOn
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
     rintro ⟨t, x⟩ ⟨ht, hx⟩
     exact ⟨hs ht, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx⟩
-
   intro q hq
   have hGf : ContDiffWithinAt ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) (f q) :=
     hGEuclid.contDiffWithinAt (hmaps hq)
   exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
 
-/-- **Per-anchor joint smoothness of the bundled DeTurck vector field.**  On the
-chart-Levi-Civita good set of an anchor `α`, the bundled DeTurck vector field section is
-jointly `C∞`, read through the trivialization at `α` as the joint-`C∞` chart-coordinate
-components. -/
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma deTurckVF_jointContMDiffOn_goodSet
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -612,11 +528,9 @@ private lemma deTurckVF_jointContMDiffOn_goodSet
   rw [(trivializationAt E (TangentSpace I) α).contMDiffOn_iff
     (IM := 𝓘(ℝ, ℝ).prod I) (n := ∞) hmaps]
   refine ⟨?_, ?_⟩
-  · -- projection q ↦ x is smooth
-    refine contMDiffOn_snd.congr ?_
+  · refine contMDiffOn_snd.congr ?_
     rintro ⟨t, x⟩ _; rfl
-  · -- the trivialization reading is the joint chart-coordinate model-basis sum
-    have hread_eq : ∀ q ∈ s ×ˢ chartLeviCivitaGoodSet (I := I) α,
+  · have hread_eq : ∀ q ∈ s ×ˢ chartLeviCivitaGoodSet (I := I) α,
         ((trivializationAt E (TangentSpace I) α) (f q)).2 =
           ∑ k : Fin (Module.finrank ℝ E),
             DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k
@@ -649,21 +563,9 @@ private lemma deTurckVF_jointContMDiffOn_goodSet
     refine ContMDiffOn.congr ?_ hread_eq
     exact contMDiffOn_finset_sum (fun k _ => hsummand k)
 
-/-- **`C2`/`C3` lift.**
-
-From the joint chart-Gram smoothness datum, the bundled DeTurck vector field
-`(t, x) ↦ deTurckVF (g_DT t) g_bg x`, viewed as a section of the tangent bundle, is
-jointly `C∞` on `s ×ˢ Set.univ` for any time set `s ⊆ Icc 0 T`.
-
-The DeTurck vector field is built in any chart from the metric components and their first
-chart-coordinate derivatives through the Christoffel/cometric formula
-`W^i = g^{jk}(Γ^i_{jk}(g) − Γ̄^i_{jk}(g_bg))`; each ingredient (the inverse Gram matrix
-by Cramer's rule, the Christoffel symbols by first partials of the Gram entries) is joint-
-`C∞` once the chart-Gram entries are, and the trace is a finite polynomial combination of
-joint-`C∞` functions.  The conclusion is established locally on each anchor's good set by
-`deTurckVF_jointContMDiffOn_goodSet` and patched globally.  Both the open `Ioo 0 T` and
-closed `Icc 0 T` time-interval conjuncts are special cases (`s := Ioo 0 T`,
-`s := Icc 0 T`). -/
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_jointContMDiffOn_of_jointChartGram
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT)
@@ -685,17 +587,9 @@ theorem deTurckVF_jointContMDiffOn_of_jointChartGram
   rw [hset]
   exact deTurckVF_jointContMDiffOn_goodSet g_bg T g_DT hJ x hs
 
-/-- **All six chart-regularity conjuncts of the DeTurck short-time bundle from the single
-joint datum.**
-
-For a background metric `g_bg`, a horizon `T`, and an abstract metric family `g_DT`, the
-six regularity conjuncts `C2`–`C7` of `deturck_ricci_flow_parabolic_short_time_existence`
-hold provided the single consumer-minimal joint chart-Gram smoothness datum
-`hJ : JointChartGramSmooth T g_DT` holds.
-
-`C4`, `C5`, `C6` are derived in full from `hJ`.  `C7` is supplied by
-`deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram` and `C2`/`C3` by
-`deTurckVF_jointContMDiffOn_of_jointChartGram`, both consuming the very same `hJ`. -/
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicci_chartRegularity_of_jointChartGramSmooth
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) :
@@ -730,22 +624,17 @@ theorem deTurckRicci_chartRegularity_of_jointChartGramSmooth
             (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · -- C2: deTurckVF joint C∞ on Ioo 0 T ×ˢ univ
-    exact deTurckVF_jointContMDiffOn_of_jointChartGram (I := I) g_bg T g_DT hJ
+  · exact deTurckVF_jointContMDiffOn_of_jointChartGram (I := I) g_bg T g_DT hJ
       (Set.Ioo_subset_Icc_self)
-  · -- C3: deTurckVF joint C∞ on Icc 0 T ×ˢ univ
-    exact deTurckVF_jointContMDiffOn_of_jointChartGram (I := I) g_bg T g_DT hJ
+  · exact deTurckVF_jointContMDiffOn_of_jointChartGram (I := I) g_bg T g_DT hJ
       (subset_refl _)
-  · -- C4: chartGram joint C∞ on Ioo 0 T ×ˢ baseSet, by restricting hJ from Icc to Ioo
-    intro x₀ i j
+  · intro x₀ i j
     exact (hJ x₀ i j).mono
       (Set.prod_mono Set.Ioo_subset_Icc_self (subset_refl _))
-  · -- C5: chartGram joint C⁰ on Ico 0 T ×ˢ baseSet, by restricting hJ and dropping to C⁰
-    intro x₀ i j
+  · intro x₀ i j
     exact ((hJ x₀ i j).mono
       (Set.prod_mono Set.Ico_subset_Icc_self (subset_refl _))).continuousOn
-  · -- C6: chartGramOnE ∘ extChartAt = chartGramMatrix on source, then hJ → C⁰
-    intro α i j
+  · intro α i j
     have hcont : ContinuousOn
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) α p.2 i j)
@@ -762,10 +651,10 @@ theorem deTurckRicci_chartRegularity_of_jointChartGramSmooth
           (extChartAt I α q.2)
         = Integral.Measure.chartGramMatrix (I := I) (g_DT q.1) α q.2 i j
     rw [chartGramOnE_def, (extChartAt I α).left_inv hsrc']
-  · -- C7: supplied by the named Euclidean iterated-FDeriv lift
-    exact deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
+  · exact deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
       (I := I) T g_DT hJ
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma param_spatial_partialDeriv_contDiffOn
     (G : ℝ × E → ℝ) (T : ℝ) (V : Set E) (hVopen : IsOpen V)
     (hG : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ V)) (m : Fin (Module.finrank ℝ E)) :
@@ -800,6 +689,8 @@ private lemma param_spatial_partialDeriv_contDiffOn
           (fun y' hy' => Set.mk_mem_prod ht hy')
           (hG.differentiableOn infty_ne_zero_withTop (t, y) ⟨ht, hy⟩) _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartChristoffel_partialDeriv_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -814,6 +705,8 @@ private lemma jointChartChristoffel_partialDeriv_contDiffOn
     T (interior (extChartAt I α).target) isOpen_interior hbase m).congr
     (fun ⟨t, y⟩ _ => rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartRiemann_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -845,6 +738,8 @@ private lemma jointChartRiemann_contDiffOn
     ((jointChristoffel_contDiffOn T g_DT hJ α k m l).mul
       (jointChristoffel_contDiffOn T g_DT hJ α i j m))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartRicci_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -862,6 +757,8 @@ private lemma jointChartRicci_contDiffOn
   rw [hexp]
   exact ContDiffOn.sum (fun j _ => jointChartRiemann_contDiffOn T g_DT hJ α i j k j)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartGramOnE_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -872,6 +769,8 @@ private lemma jointChartGramOnE_contDiffOn
   (jointGramEntry_euclidean_contDiffOn T g_DT hJ α i j).congr
     (fun ⟨t, y⟩ _ => by rw [chartGramOnE_def])
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartDeTurckVFComp_partialDeriv_contDiffOn
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -887,6 +786,8 @@ private lemma jointChartDeTurckVFComp_partialDeriv_contDiffOn
     T (interior (extChartAt I α).target) isOpen_interior hbase m).congr
     (fun ⟨t, y⟩ _ => rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartGramOnE_partialDeriv_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -897,6 +798,8 @@ private lemma jointChartGramOnE_partialDeriv_contDiffOn
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
   gramOnE_partialDeriv_joint_contDiffOn T g_DT hJ α m i j
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartLieDeTurckComp_contDiffOn
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -904,7 +807,8 @@ private lemma jointChartLieDeTurckComp_contDiffOn
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun q : ℝ × E =>
-        IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp (I := I) (g_DT q.1) g_bg α i j q.2)
+        IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp (I := I) (g_DT q.1) g_bg α i j
+          q.2)
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
   classical
   have hexp : (fun q : ℝ × E =>
@@ -935,6 +839,8 @@ private lemma jointChartLieDeTurckComp_contDiffOn
   · exact (jointChartGramOnE_contDiffOn T g_DT hJ α i k).mul
       (jointChartDeTurckVFComp_partialDeriv_contDiffOn g_bg T g_DT hJ α j k)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChartDeTurckRicciRHS_contDiffOn
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -959,6 +865,8 @@ private lemma jointChartDeTurckRicciRHS_contDiffOn
   exact (contDiffOn_const.mul (jointChartRicci_contDiffOn T g_DT hJ α i k)).add
     (jointChartLieDeTurckComp_contDiffOn g_bg T g_DT hJ α i k)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem jointChartDeTurckRicciRHS_alongChart_contMDiffOn
     (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)

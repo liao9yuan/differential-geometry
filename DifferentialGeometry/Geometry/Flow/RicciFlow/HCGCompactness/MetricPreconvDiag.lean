@@ -2,51 +2,49 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConv
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# P3 Brick C-I — countable diagonal + global limit (MSM135 Corollary lbl351)
 
-This file holds the atlas×component diagonal that turns the per-(chart, component)
-`C^∞` convergence `exists_chart_cInfConv` (Brick B) into ONE subsequence working
-for every chart and every metric component of a σ-compact manifold.
 
-* `exists_diag_subseq` (C0) — the abstract countable common-subsequence diagonal:
-  given a family of subsequence-stable, tail-stable, refinable properties
-  `P n`, one strictly monotone `φ` satisfies all of them.  Pure `ℕ`-combinatorics
-  (no manifold content); the design (hypothesis shape) is fixed by the P3 planner.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-/-- **Abstract countable diagonal subsequence** (P3 Brick C-I, C0).
 
-Given a countable family of predicates `P n` on subsequences `ℕ → ℕ` such that
-* `hstep` — every `P n` is *refinable*: any subsequence `φ` has a further
-  refinement `φ ∘ ψ` (with `ψ` strictly monotone) satisfying `P n`;
-* `hsub` — every `P n` is *subsequence-stable*: it survives passing to a further
-  refinement;
-* `hextend` — every `P n` is *tail-stable*: it holds for `φ` as soon as it holds
-  for some tail `fun k => φ (k + m)`,
 
-there is one strictly monotone `φ` with `P n φ` for all `n`.
 
-The three stabilities are exactly the ones convergence-type properties
-(`∀ ε, ∃ k₀, ∀ k ≥ k₀, …` shapes such as `MapCPConvOn`/`MetricCPConvOn`) enjoy:
-refinement = extracting a sub-subsequence; subsequence-stability = the asymptotic
-`∃ k₀` is preserved by monotone reindexing; tail-stability = a property of a tail
-of a convergent sequence is a property of the whole.
 
-Construction: classical nested extractors `G 0 = id`, `G (n+1) = G n ∘ ρ n`
-(`ρ n` from `hstep n`), diagonal `φ n = G (n+1) n`.  For each `n` the `n`-tail of
-`φ` is a subsequence of `G (n+1)` (a single strictly monotone reindexing `τ`
-built from the partial composition of the `ρ`'s past step `n+1`), so `hsub` gives
-`P n` on the tail and `hextend` lifts it to all of `φ`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem exists_diag_subseq
     (P : ℕ → (ℕ → ℕ) → Prop)
     (hstep : ∀ n : ℕ, ∀ φ : ℕ → ℕ, StrictMono φ →
@@ -56,7 +54,6 @@ theorem exists_diag_subseq
       P n (fun k => φ (k + m)) → P n φ) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧ ∀ n : ℕ, P n φ := by
   classical
-  -- nested extractors carried with their strict-monotonicity proofs
   let G : ℕ → {φ : ℕ → ℕ // StrictMono φ} := fun n =>
     Nat.rec ⟨id, strictMono_id⟩
       (fun m Gm => ⟨Gm.1 ∘ (hstep m Gm.1 Gm.2).choose,
@@ -70,18 +67,15 @@ theorem exists_diag_subseq
     rw [hGstep]; exact (hstep n (Gf n) (hGmono n)).choose_spec.2
   set φ : ℕ → ℕ := fun n => Gf (n + 1) n with hφdef
   refine ⟨φ, ?_, ?_⟩
-  · -- strict monotonicity of the diagonal
-    apply strictMono_nat_of_lt_succ
+  · apply strictMono_nat_of_lt_succ
     intro n
     have h1 : φ (n + 1) = Gf (n + 1) (ρ (n + 1) (n + 1)) := by
-      show Gf (n + 2) (n + 1) = Gf (n + 1) (ρ (n + 1) (n + 1))
+      change Gf (n + 2) (n + 1) = Gf (n + 1) (ρ (n + 1) (n + 1))
       rw [hGstep (n + 1)]; rfl
-    show φ n < φ (n + 1)
+    change φ n < φ (n + 1)
     rw [h1]
     exact hGmono (n + 1) ((Nat.lt_succ_self n).trans_le (hρmono (n + 1)).le_apply)
-  · -- each property holds, via the tail subsequence + hextend
-    intro n
-    -- partial composition of the extractors past step `n + 1`
+  · intro n
     let Q : ℕ → (ℕ → ℕ) := fun m =>
       Nat.rec id (fun j Qj => Qj ∘ ρ (n + 1 + j)) m
     have hQstep : ∀ m, Q (m + 1) = Q m ∘ ρ (n + 1 + m) := fun m => rfl
@@ -95,24 +89,23 @@ theorem exists_diag_subseq
       induction m with
       | zero => rfl
       | succ j ih =>
-        show Gf (n + 1 + j) ∘ ρ (n + 1 + j) = Gf (n + 1) ∘ Q (j + 1)
+        change Gf (n + 1 + j) ∘ ρ (n + 1 + j) = Gf (n + 1) ∘ Q (j + 1)
         rw [ih, hQstep]
         rfl
-    -- the reindexing of the `n`-tail of `φ` into `Gf (n + 1)`
     set τ : ℕ → ℕ := fun m => Q m (n + m) with hτdef
     have hτmono : StrictMono τ := by
       apply strictMono_nat_of_lt_succ
       intro m
-      show Q m (n + m) < Q (m + 1) (n + (m + 1))
+      change Q m (n + m) < Q (m + 1) (n + (m + 1))
       rw [hQstep]
-      show Q m (n + m) < Q m (ρ (n + 1 + m) (n + (m + 1)))
+      change Q m (n + m) < Q m (ρ (n + 1 + m) (n + (m + 1)))
       apply hQmono m
       exact (Nat.lt_succ_self (n + m)).trans_le
         (by rw [show n + (m + 1) = (n + m) + 1 from by ring]; exact (hρmono (n + 1 + m)).le_apply)
     have htail : (fun m => φ (n + m)) = Gf (n + 1) ∘ τ := by
       funext m
-      show φ (n + m) = Gf (n + 1) (Q m (n + m))
-      show Gf (n + m + 1) (n + m) = Gf (n + 1) (Q m (n + m))
+      change φ (n + m) = Gf (n + 1) (Q m (n + m))
+      change Gf (n + m + 1) (n + m) = Gf (n + 1) (Q m (n + m))
       rw [show n + m + 1 = n + 1 + m from by ring, hGcomp m]
       rfl
     have hPtail : P n (fun m => φ (n + m)) := by
@@ -122,7 +115,7 @@ theorem exists_diag_subseq
       funext k; rw [Nat.add_comm]
     rw [hcomm]; exact hPtail
 
-/-! ## C1a/C1b — global limit metric (probe: seams) -/
+
 
 section Realization
 
@@ -131,30 +124,32 @@ open Bundle Tensor0SBundle TensorLieDeriv
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-/-- The bridge's `frameVec` frame is exactly the engine's chart-constant section
-`tangentConstInChart` at the public model basis vector — so the engine's section
-globalizer produces global sections equal to `frameVec` on a compact. -/
+
+
+
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma frameVec_eq_tangentConst (x₀ : M) (i : Fin (Module.finrank Real E)) :
     Geometry.frameVec (I := I) x₀ i
       = tangentConstInChart (𝕜 := Real) (I := I) x₀ (Module.finBasis Real E i) := rfl
 
-/-- **Finite-dimensional bilinear-form convergence from matrix entries.**  On a
-finite-dimensional real space `W`, a sequence of continuous bilinear forms
-converges (to some limit) as soon as every matrix entry (evaluation on a fixed
-basis pair) converges.  The evaluation-to-matrix map is a linear injection out of a
-finite-dimensional space, hence a closed embedding: the coordinatewise limit lies
-in its (closed) range, and the embedding reflects `Tendsto`. -/
+
+
+
+
+
+
 lemma exists_tendsto_clm_of_basis_eval {W : Type*} [NormedAddCommGroup W] [NormedSpace Real W]
     [FiniteDimensional Real W] {n : ℕ} (b : Module.Basis (Fin n) Real W)
     (L : ℕ → (W →L[Real] W →L[Real] Real))
@@ -199,11 +194,9 @@ lemma exists_tendsto_clm_of_basis_eval {W : Type*} [NormedAddCommGroup W] [Norme
   exact htpi
 
 include I in
-/-- **C1a — countable chart cover.**  A σ-compact (locally compact) manifold is
-covered by a countable family of compacts, each inside a chart source.  Each point
-has a compact neighbourhood inside its own chart (`exists_compact_subset`); the
-interiors form an open cover, and Lindelöf (from σ-compactness) extracts a
-countable subcover. -/
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_chart_cover (hne : Nonempty M) :
     ∃ (c : ℕ → M) (K : ℕ → Set M),
       (∀ k, IsCompact (K k)) ∧ (∀ k, K k ⊆ (chartAt H (c k)).source) ∧
@@ -229,10 +222,9 @@ lemma exists_chart_cover (hne : Nonempty M) :
   exact ⟨k, interior_subset hxy⟩
 
 include I in
-/-- **C1b — pointwise limit metric data.**  Given a subsequence `φ` along which the
-fibrewise inner products converge at every point (`hconv`) and a uniform lower
-bound `hlow` (eq 3.3), the pointwise limits `gm` are symmetric (each term is) and
-positive-definite (`gm x v v ≥ c · gRef x v v > 0`). -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_gm_symm_pos
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M) (φ : ℕ → ℕ)
     (hconv : ∀ x : M, ∃ Lx : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real,
@@ -270,17 +262,17 @@ lemma exists_gm_symm_pos
       ge_of_tendsto (hev x v v) (Filter.Eventually.of_forall (fun m => hcle (φ m) x v))
     exact lt_of_lt_of_le (mul_pos hc (gRef.pos x v hv)) hle
 
-/-- The 0-th covariant derivative of a field is the field (definitional base case). -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 lemma covDerivOfField_zero (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2) :
     covDerivOfField (I := I) gRef A0 0 = A0 := rfl
 
 include I in
-/-- **C1b — engine consumption (one component, one chart), with the smooth limit.**
-Applying the Brick-B engine to `gSeq ∘ φ` at `x₀` with the global sections equal to
-`frameVec x₀ i, j` on `K₀`, extracts a refinement `ψ` along which the `(i,j)` frame
-component converges pointwise on `K₀` to a `C^∞` chart function `Φinf ∘ extChartAt`. -/
+omit [IsManifold I 2 M] in
 lemma exists_engine_frameConv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -324,7 +316,7 @@ lemma exists_engine_frameConv
   exact htend
 
 include I in
-/-- Frame-component extraction when the derivative order may choose its reference metric. -/
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_frame_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -376,13 +368,7 @@ lemma exists_frame_refs
   exact htend
 
 include I in
-/-- **Gap A producer — `C^∞`-on-compacts frame-component convergence.**  The
-Brick-B engine returns `MapCInfConvOnCompacts` (full `C^∞`-on-compacts, not only
-pointwise `Tendsto`) of the bump-extended chart representative of the `(i,j)`
-metric component, against global sections `σi, σj` equal to `frameVec x₀ i, j` on
-`K₀`.  `exists_engine_frameConv` keeps only the pointwise extraction; this exposes
-the full convergence — the order-0 input the higher covariant-tower bridge
-(`componentConv_covDeriv_of_chartCInf`, Gap B) will consume. -/
+omit [IsManifold I 2 M] in
 lemma exists_engine_frameCInfConv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -422,12 +408,7 @@ lemma exists_engine_frameCInfConv
   exact ⟨ψ, Φinf, χ, σi, σj, hψ, hΦinf, hxi, hxj, hχ1, hconv⟩
 
 include I in
-/-- **Gap A producer, limit pinned to `gm`.**  When the metric sequence already
-converges pointwise to `gm` along `φ` (the `metricPreconv_gInf`/`exists_limit_gm`
-output), the `C^∞`-on-compacts limit `Φinf` of the frame-component chart sequence
-equals `gm`'s frame component on the patch — by pointwise-limit uniqueness (the
-`frameComp_contMDiffOn` route).  So the chart components of `gSeq` converge `C^∞`
-on compacts to the chart component of the limit metric. -/
+omit [IsManifold I 2 M] in
 lemma exists_engine_frameCInfConv_eq_gm
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -473,8 +454,7 @@ lemma exists_engine_frameCInfConv_eq_gm
   exact (tendsto_nhds_unique hB hA).symm
 
 include I in
-/-- Pointwise-convergence corollary of `exists_engine_frameConv` (forgets the
-smooth limit; the `hstep` shape for the diagonal). -/
+omit [IsManifold I 2 M] in
 lemma exists_refine_componentConv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -490,7 +470,7 @@ lemma exists_refine_componentConv
   exact ⟨ψ, hψ, fun x hx => ⟨Φinf (extChartAt I x₀ x), hconv x hx⟩⟩
 
 include I in
-/-- Pointwise frame-component refinement under order-dependent reference metrics. -/
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_comp_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -508,9 +488,8 @@ lemma exists_comp_refs
   exact ⟨ψ, hψ, fun x hx => ⟨Φinf (extChartAt I x₀ x), hconv x hx⟩⟩
 
 include I in
-/-- The frame `frameVec x₀ · x` is a basis of the fibre `TangentSpace I x` whenever
-`x` lies in the trivialization base set (`symmL x` is the inverse trivialization
-equivalence there). -/
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_frameVec_basis (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet) :
     ∃ b : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x),
@@ -522,9 +501,7 @@ lemma exists_frameVec_basis (x₀ : M) {x : M}
   rfl
 
 include I in
-/-- Refine a subsequence so that ALL `n²` frame components of one chart converge
-pointwise on its compact `K₀` (finite composition of `exists_refine_componentConv`
-over the component pairs; earlier components survive by subsequence-stability). -/
+omit [IsManifold I 2 M] in
 lemma exists_refine_allComponents
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -558,7 +535,7 @@ lemma exists_refine_allComponents
   exact ⟨ψ, hψ, fun i j x hx => hψspec (i, j) (Finset.mem_univ _) x hx⟩
 
 include I in
-/-- Simultaneous finite frame-component refinement with order-dependent references. -/
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_allcomp_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -595,10 +572,7 @@ lemma exists_allcomp_refs
   exact ⟨ψ, hψ, fun i j x hx => hψspec (i, j) (Finset.mem_univ _) x hx⟩
 
 include I in
-/-- **C1a + C1b core — the limit metric exists pointwise.**  Running the countable
-diagonal over the (chart × component) cover yields one subsequence `φ` along which
-the fibrewise inner products converge everywhere; the limits `gm` are symmetric and
-positive-definite. -/
+omit [IsManifold I 2 M] in
 lemma exists_limit_gm (hne : Nonempty M)
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -642,7 +616,7 @@ lemma exists_limit_gm (hne : Nonempty M)
   exact ⟨φ, hφmono, gm, hgm, hsymm, hpos⟩
 
 include I in
-/-- Pointwise positive-definite metric limit under order-dependent reference metrics. -/
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_limit_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -692,11 +666,7 @@ lemma exists_limit_refs (hne : Nonempty M)
   exact ⟨φ, hφmono, gm, hgm, hsymm, hpos⟩
 
 include I in
-/-- **C1b — `hcoeff`.**  Each frame component `x ↦ gm x (frameVec x₀ i x)(frameVec x₀ j x)`
-of the pointwise limit is smooth on the trivialization base set.  Locally near any
-`z`, re-running the engine on `gSeq ∘ φ` produces a smooth chart function `Φinf`;
-the limit component equals `Φinf ∘ extChartAt` there (uniqueness of pointwise
-limits), giving `ContMDiffAt`. -/
+omit [IsManifold I 2 M] in
 lemma frameComp_contMDiffOn
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -737,7 +707,7 @@ lemma frameComp_contMDiffOn
   exact (hsmooth.congr_of_eventuallyEq heq).contMDiffWithinAt
 
 include I in
-/-- Smoothness of the pointwise limit's frame components under order-dependent references. -/
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma frame_smooth_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -785,10 +755,7 @@ lemma frame_smooth_refs
   exact (hsmooth.congr_of_eventuallyEq heq).contMDiffWithinAt
 
 include I in
-/-- **C1a + C1b — the spatial limit metric (lbl351 core).**  From the `(B_r)`
-covariant-derivative bounds and the uniform lower bound `hlow`, one subsequence
-`φ` of the metric sequence converges pointwise to a genuine
-`SmoothRiemannianMetric I M`. -/
+omit [IsManifold I 2 M] in
 theorem metricPreconv_gInf (hne : Nonempty M)
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -796,7 +763,8 @@ theorem metricPreconv_gInf (hne : Nonempty M)
     (hlow : ∃ c : Real, 0 < c ∧ ∀ (k : ℕ) (x : M) (v : TangentSpace I x),
       c * gRef.inner x v v ≤ (gSeq k).inner x v v) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧ ∃ gInf : SmoothRiemannianMetric I M,
-      ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop (nhds (gInf.inner x)) := by
+      ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop
+        (nhds (gInf.inner x)) := by
   obtain ⟨φ, hφ, gm, hgm, hsymm, hpos⟩ := exists_limit_gm (I := I) hne gRef gSeq hbdd hlow
   obtain ⟨gInf, hgInf⟩ :=
     Geometry.smoothMetric_of_localCoeff gm hsymm hpos
@@ -806,7 +774,7 @@ theorem metricPreconv_gInf (hne : Nonempty M)
   rw [hx]; exact hgm x
 
 include I in
-/-- Spatial metric precompactness with a separate reference metric for each order. -/
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metricPreconv_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -831,15 +799,10 @@ theorem metricPreconv_refs (hne : Nonempty M)
   exact hgm x
 
 include I in
-/-- **Gap B base case (covariant order 0).**  The order-0 covariant-tower component
-`component0S b (metricCovDeriv g gRef 0)` is just the metric component
-`g.inner (b ·) (b ·)` (since `covDerivOfField gRef · 0 = ·`), so it converges in
-ANY fibre basis directly from the limit-metric CLM convergence (the
-`metricPreconv_gInf` / `exists_limit_gm` output).  This is the base of the
-covariant tower in the exact `component0S`-of-`metricCovDeriv` shape that the
-`metricDerivNorm` norm bridge consumes; the order `a ≥ 1` steps need the
-coordinate covariant-derivative component formula and its convergence (the missing
-pieces — see `MetricPreconvDiag.md`, "Gap B remaining"). -/
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 lemma componentConv_covDeriv_zero
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (φ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)

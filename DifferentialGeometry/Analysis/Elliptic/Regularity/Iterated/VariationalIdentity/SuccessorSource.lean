@@ -2,64 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIde
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.CrossTermIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 
-/-!
-# Scaffolding for the polymorphic inductive step of the iterated chart-bilinear
-identity
-
-This module assembles three reusable ingredients needed to build, from a level-
-`m` instance of `IteratedDiffChartBilinearData`, a level-`(m+1)` instance:
-
-1. A per-pair integration-by-parts identity, applied to the chosen `m`-fold
-   mixed weak partial of the canonical chart-pushed representative. It exposes
-   the natural "cons-snoc" index `Fin.cons i (Fin.snoc dirs l)` that appears on
-   the LHS of the next-level principal block after IBP.
-
-2. A polymorphic numerator
-   `fChartEffStepNumerator g α u_h m dirs fChartEffPrev l y` recording the
-   five layers of contributions produced by integrating by parts once more
-   in direction `l`.
-
-3. The chart-pulled effective source
-   `fChartEffStep g α u_h m dirs fChartEffPrev l`, defined via an indicator on
-   `chartImagePOUTsupport α` and divided by the chart-pulled density, together
-   with its support property and its `MemLp 2` regularity with respect to the
-   chart-pulled weighted measure restricted to the chart target.
-
-The actual variational identity at level `(m+1)`, which combines these
-ingredients with the polymorphic IBP applied to the level-`m` data, is
-intentionally left for a downstream module.
-
-## Indexing
-
-The level-`m` direction multi-index is `dirs : Fin m → Fin n`. After
-differentiating once more in direction `l`, the natural IBP-derived index is
-`Fin.snoc dirs l : Fin (m+1) → Fin n`, which on the principal LHS gets
-prepended with the "inner" direction `i`, giving the cons-snoc index
-`Fin.cons i (Fin.snoc dirs l)`. By `Fin.cons_snoc_eq_snoc_cons`, this equals
-`Fin.snoc (Fin.cons i dirs) l`, the index naturally produced by appending the
-new outer direction `l` to the level-`m` cons-prepended index
-`Fin.cons i dirs`. We keep both forms in the API and the equivalence is used
-freely inside proofs.
-
-## Main definitions
-
-* `fChartEffStepNumerator` — the explicit five-layer combination
-  (A + B - C + D + E) of chart-pulled contributions appearing on the right-
-  hand side of the level-`(m+1)` variational identity after one more IBP.
-* `fChartEffStep` — the indicator-of-`chartImagePOUTsupport α` of the numerator
-  divided by `densityOnEuclid g α`.
-
-## Main theorems
-
-* `per_pair_ibp_chosenMthMixed` — the per-pair IBP identity at level `m`,
-  applied to the chosen `m`-fold mixed weak partial and a smooth chart-target
-  coefficient.
-* `fChartEffStep_supported_in_chartImagePOUTsupport` — support property of
-  `fChartEffStep`.
-* `fChartEffStep_memLp_two_weighted` — the weighted `MemLp 2` regularity of
-  `fChartEffStep` with respect to the chart-pulled weighted measure restricted
-  to the chart target.
--/
 
 noncomputable section
 
@@ -72,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedVariationalIdentityStepScaffold
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -99,39 +41,25 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The compact "kernel" inside which all chart-pulled effective sources are
-supported. -/
 private abbrev Kα (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_compact (α : M) :
     IsCompact (Kα (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_meas (α : M) :
     MeasurableSet (Kα (I := I) (M := M) α) :=
   (Kα_compact (I := I) (M := M) α).isClosed.measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma Kα_subset_target (α : M) :
     Kα (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
-/-- **Per-pair polymorphic IBP.** Given chart-`H^{m+1}` regularity of the
-canonical chart-pushed representative of `u_h.coeFn`, the chosen `m`-fold mixed
-weak partial `chosenMthMixedPartialChartPushedU g α u_h m dirs` lies in
-`MemW1p 2` on the chart target, and its weak `l`-partial is, by the recursive
-definition, `chosenMthMixedPartialChartPushedU g α u_h (m+1) (Fin.snoc dirs l)`.
-
-Combined with a smooth chart-target coefficient `φ` (extended globally via
-`exists_smooth_global_extension`) and a smooth compactly supported test
-function `ψ`, the generic `integral_smul_weak_partial_eq` IBP primitive yields
-
-```
-∫ φ · (m-mixed partial) · ∂_l ψ
-  = -((∫ (∂_l φ) · (m-mixed partial) · ψ)
-     + (∫ φ · ((m+1)-mixed partial, index `Fin.snoc dirs l`) · ψ)).
-```
--/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem per_pair_ibp_chosenMthMixed
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -244,7 +172,7 @@ theorem per_pair_ibp_chosenMthMixed
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
-    DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP.exists_smooth_global_extension
+    exists_smooth_global_extension
       (I := I) (M := M) (φ := φ) α hφ_chart hK_compact hK_in
   have h_ibp_ext :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.integral_smul_weak_partial_eq
@@ -318,8 +246,6 @@ theorem per_pair_ibp_chosenMthMixed
   rw [← hLHS_eq, ← hLeibniz1_eq, ← hLeibniz2_eq]
   exact h_ibp_ext
 
-/-- The numerator of `fChartEffStep` before division by the chart-pulled
-density. -/
 noncomputable def fChartEffStepNumerator
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -349,10 +275,6 @@ noncomputable def fChartEffStepNumerator
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) y
 
-/-- The effective chart-pulled `L²` source at the inductive step:
-`fChartEffStep g α u_h m dirs fChartEffPrev l`. Defined as the indicator of
-`chartImagePOUTsupport α` applied to
-`fChartEffStepNumerator / densityOnEuclid g α`. -/
 noncomputable def fChartEffStep
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -364,7 +286,7 @@ noncomputable def fChartEffStep
         (I := I) (M := M) g α u_h m dirs fChartEffPrev l y /
       densityOnEuclid (I := I) g α y)
 
-/-- Unfolding identity for `fChartEffStep`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_def_unfold
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -378,8 +300,7 @@ theorem fChartEffStep_def_unfold
           (I := I) (M := M) g α u_h m dirs fChartEffPrev l z /
           densityOnEuclid (I := I) g α z) y := rfl
 
-/-- Pointwise identity: `c · fChartEffStep` equals the indicator of
-`chartImagePOUTsupport α` applied to `fChartEffStepNumerator`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem density_mul_fChartEffStep_eq_indicator_numerator
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -403,8 +324,7 @@ theorem density_mul_fChartEffStep_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
-/-- The support of `fChartEffStep g α u_h m dirs fChartEffPrev l` is contained
-in `chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_supported_in_chartImagePOUTsupport
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}
@@ -417,6 +337,8 @@ theorem fChartEffStep_supported_in_chartImagePOUTsupport
   unfold fChartEffStep
   exact Set.support_indicator_subset
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma exists_bound_continuousOn_compact
     {f : EuclN → ℝ} {α : M}
     (hf_contOn :
@@ -441,6 +363,7 @@ private lemma exists_bound_continuousOn_compact
     hK_compact.exists_isMaxOn hK_ne h_abs_K
   exact ⟨|f y_max|, fun y hy => h_max hy⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma memLp_two_of_bounded_mul
     {f h : EuclN → ℝ} {K : Set EuclN}
     (hh_meas : AEStronglyMeasurable h ((volume : Measure EuclN).restrict K))
@@ -462,6 +385,7 @@ private lemma memLp_two_of_bounded_mul
     exact hy.trans (le_max_left _ _)
   exact MemLp.mul' (p := ∞) (q := 2) (r := 2) hf hh_memLp_top
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma memLp_two_continuousOn_mul_on_Kα
     {α : M} {h f : EuclN → ℝ}
     (hh_contOn : ContinuousOn h
@@ -491,6 +415,8 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -527,6 +453,8 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -541,7 +469,7 @@ private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
   exact hw.of_measure_le_smul (c := ENNReal.ofReal c)
     ENNReal.ofReal_ne_top h_le
 
-/-- Continuity of `∂_j (weightedInvGramDerivOnEuclid l i j)` on the chart target. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :
@@ -571,6 +499,7 @@ private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
   have h := h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)
   exact h.continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma memLp_restrict_Kα_of_memLp_chartTarget
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -591,9 +520,7 @@ private lemma memLp_restrict_Kα_of_memLp_chartTarget
   rw [← h_eq]
   exact hf.restrict _
 
-/-- Layer A pair: for fixed `i, j`, given chart-`H^{m+1}` regularity of the
-parent, the integrand `(∂_j ∂_l a_ij) · chosenMthMixed(m+1, Fin.cons i dirs)`
-is in `MemLp 2 (vol.restrict K)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termA_pair_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -628,10 +555,7 @@ private lemma termA_pair_memLp_vol_K
     (weightedInvGramDerivOnEuclid_partial_continuousOn
       (I := I) (M := M) g α i j l) h_factor
 
-/-- Layer B pair: for fixed `i, j`, given chart-`H^{m+2}` regularity of the
-parent, the integrand
-`(∂_l a_ij) · chosenMthMixed(m+2, Fin.cons i (Fin.snoc dirs j))` is in
-`MemLp 2 (vol.restrict K)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termB_pair_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -666,9 +590,7 @@ private lemma termB_pair_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (weightedInvGramDerivOnEuclid_continuousOn (I := I) g α i j l) h_factor
 
-/-- Layer C: `(∂_l c) · chosenMthMixed(m, dirs)` is in `MemLp 2 (vol.restrict K)`,
-from chart-`H^{m+1}` regularity of the parent (which implies chart-`H^m`
-regularity of the `m`-mixed partial, hence its `MemLp 2` regularity). -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termC_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -708,9 +630,7 @@ private lemma termC_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (densityDerivOnEuclid_continuousOn (I := I) g α l) h_factor
 
-/-- Layer D: `(∂_l c) · fChartEffPrev` is in `MemLp 2 (vol.restrict K)`, given
-that `fChartEffPrev` is in `MemLp 2` on the weighted measure restricted to the
-chart target. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termD_memLp_vol_K
     {g : SmoothRiemannianMetric I M} {α : M}
     (fChartEffPrev : EuclN → ℝ)
@@ -735,9 +655,7 @@ private lemma termD_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (densityDerivOnEuclid_continuousOn (I := I) g α l) h_prev_vol_K
 
-/-- Layer E: `c · (weak l-partial of fChartEffPrev)` is in
-`MemLp 2 (vol.restrict K)`, given that `fChartEffPrev` is in `MemW1p 2` on the
-chart target. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma termE_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (fChartEffPrev : EuclN → ℝ)
@@ -790,6 +708,7 @@ private lemma termE_memLp_vol_K
     rw [this]
     exact MemLp.zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -860,6 +779,8 @@ private lemma fChartEffStepNumerator_memLp_vol_K
   unfold fChartEffStepNumerator
   convert h_step4 using 2 with y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -874,6 +795,7 @@ private lemma one_div_densityOnEuclid_continuousOn
   rw [h_eq]
   exact h_inv
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_div_density_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -922,10 +844,7 @@ private lemma fChartEffStepNumerator_div_density_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (one_div_densityOnEuclid_continuousOn (I := I) (M := M) g α) h_num
 
-/-- `fChartEffStep g α u_h m dirs fChartEffPrev l` lies in `MemLp 2` of the
-chart-pulled weighted measure restricted to `chartTargetEuclid α`. The
-chart-`H^{m+1}` and chart-`H^{m+2}` regularity hypotheses are bundled
-explicitly. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_memLp_two_weighted
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}

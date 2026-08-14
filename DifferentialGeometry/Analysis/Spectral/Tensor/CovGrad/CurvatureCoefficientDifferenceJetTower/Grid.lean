@@ -54,7 +54,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1093,6 +1093,8 @@ lemma ricEndoRaisedFib_eq_mixed_add_gInvDiffRaised
     rw [ricMixedSharpEndoFib_apply]
     exact inner_metricSharp (I := I) g₀ x (ricciTensor (I := I) g₁ x v).toLinearMap w
   rw [hβ, ricEndoRaisedFib_apply]
+  exact (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_eq_connectionMetricSharp
+    (I := I) g₁ x (ricciTensor (I := I) g₁ x v).toLinearMap).symm
 
 end CurvatureCoefficientDifferenceJetTower
 

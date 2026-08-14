@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.CrossMetricEnergy
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 
-/-!
-# Pairwise bounds for moving scalar Laplacians
 
-This file controls the difference of two genuine moving scalar Laplacians on
-the fixed spectral `H²` space and fixed reference `L²` space.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -28,7 +28,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -68,8 +68,8 @@ private theorem normSq0S_nonneg
   rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv A]
   exact Finset.sum_nonneg fun _ _ => sq_nonneg _
 
-/-- The squared norm of a pairwise finite-core difference is the fixed-volume
-integral of the corresponding scalar Laplacian difference. -/
+
+
 theorem lapDiffCore_pair_sq
     (q h k : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) q) :
@@ -100,9 +100,9 @@ theorem lapDiffCore_pair_sq
   rw [inner_toRS0_scalar (I := I) (M := M) q x]
   ring
 
-/-- The fixed-reference energy of a pairwise Laplacian difference is bounded
-by the `C¹` distance to the second metric, with a constant independent of
-finite spectral support. -/
+
+
+
 theorem lapDiff_pair_energy
     (q k : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧
@@ -233,8 +233,8 @@ theorem lapDiff_pair_energy
           (I := I) Set.univ 1 h k k) ^ 2 * ‖v‖ ^ 2 := by
       rfl
 
-/-- On the finite spectral core, a pairwise Laplacian difference is bounded by
-the `C¹` distance to the second metric, uniformly in spectral support. -/
+
+
 theorem lapDiff_pair_core
     (q k : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧
@@ -269,9 +269,9 @@ theorem lapDiff_pair_core
     (lapDiffCore (I := I) (M := M) q h v -
       lapDiffCore (I := I) (M := M) q k v)]
 
-/-- The genuine pairwise moving Laplacian has operator norm controlled by the
-`C¹` distance to the second metric.  The two reference-smallness hypotheses
-identify both bounded extensions with their common finite spectral core. -/
+
+
+
 theorem lapDiff_pair_norm
     (q k : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧

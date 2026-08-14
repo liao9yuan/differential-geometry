@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Constant metric scaling and curvature
@@ -24,9 +22,10 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [SigmaCompactSpace M] in
 /-- The canonical lowered Riemann tensor scales linearly under positive
 constant metric scaling. -/
 theorem metricRm_scale
@@ -42,6 +41,7 @@ theorem metricRm_scale
   simp [metricRm04, metricCov, scaleMetric_inner, lcConn_scaleMetric,
     smul_eq_mul]
 
+omit [SigmaCompactSpace M] in
 /-- Standard-slot evaluation of the constant-scaling curvature law. -/
 theorem metricRmStd_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M)

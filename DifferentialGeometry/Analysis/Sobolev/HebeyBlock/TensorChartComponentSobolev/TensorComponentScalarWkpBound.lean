@@ -6,35 +6,9 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
-/-!
-# Tensor chart-component scalar `W^{k,p}` chart-Sobolev bound
-
-For a closed Riemannian manifold `(M, g)`, this file delivers the headline
-membership and norm-bound results connecting the manifold-side scalar
-chart-frame component `tensorChartComponentScalar g r s T α Idx Jdx : M → ℝ`
-to the chart-based Sobolev space `MemWkpChart g k 2` and the
-Hilbert-Schmidt partition-of-unity-weighted tensor chart-Sobolev norm
-`tensorPouSobolevHsNorm g k T`.
-
-* `tensorChartComponentScalar_memWkpChart` (membership at general `k`):
-  for any smooth compactly-supported tensor section `T`, every chart-frame
-  scalar component lies in `MemWkpChart g k 2` for every regularity order
-  `k`. The proof bridges the manifold-side smooth + compactly-supported
-  scalar to the Euclidean side via the chart-pushed raw representative,
-  combined with `MemWkp_of_smooth_compactSupport`.
-
-Both theorems use only the boundaryless-track hypotheses
-(`[I.Boundaryless]`, `[CompactSpace M]`, `[T2Space M]`,
-`[SigmaCompactSpace M]`) and never reference unallowable assumptions
-(parallelizability, embedding, orientation).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -49,6 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -63,11 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For a smooth global function `f : M → ℝ` on a closed manifold and a chart
-base point `β : M`, the chart-pushed function `chartPushed POU β f` agrees
-a.e. on `chartTargetEuclid β` with the chart-β raw push of `(POU β) · f`,
-which is globally smooth on `EuclN` with compact support inside
-`chartTargetEuclid β`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_pou_mul_smooth_compactSupport
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (β : M) :
@@ -107,13 +78,16 @@ private lemma chartPushed_pou_mul_smooth_compactSupport
   set v : EuclN → ℝ := chartPushedRaw I β g_M with hv_def
   refine ⟨v, ?_, ?_, ?_, ?_⟩
   · rw [hv_def]
-    exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+    exact
+      Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M) (α := β) (u := g_M) hg_M_smooth hg_M_supp
   · rw [hv_def]
-    exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+    exact
+      chartPushedRaw_smooth_hasCompactSupport_local
       (I := I) (M := M) (α := β) (u := g_M) hg_M_supp
   · rw [hv_def]
-    exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.tsupport_chartPushedRaw_subset_chartTargetEuclid
+    exact
+      tsupport_chartPushedRaw_subset_chartTargetEuclid
       (I := I) (M := M) (α := β) (u := g_M) hg_M_supp
   · refine (ae_restrict_iff'
       (chartTargetEuclid_measurableSet (I := I) (M := M) β)).mpr ?_
@@ -124,21 +98,7 @@ private lemma chartPushed_pou_mul_smooth_compactSupport
       (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β f hy
 
-/-- **MemWkpChart membership of the scalar chart-frame component at every
-regularity order `k`.** For every smooth compactly-supported tensor section
-`T : SmoothCcTensor g r s`, every chart base point `α : M`, and every
-multi-index pair `(Idx, Jdx)`, the manifold-side scalar chart-frame
-component is in `MemWkpChart g k 2` for every `k : ℕ`.
-
-The scalar field is smooth and compactly supported on `M`
-(`tensorChartComponentScalar_contMDiff` and
-`tensorChartComponentScalar_hasCompactSupport`). For each chart base point
-`β : M`, the chart-pushed function `chartPushed (chartAtlasPOU I M) β u`
-agrees a.e. on `chartTargetEuclid β` with the chart-β raw push of
-`(POU β) · u`, which is globally smooth and compactly supported on `EuclN`.
-The Euclidean headline density theorem
-`MemWkp_of_smooth_compactSupport` then yields `MemWkp k 2` membership of
-the chart-pushed image at every order. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_memWkpChart
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

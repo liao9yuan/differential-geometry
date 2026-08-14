@@ -1,28 +1,26 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompactness
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Re-indexing the Theorem 3.9 conclusion along a further subsequence
 
-`MetricCompactnessConclusion.compSubseq` follows the whole MSM135 Theorem 3.9
-conclusion record along a further strictly monotone subsequence `φ`: the
-extracted subsequence composes with `φ`, the limit manifold and its
-completeness are unchanged, the comparison maps re-index stage-wise, and the
-compact-open `C^p` metric convergence passes to the subsequence (its `∃ k0`
-shape is asymptotic in `k`).
 
-This is the re-indexing step of the `conv`-field assembly (Brick 5 of
-`P4_CONV_PLAN.md`): after Arzelà–Ascoli extracts a further subsequence, the
-Theorem 3.9 data must follow it before the limit flow is assembled.
 
-The source domain of the re-indexed comparison maps at stage `k` is
-definitionally the original source domain at stage `φ k`, so the
-`MetricSourceData` re-index is a field-by-field re-wrap
-(`MetricSourceData.compSubseq`) with no transport lemmas.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,7 +32,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -42,8 +40,8 @@ variable [I.Boundaryless]
 
 namespace PointedRiemannianCGMaps
 
-/-- Riemannian comparison maps re-indexed along a further strictly monotone
-subsequence: stage `k` of the new record is stage `φ k` of the old one. -/
+
+
 def compSubseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -83,8 +81,9 @@ def ofSubseq
     PointedRiemannianCGMaps (I := I) X L f :=
   Φ.ofSeqSubseq f
 
-/-- The source of the re-indexed comparison map is the original source at the
-re-indexed stage (definitional). -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem compSubseq_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -93,6 +92,8 @@ re-indexed stage (definitional). -/
     (φ : Nat -> Nat) (hφ : StrictMono φ) (k : Nat) :
     (Φ.compSubseq φ hφ).source k = Φ.source (φ k) := rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
+    [I.Boundaryless] in
 @[simp] theorem ofSeqSubseq_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (f : Nat -> Nat)
@@ -102,6 +103,8 @@ re-indexed stage (definitional). -/
     (k : Nat) :
     (Φ.ofSeqSubseq f).source k = Φ.source k := rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
+    [I.Boundaryless] in
 /-- The identity-inner lift preserves each source definitionally. -/
 @[simp] theorem ofSubseq_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -115,12 +118,12 @@ end PointedRiemannianCGMaps
 
 namespace MetricSourceData
 
-/-- Metric source-domain data transported to the re-indexed comparison maps.
 
-The source domain of `Φ.compSubseq φ hφ` at stage `k` is definitionally the
-source domain of `Φ` at stage `φ k` (the new `partialDiffeomorph k` is
-literally `Φ.partialDiffeomorph (φ k)`), so the data re-wraps field by field
-with no casts or transport lemmas. -/
+
+
+
+
+
 def compSubseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -173,6 +176,7 @@ def ofSubseq
     MetricSourceData (I := I) (Φ.ofSubseq f) k :=
   MetricSourceData.ofSeqSubseq (I := I) f k D
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The source-domain seminorm `derivNormSupOn` is unchanged by the
 re-indexing re-wrap (definitional). -/
 @[simp] theorem compSubseq_supOn
@@ -185,6 +189,7 @@ re-indexing re-wrap (definitional). -/
     (MetricSourceData.compSubseq (I := I) φ hφ k D).derivNormSupOn (I := I) K p =
       D.derivNormSupOn (I := I) K p := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem ofSeqSubseq_supOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (f : Nat -> Nat)
@@ -196,6 +201,7 @@ re-indexing re-wrap (definitional). -/
     (MetricSourceData.ofSeqSubseq (I := I) f k D).derivNormSupOn (I := I) K p =
       D.derivNormSupOn (I := I) K p := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The identity-inner source-data lift preserves `derivNormSupOn`. -/
 @[simp] theorem ofSubseq_supOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -211,10 +217,10 @@ end MetricSourceData
 
 namespace MetricCGConvergenceData
 
-/-- Metric Cheeger--Gromov convergence data re-indexed along a further strictly
-monotone subsequence: the domain data re-wraps stage-wise, and the
-`∃ k0`-shaped compact-open convergence passes to the subsequence via
-`k ≤ φ k`. -/
+
+
+
+
 def compSubseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -258,8 +264,8 @@ end MetricCGConvergenceData
 
 namespace PointedRiemannianCGConverges
 
-/-- Pointed Riemannian Cheeger--Gromov convergence re-indexed along a further
-strictly monotone subsequence. -/
+
+
 def compSubseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -310,6 +316,7 @@ def ofSeqSubseq
   maps := mc.maps.ofSeqSubseq f
   convergence := mc.convergence.ofSeqSubseq f
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The lifted conclusion extracts the composed subsequence. -/
 @[simp] theorem ofSeqSubseq_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -317,6 +324,7 @@ def ofSeqSubseq
     (mc : MetricCompactnessConclusion (I := I) (X.subseq f)) :
     (mc.ofSeqSubseq f hf).subseq = f ∘ mc.subseq := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The lifted conclusion keeps the same limit manifold. -/
 @[simp] theorem ofSeqSubseq_limit
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -341,14 +349,16 @@ def compSubseq
   maps := mc.maps.compSubseq φ hφ
   convergence := mc.convergence.compSubseq φ hφ
 
-/-- The re-indexed conclusion extracts the composed subsequence. -/
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem compSubseq_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (mc : MetricCompactnessConclusion (I := I) X)
     (φ : Nat -> Nat) (hφ : StrictMono φ) :
     (mc.compSubseq φ hφ).subseq = mc.subseq ∘ φ := rfl
 
-/-- The re-indexed conclusion keeps the same limit manifold. -/
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem compSubseq_limit
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (mc : MetricCompactnessConclusion (I := I) X)

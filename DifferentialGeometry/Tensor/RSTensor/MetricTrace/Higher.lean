@@ -1,14 +1,12 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTrace02
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Higher metric-trace derivatives
 
-Second derivative and `(0,4)` trace-derivative identities built from the two-tensor trace route.
--/
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -19,7 +17,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -134,12 +132,12 @@ private theorem headFreezeNabla
         3 cov A x (vec4 (I := I) (X x) (Y x) U V) := by
         simpa [metricTrace_finCons_vec3_eq_vec4 (I := I)] using hAtot.symm
 
-/-- Metric-compatible second covariant differentiation commutes with the
-metric trace of a smooth `(0,2)` tensor.
 
-This is the Hessian-level analogue of `nablaTrace02`: the canonical Hessian of
-`tr_g A` is the metric trace of the canonical second covariant derivative of
-`A`, with the first two slots left as the Hessian slots. -/
+
+
+
+
+
 theorem nabla2Trace02
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -574,8 +572,8 @@ private theorem middleFreezeNabla
         4 cov A x (Fin.cons (X x) (vec4 (I := I) U (Y x) (Z x) V)) := by
         simpa [hUsec, hVsec] using hAtot.symm
 
-/-- Metric-compatible covariant differentiation commutes with the Ricci-style
-trace of a smooth standard-slot `(0,4)` tensor field. -/
+
+
 theorem nablaTrace04
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]

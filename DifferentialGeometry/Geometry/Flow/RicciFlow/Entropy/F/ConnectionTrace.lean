@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ChartTrace
 
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -17,26 +16,26 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-!
-# Perelman F connection trace
 
-Split-out component of the Perelman `F`-functional layer
-(`DifferentialGeometry.PDE.RicciFlow.Entropy.F`).
 
-The Voss–Weyl coordinate divergence of the constructed metric-trace field
-`tr_g A` equals the inverse-metric contraction of the coordinate covariant
-derivative `∇_p A^p_{ij}` of the connection-variation tensor `A`.  The proof
-runs entirely in the point-centered `coordinateFrameAt` (`Module.finBasis`)
-frame through the proven basis-invariance bridge
-`divergence_g_eq_coordinateFrame_covariant_divergence`: the bridge supplies the
-coordinate covariant divergence directly, the product rule splits the trace
-coefficient, and the finite trace algebra `rawDivTraceAlg` (with the
-`∇ g^{-1} = 0` cancellation and the `∇A` coordinate formula) finishes.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 section GeometryFormula510
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,10 +43,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-set_option maxHeartbeats 1600000 in
-/-- The contracted `∇ g^{-1} = 0` input needed by `connTraceRaw_eq_gamma`.
-This is the inverse-metric cancellation specialized to the point-centered
-coordinate frame and the upper component slice `A^d_{ij}`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem connTraceUTrace
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -185,9 +182,8 @@ theorem connTraceUTrace
                   (A x) (fun _ : Fin 1 => d)
                   (fun q : Fin 2 => if q = 0 then i else a))) := rfl
 
-set_option maxHeartbeats 1600000 in
-/-- Contracted coordinate formula for `∇_p A^p_{ij}`, packaged in the exact shape
-consumed by `connTraceRaw_eq_gamma`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem connTraceATrace
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -292,12 +288,16 @@ theorem connTraceATrace
       i j
   simpa [Acomp, Gamma] using h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem gInvFun_mdifferentiableAt
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     MDifferentiableAt I 𝓘(Real, Real) (gInvFun (I := I) g x i j) x :=
   (gInvComp_contMDiffAt (I := I) g x i j).mdifferentiableAt (by norm_num)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem compFun_mdifferentiableAt
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -308,8 +308,10 @@ private theorem compFun_mdifferentiableAt
     (fun _ : Fin 1 => p)
     (fun q : Fin 2 => if q = 0 then i else j)).mdifferentiableAt (by norm_num)
 
-/-- Center value of the component function `A^p_{ij}` is the coordinate-frame
-component of `A x`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem compFun_center
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -339,15 +341,19 @@ private theorem compFun_center
   rw [componentRS]
   simp [hconst, component0S, coordinateFrameAt_basis_apply]
 
-/-- `gInvFun` center value is the inverse-metric component at the chart centre. -/
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem gInvFun_center
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     gInvFun (I := I) g x i j x =
       inverseMetricFlatModelInChart_component (I := I) g x i j (extChartAt I x x) := rfl
 
-/-- Center value of the trace-coefficient `coeff_p (tr_g A)` as the explicit
-inverse-metric contraction in the `coordinateFrameAt` frame. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem connTraceCoeff_one_center
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -362,14 +368,20 @@ private theorem connTraceCoeff_one_center
   have hev := connTraceCoeff_one_eventually (I := I) g A x p
   exact hev.eq_of_nhds
 
-set_option maxHeartbeats 1600000 in
-/-- **Bridge product-rule expansion of the raw divergence trace.**
+private theorem symmetric_trace_sum_mul
+    {ι : Type*} [Fintype ι] (Γ : ι → ι → ι → ℝ) (B : ι → ℝ)
+    (hΓ : ∀ d a k, Γ d a k = Γ a d k) :
+    (∑ l, (∑ p, Γ p l p) * B l) =
+      ∑ p, B p * ∑ a, Γ p a a := by
+  refine Finset.sum_congr rfl fun l _ => ?_
+  rw [mul_comm]
+  congr 1
+  exact Finset.sum_congr rfl fun p _ => hΓ p l p
 
-Through the basis-invariance bridge, the Voss–Weyl divergence of `tr_g A` is the
-coordinate covariant divergence in the `coordinateFrameAt` frame; the product
-rule splits the trace coefficient `∑_{ij} g^{ij} A^p_{ij}`, and the
-Christoffel-trace term is reorganized (torsion-free symmetry `hGamma`) into the
-density-trace shape expected by `rawDivTraceAlg`. -/
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem connTraceRawDiv_eq_productSum
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -404,7 +416,6 @@ private theorem connTraceRawDiv_eq_productSum
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a)) := by
   classical
   set Z := DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A with hZ
-  -- Start from the basis-invariance bridge.
   have hbridge :=
     DifferentialGeometry.Integral.Connection.divergence_g_eq_coordinateFrame_covariant_divergence
       (I := I) g Z x
@@ -412,14 +423,10 @@ private theorem connTraceRawDiv_eq_productSum
       connTraceRawDiv (I := I) g A x =
         DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g Z x := rfl
   rw [hrawdef, hbridge]
-  -- The Christoffel symbol in the bridge uses the LeviCivita connection.
   subst hcov
-  -- Split each `p`-summand into the derivative term and the Christoffel term.
   rw [Finset.sum_add_distrib]
   congr 1
-  · -- Derivative term: rewrite the trace-coefficient derivative by the
-    -- eventually-equal explicit contraction, then apply the product rule.
-    refine Finset.sum_congr rfl fun p _ => ?_
+  · refine Finset.sum_congr rfl fun p _ => ?_
     have hev' :
         (fun y : M =>
             (coordinateFrameAt_isLocalFrame_one (I := I) x).coeff p y (Z.toFun y))
@@ -453,17 +460,13 @@ private theorem connTraceRawDiv_eq_productSum
       (fun i _ j _ => compFun_mdifferentiableAt (I := I) A x p i j)]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
-  · -- Christoffel term: reorganize `∑_l Γ(p,l,p) · coeff_l` into the density
-    -- trace shape `(∑_ij g^{ij} A^p_{ij}) · (∑_a Γ(p,a,a))`.
-    -- First rewrite each coeff_l at the center as the explicit contraction.
-    have hcoeff_l : ∀ l : CoordinateIdx (𝕜 := Real) E,
+  · have hcoeff_l : ∀ l : CoordinateIdx (𝕜 := Real) E,
         (coordinateFrameAt_isLocalFrame_one (I := I) x).coeff l x (Z.toFun x) =
           ∑ i : CoordinateIdx (𝕜 := Real) E,
             ∑ j : CoordinateIdx (𝕜 := Real) E,
               gInvFun (I := I) g x i j x * compFun (I := I) A x l i j x := by
       intro l
       exact connTraceCoeff_one_center (I := I) g A x l
-    -- Reindex the double sum (over p, l) into the target (over p with the trace).
     calc
       (∑ p : CoordinateIdx (𝕜 := Real) E,
         ∑ l : CoordinateIdx (𝕜 := Real) E,
@@ -474,7 +477,8 @@ private theorem connTraceRawDiv_eq_productSum
           =
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           (∑ p : CoordinateIdx (𝕜 := Real) E,
-            christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            christoffelSymbolInFrame
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x p l p) *
             (∑ i : CoordinateIdx (𝕜 := Real) E,
@@ -491,25 +495,28 @@ private theorem connTraceRawDiv_eq_productSum
             ∑ j : CoordinateIdx (𝕜 := Real) E,
               gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x) *
             (∑ a : CoordinateIdx (𝕜 := Real) E,
-              christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              christoffelSymbolInFrame
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
                 (coordinateFrameAt (I := I) x)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a) := by
-          refine Finset.sum_congr rfl fun l _ => ?_
-          rw [mul_comm]
-          congr 1
-          refine Finset.sum_congr rfl fun p _ => ?_
-          exact hGamma p l p
+          exact symmetric_trace_sum_mul
+            (fun p a k =>
+              christoffelSymbolInFrame
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+                (coordinateFrameAt (I := I) x)
+                (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a k)
+            (fun p =>
+              ∑ i : CoordinateIdx (𝕜 := Real) E,
+                ∑ j : CoordinateIdx (𝕜 := Real) E,
+                  gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x)
+            hGamma
 
-set_option maxHeartbeats 1600000 in
-/-- **The Voss–Weyl divergence of `tr_g A` is the inverse-metric contraction of
-`∇_p A^p_{ij}`.**
 
-`div(tr_g A) = ∑_{ij} g^{ij} (∑_p ∇_p A^p_{ij})`, with the right-hand side
-`gammaRawDivergenceTrace`.  The proof goes through the basis-invariance bridge
-(no chart-coefficient identity): the bridge supplies the coordinate covariant
-divergence, the product rule splits the trace coefficient, the `∇ g^{-1} = 0`
-cancellation and the `∇A` coordinate formula are contracted, and the finite
-trace algebra `rawDivTraceAlg` assembles the result. -/
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTraceRaw_eq_gamma
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -571,7 +578,6 @@ theorem connTraceRaw_eq_gamma
     connTraceRawDiv (I := I) g A x =
       gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x := by
   classical
-  -- Canonical extDerivFun-form coordinate derivatives.
   set dU : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> Real :=
     fun d i j =>
@@ -597,16 +603,12 @@ theorem connTraceRaw_eq_gamma
       christoffelSymbolInFrame cov
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a c with hGammaDef
-  -- The `∇ g^{-1}=0` contraction (`connTraceUTrace`).
   have hUtrace :=
     connTraceUTrace (I := I) (cov := cov) g A dU x (fun d i j => rfl) hzero
-  -- The `∇A` coordinate formula (`connTraceATrace`).
   have hAtrace :=
     connTraceATrace (I := I) (cov := cov) A nablaChristoffelVariation
       (fun d k i j => dA d k i j) x hNabla hGamma
-  -- Bridge product-rule expansion.
   have hprod := connTraceRawDiv_eq_productSum (I := I) (cov := cov) g A x hcov hGamma
-  -- Finite trace algebra.
   have hraw := rawDivTraceAlg
     (U := U) (dU := dU) (A := Acomp) (dA := dA)
     (nablaA := fun d k i j => nablaChristoffelVariation x d k i j)
@@ -619,7 +621,6 @@ theorem connTraceRaw_eq_gamma
       intro i j
       have h := hAtrace i j
       simpa [Acomp, Gamma] using h)
-  -- Assemble.
   rw [hprod]
   rw [show
       (∑ p : CoordinateIdx (𝕜 := Real) E,
@@ -649,15 +650,17 @@ theorem connTraceRaw_eq_gamma
               (∑ a : CoordinateIdx (𝕜 := Real) E, Gamma d a a)) from by
       simp only [hdU, hdA, hU, hAcomp, hGammaDef, compFun_center]]
   rw [hraw]
-  -- Identify the assembled trace with `gammaRawDivergenceTrace`.
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [hU]
   rfl
 
-/-- Pointwise raw-divergence normalization for all base points: the Voss–Weyl
-divergence of `tr_g A` is `gammaRawDivergenceTrace` at every `x`, given the two
-local component producers (the `∇ g^{-1}=0` cancellation and the coordinate
-`∇A` formula) and the torsion-free Christoffel symmetry. -/
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTraceRaw_of_components
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)

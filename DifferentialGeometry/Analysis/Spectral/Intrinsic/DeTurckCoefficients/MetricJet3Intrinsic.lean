@@ -3,17 +3,16 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RawC
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 
-/-!
-# Intrinsic control of the third chart metric jet
 
-The chart `3`-jet difference of two arbitrary smooth metrics is controlled by
-the background-covariant `3`-jet of their fixed-background tensor difference.
-No small realized-metric hypothesis is used.
--/
+
+
+
+
+
+
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -31,7 +30,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -40,8 +39,9 @@ variable
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Raw chart components of the fixed-background metric tensor difference are
-the chart Gram-matrix differences. -/
+
+
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metricComp_sub
     (gBase g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source)
@@ -65,15 +65,16 @@ theorem metricComp_sub
     metricCcTensor_apply, metricCcTensor_apply,
     g_inner_eq_chartGramMatrix_basis, g_inner_eq_chartGramMatrix_basis]
 
-/-- On the chart-target interior, a Gram-entry difference is the raw
-chart-component function of the fixed-background metric tensor difference. -/
+
+
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem gramDiff_eqOn
     (gBase g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) :
     Set.EqOn
       (fun y : E => chartGramOnE (I := I) g₁ α a b y -
         chartGramOnE (I := I) g₂ α a b y)
-      (rawCompOnE (I := I) (M := M) gBase
+      (tensorChartComponentOnModel (I := I) (M := M) gBase
         (metricCcTensor (I := I) (M := M) gBase g₁ -
           metricCcTensor (I := I) (M := M) gBase g₂) α ![a, b])
       (interior (extChartAt I α).target) := by
@@ -81,7 +82,7 @@ theorem gramDiff_eqOn
   have hx : (extChartAt I α).symm y ∈ (chartAt H α).source := by
     have hsrc := (extChartAt I α).map_target (interior_subset hy)
     rwa [extChartAt_source] at hsrc
-  rw [rawCompOnE,
+  rw [tensorChartComponentOnModel,
     metricComp_sub (I := I) (M := M) gBase g₁ g₂ α hx a b]
   rfl
 
@@ -112,6 +113,7 @@ private lemma basisJet_apply_le {m : ℕ}
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramIter_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -129,6 +131,7 @@ private lemma gramIter_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gram0_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (N : ℕ) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -144,6 +147,7 @@ private lemma gram0_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gram1_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (N : ℕ)
     (hN : 1 ≤ N) {y : E}
@@ -197,6 +201,7 @@ private lemma gram1_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gram2_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (N : ℕ)
     (hN : 2 ≤ N) {y : E}
@@ -260,6 +265,7 @@ private lemma gram2_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gram3_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (N : ℕ)
     (hN : 3 ≤ N) {y : E}
@@ -332,9 +338,6 @@ private lemma gram3_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
-/-- The concrete chart metric `2`-jet difference is controlled by the
-all-order Gram `2`-jet seminorm with a constant depending only on the fixed
-model-space basis. -/
 theorem metricJet2_le_gram (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ g₂ : SmoothRiemannianMetric I M) {y : E},
@@ -433,9 +436,6 @@ theorem metricJet2_le_gram (α : M) :
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
-/-- The concrete chart metric `3`-jet difference is controlled by the
-all-order Gram `3`-jet seminorm with a constant depending only on the fixed
-model-space basis. -/
 theorem metricJet3_le_gram (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ g₂ : SmoothRiemannianMetric I M) {y : E},
@@ -566,8 +566,9 @@ theorem metricJet3_le_gram (α : M) :
     _ = C * chartGramJetDiffSeminormSum (I := I) (M := M) 3 g₁ g₂ α
           (interior (extChartAt I α).target) y := by rw [hJ_def]
 
-/-- The Gram-jet seminorm of two arbitrary metrics is controlled by the bare
-chart jet of their fixed-background metric tensor difference. -/
+
+
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem gramJet_le_bare
     (gBase g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (N : ℕ)
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -575,14 +576,14 @@ theorem gramJet_le_bare
         (interior (extChartAt I α).target) y ≤
       (∑ _a : Fin (Module.finrank ℝ E),
         ∑ _b : Fin (Module.finrank ℝ E), (1 : ℝ)) *
-        bareChartJetContentOnE (I := I) (M := M) gBase
+        chartComponentJetSeminormSum (I := I) (M := M) gBase
           (metricCcTensor (I := I) (M := M) gBase g₁ -
             metricCcTensor (I := I) (M := M) gBase g₂) α N y := by
   classical
   let D : SmoothCcTensor gBase 0 2 :=
     metricCcTensor (I := I) (M := M) gBase g₁ -
       metricCcTensor (I := I) (M := M) gBase g₂
-  set B : ℝ := bareChartJetContentOnE (I := I) (M := M) gBase D α N y
+  set B : ℝ := chartComponentJetSeminormSum (I := I) (M := M) gBase D α N y
     with hB_def
   have hB : 0 ≤ B := by
     rw [hB_def]
@@ -594,7 +595,7 @@ theorem gramJet_le_bare
         (interior (extChartAt I α).target) y ≤ B := by
     intro a b
     have heq := gramDiff_eqOn (I := I) (M := M) gBase g₁ g₂ α a b
-    change Set.EqOn _ (rawCompOnE (I := I) (M := M) gBase D α ![a, b]) _ at heq
+    change Set.EqOn _ (tensorChartComponentOnModel (I := I) (M := M) gBase D α ![a, b]) _ at heq
     unfold iteratedFDerivSeminorm
     calc
       (∑ m ∈ Finset.range (N + 1),
@@ -604,18 +605,18 @@ theorem gramJet_le_bare
             (interior (extChartAt I α).target) y‖)
           = ∑ m ∈ Finset.range (N + 1),
               ‖iteratedFDerivWithin ℝ m
-                (rawCompOnE (I := I) (M := M) gBase D α ![a, b])
+                (tensorChartComponentOnModel (I := I) (M := M) gBase D α ![a, b])
                 (interior (extChartAt I α).target) y‖ := by
             refine Finset.sum_congr rfl fun m _ => ?_
             rw [iteratedFDerivWithin_congr (𝕜 := ℝ) heq hy m]
       _ ≤ B := by
         rw [hB_def]
-        unfold bareChartJetContentOnE
+        unfold chartComponentJetSeminormSum
         exact Finset.single_le_sum
           (fun (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) _ =>
             Finset.sum_nonneg fun m _ =>
               norm_nonneg (iteratedFDerivWithin ℝ m
-                (rawCompOnE (I := I) (M := M) gBase D α Jdx)
+                (tensorChartComponentOnModel (I := I) (M := M) gBase D α Jdx)
                 (interior (extChartAt I α).target) y))
           (Finset.mem_univ ![a, b])
   unfold chartGramJetDiffSeminormSum
@@ -635,14 +636,15 @@ theorem gramJet_le_bare
       ring
     _ = (∑ _a : Fin (Module.finrank ℝ E),
           ∑ _b : Fin (Module.finrank ℝ E), (1 : ℝ)) *
-        bareChartJetContentOnE (I := I) (M := M) gBase
+        chartComponentJetSeminormSum (I := I) (M := M) gBase
           (metricCcTensor (I := I) (M := M) gBase g₁ -
             metricCcTensor (I := I) (M := M) gBase g₂) α N y := by
       rw [hB_def]
 
-/-- On the support of a chart partition-of-unity weight, the concrete metric
-`2`-jet difference is controlled uniformly by the intrinsic background-covariant
-`2`-jet of the fixed-background metric tensor difference. -/
+
+
+
+omit [BoundarylessManifold I M] in
 theorem metricJet2_intrinsic
     (gBase : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -691,7 +693,7 @@ theorem metricJet2_intrinsic
   have hgram := gramJet_le_bare (I := I) (M := M) gBase g₁ g₂ α 2 hy_int
   change chartGramJetDiffSeminormSum (I := I) (M := M) 2 g₁ g₂ α
       (interior (extChartAt I α).target) (extChartAt I α b) ≤
-        Npair * bareChartJetContentOnE (I := I) (M := M) gBase D α 2
+        Npair * chartComponentJetSeminormSum (I := I) (M := M) gBase D α 2
           (extChartAt I α b) at hgram
   have heucl' := heucl D hy_int
   have hfib' := hfib D hyK
@@ -701,7 +703,7 @@ theorem metricJet2_intrinsic
         ≤ Cmetric * chartGramJetDiffSeminormSum (I := I) (M := M) 2 g₁ g₂ α
             (interior (extChartAt I α).target) (extChartAt I α b) := hmetric'
     _ ≤ Cmetric * (Npair *
-          bareChartJetContentOnE (I := I) (M := M) gBase D α 2
+          chartComponentJetSeminormSum (I := I) (M := M) gBase D α 2
             (extChartAt I α b)) :=
       mul_le_mul_of_nonneg_left hgram hCmetric
     _ ≤ Cmetric * (Npair * (Ceucl *
@@ -725,9 +727,10 @@ theorem metricJet2_intrinsic
       dsimp [D]
       ring
 
-/-- On the support of a chart partition-of-unity weight, the concrete metric
-`3`-jet difference is controlled uniformly by the intrinsic background-covariant
-`3`-jet of the fixed-background metric tensor difference. -/
+
+
+
+omit [BoundarylessManifold I M] in
 theorem metricJet3_intrinsic
     (gBase : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -776,7 +779,7 @@ theorem metricJet3_intrinsic
   have hgram := gramJet_le_bare (I := I) (M := M) gBase g₁ g₂ α 3 hy_int
   change chartGramJetDiffSeminormSum (I := I) (M := M) 3 g₁ g₂ α
       (interior (extChartAt I α).target) (extChartAt I α b) ≤
-        Npair * bareChartJetContentOnE (I := I) (M := M) gBase D α 3
+        Npair * chartComponentJetSeminormSum (I := I) (M := M) gBase D α 3
           (extChartAt I α b) at hgram
   have heucl' := heucl D hy_int
   have hfib' := hfib D hyK
@@ -786,7 +789,7 @@ theorem metricJet3_intrinsic
         ≤ Cmetric * chartGramJetDiffSeminormSum (I := I) (M := M) 3 g₁ g₂ α
             (interior (extChartAt I α).target) (extChartAt I α b) := hmetric'
     _ ≤ Cmetric * (Npair *
-          bareChartJetContentOnE (I := I) (M := M) gBase D α 3
+          chartComponentJetSeminormSum (I := I) (M := M) gBase D α 3
             (extChartAt I α b)) :=
       mul_le_mul_of_nonneg_left hgram hCmetric
     _ ≤ Cmetric * (Npair * (Ceucl *

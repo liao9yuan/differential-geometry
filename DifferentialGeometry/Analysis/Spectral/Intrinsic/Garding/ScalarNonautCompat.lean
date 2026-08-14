@@ -2,13 +2,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffH0
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarLapDiffCore
 
-/-!
-# Compatibility of scalar nonautonomous Sobolev operators
 
-This file identifies the order-zero member of the completed all-scale
-Laplacian-difference family with the existing `H² → H⁰` operator used by the
-conjugate-heat Galerkin construction.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,9 +32,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Near zero from the nonnegative-time side, the fully applied order-zero
-all-scale Laplacian difference is the existing conjugate-heat `H² → H⁰`
-operator. -/
+
+
+
 theorem lapDiffHs_eq_A20
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

@@ -28,9 +28,11 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.HCGCompactness
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -39,6 +41,17 @@ variable
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+private local instance iterFDerivTargetNormedAddCommGroup (m : ℕ) :
+    NormedAddCommGroup
+      (ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ) :=
+  ContinuousMultilinearMap.normedAddCommGroup
+
+private local instance iterFDerivTargetNormedSpace (m : ℕ) :
+    NormedSpace ℝ
+      (ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ) :=
+  ContinuousMultilinearMap.normedSpace
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 /-- A global bound on the next Frechet derivative makes an iterated Frechet
 derivative Lipschitz. -/
 private theorem iterFDeriv_lip
@@ -46,14 +59,31 @@ private theorem iterFDeriv_lip
     {C : ℝ} (hC : 0 ≤ C)
     (hnext : ∀ x : EuclN, ‖iteratedFDeriv ℝ (m + 1) u x‖ ≤ C) :
     LipschitzWith ⟨C, hC⟩ (iteratedFDeriv ℝ m u) := by
-  apply lipschitzWith_of_nnnorm_fderiv_le
-  · exact hu.differentiable_iteratedFDeriv (by simp)
+  let f : EuclN →
+      ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ :=
+    iteratedFDeriv ℝ m u
+  letI : NormedAddCommGroup
+      (EuclN →L[ℝ]
+        ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ) :=
+    @ContinuousLinearMap.toNormedAddCommGroup
+      ℝ ℝ EuclN
+      (ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ)
+      _ (iterFDerivTargetNormedAddCommGroup m) _ _ _
+      (iterFDerivTargetNormedSpace m) (RingHom.id ℝ) _
+  refine @lipschitzWith_of_nnnorm_fderiv_le
+    ℝ (ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ)
+    _ _ (iterFDerivTargetNormedAddCommGroup m)
+    (iterFDerivTargetNormedSpace m) EuclN _ _ f ⟨C, hC⟩ ?_ ?_
+  · exact hu.differentiable_iteratedFDeriv
+      (WithTop.coe_lt_coe.mpr (ENat.coe_lt_top m))
   · intro x
     rw [← NNReal.coe_le_coe]
     simp only [coe_nnnorm, NNReal.coe_mk]
+    dsimp only [f]
     rw [norm_fderiv_iteratedFDeriv]
     exact hnext x
 
+omit [BoundarylessManifold I M] in
 /-- Uniform intrinsic metric bounds through order three give simultaneous
 uniform `C^2` size and global exponent-`1/2` Holder control of the second Frechet
 derivative of every active POU-weighted metric-difference component.

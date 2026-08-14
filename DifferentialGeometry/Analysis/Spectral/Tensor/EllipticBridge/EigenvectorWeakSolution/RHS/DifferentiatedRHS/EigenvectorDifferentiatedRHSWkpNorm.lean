@@ -3,70 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# `K`-graded explicit-norm `wkpNorm` bound for the differentiated chart-RHS numerator
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the level-`(m+1)`
-differentiated chart-RHS numerator `eigenvectorChartRHSDiffNumerator` is the
-explicit five-layer Leibniz combination `A + B − C + D + E` produced by one more
-integration by parts in the new direction `lₙ := l (Fin.last m)`.
-
-The order-`0` companion `eigenvectorChartRHSDiffNumerator_eLpNorm_le` records the
-quantitative `eLpNorm`-bound — the `wkpNorm`-bound at Sobolev order `0` — for the
-numerator against `volume.restrict (chartPouKernel α)`. This file records its
-order-`K` generalisation: there is a nonnegative constant `C` with
-
-```
-wkpNorm K 2 (eigenvectorChartRHSDiffNumerator … m l fChartEffPrev)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C * <AGGREGATE_K>,
-```
-
-where `<AGGREGATE_K>` is `diffNumeratorAggregateK`, the order-`K` analogue of the
-order-`0` `diffNumeratorAggregate`: the honest finite sum
-
-* `∑ₐ wkpNorm (2 + K) 2 (eigenvectorChartIteratedPartial … (m+1) (Fin.cons a
-  (Fin.init l))) (chartTargetEuclid α)` — the iterated weak partials feeding
-  layers `A`, `B`;
-* `wkpNorm (2 + K) 2 (eigenvectorChartIteratedPartial … m (Fin.init l))
-  (chartTargetEuclid α)` — the iterated weak partial feeding layer `C`;
-* `wkpNorm (K + 1) 2 fChartEffPrev (chartTargetEuclid α)` — controlling layer
-  `E` via the chosen weak partial;
-* `wkpNorm K 2 fChartEffPrev (chartTargetEuclid α)` — controlling layer `D`.
-
-## Strategy
-
-`eigenvectorChartRHSDiffNumerator` is a five-layer `+`/`-` combination; iterated
-Minkowski for `wkpNorm` bounds its order-`K` norm by the sum of the five layer
-norms. Each layer is a finite sum of `(smooth coefficient) · atom` summands,
-aggregated via `wkpNorm_sum_le`. Per summand the order-`K` smooth-coefficient
-bound `wkpNorm_coef_mul_factor_le` — the quantitative companion of the
-qualitative `memWkp_coef_mul_factor` — gives `wkpNorm K 2 (coef · atom) Ω ≤
-ENNReal.ofReal Cᵢ * wkpNorm K 2 atom Ω`; it cuts the chart-target-smooth
-coefficient off into a globally smooth compactly supported representative,
-uniformly bounds its iterated derivatives up to order `K`, applies the
-global-smoothness Leibniz bound `wkpNorm_smul_smooth_bounded_le`, and transfers
-back through the ae-vanishing of the atom off the kernel. The atom norm is then
-bounded by the aggregate: an iterated weak partial directly (`wkpNorm K 2 ≤
-wkpNorm (2 + K) 2`); a chosen weak partial of one by
-`wkpNorm_chosenWeakPartial_le` (dropping one order, `wkpNorm (K + 1) 2 ≤ wkpNorm
-(2 + K) 2`); `fChartEffPrev` directly; and its chosen weak partial via
-`wkpNorm_chosenWeakPartial_le` (`wkpNorm (K + 1) 2 fChartEffPrev`). All
-per-summand constants and finite-sum multiplicities fold into a single
-nonnegative `C`.
-
-## Main result
-
-* `eigenvectorChartRHSDiffNumerator_wkpNorm_le` — the `K`-graded explicit-norm
-  `wkpNorm` bound for the differentiated chart-RHS numerator.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -78,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -103,6 +39,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -116,11 +53,11 @@ private lemma wkpNorm_coef_mul_factor_le
     MemWkp (d := Module.finrank ℝ E) K 2
         (fun y => coef y * factor y) (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => coef y * factor y)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -219,16 +156,17 @@ private lemma wkpNorm_coef_mul_factor_le
     (MemWkp_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
   refine ⟨h_memWkp, Kc, le_of_lt _hKc_pos, ?_⟩
-  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_norm_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => coef y * factor y) Ω =
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => (χ y * coef y) * factor y) Ω :=
     (wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).symm
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -256,18 +194,19 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
-omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma wkpNorm_sum_le_const_mul_aggregate
     {α : M} {K : ℕ} {ι : Type*} [Fintype ι] (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
     (hF : ∀ j : ι, MemWkp (d := Module.finrank ℝ E) K 2 (F j)
       (chartTargetEuclid (I := I) (M := M) α))
     (hbd : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C * A) :
     ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ∑ j : ι, F j y) (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C * A := by
   classical
@@ -276,14 +215,14 @@ private lemma wkpNorm_sum_le_const_mul_aggregate
   choose Cf hCf_nn hCf using hbd
   refine ⟨(∑ j : ι, Cf j) * (Fintype.card ι : ℝ),
     mul_nonneg (Finset.sum_nonneg (fun j _ => hCf_nn j)) (by positivity), ?_⟩
-  have h_tri : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_tri : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => ∑ j : ι, F j y) (chartTargetEuclid (I := I) (M := M) α)
-      ≤ ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+      ≤ ∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
           (chartTargetEuclid (I := I) (M := M) α) :=
     wkpNorm_sum_le (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open Finset.univ F
       (fun j _ => hF j)
-  have h_step : ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+  have h_step : ∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A := by
     refine Finset.sum_le_sum (fun j _ => ?_)
@@ -299,9 +238,9 @@ private lemma wkpNorm_sum_le_const_mul_aggregate
     rw [mul_comm (∑ j : ι, Cf j), ENNReal.ofReal_mul (by positivity),
       ENNReal.ofReal_natCast]
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ∑ j : ι, F j y) (chartTargetEuclid (I := I) (M := M) α)
-        ≤ ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+        ≤ ∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
             (chartTargetEuclid (I := I) (M := M) α) := h_tri
     _ ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A := h_step
     _ = (Fintype.card ι : ℝ≥0∞) *
@@ -315,8 +254,8 @@ private lemma wkpNorm_sub_le
     {d : ℕ} [NeZero d] {k : ℕ} {Ω : Set (EuclideanSpace ℝ (Fin d))}
     (hΩ : IsOpen Ω) {u v : EuclideanSpace ℝ (Fin d) → ℝ}
     (hu : MemWkp (d := d) k 2 u Ω) (hv : MemWkp (d := d) k 2 v Ω) :
-    wkpNorm (d := d) k 2 (fun y => u y - v y) Ω ≤
-      wkpNorm (d := d) k 2 u Ω + wkpNorm (d := d) k 2 v Ω := by
+    iteratedWeakSobolevNorm (d := d) k 2 (fun y => u y - v y) Ω ≤
+      iteratedWeakSobolevNorm (d := d) k 2 u Ω + iteratedWeakSobolevNorm (d := d) k 2 v Ω := by
   classical
   have h_fun : (fun y => u y - v y) = (fun y => u y + (fun y => - v y) y) := by
     funext y; ring
@@ -324,8 +263,8 @@ private lemma wkpNorm_sub_le
   have hv_neg : MemWkp (d := d) k 2 (fun y => - v y) Ω :=
     MemWkp.neg (d := d) (by norm_num) hΩ hv
   refine le_trans (wkpNorm_add_le (d := d) (by norm_num) hΩ hu hv_neg) ?_
-  have h_neg_eq : wkpNorm (d := d) k 2 (fun y => - v y) Ω =
-      wkpNorm (d := d) k 2 v Ω := by
+  have h_neg_eq : iteratedWeakSobolevNorm (d := d) k 2 (fun y => - v y) Ω =
+      iteratedWeakSobolevNorm (d := d) k 2 v Ω := by
     have h_smul : (fun y => - v y) = (fun y => (-1 : ℝ) * v y) := by
       funext y; ring
     rw [h_smul, wkpNorm_const_smul (d := d) (by norm_num) hΩ hv (-1)]
@@ -340,8 +279,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- The layer-`A` coefficient `∂_b (weightedInvGramDerivOnEuclid g α a b lₙ)` is
-`C^∞` on the open chart target. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layerA_coeff_contDiffOn
     (a b : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -369,6 +307,7 @@ end LayerBounds
 
 section MainBoundUniform
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -383,11 +322,11 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
       MemWkp (d := Module.finrank ℝ E) K 2
           (fun y => coef y * factor y)
           (chartTargetEuclid (I := I) (M := M) α) ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => coef y * factor y)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -487,27 +426,28 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
     (MemWkp_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
   refine ⟨h_memWkp, ?_⟩
-  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_norm_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => coef y * factor y) Ω =
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => (χ y * coef y) * factor y) Ω :=
     (wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).symm
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {α : M} {K : ℕ} {ι : Type*} [Fintype ι] {ν : Type*} (F : ι → ν → EuclN → ℝ)
     (A : ν → ℝ≥0∞)
     (hF : ∀ (j : ι) (n : ν), MemWkp (d := Module.finrank ℝ E) K 2 (F j n)
       (chartTargetEuclid (I := I) (M := M) α))
     (hbd : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
-      ∀ n : ν, wkpNorm (d := Module.finrank ℝ E) K 2 (F j n)
+      ∀ n : ν, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j n)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C * A n) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ n : ν, wkpNorm (d := Module.finrank ℝ E) K 2
+      ∀ n : ν, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ∑ j : ι, F j n y) (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C * A n := by
   classical
@@ -517,14 +457,14 @@ private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
   refine ⟨(∑ j : ι, Cf j) * (Fintype.card ι : ℝ),
     mul_nonneg (Finset.sum_nonneg (fun j _ => hCf_nn j)) (by positivity),
     fun n => ?_⟩
-  have h_tri : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_tri : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => ∑ j : ι, F j n y) (chartTargetEuclid (I := I) (M := M) α)
-      ≤ ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j n)
+      ≤ ∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j n)
           (chartTargetEuclid (I := I) (M := M) α) :=
     wkpNorm_sum_le (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open Finset.univ (fun j => F j n)
       (fun j _ => hF j n)
-  have h_step : ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j n)
+  have h_step : ∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j n)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A n := by
     refine Finset.sum_le_sum (fun j _ => ?_)
@@ -540,9 +480,9 @@ private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     rw [mul_comm (∑ j : ι, Cf j), ENNReal.ofReal_mul (by positivity),
       ENNReal.ofReal_natCast]
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ∑ j : ι, F j n y) (chartTargetEuclid (I := I) (M := M) α)
-        ≤ ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j n)
+        ≤ ∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j n)
             (chartTargetEuclid (I := I) (M := M) α) := h_tri
     _ ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A n := h_step
     _ = (Fintype.card ι : ℝ≥0∞) *
@@ -554,7 +494,6 @@ private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
 
 end MainBoundUniform
 
-/-- Chart-locality-free twin of `diffNumeratorAggregateK`. -/
 def diffNumeratorAggregateK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -562,17 +501,17 @@ def diffNumeratorAggregateK
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
     (fChartEffPrev : EuclN → ℝ) : ℝ≥0∞ :=
   (∑ a : Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
-    + wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+    + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α)
-    + wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
+    + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
         (chartTargetEuclid (I := I) (M := M) α)
-    + wkpNorm (d := Module.finrank ℝ E) K 2 fChartEffPrev
+    + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 fChartEffPrev
         (chartTargetEuclid (I := I) (M := M) α)
 
 section AtomBoundsUnconditional
@@ -582,42 +521,41 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of `wkpNorm_iteratedPartial_succ_le`. -/
+omit [CompleteSpace E] in
 private lemma wkpNorm_iteratedPartial_succ_le
     (a : Fin (Module.finrank ℝ E)) :
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α)
-      ≤ wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α) :=
   wkpNorm_mono_order (d := Module.finrank ℝ E) (by omega) _ _
 
-/-- Chart-locality-free twin of `wkpNorm_iteratedPartial_le`. -/
+omit [CompleteSpace E] in
 private lemma wkpNorm_iteratedPartial_le :
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α)
-      ≤ wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ m (Fin.init l))
           (chartTargetEuclid (I := I) (M := M) α) :=
   wkpNorm_mono_order (d := Module.finrank ℝ E) (by omega) _ _
 
-/-- Chart-locality-free twin of
-`wkpNorm_chosenWeakPartial_iteratedPartial_succ_le`. -/
+omit [CompleteSpace E] in
 private lemma wkpNorm_chosenWeakPartial_iteratedPartial_succ_le
     (a b : Fin (Module.finrank ℝ E)) :
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α))
         (chartTargetEuclid (I := I) (M := M) α)
-      ≤ wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α) := by
@@ -636,8 +574,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter : ∀ a : Fin (Module.finrank ℝ E),
@@ -655,7 +592,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
                 g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
         (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ∑ a : Fin (Module.finrank ℝ E),
               ∑ b : Fin (Module.finrank ℝ E),
                 (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
@@ -680,7 +617,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
                 g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
           (chartTargetEuclid (I := I) (M := M) α) ∧
         ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y =>
                 (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
                       (l (Fin.last m))) y)
@@ -707,7 +644,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
       (I := I) (M := M) g r s i α P₀ m K l a) ?_
     rw [hA_def, diffNumeratorAggregateK]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
@@ -760,8 +697,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
     A (fun a => (h_inner a).1) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter : ∀ a : Fin (Module.finrank ℝ E),
@@ -779,7 +715,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
                 (chartTargetEuclid (I := I) (M := M) α) y)
         (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ∑ a : Fin (Module.finrank ℝ E),
               ∑ b : Fin (Module.finrank ℝ E),
                 weightedInvGramDerivOnEuclid (I := I) g α a b
@@ -805,7 +741,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
                 (chartTargetEuclid (I := I) (M := M) α) y)
           (chartTargetEuclid (I := I) (M := M) α) ∧
         ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y =>
                 weightedInvGramDerivOnEuclid (I := I) g α a b
                     (l (Fin.last m)) y *
@@ -844,7 +780,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
       (I := I) (M := M) g r s i α P₀ m K l a b) ?_
     rw [hA_def, diffNumeratorAggregateK]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
@@ -897,8 +833,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
           (chartTargetEuclid (I := I) (M := M) α) y)
     A (fun a => (h_inner a).1) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter_m : MemWkp (d := Module.finrank ℝ E) (2 + K) 2
@@ -912,7 +847,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
               g r s i α P₀ m (Fin.init l) y)
         (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y =>
               densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
                 eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -943,8 +878,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
   rw [hA_def, diffNumeratorAggregateK]
   exact le_trans le_add_self (le_trans le_self_add le_self_add)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
     {fChartEffPrev : EuclN → ℝ}
     (h_prev : MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -958,7 +892,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
             fChartEffPrev y)
         (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y =>
               densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
                 fChartEffPrev y)
@@ -981,8 +915,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
   rw [hA_def, diffNumeratorAggregateK]
   exact le_add_self
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le
     {fChartEffPrev : EuclN → ℝ}
     (h_prev : MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -997,7 +930,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le
               fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y)
         (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y =>
               densityOnEuclid (I := I) g α y *
                 chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
@@ -1034,7 +967,7 @@ end LayerBoundsUnconditional
 
 section MainBoundUnconditional
 
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiffNumerator_wkpNorm_le`. -/
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1052,7 +985,7 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le
         (chartTargetEuclid (I := I) (M := M) α \
           chartPouKernel (I := I) (M := M) α)] (fun _ => (0 : ℝ))) :
     ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (eigenvectorChartRHSDiffNumerator (I := I) (M := M)
             g r s i α P₀ m l fChartEffPrev)
           (chartTargetEuclid (I := I) (M := M) α)
@@ -1126,35 +1059,35 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le
     MemWkp.sub (d := Module.finrank ℝ E) (by norm_num) hΩ_open hAB_mem hC_mem
   have hABCD_mem : MemWkp (d := Module.finrank ℝ E) K 2 sABCD Ω :=
     MemWkp.add (d := Module.finrank ℝ E) (by norm_num) hΩ_open hABC_mem hD_mem
-  have h_sAB_le : wkpNorm (d := Module.finrank ℝ E) K 2 sAB Ω ≤
-      wkpNorm (d := Module.finrank ℝ E) K 2 layerA Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerB Ω :=
+  have h_sAB_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sAB Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerA Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerB Ω :=
     wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open hA_mem hB_mem
-  have h_sABC_le : wkpNorm (d := Module.finrank ℝ E) K 2 sABC Ω ≤
-      wkpNorm (d := Module.finrank ℝ E) K 2 sAB Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerC Ω :=
+  have h_sABC_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABC Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sAB Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerC Ω :=
     wkpNorm_sub_le (d := Module.finrank ℝ E) hΩ_open hAB_mem hC_mem
-  have h_sABCD_le : wkpNorm (d := Module.finrank ℝ E) K 2 sABCD Ω ≤
-      wkpNorm (d := Module.finrank ℝ E) K 2 sABC Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerD Ω :=
+  have h_sABCD_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABCD Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABC Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerD Ω :=
     wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open hABC_mem hD_mem
   have h_split : (fun y => layerA y + layerB y - layerC y + layerD y
         + layerE y) = (fun y => sABCD y + layerE y) := by
     funext y
     rw [hsABCD_def, hsABC_def, hsAB_def]
   have h_tri :
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => layerA y + layerB y - layerC y + layerD y + layerE y) Ω
-        ≤ wkpNorm (d := Module.finrank ℝ E) K 2 layerA Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerB Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerC Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerD Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerE Ω := by
+        ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerA Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerB Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerC Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerD Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerE Ω := by
     rw [h_split]
-    have h_outer : wkpNorm (d := Module.finrank ℝ E) K 2
+    have h_outer : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => sABCD y + layerE y) Ω ≤
-        wkpNorm (d := Module.finrank ℝ E) K 2 sABCD Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerE Ω :=
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABCD Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerE Ω :=
       wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
         hABCD_mem hE_mem
     refine le_trans h_outer ?_
@@ -1166,11 +1099,11 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le
     exact h_sAB_le
   refine le_trans h_tri ?_
   have h_five :
-      wkpNorm (d := Module.finrank ℝ E) K 2 layerA Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerB Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerC Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerD Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerE Ω
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerA Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerB Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerC Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerD Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerE Ω
       ≤ ENNReal.ofReal CA * A + ENNReal.ofReal CB * A + ENNReal.ofReal CC * A
         + ENNReal.ofReal CD * A + ENNReal.ofReal CE * A :=
     add_le_add (add_le_add (add_le_add (add_le_add hCA hCB) hCC) hCD) hCE
@@ -1185,8 +1118,7 @@ end MainBoundUnconditional
 
 section MainBoundUniformUnconditional
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1210,7 +1142,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
           (chartTargetEuclid (I := I) (M := M) α)) ∧
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ∑ a : Fin (Module.finrank ℝ E),
                 ∑ b : Fin (Module.finrank ℝ E),
                   (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
@@ -1235,7 +1167,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
             (chartTargetEuclid (I := I) (M := M) α)) ∧
         ∃ C : ℝ, 0 ≤ C ∧
           ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                 (fun y =>
                   (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
                         (l (Fin.last m))) y)
@@ -1266,7 +1198,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
         (I := I) (M := M) g r s i α P₀ m K l a) ?_
       rw [diffNumeratorAggregateK]
       refine le_trans (Finset.single_le_sum (f := fun a =>
-        wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α))
@@ -1283,7 +1215,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
                   g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
             (chartTargetEuclid (I := I) (M := M) α)) ∧
         ∃ C : ℝ, 0 ≤ C ∧ ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ∑ b : Fin (Module.finrank ℝ E),
                 (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
                       (l (Fin.last m))) y)
@@ -1337,8 +1269,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
       g r s i α P₀ m K l (fChartEffPrev i))
     (fun a i => (h_inner a).1 i) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1362,7 +1293,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
           (chartTargetEuclid (I := I) (M := M) α)) ∧
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ∑ a : Fin (Module.finrank ℝ E),
                 ∑ b : Fin (Module.finrank ℝ E),
                   weightedInvGramDerivOnEuclid (I := I) g α a b
@@ -1388,7 +1319,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
             (chartTargetEuclid (I := I) (M := M) α)) ∧
         ∃ C : ℝ, 0 ≤ C ∧
           ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                 (fun y =>
                   weightedInvGramDerivOnEuclid (I := I) g α a b
                       (l (Fin.last m)) y *
@@ -1433,7 +1364,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
       (I := I) (M := M) g r s i α P₀ m K l a b) ?_
     rw [diffNumeratorAggregateK]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) (2 + K) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 + K) 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
@@ -1450,7 +1381,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
                   (chartTargetEuclid (I := I) (M := M) α) y)
             (chartTargetEuclid (I := I) (M := M) α)) ∧
         ∃ C : ℝ, 0 ≤ C ∧ ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ∑ b : Fin (Module.finrank ℝ E),
                 weightedInvGramDerivOnEuclid (I := I) g α a b
                     (l (Fin.last m)) y *
@@ -1505,8 +1436,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
       g r s i α P₀ m K l (fChartEffPrev i))
     (fun a i => (h_inner a).1 i) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1526,7 +1456,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
           (chartTargetEuclid (I := I) (M := M) α)) ∧
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y =>
                 densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
                   eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -1562,8 +1492,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_trans le_add_self (le_trans le_self_add le_self_add)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1584,7 +1513,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
           (chartTargetEuclid (I := I) (M := M) α)) ∧
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y =>
                 densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
                   fChartEffPrev i y)
@@ -1607,8 +1536,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_add_self
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform`. -/
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1630,7 +1558,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
           (chartTargetEuclid (I := I) (M := M) α)) ∧
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y =>
                 densityOnEuclid (I := I) g α y *
                   chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
@@ -1668,8 +1596,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_trans le_add_self le_self_add
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform`. -/
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1690,7 +1617,7 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
             chartPouKernel (I := I) (M := M) α)] (fun _ => (0 : ℝ))) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (eigenvectorChartRHSDiffNumerator (I := I) (M := M)
               g r s i α P₀ m l (fChartEffPrev i))
             (chartTargetEuclid (I := I) (M := M) α)
@@ -1778,18 +1705,18 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
     MemWkp.sub (d := Module.finrank ℝ E) (by norm_num) hΩ_open hAB_mem hC_mem_i
   have hABCD_mem : MemWkp (d := Module.finrank ℝ E) K 2 sABCD Ω :=
     MemWkp.add (d := Module.finrank ℝ E) (by norm_num) hΩ_open hABC_mem hD_mem_i
-  have h_sAB_le : wkpNorm (d := Module.finrank ℝ E) K 2 sAB Ω ≤
-      wkpNorm (d := Module.finrank ℝ E) K 2 layerA Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerB Ω :=
+  have h_sAB_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sAB Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerA Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerB Ω :=
     wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
       hA_mem_i hB_mem_i
-  have h_sABC_le : wkpNorm (d := Module.finrank ℝ E) K 2 sABC Ω ≤
-      wkpNorm (d := Module.finrank ℝ E) K 2 sAB Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerC Ω :=
+  have h_sABC_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABC Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sAB Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerC Ω :=
     wkpNorm_sub_le (d := Module.finrank ℝ E) hΩ_open hAB_mem hC_mem_i
-  have h_sABCD_le : wkpNorm (d := Module.finrank ℝ E) K 2 sABCD Ω ≤
-      wkpNorm (d := Module.finrank ℝ E) K 2 sABC Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerD Ω :=
+  have h_sABCD_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABCD Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABC Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerD Ω :=
     wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
       hABC_mem hD_mem_i
   have h_split : (fun y => layerA y + layerB y - layerC y + layerD y
@@ -1797,18 +1724,18 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
     funext y
     rw [hsABCD_def, hsABC_def, hsAB_def]
   have h_tri :
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => layerA y + layerB y - layerC y + layerD y + layerE y) Ω
-        ≤ wkpNorm (d := Module.finrank ℝ E) K 2 layerA Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerB Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerC Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerD Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerE Ω := by
+        ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerA Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerB Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerC Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerD Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerE Ω := by
     rw [h_split]
-    have h_outer : wkpNorm (d := Module.finrank ℝ E) K 2
+    have h_outer : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => sABCD y + layerE y) Ω ≤
-        wkpNorm (d := Module.finrank ℝ E) K 2 sABCD Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2 layerE Ω :=
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 sABCD Ω
+          + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerE Ω :=
       wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
         hABCD_mem hE_mem_i
     refine le_trans h_outer ?_
@@ -1820,11 +1747,11 @@ theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
     exact h_sAB_le
   refine le_trans h_tri ?_
   have h_five :
-      wkpNorm (d := Module.finrank ℝ E) K 2 layerA Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerB Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerC Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerD Ω
-        + wkpNorm (d := Module.finrank ℝ E) K 2 layerE Ω
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerA Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerB Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerC Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerD Ω
+        + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 layerE Ω
       ≤ ENNReal.ofReal CA * A + ENNReal.ofReal CB * A + ENNReal.ofReal CC * A
         + ENNReal.ofReal CD * A + ENNReal.ofReal CE * A :=
     add_le_add (add_le_add (add_le_add (add_le_add hCA_i hCB_i) hCC_i) hCD_i)

@@ -2,14 +2,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Radius-independent seed for finite-stage comparison maps
 
-This file separates the one-time choice of the metric compactness input and
-stable net from the radius-dependent stage-map refinement.  It is the seed
-interface needed by the later integer-radius diagonal; it does not perform
-that diagonal.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,7 +34,7 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- Pairwise `B`-intersection stability for one net-limit datum. -/
+
 def IsStableNet
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -45,7 +45,7 @@ def IsStableNet
     (∀ᶠ k in atTop,
       ¬ BInter inp.decay inp.D P L.lamInf a b (L.φ k))
 
-/-- The full actual stage-map package extracted at one construction radius. -/
+
 def HasStageRefine
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -88,8 +88,8 @@ def HasStageRefineOn
     HasStageJetDataOn inp P L hr phi hphi hconn chart
       V U C0 C1 aInf Jinf Jbarinf gInf
 
-/-- One stable net and a radius-independent refinement procedure for every
-stable net over the same metric compactness input. -/
+
+
 def HasStageSeed
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -117,7 +117,7 @@ def HasStageSeedOn
       ∀ (r : Real) (hr : 0 ≤ r),
         HasStageRefineOn inp P L hconn chart r hr
 
-/-- Project the radius refinement from a stage seed. -/
+
 theorem HasStageSeed.refine
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -131,8 +131,8 @@ theorem HasStageSeed.refine
     HasStageRefine inp P L hconn r hr :=
   hseed.2 L hstable r hr
 
-/-- Every strict refinement of the seed net remains eligible for the
-radius-dependent stage-map producer. -/
+
+
 theorem HasStageSeed.subseq
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -177,9 +177,9 @@ theorem HasStageSeedOn.subseq
   apply hseed.refine inp P L0 hconn chart (L0.subseq hψ) _ r hr
   exact NetLimitData.stable_subseq inp.decay P L0 hψ hseed.1
 
-/-- Choose the metric compactness input and a stable net once, together with
-the honest refinement procedure that produces `HasStageJetData` at every
-construction radius. -/
+
+
+
 theorem MetricCompactBase.exists_stage_seed
     (b : MetricCompactBase (I := I) X)
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -257,7 +257,7 @@ theorem MetricCompactBase.exists_stage_seed
     linarith [hqGamma.2.2.2]
   have hcapTail : ∀ᶠ n in Filter.atTop,
       HasSuppCmData (I := I) inp P L r hr phi hphi n
-        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
+        hcomplete hconn U aInf q δ := by
     filter_upwards [hptsTail, hreadTail] with n hn hreadN
     let Y := X.obj (Lphi.φ n)
     letI : TopologicalSpace Y.M := Y.topology
@@ -293,7 +293,7 @@ theorem MetricCompactBase.exists_stage_seed
           (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
         z gamma
     let chi := fun (alpha : LiveSlot L inp.pack r) =>
-      NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+      NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
     let sourceBall := Lphi.hatSourceBall inp.decay P r n
     let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
       sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -319,25 +319,12 @@ theorem MetricCompactBase.exists_stage_seed
       hreadN.2 alpha (sourcePatch alpha) (hhat alpha)
         (localWeight alpha) (hweight alpha) (pts alpha) (hpts alpha)
     choose radSeq hpos hactive hsmall hcapLocal using hlocal
-    refine ⟨radSeq, ?_⟩
-    constructor
-    · exact hcover
-    constructor
-    · exact hhat
-    constructor
-    · exact hweight
-    constructor
-    · exact hpos
-    constructor
-    · set_option maxRecDepth 2048 in
-      exact hactive
-    constructor
+    refine ⟨radSeq, hcover, hhat, hweight, hpos, hactive, ?_, ?_⟩
     · intro epsilon hepsilon
       exact finite_cover_two_tail hcover
         (fun alpha a b x => radSeq alpha a b x < epsilon)
         (fun alpha => hsmall alpha epsilon hepsilon)
-    · set_option maxRecDepth 2048 in
-      exact finite_cover_two_tail hcover _ hcapLocal
+    · exact finite_cover_two_tail hcover _ hcapLocal
   have hq : ∀ alpha : LiveSlot L inp.pack r, 0 < q alpha := by
     intro alpha
     have h := hqdata0 alpha
@@ -372,7 +359,7 @@ theorem MetricCompactBase.exists_stage_seed
           (I := I) (X.obj (Lphi.φ n)).metric x
   let Q : Nat → Prop := fun n =>
     HasSuppCmData (I := I) inp P L r hr phi hphi n
-        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ ∧
+        hcomplete hconn U aInf q δ ∧
       ScaleAt n
   have hQ : ∀ᶠ n in Filter.atTop, Q n := by
     filter_upwards [hcapTail, hscaleTail] with n hcapN hscaleN

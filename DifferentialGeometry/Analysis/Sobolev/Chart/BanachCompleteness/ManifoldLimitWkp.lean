@@ -20,7 +20,7 @@ namespace Sobolev
 namespace Chart
 
 variable {E H : Type*}
-  [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -31,6 +31,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [IsManifold I ∞ M] in
 /-- The measurable pullback used in the completeness construction is the same
 pointwise function as the chart pullback used by the cross-chart estimates. -/
 lemma pullback_eq_chart (α : M) (v : EuclN → ℝ) :

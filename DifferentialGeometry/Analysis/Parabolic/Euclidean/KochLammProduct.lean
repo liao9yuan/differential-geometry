@@ -20,11 +20,11 @@ namespace Analysis
 namespace Parabolic
 namespace Euclidean
 
-variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
+section Scaling
 
-omit [MeasurableSpace V] [BorelSpace V] in
+variable {V : Type*}
+  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+
 /-- The local `L¹` source scale is the square of the local `L²` flux scale. -/
 theorem klL1_eq_L2_sq {R : ℝ} (hR : 0 < R) :
     klL1Scale (V := V) R = klL2Scale (V := V) R ^ 2 := by
@@ -44,7 +44,6 @@ theorem klL1_eq_L2_sq {R : ℝ} (hR : 0 < R) :
   rw [hre]
   exact ENNReal.ofReal_pow (Real.rpow_nonneg hR.le _) 2
 
-omit [MeasurableSpace V] [BorelSpace V] in
 /-- The late ordinary-source scale is the square of the late flux scale. -/
 theorem klLq_eq_Lp_sq {R : ℝ} (hR : 0 < R) :
     klLqScale (V := V) R = klLpScale (V := V) R ^ 2 := by
@@ -64,9 +63,8 @@ theorem klLq_eq_Lp_sq {R : ℝ} (hR : 0 < R) :
   rw [hre]
   exact ENNReal.ofReal_pow (Real.rpow_nonneg hR.le _) 2
 
-omit [MeasurableSpace V] [BorelSpace V] in
 /-- The exponents `n+4`, `n+4`, and `(n+4)/2` form a Hölder triple. -/
-theorem klP_holder :
+theorem klP_holderTriple :
     ENNReal.HolderTriple (klP V) (klP V) (klQ V) := by
   let n4 : ℕ := Module.finrank ℝ V + 4
   let p : ℝ := n4
@@ -89,6 +87,8 @@ theorem klP_holder :
   rw [hof, hofq] at he
   exact he
 
+end Scaling
+
 section Product
 
 variable {X E G F : Type*}
@@ -98,8 +98,6 @@ variable {X E G F : Type*}
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-omit [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V] in
 /-- Hölder's inequality for a space-dependent uniformly bounded bilinear
 coefficient. -/
 theorem eLpNorm_bilin_le {p q r : ℝ≥0∞} [ENNReal.HolderTriple p q r]
@@ -159,6 +157,10 @@ end Product
 
 section KochLammProduct
 
+variable {V : Type*}
+  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [MeasurableSpace V] [BorelSpace V]
+
 variable {E G F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -180,7 +182,7 @@ theorem klBilin_source {T : ℝ}
     constructor
     rw [inv_one, ENNReal.inv_two_add_inv_two]
   letI : ENNReal.HolderTriple (klP V) (klP V) (klQ V) :=
-    klP_holder (V := V)
+    klP_holderTriple (V := V)
   refine ⟨hmeas, ?_, ?_⟩
   · intro x R hR hRT
     let μ : Measure (ℝ × V) :=

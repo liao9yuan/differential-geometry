@@ -4,13 +4,13 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 
 set_option autoImplicit false
 
-/-!
-# Christoffel correction and contraction
 
-This file identifies the chart-local correction term used by the canonical
-Levi--Civita construction with the Christoffel contraction used by the
-geodesic phase-space equation.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,15 +24,16 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-- The chart-local Levi--Civita correction is exactly the chart Christoffel
-contraction after expressing the tangent direction in the fixed chart. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem correction_eq_contr
     (g : SmoothRiemannianMetric I M) (a x : M) (Y : E)
     (v : TangentSpace I x) :
@@ -86,8 +87,9 @@ theorem correction_eq_contr
     rw [Finset.sum_comm]
   rw [hLHS, hRHS]
 
-/-- On a self-model vector space, the canonical covariant derivative of a
-constant field is the chart Christoffel contraction in any fixed chart. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem const_cov_eq_contr
     (g : SmoothRiemannianMetric 𝓘(Real, E) E) (a z v w : E) :
     (leviCivitaConnectionOfMetric (I := 𝓘(Real, E)) g

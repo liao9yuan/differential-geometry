@@ -18,7 +18,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Analysis.ODE
 
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 /-- A homogeneous second-order system with zero initial data vanishes on its
 forward interval. -/
@@ -135,7 +135,6 @@ theorem eq_zero_of_interior
     change y (c + (t - c)) = 0 at hzero
     have heq : c + (t - c) = t := by ring
     simpa only [heq] using hzero
-
   let Bneg : ℝ := c - a
   let Yneg : ℝ → F := fun t => y (c - t)
   let Vneg : ℝ → F := fun t => -v (c - t)
@@ -207,7 +206,6 @@ theorem eq_zero_of_interior
       constructor <;> linarith [ht.1, ht.2]
     have hzero := hneg_zero (c - t) hct
     simpa only [Yneg, sub_sub_cancel] using hzero
-
   have hy_zero : ∀ t ∈ Icc a b, y t = 0 := by
     intro t ht
     rcases le_total t c with htc | hct

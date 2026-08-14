@@ -3,13 +3,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSFirstDerivati
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
-/-!
-# Uniform low-regularity Ricci--DeTurck coefficient data
 
-This file packages the quantitative chart coefficients that a low-regularity
-uniformly parabolic Ricci--DeTurck solver must consume.  It does not assert the
-existence of that solver.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -23,15 +23,15 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
-/-- Numerical constants controlling one uniformly parabolic low-regularity
-Ricci--DeTurck coefficient family. -/
+
+
 structure LowRegCoeff where
   ellMin : ℝ
   ellMax : ℝ
@@ -44,10 +44,10 @@ structure LowRegCoeff where
   rhsLip : ℝ
   rhsD1Lip : ℝ
 
-/-- The active chart-atlas supports satisfy the ellipticity, order-at-most-three
-Gram bounds, absolute Ricci--DeTurck RHS and first-derivative bounds, and RHS
-Lipschitz estimates against metric `2`- and `3`-jet differences recorded by `D`.
-This is an input package for a future low-regularity parabolic solver. -/
+
+
+
+
 structure IsLowRegCoeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff) : Prop where
@@ -142,9 +142,9 @@ structure IsLowRegCoeff {ι : Type*}
               D.rhsD1Lip * metricJet3DiffSup (I := I) (M := M)
                 (gSeq k₁) (gSeq k₂) α (extChartAt I α b)
 
-/-- Pointwise metric equivalence and uniform intrinsic metric bounds through
-order three produce all finite-chart coefficient constants needed by a
-low-regularity Ricci--DeTurck solver. -/
+
+
+
 theorem exists_low_reg_coeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M)

@@ -5,36 +5,34 @@ import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Topology.Instances.Matrix
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Spatial continuity of the covariant-tensor squared norm
 
-For a smooth Riemannian metric `g` and a smooth `(0,s)`-tensor field `T` on `M`, the
-scalar function `x ↦ normSq0S g x s (T x)` is continuous.
 
-This is the missing spatial-continuity API for the fibrewise tensor norm: `normSq0S`
-is defined through the pointwise recursive `MetricFiberData`, which gives no direct
-handle on base-point dependence.  The proof localises at `x₀` through the tangent
-trivialization frame and rewrites the norm by `normSq0S_eq_coord` as the
-inverse-Gram contraction of the frame components,
 
-`normSq0S g y s (T y) = ∑_{I₀ J₀} (∏ₐ (G y)⁻¹ (I₀ a) (J₀ a)) ⬝ T_y(frame ∘ I₀) ⬝ T_y(frame ∘ J₀)`,
 
-whose factors are continuous: the components by multilinear bundle-evaluation
-smoothness (`TensorMultilinear.contMDiffAt_section_apply_gen`) on the smooth local
-frame, and the inverse Gram matrix by Cramer (`Matrix.inv_def`) with a nonvanishing
-determinant (positive-definiteness of `g`).
 
-## Main results
 
-* `tensor0SField_eval_cmdAt_slots` — evaluation of a smooth `(0,s)`-field on
-  `ContMDiffAt` moving slots is `ContMDiffAt` (local-slot version of
-  `tensor0SField_eval_smooth_slots_contMDiffAt`).
-* `normSq0S_contAt` / `normSq0S_cont` — spatial continuity of the squared norm.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -44,15 +42,15 @@ open Bundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 
-/-- A smooth `(0,s)`-tensor field evaluated on `ContMDiffAt` moving tangent slots is
-`ContMDiffAt` as a scalar function.  This is the local-slot version of
-`tensor0SField_eval_smooth_slots_contMDiffAt`, needed for slots (such as local frames)
-that are smooth only near the base point. -/
+
+
+
+
 theorem tensor0SField_eval_cmdAt_slots {s : ℕ}
     (α : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -71,9 +69,9 @@ section NormSqContinuity
 
 variable (g : DifferentialGeometry.SmoothRiemannianMetric I M)
 
-/-- **Spatial continuity of the covariant-tensor squared norm** (pointwise form).
-For a smooth metric `g` and a smooth `(0,s)`-tensor field `T`, the function
-`y ↦ normSq0S g y s (T y)` is continuous at every point. -/
+
+
+
 theorem normSq0S_contAt {s : ℕ}
     (T : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -83,11 +81,9 @@ theorem normSq0S_contAt {s : ℕ}
   set e := trivializationAt E (TangentSpace I : M -> Type _) x₀ with he
   set b := Module.finBasis ℝ E with hb
   have hx₀ : x₀ ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
-  -- the Gram matrix of `g` in the local frame
   set Gm : M -> Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     fun y => Matrix.of fun i j =>
       g.inner y (e.localFrame b i y) (e.localFrame b j y) with hGm
-  -- continuity of the frame components of any smooth (0,s')-field
   have hslots : ∀ (s' : ℕ)
       (A : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) s')
@@ -98,7 +94,6 @@ theorem normSq0S_contAt {s : ℕ}
       (v := fun a y => e.localFrame b (I0 a) y)
       (hv := fun a => contMDiffAt_localFrame_of_mem (I := I)
         (n := (∞ : WithTop ℕ∞)) (e := e) (b := b) (i := I0 a) hx₀)).continuousAt
-  -- continuity of the Gram entries via the metric (0,2)-tensor field
   have hGmEnt : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousAt (fun y : M =>
         g.inner y (e.localFrame b i y) (e.localFrame b j y)) x₀ := by
@@ -115,7 +110,6 @@ theorem normSq0S_contAt {s : ℕ}
     exact h2
   have hGmc : ContinuousAt Gm x₀ :=
     continuousAt_pi.2 fun i => continuousAt_pi.2 fun j => hGmEnt i j
-  -- the Gram matrix is invertible on the base set (positive-definiteness)
   have hdetne : ∀ y, y ∈ e.baseSet -> (Gm y).det ≠ 0 := by
     intro y hy hdet0
     obtain ⟨c, hc0, hcv⟩ := (Matrix.exists_mulVec_eq_zero_iff (M := Gm y)).2 hdet0
@@ -153,7 +147,6 @@ theorem normSq0S_contAt {s : ℕ}
       funext i
       exact hall i
     exact absurd hinner (ne_of_gt (g.pos y w hwne))
-  -- continuity of the inverse Gram matrix (Cramer)
   have hGinvc : ContinuousAt (fun y => (Gm y)⁻¹) x₀ := by
     have hdetc : ContinuousAt (fun y => (Gm y).det) x₀ :=
       (continuous_id.matrix_det).continuousAt.comp hGmc
@@ -170,7 +163,6 @@ theorem normSq0S_contAt {s : ℕ}
   have hGinvEnt : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousAt (fun y => (Gm y)⁻¹ i j) x₀ := fun i j =>
     continuousAt_pi.1 (continuousAt_pi.1 hGinvc i) j
-  -- the inverse Gram entries witness `MetricInverseInBasis` at every base-set point
   have hinvw : ∀ y (hy : y ∈ e.baseSet),
       MetricInverseInBasis (I := I) g y (e.basisAt b hy) (fun i j => (Gm y)⁻¹ i j) := by
     intro y hy i j
@@ -189,7 +181,6 @@ theorem normSq0S_contAt {s : ℕ}
         (Matrix.mul_apply).symm
       rw [Finset.sum_congr rfl fun k _ => by rw [hGb i k], this,
         Matrix.mul_nonsing_inv (Gm y) hunit, Matrix.one_apply]
-  -- the coordinate functional is continuous
   have hF : ContinuousAt (fun y : M =>
       ∑ I0 : Fin s -> Fin (Module.finrank ℝ E),
         ∑ J0 : Fin s -> Fin (Module.finrank ℝ E),
@@ -200,7 +191,6 @@ theorem normSq0S_contAt {s : ℕ}
     have hprod : ContinuousAt (fun y => ∏ a : Fin s, (Gm y)⁻¹ (I0 a) (J0 a)) x₀ :=
       tendsto_finset_prod _ fun a _ => hGinvEnt (I0 a) (J0 a)
     exact (hprod.mul (hslots s T I0)).mul (hslots s T J0)
-  -- on the base set, the squared norm equals the coordinate functional
   have hev : (fun y : M => normSq0S (I := I) g y s (T y)) =ᶠ[nhds x₀]
       fun y : M =>
         ∑ I0 : Fin s -> Fin (Module.finrank ℝ E),
@@ -223,9 +213,9 @@ theorem normSq0S_contAt {s : ℕ}
     rw [h1, h2]
   exact hF.congr hev.symm
 
-/-- **Spatial continuity of the covariant-tensor squared norm.**  For a smooth metric
-`g` and a smooth `(0,s)`-tensor field `T`, the function `y ↦ normSq0S g y s (T y)` is
-continuous on `M`. -/
+
+
+
 theorem normSq0S_cont {s : ℕ}
     (T : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :

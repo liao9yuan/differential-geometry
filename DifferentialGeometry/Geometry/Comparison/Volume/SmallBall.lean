@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open Bundle Set MeasureTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -34,7 +34,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Every positive-radius explicit-metric ball has positive finite real volume
@@ -70,6 +70,7 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Around the centre of a normal chart, its scalar volume density has a
 strictly positive lower bound on one model ball. -/
 private theorem normal_dens_lower
@@ -116,7 +117,7 @@ private theorem normal_dens_lower
   intro w hw
   exact (hδsub hw).2.le
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
   [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma sqrt_inner_le_norm
@@ -134,7 +135,7 @@ private lemma sqrt_inner_le_norm
   exact hsqrt.trans (by
     nlinarith [Real.sqrt_nonneg ‖g.inner p‖, norm_nonneg w])
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
   [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma exists_inner_bound

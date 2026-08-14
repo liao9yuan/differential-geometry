@@ -387,7 +387,8 @@ private theorem unitBall_average_abs_le_lpNorm_two
     calc
       (⨍ z in B1, |f z| ∂volume) * (volume.real B1) ^ ((1 : ℝ) / 2)
           = MeasureTheory.lpNorm (fun _ : E => ⨍ z in B1, |f z| ∂volume) 2 μ1 := by
-              rw [MeasureTheory.lpNorm_const' (μ := μ1) (p := (2 : ℝ≥0∞)) (by norm_num) (by norm_num)]
+              rw [MeasureTheory.lpNorm_const' (μ := μ1) (p := (2 : ℝ≥0∞)) (by norm_num)
+                (by norm_num)]
               simp [μ1, B1, abs_of_nonneg havg_nonneg]
       _ ≤ MeasureTheory.lpNorm (fun z => |f z|) 2 μ1 := hconst_lp
       _ = MeasureTheory.lpNorm f 2 μ1 := by

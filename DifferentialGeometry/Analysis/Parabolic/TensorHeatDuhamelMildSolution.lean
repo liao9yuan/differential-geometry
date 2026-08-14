@@ -1,22 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupTimeRegularity
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
-/-!
-# Duhamel mild solution of the inhomogeneous tensor heat equation on `L²`
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, given an initial
-datum `T_0 : TensorL2 r s g` and a continuous forcing term
-`F : ℝ → TensorL2 r s g`, the **Duhamel mild solution** of the
-inhomogeneous tensor heat equation `∂_t T = Δ_∇ T + F`, `T(0) = T_0`, is
-
-  `T(t) := e^{tΔ_∇} T_0 + ∫_0^t e^{(t-τ)Δ_∇} (F τ) dτ`,
-
-where the second summand is a Bochner-valued interval integral on `[0, t]`.
-
-This file provides the file-local measure-theoretic scaffolding for that
-construction.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

@@ -30,10 +30,10 @@ namespace Geodesic
 open Bundle Filter Manifold Set TopologicalSpace
 open scoped Topology Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [FiniteDimensional ℝ F] [CompleteSpace F]
   [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -57,6 +57,8 @@ private theorem metric_ext
   subst hi
   rfl
 
+omit [NeZero (Module.finrank ℝ E)]
+  [NeZero (Module.finrank ℝ F)] in
 /-- A metric-preserving local diffeomorphism transports the geodesic equation
 at a time where the source curve is smooth. -/
 theorem geoEq_map_localIso
@@ -186,6 +188,8 @@ theorem geoEq_map_localIso
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at
     (I := J) (g := g') hmap_eq.eq_of_nhds hmap_eq hgeo_target
 
+omit [NeZero (Module.finrank ℝ E)]
+  [NeZero (Module.finrank ℝ F)] in
 /-- A metric-preserving local diffeomorphism reflects the geodesic equation
 at a time where the source curve is smooth. -/
 theorem geoEq_of_map_localIso
@@ -272,8 +276,7 @@ theorem geoEq_of_map_localIso
     dsimp only [Ψ]
     have hγUs : ((γU s : U) : M) = γ s := by
       simp only [γU, dif_pos hs]
-    change f (γ s) =
-      (Φ : M → N) ((γU s : U) : M)
+    change f (γ s) = (Φ : M → N) ((γU s : U) : M)
     rw [hγUs]
     exact hfΦ hs
   have hgeo_target :
@@ -316,6 +319,7 @@ theorem geoEq_of_map_localIso
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at
     (I := I) (g := g) hγU_val.eq_of_nhds.symm hγU_val.symm hgeo_ambient
 
+omit [NeZero (Module.finrank ℝ F)] in
 /-- A metric-preserving local diffeomorphism sends a continuous geodesic on
 an open time set to a geodesic on the same set. -/
 theorem geoOn_map_localIso

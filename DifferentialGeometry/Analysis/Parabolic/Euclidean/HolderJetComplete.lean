@@ -1,29 +1,11 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HolderPath
 import Mathlib.Topology.ContinuousMap.Bounded.Normed
 import Mathlib.Topology.Sequences
-
-/-!
-# A complete finite-component parabolic Holder jet carrier
-
-The extended gauges in `HolderPath.lean` are useful estimates, but predicates
-on arbitrary functions are not themselves a complete contraction space.  This
-file supplies an actual complete topology without adding a global instance.
-
-For each member of a finite chart/component family we keep bounded continuous
-fields for spatial jets of orders zero, one, and two on `[0, tau] x V`.  The
-ambient topology is the product sup-norm topology.  We restrict to a closed
-ball on which the second jet has uniform spatial exponent `1/2` and temporal
-exponent `1/4`.  The restriction is closed, hence complete.  A later Duhamel
-operator must return realized jets; at a fixed point, realization follows from
-the fixed-point equality and does not require treating arbitrary independent
-jets as derivatives.
--/
-
+import Mathlib.Topology.UniformSpace.Pi
 noncomputable section
 
 open Set Filter
-open scoped ENNReal NNReal Topology
-
+open scoped ENNReal NNReal Topology BoundedContinuousFunction
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
@@ -41,11 +23,9 @@ abbrev JetValue (j : ℕ) :=
 The product carries its standard sup-norm metric and complete-space structure
 when `F` is complete. -/
 abbrev ParHolderJet (τ : ℝ) :=
-  ((Set.Icc (0 : ℝ) τ × V) →ᵇ JetValue (V := V) (F := F) 0) ×
-    (((Set.Icc (0 : ℝ) τ × V) →ᵇ JetValue (V := V) (F := F) 1) ×
-      ((Set.Icc (0 : ℝ) τ × V) →ᵇ JetValue (V := V) (F := F) 2))
-
-/-- A finite chart/component family of parabolic jets. -/
+  ((Set.Icc (0 : ℝ) τ × V) →ᵇ (JetValue (V := V) (F := F) 0)) ×
+    (((Set.Icc (0 : ℝ) τ × V) →ᵇ (JetValue (V := V) (F := F) 1)) ×
+      ((Set.Icc (0 : ℝ) τ × V) →ᵇ (JetValue (V := V) (F := F) 2)))
 abbrev FinHolderJet (ι : Type*) (τ : ℝ) :=
   ι → ParHolderJet (V := V) (F := F) τ
 
@@ -74,43 +54,43 @@ theorem finHolder_closed
   refine IsSeqClosed.isClosed ?_
   intro u J hu hlim
   have hR : dist J 0 ≤ (R : ℝ) := by
-    have hdist : Tendsto (fun n => dist (u n) 0) atTop (𝒩 (dist J 0)) :=
+    have hdist : Tendsto (fun n => dist (u n) 0) atTop (𝓝 (dist J 0)) :=
       hlim.dist tendsto_const_nhds
     exact le_of_tendsto hdist
       (Eventually.of_forall (fun n => (hu n).1))
   refine ⟨hR, ?_, ?_⟩
   · intro i t x y
     have hx : Tendsto (fun n => (u n i).2.2 (t, x)) atTop
-        (𝒩 ((J i).2.2 (t, x))) := by
+        (𝓝 ((J i).2.2 (t, x))) := by
       have hc : Continuous
           (fun A : FinHolderJet (V := V) (F := F) ι τ =>
             (A i).2.2 (t, x)) :=
         (jet2_eval_cont (V := V) (F := F)).comp (continuous_apply i)
-      exact hc.tendsto.comp hlim
+      exact (hc.tendsto J).comp hlim
     have hy : Tendsto (fun n => (u n i).2.2 (t, y)) atTop
-        (𝒩 ((J i).2.2 (t, y))) := by
+        (𝓝 ((J i).2.2 (t, y))) := by
       have hc : Continuous
           (fun A : FinHolderJet (V := V) (F := F) ι τ =>
             (A i).2.2 (t, y)) :=
         (jet2_eval_cont (V := V) (F := F)).comp (continuous_apply i)
-      exact hc.tendsto.comp hlim
+      exact (hc.tendsto J).comp hlim
     exact le_of_tendsto (hx.edist hy)
       (Eventually.of_forall (fun n => (hu n).2.1 i t x y))
   · intro i x t s
     have ht : Tendsto (fun n => (u n i).2.2 (t, x)) atTop
-        (𝒩 ((J i).2.2 (t, x))) := by
+        (𝓝 ((J i).2.2 (t, x))) := by
       have hc : Continuous
           (fun A : FinHolderJet (V := V) (F := F) ι τ =>
             (A i).2.2 (t, x)) :=
         (jet2_eval_cont (V := V) (F := F)).comp (continuous_apply i)
-      exact hc.tendsto.comp hlim
+      exact (hc.tendsto J).comp hlim
     have hs : Tendsto (fun n => (u n i).2.2 (s, x)) atTop
-        (𝒩 ((J i).2.2 (s, x))) := by
+        (𝓝 ((J i).2.2 (s, x))) := by
       have hc : Continuous
           (fun A : FinHolderJet (V := V) (F := F) ι τ =>
             (A i).2.2 (s, x)) :=
         (jet2_eval_cont (V := V) (F := F)).comp (continuous_apply i)
-      exact hc.tendsto.comp hlim
+      exact (hc.tendsto J).comp hlim
     exact le_of_tendsto (ht.edist hs)
       (Eventually.of_forall (fun n => (hu n).2.2 i x t s))
 
@@ -128,6 +108,8 @@ theorem finHolder_complete
     (ι : Type*) [Fintype ι] (τ : ℝ) (R Cspace Ctime : ℝ≥0) :
     CompleteSpace
       (FinHolderBall (V := V) (F := F) ι τ R Cspace Ctime) := by
+  letI : ∀ _ : ι, CompleteSpace (ParHolderJet (V := V) (F := F) τ) :=
+    fun _ => inferInstance
   exact (finHolder_closed (V := V) (F := F)
     ι τ R Cspace Ctime).isComplete.completeSpace_coe
 
@@ -179,9 +161,7 @@ theorem fixed_jet_realizes
     (hreal : ∀ J, FinJetRealizes (V := V) (F := F) (Φ J) (real J))
     {J : FinHolderJet (V := V) (F := F) ι τ} (hfix : Φ J = J) :
     FinJetRealizes (V := V) (F := F) J (real J) := by
-  rw [← hfix]
-  exact hreal J
-
+  simpa only [hfix] using hreal J
 end Euclidean
 end Parabolic
 end Analysis

@@ -1,11 +1,11 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseEndpoint
 
-/-!
-# Quantitative normal diagonal branch at a fixed radius
 
-This file packages the public fixed-radius producer underlying the existential
-and uniform normal diagonal branch theorems.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -29,10 +29,10 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- At any fixed phase radius satisfying the bilateral fence, acceleration,
-and quantitative inverse bounds, the retained normal endpoint determines an
-explicit positive smooth inverse branch compatible with `diagExp`, together
-with the coordinate fence needed for exact transport. -/
+
+
+
+
 theorem normalDiagAtFull
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -50,7 +50,7 @@ theorem normalDiagAtFull
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric x / 4))
+        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
     (q : NNReal) (hq : 0 < q)
     (hqWide : 6 * (q : Real) < r)
     (hqAccel : 3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤
@@ -160,19 +160,19 @@ theorem normalDiagAtFull
     have htime : (1 : Real) ∈ Set.Icc (-1) 1 := by norm_num
     have hzEnd : (Φ z 1).1 ∈ Metric.ball (0 : E) r :=
       (hΦbox z hz 1 htime).1
-    have hExpPos := expRadiusGp_pos (I := I) (X.obj k).metric x
+    have hExpPos := expMapC2Radius_pos (I := I) (X.obj k).metric x
     have hrNormal : Metric.ball (0 : E) r ⊆ normalBall (I := I) (X.obj k) x := by
       intro v hv
       have hvQuarter := hrQuarter hv
       change v ∈ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric x)
+        (expMapC2Radius (I := I) (X.obj k).metric x)
       exact Metric.ball_subset_ball (by nlinarith) hvQuarter
     have hzFirst' := hrNormal hzFirst
     have hzEnd' := hrNormal hzEnd
     rw [hcoe]
     exact ⟨hzFirst', hzFirst', hzEnd'⟩
 
-/-- Compatibility wrapper retaining the original fixed-radius endpoint. -/
+
 theorem normalDiagAt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -190,7 +190,7 @@ theorem normalDiagAt
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric x / 4))
+        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
     (q : NNReal) (hq : 0 < q)
     (hqWide : 6 * (q : Real) < r)
     (hqAccel : 3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤

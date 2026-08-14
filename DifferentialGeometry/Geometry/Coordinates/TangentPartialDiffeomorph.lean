@@ -3,12 +3,12 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
 set_option autoImplicit false
 
-/-!
-# Tangent lift of a partial diffeomorphism
 
-This file packages the tangent map of a positive-order partial diffeomorphism
-and the tangent map of its inverse as one open partial homeomorphism.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H' N] [IsManifold J 1 N]
 variable {n : WithTop ℕ∞}
 
-/-- The tangent map of a positive-order partial diffeomorphism, bundled with
-the tangent map of its inverse on the corresponding open tangent bundles. -/
+
+
 def tangentHome (Φ : PartialDiffeomorph I J M N n) (hn : 1 ≤ n) :
     OpenPartialHomeomorph (TangentBundle I M) (TangentBundle J N) where
   toFun := tangentMapWithin I J (Φ : M → N) Φ.source

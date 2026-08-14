@@ -20,7 +20,6 @@ cross-chart `W^{k,p}` estimate; no regularity is assumed here.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -33,7 +32,7 @@ namespace Tensor
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -48,6 +47,8 @@ proof.  It is definitionally the trivialization used by `transitionCoeff`. -/
   trivializationAt (TensorRSModel r s ℝ E)
     (fun y : M => TensorRSSpace r s I y) α
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem rawRSTriv_base (r s : ℕ) (α : M) :
     (rawRSTriv (E := E) (I := I) (M := M) r s α).baseSet =
       (chartAt H α).source := by
@@ -63,6 +64,8 @@ private theorem rawRSTriv_base (r s : ℕ) (α : M) :
   rw [Set.inter_self]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem coordChange_apply
     (r s : ℕ) (γ α : M) {x : M}
     (hxγ : x ∈ (chartAt H γ).source) (hxα : x ∈ (chartAt H α).source)
@@ -97,6 +100,8 @@ private theorem coordChange_apply
     Bundle.Trivialization.coe_linearMapAt_of_mem _ hxα',
     Bundle.Trivialization.symmL_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 /-- On a chart overlap, the model value of an arbitrary raw section changes
 by the standard bundle coordinate-change map. -/
 theorem secTriv_trans
@@ -126,11 +131,10 @@ theorem secTriv_trans
   rw [coordChange_apply (E := E) (I := I) (M := M)
     r s γ α hxγ hxα]
   unfold secTriv
-  rw [(rawRSTriv (E := E) (I := I) (M := M) r s γ)
-    .symmL_continuousLinearMapAt hxγ' (S x)]
-
-/-- The explicit finite transition formula for an arbitrary genuine raw
-tensor section.  No smoothness or Sobolev membership is used. -/
+  rw [Bundle.Trivialization.symmL_continuousLinearMapAt
+    (rawRSTriv (E := E) (I := I) (M := M) r s γ) hxγ' (S x)]
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem secCompRaw_trans
     (r s : ℕ) (S : RSTensorSection I M r s) (γ α : M)
     (P₀ : TensorCompIdx (E := E) r s) {x : M}
@@ -186,6 +190,8 @@ theorem secCompRaw_trans
       rfl]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 /-- In the source chart, trivializing `secModelPull α v` recovers the model
 field `v` at the corresponding Euclidean coordinate. -/
 theorem secPull_triv_eq
@@ -202,11 +208,10 @@ theorem secPull_triv_eq
     exact hx
   unfold secTriv secModelPull
   rw [dif_pos hx]
-  exact (rawRSTriv (E := E) (I := I) (M := M) r s α)
-    .continuousLinearMapAt_symmL hx' _
-
-/-- In its source chart, the raw component of `secModelPull α v` is exactly
-the corresponding scalar projection of `v`. -/
+  exact Bundle.Trivialization.continuousLinearMapAt_symmL
+    (rawRSTriv (E := E) (I := I) (M := M) r s α) hx' _
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem secPull_raw_eq
     (r s : ℕ) (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →
@@ -221,6 +226,8 @@ theorem secPull_raw_eq
   unfold secCompRaw
   rw [secPull_triv_eq (E := E) (I := I) (M := M) r s α v hx]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 /-- A target-chart raw component of a pulled-back weak model field is a finite
 transition-coefficient sum of the scalar source-model components. -/
 theorem secPull_raw_trans

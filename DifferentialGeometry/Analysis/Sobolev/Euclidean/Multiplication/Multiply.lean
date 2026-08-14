@@ -1,23 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-/-!
-# Multiplication by smooth bounded functions in `W^{k,p}`
-
-For a smooth (`C^∞`) function `η : E → ℝ` whose iterated derivatives up to
-order `k` are uniformly bounded on the open set `Ω`, the operation
-`u ↦ η · u` preserves membership in `W^{k,p}(Ω)`.
-
-The first-order case is supplied by the vendored
-`MemW1pWitness.mul_smooth_bounded_p` lemma. The iterated case is proved
-recursively, exploiting the Leibniz identity at the level of the chosen
-weak partial:
-
-  `chosenWeakPartial' p i (η · u) =ᵐ η · chosenWeakPartial' p i u + (∂ᵢ η) · u`.
-
-The induction argument uses the closure of `MemWkp` under addition and
-under (smooth-bounded) multiplication by a function of one lower order.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -32,8 +14,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The j-th iterated derivative of `(fderiv ℝ η ·)(e_i)` is bounded by the
-(j+1)-th iterated derivative of `η`. -/
 lemma norm_iteratedFDeriv_partial_le
     {η : E → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -65,7 +45,6 @@ lemma norm_iteratedFDeriv_partial_le
           simp
     _ = ‖iteratedFDeriv ℝ (j + 1) η x‖ := one_mul _
 
-/-- The (∂ᵢη) is smooth (C∞). -/
 lemma contDiff_partial_eta
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (i : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -79,7 +58,6 @@ lemma contDiff_partial_eta
     simpa using hfd
   exact hfd'.clm_apply contDiff_const
 
-/-- `MemW1p` is preserved by multiplication by a smooth bounded function. -/
 theorem MemW1p.mul_smooth_bounded
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {η u : E → ℝ}
@@ -141,7 +119,6 @@ theorem MemW1p.mul_smooth_bounded
         hg_memLp.locallyIntegrable hp
       exact DeGiorgi.HasWeakPartialDeriv.mul_smooth hΩ hg_weak hη hu_loc hg_loc
 
-/-- The chosen weak partial of `η · u` is a.e. equal to `η · ∂ᵢu + (∂ᵢη) · u`. -/
 theorem chosenWeakPartial'_smul_smooth_bounded_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {η u : E → ℝ}
@@ -216,8 +193,6 @@ theorem chosenWeakPartial'_smul_smooth_bounded_ae
     (hηcwp_memLp.add hdηu_memLp).locallyIntegrable hp
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ hLHS hRHS hLHS_loc hRHS_loc
 
-/-- `MemWkp k p` is preserved by multiplication by a smooth function whose
-iterated derivatives up to order `k` are uniformly bounded on `Ω`. -/
 theorem MemWkp.smul_smooth_bounded
     (k : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -291,9 +266,6 @@ theorem MemWkp.smul_smooth_bounded
         exact MemWkp.add (d := d) hp hΩ hT1 hT2
       exact (MemWkp_congr_ae (d := d) hp hΩ hae).mpr hRHS_in_Wk
 
-/-- A polynomial-in-`C` bound for the `wkpNorm` of `η · u` in terms of
-`wkpNorm` of `u`. The constant is finite, derived from the smooth bound
-on `η`. -/
 theorem wkpNorm_smul_smooth_bounded_lt_top
     (k : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -302,7 +274,7 @@ theorem wkpNorm_smul_smooth_bounded_lt_top
     {C : ℝ}
     (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
-    wkpNorm (d := d) k p (fun x => η x * u x) Ω < (⊤ : ℝ≥0∞) :=
+    iteratedWeakSobolevNorm (d := d) k p (fun x => η x * u x) Ω < (⊤ : ℝ≥0∞) :=
   wkpNorm_lt_top_of_memWkp
     (MemWkp.smul_smooth_bounded (d := d) k hp hΩ hη hη_bound hu)
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH3
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Lowered
 
 /-!
 # Class-first full raised coefficient H3 bound
@@ -156,8 +157,10 @@ private theorem idSlotJet
   have h1 := idSlotSucc (I := I) (M := M) hDim g 0
   have h2 := idSlotSucc (I := I) (M := M) hDim g 1
   have h3 := idSlotSucc (I := I) (M := M) hDim g 2
-  norm_num [Finset.sum_range_succ, h1, h2, h3] at ⊢
-  exact h0
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  rw [h1, h2, h3]
+  norm_num
+  simpa only [iteratedCovGrad_zero] using h0
 
 private theorem fullSlotSplit (g gm : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g 1
@@ -280,13 +283,18 @@ theorem fullRaised_h3_unif
           riemannianFiberNormSq (I := I) (M := M) g 2 2 x
             ((slotInsertEndoCc (I := I) (M := M) g 1
               (fullRaisedEndoField (I := I) (M := M) g g)).toSection x)) :=
-        riemannianFiberNormSq_add_le (I := I) (M := M) g 2 2 x _ _
+        by
+          simpa only [Pi.add_apply, mul_add] using
+            (riemannianFiberNormSq_add_le (I := I) (M := M) g 2 2 x
+              ((gInvDiffSlotCoeff (I := I) g gm).toSection x)
+              ((slotInsertEndoCc (I := I) (M := M) g 1
+                (fullRaisedEndoField (I := I) (M := M) g g)).toSection x))
       _ ≤ 2 * ((Cinv * N) ^ 2 + 27) := by
         refine mul_le_mul_of_nonneg_left (add_le_add ?_ ?_) (by norm_num)
         · simpa only [N] using hinvPt x
         · exact idSlotPt (I := I) (M := M) hDim g x
       _ ≤ 2 * (Cinv ^ 2 + 27) * (1 + N) ^ 2 :=
-        affineSq Cinv 27 (by norm_num) hN
+        affineSq Cinv 27 N (by norm_num) hN
       _ ≤ K * (1 + N) ^ 2 :=
         mul_le_mul_of_nonneg_right hcoefPt (sq_nonneg _)
       _ = (Real.sqrt K * (1 + N)) ^ 2 := by
@@ -305,7 +313,7 @@ theorem fullRaised_h3_unif
         refine mul_le_mul_of_nonneg_left (add_le_add ?_ hidJet) (by norm_num)
         simpa only [N] using hinvJet
       _ ≤ 2 * (Cinv ^ 2 + 27 * vol) * (1 + N) ^ 2 :=
-        affineSq Cinv (27 * vol) (mul_nonneg (by norm_num) hvol) hN
+        affineSq Cinv (27 * vol) N (mul_nonneg (by norm_num) hvol) hN
       _ ≤ K * (1 + N) ^ 2 :=
         mul_le_mul_of_nonneg_right hcoefJet (sq_nonneg _)
       _ = (Real.sqrt K * (1 + N)) ^ 2 := by

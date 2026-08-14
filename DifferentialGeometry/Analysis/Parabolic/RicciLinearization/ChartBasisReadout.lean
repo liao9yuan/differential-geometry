@@ -1,7 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.UnitModel
-import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartBasisMetric
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
+import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleLocalityIdentities
 
@@ -36,14 +37,13 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+omit [NeZero (Module.finrank ℝ E)] in
 set_option linter.unusedSectionVars false in
 theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMetric I M)
     (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M)
@@ -54,10 +54,11 @@ theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMet
   unfold tensorTrivProj
   rw [DifferentialGeometry.Tensor.tensorRS_trivAt_continuousLinearMapAt_apply_eq_self_on_locality
         (I := I) (M := M) 0 s x (b := x) rfl (mem_chart_source H x)
-        (W.toSection x) (dualCovariantCMM (E := E) 0 ![])]
+        (W.toSection x) (dualCoordinateProductMultilinearMap (E := E) 0 ![])]
   unfold unitModel
   congr 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 set_option linter.unusedSectionVars false in
 theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M) (k i : Fin (Module.finrank ℝ E)) :
@@ -69,6 +70,7 @@ theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric
     funext j; fin_cases j <;> rfl
   rwa [hfun] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
 set_option linter.unusedSectionVars false in
 theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
     (g₁ : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
@@ -82,13 +84,13 @@ theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
   have hself : ∀ t : Fin (Module.finrank ℝ E),
       chartBasisVecFiber (I := I) x t x = chartModelBasis E t := fun t =>
     chartBasisVecFiber_self (I := I) x t
-  apply metricFlatLinear_injective (I := I) g₁ x
+  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective (I := I) g₁ x
   ext u
   change g₁.inner x (cometricLmodel (I := I) g₁ x
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) ((chartModelBasis E).cDualBasis k))) u =
     g₁.inner x (∑ l : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) g₁ x x k l • (chartModelBasis E l : TangentSpace I x)) u
-  rw [cometricLmodel_inner (I := I) g₁ x ((chartModelBasis E).cDualBasis k) u]
+  rw [cometricLmodel_covectorOfCLM_inner (I := I) g₁ x ((chartModelBasis E).cDualBasis k) u]
   have hu : u = ∑ m : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr
           ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x u)) m •

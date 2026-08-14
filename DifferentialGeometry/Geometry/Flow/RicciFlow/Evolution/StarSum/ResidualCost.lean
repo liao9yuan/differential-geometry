@@ -41,6 +41,8 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- The level-zero curvature reaction has the same explicit constructor cost
 for every finite orthonormal-frame index type. -/
 theorem e0Field_cost_any {Idx : Type*} [Fintype Idx]
@@ -68,10 +70,11 @@ def rmBaseReact {Idx : Type*} [Fintype Idx]
   DifferentialGeometry.Integral.Connection.hamiltonRmReact R m
 
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- In every finite orthonormal frame, `e0Field` realizes the explicit
 arbitrary-dimensional quadratic curvature reaction. -/
 theorem e0Field_comp_any {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    [InnerProductSpace Real E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,

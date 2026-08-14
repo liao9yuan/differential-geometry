@@ -2,30 +2,6 @@ import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Basic
 
-/-!
-# Borel-charted spaces
-
-A `ChartedSpace H M` instance specifies, for every point `x : M`, a chart
-`chartAt H x : OpenPartialHomeomorph M H`.  No additional regularity is required
-of the assignment `x ↦ chartAt H x` itself — in particular, neither
-Borel-measurability of the chart-selection map nor countability of its image is
-guaranteed.  Pathological `ChartedSpace` instances exist where the chart-selection
-map is too wild to support chart-local arguments globally.
-
-This file introduces the typeclass `IsBorelChartedSpace H M` capturing the
-"no-pathology" property the abstract `ChartedSpace` typeclass leaves out, in the
-form needed downstream: the chart-selection map `chartAt H` has countable image
-and each of its level sets is Borel-measurable in `M`.  These two conditions
-combine to a countable Borel-measurable cover of `M` by chart-source-contained
-pieces, which is the key input for proving Borel-measurability of bundle
-sections viewed through the model fiber.
-
-The class is `Prop`-valued, so it carries no data.  It is *not* an axiom: the
-content is verified per-instance, and pathological `ChartedSpace` instances
-(where the chart-selection map has uncountable image, for example) are
-genuinely excluded — that exclusion is the whole point.
--/
-
 noncomputable section
 
 open Set MeasureTheory
@@ -37,14 +13,6 @@ namespace Measure
 variable {H : Type*} [TopologicalSpace H]
 variable {M : Type*} [TopologicalSpace M]
 
-/-- A `ChartedSpace H M` is *Borel* when the chart-selection map `chartAt H` has
-countable image and each of its level sets is Borel-measurable.  Equivalently:
-`chartAt H` is Borel-measurable into `OpenPartialHomeomorph M H` equipped with
-the discrete σ-algebra, and its image is countable.
-
-Every standard `ChartedSpace` instance satisfies these conditions; the class
-exists to exclude pathological instances where the chart-selection map fails
-either property. -/
 class IsBorelChartedSpace (H : Type*) (M : Type*)
     [TopologicalSpace H] [TopologicalSpace M] [ChartedSpace H M] : Prop where
 
@@ -59,8 +27,6 @@ namespace IsBorelChartedSpace
 
 variable [ChartedSpace H M]
 
-/-- Each chart-level set `{x | chartAt H x = c}` is contained in the source of
-`c`: if `chartAt H x = c`, then by `mem_chart_source` we have `x ∈ c.source`. -/
 theorem chartAt_preimage_subset_source
     (c : OpenPartialHomeomorph M H) :
     {x : M | chartAt H x = c} ⊆ c.source := by
@@ -69,15 +35,6 @@ theorem chartAt_preimage_subset_source
   rw [hx] at hxs
   exact hxs
 
-/-- A countable Borel-measurable cover of `M` by chart-source-contained pieces.
-
-This packages the typeclass content into the form most directly useful for
-downstream proofs: a sequence `s : ℕ → Set M` of Borel-measurable sets covering
-`M`, with each `s n` contained in the source of an associated chart `c n`
-belonging to the atlas.  On each piece `s n`, every smooth bundle section's
-underlying map is continuous as a function to the model fiber via the
-trivialization induced by `c n`, so a function continuous chart-locally is
-Borel-measurable globally. -/
 theorem exists_countable_borel_chart_cover
     [_root_.DifferentialGeometry.Integral.Measure.IsBorelChartedSpace H M]
     [Nonempty M] :

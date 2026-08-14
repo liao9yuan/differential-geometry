@@ -2,14 +2,14 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffPai
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffH0
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 
-/-!
-# Short-time measurability of the moving scalar Laplacian
 
-The fixed-reference two-metric estimate gives operator-norm continuity on a
-short interval of regular times.  The canonical `L² ≃ H⁰` postcomposition
-then gives the strongly measurable, uniformly small top-order perturbation
-consumed by non-autonomous maximal regularity.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -41,9 +41,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The fixed-`L²` moving Laplacian is operator-norm continuous on any set of
-regular backward times where all metrics stay in the verified core-extension
-neighborhood of the frozen metric. -/
+
+
+
 theorem lapDiffA2_cont
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -116,9 +116,9 @@ theorem lapDiffA2_cont
     lt_of_le_of_lt
       (hpair (G.metric ((T : Real) - s)) hqh hqk hkh) hu
 
-/-- For every requested positive operator bound, there is a nontrivial time
-interval on which the genuine `H²(gT) → H⁰(gT)` perturbation is continuous,
-strongly measurable, and uniformly bounded by that value. -/
+
+
+
 theorem lapDiffA20_short
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

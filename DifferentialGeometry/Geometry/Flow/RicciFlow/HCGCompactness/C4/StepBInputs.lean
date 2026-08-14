@@ -11,38 +11,36 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 Step B normal-coordinate inputs (`lbl395`)
 
-This file collects the book-external honest inputs that Step B consumes at the
-model-coordinate level.
 
-## H6 / `lbl418` — transition derivatives
 
-The former S6 endpoint package for uniform `C^p` bounds on
-`normalChart_y ∘ exp_x` has been removed.  The canonical H6 route now derives
-those bounds from the normal-coordinate metric jets in `H6IsometryDeriv.lean`;
-the transition layer keeps the source and target containments explicit and
-uses the native `expMapDiffeo` / `normalChartAt` API.  No `exp_inv_deriv`
-endpoint field remains in this file.
 
-## `lbl395` — normal-coordinate metric bounds
 
-MSM135 Chapter 4 Proposition `lbl395` (Hamilton [H6] Corollary 4.12): in normal
-coordinates, `|∇^ℓ Rm| ≤ C_ℓ` forces `½δ ≤ g ≤ 2δ` and uniform bounds on all partial
-derivatives of `g`.  This is taken as an honest input now (Planner Ruling Q1); the
-native Jacobi/Grönwall discharge is the optional `B0NormalCoordBounds.md` route.
 
-The pulled-back metric is realized concretely as `normalCoordMetric`, the model-space
-bilinear-form map `E → (E →L[ℝ] E →L[ℝ] ℝ)`, mirroring `Diffeomorph.pullbackInner`.
-The input `NormalCoordMetricBoundInput` records, constants-first, the Euclidean
-equivalence and all-orders derivative bounds *only on the relevant normal-coordinate
-ball*.  It deliberately does NOT claim total `Set.univ` (`IsometryDerivBounds`)
-control; the partial-domain bridge is reserved for the later B-loc brick.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -59,29 +57,57 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
+
+section RawNormalCoordinates
+
+variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-/-- The model-coordinate transition map between the orthonormally framed normal
-charts at `x` and `y`. Outside the meaningful domain the partial diffeomorphisms
-return junk values; derivative bounds are therefore stated only on the chart overlap. -/
+private local instance : NormedAddCommGroup (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+
+
+
+
 noncomputable def normalTransition
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : X.M) : E → E :=
   letI : TopologicalSpace X.M := X.topology
   letI : ChartedSpace H X.M := X.charted
   letI : IsManifold I ∞ X.M := X.smooth
   letI : T2Space (TangentBundle I X.M) := X.t2TangentBundle
-  framedTransition (I := I) X.metric x y
+  fun z =>
+    normalChartAt (I := I) X.metric y
+      (expMapDiffeo (I := I) X.metric x z)
 
-/-! ## `lbl395` normal-coordinate metric bounds (honest input) -/
 
-/-- The metric pulled back through the orthonormally framed normal exponential
-at `x`. Its model vectors are genuine `g_x`-normal coordinates, so the value at
-the center is the fixed model inner product. Outside the selected chart source
-the partial-diffeomorphism derivative is junk; bounds are therefore local. -/
+
+
+
+
+
+
+
+
+
 noncomputable def normalCoordMetric
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     E -> (E →L[Real] E →L[Real] Real) :=
@@ -89,14 +115,19 @@ noncomputable def normalCoordMetric
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  NormalCoordinates.framedMetric (I := I) Y.metric x
+  fun z =>
+    let D : E →L[Real] TangentSpace I (expMapDiffeo (I := I) Y.metric x z) :=
+      mfderiv 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) z
+    (ContinuousLinearMap.precomp Real D).comp
+      ((Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)).comp D)
 
-/-- **Comparison/smoothness of the realized parametrization** (frontier-1 producer, step 1).
-On a ball where forward `expMap` is `C∞` and inside the chart source, the realized
-normal-coordinate parametrization `expMapDiffeo` — only a `PartialDiffeomorph … 1` — is in
-fact `ContMDiffOn ⊤`, because it agrees there with the now-`C∞` `expMap`
-(`expMap_contMDiffAt_infty_of_norm_lt` + `expMapDiffeo_apply_eq` + `ContMDiffOn.congr`).
-This discharges the `C¹`-vs-`C∞` mismatch the hard-stop flagged. -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMapDiffeo_contMDiffOn_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -123,7 +154,10 @@ theorem expMapDiffeo_contMDiffOn_ball
     exact (hforward w hwδ).contMDiffWithinAt
   exact hexp.congr (fun w hw => expMapDiffeo_apply_eq (I := I) Y.metric x hw.2)
 
-/-- Scalar evaluation of the framed normal-coordinate metric. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (z v w : E) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -131,39 +165,37 @@ theorem normalCoordMetric_apply
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     normalCoordMetric (I := I) Y x z v w =
-      Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)
-        (mfderiv 𝓘(Real, E) I
-          (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
-        (mfderiv 𝓘(Real, E) I
-          (fun u => framedExpDiffeo (I := I) Y.metric x u) z w) := by
+      Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
+        (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+        (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact NormalCoordinates.framedMetric_apply (I := I) Y.metric x z v w
+  simp only [normalCoordMetric, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.precomp_apply]
+  rfl
 
-/-- At the origin of a framed normal chart, the pulled-back metric is the fixed
-model inner product. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalMetric_zero
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (c : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    normalCoordMetric (I := I) Y c 0 =
-      (innerSL Real : E →L[Real] E →L[Real] Real) := by
+    normalCoordMetric (I := I) Y c 0 = Y.metric.inner c := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact NormalCoordinates.framedMetric_zero (I := I) Y.metric c
+  ext v w
+  rw [normalCoordMetric_apply (I := I), expMapDiffeo_zero (I := I)]
+  exact normalChartAt_metric_pullback_at_origin (I := I) Y.metric c v w
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The extended norm of a radial exponential-curve velocity is the square root
-of the normal-coordinate metric in the radial direction.  This is the
-`normalCoordMetric`-facing form of `mfderiv_exp_radial` used by the Step-B
-basepoint-separation argument. -/
 theorem radialEnorm_normal
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (v : E) :
@@ -173,12 +205,10 @@ theorem radialEnorm_normal
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
       ⟨Y.metric.toRiemannianMetric⟩
-    ∀ (t : Real), ‖t • v‖ < expRadiusGp (I := I) Y.metric x →
+    ∀ (t : Real), ‖t • v‖ < expMapC2Radius (I := I) Y.metric x →
     ‖mfderiv 𝓘(Real, Real) I
         (fun s : Real => (expMap (I := I) Y.metric x
-          (show TangentSpace I x from
-            s • (show E from normalFrame (I := I) Y.metric x v)) : Y.M))
-        t (1 : Real)‖ₑ =
+          (show TangentSpace I x from (s • v)) : Y.M)) t (1 : Real)‖ₑ =
       ENNReal.ofReal (Real.sqrt (normalCoordMetric (I := I) Y x (t • v) v v)) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -187,132 +217,55 @@ theorem radialEnorm_normal
   letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
     ⟨Y.metric.toRiemannianMetric⟩
   intro t ht
-  let a : E := show E from normalFrame (I := I) Y.metric x v
-  have hraw : ‖t • a‖ <
-      expMapC2Radius (I := I) Y.metric x := by
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt
-      (I := I) Y.metric x (x := t • a)
-    have ha : t • a =
-        (show E from normalFrame (I := I) Y.metric x (t • v)) := by
-      change t • (normalFrame (I := I) Y.metric x v) =
-        normalFrame (I := I) Y.metric x (t • v)
-      exact (map_smul (normalFrame (I := I) Y.metric x) t v).symm
-    rw [ha, normalFrame_sqrt]
-    exact ht
-  have hsrcRaw : t • a ∈ (expMapDiffeo (I := I) Y.metric x).source :=
-    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hraw
-  have hsrc : t • v ∈ (framedExpDiffeo (I := I) Y.metric x).source := by
-    rw [framedExp_source]
-    change normalFrame (I := I) Y.metric x (t • v) ∈
-      (expMapDiffeo (I := I) Y.metric x).source
-    simpa only [a, map_smul] using hsrcRaw
-  have hev : expMapDiffeo (I := I) Y.metric x =ᶠ[nhds (t • a)]
+  have hsrc : t • v ∈ (expMapDiffeo (I := I) Y.metric x).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x ht
+  have hev : expMapDiffeo (I := I) Y.metric x =ᶠ[nhds (t • v)]
       (fun z : E => (expMap (I := I) Y.metric x
         (show TangentSpace I x from z) : Y.M)) := by
     refine Filter.eventuallyEq_of_mem
-      ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hsrcRaw) ?_
+      ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hsrc) ?_
     intro z hz
     exact expMapDiffeo_apply_eq (I := I) Y.metric x hz
-  simp only [a] at hev
-  rw [mfderiv_exp_radial (I := I) Y.metric x
-    a t hraw]
+  rw [mfderiv_exp_radial (I := I) Y.metric x v t ht]
   rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
   have hinner :
       (inner Real
         (mfderiv 𝓘(Real, E) I
           (fun z : E => (expMap (I := I) Y.metric x
-            (show TangentSpace I x from z) : Y.M))
-          (t • a) a)
+            (show TangentSpace I x from z) : Y.M)) (t • v)
+          (show TangentSpace I x from v))
         (mfderiv 𝓘(Real, E) I
           (fun z : E => (expMap (I := I) Y.metric x
-            (show TangentSpace I x from z) : Y.M))
-          (t • a) a) : Real) =
+            (show TangentSpace I x from z) : Y.M)) (t • v)
+          (show TangentSpace I x from v)) : Real) =
         Y.metric.inner
-          (expMap (I := I) Y.metric x
-            (show TangentSpace I x from t • a))
+          (expMap (I := I) Y.metric x (show TangentSpace I x from (t • v)))
           (mfderiv 𝓘(Real, E) I
             (fun z : E => (expMap (I := I) Y.metric x
-              (show TangentSpace I x from z) : Y.M))
-            (t • a) a)
+              (show TangentSpace I x from z) : Y.M)) (t • v)
+            (show TangentSpace I x from v))
           (mfderiv 𝓘(Real, E) I
             (fun z : E => (expMap (I := I) Y.metric x
-              (show TangentSpace I x from z) : Y.M))
-            (t • a) a) := rfl
-  rw [hinner, normalCoordMetric_apply (I := I)]
-  simp only [a] at hsrcRaw ⊢
-  rw [mfderiv_framedExp (I := I) Y.metric x hsrc]
-  rw [framedExp_apply]
-  rw [map_smul (normalFrame (I := I) Y.metric x) t v]
-  let dRaw := mfderiv 𝓘(Real, E) I
-    (fun u : E => expMapDiffeo (I := I) Y.metric x u)
-    (t • (show E from normalFrame (I := I) Y.metric x v))
-  change _ = ENNReal.ofReal (Real.sqrt
-    (Y.metric.inner
-      (expMapDiffeo (I := I) Y.metric x
-        (t • (show E from normalFrame (I := I) Y.metric x v)))
-      ((dRaw.comp (normalFrame (I := I) Y.metric x).toContinuousLinearMap) v)
-      ((dRaw.comp (normalFrame (I := I) Y.metric x).toContinuousLinearMap) v)))
-  have hcomp :
-      (dRaw.comp (normalFrame (I := I) Y.metric x).toContinuousLinearMap) v =
-        dRaw (show E from normalFrame (I := I) Y.metric x v) := rfl
-  rw [hcomp]
-  rw [expMapDiffeo_apply_eq (I := I) Y.metric x hsrcRaw]
-  dsimp only [dRaw]
-  rw [hev.mfderiv_eq]
+              (show TangentSpace I x from z) : Y.M)) (t • v)
+            (show TangentSpace I x from v)) := rfl
+  rw [hinner, normalCoordMetric_apply (I := I),
+    expMapDiffeo_apply_eq (I := I) Y.metric x hsrc, hev.mfderiv_eq]
 
-/-- The framed exponential-side parametrization is smooth on its intrinsic
-source-radius ball. -/
-theorem framedExp_smoothOn
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
-    letI : TopologicalSpace Y.M := Y.topology
-    letI : ChartedSpace H Y.M := Y.charted
-    letI : IsManifold I ∞ Y.M := Y.smooth
-    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    ContMDiffOn 𝓘(Real, E) I ∞
-      (fun z => framedExpDiffeo (I := I) Y.metric x z)
-      (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
-  letI : TopologicalSpace Y.M := Y.topology
-  letI : ChartedSpace H Y.M := Y.charted
-  letI : IsManifold I ∞ Y.M := Y.smooth
-  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  have hmap : ContMDiffOn 𝓘(Real, E) I ∞
-      (framedExpMap (I := I) Y.metric x)
-      (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
-    intro z hz
-    rw [Metric.mem_ball, dist_zero_right] at hz
-    have hzRaw : ‖(show E from normalFrame (I := I) Y.metric x z)‖ <
-        expMapC2Radius (I := I) Y.metric x := by
-      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
-      simpa only [normalFrame_sqrt] using hz
-    have hexp := expMap_contMDiffAt_infty_of_norm_lt_radius
-      (I := I) Y.metric x hzRaw
-    have hframe : ContMDiffAt 𝓘(Real, E) 𝓘(Real, E) ∞
-        (fun w : E => (show E from normalFrame (I := I) Y.metric x w)) z :=
-      (normalFrame (I := I) Y.metric x).toContinuousLinearMap.contMDiff.contMDiffAt
-    simpa only [framedExpMap_apply, Function.comp_apply] using
-      (hexp.comp z hframe).contMDiffWithinAt
-  refine hmap.congr (fun z hz => ?_)
-  rw [Metric.mem_ball, dist_zero_right] at hz
-  have hzRaw : ‖(show E from normalFrame (I := I) Y.metric x z)‖ <
-      expMapC2Radius (I := I) Y.metric x := by
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
-    simpa only [normalFrame_sqrt] using hz
-  exact framedExp_eq_expMap (I := I) Y.metric x
-    (by
-      rw [framedExp_source]
-      exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hzRaw)
 
-/-- Pushforward-section smoothness for a framed exponential parametrization
-that is `C∞` on an open set. -/
-private theorem framedPush_smooth
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem expMapDiffeo_pushforward_section_contMDiffOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {U : Set E}
     (hU : IsOpen U)
     (hf : letI : TopologicalSpace Y.M := Y.topology
           letI : ChartedSpace H Y.M := Y.charted
           letI : IsManifold I ∞ Y.M := Y.smooth
           letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-          ContMDiffOn 𝓘(Real, E) I ∞
-            (fun w => framedExpDiffeo (I := I) Y.metric x w) U)
+          ContMDiffOn 𝓘(Real, E) I ∞ (fun w => expMapDiffeo (I := I) Y.metric x w) U)
     (v : E) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
@@ -320,49 +273,34 @@ private theorem framedPush_smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, E)) ∞
       (fun z => TotalSpace.mk' E (E := fun b : Y.M => TangentSpace I b)
-        (framedExpDiffeo (I := I) Y.metric x z)
-        (mfderiv 𝓘(Real, E) I
-          (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)) U := by
+        (expMapDiffeo (I := I) Y.metric x z)
+        (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)) U := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  -- the within tangent map of `f` is `C∞` on the preimage of `U`
   have htm := hf.contMDiffOn_tangentMapWithin (m := ∞) le_rfl hU.uniqueMDiffOn
-  -- constant tangent section `z ↦ ⟨z, v⟩` of `TE`, via the model-space homeomorphism
   have hσ : ContMDiff 𝓘(Real, E) (𝓘(Real, E)).tangent ∞
       (fun z : E => (TotalSpace.mk' E z v : TangentBundle 𝓘(Real, E) E)) :=
     (contMDiff_vectorSpace_iff_contDiff (V := fun _ : E => v)).mpr contDiff_const
-  -- compose: `tangentMapWithin f U` after the constant section, on `U`
   have hcomp : ContMDiffOn 𝓘(Real, E) I.tangent ∞
-      (fun z => tangentMapWithin 𝓘(Real, E) I
-        (fun w => framedExpDiffeo (I := I) Y.metric x w) U
+      (fun z => tangentMapWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U
         (TotalSpace.mk' E z v)) U :=
     htm.comp (hσ.contMDiffOn (s := U)) (fun z hz => hz)
   refine hcomp.congr ?_
   intro z hz
-  have hmf : mfderivWithin 𝓘(Real, E) I
-      (fun w => framedExpDiffeo (I := I) Y.metric x w) U z =
-      mfderiv 𝓘(Real, E) I
-        (fun w => framedExpDiffeo (I := I) Y.metric x w) z :=
+  have hmf : mfderivWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U z
+      = mfderiv 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) z :=
     mfderivWithin_of_isOpen hU hz
   change TotalSpace.mk' E (E := fun b : Y.M => TangentSpace I b)
-      (framedExpDiffeo (I := I) Y.metric x z)
-      (mfderiv 𝓘(Real, E) I
-        (fun u => framedExpDiffeo (I := I) Y.metric x u) z v) =
-      tangentMapWithin 𝓘(Real, E) I
-        (fun w => framedExpDiffeo (I := I) Y.metric x w) U
+      (expMapDiffeo (I := I) Y.metric x z)
+      (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+      = tangentMapWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U
           (TotalSpace.mk' E z v)
   dsimp only [tangentMapWithin]
   rw [hmf]
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- **Generic-domain B-metric smoothness** (the reusable core): on any open set `S ⊆ E`
-on which the framed parametrization is `C∞`, the pulled-back
-normal-coordinate metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤`.  The opaque-radius and
-named-radius producers below specialize `S`.  Built from the pushforward sections +
-`ContMDiffOn.clm_bundle_apply₂` (the bilinear bundle apply) + the finite-dimensional
-`contDiffOn_clm_apply` reduction. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_of_smooth
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {S : Set E}
     (hU : IsOpen S)
@@ -370,8 +308,7 @@ theorem normalCoordMetric_contDiffOn_of_smooth
           letI : ChartedSpace H Y.M := Y.charted
           letI : IsManifold I ∞ Y.M := Y.smooth
           letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-          ContMDiffOn 𝓘(Real, E) I ∞
-            (fun w => framedExpDiffeo (I := I) Y.metric x w) S) :
+          ContMDiffOn 𝓘(Real, E) I ∞ (fun w => expMapDiffeo (I := I) Y.metric x w) S) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -381,42 +318,35 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  -- scalar smoothness `z ↦ g(f z)(d f_z v, d f_z w)` for fixed `v, w`
   have hscalar : ∀ v w : E, ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) ∞
-      (fun z => Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)
-          (mfderiv 𝓘(Real, E) I
-            (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
-          (mfderiv 𝓘(Real, E) I
-            (fun u => framedExpDiffeo (I := I) Y.metric x u) z w))
+      (fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
+          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w))
       S := by
     intro v w
     have hg : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
         (fun z => TotalSpace.mk' (E →L[Real] E →L[Real] Real)
           (E := fun b : Y.M => TangentSpace I b →L[Real] TangentSpace I b →L[Real] Real)
-          (framedExpDiffeo (I := I) Y.metric x z)
-          (Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)))
+          (expMapDiffeo (I := I) Y.metric x z)
+          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)))
         S :=
       Y.metric.contMDiff.comp_contMDiffOn hf
-    have hv := framedPush_smooth (I := I) Y x hU hf v
-    have hw := framedPush_smooth (I := I) Y x hU hf w
+    have hv := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf v
+    have hw := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf w
     have htotal : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, Real)) ∞
         (fun z => TotalSpace.mk' Real (E := Bundle.Trivial Y.M Real)
-          (framedExpDiffeo (I := I) Y.metric x z)
-          (Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)
-            (mfderiv 𝓘(Real, E) I
-              (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
-            (mfderiv 𝓘(Real, E) I
-              (fun u => framedExpDiffeo (I := I) Y.metric x u) z w)))
+          (expMapDiffeo (I := I) Y.metric x z)
+          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
+            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)))
         S :=
       ContMDiffOn.clm_bundle_apply₂
         (E₁ := fun b : Y.M => TangentSpace I b) (E₂ := fun b : Y.M => TangentSpace I b)
         (E₃ := fun _ : Y.M => Real)
-        (b := fun z => framedExpDiffeo (I := I) Y.metric x z)
-        (ψ := fun z => Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z))
-        (v := fun z => mfderiv 𝓘(Real, E) I
-          (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
-        (w := fun z => mfderiv 𝓘(Real, E) I
-          (fun u => framedExpDiffeo (I := I) Y.metric x u) z w)
+        (b := fun z => expMapDiffeo (I := I) Y.metric x z)
+        (ψ := fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z))
+        (v := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+        (w := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)
         hg hv hw
     intro z hz
     have h_at := htotal z hz
@@ -429,13 +359,7 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   rw [← contMDiffOn_iff_contDiffOn]
   exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- **B-metric smoothness producer** (frontier-1, H6/`lbl395`): the model-coordinate
-normal-coordinate pulled-back metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤` on a uniform
-ball `ball 0 δ ∩ source` where forward `expMap` is `C∞`.  This discharges the `hsmooth`
-hypothesis of `exists_metricLimit_normalCoord` for a fixed `β`.  Built from
-`expMapDiffeo_contMDiffOn_ball` + the pushforward sections + `ContMDiffOn.clm_bundle_apply₂`
-(the bilinear bundle apply) + the finite-dimensional `contDiffOn_clm_apply` reduction. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -444,28 +368,27 @@ theorem normalCoordMetric_contDiffOn
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∃ δ : ℝ, 0 < δ ∧
       ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x)
-        (Metric.ball (0 : E) δ ∩
-          (framedExpDiffeo (I := I) Y.metric x).source) := by
+        (Metric.ball (0 : E) δ ∩ (expMapDiffeo (I := I) Y.metric x).source) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  refine ⟨expRadiusGp (I := I) Y.metric x,
-    expRadiusGp_pos (I := I) Y.metric x, ?_⟩
-  exact (normalCoordMetric_contDiffOn_of_smooth (I := I) Y x
-    Metric.isOpen_ball (framedExp_smoothOn (I := I) Y x)).mono Set.inter_subset_left
+  obtain ⟨δ, hδ, hf⟩ := expMapDiffeo_contMDiffOn_ball (I := I) Y x
+  exact ⟨δ, hδ, normalCoordMetric_contDiffOn_of_smooth (I := I) Y x
+    (Metric.isOpen_ball.inter (expMapDiffeo (I := I) Y.metric x).open_source) hf⟩
 
-/-- **B-metric smoothness producer, pure-ball form** (the smallest domain/radius lemma for
-the fixed-`U` wrapper).  Combining `normalCoordMetric_contDiffOn` (`C∞` on `ball 0 δ ∩ source`)
-with a positive model ball inside the chart source (`source` is open and contains `0`), the
-pulled-back normal-coordinate metric is `C∞` on a single `Metric.ball 0 r`.  This is the clean
-consumable shape matching `NormalCoordMetricBoundInput.radius` (no `∩ source` wrinkle).
 
-The per-point `r` here is still an **opaque existential** (`min` of the `expMap`-smoothness
-radius `δ` and the ball-in-source radius), with no uniform positive lower bound across the
-sequence; supplying that uniform lower bound is the remaining frontier recorded in
-`StepBLocalMetrics.md` (it requires anchoring the `∞`-smoothness radius to a Step-A-controlled
-geometric scale — a smoothness-layer input, not domain bookkeeping). -/
+
+
+
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     ∃ r : ℝ, 0 < r ∧
@@ -476,20 +399,20 @@ theorem normalCoordMetric_contDiffOn_ball
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   obtain ⟨δ, hδ, hsm⟩ := normalCoordMetric_contDiffOn (I := I) Y x
   obtain ⟨r₀, hr₀, hsub⟩ :=
-    Metric.isOpen_iff.mp (framedExpDiffeo (I := I) Y.metric x).open_source 0
-      (zero_mem_framedExp_source (I := I) Y.metric x)
+    Metric.isOpen_iff.mp (expMapDiffeo (I := I) Y.metric x).open_source 0
+      (zero_mem_expMapDiffeo_source (I := I) Y.metric x)
   refine ⟨min δ r₀, lt_min hδ hr₀, hsm.mono fun z hz => ?_⟩
   rw [Metric.mem_ball, dist_zero_right] at hz
   refine ⟨Metric.mem_ball.mpr ?_, hsub (Metric.mem_ball.mpr ?_)⟩
   · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_left _ _)
   · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_right _ _)
 
-/-- **Realized parametrization `C∞` on the named geometric ball.**  On
-`Metric.ball 0 (expMapC2Radius Y.metric x)` the realized normal-coordinate parametrization
-`expMapDiffeo` — only a `PartialDiffeomorph … 1` — is `ContMDiffOn ⊤`, because it agrees there
-with the now-`C∞` forward `expMap` (`expMap_contMDiffAt_infty_of_norm_lt_radius` +
-`expMapDiffeo_apply_eq` + `ContMDiffOn.congr`), the ball being inside the chart source by
-the fourth component of `expMapC2Radius` (`mem_expMapDiffeo_source_of_norm_lt_radius`). -/
+
+
+
+
+
+
 theorem expMapDiffeo_contMDiffOn_expBall
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -514,8 +437,12 @@ theorem expMapDiffeo_contMDiffOn_expBall
   exact expMapDiffeo_apply_eq (I := I) Y.metric x
     (mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hw)
 
-/-- The framed normal-coordinate metric is smooth on the intrinsic source-radius
-ball. -/
+
+
+
+
+
+
 theorem normalCoordMetric_contDiffOn_expBall
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -523,20 +450,20 @@ theorem normalCoordMetric_contDiffOn_expBall
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x)
-      (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
+      (Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact normalCoordMetric_contDiffOn_of_smooth (I := I) Y x Metric.isOpen_ball
-    (framedExp_smoothOn (I := I) Y x)
+    (expMapDiffeo_contMDiffOn_expBall (I := I) Y x)
 
-/-- **`hsmooth` reduction for the fixed-`U` wrapper.**  Given a fixed open `U` contained in
-every term's intrinsic framed source-radius ball, the
-pulled-back metrics are uniformly `ContDiffOn ℝ ⊤` on `U` — exactly the `hsmooth` hypothesis
-of `exists_metricLimit_normalCoord`.  This reduces `hsmooth` to the single geometric
-containment `hsub`, i.e. to a uniform lower bound on `expMapC2Radius` across the sequence (the
-remaining Step-A wiring frontier). -/
+
+
+
+
+
+
 theorem contDiffOn_normalCoordMetric_of_subset_expBall
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} (c : ∀ k : ℕ, (X.obj k).M) {U : Set E}
     (hsub : ∀ k,
@@ -544,13 +471,13 @@ theorem contDiffOn_normalCoordMetric_of_subset_expBall
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-      U ⊆ Metric.ball (0 : E) (expRadiusGp (I := I) (X.obj k).metric (c k))) :
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (c k))) :
     ∀ k, ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) (X.obj k) (c k)) U :=
   fun k => (normalCoordMetric_contDiffOn_expBall (I := I) (X.obj k) (c k)).mono (hsub k)
 
-/-- Local Euclidean equivalence of the pulled-back normal-coordinate metric on `U`:
-`½‖v‖² ≤ g(z)(v,v) ≤ 2‖v‖²` for every `z ∈ U` and `v` — the quadratic-form form of
-the book's `½(δ_ij) ≤ (g_ij) ≤ 2(δ_ij)`. -/
+
+
+
 def NormalCoordMetricEquivOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (U : Set E) :
     Prop :=
@@ -560,8 +487,9 @@ def NormalCoordMetricEquivOn
 
 namespace NormalCoordMetricEquivOn
 
-/-- The lower half of normal-coordinate metric equivalence makes the metric
-coercive at every point of the controlled set. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem coercive
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
     {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
@@ -571,8 +499,9 @@ theorem coercive
   intro v
   simpa [pow_two, mul_assoc] using (h z hz v).1
 
-/-- On a region where the normal-coordinate metric satisfies
-`(1 / 2) * ||v||^2 <= g(v,v)`, its sharp operator has norm at most `2`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sharp_norm_le
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
     {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
@@ -586,8 +515,7 @@ theorem sharp_norm_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The H6 quadratic upper bound controls every mixed evaluation of the
-normal-coordinate metric by the model norms. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem abs_apply_le
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
     {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
@@ -600,9 +528,9 @@ theorem abs_apply_le
   letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
     ⟨Y.metric.toRiemannianMetric⟩
   let dExp : E →L[Real]
-      TangentSpace I (framedExpDiffeo (I := I) Y.metric x z) :=
+      TangentSpace I (expMapDiffeo (I := I) Y.metric x z) :=
     mfderiv 𝓘(Real, E) I
-      (fun u ↦ framedExpDiffeo (I := I) Y.metric x u) z
+      (fun u ↦ expMapDiffeo (I := I) Y.metric x u) z
   have hcs :
       |normalCoordMetric (I := I) Y x z v w| ≤
         ‖dExp v‖ * ‖dExp w‖ := by
@@ -624,53 +552,49 @@ theorem abs_apply_le
 
 end NormalCoordMetricEquivOn
 
--- `iteratedFDeriv` over the nested operator-norm space `E →L[ℝ] E →L[ℝ] ℝ` with
--- `InnerProductSpace ℝ E` in scope needs the project-standard extended (terminating)
--- instance-synthesis budget.
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Uniform `C^p` Euclidean derivative bound for the pulled-back normal-coordinate
-metric on `U`: `‖∇ᵖ g‖ ≤ C` for every `z ∈ U` (`∇` the Euclidean iterated Fréchet
-derivative). -/
+
+
+
 def NormalCoordMetricDerivBound
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (U : Set E) (p : Nat) (C : Real) : Prop :=
   forall z : E, z ∈ U ->
     ‖iteratedFDeriv Real p (normalCoordMetric (I := I) Y x) z‖ <= C
 
-/-- MSM135 Chapter 4 Proposition `lbl395` (Hamilton [H6] Corollary 4.12), as the
-book-external honest input for Step B: in normal coordinates, `|∇^ℓ Rm| ≤ C_ℓ`
-forces uniform Euclidean control of the pulled-back metrics.
 
-For each term `k` of the sequence and each chart center `x`, on the
-normal-coordinate ball `Metric.ball 0 (radius k x)`:
 
-* `metric_equiv` — the pulled-back metric is uniformly Euclidean-equivalent
-  (`½δ ≤ g ≤ 2δ`);
-* `metric_deriv` — every Euclidean iterated derivative of order `p` is bounded by the
-  uniform constant `metricC p`.
 
-The constants `metricC` are listed first and are uniform over `k` and `x` (the book's
-`C̃_ℓ` depend only on `n`, `inj`, and the curvature bounds, all uniform across the
-cover); the per-center `radius` only records *where* the bounds apply.  The control is
-**local** to the normal-coordinate ball: this input does not claim total `Set.univ`
-control — the partial-domain bridge to `IsometryDerivBounds` is the later B-loc
-brick. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 structure NormalCoordMetricBoundInput
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   metricC : Nat -> Real
   metricC_nonneg : forall p : Nat, 0 <= metricC p
-  /-- The per-center normal-coordinate radius `min{c₁/√C₀, r₀}` of `lbl395` (book
-  scale), recording where the bounds below hold. -/
+
+
   radius : forall k : Nat, (X.obj k).M -> Real
   radius_pos : forall (k : Nat) (x : (X.obj k).M), 0 < radius k x
-  /-- Uniform Euclidean equivalence `½δ ≤ g ≤ 2δ` of the pulled-back normal-coordinate
-  metric on the relevant ball. -/
+
+
   metric_equiv :
     forall (k : Nat) (x : (X.obj k).M),
       NormalCoordMetricEquivOn (I := I) (X.obj k) x
         (Metric.ball (0 : E) (radius k x))
-  /-- Uniform all-orders Euclidean derivative bounds for the pulled-back metric on the
-  relevant ball, with `metricC p` independent of `k` and `x`. -/
+
+
   metric_deriv :
     forall (k p : Nat) (x : (X.obj k).M),
       NormalCoordMetricDerivBound (I := I) (X.obj k) x
@@ -678,11 +602,34 @@ structure NormalCoordMetricBoundInput
 
 namespace NormalCoordMetricBoundInput
 
--- Evaluation of the order-one metric jet in the nested bilinear-form space
--- needs the project-standard extended, terminating synthesis budget.
-set_option synthInstance.maxHeartbeats 800000 in
-/-- The order-one metric-jet bound controls every trilinear evaluation of the
-Fréchet derivative of the normal-coordinate metric. -/
+
+
+theorem half_le_gpConst
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : NormalCoordMetricBoundInput (I := I) X)
+    (k : Nat) (x : (X.obj k).M) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    (1 / 2 : Real) ≤ gpCoerciveConst (I := I) (X.obj k).metric x := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  have h0 : (0 : E) ∈ Metric.ball 0 (h.radius k x) := by
+    rw [Metric.mem_ball, dist_self]
+    exact h.radius_pos k x
+  apply le_gpCoerciveConst (I := I)
+  intro v
+  simpa only [normalMetric_zero (I := I) (X.obj k) x] using
+    (h.metric_equiv k x 0 h0 v).1
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_apply_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -708,11 +655,12 @@ theorem fderiv_apply_le
       gcongr
     _ = h.metricC 1 * ‖u‖ * ‖v‖ * ‖w‖ := rfl
 
-/-- On the controlled normal-coordinate ball, raising the coordinate Koszul
-covector of the metric derivative has the explicit bound
-`3 * metricC 1 * ||v|| * ||w||`.  This is an algebraic model estimate; a
-separate realization theorem must identify it with the Christoffel
-contraction of the existing Levi-Civita connection. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem koszulVec_norm_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -732,9 +680,10 @@ theorem koszulVec_norm_le
   ring_nf at hraw ⊢
   exact hraw
 
-/-- Pairwise raised-Koszul estimate from first- and second-jet variation.
-The two variation hypotheses are the exact mean-value outputs still needed
-from the controlled normal-coordinate metric. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem koszulVec_pair_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -787,21 +736,13 @@ theorem koszulVec_pair_le
           ‖z - y‖ * ‖v‖ * ‖w‖ := by
       ring
 
-set_option synthInstance.maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private theorem fderiv_eval3
     {G : E → E →L[Real] E →L[Real] Real} {q : E}
     (hG : DifferentiableAt Real (fderiv Real G) q)
     (d u v w : E) :
     fderiv Real (fun p ↦ fderiv Real G p u v w) q d =
       fderiv Real (fderiv Real G) q d u v w := by
-  letI : NormedAddCommGroup (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedSpace
-  letI : NormedAddCommGroup (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedSpace
   have hu : HasFDerivAt (fun _ : E ↦ u) 0 q :=
     hasFDerivAt_const (𝕜 := Real) (x := q) u
   have hv : HasFDerivAt (fun _ : E ↦ v) 0 q :=
@@ -814,11 +755,6 @@ private theorem fderiv_eval3
   have happ := DFunLike.congr_fun hthird.fderiv d
   simpa using happ
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
-/-- On a controlled ball contained in the named smoothness ball, the raised
-coordinate Koszul vector is Lipschitz in position with the explicit constant
-`6 * metricC 1 ^ 2 + 3 * metricC 2`. -/
 theorem koszulVec_lip_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -832,7 +768,7 @@ theorem koszulVec_lip_on
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆
         Metric.ball (0 : E)
-          (expRadiusGp (I := I) (X.obj k).metric x))
+          (expMapC2Radius (I := I) (X.obj k).metric x))
     {z y : E}
     (hz : z ∈ Metric.ball (0 : E) r)
     (hy : y ∈ Metric.ball (0 : E) r)
@@ -847,14 +783,6 @@ theorem koszulVec_lip_on
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  letI : NormedAddCommGroup (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedSpace
-  letI : NormedAddCommGroup (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedSpace
   let G := normalCoordMetric (I := I) (X.obj k) x
   let U := Metric.ball (0 : E) r
   have hsm : ContDiffOn Real (⊤ : ℕ∞) G U :=
@@ -940,8 +868,8 @@ theorem koszulVec_lip_on
     (by simpa only [G] using hmetric)
     (by simpa only [G] using hjet) v w
 
-/-- Specialization of `koszulVec_lip_on` when the whole metric-control ball is
-contained in the named exponential smoothness ball. -/
+
+
 theorem koszulVec_lip_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -953,7 +881,7 @@ theorem koszulVec_lip_le
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) (h.radius k x) ⊆
         Metric.ball (0 : E)
-          (expRadiusGp (I := I) (X.obj k).metric x))
+          (expMapC2Radius (I := I) (X.obj k).metric x))
     {z y : E}
     (hz : z ∈ Metric.ball (0 : E) (h.radius k x))
     (hy : y ∈ Metric.ball (0 : E) (h.radius k x))
@@ -966,10 +894,10 @@ theorem koszulVec_lip_le
         ‖z - y‖ * ‖v‖ * ‖w‖ := by
   simpa using h.koszulVec_lip_on k x (fun _ hz' ↦ hz') hsub hz hy v w
 
-/-- On a phase box with velocity norm at most `R`, the raised coordinate
-Koszul acceleration has a Lipschitz bound whose coefficient tends to zero
-with `R`.  Identification with the chart geodesic acceleration is a separate
-realization step. -/
+
+
+
+
 theorem koszulAccel_lip_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -983,7 +911,7 @@ theorem koszulAccel_lip_on
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆
         Metric.ball (0 : E)
-          (expRadiusGp (I := I) (X.obj k).metric x))
+          (expMapC2Radius (I := I) (X.obj k).metric x))
     {z y : E × E} {R : Real} (hR : 0 ≤ R)
     (hz : z.1 ∈ Metric.ball (0 : E) r)
     (hy : y.1 ∈ Metric.ball (0 : E) r)
@@ -1054,7 +982,7 @@ theorem koszulAccel_lip_on
     _ = ((6 * (h.metricC 1) ^ 2 + 3 * h.metricC 2) * R ^ 2 +
           6 * h.metricC 1 * R) * ‖z - y‖ := by rfl
 
-/-- Specialization of `koszulAccel_lip_on` to the full metric-control ball. -/
+
 theorem koszulAccel_lip_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -1066,7 +994,7 @@ theorem koszulAccel_lip_le
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) (h.radius k x) ⊆
         Metric.ball (0 : E)
-          (expRadiusGp (I := I) (X.obj k).metric x))
+          (expMapC2Radius (I := I) (X.obj k).metric x))
     {z y : E × E} {R : Real} (hR : 0 ≤ R)
     (hz : z.1 ∈ Metric.ball (0 : E) (h.radius k x))
     (hy : y.1 ∈ Metric.ball (0 : E) (h.radius k x))
@@ -1079,7 +1007,7 @@ theorem koszulAccel_lip_le
           6 * h.metricC 1 * R) * ‖z - y‖ := by
   simpa using h.koszulAccel_lip_on k x (fun _ hz' ↦ hz') hsub hR hz hy hzv hyv
 
-/-- Reindex the normal-coordinate metric bound input along a subsequence. -/
+
 def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) (f : Nat -> Nat) :
     NormalCoordMetricBoundInput (I := I) (X.subseq f) where
@@ -1098,17 +1026,17 @@ def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 end NormalCoordMetricBoundInput
 
-/-! ## `C∞` normal chart inverse (B-trans transition-map smoothness)
 
-`normalChartAt` carries only `C¹` smoothness in the library
-(`NormalCoordinates.normalChartAt_contMDiffOn`), because its realizing `PartialDiffeomorph`
-was built at order 1.  Now that the forward exponential is `C∞` on a uniform ball
-(`expMap_contMDiffAt_infty_of_norm_lt_radius`), the chart inverse is `C∞` by the inverse
-function theorem.  This cannot be a bump of `LocalDiffeomorphism.lean` (the `C∞` forward fact
-is downstream of it, so importing it there is an import cycle), so the Banach IFT is re-run
-here, downstream of both `OffZero` and `NormalCoordinates`, pointwise over the ball (a single
-IFT at the centre is not enough: `ContDiffAt ∞` does not give `ContDiffOn ∞` on a nbhd —
-`ContDiffAt.contDiffOn` needs `n = ω`).  See `StepBTransition.md`. -/
+
+
+
+
+
+
+
+
+
+
 
 section NormalChartInftySmooth
 
@@ -1117,12 +1045,12 @@ open scoped Manifold ContDiff Topology
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [T2Space (TangentBundle I M)]
 
-/-- **`normalChartAt` is `C∞` at every image point of the smoothness ball.**  For
-`‖v₀‖ < expMapC2Radius g p`, the normal chart `normalChartAt g p` is `ContMDiffAt … ∞` at the
-image point `expMap g p v₀`.  Proved by the Banach inverse function theorem at `∞` applied to
-`extChartAt (expMap g p v₀) ∘ expMap g p` (its derivative at `v₀` is invertible: `expMap` is a
-local diffeomorphism on the ball and `extChartAt`'s differential at its centre is invertible),
-identifying the produced local inverse with `normalChartAt g p` near the image point. -/
+
+
+
+
+
+
 theorem normalChartAt_contMDiffAt_infty
     (g : SmoothRiemannianMetric I M) (p : M) {v₀ : E}
     (hv₀ : ‖v₀‖ < expMapC2Radius (I := I) g p) :
@@ -1133,22 +1061,17 @@ theorem normalChartAt_contMDiffAt_infty
   set fexp : E → M := fun v => (expMap (I := I) g p (show TangentSpace I p from v)) with hfexp
   set q : M := fexp v₀ with hq
   set χ : M → E := ⇑(extChartAt I q) with hχ
-  -- forward map `C∞` at `v₀`
   have hf_cd : ContMDiffAt 𝓘(ℝ, E) I ∞ fexp v₀ :=
     expMap_contMDiffAt_infty_of_norm_lt_radius (I := I) g p hv₀
-  -- forward map is a `C¹` local diffeomorphism at `v₀`
-  have hsrc : v₀ ∈ (expMapDiffeo (I := I) g p).source :=
-    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) g p hv₀
+  have hmem_ball : v₀ ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) g p) := by
+    rw [Metric.mem_ball, dist_zero_right]; exact hv₀
   have hf_diffeo : IsLocalDiffeomorphAt 𝓘(ℝ, E) I 1 fexp v₀ :=
-    ⟨expMapDiffeo (I := I) g p, hsrc,
-      fun y hy => (expMapDiffeo_apply_eq (I := I) g p hy).symm⟩
-  -- the two factor differentials are invertible, hence so is the composite
+    exp_isLocalDiffeomorphOn_ball (I := I) g p (le_refl _) ⟨v₀, hmem_ball⟩
   have hD1_inv : (mfderiv 𝓘(ℝ, E) I fexp v₀).IsInvertible :=
     ⟨hf_diffeo.mfderivToContinuousLinearEquiv one_ne_zero,
       hf_diffeo.mfderivToContinuousLinearEquiv_coe one_ne_zero⟩
   have hD2_inv : (mfderiv I 𝓘(ℝ, E) χ q).IsInvertible :=
     isInvertible_mfderiv_extChartAt (I := I) (mem_extChartAt_source q)
-  -- composite `F = χ ∘ fexp` is `C∞` at `v₀`
   have hχ_cd : ContMDiffAt I 𝓘(ℝ, E) ∞ χ q := contMDiffAt_extChartAt (I := I) (x := q)
   have hF_cd : ContDiffAt ℝ ∞ (χ ∘ fexp) v₀ := (hχ_cd.comp v₀ hf_cd).contDiffAt
   have h1 : HasMFDerivAt 𝓘(ℝ, E) I fexp v₀ (mfderiv 𝓘(ℝ, E) I fexp v₀) :=
@@ -1157,22 +1080,17 @@ theorem normalChartAt_contMDiffAt_infty
     (hχ_cd.mdifferentiableAt hne).hasMFDerivAt
   have hF_mfd : HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (χ ∘ fexp) v₀
       ((mfderiv I 𝓘(ℝ, E) χ q).comp (mfderiv 𝓘(ℝ, E) I fexp v₀)) := h2.comp v₀ h1
-  -- view the differential as an `E →L E` Fréchet derivative; it is invertible, so it is an
-  -- `E ≃L E` (this dodges the `TangentSpace 𝓘(ℝ,E) (χ q) = E` defeq friction in `↑e`)
   have hF_fderiv0 := hasMFDerivAt_iff_hasFDerivAt.mp hF_mfd
   have hfd_inv : (fderiv ℝ (χ ∘ fexp) v₀).IsInvertible := by
     rw [hF_fderiv0.fderiv]; exact hD2_inv.comp hD1_inv
   obtain ⟨e, he⟩ := hfd_inv
   have hF_fderiv : HasFDerivAt (χ ∘ fexp) (e : E →L[ℝ] E) v₀ := by
     rw [he]; exact hF_fderiv0.differentiableAt.hasFDerivAt
-  -- IFT at `∞`: the local inverse of `F` is `C∞` at `F v₀ = χ q`
   have hinv := hF_cd.to_localInverse hF_fderiv hne
-  -- the IFT homeomorph; its `.symm` is the local inverse
   set Φ : OpenPartialHomeomorph E E :=
     hF_cd.toOpenPartialHomeomorph (χ ∘ fexp) hF_fderiv hne with hΦ
   have hloc_eq : hF_cd.localInverse hF_fderiv hne = Φ.symm := rfl
   rw [hloc_eq] at hinv
-  -- key memberships
   have hv₀_Φsrc : v₀ ∈ Φ.source :=
     hF_cd.mem_toOpenPartialHomeomorph_source hF_fderiv hne
   have hv₀_src : v₀ ∈ (expMapDiffeo (I := I) g p).source := by
@@ -1182,11 +1100,9 @@ theorem normalChartAt_contMDiffAt_infty
     have hev : expMapDiffeo (I := I) g p v₀ = q := by
       rw [expMapDiffeo_apply_eq (I := I) g p hv₀_src]
     rw [← hev]; exact (expMapDiffeo (I := I) g p).map_source hv₀_src
-  -- `Φ.symm ∘ χ` is `C∞` at `q`
   have hsymm_cm : ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) ∞ Φ.symm (χ q) :=
     (contMDiffAt_iff_contDiffAt).mpr hinv
   have hcomp : ContMDiffAt I 𝓘(ℝ, E) ∞ (Φ.symm ∘ χ) q := hsymm_cm.comp q hχ_cd
-  -- they agree on the open set `target ∩ symm⁻¹(Φ.source)`, a neighbourhood of `q`
   have hΦcoe : (Φ : E → E) = χ ∘ fexp :=
     hF_cd.toOpenPartialHomeomorph_coe hF_fderiv hne
   have hncq : normalChartAt (I := I) g p q = v₀ := by
@@ -1222,9 +1138,9 @@ theorem normalChartAt_contMDiffAt_infty
     rw [Function.comp_apply, ← hΦv', Φ.left_inv hq'_pre]
   exact hcomp.congr_of_eventuallyEq heqEv
 
-/-- **`normalChartAt` is `C∞` on the image of the smoothness ball** (`ContMDiffOn` form of
-`normalChartAt_contMDiffAt_infty`): the normal chart at `p` is `C∞` on the normal-coordinate
-neighbourhood `expMap g p '' (ball 0 (expMapC2Radius g p))`. -/
+
+
+
 theorem normalChartAt_contMDiffOn_infty
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn I 𝓘(ℝ, E) ∞ (normalChartAt (I := I) g p)
@@ -1236,35 +1152,14 @@ theorem normalChartAt_contMDiffOn_infty
 
 end NormalChartInftySmooth
 
-/-- The framed normal chart is smooth on the image of its intrinsic framed
-source-radius ball. -/
-theorem framedChart_smooth
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
-    letI : TopologicalSpace Y.M := Y.topology
-    letI : ChartedSpace H Y.M := Y.charted
-    letI : IsManifold I ∞ Y.M := Y.smooth
-    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    ContMDiffOn I 𝓘(Real, E) ∞ (framedChartAt (I := I) Y.metric x)
-      (framedExpMap (I := I) Y.metric x ''
-        Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
-  letI : TopologicalSpace Y.M := Y.topology
-  letI : ChartedSpace H Y.M := Y.charted
-  letI : IsManifold I ∞ Y.M := Y.smooth
-  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  rintro _ ⟨v, hv, rfl⟩
-  rw [Metric.mem_ball, dist_zero_right] at hv
-  have hvRaw : ‖(show E from normalFrame (I := I) Y.metric x v)‖ <
-      expMapC2Radius (I := I) Y.metric x := by
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
-    simpa only [normalFrame_sqrt] using hv
-  have hchart := normalChartAt_contMDiffAt_infty (I := I) Y.metric x hvRaw
-  have hframe : ContMDiffAt 𝓘(Real, E) 𝓘(Real, E) ∞
-      (fun w : E => (normalFrame (I := I) Y.metric x).symm w)
-      (normalChartAt (I := I) Y.metric x
-        (framedExpMap (I := I) Y.metric x v)) :=
-    (normalFrame (I := I) Y.metric x).symm.toContinuousLinearMap.contMDiff.contMDiffAt
-  simpa only [framedChart_apply, framedExpMap_apply, Function.comp_apply] using
-    (hframe.comp (framedExpMap (I := I) Y.metric x v) hchart).contMDiffWithinAt
+end RawNormalCoordinates
+
+section ControlledNormalCharts
+
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {I : ModelWithCorners Real E H}
+variable [I.Boundaryless]
 
 /-- A controlled normal-ball chart at a point of a packaged pointed
 Riemannian manifold.  This abbreviation installs the manifold instances stored
@@ -1323,8 +1218,8 @@ noncomputable def metric
 
 end NormalChartFamily
 
-/-- The existing selected framed branch, packaged through the canonical
-branch-parametric normal-ball interface. -/
+/-- The existing selected raw normal-coordinate branch, packaged through
+the canonical branch-parametric normal-ball interface. -/
 noncomputable def legacyBallChart
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -1336,31 +1231,30 @@ noncomputable def legacyBallChart
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  let U := Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)
-  have hsub : U ⊆ (framedExpDiffeo (I := I) Y.metric x).source := by
+  let U := Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)
+  have hsub : U ⊆ (expMapDiffeo (I := I) Y.metric x).source := by
     intro z hz
-    rw [framedExp_source]
     apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
-    simpa only [U, Metric.mem_ball, dist_zero_right, normalFrame_sqrt] using hz
+    simpa only [U, Metric.mem_ball, dist_zero_right] using hz
   have himage :
-      (fun z => framedExpDiffeo (I := I) Y.metric x z) '' U =
-        framedExpMap (I := I) Y.metric x '' U := by
+      (fun z => expMapDiffeo (I := I) Y.metric x z) '' U =
+        (fun z : E => (expMap (I := I) Y.metric x
+          (show TangentSpace I x from z) : Y.M)) '' U := by
     apply Set.image_congr
     intro z hz
-    exact framedExp_eq_expMap (I := I) Y.metric x (hsub hz)
+    exact expMapDiffeo_apply_eq (I := I) Y.metric x (hsub hz)
   exact
-    { radius := expRadiusGp (I := I) Y.metric x
-      radius_pos := expRadiusGp_pos (I := I) Y.metric x
-      hom := framedExpDiffeo (I := I) Y.metric x
+    { radius := expMapC2Radius (I := I) Y.metric x
+      radius_pos := expMapC2Radius_pos (I := I) Y.metric x
+      hom := expMapDiffeo (I := I) Y.metric x
       ball_subset := hsub
-      map_zero := framedExp_zero (I := I) Y.metric x
-      smooth_to := framedExp_smoothOn (I := I) Y x
+      map_zero := expMapDiffeo_zero (I := I) Y.metric x
+      smooth_to := expMapDiffeo_contMDiffOn_expBall (I := I) Y x
       smooth_inv := by
         rw [himage]
-        exact framedChart_smooth (I := I) Y x }
+        exact normalChartAt_contMDiffOn_infty (I := I) Y.metric x }
 
-/-- The legacy framed normal charts, packaged as one stage-indexed family. -/
+/-- The legacy raw normal-coordinate charts, packaged as one stage-indexed family. -/
 noncomputable def legacyChartFamily
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :
     NormalChartFamily (I := I) X :=
@@ -1373,7 +1267,7 @@ noncomputable def legacyChartFamily
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     (legacyBallChart (I := I) Y x).radius =
-      expRadiusGp (I := I) Y.metric x :=
+      expMapC2Radius (I := I) Y.metric x :=
   rfl
 
 @[simp] theorem legacyChart_apply
@@ -1384,11 +1278,10 @@ noncomputable def legacyChartFamily
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     (legacyBallChart (I := I) Y x).hom z =
-      framedExpDiffeo (I := I) Y.metric x z := by
+      expMapDiffeo (I := I) Y.metric x z := by
   rfl
 
-/-- The inverse map carried by the legacy provider is the established framed
-normal-coordinate chart. -/
+/-- The inverse map carried by the legacy provider is the established raw normal-coordinate chart. -/
 @[simp] theorem legacyInv_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) :
@@ -1397,11 +1290,10 @@ normal-coordinate chart. -/
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     (legacyBallChart (I := I) Y x).inv =
-      NormalCoordinates.framedChartAt (I := I) Y.metric x := by
+      normalChartAt (I := I) Y.metric x := by
   rfl
 
-/-- The target of the legacy exponential branch is the source of its framed
-inverse chart. -/
+/-- The target of the legacy exponential branch is the source of its raw inverse chart. -/
 @[simp] theorem legacyTarget_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) :
@@ -1410,11 +1302,10 @@ inverse chart. -/
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     (legacyBallChart (I := I) Y x).hom.target =
-      (NormalCoordinates.framedChartAt (I := I) Y.metric x).source := by
+      (normalChartAt (I := I) Y.metric x).source := by
   rfl
 
-/-- The controlled image of the legacy provider is the corresponding framed
-exponential image. -/
+/-- The controlled image of the legacy provider is the corresponding raw exponential image. -/
 theorem legacyImage_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) :
@@ -1424,8 +1315,8 @@ theorem legacyImage_eq
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     (legacyBallChart (I := I) Y x).hom ''
         Metric.ball (0 : E) (legacyBallChart (I := I) Y x).radius =
-      framedExpMap (I := I) Y.metric x ''
-        Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) := by
+      (fun z : E => (expMap (I := I) Y.metric x (show TangentSpace I x from z) : Y.M)) ''
+        Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -1434,7 +1325,7 @@ theorem legacyImage_eq
   apply Set.image_congr
   intro z hz
   rw [legacyChart_apply]
-  exact framedExp_eq_expMap (I := I) Y.metric x
+  exact expMapDiffeo_apply_eq (I := I) Y.metric x
     ((legacyBallChart (I := I) Y x).ball_subset hz)
 
 /-- The branch-parametric pullback metric of the legacy provider is the
@@ -1493,8 +1384,7 @@ theorem legacyTransition_eq
       normalTransition (I := I) Y x y := by
   rfl
 
-/-- Controlled overlap for the legacy provider is exactly the framed
-ball-and-image condition. -/
+/-- Controlled overlap for the legacy provider is exactly the raw ball-and-image condition. -/
 theorem legacyOverlap_iff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x y : Y.M) (U : Set E) :
@@ -1505,10 +1395,10 @@ theorem legacyOverlap_iff
     (legacyBallChart (I := I) Y x).OverlapOn
         (legacyBallChart (I := I) Y y) U ↔
       ∀ z ∈ U,
-        z ∈ Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) ∧
-        framedExpDiffeo (I := I) Y.metric x z ∈
-          framedExpMap (I := I) Y.metric y ''
-            Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric y) := by
+        z ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) ∧
+        expMapDiffeo (I := I) Y.metric x z ∈
+          (fun z : E => (expMap (I := I) Y.metric y (show TangentSpace I y from z) : Y.M)) ''
+            Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -1553,6 +1443,9 @@ theorem legacyDeriv_iff
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   rw [NormalBallChart.MetricDerivBound, NormalCoordMetricDerivBound,
     legacyMetric_eq (I := I)]
+
+
+end ControlledNormalCharts
 
 end HCGCompactness
 end DifferentialGeometry

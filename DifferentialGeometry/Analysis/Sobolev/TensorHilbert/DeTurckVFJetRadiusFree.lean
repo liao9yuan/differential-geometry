@@ -118,7 +118,8 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
       linarith), ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup
   set W : SmoothCcTensor g₀ 3 3 :=
-    slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁) with hW_def
+    endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
+      (gInvDiffRaisedEndoField (I := I) g₀ g₁) with hW_def
   have hid : cometricCastG0 (I := I) g₀ g₁ =
       Φ + appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W := by
     have h := cometricCastG0_eq_doubleTrace_add_appCcRS (I := I) g₀ g₁
@@ -336,7 +337,7 @@ is integrated by the radius-free workhorse (byte-identical integrand, order-0 fi
 are `private` in the read-only Producers split part; every sibling re-derives them). -/
 
 private lemma gInvRaisedEndo_self_rf (g₀ : SmoothRiemannianMetric I M) (x : M) :
-    gInvRaisedEndo (I := I) g₀ g₀ x =
+    metricComparisonEndo (I := I) g₀ g₀ x =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
   apply ContinuousLinearMap.ext
   intro v
@@ -486,8 +487,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
               ((iteratedCovGrad (I := I) g₀ 0 2 (e k) P).toSection x)) := by
     intro n x
     have h2 := hC_base g₁ P htie hδ_le hδ0 hδ n x
-    rw [← hDiffIns_def] at h2
-    exact h2
+    simpa only [hDiffIns_def] using h2
   -- `DiffIns` L² jets via the workhorse.
   have hDiff2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 1 1 q DiffIns‖ ^ 2 ≤
@@ -864,7 +864,8 @@ lemma rfns_iCG_cometricCastG0_atgw_rf
     have hatgw_one : (1 : ℝ) ≤ atgw :=
       Combinatorics.one_le_antidiagonalTupleGridWindow bP hbP_nn (by omega)
     set W : SmoothCcTensor g₀ 3 3 :=
-      slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁) with hW_def
+      endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
+        (gInvDiffRaisedEndoField (I := I) g₀ g₁) with hW_def
     have hWq : ∀ q : ℕ,
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (3 + q) x
           ((iteratedCovGrad (I := I) g₀ 3 3 q W).toSection x) ≤

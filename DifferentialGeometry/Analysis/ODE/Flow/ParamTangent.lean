@@ -6,13 +6,13 @@ import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapCon
 
 set_option autoImplicit false
 
-/-!
-# Parameter-tangent lift of an ODE
 
-This file packages one derivative in the initial parameter as an ODE on the
-product of the state space with a continuous-linear-map space.  Iterating this
-single lift avoids explicit higher-order variational equations.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,8 +24,8 @@ namespace Analysis
 namespace ODE
 namespace Flow
 
-/-- Vector field governing a state together with its derivative in an
-independent parameter space. -/
+
+
 def paramTangentVF
     (P : Type*) [NormedAddCommGroup P] [NormedSpace ℝ P]
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
@@ -33,7 +33,7 @@ def paramTangentVF
     ℝ → (X × (P →L[ℝ] X)) → X × (P →L[ℝ] X) :=
   fun t z => (v t z.1, (fderiv ℝ (v t) z.1).comp z.2)
 
-/-- Initial state for the parameter-tangent ODE. -/
+
 def paramTangentInit
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P]
@@ -41,8 +41,8 @@ def paramTangentInit
     (a : P → X) (p : P) : X × (P →L[ℝ] X) :=
   (a p, fderiv ℝ a p)
 
-/-- A selected solution family paired with its Fréchet derivative in the
-parameter variable. -/
+
+
 def paramTangentCurve
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P]
@@ -50,8 +50,8 @@ def paramTangentCurve
     (γ : P → ℝ → X) (p : P) (t : ℝ) : X × (P →L[ℝ] X) :=
   (γ p t, fderiv ℝ (fun q => γ q t) p)
 
-/-- A smooth initial map has a smooth parameter-tangent initial lift on the
-same open parameter domain. -/
+
+
 theorem paramTangentInit_contDiffOn
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
@@ -63,8 +63,8 @@ theorem paramTangentInit_contDiffOn
     ha.fderiv_of_isOpen hA (by exact_mod_cast le_top)
   exact ha.prodMk hDa
 
-/-- The parameter-tangent vector field records the original velocity and the
-spatial linearization applied to the parameter derivative. -/
+
+
 @[simp]
 theorem paramTangentVF_apply
     (P : Type*) [NormedAddCommGroup P] [NormedSpace ℝ P]
@@ -72,8 +72,8 @@ theorem paramTangentVF_apply
     (v : ℝ → X → X) (t : ℝ) (x : X) (Z : P →L[ℝ] X) :
     paramTangentVF P v t (x, Z) = (v t x, (fderiv ℝ (v t) x).comp Z) := rfl
 
-/-- The parameter-tangent field is smooth on the lifted open domain whenever
-the original time-dependent field is jointly smooth. -/
+
+
 theorem paramTangentVF_contDiffOn
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
@@ -115,9 +115,9 @@ theorem paramTangentVF_contDiffOn
     exact hcomp.contDiffOn.comp hpair (fun _ _ => mem_univ _)
   exact hfirst.prodMk hsecond
 
-/-- The parameter-tangent curve has the derivative-lifted initial value on an
-open parameter domain where the selected family has the prescribed initial
-slice. -/
+
+
+
 theorem paramTangentCurve_initial
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P]
@@ -130,9 +130,9 @@ theorem paramTangentCurve_initial
     Filter.eventuallyEq_of_mem (hA.mem_nhds hp) hγ
   simp only [paramTangentCurve, paramTangentInit, hγ p hp, heq.fderiv_eq]
 
-/-- The parameter derivative of a selected smooth ODE family solves the
-one-step parameter-tangent equation, with the derivative of the initial map as
-its initial value. -/
+
+
+
 theorem paramTangentCurve_initial_isIntegralCurveOn
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
@@ -236,8 +236,8 @@ namespace HCGCompactness
 open Set
 open scoped ContDiff
 
-/-- Compact-open `C∞` convergence of initial maps is preserved by adjoining
-their Fréchet derivatives. -/
+
+
 theorem MapCInfConvOnCompacts.paramTangentInit
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
@@ -261,8 +261,8 @@ theorem MapCInfConvOnCompacts.paramTangentInit
     mapCInfConv_prodMk hA ha_conv hderiv_conv ha_cd haInf_cd
       hderiv_cd hderivInf_cd
 
-/-- Compact-open `C∞` convergence is preserved by the one-step
-parameter-tangent lift of a smooth time-dependent vector field. -/
+
+
 theorem MapCInfConvOnCompacts.paramTangentVF
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]

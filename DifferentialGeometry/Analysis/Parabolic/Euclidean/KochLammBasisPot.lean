@@ -32,6 +32,8 @@ variable {V F : Type*}
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
+omit [Nontrivial V]
+  [CompleteSpace F] in
 /-- Evaluation of an operator-valued Koch--Lamm flux on one canonical unit
 basis vector preserves both source radii. -/
 theorem klFluxComp {T : ℝ} {A₂ Aₚ : ℝ≥0}
@@ -75,6 +77,7 @@ def klBasisGrad (t : ℝ) (f₀ : ℝ × V → F)
       heatGrad1 t ((stdOrthonormalBasis ℝ V) i)
         (fun z ↦ f₁ z ((stdOrthonormalBasis ℝ V) i)) x
 
+omit [CompleteSpace F] in
 /-- On controlled sources, the finite-basis realized potential is exactly
 the ordinary Duhamel potential plus the directional `heatPot1` sum. -/
 theorem klBasisPot_eq {T t : ℝ} {A₁ A_q A₂ Aₚ : ℝ≥0}
@@ -96,6 +99,8 @@ theorem klBasisPot_eq {T t : ℝ} {A₁ A_q A₂ Aₚ : ℝ≥0}
     (fun z ↦ f₁ z ((stdOrthonormalBasis ℝ V) i)) x
     (klFluxComp (V := V) f₁ h₁ i)
 
+omit [Nontrivial V]
+  [CompleteSpace F] in
 /-- The canonical finite-basis split potential has zero initial value. -/
 @[simp] theorem klBasisPot_zero (f₀ : ℝ × V → F)
     (f₁ : ℝ × V → V →L[ℝ] F) (x : V) :
@@ -104,6 +109,7 @@ theorem klBasisPot_eq {T t : ℝ} {A₁ A_q A₂ Aₚ : ℝ≥0}
   simp [klBasisPot, klHeat0, klHeat1, heatEarly0, heatEarly1,
     klLateFull0, klFluxFull1, klTermMeasure]
 
+omit [CompleteSpace F] in
 /-- The realized ordinary value potential is linear under subtraction once
 the two input integrals are known to be integrable from their source bounds. -/
 theorem klHeat0_sub {T t : ℝ} {A₁ A_q B₁ B_q : ℝ≥0}
@@ -120,6 +126,7 @@ theorem klHeat0_sub {T t : ℝ} {A₁ A_q B₁ B_q : ℝ≥0}
     MeasureTheory.integral_sub hfL hgL]
   abel
 
+omit [CompleteSpace F] in
 /-- The realized directional flux value potential is linear under
 subtraction once both directional integrals are controlled. -/
 theorem klHeat1_sub {T t : ℝ} {A₂ Aₚ B₂ Bₚ : ℝ≥0}
@@ -137,6 +144,7 @@ theorem klHeat1_sub {T t : ℝ} {A₂ Aₚ B₂ Bₚ : ℝ≥0}
     MeasureTheory.integral_sub hfL hgL]
   abel
 
+omit [CompleteSpace F] in
 /-- Linearity of the full finite-basis split potential under subtraction.
 The hypotheses are only the source bounds needed for Bochner integrability. -/
 theorem klBasisPot_sub {T t : ℝ}
@@ -187,6 +195,7 @@ def klVal1Bound (A₂ Aₚ : ℝ≥0) : ℝ≥0∞ :=
     ENNReal.ofReal
       (klFluxSeries (Module.finrank ℝ V) * (klFluxTailC V * (Aₚ : ℝ)))
 
+omit [CompleteSpace F] in
 /-- The genuine finite-dimensional divergence value bound.  The flux cost is
 the number of canonical orthonormal-basis components times the proved unit
 directional cost. -/

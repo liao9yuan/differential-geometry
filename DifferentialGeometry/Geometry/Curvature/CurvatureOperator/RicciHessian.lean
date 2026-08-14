@@ -3,17 +3,15 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Ricci--Hessian contraction
 
-This file identifies the trace of the raised Ricci endomorphism composed with
-the covariant derivative of a gradient with the intrinsic two-tensor pairing
-of Ricci and the canonical Hessian.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +21,7 @@ open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,8 +30,8 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- The trace of raised Ricci composed with the covariant derivative of a
-gradient is the intrinsic Ricci--Hessian contraction. -/
+
+
 theorem ricHess_eq_inner
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

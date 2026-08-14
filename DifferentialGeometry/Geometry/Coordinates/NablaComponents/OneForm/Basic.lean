@@ -3,15 +3,13 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-/-!
-# Coordinate one-form covariant derivative components
 
-This submodule is part of the split `OneForm` coordinate component API.
--/
+
+
+
+
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -22,13 +20,11 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 theorem nabla0S_one_model_coord
@@ -56,8 +52,8 @@ theorem nabla0S_one_model_coord
     simp
   simpa only [Fin.sum_univ_one, hupdate] using h
 
-/-- Coordinate-frame component formula for one-forms, after supplying the
-derivative-identification bridge. -/
+
+
 theorem nabla0S_one_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -84,13 +80,13 @@ theorem nabla0S_one_coord
     simp
   simpa only [Fin.sum_univ_one, hupdate] using h
 
-/-- Evaluation form of `nabla0S_one_coord` on a coordinate-frame basis vector.
 
-This is the coordinate-frame bridge from the canonical raw derivative
-`nabla0SFun` to the usual one-form Christoffel component formula.  It is not the
-intrinsic moving-vector-field identity
-`(∇_X α)(Z) = X(α Z) - α(∇_X Z)`; that identity additionally needs a product
-rule for differentiating the scalar pairing `p ↦ α p (Z p)`. -/
+
+
+
+
+
+
 theorem nabla0SFun_one_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -110,8 +106,10 @@ theorem nabla0SFun_one_eval_coordFrame
   simpa [coordComponent0SAt, component0S] using
     nabla0S_one_coord (I := I) cov X α x₀ hderiv j
 
-/-- Evaluate a one-form on an arbitrary tangent vector by expanding the vector
-in the coordinate-frame basis at the base point. -/
+
+
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 theorem tensor0S_one_eval_coordFrame_sum
     {x₀ : M}
     (αx : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 1 x₀)
@@ -153,6 +151,8 @@ theorem tensor0S_one_eval_coordFrame_sum
           simp [b]
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 theorem tensor0S_one_eval_finset_sum
     {ι : Type*} {x : M}
     (αx : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -181,6 +181,8 @@ theorem tensor0S_one_eval_finset_sum
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [hupdate]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 private theorem mdifferentiableAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> 𝕜) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(𝕜, 𝕜) (f i) x) :
@@ -199,6 +201,8 @@ private theorem mdifferentiableAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(𝕜, 𝕜) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 theorem oneForm_extDerivFun_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> 𝕜)
     {x : M} (v : TangentSpace I x)
@@ -231,6 +235,8 @@ theorem oneForm_extDerivFun_finset_sum
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 theorem oneForm_extDerivFun_mul
     {f g : M -> 𝕜} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(𝕜, 𝕜) f x)
@@ -246,6 +252,8 @@ theorem oneForm_extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 theorem oneForm_covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
@@ -273,6 +281,8 @@ theorem oneForm_covariantDerivative_finset_sum
               rw [ih]
               simp [Finset.sum_insert, hit]
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 theorem oneForm_coordinateFrame_coeff_at_base_eq_coord
     (x₀ : M) (Z : TangentSpace I x₀) (j : CoordinateIdx (𝕜 := 𝕜) E) :
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j x₀ Z =
@@ -288,6 +298,8 @@ theorem oneForm_coordinateFrame_coeff_at_base_eq_coord
   rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
   rw [hbasis]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 theorem oneForm_extDerivFun_congr_eventually
     {f g : M -> 𝕜} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[𝓝 x] g) :

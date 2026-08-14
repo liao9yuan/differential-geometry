@@ -3,20 +3,17 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
 
-/-!
-# The metric index-lowering is a fiber-norm isometry
 
-`ric_bound` (MSM135 Lemma 3.11, Claim 1) bounds `|∇ᵐA_k|` where `A_k = ∇−∇_k` is the
-`(1,2)` connection-difference tensor.  The proven analytic core (`iterCov_product_sqrtNormSq_le`)
-is built on the `(0,s)` stack, so we reduce the `(1,2)` object to `(0,3)` by all-index
-metric lowering.  The foundational reduction is that lowering preserves the `gRef`-fiber norm:
-`normSqRS gRef x r s A = normSq0S gRef x (r+s) (lowerAll A)`.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,16 +33,18 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- The space-level all-index metric lowering of an `(r,s)` tensor to a `(0, r+s)` tensor. -/
+
 noncomputable def lowerAllSpace
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : TensorRSSpace r s I x) : Tensor0SSpace (r + s) I x :=
   Tensor0SSpace.ofModel
     (lowerAllUpperIndices (I := I) (M := M) g r s x (TensorRSSpace.toModel A))
 
-/-- **The index-lowering fiber-norm isometry.**  `|A|² = |lowerAll A|²`.  Proved in a
-`gRef`-orthonormal basis at `x` (supplied per-point), where both sides are `∑ component²`
-and the lowering acts by the identity Gram matrix. -/
+
+
+
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 theorem normSqRS_eq_normSq0S_lowerAllSpace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
@@ -90,8 +89,6 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
   rw [hbij]
   refine Finset.sum_congr rfl fun up _ => Finset.sum_congr rfl fun low _ => ?_
   congr 1
-  -- Per-term component match `componentRS A up low = component0S (lowerAll A) (append up low)`.
-  -- Forward Gram is the identity: `hinv` for `identityInvMetric` collapses `∑ₖ δᵢₖ Gₖⱼ = δᵢⱼ` to `Gᵢⱼ = δᵢⱼ`.
   have hgram : ∀ i j : Idx, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0 := by
     intro i j
     have hsum : (∑ k : Idx, identityInvMetric (Idx := Idx) i k * g.inner x (basis k) (basis j))
@@ -103,21 +100,19 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
           diagonalInvMetric_eq_zero_of_ne (Ne.symm hk), zero_mul]
       · intro hni; exact absurd (Finset.mem_univ i) hni
     rw [← hsum]; exact (hinv i j).1
-  -- In the ON basis the lowering of the basis vectors is the basis tensor.
   have hsep : separableFormAt (I := I) (M := M) g x r (fun i => basis (up i)) =
       basisTensor0S (I := I) basis up := by
     apply ext0S_basis (I := I) basis
     intro jdx
     rw [basisTensor0S_component]
-    change (∏ i : Fin r, g.inner x (basis (up i)) (basis (jdx i))) = if up = jdx then (1 : Real) else 0
+    change (∏ i : Fin r, g.inner x (basis (up i)) (basis (jdx i))) = if up = jdx then (1 : Real)
+      else 0
     rw [Finset.prod_congr rfl (fun i _ => hgram (up i) (jdx i))]
     by_cases h : up = jdx
     · subst h; simp
     · rw [if_neg h]
       obtain ⟨i, hi⟩ := Function.ne_iff.mp h
       exact Finset.prod_eq_zero (Finset.mem_univ i) (if_neg hi)
-  -- Assemble: `componentRS` = `A (basisTensor up) (basis∘low)`; the lowered `(0,r+s)` component, via
-  -- `ofModel`/`toModel = id` + `lowerAllUpperIndices_apply` + `hsep`, equals the same value.
   rw [componentRS_apply_gen, component0S_apply]
   unfold lowerAllSpace
   rw [show (Tensor0SSpace.ofModel

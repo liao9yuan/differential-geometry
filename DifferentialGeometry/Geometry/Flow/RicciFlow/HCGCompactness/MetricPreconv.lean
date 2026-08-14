@@ -1,10 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivTimeDeriv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovDerivProducer
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.PartialDerivIteratedFDerivOrderBridge
+import DifferentialGeometry.Analysis.Calculus.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Operator.Hessian
@@ -17,47 +17,47 @@ import DifferentialGeometry.Analysis.Calculus.PiDeriv
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Order-1 covariant → coordinate derivative conversion (P3 Brick A1)
 
-The genuinely new layer of MSM135 Corollary `lbl351` (metrics with bounded
-covariant derivatives preconverge).  For a fixed background metric `gRef` and a
-`(0,2)` field `A0`, the chart-model first derivative of a tower-component scalar
 
-  `s_p^V(y) := (covDerivOfField gRef A0 p) y (V·y)`
 
-is bounded on an inner compact `Kc` of the chart source by a constant `CV`
-(collecting `gRef`/chart/slot data only — independent of `A0`) times the next
-two covariant-order norms `Cp1 + Cp`.  This is the order-1 step of the
-`iteratedFDeriv` induction (Brick A2).
 
-**Route.**  The model `fderiv` is bounded by a finite sum over a basis of the
-model fibre (`opNorm_le_sum_coord`); each basis direction is evaluated by the
-pointwise chart bridge `extDerivFun_tangentConstInChart_eq_fderiv`
-(`FixedBase.lean`).  The chart-constant direction field is globalized to a
-genuine smooth section by a bump (`exists_section_eqOn_compact`), so the P2 step
-decomposition `totalNabla0SFun_apply_section` + `nabla0SFun_eval_smooth_slots`
-rewrites the directional derivative of the level-`p` scalar as the level-`(p+1)`
-scalar minus Christoffel corrections (each a level-`p` scalar at a modified slot
-tuple).  Cauchy–Schwarz for covariant tensors (`abs_apply_le_sqrt_normSq0S`) at a
-`gRef`-orthonormal basis (`exists_ON_tangentBasis`) bounds each term by the
-covariant norm times the product of the slot fields' `gRef`-norms, which are
-continuous, hence bounded on the compact `Kc` (`exists_family_bound`).
 
-The quantifier discipline (constants — `CV` — before the varying field `A0`) is
-load-bearing: when applied to a metric SEQUENCE `A0 = g_k`, `CV` is
-`k`-independent and `Cp, Cp1` carry the `k`-dependence.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
 universe u uE uH
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
@@ -69,22 +69,22 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-/-! ## Generic finite-dimensional operator-norm bound -/
 
-/-- **Operator-norm bound via a basis.**  A real continuous linear functional on a
-finite-dimensional space is bounded by the sum over a basis of the dual-basis
-norms times the values on the basis.  Used to reduce the chart `fderiv` operator
-norm to finitely many directional derivatives. -/
+
+
+
+
+
+omit [CompleteSpace E] in
 theorem opNorm_le_sum_coord {n : ℕ}
     (bE : Module.Basis (Fin n) Real E) (L : E →L[Real] Real) :
     ‖L‖ ≤ ∑ i : Fin n, ‖LinearMap.toContinuousLinearMap (bE.coord i)‖ * |L (bE i)| := by
@@ -105,11 +105,12 @@ theorem opNorm_le_sum_coord {n : ℕ}
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [norm_smul, Real.norm_eq_abs, mul_comm]
 
-/-! ## A `gRef`-orthonormal tangent basis at each point -/
 
-/-- **A `gRef`-orthonormal basis of the tangent space at any point** (general
-dimension).  Repackages the trivialization-frame orthonormal basis
-`exists_trivONBasis` as a basis of `TangentSpace I y`. -/
+
+
+
+
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem exists_ON_tangentBasis (gRef : SmoothRiemannianMetric I M) (y : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I y),
       ∀ i j, gRef.inner y (b i) (b j) = if i = j then (1 : Real) else 0 := by
@@ -120,13 +121,15 @@ theorem exists_ON_tangentBasis (gRef : SmoothRiemannianMetric I M) (y : M) :
   rw [IsLocalFrameOn.toBasisAt_coe, IsLocalFrameOn.toBasisAt_coe]
   exact hON i j
 
-/-! ## Globalizing a chart-constant direction field on a compact -/
 
-/-- **Bump-globalization of a chart-constant tangent field on a compact.**  For
-a compact `Kc` inside the chart source at `x₀`, there is a genuine smooth global
-section agreeing with the chart-constant field `tangentConstInChart x₀ v` on
-`Kc`.  This lets the step decomposition (which consumes global smooth slot
-sections) see the chart-constant direction. -/
+
+
+
+
+
+
+omit [CompleteSpace E] [I.Boundaryless] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_section_eqOn_compact
     (x₀ : M) (v : E) {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
@@ -166,16 +169,16 @@ theorem exists_section_eqOn_compact
   · filter_upwards [hχ_one] with x hx
     simp [hx]
 
-/-! ## Compact bound for the `gRef`-norm of a smooth section -/
 
-/-- The `gRef`-norm of a smooth tangent section is bounded on a compact set. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_sqrtInner_bound (gRef : SmoothRiemannianMetric I M)
     {Kc : Set M} (hKc : IsCompact Kc)
     (s : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
     ∃ C : Real, 0 ≤ C ∧ ∀ y ∈ Kc,
       Real.sqrt (gRef.inner y (s y) (s y)) ≤ C := by
-  -- Smoothness of `y ↦ gRef.inner y (s y) (s y)` from the metric bundle map paired
-  -- with the smooth section twice (no inner-product structure on `E` required).
   have hg : ContMDiff I (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
       (fun b : M => TotalSpace.mk' (E →L[Real] E →L[Real] Real)
         (E := fun x : M => TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real) b
@@ -204,11 +207,13 @@ theorem exists_sqrtInner_bound (gRef : SmoothRiemannianMetric I M)
   obtain ⟨C, hC⟩ := hKc.bddAbove_image hcont.continuousOn
   exact ⟨max C 0, le_max_right _ _, fun y hy => le_trans (hC ⟨y, hy, rfl⟩) (le_max_left _ _)⟩
 
-/-- A uniform `gRef`-norm bound over a finite family of smooth tangent sections,
-on a compact set. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_family_bound (gRef : SmoothRiemannianMetric I M)
     {Kc : Set M} (hKc : IsCompact Kc)
-    {ι : Type*} [Fintype ι]
+    {ι : Type*} [Finite ι]
     (s : ι → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
     ∃ D : Real, 0 ≤ D ∧ ∀ i : ι, ∀ y ∈ Kc,
       Real.sqrt (gRef.inner y (s i y) (s i y)) ≤ D := by
@@ -221,14 +226,15 @@ theorem exists_family_bound (gRef : SmoothRiemannianMetric I M)
   exact le_trans (hC i y hy)
     (Finset.single_le_sum (fun j _ => hC0 j) (Finset.mem_univ i))
 
-/-! ## Brick A1 — the order-1 conversion -/
 
-/-- **Order-1 covariant → coordinate conversion** (MSM135 `lbl351`, P3 Brick A1).
-The chart-model first derivative of the level-`p` tower-component scalar
-`y ↦ (covDerivOfField gRef A0 p) y (V·y)` is bounded on an inner compact `Kc` of
-the chart source by a constant `CV` (collecting `gRef`/chart/slot data only,
-independent of `A0`) times `Cp1 + Cp`, where `Cp1`/`Cp` are uniform `gRef`-norms
-of the next two covariant orders.  Base case of the `iteratedFDeriv` induction. -/
+
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
 theorem fderiv_comp_le_tower
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -249,18 +255,15 @@ theorem fderiv_comp_le_tower
   classical
   set n := Module.finrank Real E with hn
   set bE := Module.finBasis Real E with hbE
-  -- Globalize each model-basis chart-constant direction to a smooth section.
   have hσex : ∀ i : Fin n, ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _), ∀ᶠ x in 𝓝ˢ Kc,
       σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (bE i) x :=
     fun i => exists_section_eqOn_compact (I := I) x₀ (bE i) hKc hKchart
   choose σ hσ using hσex
-  -- Levi-Civita smoothness witness for the Christoffel-correction sections.
   have hcov : CovariantDerivative.ContMDiffCovariantDerivative
       (leviCivitaConnectionOfMetric (I := I) gRef) (∞ : WithTop ℕ∞) :=
     ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) gRef isOpen_univ⟩
-  -- Correction sections `W i a = ∇_{σ i} (V a)`.
   let W : Fin n → Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _) := fun i a =>
     ⟨fun y : M =>
@@ -269,7 +272,6 @@ theorem fderiv_comp_le_tower
         simpa [TensorLieDeriv.covariantDeriv_vectorField] using
           TensorLieDeriv.covariantDeriv_vectorField_contMDiff (I := I)
             (leviCivitaConnectionOfMetric (I := I) gRef) hcov (σ i) (V a)⟩
-  -- Uniform `gRef`-norm bound `D` over directions, slots, and corrections.
   obtain ⟨Dσ, hDσ0, hDσ⟩ := exists_family_bound (I := I) gRef hKc σ
   obtain ⟨DV, hDV0, hDV⟩ := exists_family_bound (I := I) gRef hKc V
   obtain ⟨DW, hDW0, hDW⟩ := exists_family_bound (I := I) gRef hKc
@@ -279,7 +281,6 @@ theorem fderiv_comp_le_tower
   have hDσD : Dσ ≤ D := le_max_left _ _
   have hDVD : DV ≤ D := le_trans (le_max_left _ _) (le_max_right _ _)
   have hDWD : DW ≤ D := le_trans (le_max_right _ _) (le_max_right _ _)
-  -- Pointwise direction/slot/correction `gRef`-norm bounds by `D`.
   have hσbd : ∀ i : Fin n, ∀ y ∈ Kc, Real.sqrt (gRef.inner y (σ i y) (σ i y)) ≤ D :=
     fun i y hy => le_trans (hDσ i y hy) hDσD
   have hVbd : ∀ a : Fin (p + 2), ∀ y ∈ Kc, Real.sqrt (gRef.inner y (V a y) (V a y)) ≤ D :=
@@ -287,7 +288,6 @@ theorem fderiv_comp_le_tower
   have hWbd : ∀ i : Fin n, ∀ a : Fin (p + 2), ∀ y ∈ Kc,
       Real.sqrt (gRef.inner y (W i a y) (W i a y)) ≤ D :=
     fun i a y hy => le_trans (hDW (i, a) y hy) hDWD
-  -- The coefficient constant.
   set Ccoord : Real := ∑ i : Fin n, ‖LinearMap.toContinuousLinearMap (bE.coord i)‖
     with hCcoord
   have hCcoord0 : 0 ≤ Ccoord := Finset.sum_nonneg (fun i _ => norm_nonneg _)
@@ -295,31 +295,24 @@ theorem fderiv_comp_le_tower
     le_trans (mul_nonneg hCcoord0 (pow_nonneg hD0 _)) (le_max_left _ _), ?_⟩
   intro y hy Cp Cp1 hCp hCp1
   set CV := max (Ccoord * D ^ (p + 3)) (Ccoord * ((p + 2 : ℕ) * D ^ (p + 2))) with hCV
-  -- The scalar whose chart derivative we bound.
   set f : M → Real := fun z : M => (covDerivOfField (I := I) gRef A0 p) z (fun a => V a z)
     with hf
-  -- Nonnegativity of the order norms (from the hypotheses at `y`).
   have hCpnn : 0 ≤ Cp := le_trans (Real.sqrt_nonneg _) (hCp y hy)
   have hCp1nn : 0 ≤ Cp1 := le_trans (Real.sqrt_nonneg _) (hCp1 y hy)
-  -- The `gRef`-orthonormal tangent basis at `y` for Cauchy–Schwarz.
   obtain ⟨bON, hbON⟩ := exists_ON_tangentBasis (I := I) gRef y
-  -- Differentiability of the scalar at `y` (for the chart bridge).
   have hfmd : MDifferentiableAt I 𝓘(Real, Real) f y :=
     covDerivOfField_eval_mdiffAt (I := I) gRef A0 p V y
   have hychart : y ∈ (chartAt H x₀).source := hKchart hy
-  -- The per-direction bound, valid for every model-basis index.
   have hdir : ∀ i : Fin n,
       |fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x₀ f) (extChartAt I x₀ y) (bE i)|
         ≤ Cp1 * D ^ (p + 3) + (p + 2 : ℕ) * (Cp * D ^ (p + 2)) := by
     intro i
-    -- Chart bridge: the directional model derivative is the exterior derivative.
     have hbridge :
         fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x₀ f) (extChartAt I x₀ y) (bE i)
           = extDerivFun (I := I) f y (σ i y) := by
       rw [← extDerivFun_tangentConstInChart_eq_fderiv (I := I) (f := f)
         (x := x₀) (p := y) hychart hfmd (bE i)]
       rw [(hσ i).self_of_nhdsSet y hy]
-    -- Step decomposition of the directional derivative.
     have hdecomp :
         extDerivFun (I := I) f y (σ i y)
           = (covDerivOfField (I := I) gRef A0 (p + 1)) y
@@ -343,11 +336,9 @@ theorem fderiv_comp_le_tower
           Tensor0SBundle.nabla0SFun_eval_smooth_slots]
       linarith [key]
     rw [hbridge, hdecomp]
-    -- Triangle inequality.
     refine le_trans (abs_add_le _ _) ?_
     refine add_le_add ?_ ?_
-    · -- Cauchy–Schwarz for the level-`(p+1)` term.
-      have hCS := abs_apply_le_sqrt_normSq0S (I := I) gRef y (p + 3) bON hbON
+    · have hCS := abs_apply_le_sqrt_normSq0S (I := I) gRef y (p + 3) bON hbON
         (covDerivOfField (I := I) gRef A0 (p + 1) y)
         (Fin.cons (σ i y) (fun a : Fin (p + 2) => V a y))
       refine le_trans hCS ?_
@@ -368,8 +359,7 @@ theorem fderiv_comp_le_tower
       refine le_trans (mul_le_mul (hCp1 y hy) hprod
         (Finset.prod_nonneg (fun a _ => Real.sqrt_nonneg _)) hCp1nn) ?_
       exact le_of_eq rfl
-    · -- Cauchy–Schwarz for the correction sum.
-      refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+    · refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
       have hterm : ∀ a : Fin (p + 2),
           |(covDerivOfField (I := I) gRef A0 p) y
               (Function.update (fun b : Fin (p + 2) => V b y) a
@@ -405,7 +395,6 @@ theorem fderiv_comp_le_tower
         exact le_of_eq rfl
       refine le_trans (Finset.sum_le_sum (fun a _ => hterm a)) ?_
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Assemble: operator norm ≤ Σ over basis ≤ CV · (Cp1 + Cp).
   set Lz := fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x₀ f) (extChartAt I x₀ y)
     with hLz
   refine le_trans (opNorm_le_sum_coord (E := E) bE Lz) ?_
@@ -416,7 +405,6 @@ theorem fderiv_comp_le_tower
     refine Finset.sum_le_sum (fun i _ => ?_)
     exact mul_le_mul_of_nonneg_left (hdir i) (norm_nonneg _)
   refine le_trans hsum ?_
-  -- `Ccoord · (Cp1·D^(p+3) + (p+2)·Cp·D^(p+2)) ≤ CV · (Cp1 + Cp)`.
   have hb1 : Ccoord * D ^ (p + 3) ≤ CV := le_max_left _ _
   have hb2 : Ccoord * ((p + 2 : ℕ) * D ^ (p + 2)) ≤ CV := le_max_right _ _
   have hexpand :
@@ -432,13 +420,14 @@ theorem fderiv_comp_le_tower
       ≤ CV * Cp1 + CV * Cp := add_le_add h1 h2
     _ = CV * (Cp1 + Cp) := by ring
 
-/-! ## Brick A2 — all-orders conversion (the `iteratedFDeriv` induction) -/
 
-/-- A continuous linear functional on a finite-dimensional space equals the sum
-over a basis of its values on the basis times the dual-basis covectors.  The
-function-level identity behind `opNorm_le_sum_coord`; used to express the chart
-`fderiv` as a finite sum of scalar directional derivatives times constant
-covectors. -/
+
+
+
+
+
+
+omit [CompleteSpace E] in
 theorem clm_eq_sum_coord {m : ℕ}
     (bE : Module.Basis (Fin m) Real E) (L : E →L[Real] Real) :
     L = ∑ i : Fin m, (L (bE i)) • LinearMap.toContinuousLinearMap (bE.coord i) := by
@@ -451,11 +440,14 @@ theorem clm_eq_sum_coord {m : ℕ}
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [map_smul, smul_eq_mul, mul_comm]
 
-/-- **Pointwise tower step decomposition.**  The directional derivative of the
-level-`p` tower scalar `s_p^V` along a smooth section `X` is the level-`(p+1)`
-scalar (with `X` prepended) plus the level-`p` scalars at the Christoffel-updated
-slot tuples.  This is the engine of the `iteratedFDeriv` induction (`A2`); it is
-the pointwise version of the `hdecomp` used inside `fderiv_comp_le_tower`. -/
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem extDerivFun_tower_step
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -489,9 +481,12 @@ theorem extDerivFun_tower_step
       Tensor0SBundle.nabla0SFun_eval_smooth_slots]
   linarith [key]
 
-/-- **Chart-representative smoothness.**  The chart model of a smooth manifold
-scalar is `ContDiff` at the chart image of any chart-source point.  Needed for
-the `iteratedFDeriv` linearity/germ lemmas. -/
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem contDiffAt_chartRep
     (f : M → Real) (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f)
     (x₀ : M) {y : M} (hy : y ∈ (chartAt H x₀).source) :
@@ -514,15 +509,19 @@ theorem contDiffAt_chartRep
     (extChartAt I x₀).map_source hysrc
   exact hcd.contDiffAt ((isOpen_extChartAt_target (I := I) x₀).mem_nhds hz)
 
-/-- The chart representative of a real-valued manifold scalar is the scalar
-composed with the chart inverse (the target model chart is trivial). -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem writtenInExtChartAt_real_apply (x₀ : M) (g : M → Real) (z : E) :
     writtenInExtChartAt I 𝓘(Real, Real) x₀ g z = g ((extChartAt I x₀).symm z) := by
   simp [writtenInExtChartAt]
 
-/-- The level-`p` directional tower step scalar (the value of
-`extDerivFun (s_p^V)` along `X`): the level-`(p+1)` scalar with `X` prepended,
-plus the level-`p` scalars at the Christoffel-updated slot tuples. -/
+
+
+
 noncomputable def towerStep (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
@@ -539,11 +538,13 @@ noncomputable def towerStep (gRef : SmoothRiemannianMetric I M)
             (((leviCivitaConnectionOfMetric (I := I) gRef)
               (fun r : M => V a r) q) (X q)))
 
-/-- **The chart `fderiv` is the chart representative of the tower step.**  Near
-the chart image of a point of `Kc`, the directional chart derivative of `s_p^V`
-along `v` equals the chart representative of `towerStep` (with the globalized
-direction `σ = tangentConstInChart x₀ v`).  This is the germ form feeding the
-`iteratedFDeriv` induction. -/
+
+
+
+
+
+omit [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem fderiv_chartRep_eq_towerStep
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -564,7 +565,6 @@ theorem fderiv_chartRep_eq_towerStep
     with hf
   have hytarget : extChartAt I x₀ y ∈ (extChartAt I x₀).target :=
     (extChartAt I x₀).map_source (by rw [extChartAt_source]; exact hKchart hy)
-  -- the chart inverse maps a neighbourhood of `extChartAt x₀ y` into where `σ = tgtConst`
   have hsymm_y : (extChartAt I x₀).symm (extChartAt I x₀ y) = y :=
     (extChartAt I x₀).left_inv (by rw [extChartAt_source]; exact hKchart hy)
   have htend : Filter.Tendsto (extChartAt I x₀).symm
@@ -584,17 +584,18 @@ theorem fderiv_chartRep_eq_towerStep
   have hqsource : q ∈ (extChartAt I x₀).source := (extChartAt I x₀).map_target hztarget
   have hqchart : q ∈ (chartAt H x₀).source := by rwa [← extChartAt_source (I := I)]
   have hzq : extChartAt I x₀ q = z := (extChartAt I x₀).right_inv hztarget
-  -- chart bridge at `q`
   have hbridge := extDerivFun_tangentConstInChart_eq_fderiv (I := I) (f := f)
     (x := x₀) (p := q) hqchart
     (covDerivOfField_eval_mdiffAt (I := I) gRef A0 p V q) v
   rw [hzq] at hbridge
-  -- assemble the chain
   rw [← hbridge, ← hzσ, writtenInExtChartAt_real_apply, ← hq, hf]
   exact extDerivFun_tower_step (I := I) gRef A0 p V σ q
 
-/-- Full smoothness of a tower-component scalar (`ContMDiff`, not just `…At`),
-needed for the chart-representative `ContDiff` bridge inside the induction. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_contMDiff
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -608,8 +609,9 @@ theorem covDerivOfField_eval_contMDiff
     (fun W => Tensor0SBundle.tensor0SField_eval_smooth_slots_contMDiffAt
       (I := I) A0 W x) p V
 
-/-- The iterated derivative norm of a scalar function times a constant covector
-is bounded by the covector norm times the scalar's iterated derivative norm. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem iteratedFDeriv_smul_const_le {rr : ℕ} {g : E → Real} {z₀ : E}
     (c : E →L[Real] Real) (hg : ContDiffAt Real (∞ : WithTop ℕ∞) g z₀) :
     ‖iteratedFDeriv Real rr (fun z : E => g z • c) z₀‖
@@ -625,6 +627,7 @@ theorem iteratedFDeriv_smul_const_le {rr : ℕ} {g : E → Real} {z₀ : E}
   rw [ContinuousLinearMap.norm_smulRight_apply]
   exact mul_le_of_le_one_left (norm_nonneg _) ContinuousLinearMap.norm_id_le
 
+omit [IsManifold I 2 M] in
 /-- Pointwise all-orders covariant-to-coordinate conversion.  The compact set
 controls the chart and slot constants, while the tensor norms on the right are
 evaluated at the same point as the chart derivative. -/
@@ -685,7 +688,6 @@ theorem iterFDeriv_tower_le
       classical
       set m := Module.finrank Real E with hm
       set bE := Module.finBasis Real E with hbE
-      -- globalized model-basis directions
       have hσex : ∀ i : Fin m, ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M → Type _), ∀ᶠ x in 𝓝ˢ Kc,
           σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (bE i) x :=
@@ -695,7 +697,6 @@ theorem iterFDeriv_tower_le
           (leviCivitaConnectionOfMetric (I := I) gRef) (∞ : WithTop ℕ∞) :=
         ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) gRef isOpen_univ⟩
-      -- correction sections `W i a = ∇_{σ i}(V a)`
       let W : Fin m → Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M → Type _) := fun i a =>
         ⟨fun q : M =>
@@ -705,12 +706,10 @@ theorem iterFDeriv_tower_le
             simpa [TensorLieDeriv.covariantDeriv_vectorField] using
               TensorLieDeriv.covariantDeriv_vectorField_contMDiff (I := I)
                 (leviCivitaConnectionOfMetric (I := I) gRef) hcov (σ i) (V a)⟩
-      -- the grown slot tuples (typed so the section coercion resolves)
       let Vf : Fin m → Fin (p + 3) → ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M → Type _) := fun i => Fin.cons (σ i) V
       let Vc : Fin m → Fin (p + 2) → Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M → Type _) := fun i a => Function.update V a (W i a)
-      -- IH constants (level `p+1`, tuple `Vf i`; level `p`, tuple `Vc i a`)
       have hCf := fun i : Fin m => ih (p + 1) (Vf i)
       choose Cf hCf0 hCfb using hCf
       have hCc := fun (i : Fin m) (a : Fin (p + 2)) => ih p (Vc i a)
@@ -731,7 +730,6 @@ theorem iterFDeriv_tower_le
         (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w)) with hFdef
       set S : Real := ∑ q ∈ Finset.range (p + (r + 1) + 1), b q with hSdef
       have hSnn : 0 ≤ S := Finset.sum_nonneg (fun q _ => hbnn q)
-      -- slot funexts identifying `towerStep` terms with the IH-form tower scalars
       have hcons : ∀ (i : Fin m) (q : M),
           (Fin.cons ((σ i) q) (fun a : Fin (p + 2) => V a q)
             : Fin (p + 3) → TangentSpace I q) = fun a => Vf i a q := by
@@ -748,7 +746,6 @@ theorem iterFDeriv_tower_le
         by_cases hba : bb = a
         · subst hba; simp [Vc, W]
         · simp [Vc, Function.update_of_ne hba]
-      -- `towerStep` chart rep splits into IH-form chart reps
       have hsplit : ∀ i : Fin m,
           writtenInExtChartAt I 𝓘(Real, Real) x₀ (towerStep (I := I) gRef A0 p V (σ i))
             = fun z' : E =>
@@ -764,7 +761,6 @@ theorem iterFDeriv_tower_le
         congr 1
         · rw [hcons i]
         · exact Finset.sum_congr rfl (fun a _ => by rw [hupd i a])
-      -- ContDiff of the chart reps
       have hcd_first : ∀ i : Fin m, ContDiffAt Real (∞ : WithTop ℕ∞)
           (writtenInExtChartAt I 𝓘(Real, Real) x₀
             (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
@@ -789,7 +785,6 @@ theorem iterFDeriv_tower_le
           (writtenInExtChartAt I 𝓘(Real, Real) x₀
             (towerStep (I := I) gRef A0 p V (σ i))) z := by
         intro i; rw [hsplit i]; exact (hcd_first i).add (hcd_corrsum i)
-      -- the `fderiv F` germ
       have hgerm : fderiv Real F =ᶠ[𝓝 z]
           fun z' : E => ∑ i : Fin m,
             (writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -803,7 +798,6 @@ theorem iterFDeriv_tower_le
         filter_upwards [Filter.eventually_all.mpr (fun i => hperi i)] with z' hz'
         rw [clm_eq_sum_coord bE (fderiv Real F z')]
         exact Finset.sum_congr rfl (fun i _ => by rw [hz' i])
-      -- range arithmetic for the sums
       have hr : (r : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
       have heqf : p + 1 + r + 1 = p + (r + 1) + 1 := by omega
       have hlec : p + r + 1 ≤ p + (r + 1) + 1 := by omega
@@ -813,7 +807,6 @@ theorem iterFDeriv_tower_le
         fun x hx => Finset.mem_range.2 (lt_of_lt_of_le (Finset.mem_range.1 hx) hlec)
       have hSc : ∑ q ∈ Finset.range (p + r + 1), b q ≤ S :=
         Finset.sum_le_sum_of_subset_of_nonneg hrange_c (fun q _ _ => hbnn q)
-      -- per-direction bound
       have hgi : ∀ i : Fin m,
           ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
             (towerStep (I := I) gRef A0 p V (σ i))) z‖
@@ -847,7 +840,6 @@ theorem iterFDeriv_tower_le
                     (fun bb => Vc i a bb w))) z‖
             ≤ Cf i * S + (∑ a : Fin (p + 2), Cc i a) * S := add_le_add hfst hcsum
           _ = (Cf i + ∑ a : Fin (p + 2), Cc i a) * S := by ring
-      -- assemble
       rw [← norm_iteratedFDeriv_fderiv, (hgerm.iteratedFDeriv Real r).eq_of_nhds,
         iteratedFDeriv_fun_sum_apply
           (f := fun i (z' : E) => (writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -861,6 +853,7 @@ theorem iterFDeriv_tower_le
       rw [Finset.sum_mul]
       exact Finset.sum_congr rfl (fun i _ => (mul_assoc _ _ _).symm)
 
+omit [IsManifold I 2 M] in
 /-- **All-orders covariant → coordinate conversion** (MSM135 `lbl351`, P3
 Brick A2).  This constants-first form is retained for consumers with uniform
 covariant bounds; it follows from the pointwise estimate
@@ -888,10 +881,12 @@ theorem iteratedFDeriv_comp_le_tower
 
 /-! ## Brick B — chart-local extraction (bump-extended components) -/
 
-/-- **Bump-multiplication is globally smooth.**  A globally smooth bump `χ` with
-`tsupport χ ⊆ U` times a function `g` that is `ContDiffOn` the open set `U` is
-globally `ContDiff` (smooth on `U`, identically `0` off `tsupport χ`).  The
-Euclidean glue behind the bump-extended chart components. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem bumpMul_contDiff {χ g : E → Real} {U : Set E} (hU : IsOpen U)
     (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (htsupp : tsupport χ ⊆ U)
     (hg : ContDiffOn Real (∞ : WithTop ℕ∞) g U) :
@@ -906,11 +901,12 @@ theorem bumpMul_contDiff {χ g : E → Real} {U : Set E} (hU : IsOpen U)
     have hχz : χ z = 0 := image_eq_zero_of_notMem_tsupport hz
     simp [hχz]
 
-/-- **Uniform iterated-derivative bound for a bump product.**  If on `tsupport χ`
-all derivatives of the bump `χ` are `≤ Bχ` and all derivatives of `gg` are `≤ Bg`,
-then `‖∇ʳ(χ·gg)‖ ≤ 2ʳ·Bχ·Bg` EVERYWHERE (off `tsupport χ` the χ-derivatives
-vanish, so the whole product derivative does).  The `K`-independent bound feeding
-`exists_cInf_subseq`. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
     (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (hgg : ContDiff Real (∞ : WithTop ℕ∞) gg)
     {Bχ Bg : Real} (hBχ0 : 0 ≤ Bχ) (hBg0 : 0 ≤ Bg)
@@ -944,9 +940,10 @@ theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
   push_cast
   ring
 
-/-- Fixed-order metric component bound from covariant bounds only through that
-order.  Higher covariant orders are bounded separately for each smooth metric
-and do not enter the resulting uniform constant. -/
+
+
+
+omit [IsManifold I 2 M] in
 theorem metricComp_iter_le
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -1011,8 +1008,11 @@ theorem metricComp_iter_le
           simpa only [zero_add] using hbound
     _ = CV * ∑ q ∈ Finset.range (r + 1), B q := by rw [hsum]
 
-/-- A metric component written using globalized chart-basis slots agrees near
-each compact-set point with the corresponding chart Gram entry. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem chartGram_germ
     (gRef g : SmoothRiemannianMetric I M) (x₀ : M) {Kc : Set M}
     (hKchart : Kc ⊆ (chartAt H x₀).source) {y : M} (hy : y ∈ Kc)
@@ -1064,9 +1064,10 @@ theorem chartGram_germ
   rw [hval, hzi, hzj, chartGramOnE, chartGramMatrix_apply]
   congr 1
 
-/-- Uniform fixed-order chart Gram bounds from covariant metric bounds through
-the same order.  In particular, `r = 3` packages the coefficient data needed by
-a low-regularity Ricci--DeTurck existence theorem. -/
+
+
+
+omit [IsManifold I 2 M] in
 theorem chartGram_iter_le
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -1104,6 +1105,7 @@ theorem chartGram_iter_le
   exact le_trans (hC (i, j) k y hy)
     (Finset.single_le_sum (fun p _ => hC0 p) (Finset.mem_univ (i, j)))
 
+omit [IsManifold I 2 M] in
 /-- Fixed-order chart Gram differences are controlled by the covariant metric
 difference through the same order.  The tower estimate is applied to the
 tensor-field difference before taking norms, so the constant depends only on
@@ -1213,8 +1215,11 @@ theorem chartJet_sub_le
     (mul_le_mul_of_nonneg_right
       (Finset.single_le_sum (fun p _ => hC0 p) (Finset.mem_univ (i, j))) hsum0)
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem gramPi_sub_le
-    [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+    [NeZero (Module.finrank ℝ E)]
     (u u' : SmoothRiemannianMetric I M) (x₀ : M) (z : E) (r : ℕ) (B : ℝ)
     (hB : 0 ≤ B)
     (hentry : ∀ i j : Fin (Module.finrank ℝ E),
@@ -1266,10 +1271,11 @@ private theorem gramPi_sub_le
     ((hsmooth u' i j).of_le hr)]
   exact hentry i j
 
+omit [IsManifold I 2 M] in
 /-- The full chart-Gram spatial `2`-jet difference is controlled by the
 covariant metric difference through order two. -/
 theorem chartJet2_sub_le
-    [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+    [NeZero (Module.finrank ℝ E)]
     (gRef : SmoothRiemannianMetric I M) (x₀ : M)
     {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
@@ -1355,6 +1361,7 @@ theorem chartJet2_sub_le
   exact Analysis.jet2_sub_le ((hmat u).of_le htwoInf) ((hmat u').of_le htwoInf)
     hpi₀ hpi₁ hpi₂
 
+omit [IsManifold I 2 M] in
 /-- The theorem-facing exact-order predicate supplies the fixed-order chart
 Gram bounds required by `chartGram_iter_le`. -/
 theorem chartGram_of_orders
@@ -1372,8 +1379,9 @@ theorem chartGram_of_orders
   chartGram_iter_le (I := I) gRef gSeq x₀ hKc hKchart r
     (fun q hq => ⟨B, fun k z hz => hbdd k q hq z hz⟩)
 
-/-- Uniform fixed-order chart Gram bounds over every active support of the
-canonical finite chart-atlas partition of unity. -/
+
+
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_le
     [CompactSpace M]
     {ι : Type*}
@@ -1420,8 +1428,9 @@ theorem chartGram_pou_le
     · exact hα
   exact (hbound α k y hy i j).trans hCα_le
 
-/-- Uniform order-zero intrinsic metric bounds give uniform chart Gram entry
-bounds on every active partition-of-unity chart support. -/
+
+
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_bnd
     [CompactSpace M]
     {ι : Type*}
@@ -1446,8 +1455,9 @@ theorem chartGram_pou_bnd
   have h := hC α hα k y hy i j
   simpa only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] using h
 
-/-- Uniform order-one chart Gram norms give uniform first coordinate partial
-bounds on every active partition-of-unity chart support. -/
+
+
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_d1
     [CompactSpace M]
     {ι : Type*}
@@ -1486,10 +1496,11 @@ theorem chartGram_pou_d1
     _ ≤ C * C_E := mul_le_mul (hC α hα k y hy i j) hm_le
       (norm_nonneg _) hC_nn
 
-/-- Uniform order-two chart Gram norms give uniform nested second coordinate
-partial bounds on every active partition-of-unity chart support. -/
+
+
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_d2
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] [CompactSpace M]
+    [NeZero (Module.finrank Real E)] [CompactSpace M]
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M)
@@ -1547,10 +1558,11 @@ theorem chartGram_pou_d2
       (mul_le_mul hc_le hm_le (norm_nonneg _) hCE_nn) (mul_nonneg (norm_nonneg _) (norm_nonneg _))
       hC_nn
 
-/-- Uniform order-three chart Gram norms give uniform nested third coordinate
-partial bounds on every active partition-of-unity chart support. -/
+
+
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_d3
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] [CompactSpace M]
+    [NeZero (Module.finrank Real E)] [CompactSpace M]
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M)
@@ -1623,11 +1635,12 @@ theorem chartGram_pou_d3
       exact mul_le_mul (hC α hα k y hy i j) hprod
         (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))) hC_nn
 
-/-- **Metric component chart-derivative bound** (the A2 → metric bridge).  For a
-metric SEQUENCE with uniform `(B_q)` covariant bounds, the order-`r` chart
-derivative of the `(0,2)`-component along a fixed slot tuple `V` is bounded on
-`Kc` by a constant `Mr` that is `∃`-bound BEFORE `k` (strict constants-first:
-the A2 `CV` is uniform in `k`, the `(B_q)` constants are uniform in `k`). -/
+
+
+
+
+
+omit [IsManifold I 2 M] in
 theorem metricComp_iteratedFDeriv_le
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -1645,10 +1658,11 @@ theorem metricComp_iteratedFDeriv_le
   metricComp_iter_le (I := I) gRef gSeq x₀ hKc hKchart r
     (fun q _ => hbdd q Kc hKc) V
 
-/-- Chart-component derivative bounds when the reference metric may depend on the requested
-order.  Only covariant orders up to `r` need uniform bounds relative to `gRef r`; higher orders
-required by the all-orders conversion interface are supplied pointwise for each fixed sequence
-term and do not enter the resulting finite sum. -/
+
+
+
+
+omit [IsManifold I 2 M] in
 theorem metricComp_iter_refs
     (gRef : ℕ → SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -1713,12 +1727,13 @@ theorem metricComp_iter_refs
     _ = CV * ∑ q ∈ Finset.range (r + 1), B q := by
       rw [show 0 + r + 1 = r + 1 by omega, hsum]
 
-/-- **Per-chart bump-extended metric-component sequence** (the `exists_cInf_subseq`
-input).  For a metric sequence with uniform `(B_q)` bounds, a chart `x₀`, a slot
-tuple `V`, and an inner compact `K₀ ⊆ chart source`, there is a bump `χ` (`= 1` on
-the chart image of `K₀`) and the bump-extended components `Φ k = χ · (chart rep of
-the V-component of gSeq k)` which are globally `ContDiff ⊤` and whose order-`r`
-derivatives are uniformly bounded in `k` (constant before `k`). -/
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
 theorem exists_chart_engineInput
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -1741,7 +1756,6 @@ theorem exists_chart_engineInput
   haveI : LocallyCompactSpace E := inferInstance
   set tgt := (extChartAt I x₀).target with htgt
   have htgt_open : IsOpen tgt := isOpen_extChartAt_target (I := I) x₀
-  -- the chart image of `K₀`, compact in `tgt`
   set EK₀ : Set E := extChartAt I x₀ '' K₀ with hEK₀
   have hEK₀cpt : IsCompact EK₀ :=
     hK₀.image_of_continuousOn ((continuousOn_extChartAt (I := I) x₀).mono
@@ -1749,7 +1763,6 @@ theorem exists_chart_engineInput
   have hEK₀tgt : EK₀ ⊆ tgt := by
     rintro z ⟨y, hy, rfl⟩
     exact (extChartAt I x₀).map_source (by rw [extChartAt_source]; exact hK₀chart hy)
-  -- outer bump χ : = 1 on a nhd of EK₀, COMPACT support ⊆ tgt
   obtain ⟨L, hLcpt, hEK₀L, hLt⟩ := exists_compact_between hEK₀cpt htgt_open hEK₀tgt
   obtain ⟨χM, hχ1, hχ0, -⟩ :=
     exists_contMDiffMap_one_nhds_of_subset_interior (I := 𝓘(Real, E)) (M := E)
@@ -1762,7 +1775,6 @@ theorem exists_chart_engineInput
   have hχcpt : IsCompact (tsupport χ) :=
     hLcpt.of_isClosed_subset (isClosed_tsupport χ) hχLsub
   have hχtsupp : tsupport χ ⊆ tgt := subset_trans hχLsub hLt
-  -- inner bump χ₁ : = 1 on a nhd of tsupport χ, tsupport ⊆ tgt
   obtain ⟨V₂, hV₂o, htsχV₂, hV₂t⟩ :=
     normal_exists_closure_subset (isClosed_tsupport χ) htgt_open hχtsupp
   obtain ⟨χ1M, hχ1one, hχ1zero, -⟩ :=
@@ -1774,13 +1786,11 @@ theorem exists_chart_engineInput
   have hχ1tsupp : tsupport χ1 ⊆ tgt := by
     refine subset_trans (closure_mono ?_) hV₂t
     intro x hx; by_contra hxV; exact hx (hχ1zero x hxV)
-  -- the chart rep of the V-component of gSeq k
   set cr : ℕ → E → Real := fun k =>
     writtenInExtChartAt I 𝓘(Real, Real) x₀
       (fun w : M => (covDerivOfField (I := I) gRef
         (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w))
     with hcr
-  -- `cr k` is ContDiffOn `tgt`
   have hcrOn : ∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (cr k) tgt := by
     intro k z hz
     have : ContDiffAt Real (∞ : WithTop ℕ∞) (cr k) z := by
@@ -1791,12 +1801,9 @@ theorem exists_chart_engineInput
           (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0 V) x₀ hzsrc
       rwa [(extChartAt I x₀).right_inv hz] at this
     exact this.contDiffWithinAt
-  -- Φ k := χ · cr k
   refine ⟨fun k => fun x => χ x * cr k x, χ, ?_, ?_, ?_, fun k => rfl⟩
-  · -- ContDiff
-    exact fun k => bumpMul_contDiff htgt_open hχcd hχtsupp (hcrOn k)
-  · -- uniform bound
-    intro r
+  · exact fun k => bumpMul_contDiff htgt_open hχcd hχtsupp (hcrOn k)
+  · intro r
     set Kc : Set M := (extChartAt I x₀).symm '' (tsupport χ) with hKcdef
     have hKccpt : IsCompact Kc :=
       hχcpt.image_of_continuousOn
@@ -1805,7 +1812,6 @@ theorem exists_chart_engineInput
       rintro w ⟨z, hz, rfl⟩
       rw [← extChartAt_source (I := I)]
       exact (extChartAt I x₀).map_target (hχtsupp hz)
-    -- Bχ : χ-derivative bound over `tsupport χ` for orders ≤ r
     obtain ⟨Bχ, hBχ0, hBχ⟩ : ∃ Bχ : Real, 0 ≤ Bχ ∧ ∀ x ∈ tsupport χ, ∀ i : ℕ, i ≤ r →
         ‖iteratedFDeriv Real i χ x‖ ≤ Bχ := by
       have hbd : ∀ i : ℕ, ∃ Bi : Real, ∀ x ∈ tsupport χ,
@@ -1820,7 +1826,6 @@ theorem exists_chart_engineInput
       exact le_trans (le_trans (hBi i x hx) (le_max_left _ _))
         (Finset.single_le_sum (fun ii _ => le_max_right _ _)
           (Finset.mem_range.2 (Nat.lt_succ_of_le hir)))
-    -- Bg := Σ_{j≤r} Mr j, from the metric → A2 bridge (uniform in k)
     choose Mr hMr0 hMrb using fun j =>
       metricComp_iteratedFDeriv_le (I := I) gRef gSeq hbdd x₀ hKccpt hKcsrc V j
     refine ⟨2 ^ r * Bχ * ∑ j ∈ Finset.range (r + 1), Mr j, fun k x => ?_⟩
@@ -1849,14 +1854,14 @@ theorem exists_chart_engineInput
     simp only [hΦeq]
     exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
       hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
-  · -- χ = 1 on EK₀
-    intro y hy
+  · intro y hy
     exact hχ1.self_of_nhdsSet _ ⟨y, hy, rfl⟩
 
-/-- **Per-chart `C^∞` convergence of the bump-extended metric components.**  Feeds
-the `exists_chart_engineInput` output to `exists_cInf_subseq`: a subsequence `φ`,
-a `ContDiff ⊤` limit `Φinf`, a bump `χ` (`= 1` on the chart image of `K₀`), with
-the bump-extended components converging `C^∞` on every compact. -/
+
+
+
+
+omit [IsManifold I 2 M] in
 theorem exists_chart_cInfConv
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)

@@ -22,7 +22,8 @@ small enough to stay in the ball.
 -/
 
 noncomputable section
-
+open MeasureTheory
+open scoped ENNReal
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
@@ -83,50 +84,52 @@ namespace HmfFPData
 
 variable {tr : X →L[ℝ] E} {eps K R eta : ℝ}
   (D : HmfFPData tr eps K R eta)
-
+omit [CompleteSpace X] in
+include D in
 theorem rate_nonneg : 0 ≤ hmfRate eps K R := by
-  exact add_nonneg (mul_nonneg (by norm_num) D.eps0) (mul_nonneg D.K0 D.R0)
-
+  exact add_nonneg (mul_nonneg (by norm_num) (HmfFPData.eps0 D))
+    (mul_nonneg (HmfFPData.K0 D) (HmfFPData.R0 D))
+omit [CompleteSpace X] in
+include D in
 private theorem zero_mem : (0 : X) ∈ Metric.closedBall 0 R := by
-  simpa [Metric.mem_closedBall] using D.R0
-
+  simpa [Metric.mem_closedBall] using HmfFPData.R0 D
+omit [CompleteSpace X] in
 private theorem principal_bound {u : X} (hu : u ∈ Metric.closedBall 0 R) :
     ‖D.principal u‖ ≤ 4 * eps * ‖u‖ := by
-  simpa [D.principal_zero] using D.principal_lip u 0 hu D.zero_mem
-
+  simpa [D.principal_zero] using D.principal_lip u 0 hu (zero_mem D)
+omit [CompleteSpace X] in
 private theorem quadratic_bound {u : X} (hu : u ∈ Metric.closedBall 0 R) :
     ‖D.quadratic u‖ ≤ K * R * ‖u‖ := by
-  simpa [D.quadratic_zero] using D.quadratic_lip u 0 hu D.zero_mem
-
-/-- The Duhamel map sends the radius-`R` rough-path ball into itself. -/
+  simpa [D.quadratic_zero] using D.quadratic_lip u 0 hu (zero_mem D)
+omit [CompleteSpace X] in
 theorem duh_mem {u : X} (hu : u ∈ Metric.closedBall 0 R) :
     hmfDuh D u ∈ Metric.closedBall (0 : X) R := by
   have huR : ‖u‖ ≤ R := by
     simpa [Metric.mem_closedBall, dist_zero_right] using hu
   have hrateR : hmfRate eps K R * ‖u‖ ≤ hmfRate eps K R * R :=
-    mul_le_mul_of_nonneg_left huR D.rate_nonneg
-  rw [Metric.mem_closedBall, dist_zero_left]
+    mul_le_mul_of_nonneg_left huR (rate_nonneg D)
+  rw [Metric.mem_closedBall, dist_zero_right]
   calc
     ‖hmfDuh D u‖
         ≤ ‖D.seed‖ + ‖D.principal u‖ + ‖D.quadratic u‖ := by
-          simpa [hmfDuh, add_assoc] using
+          simpa only [hmfDuh] using
             (norm_add_le (D.seed + D.principal u) (D.quadratic u) |>.trans
-              (add_le_add_right (norm_add_le D.seed (D.principal u)) _))
+              (add_le_add (norm_add_le D.seed (D.principal u)) (le_refl _)))
     _ ≤ eta + (4 * eps * ‖u‖) + (K * R * ‖u‖) :=
       add_le_add (add_le_add D.seed_bound (D.principal_bound hu))
         (D.quadratic_bound hu)
     _ = eta + hmfRate eps K R * ‖u‖ := by
       simp only [hmfRate]
       ring
-    _ ≤ eta + hmfRate eps K R * R := add_le_add_left hrateR eta
+    _ ≤ eta + hmfRate eps K R * R := add_le_add (le_refl eta) hrateR
     _ ≤ (1 - hmfRate eps K R) * R + hmfRate eps K R * R :=
-      add_le_add_right D.seed_small _
+      add_le_add D.seed_small (le_refl _)
     _ = R := by ring
 
 /-- The Duhamel self-map of the rough-path state ball. -/
 def duhBall (u : HmfBall R X) : HmfBall R X :=
-  ⟨hmfDuh D u, D.duh_mem u.property⟩
-
+  ⟨hmfDuh D u, duh_mem D u.property⟩
+omit [CompleteSpace X] in
 private theorem duh_diff {u v : X}
     (hu : u ∈ Metric.closedBall 0 R) (hv : v ∈ Metric.closedBall 0 R) :
     ‖hmfDuh D u - hmfDuh D v‖ ≤ hmfRate eps K R * ‖u - v‖ := by
@@ -148,32 +151,27 @@ private theorem duh_diff {u v : X}
       simp only [hmfRate]
       ring
 
+omit [CompleteSpace X] in
 /-- The state-ball Duhamel map is a contraction with the exact rate
 `4 * eps + K * R`. -/
 theorem duh_contracting :
-    ContractingWith ⟨hmfRate eps K R, D.rate_nonneg⟩ D.duhBall := by
+    ContractingWith ⟨hmfRate eps K R, rate_nonneg D⟩ D.duhBall := by
   refine ⟨?_, ?_⟩
   · rw [← NNReal.coe_lt_coe]
     simpa using D.rate_lt_one
   · refine LipschitzWith.of_dist_le_mul ?_
     intro u v
-    rw [Subtype.dist_eq, dist_eq_norm, dist_eq_norm]
-    simpa using D.duh_diff u.property v.property
-
-/-- Banach fixed point for the rough local-addition HMF equation.
-
-The solution lies in the stated rough-path ball, has zero initial trace, and
-satisfies the untruncated Duhamel equation.  It is unique among all elements
-of the same ball satisfying that equation. -/
+    simpa only [Subtype.dist_eq, dist_eq_norm] using D.duh_diff u.property v.property
 theorem rough_fixed :
     ∃! u : X,
       u ∈ Metric.closedBall (0 : X) R ∧
       tr u = 0 ∧
       hmfDuh D u = u := by
-  let zeroBall : HmfBall R X := ⟨0, D.zero_mem⟩
+  let zeroBall : HmfBall R X := ⟨0, zero_mem D⟩
   letI : Nonempty (HmfBall R X) := ⟨zeroBall⟩
+  letI : CompleteSpace (HmfBall R X) := Metric.isClosed_closedBall.completeSpace_coe
   let Φ : HmfBall R X → HmfBall R X := D.duhBall
-  have hcontr : ContractingWith ⟨hmfRate eps K R, D.rate_nonneg⟩ Φ :=
+  have hcontr : ContractingWith ⟨hmfRate eps K R, rate_nonneg D⟩ Φ :=
     D.duh_contracting
   let uStar : HmfBall R X := ContractingWith.fixedPoint Φ hcontr
   have hfixBall : Φ uStar = uStar := ContractingWith.fixedPoint_isFixedPt hcontr
@@ -199,6 +197,7 @@ section SplitRealization
 
 variable {V G F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [MeasurableSpace V] [BorelSpace V]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 

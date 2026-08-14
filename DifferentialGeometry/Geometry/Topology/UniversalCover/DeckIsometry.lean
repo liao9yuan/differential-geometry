@@ -24,7 +24,7 @@ namespace Topology
 namespace UniversalCover
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -33,8 +33,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless]
-  [IsManifold I ∞ M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless]
+  [IsManifold I ∞ M]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [ConnectedSpace M] in
 /-- A deck transformation has identity differential in the preferred
 universal-cover tangent coordinates. -/
 theorem hasMFDerivAt_deck
@@ -53,7 +56,7 @@ theorem hasMFDerivAt_deck
       extChartAt_target_mem_nhdsWithin p
     refine Filter.eventuallyEq_of_mem hmem ?_
     intro y hy
-    show extChartAt I (f p) (f ((extChartAt I p).symm y)) = y
+    change extChartAt I (f p) (f ((extChartAt I p).symm y)) = y
     rw [extChartAt_proj_eq (I := I) (M := M),
       hproj p, hproj ((extChartAt I p).symm y),
       ← extChartAt_proj_eq (I := I) (M := M)]
@@ -64,13 +67,18 @@ theorem hasMFDerivAt_deck
   have hx0 :
       writtenInExtChartAt I I p f (extChartAt I p p) =
         (id : E → E) (extChartAt I p p) := by
-    show extChartAt I (f p) (f ((extChartAt I p).symm (extChartAt I p p))) =
+    change extChartAt I (f p) (f ((extChartAt I p).symm (extChartAt I p p))) =
       extChartAt I p p
     rw [extChartAt_proj_eq (I := I) (M := M),
       hproj p, hproj ((extChartAt I p).symm (extChartAt I p p)),
       ← extChartAt_proj_eq (I := I) (M := M), extChartAt_to_inv]
   exact hId.congr_of_eventuallyEq hEq hx0
 
+omit [FiniteDimensional ℝ E]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [ConnectedSpace M] in
 /-- Deck transformations preserve the lifted pointwise metric. -/
 theorem deck_inner
     (g : SmoothRiemannianMetric I M)

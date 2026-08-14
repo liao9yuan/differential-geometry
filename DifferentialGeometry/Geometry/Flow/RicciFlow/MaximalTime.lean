@@ -12,16 +12,14 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import Mathlib.Analysis.Calculus.FDeriv.Extend
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Maximal and Singular Times for Ricci Flow
 
-This file records the interval-changing definitions needed for the appendix
-maximal-time discussion.  The genuine theorem that singularity is equivalent
-to maximality remains a global extension-criterion frontier.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,14 +33,14 @@ variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
 
-/-- Two interval solutions agree on `U` when their stored metric, connection,
-and Ricci data agree at every time in `U`.  Ricci equality is explicit because
-the current solution predicate does not prove Ricci is uniquely reconstructed
-from the metric. -/
+
+
+
+
 def SolutionAgreesOn
     {D Dhat : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -53,38 +51,44 @@ def SolutionAgreesOn
       S.family.connection t = Shat.family.connection t ∧
         S.ricci t = Shat.ricci t
 
-/-- The solution on `[alpha, omega)` extends as a Ricci flow past `omega`. -/
+
 def ExtendsPastEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   ∃ eps : Real, 0 < eps ∧
     ∃ hwide : alpha < omega + eps,
       ∃ Shat : SolutionOn (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + eps) hwide),
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + eps)
+          hwide),
         IsSolutionOn (I := I) Shat ∧
           SolutionAgreesOn (I := I) S Shat (Set.Ico alpha omega)
 
-/-- The solution on `[alpha, omega)` is maximal at its finite endpoint. -/
+
 def IsMaximalAtEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   ¬ ExtendsPastEndpoint (I := I) hαω S
 
-/-- A time-indexed lowered Riemann tensor realizes the solution curvature on
-the interval where the solution is defined. -/
+
+
 def Rm04RealizesSolutionConnectionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) : Prop :=
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) :
+      Prop :=
   forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D,
     DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I)
       (S.family.metric (t : Real)) (S.family.connection (t : Real))
       (Rm04 (t : Real))
 
-/-- The canonical lowered Riemann section of a solution's metric realizes its
-Levi-Civita connection curvature. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] in
 theorem rm04Realizes_metric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -97,7 +101,7 @@ theorem rm04Realizes_metric
       (metricCov (I := I) (M := M) (S.base.metric (t : Real)))
       (metricCov_smooth (I := I) (M := M) (S.base.metric (t : Real))))
 
-/-- Metric-induced squared norm of a time-indexed lowered Riemann tensor. -/
+
 def curvatureNormSq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -106,6 +110,8 @@ def curvatureNormSq
   fun t x =>
     Tensor0SBundle.normSq0S (I := I) (S.family.metric t) x 4 ((Rm04 t) x)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] in
 @[simp] theorem curvatureNormSq_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -115,29 +121,33 @@ def curvatureNormSq
       Tensor0SBundle.normSq0S (I := I) (S.family.metric t) x 4 ((Rm04 t) x) := by
   rfl
 
-/-- The metric-induced squared norm of a supplied lowered Riemann tensor is
-unbounded on `M × [alpha, omega)`. -/
+
+
 def Rm04NormSqUnboundedAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) : Prop :=
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) :
+      Prop :=
   forall K : Real, ∃ t : Real, ∃ x : M,
     alpha <= t ∧ t < omega ∧ K < curvatureNormSq (I := I) S Rm04 t x
 
-/-- The metric-induced squared norm of a supplied lowered Riemann tensor is
-bounded above on `M × [alpha, omega)`. -/
+
+
 def Rm04NormSqBoundedAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) : Prop :=
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) :
+      Prop :=
   ∃ K : Real, forall t : Real, forall x : M,
     alpha <= t -> t < omega ->
       curvatureNormSq (I := I) S Rm04 t x <= K
 
-/-- Failure of unboundedness gives a finite bound.  This is just classical
-logic for the chosen squared-norm formulation. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] in
 theorem rmBounded_of_not_unbounded
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -153,10 +163,6 @@ theorem rmBounded_of_not_unbounded
   intro t x ht hT
   exact hK t x ht hT
 
-set_option maxHeartbeats 1000000 in
-/-- Black Box 11.2: bounded curvature on a closed finite-endpoint Ricci flow
-lets the flow extend smoothly past the endpoint.  This is global PDE theory,
-not local tensor algebra. -/
 theorem extends_of_rmBounded
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -168,16 +174,13 @@ theorem extends_of_rmBounded
     (_hbound : Rm04NormSqBoundedAt (I := I) S Rm04) :
     ExtendsPastEndpoint (I := I) hαω S := by
   let g_fam := S.base.metric
-  -- Leaf 1: Ricci-flow PDE on [α, ω) (ported helper `ricciFlowPDE_Ici_of_soln`).
   have hleft := ricciFlowPDE_Ici_of_soln (I := I) _hS
-  -- Bridge `_hbound` → raw `|Rm|²` bound `K'`.
   obtain ⟨K', hK'bound⟩ := _hbound
   have hbound_raw : ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
       Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K' := by
     intro t x ht1 ht2
     have h := hK'bound t x ht1 ht2
     simpa [curvatureNormSq, SolutionOn.family] using h
-  -- Bridge `_hRm` → raw per-time realization, then produce `hric` via `ric_quad_le_of_soln`.
   have hRmRaw : ∀ t ∈ Set.Ico alpha omega,
       Rm04RealizesConnection (I := I) (S.base.metric t)
         (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t) := by
@@ -186,21 +189,17 @@ theorem extends_of_rmBounded
     simpa [SolutionOn.family, SolutionFamily.connection, metricCov] using h
   have hric := ric_quad_le_of_soln (I := I) hRmRaw hbound_raw
   have hbound_can := rm04_bound_can (I := I) Rm04 hRmRaw ⟨K', hbound_raw⟩
-  -- The two `ricci_flow_interior_restart` inputs (`hell` ellipticity, `hcov` Shi bounds).
   obtain ⟨hell, hcov⟩ := extendInputs_of_soln (I := I) hdim _hS
     (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric hbound_can
-  -- (A): interior restart + short-time flow `rr` on `[0, TT)` with `t* + TT > ω`.
   obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
     ricci_flow_interior_restart (I := I) hdim g_fam hαω hell hcov
   have ht0 : alpha < t_star := ht_star.1
   have ht1 : alpha ≤ t_star := ht_star.1.le
   have ht2 : t_star < omega := ht_star.2
-  -- Left-family chart-Gram regularity, from the solution.
   have hsmooth_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
     chartGram_smooth_of_soln (I := I) _hS x₀ i j
   have hcont_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
     chartGram_cont_of_soln (I := I) _hS x₀ i j
-  -- `hagree_overlap` via forward uniqueness (B) on `g_fam` vs the shifted restart `rr(·−t*)`.
   have hshift : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
       (fun p : ℝ × M => ((p.1 - t_star, p.2) : ℝ × M)) :=
     (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
@@ -214,7 +213,8 @@ theorem extends_of_rmBounded
         (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
         (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
       fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
-    exact (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
+    have h := (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
+    exact h
   have h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M =>
@@ -225,7 +225,8 @@ theorem extends_of_rmBounded
         (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
         (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
       fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
-    exact (hrr_cont x₀ i j).comp hshift.continuous.continuousOn hmaps
+    have h := (hrr_cont x₀ i j).comp hshift.continuous.continuousOn hmaps
+    exact h
   have h2pde : ∀ t ∈ Set.Ico t_star omega, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (rr (s - t_star)).inner x v w)
         ((-2 : ℝ) * ricciTensor (I := I) (rr (t - t_star)) x v w) (Set.Ici t_star) t := by
@@ -264,47 +265,41 @@ theorem extends_of_rmBounded
     fun s hs =>
       (ricci_flow_forward_unique (I := I) g_fam (fun t => rr (t - t_star)) ht2
         h1smooth h1cont h2smooth h2cont h1pde h2pde h0 s hs).symm
-  -- Brick U: assemble the extension tuple from the interior restart + overlap agreement.
   obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
     extend_construction_of_restart (I := I) g_fam hαω hleft hsmooth_left hcont_left
       ht1 ht2 hreach rr
       (fun x₀ i j => (hrr_smooth x₀ i j).mono
         (Set.prod_mono Set.Ioo_subset_Ico_self (le_refl _)))
       hrr_cont hrr_pde hagree_overlap
-  -- Leaf 5: wrap the raw metric data into ExtendsPastEndpoint
   have hwide : alpha < omega + ε := by linarith
   let Shat : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε) hwide) :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε)
+        hwide) :=
     { base := { metric := g_ext } }
   refine ⟨ε, hε, hwide, Shat, ?_, ?_⟩
-  · -- IsSolutionOn for the extended solution (banked builder; nablaRicCont field removed as vestigial)
-    exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_extendData
+  · exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_extendData
       hwide hαω g_ext S _hS hagree _hsmooth _hcont hpde
-  · -- SolutionAgreesOn on [α, ω)
-    intro t ht
+  · intro t ht
     have htlt : t < omega := ht.2
     have hteq : g_ext t = g_fam t := hagree t htlt
     refine ⟨?_, ?_, ?_⟩
-    · -- metric agreement: g_ext t = S.base.metric t
-      show S.family.metric t = Shat.family.metric t
+    · show S.family.metric t = Shat.family.metric t
       change S.base.metric t = g_ext t
       exact hteq.symm
-    · -- connection agreement (follows from metric agreement)
-      show S.family.connection t = Shat.family.connection t
+    · change S.family.connection t = Shat.family.connection t
       change S.base.connection t = (SolutionFamily.connection { metric := g_ext }) t
       simp only [SolutionFamily.connection]
       congr 1; exact hteq.symm
-    · -- Ricci agreement (follows from metric agreement)
-      show S.ricci t = Shat.ricci t
+    · show S.ricci t = Shat.ricci t
       change S.base.ricci t = SolutionFamily.ricci { metric := g_ext } t
       simp only [SolutionFamily.ricci]
       congr 1; exact hteq.symm
 
-/-- Lemma 11.3: a maximal finite-endpoint Ricci flow has unbounded curvature.
 
-This is the consumer proof from Black Box 11.2: if curvature were bounded, the
-extension criterion would extend the solution past the endpoint, contradicting
-maximality. -/
+
+
+
+
 theorem rmUnbounded_of_maximal
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -319,19 +314,20 @@ theorem rmUnbounded_of_maximal
   exact hmax (extends_of_rmBounded (I := I) hdim hS hRm
     (rmBounded_of_not_unbounded (I := I) hnot))
 
-/-- A Ricci flow forms a singularity at the finite endpoint when some lowered
-Riemann tensor realizing the solution curvature has metric-induced squared
-norm unbounded on `M × [alpha, omega)`. -/
+
+
+
 def FormsSingularityAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   ∃ Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M),
     Rm04RealizesSolutionConnectionOn (I := I) S Rm04 ∧
       Rm04NormSqUnboundedAt (I := I) S Rm04
 
-/-- Existential version of Lemma 11.3 matching `FormsSingularityAt`.  A
-separate curvature-realization producer supplies the realizing `Rm04`. -/
+
+
 theorem formsSing_of_maximal
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -346,7 +342,7 @@ theorem formsSing_of_maximal
   rcases hRmEx with ⟨Rm04, hRm⟩
   exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hdim hS hmax hRm⟩
 
-/-- Canonical metric-curvature version of Lemma 11.3. -/
+
 theorem formsSing_of_maximal_metric
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -358,13 +354,14 @@ theorem formsSing_of_maximal_metric
   exact formsSing_of_maximal (I := I) hdim hS hmax
     ⟨S.base.rm04, rm04Realizes_metric (I := I) S⟩
 
-/-- Interface for Lemma 14.27.  Proving this requires the global extension
-criterion and compactness/regularity inputs; this file only exposes the target
-shape. -/
+
+
+
 def SingularIffMaximalAtEndpoint
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   FormsSingularityAt (I := I) S ↔
     IsMaximalAtEndpoint (I := I) hαω S
 

@@ -1,16 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateIdentities
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution Lichnerowicz
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -33,6 +29,8 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem evol_ricci_inFrame_of_variation_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -44,7 +42,8 @@ theorem evol_ricci_inFrame_of_variation_commutators
       (nablaGammaDtFromNabla2RicInFrame (M := M) gInv nabla2Ric))
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx) :
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (i j : Idx) :
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (roughLapRicInFrame (M := M) gInv nabla2Ric (t : Real) x i j -
@@ -63,8 +62,8 @@ theorem evol_ricci_inFrame_of_variation_commutators
       t x i j
   simpa [ricciEvolutionRHSInFrame] using h
 
-/-- Product-rule derivative of the Ricci trace
-`Ric_ij = g^{kl} Rm04_kijl`. -/
+
+
 def ricciTraceDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -78,9 +77,9 @@ def ricciTraceDerivRHSInFrame
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x k i j l +
     gInv t x k l * rm04Dt t x k i j l)
 
-/-- The finite trace simplification that turns traced Riemann evolution into
-Lemma 6.3's Ricci RHS.  This is the realized counterpart of the synthetic
-`RicciFromRiemann.lean` trace algebra. -/
+
+
+
 def RicciTraceDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -89,14 +88,17 @@ def RicciTraceDerivativeSimplifiesInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     ricciTraceDerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
         (t : Real) x i j =
       ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (t : Real) x i j
 
-/-- Trace a supplied lowered-Riemann evolution equation to the Ricci evolution
-equation in the existing Section 6.2 component API. -/
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem ricciEvolutionEquationInFrame_of_riemann_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -135,7 +137,8 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
           ∑ l : Idx,
             (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
                 (t : Real) x k l *
-              DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x k i j l +
+              DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x k
+                i j l +
             gInv (t : Real) x k l * rm04Dt (t : Real) x k i j l))
         (s := D.carrier) (x := (t : Real))
         (fun k _hk =>
@@ -145,11 +148,13 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
                 (u := (Finset.univ : Finset Idx))
                 (A := fun l s =>
                   gInv s x k l *
-                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 s) frame x k i j l)
+                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 s) frame x k i
+                      j l)
                 (A' := fun l =>
                   inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
                       (t : Real) x k l *
-                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x k i j l +
+                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real))
+                      frame x k i j l +
                   gInv (t : Real) x k l * rm04Dt (t : Real) x k i j l)
                 (s := D.carrier) (x := (t : Real))
                 (fun l _hl =>
@@ -170,16 +175,16 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
         (I := I) S Rm04 gInv frame h_trace (t : Real) x i j
   exact hricci.congr_deriv (h_simplify t x i j)
 
-/-! ## Corollary 6.5: Lichnerowicz form -/
 
-/-- Raise the second index of a fixed-frame `(0,2)` tensor component family. -/
+
+
 def tensorOneUpCompInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (h : Real -> M -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i k : Idx) : Real :=
   ∑ a : Idx, gInv t x k a * h t x i a
 
-/-- Left Ricci action on a `(0,2)` tensor: `Ric_i^k h_kj`. -/
+
 def ricciLeftActionCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -191,7 +196,7 @@ def ricciLeftActionCompInFrame
     ricciOneUpCompInFrame (I := I) S gInv frame t x i k *
       h t x k j
 
-/-- Right Ricci action on a `(0,2)` tensor: `Ric_j^k h_ki`. -/
+
 def ricciRightActionCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -203,12 +208,12 @@ def ricciRightActionCompInFrame
     ricciOneUpCompInFrame (I := I) S gInv frame t x j k *
       h t x k i
 
-/-- Ricci-specialized Lichnerowicz RHS in fixed-frame components:
-`Delta h_ij - 2 * curvature-action contraction - Ric_i^k h_kj - Ric_j^k h_ki`.
 
-For Corollary 6.5, `h` is the Ricci tensor. -/
--- Convention note: this uses the same curvature-action contraction sign as
--- `ricciEvolutionRHSInFrame`.
+
+
+
+
+
 def lichnerowiczRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -224,7 +229,7 @@ def lichnerowiczRHSInFrame
     ricciLeftActionCompInFrame (I := I) S gInv frame h t x i j -
     ricciRightActionCompInFrame (I := I) S gInv frame h t x i j
 
-/-- Component equation `∂t Ric = Δ_L Ric`. -/
+
 def RicciLichnerowiczEquationInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -232,7 +237,8 @@ def RicciLichnerowiczEquationInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (lichnerowiczRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
@@ -242,10 +248,10 @@ def RicciLichnerowiczEquationInFrame
       D.carrier
       (t : Real)
 
-/-- The finite component specialization of the Lichnerowicz RHS to `h = Ric`.
-For a realized Levi-Civita Ricci tensor this follows from Ricci symmetry and
-the frame inverse-metric identities, whose symmetry consequence is now proved
-in the metric layer. -/
+
+
+
+
 def RicciLichnerowiczSpecializesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -253,7 +259,8 @@ def RicciLichnerowiczSpecializesInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     lichnerowiczRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (ricciCompInFrame (I := I) S frame)
         (raisedRicciCompInFrame (I := I) S gInv frame)
@@ -261,7 +268,7 @@ def RicciLichnerowiczSpecializesInFrame
       ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (t : Real) x i j
 
-/-- Fixed-frame symmetry of the Ricci tensor. -/
+
 def RicciSymmetricInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -270,8 +277,10 @@ def RicciSymmetricInFrameOn
     ricciCompInFrame (I := I) S frame t x i j =
       ricciCompInFrame (I := I) S frame t x j i
 
-/-- The left Ricci action on `Ric` is definitionally the quadratic term from
-Lemma 6.3. -/
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLeftActionCompInFrame_eq_quadratic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -283,8 +292,10 @@ theorem ricciLeftActionCompInFrame_eq_quadratic
       ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   rfl
 
-/-- The right Ricci action on `Ric` is the same quadratic term, using Ricci
-symmetry and the frame inverse-metric identities. -/
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -336,8 +347,10 @@ theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
           ricciCompInFrame (I := I) S frame t x k j := by
           rfl
 
-/-- Pointwise version of
-`ricciRightActionCompInFrame_eq_quadratic_of_symm`. -/
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciRightActionCompInFrame_eq_quadratic_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -391,6 +404,8 @@ theorem ricciRightActionCompInFrame_eq_quadratic_at
           ricciCompInFrame (I := I) S frame t x k j := by
           rfl
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem rightActAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -444,9 +459,11 @@ private theorem rightActAt
           ricciCompInFrame (I := I) S frame t x k j := by
           rfl
 
-/-- Constructor for the Lichnerowicz specialization from the two Ricci-action
-identities `Ric_i^k Ric_kj = Ric_i^k Ric_kj` and
-`Ric_j^k Ric_ki = Ric_i^k Ric_kj`. -/
+
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_of_actions
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -454,11 +471,13 @@ theorem ricciLichnerowiczSpecializesInFrame_of_actions
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (h_left : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    (h_left : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M) (i j : Idx),
       ricciLeftActionCompInFrame (I := I) S gInv frame
           (ricciCompInFrame (I := I) S frame) (t : Real) x i j =
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j)
-    (h_right : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    (h_right : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M) (i j : Idx),
       ricciRightActionCompInFrame (I := I) S gInv frame
           (ricciCompInFrame (I := I) S frame) (t : Real) x i j =
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j) :
@@ -470,8 +489,10 @@ theorem ricciLichnerowiczSpecializesInFrame_of_actions
     h_left t x i j, h_right t x i j]
   ring
 
-/-- Lichnerowicz specialization for `h = Ric`, produced from Ricci symmetry
-and the frame inverse-metric identities. -/
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_of_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -492,9 +513,11 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
       ricciRightActionCompInFrame_eq_quadratic_of_symm
         (I := I) S gInv frame hRic hInv (t : Real) x i j)
 
-/-- Regular-time version of `ricciLichnerowiczSpecializesInFrame_of_symm`.
-This is the application-facing shape for Ricci-flow equations, where the
-evolution identity is only asserted at regular flow times. -/
+
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -516,8 +539,8 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
       (I := I) S gInv frame (t : Real) x i j
       (fun a b => hInv (t : Real) x a b) (hRic t x)
 
-/-- Lichnerowicz specialization with the Ricci symmetry produced from
-Levi-Civita curvature data. -/
+
+
 @[deprecated "use a local or pointwise Lichnerowicz specialization instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczSpecializesInFrame_lc
     [IsManifold I (∞ + 1) M]
@@ -532,7 +555,8 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
@@ -540,8 +564,10 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
+      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+        (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
     (hinv : InvMetricLocal (I := I) S gInv frame u) :
     RicciLichnerowiczSpecializesInFrame
@@ -570,8 +596,10 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
   exact ricciLichnerowiczSpecializesInFrame_regular
     (I := I) S Rm04 gInv frame roughLapRic hRic hInv
 
-/-- Corollary 6.5: Lemma 6.3 implies the Ricci tensor evolves by the
-Lichnerowicz heat equation. -/
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -588,9 +616,11 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
   intro t x i j
   exact (h_ricci t x i j).congr_deriv (h_spec t x i j).symm
 
-/-- Corollary 6.5 with the standard inputs: Lemma 6.3 plus Ricci symmetry and
-the frame inverse-metric identities imply the Ricci-specialized
-Lichnerowicz heat equation. -/
+
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -609,8 +639,8 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (ricciLichnerowiczSpecializesInFrame_of_symm
       (I := I) S Rm04 gInv frame roughLapRic hRic hInv)
 
-/-- Corollary 6.5 with Ricci symmetry produced from Levi-Civita curvature
-data instead of supplied as an application-layer hypothesis. -/
+
+
 @[deprecated "use a local or pointwise Lichnerowicz equation route instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     [IsManifold I (∞ + 1) M]
@@ -625,7 +655,8 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
@@ -633,8 +664,10 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
+      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+        (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
@@ -647,11 +680,12 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
       (I := I) S hS Rm13 Rm04 gInv frame roughLapRic hframe hcover
       hTrace hRm13 hLower hinv)
 
-/-- Corollary 6.5 in the coordinate-frame display form used by the native
-Lemma 6.3 producer.  This is only an exposure wrapper: the Ricci evolution
-calculation comes from `evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators`,
-and the Lichnerowicz rewrite comes from
-`ricciLichnerowiczSpecializesInFrame_of_symm`. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -660,7 +694,8 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
     (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv :
-      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+        (CoordinateIdx (𝕜 := Real) E))
     (gInvDt :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
     (nablaRic :
@@ -680,11 +715,14 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
     (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s)
+        (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+        (S.family.connection s) (Rm13 s))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
+      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I)
+        (S.family.connection s) x₀)
     (hmix :
       ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)
@@ -761,9 +799,11 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
     ring
   exact hRicci.congr_deriv hSpecAt.symm
 
-/-- Pointwise Corollary 6.5: a Ricci-evolution component becomes the
-Lichnerowicz component once inverse-metric and Ricci symmetry are known at the
-same spacetime point. -/
+
+
+
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -806,8 +846,8 @@ theorem ricciLichAt
     ring
   exact hRicci.congr_deriv hSpec.symm
 
-/-- The canonical centered coordinate components of every Ricci-flow solution
-satisfy the Ricci Lichnerowicz equation at the frame center. -/
+
+
 theorem coordRicciLich
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -837,8 +877,8 @@ theorem coordRicciLich
     exact coordRicSymmOn (I := I) S x₀ (t : Real)
       (coordinateFrameAt_mem (I := I) x₀) a b
 
-/-- Coordinate-basis expansion of the centered Ricci-evolution right-hand side
-on a fixed pair of tangent vectors. -/
+
+
 noncomputable def ricciPairRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -851,8 +891,8 @@ noncomputable def ricciPairRHS
           (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀))
           t x₀ i j
 
-/-- The time derivative of Ricci on any fixed pair of tangent vectors is the
-coordinate-basis expansion of the centered Ricci-evolution right-hand side. -/
+
+
 theorem ricciPairCoord
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

@@ -2,13 +2,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ConnLapPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 
-/-!
-# Balanced connection-Laplacian pairings
 
-This file contains rank-generic jet estimates for powers of `1 - Δ_∇` and the
-balanced curvature pairing used when those powers are moved between the two
-arms of an `L²` pairing.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,15 +26,32 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- Every covariant jet of an iterate of `1 - Δ_∇` is bounded by the finite
-jet window whose top order is the expected `p + 2a`. -/
+private local instance balancedTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance balancedTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance balancedTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance balancedTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
+
+
 theorem iterL_jet_le (g : SmoothRiemannianMetric I M) (s a : ℕ) :
     ∃ C : ℕ → ℝ, (∀ p, 0 ≤ C p) ∧ ∀ (p : ℕ) (v : SmoothCcTensor g 0 s),
       ‖iteratedCovGrad (I := I) g 0 s p
@@ -109,6 +126,7 @@ theorem iterL_jet_le (g : SmoothRiemannianMetric I M) (s a : ℕ) :
         _ = (C p + D p * ∑ b ∈ Finset.range (p + 3), C b) * J := by ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetSum_mono (g : SmoothRiemannianMetric I M) (s : ℕ)
     {m n : ℕ} (h : m ≤ n) (v : SmoothCcTensor g 0 s) :
     ∑ q ∈ Finset.range m, ‖iteratedCovGrad (I := I) g 0 s q v‖ ≤
@@ -149,8 +167,8 @@ private theorem inner_abs_le (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [← SmoothCcTensor.inner_def (I := I) (M := M) A B]
   exact abs_real_inner_le_norm A B
 
-/-- Splitting a power of `1 - Δ_∇` across an `L²` pairing is bounded by the
-product of the two resulting `L²` norms. -/
+
+
 theorem iterL_pair_le (g : SmoothRiemannianMetric I M)
     (s a r : ℕ) (hr : r ≤ a) (A B : SmoothCcTensor g 0 s) :
     |tensorL2Inner (I := I) (M := M) g 0 s
@@ -167,9 +185,9 @@ theorem iterL_pair_le (g : SmoothRiemannianMetric I M)
     (I := I) (M := M) g 0 s r]
   exact inner_abs_le (I := I) (M := M) g s _ _
 
-/-- A supplied pair of covariant-jet windows controls a balanced
-`1 - Δ∇` pairing.  The constant depends only on the fixed iterate, split,
-and window coefficients, never on the datum or its spectral support. -/
+
+
+
 theorem iterL_window_pair (g : SmoothRiemannianMetric I M)
     (s₀ σ a r dX dY NA NB : ℕ) (hr : r ≤ a)
     (hNA : 2 * (a - r) + dX ≤ NA) (hNB : 2 * r + dY ≤ NB)
@@ -252,6 +270,8 @@ theorem iterL_window_pair (g : SmoothRiemannianMetric I M)
             ‖iteratedCovGrad (I := I) g 0 s₀ j u‖)) := by
       ring
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covJet_norm_comp (g : SmoothRiemannianMetric I M) (s j i : ℕ)
     (S : SmoothCcTensor g 0 s) :
     ‖iteratedCovGrad (I := I) g 0 (s + j) i
@@ -279,13 +299,14 @@ private theorem covJet_norm_comp (g : SmoothRiemannianMetric I M) (s j i : ℕ)
         (I := I) (M := M) g (s + (j + i))
         (iteratedCovGrad (I := I) g 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
   have hleft_nn : 0 ≤ ‖iteratedCovGrad (I := I) g 0 (s + j) i
       (iteratedCovGrad (I := I) g 0 s j S)‖ := norm_nonneg _
   have hright_nn : 0 ≤ ‖iteratedCovGrad (I := I) g 0 s (j + i) S‖ := norm_nonneg _
   rw [← Real.sqrt_sq hleft_nn, ← Real.sqrt_sq hright_nn, hsq]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covJet_norm_order (g : SmoothRiemannianMetric I M) (s : ℕ)
     {i j : ℕ} (hij : i = j) (S : SmoothCcTensor g 0 s) :
     ‖iteratedCovGrad (I := I) g 0 s i S‖ =
@@ -293,6 +314,8 @@ private theorem covJet_norm_order (g : SmoothRiemannianMetric I M) (s : ℕ)
   subst j
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem grad_jet_sum_le (g : SmoothRiemannianMetric I M) (s m : ℕ)
     (S : SmoothCcTensor g 0 s) :
     ∑ q ∈ Finset.range m,
@@ -316,6 +339,7 @@ private theorem grad_jet_sum_le (g : SmoothRiemannianMetric I M) (s m : ℕ)
   linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetProduct_le (g : SmoothRiemannianMetric I M) (s n p q : ℕ)
     (hp : p ≤ n + 2) (hq : q ≤ n + 2) (hpq : p + q ≤ 2 * n + 3)
     (S : SmoothCcTensor g 0 s) :
@@ -344,20 +368,20 @@ private theorem jetProduct_le (g : SmoothRiemannianMetric I M) (s n p q : ℕ)
           (jetSum_mono (I := I) (M := M) g s hp S)
           (hnonneg p) (hnonneg (n + 1))
 
-/-- A common coefficient-action jet window gives one balanced pairing
-constant for an arbitrary parameter family. -/
+
+
 theorem iterL_pair_jet_of (g : SmoothRiemannianMetric I M) (s n : ℕ)
     {α : Type*} (Φ : α → SmoothCcTensor g (s + 1) s) (K : Set α)
     (CG : ℕ → ℝ) (hCG_nn : ∀ q, 0 ≤ CG q)
     (hCG : ∀ t, t ∈ K → ∀ (W : SmoothCcTensor g 0 (s + 1)) (q : ℕ),
       ‖iteratedCovGrad (I := I) g 0 s q
-          (appCc (I := I) (M := M) g (s + 1) s (Φ t) W)‖ ≤
+          (operatorFieldApply (I := I) (M := M) g (s + 1) s (Φ t) W)‖ ≤
         CG q * ∑ k ∈ Finset.range (q + 1),
           ‖iteratedCovGrad (I := I) g 0 (s + 1) k W‖) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t, t ∈ K → ∀ S : SmoothCcTensor g 0 s,
       |tensorL2Inner (I := I) (M := M) g 0 s
           (oneMinusConnLapSmoothIter (I := I) g 0 s n S).toFun
-          (appCc (I := I) (M := M) g (s + 1) s (Φ t)
+          (operatorFieldApply (I := I) (M := M) g (s + 1) s (Φ t)
             (covGrad (I := I) (M := M) g 0 s S)).toFun| ≤
         C * ((∑ j ∈ Finset.range (n + 1),
             ‖iteratedCovGrad (I := I) g 0 s j S‖) *
@@ -373,7 +397,7 @@ theorem iterL_pair_jet_of (g : SmoothRiemannianMetric I M) (s n : ℕ)
       (mul_nonneg (hCR_nn 0) (Finset.sum_nonneg fun q _ => hCG_nn q)),
     fun t ht S => ?_⟩
   let G : SmoothCcTensor g 0 s :=
-    appCc (I := I) (M := M) g (s + 1) s (Φ t)
+    operatorFieldApply (I := I) (M := M) g (s + 1) s (Φ t)
       (covGrad (I := I) (M := M) g 0 s S)
   have hpair := iterL_pair_le (I := I) (M := M) g s n a (by omega) S G
   rw [show n - a = b by omega] at hpair
@@ -435,14 +459,14 @@ theorem iterL_pair_jet_of (g : SmoothRiemannianMetric I M) (s n : ℕ)
       exact jetProduct_le (I := I) (M := M) g s n (2 * b + 1) (2 * a + 2)
         (by omega) (by omega) (by omega) S
 
-/-- Pairing an iterate of `1 - Δ_∇` with a fixed first-order coefficient action
-is controlled by the two adjacent balanced covariant-jet windows. -/
+
+
 theorem iterL_pair_jet_le (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (Φ : SmoothCcTensor g (s + 1) s) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ S : SmoothCcTensor g 0 s,
       |tensorL2Inner (I := I) (M := M) g 0 s
           (oneMinusConnLapSmoothIter (I := I) g 0 s n S).toFun
-          (appCc (I := I) (M := M) g (s + 1) s Φ
+          (operatorFieldApply (I := I) (M := M) g (s + 1) s Φ
             (covGrad (I := I) (M := M) g 0 s S)).toFun| ≤
         C * ((∑ j ∈ Finset.range (n + 1),
             ‖iteratedCovGrad (I := I) g 0 s j S‖) *
@@ -457,9 +481,9 @@ theorem iterL_pair_jet_le (g : SmoothRiemannianMetric I M) (s n : ℕ)
       (fun _ _ W q => hCG W q)
   exact ⟨C, hC_nn, fun S => hC () (Set.mem_univ ()) S⟩
 
-/-- A balanced `L²` pairing with the covariant-gradient/rough-Laplacian
-curvature defect is controlled by two prescribed jet windows of any common
-base tensor rank. -/
+
+
+
 theorem curv_iterL_pair_le (g : SmoothRiemannianMetric I M)
     (s₀ σ i q dS dZ NA NB : ℕ) (hNA : i + q + 2 + dS ≤ NA)
     (hNB : i + q + dZ ≤ NB) (cS cZ : ℕ → ℝ)

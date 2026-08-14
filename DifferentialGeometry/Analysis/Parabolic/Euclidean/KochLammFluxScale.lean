@@ -60,7 +60,7 @@ theorem klFluxCore_scale {R : ℝ} (hR : 0 < R) :
     klFluxMassCore (V := V) (R ^ 2) =
       (klLpScaleR (V := V) R) ^ klPDual V *
         klFluxMassCore (V := V) 1 := by
-  have hp : 0 < klPDual V := (klP_holder (V := V)).pos
+  have hp : 0 < klPDual V := (klPDual_holder (V := V)).pos
   have hexp :
       2 * (klD1Exp V + 1) =
         (2 / (Module.finrank ℝ V + 4 : ℝ)) * klPDual V := by
@@ -96,7 +96,7 @@ copy of the late divergence-source radius scale. -/
 theorem klFluxRoot_scale {R : ℝ} (hR : 0 < R) :
     klFluxRoot (V := V) (R ^ 2) =
       klLate1C V * klLpScaleR (V := V) R := by
-  have hp : 0 < klPDual V := (klP_holder (V := V)).pos
+  have hp : 0 < klPDual V := (klPDual_holder (V := V)).pos
   have hs : 0 < klLpScaleR (V := V) R :=
     Real.rpow_pos_of_pos hR _
   have hc : 0 ≤ klFluxMassCore (V := V) 1 :=

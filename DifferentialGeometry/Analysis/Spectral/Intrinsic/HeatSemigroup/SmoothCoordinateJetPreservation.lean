@@ -30,7 +30,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -128,12 +128,12 @@ theorem perModeConv_sq_le_time_mul_integral' (lam : ℝ) (hlam : 0 ≤ lam)
     _ ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 :=
         mul_le_mul_of_nonneg_left hk_sq_int ht
 
-set_option linter.unusedVariables false in
 theorem deTurckRemainder_path_timeJet_section
-    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+    (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
@@ -213,9 +213,10 @@ theorem deTurckRemainder_path_timeJet_section
 
 private theorem deTurckSmoothN_path_coeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+    (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
@@ -232,7 +233,8 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
     ∃ ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ ψ T ∧
         ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i,
-          (deTurckSmoothN (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i = ψ i t := by
+          (deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i =
+            ψ i t := by
   classical
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   set Rem : ℝ → SmoothCcTensor g₀ 0 2 :=
@@ -242,7 +244,7 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rem t)) i with hcpath_def
   obtain ⟨Rjet, hsmooth, hjet, hcovbnd⟩ :=
     deTurckRemainder_path_timeJet_section (I := I) (M := M)
-      g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+      g₀ g_bg a ha_super hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
   have hext : ∀ i, ∃ ψi : ℝ → ℝ, ContDiff ℝ ∞ ψi ∧
       Set.EqOn (cpath i) ψi (Set.Icc (0 : ℝ) T) :=
     fun i => contDiffOn_Icc_scalar_globalExtend hT (hsmooth i)
@@ -299,7 +301,8 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
         have hmass : tensorSobolevWeight (I := I) (M := M) i σ' * u ^ 2 ≤
             ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)‖ ^ 2 := by
           rw [tensorHs.norm_sq_eq_tsum]
-          have hsummable := (smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).weighted_summable
+          have hsummable := (smoothCcToTensorHs (I := I) (M := M) g₀ σ'
+            (Rjet j t)).weighted_summable
           have hle := hsummable.le_tsum i (fun i' _ =>
             mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i' σ') (sq_nonneg _))
           rw [hcoeff_eq] at hle
@@ -331,7 +334,7 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
         =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i) :
     ∃ ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ ψ d₂ ∧
-        ∀ i, (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
+        ∀ i, (fun t => (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
             =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] ψ i := by
   classical
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
@@ -458,7 +461,7 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ⊓ R₀ := heq ht
     rw [hmin]; exact inf_le_right
   obtain ⟨δ, hδ_lt, hδ_all⟩ :
-      ∃ δ : ℝ, δ < 1 ∧ ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      ∃ δ : ℝ, δ < 1 ∧ ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ (F t)) δ := by
     obtain ⟨hp_pos, hp_lt, hp_ball⟩ := Classical.choose_spec
       (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super)
@@ -469,7 +472,8 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       rw [h0, smoothCcToTensorHs_smul, zero_smul]
     refine ⟨(Classical.choose (deTurckSobolevNHa2_exists_of_super
       (I := I) (M := M) g₀ a ha_super)).2,
-      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t => ?_⟩
+      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t
+        => ?_⟩
     by_cases ht : t ∈ Set.Icc (0 : ℝ) d₂
     · exact hp_ball (F t) (hball_pt t ht)
     · have hF0 : F t = 0 := by simp only [hF_def, ht, if_neg, not_false_iff]
@@ -478,7 +482,7 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       exact hp_pos.le
   obtain ⟨ψ, hψ_ctrl, hψ_coeff⟩ :=
     deTurckSmoothN_path_coeff_jetSpectralMass (I := I) (M := M)
-      g₀ g_bg a hd₂_pos F hδ_lt hδ_all φ hφ_smooth
+      g₀ g_bg a ha_super hd₂_pos F hδ_lt hδ_all φ hφ_smooth
       hF_coeff hφ_mass
   refine ⟨ψ, hψ_ctrl, fun i => ?_⟩
   have hae_all : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),

@@ -6,18 +6,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6NormalCo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeOverlap
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Noncollapse-to-injectivity boundary
 
-This file connects the geometric Perelman noncollapsing vocabulary to the
-injectivity-radius input consumed by Hamilton compactness.  `FlowBaseVolData`
-stores the chosen scale, while `IsFlowBaseVolBound` proves the actual time-zero
-balls satisfy the parabolic curvature and Riemannian-volume predicates.
-`flowInj_of_vol` is the single Cheeger--Gromov--Taylor frontier.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -45,8 +43,8 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace PointedFlowData
 
-/-- The actual radius-`r` time-zero ball centered at a pointed flow's
-basepoint. -/
+
+
 def baseFlowBall
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D)
@@ -79,9 +77,9 @@ def baseFlowBall
 
 end PointedFlowData
 
-/-- The scale and positive noncollapse constant used at the time-zero
-basepoints of a pointed flow sequence.  Geometric validity is recorded
-separately by `IsFlowBaseVolBound`. -/
+
+
+
 structure FlowBaseVolData
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   zero_mem : 0 ∈ X.D.carrier
@@ -90,8 +88,8 @@ structure FlowBaseVolData
   radius : Real
   radius_pos : 0 < radius
 
-/-- The balls selected by `V` have actual parabolic curvature control and
-actual Riemannian-volume noncollapse. -/
+
+
 structure IsFlowBaseVolBound
     {X : PointedFlowSeq.{u, uE, uH} (I := I)}
     (V : FlowBaseVolData (I := I) X) : Prop where
@@ -124,6 +122,10 @@ structure IsFlowBaseVolBound
     (PointedFlowData.baseFlowBall (I := I) (X.term i)
       V.zero_mem V.radius V.radius_pos).IsKappaNoncollapsed V.kappa
 
+
+
+
+
 private lemma ofReal_add_mul {a b c : Real}
     (ha : 0 ≤ a) (hb : 0 ≤ b) :
     ENNReal.ofReal a * ENNReal.ofReal c +
@@ -140,16 +142,8 @@ private lemma cgt_quarter {s : Real} (hs : 0 < s) :
     s < (5 * s) / 4 := by
   nlinarith
 
-set_option linter.style.setOption false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option maxHeartbeats 800000 in
-/-- Cheeger--Gromov--Taylor boundary: completeness together with genuine
-curvature-controlled base-ball volume lower bounds and uniform time-zero
-bounded geometry gives a uniform geometric injectivity-radius lower bound.
-The bounded-geometry input supplies the global curvature and exponential
-nonsingularity hypotheses required by the pointwise CGT theorem; the volume
-input is transferred to the smaller CGT scale by relative Bishop comparison. -/
 noncomputable def flowInj_of_vol
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) (X.atZero (I := I)))
@@ -255,13 +249,10 @@ noncomputable def flowInj_of_vol
   letI : IsManifold I ∞ (Y.obj i).M := (Y.obj i).smooth
   letI : IsManifold I 1 (Y.obj i).M :=
     IsManifold.of_le (I := I) (M := (Y.obj i).M) (n := ∞) (by decide)
-  letI : SigmaCompactSpace (Y.obj i).M := (Y.obj i).sigmaCompact
   letI : T2Space (Y.obj i).M := (Y.obj i).t2
+  letI : SigmaCompactSpace (Y.obj i).M := (Y.obj i).sigmaCompact
   letI : T2Space (TangentBundle I (Y.obj i).M) :=
     (Y.obj i).t2TangentBundle
-  letI : TopologicalSpace.MetrizableSpace (Y.obj i).M :=
-    Manifold.metrizableSpace I (Y.obj i).M
-  letI : T3Space (Y.obj i).M := inferInstance
   letI : RiemannianBundle
       (fun y : (Y.obj i).M => TangentSpace I y) :=
     (Y.obj i).riemBundle (I := I)

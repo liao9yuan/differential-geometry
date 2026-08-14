@@ -94,8 +94,14 @@ private theorem omegaDiffAtgw
     (cometricCastG0 (I := I) g₀ g₁) Wfix P hKcg_nn hS_nn
     (fun l y => hcg g₁ P htie hδ_le hδ0 hδ l y) hW i x
   rw [insOmegaDiff, wOmegaDiff_eq (I := I) (M := M) g₀ g₁ g_bg,
+    show appCc (I := I) (M := M) g₀ 3 1
+        (cometricCastG0 (I := I) g₀ g₁)
+        (wXi (I := I) (M := M) g₀ g_bg g₀) =
+      operatorFieldApply (I := I) (M := M) g₀ 3 1
+        (cometricCastG0 (I := I) g₀ g₁)
+        (wXi (I := I) (M := M) g₀ g_bg g₀) from rfl,
     ← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1]
-  exact hfold
+  simpa only [Wfix, Nat.add_zero] using hfold
 
 set_option linter.unusedVariables false in
 private theorem alphaDiffAtgw
@@ -135,13 +141,25 @@ private theorem alphaDiffAtgw
     (insOmegaDiff (I := I) (M := M) g₀ g₁ g_bg) P
     hKcd_nn hKω_nn hCA (fun l y => hω g₁ P htie hδ_le hδ0 hδ l y) i x
   have hform : insAlphaDiff (I := I) (M := M) g₀ g₁ g_bg =
-      appCcRS (I := I) (M := M) g₀ 0 1 2
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 1 2
         (wCA (I := I) (M := M) g₀ g₁)
         (insOmegaDiff (I := I) (M := M) g₀ g₁ g_bg) := by
     rw [insAlphaDiff, insOmegaDiff, wAlphaB, wAlphaB,
+      show appCc (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ g₀) =
+        operatorFieldApply (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ g₀) from rfl,
+      show appCc (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ g_bg) =
+        operatorFieldApply (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ g_bg) from rfl,
       ← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 1 2,
       ← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 1 2,
-      appCcRS_sub_right]
+      ccOperatorFieldComp_sub_right]
   rw [hform]
   exact hfold
 
@@ -191,22 +209,25 @@ theorem lc0InsDiffAtgw
     rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
       ContinuousLinearMap.sub_apply]
     rfl
-  have hslot : slotInsertEndoCc (I := I) (M := M) g₀ 0 N =
+  have hslot : endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 N =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 AD := by
     dsimp only [N]
-    rw [endoDiffSection, slotInsertEndoCc_sub,
+    change slotInsertEndoCc (I := I) (M := M) g₀ 0
+        (connDiffDVFSection (I := I) (M := M) g₀ g₁ g₀ -
+          connDiffDVFSection (I := I) (M := M) g₀ g₁ g_bg) = _
+    rw [slotInsertEndoCc_sub,
       connDiffDVFInsert_eq_cometricRaise, connDiffDVFInsert_eq_cometricRaise,
       hraise_sub]
   have hslot_bound :
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
           ((iteratedCovGrad (I := I) g₀ 1 1 i
-            (slotInsertEndoCc (I := I) (M := M) g₀ 0 N)).toSection x) ≤
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 N)).toSection x) ≤
         Kα i * Combinatorics.antidiagonalTupleGridWindow
           (gridBase (I := I) (M := M) g₀ P x) (i + 2) := by
     rw [hslot, rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
       (I := I) (M := M) g₀ 0 AD i x]
     exact hα g₁ P htie hδ_le hδ0 hδ i x
-  let A := slotInsertEndoCc (I := I) (M := M) g₀ 1 N
+  let A := endoSlotZeroCcTensor (I := I) (M := M) g₀ 1 N
   let B := reindexCoeffGen (I := I) (M := M) g₀ 2 2
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2
       (Equiv.swap (0 : Fin 2) 1) A) (Equiv.swap (0 : Fin 2) 1)

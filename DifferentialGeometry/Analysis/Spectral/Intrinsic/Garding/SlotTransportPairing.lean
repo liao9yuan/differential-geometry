@@ -2,14 +2,14 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.BalancedPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricAppCcJetBound
 
-/-!
-# Passenger-slot transport in connection-Laplacian pairings
 
-This file records the exact single-step recurrence that transports a smooth
-operator field through one balanced `1 - Δ∇` integration-by-parts step.  The
-new covariant-gradient slot remains a leading passenger slot; no slot swap or
-second-covariant-derivative commutator is used.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,18 +36,35 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- One natural passenger-slot transport step.  The main term after expanding
-the final pairing is the same expression at rank `σ + 1`, with one fewer
-`1 - Δ∇` iterate and coefficient `slotExtend C`; all other summands are the
-zeroth-order, differentiated-coefficient, and curvature errors. -/
+private local instance slotPairTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance slotPairTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance slotPairTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance slotPairTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
+
+
+
+
 theorem slot_pair_step (g : SmoothRiemannianMetric I M) (σ k : ℕ)
     (C : SmoothCcTensor g σ σ) (V : SmoothCcTensor g 0 σ) :
     tensorL2Inner (I := I) (M := M) g 0 σ
         (oneMinusConnLapSmoothIter (I := I) g 0 σ (k + 1) V).toFun
-        (appCcRS (I := I) (M := M) g 0 σ σ C V).toFun =
+        (ccOperatorFieldComp (I := I) (M := M) g 0 σ σ C V).toFun =
       tensorL2Inner (I := I) (M := M) g 0 σ
           (oneMinusConnLapSmoothIter (I := I) g 0 σ k V).toFun
-          (appCcRS (I := I) (M := M) g 0 σ σ C V).toFun +
+          (ccOperatorFieldComp (I := I) (M := M) g 0 σ σ C V).toFun +
         tensorL2Inner (I := I) (M := M) g 0 (σ + 1)
           (oneMinusConnLapSmoothIter (I := I) g 0 (σ + 1) k
               (covGrad (I := I) (M := M) g 0 σ V) +
@@ -55,9 +72,9 @@ theorem slot_pair_step (g : SmoothRiemannianMetric I M) (σ k : ℕ)
               oneMinusConnLapSmoothIter (I := I) g 0 (σ + 1) i
                 (pointwiseTensorCurv (I := I) (M := M) g σ
                   (oneMinusConnLapSmoothIter (I := I) g 0 σ (k - 1 - i) V))).toFun
-          (appCcRS (I := I) (M := M) g 0 σ (σ + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 σ (σ + 1)
               (covGrad (I := I) (M := M) g σ σ C) V +
-            appCcRS (I := I) (M := M) g 0 (σ + 1) (σ + 1)
+            ccOperatorFieldComp (I := I) (M := M) g 0 (σ + 1) (σ + 1)
               (slotExtend (I := I) (M := M) g σ σ C)
               (covGrad (I := I) (M := M) g 0 σ V)).toFun := by
   rw [oneMinusConnLapSmoothIter_succ]
@@ -120,7 +137,7 @@ private def slotEnergy (g : SmoothRiemannianMetric I M) (σ k : ℕ)
     (C : SmoothCcTensor g σ σ) (V : SmoothCcTensor g 0 σ) : ℝ :=
   tensorL2Inner (I := I) (M := M) g 0 σ
     (oneMinusConnLapSmoothIter (I := I) g 0 σ k V).toFun
-    (appCcRS (I := I) (M := M) g 0 σ σ C V).toFun
+    (ccOperatorFieldComp (I := I) (M := M) g 0 σ σ C V).toFun
 
 private def slotStage (g : SmoothRiemannianMetric I M) (σ m k : ℕ)
     (C : SmoothCcTensor g σ σ) (V : SmoothCcTensor g 0 σ) : ℝ :=
@@ -135,7 +152,7 @@ private theorem slot_step_exp (g : SmoothRiemannianMetric I M) (σ k : ℕ)
       tensorL2Inner (I := I) (M := M) g 0 (σ + 1)
         (oneMinusConnLapSmoothIter (I := I) g 0 (σ + 1) k
           (covGrad (I := I) (M := M) g 0 σ V)).toFun
-        (appCcRS (I := I) (M := M) g 0 σ (σ + 1)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 σ (σ + 1)
           (covGrad (I := I) (M := M) g σ σ C) V).toFun +
       slotEnergy (I := I) (M := M) g (σ + 1) k
         (slotExtend (I := I) (M := M) g σ σ C)
@@ -145,14 +162,14 @@ private theorem slot_step_exp (g : SmoothRiemannianMetric I M) (σ k : ℕ)
           (oneMinusConnLapSmoothIter (I := I) g 0 (σ + 1) i
             (pointwiseTensorCurv (I := I) (M := M) g σ
               (oneMinusConnLapSmoothIter (I := I) g 0 σ (k - 1 - i) V))).toFun
-          (appCcRS (I := I) (M := M) g 0 σ (σ + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 σ (σ + 1)
             (covGrad (I := I) (M := M) g σ σ C) V).toFun +
       ∑ i ∈ Finset.range k,
         tensorL2Inner (I := I) (M := M) g 0 (σ + 1)
           (oneMinusConnLapSmoothIter (I := I) g 0 (σ + 1) i
             (pointwiseTensorCurv (I := I) (M := M) g σ
               (oneMinusConnLapSmoothIter (I := I) g 0 σ (k - 1 - i) V))).toFun
-          (appCcRS (I := I) (M := M) g 0 (σ + 1) (σ + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + 1) (σ + 1)
             (slotExtend (I := I) (M := M) g σ σ C)
             (covGrad (I := I) (M := M) g 0 σ V)).toFun := by
   rw [slotEnergy, slot_pair_step (I := I) (M := M) g σ k C V]
@@ -164,6 +181,8 @@ private theorem slot_step_exp (g : SmoothRiemannianMetric I M) (σ k : ℕ)
   unfold slotEnergy
   ring
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_comp_norm (g : SmoothRiemannianMetric I M) (σ m p : ℕ)
     (V : SmoothCcTensor g 0 σ) :
     ‖iteratedCovGrad (I := I) g 0 (σ + m) p
@@ -191,12 +210,14 @@ private theorem jet_comp_norm (g : SmoothRiemannianMetric I M) (σ m p : ℕ)
         (I := I) (M := M) g (σ + (m + p))
         (iteratedCovGrad (I := I) g 0 σ (m + p) V)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g 0 σ m p V x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g 0 σ m p V x
   have hleft_nn : 0 ≤ ‖iteratedCovGrad (I := I) g 0 (σ + m) p
       (iteratedCovGrad (I := I) g 0 σ m V)‖ := norm_nonneg _
   have hright_nn : 0 ≤ ‖iteratedCovGrad (I := I) g 0 σ (m + p) V‖ := norm_nonneg _
   rw [← Real.sqrt_sq hleft_nn, ← Real.sqrt_sq hright_nn, hsq]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_shift_le (g : SmoothRiemannianMetric I M) (σ m c : ℕ)
     (V : SmoothCcTensor g 0 σ) :
     ∑ p ∈ Finset.range c,
@@ -225,6 +246,8 @@ private theorem jet_shift_le (g : SmoothRiemannianMetric I M) (σ m c : ℕ)
   rw [Finset.mem_range]
   omega
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_one_win (g : SmoothRiemannianMetric I M) (σ m : ℕ)
     (V : SmoothCcTensor g 0 σ) (p : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 (σ + m) p
@@ -243,11 +266,12 @@ private def ShiftWin (g : SmoothRiemannianMetric I M)
     (cc : ℕ → ℝ) : Prop :=
   ∀ (V : SmoothCcTensor g 0 sigma) (p : ℕ),
     ‖iteratedCovGrad (I := I) g 0 c p
-      (appCcRS (I := I) (M := M) g 0 (sigma + m) c Phi
+      (ccOperatorFieldComp (I := I) (M := M) g 0 (sigma + m) c Phi
         (iteratedCovGrad (I := I) g 0 sigma m V))‖ ≤
       cc p * ∑ j ∈ Finset.range (p + m + 1),
         ‖iteratedCovGrad (I := I) g 0 sigma j V‖
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem app_shift_win (g : SmoothRiemannianMetric I M)
     (σ m c : ℕ) (Φ : SmoothCcTensor g (σ + m) c) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧
@@ -368,7 +392,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
       |tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
         (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) k
           (iteratedCovGrad (I := I) g 0 σ (m + 1) V)).toFun
-        (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
           (iteratedCovGrad (I := I) g 0 σ m V)).toFun| ≤
         CAD * ((∑ j ∈ Finset.range (m + k + 1),
             ‖iteratedCovGrad (I := I) g 0 σ j V‖) *
@@ -383,7 +407,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
       refine ⟨CAD, hCAD_nn, fun t ht V => ?_⟩
       have h := hCAD V
         (iteratedCovGrad (I := I) g 0 σ (m + 1) V)
-        (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
           (iteratedCovGrad (I := I) g 0 σ m V))
         (fun p => jet_one_win (I := I) (M := M) g σ (m + 1) V p)
         (hcD t ht V)
@@ -398,7 +422,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
       refine ⟨CAD, hCAD_nn, fun t ht V => ?_⟩
       have h := hCAD V
         (iteratedCovGrad (I := I) g 0 σ (m + 1) V)
-        (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
           (iteratedCovGrad (I := I) g 0 σ m V))
         (fun p => jet_one_win (I := I) (M := M) g σ (m + 1) V p)
         (hcD t ht V)
@@ -412,7 +436,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
             (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
               (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i)
                 (iteratedCovGrad (I := I) g 0 σ m V)))).toFun
-          (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
             (iteratedCovGrad (I := I) g 0 σ m V)).toFun| ≤
           Ki * ((∑ j ∈ Finset.range (m + k + 1),
               ‖iteratedCovGrad (I := I) g 0 σ j V‖) *
@@ -427,7 +451,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
       refine ⟨Ki, hKi_nn, fun t ht V _ => ?_⟩
       have h := hKi V
         (iteratedCovGrad (I := I) g 0 σ m V)
-        (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t)
           (iteratedCovGrad (I := I) g 0 σ m V))
         (fun p => jet_one_win (I := I) (M := M) g σ m V p)
         (hcD t ht V)
@@ -442,7 +466,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
             (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
               (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i)
                 (iteratedCovGrad (I := I) g 0 σ m V)))).toFun
-          (appCcRS (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t)
             (iteratedCovGrad (I := I) g 0 σ (m + 1) V)).toFun| ≤
           Ki * ((∑ j ∈ Finset.range (m + k + 1),
               ‖iteratedCovGrad (I := I) g 0 σ j V‖) *
@@ -457,7 +481,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
       refine ⟨Ki, hKi_nn, fun t ht V _ => ?_⟩
       have h := hKi V
         (iteratedCovGrad (I := I) g 0 σ m V)
-        (appCcRS (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t)
           (iteratedCovGrad (I := I) g 0 σ (m + 1) V))
         (fun p => jet_one_win (I := I) (M := M) g σ m V p)
         (hcE t ht V)
@@ -487,7 +511,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
         (∑ j ∈ Finset.range (m + k + 2),
           ‖iteratedCovGrad (I := I) g 0 σ j V‖)) := by
     have h := hCZ V W
-      (appCcRS (I := I) (M := M) g 0 (σ + m) (σ + m) (Cm t) W)
+      (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) (σ + m) (Cm t) W)
       (fun p => jet_one_win (I := I) (M := M) g σ m V p) (hcC t ht V)
     rw [show m + k + 1 + 1 = m + k + 2 from by omega] at h
     exact le_trans h (le_of_eq (by ring))
@@ -497,7 +521,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
         (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
             (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-        (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun| ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun| ≤
       (∑ i ∈ Finset.range k, KD i) *
         ((∑ j ∈ Finset.range (m + k + 1),
             ‖iteratedCovGrad (I := I) g 0 σ j V‖) *
@@ -512,7 +536,7 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
         (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
             (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-        (appCcRS (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun| ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun| ≤
       (∑ i ∈ Finset.range k, KE i) *
         ((∑ j ∈ Finset.range (m + k + 1),
             ‖iteratedCovGrad (I := I) g 0 σ j V‖) *
@@ -529,37 +553,39 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
       slotEnergy (I := I) (M := M) g (σ + m) k (Cm t) W +
         tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
           (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) k W₁).toFun
-          (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun +
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun +
         slotStage (I := I) (M := M) g σ (m + 1) k (C t) V +
         (∑ i ∈ Finset.range k,
           tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
             (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
                 (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-            (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun) +
+            (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun) +
         (∑ i ∈ Finset.range k,
           tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
             (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
                 (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-            (appCcRS (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun) -
+            (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun)
+              -
         slotStage (I := I) (M := M) g σ (m + 1) k (C t) V =
       slotEnergy (I := I) (M := M) g (σ + m) k (Cm t) W +
         tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
           (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) k W₁).toFun
-          (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun +
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun +
         (∑ i ∈ Finset.range k,
           tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
             (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
                 (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-            (appCcRS (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun) +
+            (ccOperatorFieldComp (I := I) (M := M) g 0 (σ + m) ((σ + m) + 1) (D t) W).toFun) +
         (∑ i ∈ Finset.range k,
           tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
             (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
                 (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-            (appCcRS (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun) := by
+            (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t)
+              W₁).toFun) := by
     ring
   rw [hcancel]
   refine le_trans (abs_add4 _ _ _ _) ?_
@@ -804,22 +830,22 @@ private theorem slot_main_bound (g : SmoothRiemannianMetric I M)
   refine le_trans (Finset.sum_le_sum hstep) ?_
   rw [← Finset.sum_mul]
 
-/-- Transporting the connection-Laplacian power through a fixed operator-field
-pairing leaves only adjacent covariant-jet windows.  The final coefficient is
-the natural passenger extension and the final tensor is the iterated gradient
-of the initial gradient. -/
+
+
+
+
 theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (C₀ : SmoothCcTensor g (s + 1) (s + 1)) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ U : SmoothCcTensor g 0 s,
       |tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s
             (oneMinusConnLapSmoothIter (I := I) g 0 s n U)).toFun
-          (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
             (covGrad (I := I) (M := M) g 0 s U)).toFun -
         tensorL2Inner (I := I) (M := M) g 0 ((s + 1) + n)
           (iteratedCovGrad (I := I) g 0 (s + 1) n
             (covGrad (I := I) (M := M) g 0 s U)).toFun
-          (appCcRS (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
             (slotExtendIter (I := I) (M := M) g (s + 1) (s + 1) n C₀)
             (iteratedCovGrad (I := I) g 0 (s + 1) n
               (covGrad (I := I) (M := M) g 0 s U))).toFun| ≤
@@ -838,7 +864,7 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
           (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
             (pointwiseTensorCurv (I := I) (M := M) g s
               (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-          (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
             (covGrad (I := I) (M := M) g 0 s U)).toFun| ≤
           Ki * ((∑ j ∈ Finset.range (n + 1),
               ‖iteratedCovGrad (I := I) g 0 s j U‖) *
@@ -853,14 +879,14 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
       refine ⟨Ki, hKi_nn, fun U _ => ?_⟩
       have hZwin : ∀ p,
           ‖iteratedCovGrad (I := I) g 0 (s + 1) p
-            (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
+            (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
               (covGrad (I := I) (M := M) g 0 s U))‖ ≤
             cZ p * ∑ j ∈ Finset.range (p + 1 + 1),
               ‖iteratedCovGrad (I := I) g 0 s j U‖ := by
         intro p
         simpa only [iteratedCovGrad_succ, iteratedCovGrad_zero] using hcZ U p
       have h := hKi U U
-        (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀
           (covGrad (I := I) (M := M) g 0 s U))
         (fun p => jet_one_win (I := I) (M := M) g s 0 U p)
         hZwin
@@ -907,7 +933,7 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
         (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g s
             (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-        (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun| ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun| ≤
       (∑ i ∈ Finset.range n, Ki i) * P := by
     refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
     refine le_trans (Finset.sum_le_sum (fun i hi => hKi i U (Finset.mem_range.mp hi))) ?_
@@ -915,14 +941,14 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
   have hbase : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
       (covGrad (I := I) (M := M) g 0 s
         (oneMinusConnLapSmoothIter (I := I) g 0 s n U)).toFun
-      (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun =
+      (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun =
       slotStage (I := I) (M := M) g (s + 1) 0 n C₀ W +
         ∑ i ∈ Finset.range n,
           tensorL2Inner (I := I) (M := M) g 0 (s + 1)
             (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g s
                 (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-            (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun := by
+            (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun := by
     rw [covGrad_iterL (I := I) (M := M) g s n U,
       l2_add_left (I := I) (M := M) g (s + 1),
       l2_sum_left (I := I) (M := M) g (s + 1)]
@@ -930,7 +956,7 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
   have htop : slotStage (I := I) (M := M) g (s + 1) n 0 C₀ W =
       tensorL2Inner (I := I) (M := M) g 0 ((s + 1) + n)
         (iteratedCovGrad (I := I) g 0 (s + 1) n W).toFun
-        (appCcRS (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
           (slotExtendIter (I := I) (M := M) g (s + 1) (s + 1) n C₀)
           (iteratedCovGrad (I := I) g 0 (s + 1) n W)).toFun := by
     simp only [slotStage, slotEnergy, oneMinusConnLapSmoothIter_zero]
@@ -942,7 +968,7 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
               (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
                 (pointwiseTensorCurv (I := I) (M := M) g s
                   (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-              (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun) -
+              (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun) -
           slotStage (I := I) (M := M) g (s + 1) n 0 C₀ W =
         (slotStage (I := I) (M := M) g (s + 1) 0 n C₀ W -
           slotStage (I := I) (M := M) g (s + 1) n 0 C₀ W) +
@@ -951,15 +977,15 @@ theorem slot_iterL_pair (g : SmoothRiemannianMetric I M) (s n : ℕ)
               (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
                 (pointwiseTensorCurv (I := I) (M := M) g s
                   (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-              (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun := by
+              (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) C₀ W).toFun := by
     ring
   rw [hsplit]
   refine le_trans (abs_add_le _ _) ?_
   exact le_trans (add_le_add hmain hcurv) (le_of_eq (by ring))
 
-/-- A common pointwise jet envelope for an operator-field family gives one
-slot-transport pairing constant, uniform in the parameter and in the support
-of the input tensor. -/
+
+
+
 theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
     {α : Type*} (C : α → SmoothCcTensor g (s + 1) (s + 1)) (A : Set α)
     (B : ℕ → ℝ) (hB_nn : ∀ i, 0 ≤ B i)
@@ -970,12 +996,12 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
       |tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s
             (oneMinusConnLapSmoothIter (I := I) g 0 s n U)).toFun
-          (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
             (covGrad (I := I) (M := M) g 0 s U)).toFun -
         tensorL2Inner (I := I) (M := M) g 0 ((s + 1) + n)
           (iteratedCovGrad (I := I) g 0 (s + 1) n
             (covGrad (I := I) (M := M) g 0 s U)).toFun
-          (appCcRS (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
             (slotExtendIter (I := I) (M := M) g (s + 1) (s + 1) n (C t))
             (iteratedCovGrad (I := I) g 0 (s + 1) n
               (covGrad (I := I) (M := M) g 0 s U))).toFun| ≤
@@ -994,7 +1020,7 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
           (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
             (pointwiseTensorCurv (I := I) (M := M) g s
               (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-          (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
             (covGrad (I := I) (M := M) g 0 s U)).toFun| ≤
           Ki * ((∑ j ∈ Finset.range (n + 1),
               ‖iteratedCovGrad (I := I) g 0 s j U‖) *
@@ -1009,14 +1035,14 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
       refine ⟨Ki, hKi_nn, fun t ht U _ => ?_⟩
       have hZwin : ∀ p,
           ‖iteratedCovGrad (I := I) g 0 (s + 1) p
-            (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
+            (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
               (covGrad (I := I) (M := M) g 0 s U))‖ ≤
             cZ p * ∑ j ∈ Finset.range (p + 1 + 1),
               ‖iteratedCovGrad (I := I) g 0 s j U‖ := by
         intro p
         simpa only [iteratedCovGrad_succ, iteratedCovGrad_zero] using hcZ t ht U p
       have h := hKi U U
-        (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t)
           (covGrad (I := I) (M := M) g 0 s U))
         (fun p => jet_one_win (I := I) (M := M) g s 0 U p) hZwin
       rw [show n + 1 + 1 = n + 2 from by omega] at h
@@ -1063,7 +1089,7 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
         (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g s
             (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-        (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun| ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun| ≤
       (∑ i ∈ Finset.range n, Ki i) * P := by
     refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
     refine le_trans (Finset.sum_le_sum
@@ -1072,14 +1098,14 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
   have hbase : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
       (covGrad (I := I) (M := M) g 0 s
         (oneMinusConnLapSmoothIter (I := I) g 0 s n U)).toFun
-      (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun =
+      (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun =
       slotStage (I := I) (M := M) g (s + 1) 0 n (C t) W +
         ∑ i ∈ Finset.range n,
           tensorL2Inner (I := I) (M := M) g 0 (s + 1)
             (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g s
                 (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-            (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun := by
+            (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun := by
     rw [covGrad_iterL (I := I) (M := M) g s n U,
       l2_add_left (I := I) (M := M) g (s + 1),
       l2_sum_left (I := I) (M := M) g (s + 1)]
@@ -1087,7 +1113,7 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
   have htop : slotStage (I := I) (M := M) g (s + 1) n 0 (C t) W =
       tensorL2Inner (I := I) (M := M) g 0 ((s + 1) + n)
         (iteratedCovGrad (I := I) g 0 (s + 1) n W).toFun
-        (appCcRS (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
+        (ccOperatorFieldComp (I := I) (M := M) g 0 ((s + 1) + n) ((s + 1) + n)
           (slotExtendIter (I := I) (M := M) g (s + 1) (s + 1) n (C t))
           (iteratedCovGrad (I := I) g 0 (s + 1) n W)).toFun := by
     simp only [slotStage, slotEnergy, oneMinusConnLapSmoothIter_zero]
@@ -1099,7 +1125,7 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
               (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
                 (pointwiseTensorCurv (I := I) (M := M) g s
                   (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-              (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun) -
+              (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun) -
           slotStage (I := I) (M := M) g (s + 1) n 0 (C t) W =
         (slotStage (I := I) (M := M) g (s + 1) 0 n (C t) W -
           slotStage (I := I) (M := M) g (s + 1) n 0 (C t) W) +
@@ -1108,7 +1134,7 @@ theorem slot_iterL_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
               (oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
                 (pointwiseTensorCurv (I := I) (M := M) g s
                   (oneMinusConnLapSmoothIter (I := I) g 0 s (n - 1 - i) U))).toFun
-              (appCcRS (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun := by
+              (ccOperatorFieldComp (I := I) (M := M) g 0 (s + 1) (s + 1) (C t) W).toFun := by
     ring
   rw [hsplit]
   refine le_trans (abs_add_le _ _) ?_

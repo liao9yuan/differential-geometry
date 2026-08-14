@@ -6,17 +6,15 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Uniqueness
 import Mathlib.Topology.Instances.Matrix
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Time continuity of the metric C1 seminorm
 
-The proof is scalar and local-to-global.  A local frame is extended only near
-the point under consideration, every varying-fibre tensor is fully evaluated
-on frame slots, and compactness supplies the finite spatial subcover needed for
-a uniform time neighborhood.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,16 +29,18 @@ open DifferentialGeometry.Coordinates
 open scoped Manifold ContDiff Topology BigOperators
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+  [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- Local continuity of a varying-background metric-difference norm, once all
 of its coordinate-frame components are known to be continuous. -/
 private theorem derivNorm_pair_cont
@@ -199,6 +199,9 @@ private theorem derivNorm_pair_cont
   simpa only [Function.comp_def] using
     (Real.continuous_sqrt.continuousAt.comp hq).congr_of_eventuallyEq heq
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+  [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- Order-zero varying-background metric-difference continuity at a diagonal
 regular spacetime point. -/
 private theorem metric0_pair_cont
@@ -256,6 +259,9 @@ private theorem metric0_pair_cont
     Tensor0SBundle.metricTensorField_apply, Pi.sub_apply,
     ContinuousMultilinearMap.sub_apply, frame, Idx, i, j] using hvar.sub hbase
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+  [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- Order-one varying-background metric-difference continuity at a diagonal
 regular spacetime point.  The proof remains fully scalar in one coordinate
 frame; the moving Levi--Civita coefficients are expanded by the Koszul
@@ -481,7 +487,17 @@ private theorem metric1_pair_cont
       rhs p d i j
   rw [hv, hb, hconn d i, hconn d j]
   simp only [map_sum, map_smul, smul_eq_mul]
-  simp [rhs, mv, mb, dv, db]
+  suffices h :
+      dv p d i j -
+            ((∑ k, gamma p d i k * mv p k j) +
+              ∑ k, gamma p d j k * mv p i k) -
+          (db p d i j -
+            ((∑ k, gamma p d i k * mb p k j) +
+              ∑ k, gamma p d j k * mb p i k)) =
+        dv p d i j - db p d i j -
+            ∑ k, gamma p d i k * (mv p k j - mb p k j) -
+          ∑ k, gamma p d j k * (mv p i k - mb p i k)
+    by simpa [rhs, mv, mb, dv, db] using h
   simp only [mul_sub]
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib]
   ring
@@ -490,6 +506,9 @@ section Compact
 
 variable [CompactSpace M]
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+  [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- Around one regular diagonal time, the order-zero and order-one
 varying-background seminorms are jointly small, uniformly in space. -/
 private theorem metric_pair_event
@@ -542,6 +561,9 @@ private theorem metric_pair_event
   obtain ⟨x, hxF, hyW⟩ := Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
   exact hsmall x q (hq x hxF) y hyW a ha
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+  [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- A smooth metric family has one order-one metric-jet modulus on every
 compact regular-time slab, with the derivative connection and tensor norm both
 taken at the varying base time. -/
@@ -627,10 +649,14 @@ theorem metric_c1_span
 
 end Compact
 
+omit [FiniteDimensional Real E] [I.Boundaryless] [SigmaCompactSpace M]
+  [IsManifold I 2 M]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- A fully applied metric derivative relative to a fixed background is
 continuous at every regular spacetime point when its slots come from one
 actual smooth local frame. -/
 theorem metricCov_cont
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -687,9 +713,14 @@ theorem metricCov_cont
   funext j
   exact (hp j).symm
 
-/-- A fully applied fixed-background metric derivative is continuous in
-spacetime when its slots come from one actual smooth local frame. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCov_smooth
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -707,9 +738,13 @@ theorem metricCov_smooth
   metricCov_cont (I := I) G hG (G.metric (T : Real)) T.2
     frame hframe hu hx a slots
 
-/-- One exact covariant order is uniformly small on a product neighborhood of
-a regular spacetime point. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_c_patch
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -806,9 +841,13 @@ private theorem metric_c_patch
       IsLocalFrameOn.toBasisAt_coe] using hle
   exact lt_of_le_of_lt hle' hpair.1
 
-/-- Orders zero and one are simultaneously small on one product
-neighborhood. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_c1_patch
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -832,9 +871,13 @@ private theorem metric_c1_patch
   · exact h0 t ht.1 y hy.1
   · exact h1 t ht.2 y hy.2
 
-/-- One fixed covariant order is locally bounded in spacetime relative to a
-fixed regular-time background metric. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_b_patch
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -937,9 +980,13 @@ section Compact
 
 variable [CompactSpace M]
 
-/-- At one regular time, one exact fixed-background covariant order is bounded
-uniformly over the compact manifold on a time neighborhood. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_b_event
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -970,9 +1017,13 @@ private theorem metric_b_event
   exact (hloc x r (hr x hxF) y hyW).trans
     (Finset.single_le_sum (fun z _ => hC z) hxF)
 
-/-- On a compact regular-time set, one exact fixed-background covariant order
-has a bound uniform in both time and space. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_b_compact
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -997,9 +1048,13 @@ private theorem metric_b_compact
   exact (hOsub r htO' y).trans
     (Finset.single_le_sum (fun z _ => hC z) hrF)
 
-/-- On one fixed compact set of regular times, all finite cumulative
-fixed-background metric seminorms admit order-dependent uniform bounds. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metric_cp_bdd
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -1021,9 +1076,13 @@ theorem metric_cp_bdd
       (Finset.single_le_sum (fun j _ => hB j)
         (by simp only [Finset.mem_range]; omega))
 
-/-- One fixed covariant order is uniformly small over the compact manifold
-for all times sufficiently close to a regular time. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_c_event
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -1052,9 +1111,13 @@ private theorem metric_c_event
     Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
   exact hloc x t (ht x hxF) y hyW
 
-/-- At a regular time, a smooth realized metric family converges to its
-fixed-time metric in every finite cumulative fixed-background seminorm. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metric_cp_tendsto
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -1107,9 +1170,13 @@ theorem metric_cp_tendsto
   simpa only [Real.dist_eq, sub_zero, abs_of_nonneg hnonneg] using
     hsup.trans_lt (half_lt_self hε)
 
-/-- At a regular time, a smooth realized metric family converges to its
-fixed-time metric in the cumulative order-one fixed-background seminorm. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metric_c1_tendsto
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)

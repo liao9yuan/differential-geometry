@@ -1,10 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Components.TraceOneForm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -21,13 +17,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Ricci and scalar trace components
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
 
-/-- In an orthonormal tangent basis, the identity matrix is the inverse metric. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] in
 theorem metricInverseInBasis_of_orthonormal
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -37,10 +34,10 @@ theorem metricInverseInBasis_of_orthonormal
   intro i j
   constructor <;> simp [hON]
 
-/-- Coordinate form of `Ric(Y,Z) = trace (X |-> R(X,Y)Z)`, rewritten through a
-lowered `(0,4)` Riemann tensor. With the standard convention
-`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, the traced component is
-`sum_{a,k} gInv a k * Rm04(e_a,e_i,e_j,e_k)`. -/
+
+
+
+
 theorem ricciFromRm13_comp_eq_rm04_trace
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -76,8 +73,8 @@ theorem ricciFromRm13_comp_eq_rm04_trace
   rw [← hLower (basis a) (basis i) (basis j) (basis k)]
   rw [rm04CompAt_apply]
 
-/-- Coordinate form of a Ricci tensor that is intrinsically the trace of a
-`(1,3)` tensor, after lowering that `(1,3)` tensor to a `(0,4)` tensor. -/
+
+
 theorem ricciComp_eq_rm04_trace_of_rm13
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -112,8 +109,8 @@ theorem ricciComp_eq_rm04_trace_of_rm13_section
   exact ricciComp_eq_rm04_trace_of_rm13 (I := I) g basis gInv hinv (Ric x) (Rm13 x)
     (Rm04 x) (hRic x) hLower i j
 
-/-- In an orthonormal basis, the diagonal inverse-metric contraction in the
-Ricci trace reduces to a single sum over lowered Riemann components. -/
+
+
 theorem ricci_diag_eq_sum_rm04_diag_of_orthonormal
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -149,11 +146,11 @@ theorem ricciCompAt_eq_contractTrace_of_realizes
   rw [hRic x]
   exact ricciCompAt_eq_contractTrace (I := I) basis (Rm13 x) i j
 
-/-- Convention-correct pointwise Ricci trace from a lowered Riemann tensor.
 
-This is the lowered form of the intrinsic `Rm13` trace:
-`Ric_ab = g^{kl} Rm04(e_k,e_a,e_b,e_l)` in standard slots.  The name is
-retained for compatibility during the convention migration. -/
+
+
+
+
 def RicciRealizesRm04FirstTraceAt
     (Ric : Tensor02At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -164,8 +161,9 @@ def RicciRealizesRm04FirstTraceAt
       ∑ k : Idx, ∑ l : Idx,
         gInv k l * Rm04 (vec4 (basis k) (basis a) (basis b) (basis l))
 
-/-- Ricci symmetry from the convention-correct lowered Riemann trace and the
-algebraic Riemann symmetries. -/
+
+
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem ricciSymm_of_rm04
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -207,8 +205,8 @@ theorem ricciSymm_of_rm04
           rw [hP, hI, hO]
           ring
 
-/-- The intrinsic `Rm13` trace plus output lowering realizes the
-convention-correct lowered `Rm04` first trace. -/
+
+
 theorem ricciFirstTraceAt_of_rm13
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -228,7 +226,7 @@ theorem ricciFirstTraceAt_of_rm13
   rw [hcomp]
   simp_rw [rm04CompAt_apply]
 
-/-- Section form of `ricciFirstTraceAt_of_rm13`. -/
+
 theorem ricciFirstTraceAt_of_rm13_section
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -244,11 +242,11 @@ theorem ricciFirstTraceAt_of_rm13_section
   exact ricciFirstTraceAt_of_rm13 (I := I) g basis gInv hinv
     (Ric x) (Rm13 x) (Rm04 x) (hRic x) hLower hInvSym
 
-/-- Legacy pointwise trace realization of Ricci from a lowered Riemann tensor
-in a tangent basis.
 
-This traces the last lowered slot, `Rm04(e_k,X,Y,e_l)`, and is now the
-standard-slot Ricci trace. -/
+
+
+
+
 def RicciRealizesRm04TraceAt
     (Ric : Tensor02At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -259,8 +257,8 @@ def RicciRealizesRm04TraceAt
       ∑ k : Idx, ∑ l : Idx,
         gInv k l * Rm04 (vec4 (basis k) X Y (basis l))
 
-/-- Pointwise trace realization of scalar curvature from a Ricci tensor in a
-tangent basis. -/
+
+
 def ScalarRealizesRicciTraceAt
     (scalar : Real)
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -269,6 +267,7 @@ def ScalarRealizesRicciTraceAt
   scalar =
     ∑ i : Idx, ∑ j : Idx, gInv i j * Ric (vec2 (basis i) (basis j))
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem ricciComp_eq_trace_rm04
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -283,6 +282,7 @@ theorem ricciComp_eq_trace_rm04
   simp_rw [rm04CompAt_apply]
   exact hRic (basis i) (basis j)
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem scalar_eq_trace_ricci
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (scalar : Real)

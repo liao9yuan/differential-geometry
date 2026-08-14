@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -15,20 +12,18 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak Limit And WMP Data
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 def TensorBarrierUniformOnSlab
     (G : Real -> SmoothRiemannianMetric I M)
@@ -39,10 +34,11 @@ def TensorBarrierUniformOnSlab
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0)
       (Set.Icc t0 (t0 + delta))
 
-/--
-On a fixed short slab, uniform nonnegativity of all small positive barriers
-implies nonnegativity of the unperturbed tensor.
--/
+
+
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensorBarrier_limit_on_fixed_slab
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -107,12 +103,12 @@ theorem tensorBarrier_limit_on_fixed_slab
   have hq_nonneg : 0 ≤ q := le_of_forall_pos_le_add hforall
   simpa [q] using hq_nonneg
 
-/--
-Global finite-subinterval continuation for the tensor barrier.
 
-The local input is already uniform in small `epsilon`; the fixed-slab epsilon
-limit is therefore separated from the global reachability/closedness argument.
--/
+
+
+
+
+
 def TensorBarrierLimitClosureOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -124,9 +120,10 @@ def TensorBarrierLimitClosureOn
       TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0) ->
   TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T)
 
-/-- The set of times where a tensor family is pointwise nonnegative is closed
-on a compact time interval, provided every quadratic evaluation is continuous
-there. -/
+
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 private theorem nonnegativeTime_isClosed
     {S : TwoTensorFamily (I := I) (M := M)}
     {T : Real}
@@ -157,13 +154,14 @@ private theorem nonnegativeTime_isClosed
       isClosed_iInter fun v =>
         (hcont x v v).preimage_isClosed_of_isClosed isClosed_Icc isClosed_Ici)
 
-/-- Closed-interval continuation closes the global barrier-limit step once the
-unperturbed tensor evaluations are continuous in time. -/
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierLimitClosure_of_continuous
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
     {T : Real}
-    (hT : 0 ≤ T)
+    (_hT : 0 ≤ T)
     (hcont : ∀ x, ∀ v w : TangentSpace I x,
       ContinuousOn (fun t : Real => S t x v w) (Set.Icc 0 T)) :
     TensorBarrierLimitClosureOn (I := I) (M := M) G S T := by
@@ -198,7 +196,7 @@ theorem barrierLimitClosure_of_continuous
   intro t ht
   exact hP ht
 
-/-- Regularity package for the tensor WMP, without any strict-barrier witness. -/
+
 structure TensorWMPCore
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -218,13 +216,13 @@ structure TensorWMPCore
       Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
       TensorFirstNullCompactnessOn (I := I) (M := M) G S epsilon delta t0
 
-/--
-Compatibility regularity package needed by the original raw WMP theorem.
 
-New producer routes should prefer `TensorWMPCore` plus a `TensorStrictCert`;
-this package remains as the old interface whose scalar signs must work for an
-arbitrary strict-barrier witness.
--/
+
+
+
+
+
+
 structure TensorWMPRegularityOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -259,7 +257,7 @@ structure TensorWMPRegularityOn
 
 namespace TensorWMPRegularityOn
 
-/-- Forget the compatibility scalar-sign producer, retaining only regularity. -/
+
 def toCore
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -275,11 +273,11 @@ def toCore
 
 end TensorWMPRegularityOn
 
-/--
-Section-backed regularity package for Hamilton's tensor WMP, without scalar
-signs.  The signs are produced later by strict-barrier certificates whose
-derivative witnesses match the section covariant derivatives.
--/
+
+
+
+
+
 structure TensorWMPSectionCore
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -327,17 +325,17 @@ structure TensorWMPSectionCore
               epsilon delta t0 t x v v)
           (Set.Icc t0 (t0 + delta))
 
-/--
-Compatibility section-backed regularity package for Hamilton's tensor WMP.
 
-This is the public geometric entry point for smooth two-tensor sections.  It
-replaces the raw `firstNullCompactness` field with the transparent inputs used
-by `TensorFirstNullCompactnessOn.of_section`: compactness of the metric
-unit-tangent geometric time slab, continuity of the metric and tensor
-quadratic evaluations on the ambient time/tangent-bundle product, and
-fixed-vector time continuity.  New producers should prefer
-`TensorWMPSectionCore` plus `TensorStrictCert`.
--/
+
+
+
+
+
+
+
+
+
+
 structure TensorWMPSectionReg
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -403,7 +401,8 @@ structure TensorWMPSectionReg
 
 namespace TensorWMPSectionCore
 
-/-- Build the section-backed core regularity package from compact slab data. -/
+
+omit [IsManifold I 2 M] in
 theorem ofCompact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -456,7 +455,8 @@ theorem ofCompact
   tensorQuadCont := hTensor
   barrierFixedContinuous := hFixed
 
-/-- Build section-backed core regularity from total-space continuity. -/
+
+omit [IsManifold I 2 M] in
 theorem ofTotal
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -514,7 +514,8 @@ theorem ofTotal
         (hTensor delta t0 hdelta hsub))
     hFixed
 
-/-- Build the section-backed core package from a smooth realized metric family. -/
+
+omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
@@ -556,13 +557,14 @@ theorem ofSmoothMetric
   ofTotal (I := I) (M := M)
     (G := fun t => G.metric t) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
-    (fun delta t0 hdelta hsub =>
+    (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
         (I := I) (M := M) G hG
-        (fun t ht => hTsub (hsub ht)))
+        (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed
 
-/-- Convert section-backed core regularity to raw core regularity. -/
+
+omit [IsManifold I 2 M] in
 theorem toRaw
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -590,7 +592,7 @@ end TensorWMPSectionCore
 
 namespace TensorWMPSectionReg
 
-/-- Forget the compatibility scalar-sign producer, retaining only core data. -/
+
 def toCore
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -606,10 +608,11 @@ def toCore
   tensorQuadCont := h.tensorQuadCont
   barrierFixedContinuous := h.barrierFixedContinuous
 
-/-- Build the section-backed WMP regularity package using the geometric
-closed-slab compactness theorem for the unit tangent time slab.  Callers supply
-the transparent scalar quadratic continuities; compactness is no longer a
-separate first-null input. -/
+
+
+
+
+omit [IsManifold I 2 M] in
 theorem ofCompact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -679,8 +682,9 @@ theorem ofCompact
   barrierFixedContinuous := hFixed
   firstNullScalarSigns := hSigns
 
-/-- Build the section-backed regularity package from total-space continuity of
-the time-dependent metric and two-tensor sections over each compact test slab. -/
+
+
+omit [IsManifold I 2 M] in
 theorem ofTotal
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -754,9 +758,10 @@ theorem ofTotal
         (hTensor delta t0 hdelta hsub))
     hFixed hSigns
 
-/-- Build the section-backed WMP regularity package from a smooth realized
-metric family.  The strengthened `MetricFamilySmoothOn` supplies the metric
-total-space continuity; callers still supply the tensor-family continuity. -/
+
+
+
+omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
@@ -814,14 +819,15 @@ theorem ofSmoothMetric
   ofTotal (I := I) (M := M)
     (G := fun t => G.metric t) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
-    (fun delta t0 hdelta hsub =>
+    (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
         (I := I) (M := M) G hG
-        (fun t ht => hTsub (hsub ht)))
+        (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed hSigns
 
-/-- Convert the section-backed WMP regularity package to the raw kernel
-package, producing first-null compactness via `TensorFirstNullCompactnessOn.of_section`. -/
+
+
+omit [IsManifold I 2 M] in
 theorem toRaw
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

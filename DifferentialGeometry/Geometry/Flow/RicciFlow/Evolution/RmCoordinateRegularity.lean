@@ -5,13 +5,13 @@ import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 
 set_option autoImplicit false
 
-/-!
-# Joint coordinate regularity of the lowered Riemann tensor
 
-The solution's jointly smooth metric components determine a jointly smooth
-coordinate Riemann tensor through the spatial metric two-jet. This supplies the
-base regularity input for the iterated covariant-derivative component tower.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,7 +26,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open IntrinsicSpectral.DeTurckCoefficients
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
@@ -68,8 +68,7 @@ private lemma coordFrame_chartSum
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- A Ricci-flow solution supplies joint chart-Gram smoothness on its regular
-time interval. -/
+omit [SigmaCompactSpace M] in
 theorem solnChartGramSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -104,8 +103,6 @@ theorem solnChartGramSmooth
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [I.Boundaryless]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The second spatial jet slot only needs differentiability on a neighborhood
-of the point, rather than on the whole model space. -/
 private lemma jet2GramD2Local
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hG1 : ∀ᶠ z in nhds y,
@@ -131,7 +128,7 @@ private lemma jet2GramD2Local
 
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- Local two-jet form of the coordinate Christoffel derivative. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChrDerivJet
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hy : y ∈ interior (extChartAt I x0).target)
@@ -156,7 +153,7 @@ private lemma chartChrDerivJet
 
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- Local two-jet form of the coordinate Riemann tensor. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRmEqJet
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hy : y ∈ interior (extChartAt I x0).target)
@@ -180,7 +177,12 @@ private lemma chartRmEqJet
     chartChristoffel_eq_jet g x0 hG k m l,
     chartChristoffel_eq_jet g x0 hG i j m]
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
 /-- Joint smoothness of a chart Riemann component from joint smoothness of the
 metric's chart-Gram components. -/
 theorem chartRmSmoothAt
@@ -277,6 +279,8 @@ theorem chartRmSmoothAt
       chartRmEqJet (I := I) (g q.1) x0 hq.2 hDiff hDiffNhd hDiff2 i j k l
   exact hmodel.congr_of_eventuallyEq heq
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- The chart-basis components of the canonical lowered Riemann tensor are
 jointly smooth at every regular spacetime point. -/
 theorem coordRmSmoothInf
@@ -360,6 +364,8 @@ theorem coordRmSmoothInf
   rw [chartGramOnE_def, (extChartAt I x0).left_inv
     (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hp)]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- The coordinate-frame level-zero Riemann array is jointly smooth at every
 regular spacetime point in the chart good set. -/
 theorem coordRmFinSmooth

@@ -2,19 +2,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Tensor-backed reactions for the tensor WMP
 
-This file adds a bundled `(0,2)` tensor reaction core below the existing raw
-`TwoTensorReaction` API.  The raw API remains the compatibility surface used by
-the current tensor WMP; tensor-backed reactions provide honest invariant tensor
-inputs for geometric reactions.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -24,21 +21,20 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A bundled pointwise `(0,2)` tensor realizes a raw two-tensor evaluator at
-one point. -/
+
+
 def Tensor02RealizesRawAt
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
     (T : Tensor02At (I := I) (M := M) x) : Prop :=
   ∀ v w : TangentSpace I x, T (vec2 (I := I) v w) = A x v w
 
-/-- The right-slot linear map of a raw bilinear two-tensor at one point. -/
+
 def rawRightLM
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x)
@@ -52,8 +48,8 @@ def rawRightLM
     intro c y
     simpa [smul_eq_mul] using hA.smul_right c v y
 
-/-- The right-slot continuous linear map of a raw bilinear two-tensor at one
-point.  Continuity is finite-dimensional. -/
+
+
 def rawRightCLM
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x)
@@ -62,7 +58,7 @@ def rawRightCLM
   ⟨rawRightLM (I := I) (M := M) A hA v,
     LinearMap.continuous_of_finiteDimensional _⟩
 
-/-- The right-slot one-form as a one-variable continuous multilinear map. -/
+
 def rawRightTensor1
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x)
@@ -71,6 +67,7 @@ def rawRightTensor1
   (continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm
     (rawRightCLM (I := I) (M := M) A hA v)
 
+omit [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 @[simp]
 theorem rawRightTensor1_apply
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
@@ -80,7 +77,7 @@ theorem rawRightTensor1_apply
   simp [rawRightTensor1, rawRightCLM, rawRightLM,
     continuousMultilinearCurryFin1_symm_apply]
 
-/-- Curry a raw bilinear two-tensor into a linear map with values in one-forms. -/
+
 def rawCurriedLM
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
@@ -98,7 +95,7 @@ def rawCurriedLM
     intro m
     simp [hA.smul_left c v (m 0), smul_eq_mul]
 
-/-- Continuous curried form of a raw bilinear two-tensor. -/
+
 def rawCurriedCLM
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
@@ -107,16 +104,17 @@ def rawCurriedCLM
   ⟨rawCurriedLM (I := I) (M := M) A hA,
     LinearMap.continuous_of_finiteDimensional _⟩
 
-/-- Bundle a raw bilinear two-tensor evaluator at one point as a continuous
-pointwise `(0,2)` tensor. -/
+
+
 def tensor02OfRawAt
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
     Tensor02At (I := I) (M := M) x :=
   (rawCurriedCLM (I := I) (M := M) A hA).uncurryLeft
 
-/-- The bundled tensor produced from a raw bilinear evaluator realizes that
-evaluator. -/
+
+
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02OfRawAt_realizes
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
@@ -125,7 +123,8 @@ theorem tensor02OfRawAt_realizes
   intro v w
   rfl
 
-/-- Realization extensionality for pointwise `(0,2)` tensors. -/
+
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02_realizes_ext
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {T U : Tensor02At (I := I) (M := M) x}
@@ -139,7 +138,8 @@ theorem tensor02_realizes_ext
     fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
   rw [hm, hT, hU]
 
-/-- Fiberwise symmetrization is idempotent. -/
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_idem
     (A : RawTwoTensorField (I := I) (M := M)) :
     rawSym2 (I := I) (M := M) (rawSym2 (I := I) (M := M) A) =
@@ -148,7 +148,8 @@ theorem rawSym2_idem
   unfold rawSym2
   ring
 
-/-- Fiberwise symmetrization fixes pointwise symmetric raw tensors. -/
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_eq_of_symm
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x) :
@@ -159,14 +160,14 @@ theorem rawSym2_eq_of_symm
   rw [hsym w v]
   ring
 
-/-- A pointwise tensor-backed reaction core. -/
+
 abbrev Tensor02ReactionAt : Type _ :=
   Real -> SmoothRiemannianMetric I M -> (x : M) ->
     Tensor02At (I := I) (M := M) x -> Tensor02At (I := I) (M := M) x
 
-/-- Adapt a tensor-backed reaction to the existing raw reaction API by feeding
-it the bundled symmetric part whenever the symmetric part is bilinear, and zero
-otherwise.  The zero branch is only for totality of the raw compatibility API. -/
+
+
+
 def Tensor02ReactionAt.toRawSymm
     (N : Tensor02ReactionAt (I := I) (M := M)) :
     TwoTensorReaction (I := I) (M := M) :=
@@ -180,7 +181,8 @@ def Tensor02ReactionAt.toRawSymm
     else
       0
 
-/-- Evaluation of the raw symmetric adapter when the input is bilinear. -/
+
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_eval_of_bilin
     (N : Tensor02ReactionAt (I := I) (M := M))
     (t : Real) (g : SmoothRiemannianMetric I M)
@@ -196,8 +198,9 @@ theorem Tensor02ReactionAt.toRawSymm_eval_of_bilin
   unfold Tensor02ReactionAt.toRawSymm
   rw [dif_pos (rawSym2_bilin (I := I) (M := M) hA)]
 
-/-- The raw symmetric adapter depends only on the symmetric part in quadratic
-evaluations, so it satisfies the WMP compatibility predicate. -/
+
+
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_symmInputOn
     (G : Real -> SmoothRiemannianMetric I M)
     (N : Tensor02ReactionAt (I := I) (M := M)) (U : Set Real) :
@@ -207,14 +210,15 @@ theorem Tensor02ReactionAt.toRawSymm_symmInputOn
   unfold Tensor02ReactionAt.toRawSymm
   rw [rawSym2_idem (I := I) (M := M) A]
 
-/-- Reaction-wide output bilinearity on a time set. -/
+
 def TensorReactionOutputBilinearOn
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M)) (U : Set Real) : Prop :=
   ∀ t, t ∈ U -> ∀ A : RawTwoTensorField (I := I) (M := M), ∀ x,
     TwoTensorBilinearAt (I := I) (M := M) (N t (G t) A) x
 
-/-- Tensor-backed raw symmetric reactions have bilinear raw outputs. -/
+
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_output_bilin
     (G : Real -> SmoothRiemannianMetric I M)
     (N : Tensor02ReactionAt (I := I) (M := M)) (U : Set Real) :
@@ -237,13 +241,16 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (0 : Fin 2) (X + Y) = vec2 (I := I) (X + Y) Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       have hY : Function.update m (0 : Fin 2) Y = vec2 (I := I) Y Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       simpa [hleft, hX, hY] using hmap
     · intro c X Z
       dsimp [Tensor02ReactionAt.toRawSymm]
@@ -255,10 +262,12 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (0 : Fin 2) (c • X) = vec2 (I := I) (c • X) Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       simpa [hleft, hX, smul_eq_mul] using hmap
     · intro X Y Z
       dsimp [Tensor02ReactionAt.toRawSymm]
@@ -270,13 +279,16 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (1 : Fin 2) (Y + Z) = vec2 (I := I) X (Y + Z) := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       have hY : Function.update m (1 : Fin 2) Y = vec2 (I := I) X Y := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       simpa [hleft, hY, hZ] using hmap
     · intro c X Z
       dsimp [Tensor02ReactionAt.toRawSymm]
@@ -288,10 +300,12 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (1 : Fin 2) (c • Z) = vec2 (I := I) X (c • Z) := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          Function.update]
       simpa [hleft, hZ, smul_eq_mul] using hmap
   · constructor <;> simp [Tensor02ReactionAt.toRawSymm, hA]
 

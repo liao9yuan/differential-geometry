@@ -2,11 +2,11 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 set_option autoImplicit false
 
-/-!
-# Iterated derivatives of finite tuples
 
-This file provides the finite-Pi analogue of `iteratedFDeriv_prodMk`.
--/
+
+
+
+
 
 namespace DifferentialGeometry
 
@@ -15,8 +15,8 @@ variable {𝕜 E F : Type*}
   [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 
-/-- The iterated derivative of a finite tuple-valued map is the tuple of the
-componentwise iterated derivatives. -/
+
+
 theorem iteratedFDeriv_pi
     {ι : Type*} [Fintype ι] {n : WithTop ℕ∞} {f : ι → E → F} {x : E}
     (hf : ∀ i, ContDiffAt 𝕜 n (f i) x) {r : ℕ} (hr : (r : WithTop ℕ∞) ≤ n) :

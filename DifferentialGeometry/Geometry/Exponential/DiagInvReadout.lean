@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Exponential.NormalBallHome
 
 set_option autoImplicit false
 
-/-!
-# Readouts of selected diagonal-exponential inverse branches
 
-This file turns an explicit `DiagInvBranch` into the fixed-trivialization
-readout used by center-of-mass equations.  It is independent of the qualitative
-or quantitative producer that selected the branch.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,8 +38,8 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- The fiber coordinate of a selected inverse branch in the fixed
-trivialization centered at `p`. -/
+
+
 noncomputable def diagReadout
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -48,8 +48,8 @@ noncomputable def diagReadout
     (y : M × M) : E :=
   (trivializationAt E (TangentSpace I) p (B.inv y)).2
 
-/-- The branch target restricted to the base set of the fixed
-trivialization. -/
+
+
 def readDom
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -57,9 +57,10 @@ def readDom
     {p : M} (B : DiagInvBranch (I := I) g hEnorm p) : Set (M × M) :=
   B.dom ∩ Prod.fst ⁻¹' (trivializationAt E (TangentSpace I) p).baseSet
 
+
+
 omit [ConnectedSpace M] in
-/-- A selected branch has one open all-order readout domain carrying the
-inverse, base-projection, and intrinsic-exponential identities. -/
+omit [InnerProductSpace ℝ E] in
 theorem readoutDomInf
     [T2Space (TangentBundle I M)]
     {g : SmoothRiemannianMetric I M}

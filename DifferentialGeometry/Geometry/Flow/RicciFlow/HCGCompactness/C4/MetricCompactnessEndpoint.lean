@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1RawP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDAssembly
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # MSM135 Theorem 3.9 -- conditional Chapter-4 endpoint
@@ -26,52 +24,6 @@ variable [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-namespace MetricCompactBase
-
-/-- The concrete canonical Step-D construction from the divisor-independent
-time-zero producer bundle. The master B/C subsequence is selected internally,
-and the resulting sidecar is transported back to the original sequence. -/
-def metricCanon
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (b : MetricCompactBase (I := I) X)
-    (hcomplete : SeqMetricComplete (I := I) X)
-    (hconn : forall k : Nat,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M) :
-    StepDCanonData (I := I) X := by
-  let P : forall j : Nat, ProperMetricOn (I := I) (X.obj j) :=
-    fun j => properMetricOn (I := I) (X.obj j)
-      (hcomplete.complete j) (hconn j)
-  let hraw := b.exists_b1_raw hcomplete hconn
-  let psi : Nat → Nat := Classical.choose hraw
-  have hraw_spec := Classical.choose_spec hraw
-  have hpsi : StrictMono psi := hraw_spec.1
-  have B := hraw_spec.2
-  let Ppsi : forall k : Nat, ProperMetricOn (I := I) ((X.subseq psi).obj k) :=
-    fun k => P (psi k)
-  let canon : StepDCanonData (I := I) (X.subseq psi) :=
-    compactness_canon Ppsi B
-  exact canon.ofSeqSubseq psi hpsi
-
-/-- The limit selected by the canonical metric-compactness construction is
-connected. -/
-theorem metricCanon_conn
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (b : MetricCompactBase (I := I) X)
-    (hcomplete : SeqMetricComplete (I := I) X)
-    (hconn : forall k : Nat,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M) :
-    let C := b.metricCanon hcomplete hconn
-    letI : TopologicalSpace C.mc.limit.M := C.mc.limit.topology
-    ConnectedSpace C.mc.limit.M := by
-  classical
-  dsimp only [metricCanon, StepDCanonData.ofSeqSubseq,
-    MetricCompactnessConclusion.ofSeqSubseq]
-  exact compactness_conn (I := I) _ _
-
-end MetricCompactBase
-
 namespace MetricCompactnessInputs
 
 /-- The conditional Chapter-4 construction with the concrete canonical
@@ -85,8 +37,20 @@ def metricCanon
     (hconn : forall k : Nat,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
-    StepDCanonData (I := I) X :=
-  inp.toBase.metricCanon hcomplete hconn
+    StepDCanonData (I := I) X := by
+  let P : forall j : Nat, ProperMetricOn (I := I) (X.obj j) :=
+    fun j => properMetricOn (I := I) (X.obj j)
+      (hcomplete.complete j) (hconn j)
+  let hraw := inp.toBase.exists_b1_raw hcomplete hconn
+  let psi : Nat → Nat := Classical.choose hraw
+  have hraw_spec := Classical.choose_spec hraw
+  have hpsi : StrictMono psi := hraw_spec.1
+  have B := hraw_spec.2
+  let Ppsi : forall k : Nat, ProperMetricOn (I := I) ((X.subseq psi).obj k) :=
+    fun k => P (psi k)
+  let canon : StepDCanonData (I := I) (X.subseq psi) :=
+    compactness_canon Ppsi B
+  exact canon.ofSeqSubseq psi hpsi
 
 /-- **MSM135 Theorem 3.9, conditional form -- the Chapter 4 working target.**
 Compactness for complete connected pointed Riemannian manifolds, given the

@@ -302,12 +302,14 @@ theorem topKerJetSharp
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le h31
   have hs0 : (0 : ℝ) ≤ s := hs.1
   have hs1 : s ≤ 1 := hs.2
-  -- the state is its own `L^∞` witness: symmetry identifies it with `symmS g T`
+  -- the state is its own `L^∞` witness: symmetry identifies it with `ccTensor02Symm g T`
   have hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
       (T.toSection x) ≤ ((Module.finrank ℝ E : ℝ) * (1 / 3)) ^ 2 := by
     intro x
     have h := rfns_symmS_zero_le_fibreSmall
       (I := I) (M := M) g h30 T hδ_le hδ0 hδg x
+    change riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+      ((ccTensor02Symm (I := I) (M := M) g T).toSection x) ≤ _ at h
     rwa [symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT] at h
   have hpert := pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
   -- the three summands, each an affine window with `s`-free constants

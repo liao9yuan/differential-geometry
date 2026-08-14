@@ -1,18 +1,16 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTower
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Linearity of the component covariant-derivative step `covDerivStepComp`
 
-The `ric_bound` proof (MSM135 Lemma 3.11) iterates a single-step contraction-Leibniz
-to the `m`-fold binomial `∇^m(A∗g) = ∑_c \binom m c ∇^c A ∗ ∇^{m-c}g`.  The induction
-applies `∇` to the binomial *sum*, so it needs `covDerivStepComp` to be additive and
-`ℝ`-homogeneous in its `(ext, array)` data.  These are pure component identities
-(unfold + `Finset` algebra), the component analogues of `covStep_add`/`iterCov_add`.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,7 +20,8 @@ open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- `covDerivStepComp` is additive in its `(ext, array)` data. -/
+
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_add {r : ℕ}
     (extA extB : (Fin r → Idx) → Idx → Real)
     (chr : Idx → Idx → Idx → Real)
@@ -47,7 +46,8 @@ theorem covDerivStepComp_add {r : ℕ}
   rw [hsum]
   ring
 
-/-- `covDerivStepComp` is `ℝ`-homogeneous in its `(ext, array)` data. -/
+
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_smul {r : ℕ} (c : Real)
     (ext : (Fin r → Idx) → Idx → Real)
     (chr : Idx → Idx → Idx → Real)

@@ -518,3 +518,4 @@ theorem HasRadiusTail.geom_tail
 
 end HCGCompactness
 end DifferentialGeometry
+

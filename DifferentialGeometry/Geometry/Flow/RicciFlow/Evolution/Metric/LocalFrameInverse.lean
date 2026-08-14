@@ -1,13 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 
-/-!
-# Canonical inverse metric in a local frame
 
-This module packages the inverse of a metric Gram matrix in an arbitrary local
-frame.  The inverse is extended by zero off the frame domain, so its time
-derivative is a globally defined component family while all geometric claims
-remain local to the actual frame domain.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -17,13 +17,12 @@ open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -31,8 +30,8 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {n : WithTop ℕ∞} {u : Set M}
 
-/-- Canonical inverse-metric components in a local frame, extended by zero off
-the frame domain. -/
+
+
 noncomputable def localFrameInv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -48,6 +47,7 @@ noncomputable def localFrameInv
       else 0
 
 omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem localFrameInv_of_mem
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -59,8 +59,9 @@ omit [Fintype Idx] [DecidableEq Idx] in
         (hframe.toBasisAt hx) i j := by
   simp [localFrameInv, hx]
 
-/-- The canonical local-frame components are a two-sided inverse of the frame
-Gram matrix on the frame domain. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameInv_real
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -74,6 +75,7 @@ theorem localFrameInv_real
   simpa [metricCompInFrame, localFrameInv_of_mem (I := I) S frame hframe hx,
     hframe.toBasisAt_coe] using hreal i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem frameGram_time
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -92,8 +94,7 @@ private theorem frameGram_time
   exact (hmetric i j).smul contDiffOn_const
 
 omit [Fintype Idx] [DecidableEq Idx] in
-/-- Time-smoothness of the zero-extended canonical inverse follows from
-time-smoothness of the frame Gram entries on the same set. -/
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameInv_time
     [Finite Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -146,7 +147,7 @@ theorem localFrameInv_time
       (contDiffOn_const (c := (0 : Real)) :
         ContDiffOn Real ∞ (fun _ : Real => (0 : Real)) K)
 
-/-- The canonical derivative field of the zero-extended local-frame inverse. -/
+
 noncomputable def localFrameInvDt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -157,8 +158,9 @@ noncomputable def localFrameInvDt
     (fun s : Real => localFrameInv (I := I) S frame hframe s x i j)
     D.carrier t
 
-/-- Carrier-level time smoothness of a local frame produces the full metric
-time-regularity package with no inverse-metric black box. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameTimeReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

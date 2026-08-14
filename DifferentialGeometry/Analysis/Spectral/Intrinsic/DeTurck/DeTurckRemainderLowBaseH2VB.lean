@@ -911,6 +911,8 @@ theorem ipSub
     ipLowCc (I := I) (M := M) g (a - b) =
       ipLowCc (I := I) (M := M) g a - ipLowCc (I := I) (M := M) g b := by
   rw [ipForm, ipForm, ipForm, slotExtend_sub, slotExtend_sub,
+    show appCcRS (I := I) (M := M) g 2 3 1 =
+      ccOperatorFieldComp (I := I) (M := M) g 2 3 1 from rfl,
     appCcRS_sub_right]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
@@ -1555,7 +1557,9 @@ theorem vbH2Pair
     have hdel : WT - WU =
         appCcRS (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT +
           appCcRS (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU) := by
-      rw [hWTform, hWUform, appCcRS_sub_left, appCcRS_sub_right]
+      rw [hWTform, hWUform]
+      simp only [appCcRS]
+      rw [appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hdel]
     have h1 : lowJetSq (I := I) (M := M) g 2
@@ -1704,7 +1708,9 @@ theorem vbH2Pair
     have hdel : InT - InU =
         appCcRS (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT +
           appCcRS (I := I) (M := M) g 2 1 4 VmU (IpT - IpU) := by
-      rw [hInT, hInU, appCcRS_sub_left, appCcRS_sub_right]
+      rw [hInT, hInU]
+      simp only [appCcRS]
+      rw [appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hdel]
     have h1 : lowJetSq (I := I) (M := M) g 2
@@ -1759,7 +1765,9 @@ theorem vbH2Pair
       lc0VB (I := I) (M := M) g gmU =
       (2 : ℝ) • (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
         appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) := by
-    rw [hFormT, hFormU, appCcRS_sub_left, appCcRS_sub_right]
+    rw [hFormT, hFormU]
+    simp only [appCcRS]
+    rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have h1 : lowJetSq (I := I) (M := M) g 2
       (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT) ≤

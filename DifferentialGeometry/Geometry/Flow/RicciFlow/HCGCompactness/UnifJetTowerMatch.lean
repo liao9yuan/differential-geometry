@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCovSumCross
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingUnif
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Nabla0SFunAgreement
@@ -234,7 +234,7 @@ theorem rfns0_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W.toSection x)]
   rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
         (TensorRSSpace.toModel (W.toSection x)) (TensorRSSpace.toModel (W.toSection x)) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x
           (TensorRSSpace.toModel (W.toSection x)))
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x

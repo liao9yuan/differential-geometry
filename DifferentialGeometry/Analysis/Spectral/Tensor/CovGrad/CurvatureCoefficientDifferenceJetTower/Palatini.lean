@@ -33,7 +33,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -560,7 +560,8 @@ set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 lemma slotInsert_perturbationSharp_eq_raise_symmS (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
-    slotInsertEndoCc (I := I) (M := M) g₀ 0 (perturbationSharpEndoField (I := I) (M := M) g₀ T) =
+    endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
+        (perturbationSharpEndoField (I := I) (M := M) g₀ T) =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
         (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
           (symmS (I := I) (M := M) g₀ T)) := by

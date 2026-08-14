@@ -3,13 +3,13 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IterCovGradHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Scalar nonautonomous operators on the spectral Sobolev scale
 
-This file converts the common-slab coefficient envelopes for the moving scalar
-Laplacian difference into support-independent smooth-core bounds at every
-natural spectral Sobolev order.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -33,9 +33,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- On one backward-time slab, the smooth scalar moving-minus-fixed Laplacian
-loses exactly two spectral Sobolev orders, with a constant independent of time
-and spectral support. -/
+
+
+
 theorem lapDiff_hs_unif
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -86,10 +86,10 @@ theorem lapDiff_hs_unif
     refine ⟨C₂ * G₂ + C₁ * G₁, by positivity, ?_⟩
     intro s hs U
     let X : SmoothCcTensor q 0 0 :=
-      appCc (I := I) (M := M) q 2 0 (Phi₂ s)
+      operatorFieldApply (I := I) (M := M) q 2 0 (Phi₂ s)
         (iteratedCovGrad (I := I) q 0 0 2 U)
     let Y : SmoothCcTensor q 0 0 :=
-      appCc (I := I) (M := M) q 1 0 (Phi₁ s)
+      operatorFieldApply (I := I) (M := M) q 1 0 (Phi₁ s)
         (iteratedCovGrad (I := I) q 0 0 1 U)
     let Hhi : ℝ := ‖ccTensorToHs (I := I) (M := M) q 0
       ((m + 2 : ℕ) : ℝ) U‖
@@ -160,8 +160,8 @@ private noncomputable def lapDiffCcLin
   map_add' := scalarLapDiff_add (I := I) (M := M) q h
   map_smul' := scalarLapDiff_smul (I := I) (M := M) q h
 
-/-- The fixed-background scalar moving-minus-fixed Laplacian, completed from
-smooth tensors as a bounded map `H^(m+2) → H^m`. -/
+
+
 noncomputable def lapDiffHs
     (q h : SmoothRiemannianMetric I M) (m : ℕ) :
     tensorHs (I := I) (M := M) q 0 0 ((m : ℝ) + 2) →L[ℝ]
@@ -212,9 +212,9 @@ theorem lapHs_core
           ccTensorToHs (I := I) (M := M) q 1 (m : ℝ)
             (iteratedCovGrad (I := I) q 0 0 1 W) := by
       exact iterCovGradHs_core (I := I) (M := M) q 0 1 m W
-    let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+    let X := operatorFieldApply (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 W)
-    let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+    let Y := operatorFieldApply (I := I) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 W)
     have hsub :
         ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =
@@ -299,9 +299,9 @@ theorem lapHs_eq
         ccTensorToHs (I := I) (M := M) q 1 (m : ℝ)
           (iteratedCovGrad (I := I) q 0 0 1 U) := by
     exact iterCovGradHs_core (I := I) (M := M) q 0 1 m U
-  let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+  let X := operatorFieldApply (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
     (iteratedCovGrad (I := I) q 0 0 2 U)
-  let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+  let Y := operatorFieldApply (I := I) q 1 0 (connTraceCoeff (I := I) q h)
     (iteratedCovGrad (I := I) q 0 0 1 U)
   have hsub :
       ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =
@@ -339,8 +339,8 @@ theorem lapDiffHs_core
   exact lapHs_core (I := I) (M := M)
     (G.metric (T : ℝ)) (G.metric ((T : ℝ) - s)) m U
 
-/-- On the same kind of common slab, the completed all-scale scalar Laplacian
-difference has an operator-norm bound independent of backward time. -/
+
+
 theorem lapDiffHs_norm
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -374,8 +374,8 @@ theorem lapDiffHs_norm
   rw [show ((m : ℝ) + 2) = ((m + 2 : ℕ) : ℝ) by norm_num]
   simpa only [q, h] using hC s hs W
 
-/-- The completed moving-minus-fixed scalar Laplacian tends to zero in every
-natural `H^(m+2) → H^m` operator norm at a regular time. -/
+
+
 theorem lapDiffHs_small
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -444,11 +444,11 @@ theorem lapDiffHs_small
             ((m + 2 : ℕ) : ℝ) U‖ := by
     intro U
     let X : SmoothCcTensor q 0 0 :=
-      appCc (I := I) (M := M) q 2 0
+      operatorFieldApply (I := I) (M := M) q 2 0
         (scalarTraceCoeff (I := I) q (G.metric t))
         (iteratedCovGrad (I := I) q 0 0 2 U)
     let Y : SmoothCcTensor q 0 0 :=
-      appCc (I := I) (M := M) q 1 0
+      operatorFieldApply (I := I) (M := M) q 1 0
         (connTraceCoeff (I := I) q (G.metric t))
         (iteratedCovGrad (I := I) q 0 0 1 U)
     let Hhi : ℝ := ‖ccTensorToHs (I := I) (M := M) q 0
@@ -537,8 +537,8 @@ theorem lapDiffHs_small
     exact hcore U
   exact lt_of_le_of_lt hop hsmall
 
-/-- The all-scale scalar Laplacian-difference operator converges to zero at a
-regular time. -/
+
+
 theorem lapDiffHs_tendsto
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

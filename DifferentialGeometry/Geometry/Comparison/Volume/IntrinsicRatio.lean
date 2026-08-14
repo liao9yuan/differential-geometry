@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.BishopIntrinsic
 import DifferentialGeometry.Geometry.Comparison.Variation.MinimizingNoConj
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Intrinsic Bishop ratio — consumer adapters
@@ -44,7 +43,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -55,10 +54,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
-variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
+variable [riemannianBundle : RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+variable [pseudoEMetricSpace : PseudoEMetricSpace M]
+  [riemannianManifold : IsRiemannianManifold I M]
+  [completeSpaceM : CompleteSpace M]
+  [continuousRiemannianBundle :
+    IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
+omit [CompleteSpace E] in
 /-- Division-free Bishop ratio monotonicity along the complete intrinsic
 geodesic: for `s ≤ t` in the conjugate-free window,
 `curveDensity t · hypDensity s ≤ curveDensity s · hypDensity t`.  The
@@ -104,6 +107,18 @@ theorem intrCross_anti
   rw [div_le_div_iff₀ hpt hps] at hR
   exact hR
 
+omit riemannianBundle
+  [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [CompleteSpace E]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)]
+  pseudoEMetricSpace
+  riemannianManifold
+  completeSpaceM
+  continuousRiemannianBundle in
 /-- Antitone density ratio plus a near-pole cap gives a uniform pointwise upper
 density bound on the whole window.  Pure consequence of monotonicity: the ratio
 sup is attained at the pole. -/
@@ -132,6 +147,16 @@ theorem densUB_of_pole
   have hpt : 0 < hypDensity q' d t := hypDensity_pos hq' ht.1
   rwa [div_le_iff₀ hpt] at hRt
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompleteSpace E]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)]
+  pseudoEMetricSpace
+  riemannianManifold
+  completeSpaceM
+  continuousRiemannianBundle in
 /-- A nonzero tangent vector plus an orthogonal linearly independent transverse
 family assembles into an `Option`-indexed basis of `E`, with `none ↦ u` and
 `some i ↦ v i`.  (Weaker input than `exists_scaled_basis`: only `u ⊥ vᵢ` and
@@ -239,7 +264,7 @@ private theorem intrPoleCap
   have hsrc : Set.MapsTo (fun r : Real => r • ue) (Set.Ioo (0 : Real) b₀)
       (expMapDiffeo (I := I) g p).source := by
     intro r hr
-    show r • ue ∈ (expMapDiffeo (I := I) g p).source
+    change r • ue ∈ (expMapDiffeo (I := I) g p).source
     exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) g p (hrad r hr)
   have hBperp : ∀ i, g.inner p ue (B (some i)) = 0 := by
     intro i

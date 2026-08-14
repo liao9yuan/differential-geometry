@@ -17,13 +17,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 /-!
 # Curvature-coefficient background-difference jet tower
 
-Umbrella module.  The mathematics lives in the chunk modules imported
-above; this file exists so that the module path
-`DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower`
-keeps re-exporting the whole API for its downstream consumers.
-
-The monolith (15111 lines) could no longer be elaborated in a single
-Lean process, so it was split at section/abstraction seams.  Chunk map,
-per-chunk contents and verification status: `CurvatureCoefficientDifferenceJetTower.md`.
+Umbrella module. The mathematics lives in the chunk modules imported above;
+this file keeps the original module path as a stable re-exporting API.
 -/
-

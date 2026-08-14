@@ -1,16 +1,14 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Basic
 
-/-!
-# Second block of the zeroth-order DeTurck normal form
 
-This module expands the quadratic connection-difference block.  Its public
-statement uses only the symmetry of the varied metric tensor.
--/
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option maxHeartbeats 3200000
 
 open scoped BigOperators
 
@@ -69,7 +67,7 @@ private lemma p2_h4 {n : ℕ} (ig f : Fin n → Fin n → ℝ)
   rw [hfs b a]
   ring
 
-/-- The quadratic connection-difference block has its four-term scalar normal form. -/
+
 theorem nf_p2 {n : ℕ} (ig f : Fin n → Fin n → ℝ)
     (ga0 ga1 : Fin n → Fin n → Fin n → ℝ)
     (hfs : ∀ a b, f a b = f b a) (i j : Fin n) :

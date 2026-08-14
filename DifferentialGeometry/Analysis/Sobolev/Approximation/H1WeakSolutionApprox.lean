@@ -2,85 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothApproximationCo
 import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# Construction of `SmoothApproximation` from a non-smooth `H¹` weak solution
-
-This module supplies an existence theorem for the structure
-`DifferentialGeometry.Analysis.Sobolev.NirenbergNonSmooth.SmoothApproximation`
-in the non-smooth case: the input is a non-smooth weak solution
-`u ∈ H¹` of an elliptic divergence-form equation `B(u, ·) = ⟨f, ·⟩` on
-Euclidean space, with `L²` data `f`.
-
-## Mollification scheme
-
-The approximating sequence is the standard Friedrichs mollification of
-the non-smooth solution. For a fixed `0 < ε ≤ 1` decreasing along the
-sequence, set:
-
-* `u_n := u ⋆ φ_{ε_n}` — the mollified solution; smooth on the whole
-  space because `u` is locally integrable and `φ_{ε_n}` is a smooth
-  compactly-supported bump.
-* `f_n := classicalApply B u_n` — the classical second-order operator
-  applied to the smooth `u_n`. By
-  `mollifyEps_isSmoothWeakSolution_classicalApply`, the pair
-  `(u_n, f_n)` is automatically a smooth weak solution of `B(u_n, ·) =
-  ⟨f_n, ·⟩` on `Ω`.
-
-## Uniform `L²` bounds
-
-The construction packages three uniform-in-`n` `L²(E)` bounds:
-
-* `‖u_n‖_{L²(E)} ≤ ‖u‖_{L²(E)}` — from Young's inequality applied to
-  `mollifyEps`.
-* `‖∂_j u_n‖_{L²(E)} ≤ ‖g_j‖_{L²(E)}` for the weak partials `g_j` of
-  `u`, valid when each `g_j` is the weak partial of `u` on the whole
-  space (e.g. by zero-extension when `u` and `g_j` are compactly
-  supported in `Ω`). The pointwise identity `∂_j u_n = g_j ⋆ φ_{ε_n}`
-  follows from
-  `convolution_fderiv_eq_convolution_weakPartial_univ` applied to the
-  weak partial relation; the `L²` bound is then Young.
-* `‖f_n‖_{L²(E)}` is uniformly bounded — this is the *Friedrichs
-  commutator* estimate. The discrepancy `f_n - φ_{ε_n} ⋆ f` is bounded
-  in `L²(E)` uniformly in `n` by a constant determined by the elliptic
-  data `B` and the `H¹` data of `u`, after expanding in coordinates and
-  using both the standard Friedrichs commutator (for the principal
-  part, after one integration by parts) and the zeroth-order
-  commutator. Combined with `‖φ_{ε_n} ⋆ f‖_{L²(E)} ≤ ‖f‖_{L²(E)}`, this
-  yields a uniform `L²(E)` bound on `f_n`.
-
-## The headline theorem
-
-Because the Friedrichs commutator analysis for the divergence-form
-operator (with non-constant smooth coefficients) is substantial, the
-headline theorem in this module is *hypothesis-bearing*: it accepts the
-uniform `L²(E)` bound on `f_n = classicalApply B u_n` as an explicit
-input. Downstream callers can supply this bound for their concrete
-configurations (e.g. globally bounded coefficients, compact-support
-data on bounded `Ω`).
-
-The remaining bounds — on `u_n` and `∇u_n` — are *derived* inside the
-construction from the natural `H¹` hypotheses on `u`.
-
-## Main results
-
-* `mollifyEps_partial_eq_convolution_weakPartial_univ` — pointwise
-  identity `(fderiv ℝ (mollifyEps ε u) x) e_j = (g_j ⋆ φ_ε)(x)`,
-  obtained from
-  `convolution_fderiv_eq_convolution_weakPartial_univ` and the
-  fundamental smoothness of the convolution.
-* `eLpNorm_mollifyEps_le` — Young: `‖mollifyEps ε u‖_{L²} ≤ ‖u‖_{L²}`
-  for `u ∈ L²(E)`.
-* `eLpNorm_partial_mollifyEps_le` — Young applied to the partial:
-  `‖∂_j (mollifyEps ε u)‖_{L²} ≤ ‖g_j‖_{L²}` when `g_j` is a weak
-  partial of `u` on the whole space.
-* `exists_smoothApproximation_of_h1_weak_solution_with_fseq_l2_bound`
-  — given a non-smooth weak solution `u` of `B(u, ·) = ⟨f, ·⟩` with
-  global `L²(E)` weak partials `g_j` of `u` on `Set.univ` and a
-  uniform `L²(E)` bound on `f_n = classicalApply B u_n` (with
-  `u_n := mollifyEps (1/(n+2)) u`), produce a
-  `SmoothApproximation B u f`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -97,9 +18,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- The mollified value `mollifyEps hε u x` equals the convolution
-`(u ⋆ mollifierEps hε) x` (in the `lsmul ℝ ℝ` form). The two are
-related by commutativity of convolution. -/
 private lemma mollifyEps_eq_convolution_swap
     {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
@@ -112,10 +30,7 @@ private lemma mollifyEps_eq_convolution_swap
   filter_upwards with t
   rw [smul_eq_mul, smul_eq_mul, mul_comm]
 
-/-- For `u : E → ℝ` locally integrable with a global weak `j`-partial
-`g_j` on `Set.univ`, the classical `j`-partial of the mollified
-function `mollifyEps hε u` equals the convolution
-`mollifyEps hε g_j` pointwise. -/
+omit [NeZero d] in
 theorem mollifyEps_partial_eq_mollifyEps_weakPartial
     {ε : ℝ} (hε : 0 < ε)
     {u g : E → ℝ} {j : Fin d}
@@ -173,15 +88,12 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
   have hη_smooth' : ContDiff ℝ (⊤ : ℕ∞) (mollifierEps (d := d) hε) :=
     mollifierEps_smooth hε
   have h_ibp :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.convolution_fderiv_eq_convolution_weakPartial_univ
+    Euclidean.convolution_fderiv_eq_convolution_weakPartial_univ
       (d := d) (i := j) (g := g) (u := u) hweak hη_smooth' hη_compact x
   rw [h_ibp]
   rfl
 
-/-- For `u ∈ L²(E)`, the mollified function satisfies
-`‖mollifyEps hε u‖_{L²} ≤ ‖u‖_{L²}`. This is the standard Young
-inequality for convolution with a probability density (the normalized
-mollifier). -/
+omit [NeZero d] in
 theorem eLpNorm_mollifyEps_le
     {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E)) :
@@ -237,7 +149,8 @@ theorem eLpNorm_mollifyEps_le
       refine integral_congr_ae ?_
       filter_upwards with y
       simp [ρ, ψ, ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_nn y]
-    have h_norm_sq_int_vol : Integrable (fun y => (ρ y).toReal * ‖u (x - y)‖) (volume : Measure E) := by
+    have h_norm_sq_int_vol : Integrable (fun y => (ρ y).toReal * ‖u (x - y)‖)
+      (volume : Measure E) := by
       refine hce_u.integrable.norm.congr ?_
       filter_upwards with y
       simp [ρ, ψ, ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_nn y]
@@ -386,7 +299,8 @@ theorem eLpNorm_mollifyEps_le
       have h_lint_pt :
           (fun x => ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖ₑ
             ^ (2 : ℝ)) =
-          (fun x => ENNReal.ofReal (‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖
+          (fun x => ENNReal.ofReal
+            (‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖
             ^ (2 : ℝ))) := by
         funext x
         exact h_pt_lint x
@@ -452,13 +366,7 @@ theorem eLpNorm_mollifyEps_le
   · exact integral_nonneg fun _ => Real.rpow_nonneg (norm_nonneg _) _
   · exact inv_nonneg.mpr (by norm_num : (0 : ℝ) ≤ 2)
 
-/-- For `u : E → ℝ` locally integrable with global weak partial `g`
-on `Set.univ` and `g ∈ L²(E)`, the partial of `mollifyEps hε u`
-satisfies `‖∂_j (mollifyEps hε u)‖_{L²(E)} ≤ ‖g‖_{L²(E)}`.
-
-Combines `mollifyEps_partial_eq_mollifyEps_weakPartial` (which
-identifies the partial with `mollifyEps hε g`) and Young's inequality
-`eLpNorm_mollifyEps_le`. -/
+omit [NeZero d] in
 theorem eLpNorm_partial_mollifyEps_le_of_weakPartial_univ
     {ε : ℝ} (hε : 0 < ε)
     {u g : E → ℝ} {j : Fin d}
@@ -478,18 +386,6 @@ theorem eLpNorm_partial_mollifyEps_le_of_weakPartial_univ
   rw [h_pointwise]
   exact eLpNorm_mollifyEps_le hε hg
 
-/-- Hypothesis bundle for the construction below: a non-smooth `H¹`
-weak solution of `B(u, ·) = ⟨f, ·⟩` on `Ω`, plus a uniform `L²(E)`
-bound on the data sequence `f_n := classicalApply B u_n` of the
-mollified solution.
-
-The bound on `f_n` is the analytic content of the *Friedrichs
-commutator estimate* for the divergence-form operator: when the
-elliptic data `B` has bounded coefficients with bounded derivatives in
-a neighborhood of the support of `u`, the commutator
-`f_n - φ_{ε_n} ⋆ f` is bounded in `L²(E)` uniformly in `n`, yielding a
-uniform bound on `‖f_n‖_{L²(E)}`. This bundle exposes the bound as an
-explicit hypothesis to keep the construction modular. -/
 structure H1WeakSolutionData
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (u f : E → ℝ) where
 
@@ -511,17 +407,13 @@ structure H1WeakSolutionData
       (mollifyEps (d := d) (show (0 : ℝ) < 1 / ((n : ℝ) + 2) by positivity) u))
       2 (volume : Measure E) ≤ ENNReal.ofReal fseq_l2_bound
 
-/-- Smoothness of `mollifyEps hε u` for `u ∈ L²(E)`. -/
+omit [NeZero d] in
 private lemma contDiff_mollifyEps_of_memLp_two
     {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E)) :
     ContDiff ℝ (⊤ : ℕ∞) (mollifyEps (d := d) hε u) :=
   mollifyEps_contDiff hε (hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2))
 
-/-- Each pair `(u_n, f_n)` with `u_n := mollifyEps hε u` and
-`f_n := classicalApply B u_n` is a smooth weak solution of the same
-equation `B`. Direct corollary of
-`mollifyEps_isSmoothWeakSolution_classicalApply`. -/
 private lemma is_smooth_weak_sol_mollifyEps
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : MemLp u 2 (volume : Measure E))
@@ -533,15 +425,12 @@ private lemma is_smooth_weak_sol_mollifyEps
     (d := d) hΩ B (hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)) hε
 
 omit [NeZero d] in
-/-- Restriction of an `L²(E)` bound to a set. -/
 private lemma memLp_two_restrict_of_memLp_two
     {f : E → ℝ} (hf : MemLp f 2 (volume : Measure E)) (S : Set E) :
     MemLp f 2 (volume.restrict S) :=
   hf.restrict S
 
 omit [NeZero d] in
-/-- Square-integral bound on a measurable subset, given an `L²(E)`
-bound on the whole space. -/
 private lemma integral_sq_le_eLpNorm_sq
     {f : E → ℝ} (hf : MemLp f 2 (volume : Measure E))
     {S : Set E} (_hS_open : IsOpen S) :
@@ -593,30 +482,6 @@ private lemma integral_sq_le_eLpNorm_sq
   rw [h_int_E] at h_int_le_E
   exact h_int_le_E
 
-/-- **Construction of `SmoothApproximation` from a non-smooth `H¹`
-weak solution.**
-
-Given a `H1WeakSolutionData` bundle for a weak solution `(u, f)` of
-`B(u, ·) = ⟨f, ·⟩` on `Ω`, produce a `SmoothApproximation B u f` whose
-approximating sequence is the mollification
-`u_n := mollifyEps (1/(n+2)) u` and whose data is
-`f_n := classicalApply B u_n`.
-
-The clauses of `SmoothApproximation` are populated as follows:
-
-* `u_seq_smooth`: `mollifyEps_contDiff` (mollification of locally
-  integrable is `C^∞`).
-* `is_smooth_weak_sol`: `mollifyEps_isSmoothWeakSolution_classicalApply`
-  ((`u_n`, `classicalApply B u_n`) is a smooth weak solution).
-* `f_seq_l2_loc`, `u_seq_l2_loc`, `grad_seq_l2_loc`: continuity of
-  `u_n`, `∂_j u_n`, and `f_n` on every compact-closure subset.
-* `data_bound`: a single nonneg scalar combining the global `L²(E)`
-  bounds on `u`, the weak partials, `f`, and the uniform `L²(E)`
-  bound on `f_n`.
-* `data_integrated_bound`: assembled from the global `L²(E)` bounds.
-
-The integrated `L²(Ω')` bound on every precompact open `Ω'` is
-controlled by the universal constant `1`, scaled by `data_bound`. -/
 theorem exists_smoothApproximation_of_h1WeakSolutionData
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -810,24 +675,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
   have h_f_nn : 0 ≤ ((eLpNorm f 2 (volume : Measure E)).toReal) ^ 2 := sq_nonneg _
   linarith
 
-/-- **Convenience form of the construction theorem.**
-
-A direct, hypothesis-bearing existence theorem for `SmoothApproximation`
-in the non-smooth `H¹` weak-solution case. The hypotheses are the
-"raw" ingredients matching a non-smooth `H¹` weak solution:
-
-* `hu_l2`: `u ∈ L²(E)`.
-* `hu_grad_l2`: each coordinate's weak partial of `u` exists on the
-  whole space and lies in `L²(E)`.
-* `hf_l2`: `f ∈ L²(E)`.
-* `h_weak`: `u` is a weak solution of `B(u, ·) = ⟨f, ·⟩` on `Ω`.
-* `M_F` and `hMF_bound`: the uniform `L²(E)` bound on the data sequence
-  `f_n := classicalApply B (u ⋆ φ_{ε_n})`.
-
-Constructs a `SmoothApproximation B u f` whose smooth approximating
-sequence is the standard mollification `u_n := u ⋆ φ_{ε_n}` (with
-`ε_n := 1/(n+2)`) and whose data sequence is the classical operator
-applied pointwise to the smooth `u_n`. -/
 theorem exists_smoothApproximation_of_h1_weak_solution
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}

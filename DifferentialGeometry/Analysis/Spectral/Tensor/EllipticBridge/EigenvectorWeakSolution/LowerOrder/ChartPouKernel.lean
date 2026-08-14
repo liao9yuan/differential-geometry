@@ -2,29 +2,10 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Weak
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Component.PouComponentBridge
 
-/-!
-# The chart partition-of-unity kernel and the vanishing of chart components off it
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart center
-`α : M`, this file isolates the compact *partition-of-unity kernel*
-`chartPouKernel α` — the Euclidean-model image of the closed support of the
-chart-atlas partition-of-unity weight — and records its basic measure-theoretic
-properties (compactness, measurability, containment in the chart target).
-
-Off this kernel both the Euclidean chart component
-`tensorChartComponent g r s S α Idx Jdx` and its chart-Euclidean partial vanish,
-so a `C^∞`-on-the-chart-target factor is bounded on the kernel and its
-kernel-indicator is `AEStronglyMeasurable` for the chart `L²` measure. These are
-the geometric facts underlying every later `L²`-estimate on the lower-order
-coefficient terms.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix ENNReal NNReal
@@ -43,7 +24,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -56,25 +37,22 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The compact partition-of-unity kernel of the chart at `α`, transferred to
-the Euclidean model space: the `toEuclidean`-image of the chart image of the
-closed support of the chart-atlas partition-of-unity weight. -/
 def chartPouKernel (α : M) : Set EuclN :=
   toEuclidean '' ((extChartAt I α) ''
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)))
 
-/-- The partition-of-unity kernel is compact. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPouKernel_isCompact (α : M) :
     IsCompact (chartPouKernel (I := I) (M := M) α) :=
   (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_isCompact
     (I := I) (M := M) α).image (toEuclidean (E := E)).continuous
 
-/-- The partition-of-unity kernel is a measurable set. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPouKernel_measurableSet (α : M) :
     MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
   (chartPouKernel_isCompact (I := I) (M := M) α).isClosed.measurableSet
 
-/-- The partition-of-unity kernel is contained in the Euclidean chart target. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma chartPouKernel_subset_chartTargetEuclid (α : M) :
     chartPouKernel (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := by
@@ -84,9 +62,7 @@ lemma chartPouKernel_subset_chartTargetEuclid (α : M) :
   exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_subset_target
     (I := I) (M := M) α
 
-/-- If a Euclidean point lies outside the partition-of-unity kernel, then its
-chart-Euclidean preimage lies outside the closed support of the chart-atlas
-partition-of-unity weight. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma notMem_pouTsupport_of_notMem_chartPouKernel
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -103,8 +79,7 @@ private lemma notMem_pouTsupport_of_notMem_chartPouKernel
     exact (extChartAt I α).right_inv hmem
   · exact toEuclidean.apply_symm_apply y
 
-/-- The Euclidean chart component vanishes outside the partition-of-unity
-kernel. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponent_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -133,8 +108,7 @@ lemma tensorChartComponent_eq_zero_off_chartPouKernel
   · rw [tensorChartComponent_def,
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ htar]
 
-/-- The chart-Euclidean partial of the Euclidean chart component vanishes
-outside the partition-of-unity kernel. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma euclidPartial_tensorChartComponent_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -170,9 +144,7 @@ lemma euclidPartial_tensorChartComponent_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
-/-- A `C^∞`-on-the-chart-target function is bounded on the compact
-partition-of-unity kernel: there is a non-negative constant `C` with
-`‖c y‖ ≤ C` for every `y` in the kernel. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma exists_bound_on_chartPouKernel
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α)) :
@@ -187,9 +159,7 @@ lemma exists_bound_on_chartPouKernel
   refine ⟨max C 0, le_max_right _ _, fun y hy => ?_⟩
   exact (hC ⟨y, hy, rfl⟩).trans (le_max_left _ _)
 
-/-- The indicator of the partition-of-unity kernel times a `C^∞`-on-the-chart-
-target function is `AEStronglyMeasurable` with respect to the chart `L²`
-measure. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma aestronglyMeasurable_indicator_mul
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α)) :

@@ -7,14 +7,14 @@ import Mathlib.Topology.Separation.Regular
 
 set_option autoImplicit false
 
-/-!
-# Compact moving implicit roots
 
-This file isolates the generic compact-graph implicit-function layer used by
-moving center and inverse constructions.  A limit root branch first supplies
-one fixed compact tube; stability of that tube under smoothly converging
-equations is a separate theorem.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,8 +26,8 @@ namespace Analysis
 
 open HCGCompactness
 
-/-- A uniform derivative bound on a convex set gives the corresponding
-`ApproximatesLinearOn` estimate. -/
+
+
 theorem approx_of_fderiv_le
     {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace Real E]
@@ -41,8 +41,8 @@ theorem approx_of_fderiv_le
   exact hs.norm_image_sub_le_of_norm_fderiv_le'
     (x := y) (y := x) hf hderiv hy hx
 
-/-- A map whose derivative stays close to a linear equivalence on a closed
-ball attains every point in the quantitative target ball. -/
+
+
 theorem exists_eq_of_fderiv
     {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace Real E] [CompleteSpace E]
@@ -61,8 +61,8 @@ theorem exists_eq_of_fderiv
   exact happ.surjOn_closedBall_of_nonlinearRightInverse
     A.toNonlinearRightInverse hr Subset.rfl hy
 
-/-- A smoothly convergent family of local diffeomorphisms is eventually
-injective on one fixed closed ball and covers one fixed target ball. -/
+
+
 theorem exists_preim_tail
     {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace Real E] [FiniteDimensional Real E]
@@ -227,8 +227,8 @@ theorem exists_preim_tail
       B hr.le Subset.rfl
     simpa only [margin] using hsurj hyStage
 
-/-- The partial Fréchet derivative in the second variable of a map on a
-product. -/
+
+
 noncomputable def partialFDeriv₂
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -237,8 +237,8 @@ noncomputable def partialFDeriv₂
     (F : P × X → Y) (p : P) (x : X) : X →L[Real] Y :=
   (fderiv Real F (p, x)).comp (ContinuousLinearMap.inr Real P X)
 
-/-- Identify the partial derivative in the root variable from a derivative of
-the corresponding fixed-parameter slice. -/
+
+
 theorem partialFDeriv₂_eq
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -252,8 +252,8 @@ theorem partialFDeriv₂_eq
     ((hasFDerivAt_const (x := x) (c := p)).prodMk (hasFDerivAt_id x))
   exact hslice.unique hL
 
-/-- The derivative prescribed by the implicit equation when the root-variable
-block is invertible. -/
+
+
 noncomputable def implicitRootDeriv
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -263,8 +263,8 @@ noncomputable def implicitRootDeriv
   -((A.comp (ContinuousLinearMap.inr Real P X)).inverse.comp
     (A.comp (ContinuousLinearMap.inl Real P X)))
 
-/-- The open operator locus on which `implicitRootDeriv` is the genuine
-implicit derivative. -/
+
+
 def implicitRootDomain
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -273,7 +273,7 @@ def implicitRootDomain
     Set ((P × X) →L[Real] Y) :=
   {A | (A.comp (ContinuousLinearMap.inr Real P X)).IsInvertible}
 
-/-- The operator domain of the implicit derivative is open. -/
+
 theorem isOpen_rootDerivDom
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -287,8 +287,8 @@ theorem isOpen_rootDerivDom
     Set.range ((↑) : (X ≃L[Real] Y) → X →L[Real] Y))
   exact ContinuousLinearEquiv.isOpen.preimage restrictRoot.continuous
 
-/-- The implicit derivative depends smoothly on the full equation derivative
-throughout the invertible root-block locus. -/
+
+
 theorem rootDeriv_contDiffOn
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -318,8 +318,8 @@ theorem rootDeriv_contDiffOn
   simpa only [implicitRootDeriv, restrictRoot, restrictParam,
     ContinuousLinearMap.compL_apply] using hComp
 
-/-- Pair an equation with its parameter projection.  Zeros of the first
-component over a prescribed parameter are fibers of this pinned map. -/
+
+
 noncomputable def pinnedRootMap
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -328,8 +328,8 @@ noncomputable def pinnedRootMap
     (F : P × X → Y) : P × X → Y × P :=
   fun z => (F z, z.1)
 
-/-- The derivative of the pinned root map is invertible whenever the
-root-variable block of the equation derivative is invertible. -/
+
+
 theorem pinnedFDeriv_inv
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -378,8 +378,8 @@ theorem pinnedFDeriv_inv
   rw [hderiv]
   exact ContinuousLinearMap.IsInvertible.of_inverse hCB hBC
 
-/-- A relatively compact parameter neighborhood together with one uniform
-root-variable tube around a smooth limiting implicit branch. -/
+
+
 structure CompactRootTube
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -408,7 +408,7 @@ structure CompactRootTube
 
 namespace CompactRootTube
 
-/-- The closed fiberwise tube of radius `r` around the limiting root graph. -/
+
 def closedTube
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -420,8 +420,8 @@ def closedTube
   (fun q : P × X => (q.1, PhiInf q.1 + q.2)) ''
     (closure T.W ×ˢ Metric.closedBall 0 r)
 
-/-- Membership in the closed fiberwise tube is the expected base membership
-and distance bound. -/
+
+
 theorem mem_closedTube
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -445,8 +445,8 @@ theorem mem_closedTube
       · change PhiInf z.1 + (z.2 - PhiInf z.1) = z.2
         rw [add_comm, sub_add_cancel]
 
-/-- In finite dimensions the closed fiberwise tube over the compact parameter
-closure is compact. -/
+
+
 theorem closedTube_compact
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -465,7 +465,7 @@ theorem closedTube_compact
       ((hPhi.comp continuousOn_fst (fun q hq => hq.1)).add continuousOn_snd)
   exact (T.isCompact_closure_W.prod (isCompact_closedBall 0 r)).image_of_continuousOn hmap
 
-/-- Every closed tube with radius at most `rho` lies in the equation domain. -/
+
 theorem closedTube_subset
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -480,9 +480,9 @@ theorem closedTube_subset
   exact T.tube_subset z.1 hp (by
     simpa only [Metric.mem_closedBall] using hdist.trans hr)
 
-/-- A compact root tube admits a relatively compact open equation domain after
-shrinking its fiber radius.  The parameter core and limiting branch are kept
-unchanged. -/
+
+
+
 theorem exists_domain_buffer
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -529,7 +529,7 @@ theorem exists_domain_buffer
       limit_root_deriv_inv := T.limit_root_deriv_inv }
   exact ⟨D', T', hD'cpt, hD'D, rfl, rfl⟩
 
-/-- The closed fiberwise annulus between radii `inner` and `outer`. -/
+
 def closedAnnulus
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -541,8 +541,8 @@ def closedAnnulus
   (fun q : P × X => (q.1, PhiInf q.1 + q.2)) ''
     (closure T.W ×ˢ (Metric.closedBall 0 outer \ Metric.ball 0 inner))
 
-/-- Membership in the closed fiberwise annulus is equivalent to the two
-distance inequalities over the compact parameter closure. -/
+
+
 theorem mem_closedAnnulus
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -571,8 +571,8 @@ theorem mem_closedAnnulus
       · change PhiInf z.1 + (z.2 - PhiInf z.1) = z.2
         rw [add_comm, sub_add_cancel]
 
-/-- In finite dimensions every closed fiberwise annulus over the compact
-parameter closure is compact. -/
+
+
 theorem annulus_compact
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -592,8 +592,8 @@ theorem annulus_compact
   exact (T.isCompact_closure_W.prod
     ((isCompact_closedBall 0 outer).diff Metric.isOpen_ball)).image_of_continuousOn hmap
 
-/-- The limiting equation has a uniform positive residual on every nonempty
-closed annulus that stays away from its unique root graph. -/
+
+
 theorem exists_residual_gap
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -627,9 +627,9 @@ theorem exists_residual_gap
     intro z hz
     exact False.elim (hne ⟨z, hz⟩)
 
-/-- A smoothly convergent equation family has no stage zeros on a fixed
-positive-width annulus around the limiting root graph, eventually uniformly
-in the compact parameter closure. -/
+
+
+
 theorem eventually_no_root
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -659,8 +659,8 @@ theorem eventually_no_root
   rw [hzero, dist_zero_right] at hclose
   exact (not_lt_of_ge (hgap z hz)) (hclose.trans_le (by linarith))
 
-/-- There is a fixed positive inner tube on which the limiting root derivative
-is invertible and all stage root derivatives are eventually invertible. -/
+
+
 theorem exists_deriv_radius
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -783,8 +783,8 @@ theorem exists_deriv_radius
   rcases hdeltaball hmem with ⟨e, he⟩
   exact ⟨e, he⟩
 
-/-- Stage roots exist uniformly near the limiting graph, and the stage
-equations are uniformly injective on one smaller fiberwise ball. -/
+
+
 theorem exists_root_buffer
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1011,9 +1011,9 @@ theorem exists_root_buffer
       · next h => exact absurd ⟨p, hpSf⟩ h
     exact hbMin_b₀.trans hb₀_b
 
-/-- On a compact limiting root tube, smoothly convergent equations admit a
-selected stage root that converges uniformly, has invertible root derivative,
-and is the unique stage root in the full open tube. -/
+
+
+
 theorem exists_root_c0
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1136,8 +1136,8 @@ theorem exists_root_c0
     · rintro rfl
       exact hPhiRoot
 
-/-- A selected root that is unique in the compact tube is smooth on the open
-parameter core once its root derivative is invertible. -/
+
+
 theorem root_contDiffOn
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1195,8 +1195,8 @@ theorem root_contDiffOn
     exact ((huniq n hn q (subset_closure hqW) (psi q) hqDist).mp hqRoot).symm
   exact (hpsiCD.congr_of_eventuallyEq heq).contDiffWithinAt
 
-/-- The derivative of a selected root is the derivative prescribed by its
-implicit equation. -/
+
+
 theorem root_fderiv_eq
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1258,7 +1258,7 @@ theorem root_fderiv_eq
   simpa only [psi, implicitRootDeriv] using
     (cdf.hasStrictFDerivAt_implicitFunction htop hinv).hasFDerivAt.fderiv
 
-/-- The limiting root branch satisfies the same implicit derivative formula. -/
+
 theorem limit_fderiv_eq
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1289,8 +1289,8 @@ theorem limit_fderiv_eq
     (fun _ => T.limit_equation_smooth) (N := 0)
     (Phi := fun _ : Nat => PhiInf) hspec huniq 0 (by omega)
 
-/-- A uniformly convergent family of smooth, uniquely selected roots converges
-in `C^∞` on compact subsets of the parameter core. -/
+
+
 theorem root_cInf
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1420,8 +1420,8 @@ theorem root_cInf
           (fun n => (hPhi_cd n).differentiableOn (by simp))
           (hPhiInf_cd.differentiableOn (by simp))
 
-/-- Smoothly convergent equations on a compact root tube admit a uniformly
-convergent tail of smooth selected roots with full-tube uniqueness. -/
+
+
 theorem exists_root_smooth
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1446,11 +1446,11 @@ theorem exists_root_smooth
   obtain ⟨N, Phi, hconv, hspec, huniq⟩ := T.exists_root_c0 hF_cd hF_conv
   exact ⟨N, Phi, hconv, T.root_contDiffOn hF_cd hspec huniq, hspec, huniq⟩
 
-/-- Smoothly convergent equations on a compact root tube admit selected roots
-that converge in `C^∞` on compact subsets of the parameter core.  A finite
-prefix is filled by the limiting branch, so every selected map is smooth while
-the original stage equations and uniqueness statements are retained on one
-tail. -/
+
+
+
+
+
 theorem exists_root_cInf
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1534,9 +1534,9 @@ theorem exists_root_cInf
   · intro n hn p hp x hx
     simpa only [Phi, if_pos hn] using huniq₀ n hn p hp x hx
 
-/-- A smoothly convergent equation family that is smooth only on a common tail
-still admits a `C^∞`-convergent selected root family.  The finite equation
-prefix is filled by the limiting equation. -/
+
+
+
 theorem exists_cInf_tail
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1588,9 +1588,9 @@ theorem exists_cInf_tail
 
 end CompactRootTube
 
-/-- A smooth limiting implicit branch over a compact parameter core admits a
-single relatively compact parameter neighborhood and a uniform uniqueness
-tube. -/
+
+
+
 theorem exists_compactRootTube
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
@@ -1724,8 +1724,8 @@ theorem exists_compactRootTube
   exact ⟨⟨W, rho, hWopen, hWcompact, hKW, hWW₀, hrho, hD, hW₀,
     hFInf, hPhiInf, fun p hp => hroot p (hWW₀ hp), htube, hunique, hderiv⟩⟩
 
-/-- A compact continuous family of nondegenerate seed roots extends to one
-smooth ambient root branch carrying a compact uniform root tube. -/
+
+
 theorem exists_rootTube
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]

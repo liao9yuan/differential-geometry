@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.CompactChartJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.EigensectionSobolevDecay
 
-/-!
-# Compact chart-jet bounds for scalar eigensections
 
-This file specializes the rank-generic compact raw-component estimate and the
-covariant eigensection Sobolev estimate to scalar `(0, 0)` eigensections.  The
-result is the spatial majorant used by the scalar spectral-series M-test.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,9 +32,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- On a compact chart subset, every order-`m` spatial jet of a scalar
-eigensection is bounded uniformly in the eigen-index by a fixed polynomial in
-`1 + λᵢ`. -/
+
+
+
 theorem scalarEig_jet_le
     (g : SmoothRiemannianMetric I M) (α : M) (m k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m)
@@ -44,7 +44,7 @@ theorem scalarEig_jet_le
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 0) (y : EuclN),
         y ∈ K →
           ‖iteratedFDerivWithin ℝ m
-              (rawPullR (I := I) (M := M) g 0 0
+              (tensorComponentEuclideanChart (I := I) (M := M) g 0 0
                 (eigenvectorSmooth (I := I) (M := M) g 0 0 i) α
                 Fin.elim0 Fin.elim0)
               (chartTargetEuclid (I := I) (M := M) α) y‖ ≤
@@ -62,7 +62,7 @@ theorem scalarEig_jet_le
     (chartTargetEuclid_isOpen (I := I) (M := M) α) hy_open]
   calc
     ‖iteratedFDeriv ℝ m
-        (rawPullR (I := I) (M := M) g 0 0
+        (tensorComponentEuclideanChart (I := I) (M := M) g 0 0
           (eigenvectorSmooth (I := I) (M := M) g 0 0 i) α
           Fin.elim0 Fin.elim0) y‖
         ≤ Cjet *

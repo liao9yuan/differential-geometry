@@ -107,7 +107,7 @@ theorem ricci1Split (g₀ g₁ : SmoothRiemannianMetric I M) :
             (rsDomDomCongrSection (I := I) (M := M) g₀ 3 4 kOutPerm1203
               (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120) := by
   rw [kernelField_eq_neg_arm_combination (I := I) (M := M) g₀ g₁]
-  simp only [permAppEqRs]
+  simp only [permAppEqRs, kInPerm102, kInPerm120]
 
 omit [BoundarylessManifold I M] in
 private lemma icgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
@@ -191,7 +191,7 @@ theorem insertAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   rw [rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 4
     (slotExtend (I := I) (M := M) g₀ 2 3
       (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
-    coreInPerm201 l x]
+    connDiffContrInsertionReindexPerm l x]
   refine le_trans (rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 2 3
     (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)) l x) ?_
   refine le_trans (mul_le_mul_of_nonneg_left

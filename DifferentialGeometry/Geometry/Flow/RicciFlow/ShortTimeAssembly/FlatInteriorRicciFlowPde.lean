@@ -10,12 +10,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-!
-# Interior Ricci-flow PDE via the flat variational route
-
-Assembles, on the interior of the flow domain, the Ricci-flow PDE for the conjugated metric family
-from the flat per-slot variational data of the conjugating diffeomorphism flow.
--/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -44,7 +38,8 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem flat_assembly_interior
+omit [CompactSpace M] [I.Boundaryless] in
+theorem pullbackMetric_hasDerivWithinAt_ricciFlow_interior
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

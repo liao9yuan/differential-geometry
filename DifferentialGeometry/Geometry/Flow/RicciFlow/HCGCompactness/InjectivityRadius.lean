@@ -3,17 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Injectivity-Radius Inputs
 
-This file contains theorem-facing injectivity-radius predicates for the
-Hamilton--Cheeger--Gromov compactness interface. The pointwise predicate uses
-the complete intrinsic framed exponential. The chart-fixed injectivity radius
-remains in `Geometry.Comparison.InjectivityRadius` only as a compatibility API.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,6 +30,15 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
+
+
+
+
+
+
+
+
+
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -177,6 +183,7 @@ theorem HasInjRadiusAt.mono
 
 /-- Uniform injectivity-radius lower bound at the basepoints of a pointed
 metric sequence. -/
+
 structure BaseInjBound
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   ρ : Real
@@ -185,7 +192,7 @@ structure BaseInjBound
 
 namespace BaseInjBound
 
-/-- Reindex a basepoint injectivity-radius lower bound along a subsequence. -/
+
 def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : BaseInjBound (I := I) X) (f : Nat -> Nat) :
     BaseInjBound (I := I) (X.subseq f) where
@@ -197,7 +204,7 @@ def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 end BaseInjBound
 
-/-- Time-zero basepoint injectivity-radius input for a pointed flow sequence. -/
+
 abbrev FlowBaseInjBound
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) :=
   BaseInjBound (I := I) (X.atZero (I := I))

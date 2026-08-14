@@ -1,16 +1,14 @@
 import DifferentialGeometry.Geometry.Coordinates.Tensor
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Formula
 
-/-!
-# `(1,2)` mixed tensor coordinate formula
 
-Specialization of the generic mixed tensor coordinate formula to
-Christoffel-type `(1,2)` tensors.
--/
+
+
+
+
+
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,18 +19,16 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-- Coordinate-frame formula for the covariant derivative of a `(1,2)` mixed
-tensor:
-`(∇_X A)^k_ij = X(A^k_ij) + Γ^k_m A^m_ij - Γ^m_i A^k_mj - Γ^m_j A^k_im`. -/
+
+
+
 theorem nablaRS_coordFrame_1_2_of_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

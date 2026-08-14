@@ -5,35 +5,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.WeakPartial.Chose
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.AtlasIndependence
 
-/-!
-# Uniform-in-`S` chart-Sobolev `W^{1,2}` bound for tensor chart-frame scalar
-components from the H¹ norm
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an extraction
-chart `α : M`, and the chart-frame scalar component
-`tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`, this file
-delivers a uniform-in-`(S, Idx, Jdx)` bound on the chart-based Sobolev
-`W^{1,2}` norm of the component, conditional on a uniform-in-`(S, Idx, Jdx)`
-`L²` gradient-norm bound for the same component.
-
-The chart-based norm `wkpNormChart g 1 2 u` is a `tsum` over chart base
-points `β : M`. Summands outside the canonical POU finset vanish because
-`(chartAtlasPOU I M β) = 0` there. Per `β` in the finset, the order-one
-Euclidean Sobolev norm splits into an `L²` piece and a sum-over-directions
-of chosen weak partials. The `L²` piece is handled by the chart-pushed
-reverse bridge in `ComponentSobolevBoundFromH1`; the partial pieces by
-the chosen-weak-partial / `fderiv chartSmoothExt` bridge combined with
-the generic Frechet envelope from `Analysis.Sobolev.EquivalenceReverse`,
-both parametric in the push chart `β`. The C_grad hypothesis enters
-through the right-hand side of the generic envelope.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -48,7 +22,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -59,15 +33,10 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Headline uniform-in-`(S, Idx, Jdx)` chart-Sobolev `W^{1,2}` bound.**
-Conditional on a uniform-in-`(S, Idx, Jdx)` `L²` bound for the manifold-
-side gradient of the chart-frame scalar component, the chart-based
-Sobolev `W^{1,2}` norm of the chart-frame scalar component is bounded by
-`ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)`, with `C` depending only on
-`(g, r, s, α, C_grad)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {C_grad : ℝ} (hC_grad_nn : 0 ≤ C_grad)
@@ -127,7 +96,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       ∀ (S : SmoothCcTensorH1 g r s)
         (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 2
             (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β
               (tensorChartComponentScalar (I := I) (M := M)
@@ -139,7 +108,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
         (I := I) (M := M) g r s α β
     obtain ⟨C_env, hC_env_nn, h_env⟩ :=
-      DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
+      Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
         (I := I) (M := M) g β (p := (2 : ℝ≥0∞)) hp_one hp_top
     have hper_k : ∀ k : Fin (Module.finrank ℝ E),
         ∀ (S : SmoothCcTensorH1 g r s)
@@ -276,13 +245,13 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       g r s S.toCcTensor α Idx Jdx with hu_def
   have h_def : wkpNormChart (I := I) (M := M) g 1 2 u =
       ∑' β : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u)
           (chartTargetEuclid (I := I) (M := M) β) := rfl
   rw [h_def]
   have h_outside_zero : ∀ β : M, β ∉ finS →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u)
         (chartTargetEuclid (I := I) (M := M) β) = 0 := by
@@ -298,7 +267,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u hρ_zero
   rw [tsum_eq_sum (s := finS) h_outside_zero]
   have h_per_β : ∀ β ∈ finS,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u)
         (chartTargetEuclid (I := I) (M := M) β) ≤

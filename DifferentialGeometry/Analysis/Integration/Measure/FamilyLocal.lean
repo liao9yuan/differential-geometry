@@ -4,16 +4,15 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Local first variation for moving Riemannian volume
 
-The global `FunctionRegularAt` interface used by `first_variation_of_volume`
-asks for regularity at every real time.  This file localizes that theorem at an
-interior time: a smooth time retraction globalizes a jointly smooth integrand
-from an arbitrary open time set without changing its germ at the base time.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,15 +22,15 @@ open scoped Manifold Topology ContDiff ENNReal Matrix BigOperators
 namespace DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-! ## Smooth time retraction -/
 
-/-- A smooth clamp centered at `t`, equal to the identity on
-`[t - δ, t + δ]` and constant outside a slightly larger interval. -/
+
+
+
 private def timeRetract (t δ w s : Real) : Real :=
   t + (s - t) * (1 - Real.smoothTransition ((s - t - δ) / w)) *
     (1 - Real.smoothTransition ((t - δ - s) / w))
@@ -119,8 +118,8 @@ private lemma timeRetract_abs_le (t δ w : Real) (hδ : 0 ≤ δ) (hw : 0 < w)
     rw [hzero, abs_zero]
     linarith
 
-/-- An interior point of an open real set admits a globally smooth time
-retraction into that set which is the identity in a neighborhood of the point. -/
+
+
 theorem exists_time_retract {U : Set Real} (hU : IsOpen U) {t : Real}
     (ht : t ∈ U) :
     ∃ ρ : Real → Real, ContDiff Real ∞ ρ ∧
@@ -145,10 +144,10 @@ theorem exists_time_retract {U : Set Real} (hU : IsOpen U) {t : Real}
     filter_upwards [hmem] with s hs
     exact timeRetract_eq_self t η η hη hs
 
-/-! ## Localized first variation -/
 
-/-- First variation of moving Riemannian volume from joint smoothness on an
-open time neighborhood of the base time. -/
+
+
+
 theorem first_var_local
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : Real → SmoothRiemannianMetric I M}
@@ -218,8 +217,8 @@ theorem first_var_local
     simp only [f', hρt]
   exact (hvariation.congr_deriv hvalue).congr_of_eventuallyEq hmass_eq.symm
 
-/-- First variation of moving Riemannian volume from joint smoothness of both
-the metric chart components and the integrand on an open time neighborhood. -/
+
+
 theorem first_var_joint
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : Real → SmoothRiemannianMetric I M}

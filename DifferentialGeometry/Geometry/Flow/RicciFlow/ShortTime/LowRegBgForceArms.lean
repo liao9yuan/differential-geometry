@@ -133,7 +133,7 @@ theorem galArmIdBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     _ = _ :=
         congrArg (smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ))
           (hsplit _
-            (DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm
+            (ccTensorBilin_symmS_symm
               (I := I) (M := M) g₀
               (galCoreRep (I := I) (M := M) g₀ R S c))
             hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR.le hreal S c)
@@ -163,7 +163,7 @@ theorem galArmCapBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     mul_nonneg hK (div_nonneg hδ0 (sq_nonneg _)), ?_⟩
   intro S c x
   exact (hsplit _
-    (DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm (I := I) (M := M)
+    (ccTensorBilin_symmS_symm (I := I) (M := M)
       g₀ (galCoreRep (I := I) (M := M) g₀ R S c))
     hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR hreal S c)
       (lowregFibZero (I := I) (M := M) g₀ hR hreal)).2 x

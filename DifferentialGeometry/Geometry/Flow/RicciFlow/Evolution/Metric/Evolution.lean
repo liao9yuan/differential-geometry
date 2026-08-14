@@ -1,18 +1,15 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Covariant
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
 
-/-!
-# Ricci-Flow Metric Evolution in a Fixed Frame
 
-This file translates the first Section 6.2 metric calculation into the realized
-interval API.  The core geometric input is the Ricci-flow equation
-`partial_t g = -2 Ric`; the inverse-metric result is obtained by differentiating
-the frame identity `g^{-1} g = I`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,7 +24,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -35,12 +32,13 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-- Inverse-metric evolution from the differentiated identity `g^{-1}g = I`.
 
-The proof uses the Ricci-flow metric derivative, the product rule on the
-left-inverse identity, uniqueness of the interval derivative, and the two-sided
-inverse identity to solve for the component derivative.  Inverse-metric
-symmetry is derived from the two-sided inverse identities. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -85,11 +83,12 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
       j
   exact (hdt t x hx i j).congr_deriv hsolve
 
-/-- Metric-frame regularity produces the inverse-metric evolution equation.
 
-The computation is the existing inverse-identity differentiation theorem; this
-wrapper keeps the future matrix-inverse smoothness work attached to the metric
-regularity package rather than to the Christoffel evolution layer. -/
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -109,8 +108,8 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     hreg.nondegenerateGram
     hreg.uniqueTimeDerivatives
 
-/-- The canonical coordinate inverse is locally the inverse of the coordinate
-frame Gram matrix on the coordinate-frame domain. -/
+
+
 theorem coordInvLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -127,11 +126,11 @@ theorem coordInvLocal
   · simpa [coordInv, metricCompInFrame,
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).2
 
-/-- Canonical coordinate inverse-metric evolution for a Ricci-flow solution.
 
-This differentiates the actual coordinate inverse of the frame Gram operator,
-so it does not require a supplied `gInvDt` field or interval derivative
-uniqueness.  The theorem is local on the coordinate-frame set. -/
+
+
+
+
 theorem coordInvEvol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -144,7 +143,8 @@ theorem coordInvEvol
   classical
   intro t x hx i j
   let frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0
-  let gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E) :=
+  let gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+    (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E) :=
     coordInv (I := I) S x0
   let G : Real -> ((DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real]
       (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real)) :=
@@ -173,11 +173,13 @@ theorem coordInvEvol
         (by
           intro a b
           simpa [gInv, coordInv, frame, metricCompInFrame,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).1)
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+              (hbasis a b).1)
         (by
           intro a b
           simpa [gInv, coordInv, frame, metricCompInFrame,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+              (hbasis a b).2)
   have hInv :
       HasDerivWithinAt
         (fun s : Real => ContinuousLinearMap.inverse (G s))
@@ -193,45 +195,53 @@ theorem coordInvEvol
       HasDerivWithinAt
         (fun s : Real =>
           ContinuousLinearMap.inverse (G s)
-            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real)))
+            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+              Real) j (1 : Real)))
         (dInv
-          (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real)))
+          (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real)
+            j (1 : Real)))
         D.carrier
         (t : Real) := by
     simpa using
       hInv.clm_apply
         (hasDerivWithinAt_const
           (x := (t : Real)) (s := D.carrier)
-          (c := Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real)))
+          (c := Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+            Real) j (1 : Real)))
   have hProj :
       HasDerivWithinAt
         (fun s : Real =>
           (ContinuousLinearMap.proj i :
             (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
             (ContinuousLinearMap.inverse (G s)
-              (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+              (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+                Real) j (1 : Real))))
         ((ContinuousLinearMap.proj i :
             (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
           (dInv
-            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+              Real) j (1 : Real))))
         D.carrier
         (t : Real) := by
     simpa using
       (hasDerivWithinAt_const
         (x := (t : Real)) (s := D.carrier)
         (c := (ContinuousLinearMap.proj i :
-          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real))).clm_apply hApp
+          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real]
+            Real))).clm_apply hApp
   have hsymm :
       forall a b : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E,
         gInv (t : Real) x a b = gInv (t : Real) x b a := by
     intro a b
     simpa [gInv, coordInv] using
-      DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric (t : Real)) x0 hx a b
+      DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric (t : Real))
+        x0 hx a b
   have hDerivEq :
       (ContinuousLinearMap.proj i :
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
           (dInv
-            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))) =
+            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+              Real) j (1 : Real))) =
         inverseMetricEvolutionRHSInFrame
           (I := I) S gInv frame (t : Real) x i j := by
     have hEq := coordInvCLM_eq (I := I) S x0 hx (t : Real)
@@ -252,7 +262,8 @@ theorem coordInvEvol
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) =>
         (ContinuousLinearMap.proj i :
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
-          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+            Real) j (1 : Real))))
       hEq |>.symm
   · have hEq := coordInvCLM_eq (I := I) S x0 hx (t : Real)
     simpa [G, gInv, frame, sum_mul_pi_single] using congrArg
@@ -260,11 +271,13 @@ theorem coordInvEvol
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) =>
         (ContinuousLinearMap.proj i :
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
-          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+            Real) j (1 : Real))))
       hEq |>.symm
 
-/-- LaTeX Lemma 6.1 in fixed-frame component form:
-`partial_t g^{ij} = 2 Ric^{ij}`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem evol_inverse_metric_inFrame
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

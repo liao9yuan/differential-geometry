@@ -29,7 +29,7 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -40,7 +40,7 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 private lemma real_inner_mul (a b : ℝ) : inner ℝ a b = b * a := by
   simp [real_inner_eq_re_inner, RCLike.inner_apply]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [Fintype ι] [DecidableEq ι]
   [T2Space M] [SigmaCompactSpace M] in
@@ -83,9 +83,11 @@ def perpCoeff (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
   (EuclideanSpace.equiv ι ℝ).symm
     (fun i => g.inner (γ t) (F i t) (Y t))
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [Fintype ι] [DecidableEq ι] in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 @[simp]
 theorem perpCoeff_apply
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
@@ -94,7 +96,7 @@ theorem perpCoeff_apply
     perpCoeff (I := I) g F Y t i = g.inner (γ t) (F i t) (Y t) := by
   rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [Fintype ι] [DecidableEq ι]
   [T2Space M] [SigmaCompactSpace M] in
@@ -110,7 +112,7 @@ theorem perpCoeff_zero
   simp only [perpCoeff, ContinuousLinearEquiv.apply_symm_apply, map_zero,
     Pi.zero_apply, hY]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- Frame coefficients are globally smooth when the frame and field are
@@ -146,6 +148,8 @@ def perpCurvOp (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
           (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
         (F i t))).toContinuousLinearMap
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 @[simp]
 theorem perpCurvOp_apply
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -161,11 +165,11 @@ theorem perpCurvOp_apply
         (F i t) * y j := by
   rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
+-- Elaborating the geometric instance chain requires the larger synthesis budget.
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option maxHeartbeats 1000000 in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The coefficient-space curvature operator is smooth along a smooth curve
 and a smooth finite frame. -/
 theorem perpCurv_smooth
@@ -271,7 +275,7 @@ theorem perpCurv_smooth
   simp only [perpCurvOp_apply]
   exact ContDiff.sum fun j _ => (hcoeff i j).mul contDiff_const
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- A coefficient field that vanishes at a time has zero frame lift there. -/
@@ -282,7 +286,7 @@ theorem perpLift_zero {γ : ℝ → M}
     perpFrameLift (I := I) F y t = 0 := by
   simp [perpFrameLift, hy]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- A lift through a perpendicular frame remains perpendicular. -/
@@ -295,7 +299,7 @@ theorem perpLift_perp
     g.inner (γ t) (perpFrameLift (I := I) F y t) u = 0 := by
   simp [perpFrameLift, map_sum, map_smul, hperp]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
 /-- A lift through a pointwise orthonormal frame preserves inner products. -/
@@ -312,7 +316,7 @@ theorem perpLift_inner
   rw [PiLp.inner_apply]
   simp [map_sum, map_smul, hON, mul_ite, real_inner_mul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- A pointwise orthonormal frame of the orthogonal complement expands every
 vector perpendicular to the distinguished nonzero vector. -/
@@ -412,7 +416,7 @@ theorem perpFrame_expand
     _ = ∑ i, g.inner x (F i) Z • F i :=
       Finset.sum_congr rfl fun i _ => by rw [ha i]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- A perpendicular field is recovered from its coefficients in a complete
 orthonormal perpendicular frame. -/
@@ -435,7 +439,7 @@ theorem perpLift_coeff
     perpFrame_expand (I := I) g (fun i => F i t)
       (curveVelocity (I := I) γ t) (Y t) hcard hvel hFperp hYperp hON
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- A nonzero perpendicular vector has a nonzero coefficient vector in a
 complete orthonormal perpendicular frame. -/
@@ -460,11 +464,12 @@ theorem perpCoeff_ne_zero
     hFperp hYperp hON]
   exact perpLift_zero (I := I) F (perpCoeff (I := I) g F Y) t hcoeff
 
-set_option synthInstance.maxHeartbeats 400000 in
+-- Elaborating the geometric instance chain requires the larger synthesis budget.
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option maxHeartbeats 1000000 in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- The curvature coordinates of a perpendicular field are obtained by
 applying the frame curvature operator to its frame coefficients. -/
 theorem perpCurv_coeff
@@ -527,6 +532,8 @@ theorem perpCurv_coeff
   simp only [curveVelocity]
   ring
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- Frame coefficients of a perpendicular Jacobi field satisfy the
 first-order form of the coefficient Jacobi equation. -/
 theorem perpCoeff_ode
@@ -590,6 +597,8 @@ theorem perpCoeff_ode
     simpa only [perpCoeff, L, map_neg] using hL
 
 omit [Fintype ι] [DecidableEq ι] in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- A Jacobi field along a global geodesic that vanishes at two distinct
 times is everywhere perpendicular to the geodesic velocity. -/
 theorem jacobi_perp_of_ends
@@ -724,6 +733,7 @@ theorem jacobi_perp_of_ends
     _ = 0 := ht
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Covariant differentiation becomes ordinary coefficient differentiation
 in a parallel frame. -/
 theorem perpLift_covDeriv
@@ -754,7 +764,7 @@ theorem perpLift_covDeriv
     (fun i _ => hFdiff i) (fun i _ => hpar i)]
   exact Finset.sum_congr rfl fun i _ => by rw [hderiv i]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- A finite coefficient lift is a smooth bundle field when both the
@@ -812,7 +822,9 @@ theorem perpLift_smooth
   rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
     ℝ (γ t) ht]
 
-set_option synthInstance.maxHeartbeats 400000 in
+-- Elaborating the geometric instance chain requires the larger synthesis budget.
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- The Euclidean curvature pairing is the geometric curvature pairing of
 the lifted fields. -/
 theorem perpCurv_inner
@@ -839,6 +851,8 @@ theorem perpCurv_inner
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- The frame curvature operator is self-adjoint. -/
 theorem perpCurv_symm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -861,6 +875,8 @@ theorem perpCurv_symm
   rw [← perpCurv_inner (I := I) g γ F z y t]
   exact real_inner_comm _ _
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- Pointwise identification of geometric and coefficient index integrands. -/
 theorem perpLift_integrand
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -885,6 +901,8 @@ theorem perpLift_integrand
   rw [perpLift_inner (I := I) g F (deriv y t) (deriv z t) t hON]
   rw [perpCurv_inner (I := I) g γ F (y t) (z t) t]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- Identification of the geometric index form with the abstract Euclidean
 index form in a parallel orthonormal frame. -/
 theorem perpLift_indexForm

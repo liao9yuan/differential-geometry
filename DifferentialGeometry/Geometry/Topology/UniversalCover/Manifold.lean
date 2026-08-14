@@ -12,29 +12,29 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import DifferentialGeometry.Geometry.Topology.UniversalCover.CoveringMap
 import DifferentialGeometry.Geometry.Topology.UniversalCover.CountablePi1
 
-/-!
-# Manifold structure on the universal cover
 
-Equips the universal cover `UniversalCover M` of a smooth manifold `M`
-with its own smooth-manifold structure, transported through the local
-homeomorphism `proj : UniversalCover M → M` (which is a covering map by
-`UniversalCover.proj_isCoveringMap`).
 
-The instances assembled here are:
 
-* `ChartedSpace H (UniversalCover M)` — charts pulled back along the
-  sheet homeomorphisms of the covering trivialisations.
-* `IsManifold I ∞ (UniversalCover M)` — pulled-back chart transitions
-  factor through the upstairs transitions in `contDiffGroupoid ∞ I`.
-* `T2Space (UniversalCover M)` — separation lifts from `M` for distinct
-  projections, and uses sheet-disjointness for distinct points over the
-  same projection.
-* `SigmaCompactSpace (UniversalCover M)` — assembled from σ-compactness
-  of the base plus countability of the fibre (which equals the
-  fundamental group, itself countable for second-countable manifolds).
-* `LocallyCompactSpace (UniversalCover M)` — local compactness pulls
-  back along the local homeomorphism `proj`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 open Set Function Filter
 open scoped Topology ContDiff Manifold
@@ -48,7 +48,7 @@ namespace Topology
 namespace UniversalCover
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,12 +57,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
-/-- **Local section of `proj` around a point of the universal cover.**
 
-`UniversalCover.proj_isCoveringMap.isLocalHomeomorph` provides, for each
-cover-point, an `OpenPartialHomeomorph` whose underlying map agrees with
-`proj` and whose source contains the cover-point. We pick one such
-homeomorphism via `Classical.choose`. -/
+
+
+
+
+
 noncomputable def localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     OpenPartialHomeomorph
@@ -70,12 +70,16 @@ noncomputable def localSection
   Classical.choose
     ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma mem_source_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     xt ∈ (localSection xt).source :=
   (Classical.choose_spec
     ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)).1
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma proj_eq_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     (proj :
@@ -84,20 +88,20 @@ lemma proj_eq_localSection
   (Classical.choose_spec
     ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)).2
 
-/-- The chart at `xt` in the universal cover: compose the chosen local
-section with the model chart `chartAt H (proj xt)`. -/
+
+
 noncomputable def coverChartAt
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     OpenPartialHomeomorph
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H :=
   (localSection xt).trans (chartAt H (proj xt))
 
-/-- **Charted-space structure on the universal cover.**
 
-For each cover-point, choose an evenly-covered open neighbourhood `U` of
-its projection lying inside the source of the chart at the projection;
-take the unique sheet through the cover-point together with its sheet
-homeomorphism, and compose with the model chart. -/
+
+
+
+
+
 noncomputable instance instChartedSpace :
     ChartedSpace H
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
@@ -116,8 +120,10 @@ noncomputable instance instChartedSpace :
     exact mem_chart_source H (proj xt)
   chart_mem_atlas xt := Set.mem_range_self xt
 
-/-- The target of `coverChartAt a` equals the model chart's target intersected
-with the preimage, under the chart's inverse, of the local section's target. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma coverChartAt_target_eq
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a) :
@@ -128,8 +134,10 @@ lemma coverChartAt_target_eq
   unfold coverChartAt
   exact OpenPartialHomeomorph.trans_target _ _
 
-/-- The source of `coverChartAt b` equals the local section's source intersected
-with the preimage, under the local section, of the model chart's source. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma coverChartAt_source_eq
     (b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt b) :
@@ -140,9 +148,11 @@ lemma coverChartAt_source_eq
   unfold coverChartAt
   exact OpenPartialHomeomorph.trans_source _ _
 
-/-- For `y` in the target of `localSection a`, applying `localSection b` to
-`(localSection a).symm y` returns `y`: both local sections coincide with `proj`,
-which is the inverse of `(localSection a).symm` on `(localSection a).target`. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma localSection_collapse
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     {y : M} (hy : y ∈ (localSection a).target) :
@@ -161,12 +171,12 @@ lemma localSection_collapse
     simpa using this
   rw [h_b_to_proj, h_proj_to_a, (localSection a).right_inv hy]
 
-/-- **The universal cover is a smooth manifold.**
 
-The pulled-back charts of `instChartedSpace` have transitions that
-agree, in a neighbourhood of every point, with the upstairs transitions
-of `M`. The latter lie in `contDiffGroupoid ∞ I`, so the same holds
-upstairs. -/
+
+
+
+
+
 instance instIsManifold :
     IsManifold I ∞
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
@@ -233,10 +243,8 @@ instance instIsManifold :
         exact localSection_collapse a b hhCaTarget
     exact StructureGroupoid.mem_of_eqOnSource _ hRestrIn hEq
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless]
-  [IsManifold I ∞ M] in
-/-- Extended chart coordinates on the universal cover agree with the
-corresponding base chart coordinates after projection. -/
+omit [FiniteDimensional ℝ E] [I.Boundaryless]
+  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma extChartAt_proj_eq
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
@@ -252,22 +260,9 @@ lemma extChartAt_proj_eq
     congrArg (fun f => f x) (proj_eq_localSection a)
   rw [h.symm]
 
-/-- **The projection `proj : UniversalCover M → M` is smooth.**
-
-On the source of the chart `coverChartAt xt` (which equals
-`chartAt H xt` for the universal cover), `proj` agrees with the
-composition `(chartAt H (proj xt)).symm ∘ (coverChartAt xt)`: indeed,
-`(coverChartAt xt) z = (chartAt H (proj xt)) (proj z)` by definition of
-`coverChartAt` and `proj_eq_localSection`, and the source condition
-guarantees `proj z ∈ (chartAt H (proj xt)).source` so we can apply the
-chart's left inverse.
-
-Both factors of this composition are smooth on their respective
-domains (atlas members and their inverses are smooth), and the image of
-`(coverChartAt xt).source` under `coverChartAt xt` lies in
-`(chartAt H (proj xt)).target`. Hence `proj` is smooth on a
-neighbourhood of every point, which by locality gives global
-smoothness. -/
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [ConnectedSpace M] in
+/-- **The projection `proj : UniversalCover M → M` is smooth.** -/
 theorem proj_contMDiff :
     ContMDiff I I ∞
       (proj :
@@ -341,12 +336,12 @@ theorem proj_contMDiff :
   intro z hz
   exact (hcongr z hz).symm
 
-/-- **The universal cover is Hausdorff.**
 
-Two distinct cover-points either project to distinct points (separate
-their projections in `M` and pull back the disjoint opens through
-`proj`) or to the same point (use sheet-disjointness from the covering
-trivialisation around that projection). -/
+
+
+
+
+
 instance instT2Space :
     T2Space
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
@@ -369,10 +364,7 @@ instance instT2Space :
     rw [Set.disjoint_iff] at hUVdisj ⊢
     rintro z ⟨hzU, hzV⟩
     exact hUVdisj ⟨hzU, hzV⟩
-
-/-- **Countability of the polygonal-loop representatives.**
-
-Auxiliary intermediate step for `fundamentalGroup_countable_of_secondCountable`.
+/-- Auxiliary intermediate step for `fundamentalGroup_countable_of_secondCountable`.
 On a second-countable, connected, locally path-connected, semi-locally
 simply connected space, the homotopy classes of loops at `x` are in
 surjective image of a countable indexing set. Concretely, one fixes a
@@ -396,20 +388,10 @@ theorem fundamentalGroup_isCountablyGenerated_aux
       Function.Surjective f :=
   fundamentalGroup_countable_surjection_of_nullHomotopic_basis
     X x B hBopen hBpc hBnull hBbasis
-
-/-- **The fundamental group is countable for a second-countable space with
-a good countable path-connected basis.**
-
-For a second-countable, connected, locally path-connected, semi-locally
+/-- For a second-countable, connected, locally path-connected, semi-locally
 simply connected space `X`, given a countable family `B : ℕ → Set X` that is
 a topological basis of open, path-connected sets whose ambient loops are
-null-homotopic (`hBnull`), `FundamentalGroup X x` is `Countable`.
-
-The proof reduces to `fundamentalGroup_isCountablyGenerated_aux`, which
-produces a countable indexing set surjecting onto `FundamentalGroup X x`
-(every loop is homotopic to a polygonal loop along countably many basis
-edges); countability of the group then follows from surjectivity. The
-combinatorial polygonal-enumeration content lives in that auxiliary lemma. -/
+null-homotopic (`hBnull`), `FundamentalGroup X x` is `Countable`. -/
 theorem fundamentalGroup_countable_of_secondCountable
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X]
@@ -491,16 +473,16 @@ theorem fibre_countable
     h_pi1_countable
   exact Countable.of_equiv _ (e_fibre.trans e_pathTrans).symm
 
-/-- **σ-compactness from σ-compact base and countable fibre.**
 
-For a covering map `p : E → X` with `[SigmaCompactSpace X]` and countable
-fibres, the total space `E` is σ-compact.
 
-Proof outline: Decompose `Set.univ` in `E` as the disjoint union over
-`x : X` of fibres `p⁻¹{x}`. Use the σ-compact cover `Kn` of `X` and
-finite covers by evenly-covered opens. Each preimage of a compact slice
-splits into a countable union of sheets (homeomorphic copies of the
-slice), giving σ-compactness fibre-by-fibre. -/
+
+
+
+
+
+
+
+
 theorem sigmaCompact_from_countable_fibre
     {E X : Type*} [TopologicalSpace E] [TopologicalSpace X]
     [SigmaCompactSpace X] [T2Space X]
@@ -647,30 +629,30 @@ theorem sigmaCompact_from_countable_fibre
   exact isSigmaCompact_iUnion_of_isCompact _ hgS_compact
 
 variable [SecondCountableTopology M] [Nonempty M]
-
-/-- **The universal cover is σ-compact.**
-
-Combines `UniversalCover.proj_isCoveringMap`, `fibre_countable`, and
+/-- Combines `UniversalCover.proj_isCoveringMap`, `fibre_countable`, and
 `sigmaCompact_from_countable_fibre`. -/
 instance instSigmaCompactSpace :
     SigmaCompactSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
   sigmaCompact_from_countable_fibre UniversalCover.proj_isCoveringMap fibre_countable
 
-/-- A finite-dimensional smooth manifold modelled on `ℝ` is locally
-compact (inherited from its model space). Provided here as a `theorem`
-because the model `E` and `I` are not derivable from `M` alone. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [LocPathConnectedSpace M] [SemilocallySimplyConnectedSpace M] [Inhabited M]
+    [SecondCountableTopology M] [Nonempty M] in
 theorem locallyCompactSpaceBase (I : ModelWithCorners ℝ E H) :
     LocallyCompactSpace M :=
   Manifold.locallyCompact_of_finiteDimensional I
 
-/-- **The universal cover is locally compact.**
 
-Local compactness pulls back along the local homeomorphism `proj`
-provided by `UniversalCover.proj_isCoveringMap`. The base manifold's own
-local compactness is assumed as a class hypothesis here; downstream
-instances can supply it via `locallyCompactSpaceBase` (or, equivalently,
-`Manifold.locallyCompact_of_finiteDimensional`). -/
+
+
+
+
+
+
 instance instLocallyCompactSpace [LocallyCompactSpace M] :
     LocallyCompactSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by

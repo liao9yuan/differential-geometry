@@ -143,7 +143,8 @@ omit [NeZero (Module.finrank ℝ E)] in
 /-- The two-sided package is stronger: `GenJointGram` implies `GenJointGramOn`.  Hence every
 consumer of the `Within` tower below can also be fed by the settled producers of
 `RicciDifferenceMeanValue.lean` (`genGram_of_family`, …). -/
-theorem genJointGramOn_of_gen {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S) :
+theorem genJointGramOn_of_gen {S : Set ℝ}
+    (hG : ChartGramFamilyJointSmoothNondegenerate (I := I) gfam α S) :
     GenJointGramOn (I := I) gfam α S := by
   refine ⟨fun i j _ _ hs hy => (hG.1 i j hs hy).contDiffWithinAt, ?_⟩
   intro s₀ hs x hx

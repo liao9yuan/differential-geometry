@@ -2,14 +2,13 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvari
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Bridge between realized and divergence-form scalar Laplacians
 
-This file identifies the connection-trace divergence for the canonical
-Levi-Civita connection with the Voss--Weyl divergence used by `Δ_g`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +22,7 @@ open Tensor0SBundle
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -32,8 +31,8 @@ variable [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
 variable [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The algebraic trace divergence of the canonical Levi-Civita connection is
-the Voss--Weyl divergence of a smooth tangent field. -/
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem divergence_levi_eq
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -97,8 +96,8 @@ theorem divergence_levi_eq
   norm_num
 
 omit [NeZero (Module.finrank Real E)] in
-/-- For the canonical Levi-Civita connection, the realized scalar Laplacian is
-the divergence-form Laplace--Beltrami operator `Δ_g`. -/
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem laplacian_levi_eq
     (g : SmoothRiemannianMetric I M) {f : M → Real}
     (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
@@ -108,8 +107,8 @@ theorem laplacian_levi_eq
   simpa only [laplacian_eq, grad_g_apply, Δ_g_def] using hdiv
 
 omit [NeZero (Module.finrank Real E)] in
-/-- A realized family whose stored connection is canonical computes the same
-scalar Laplacian as `Δ_g` at that time. -/
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem laplacianAt_eq_delta
     (G : RealizedMetricFamily (I := I) (M := M) Real) (t : Real)
     {f : M → Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)

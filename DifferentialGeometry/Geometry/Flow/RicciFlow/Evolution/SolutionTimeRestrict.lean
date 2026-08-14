@@ -1,12 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.LocalFrameInverse
 
-/-!
-# Restricting a Ricci-flow solution to a smaller time interval
 
-This module reindexes a metric-only `SolutionOn` by a smaller real-time
-interval and transports `IsSolutionOn` when the new carrier and regular set are
-contained in the old ones.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -15,7 +15,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Set
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -24,8 +24,8 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 namespace SolutionOn
 
-/-- Reindex a solution candidate by another time interval without changing its
-underlying all-real metric family. -/
+
+
 def timeRestrict
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -40,6 +40,7 @@ omit [FiniteDimensional Real E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space
     (S.timeRestrict D').base = S.base := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeRestrict_metric
     {D D' : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -48,8 +49,9 @@ omit [FiniteDimensional Real E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space
 
 end SolutionOn
 
-/-- Restrict a Ricci-flow solution to a time interval whose carrier and regular
-set are contained in those of the original interval. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem isSoln_timeRestrict
     {D D' : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -110,8 +112,9 @@ theorem isSoln_timeRestrict
     simpa [ricciNorm, SolutionOn.timeRestrict, SolutionOn.family, SolutionOn.ricci] using
       hS.ricciNormGrad t (hcar ht) x
 
-/-- Restrict a half-open solution to a later half-open tail.  The new carrier
-lies entirely in the original regular set. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem isSoln_tailRestrict
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -127,10 +130,11 @@ theorem isSoln_tailRestrict
   · intro t ht
     exact ⟨lt_trans hαt₀ ht.1, ht.2⟩
 
-/-- On a later half-open tail, every local frame has carrier-level metric time
-regularity.  The new closed-left carrier lies in the original open regular set,
-so the canonical local-frame inverse and its time derivative require no
-endpoint regularity black box. -/
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem tailFrameTimeReg
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -159,14 +163,17 @@ theorem tailFrameTimeReg
   · intro x _hx i j
     have hsmooth := hS.smoothMetric.coeff x (frame i x) (frame j x)
     have hsub :
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega ht₀ω).carrier ⊆
-          (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω).regular := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega ht₀ω).carrier
+          ⊆
+          (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega
+            hαω).regular := by
       intro t ht
       exact ⟨lt_of_lt_of_le hαt₀ ht.1, ht.2⟩
     simpa [metricCompInFrame, SolutionOn.timeRestrict, SolutionOn.family] using
       hsmooth.mono hsub
   · intro t
     exact (uniqueDiffOn_Ico t₀ omega).uniqueDiffWithinAt
-      ((DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega ht₀ω).regular_subset t.2)
+      ((DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega
+        ht₀ω).regular_subset t.2)
 
 end DifferentialGeometry.PDE.RicciFlow

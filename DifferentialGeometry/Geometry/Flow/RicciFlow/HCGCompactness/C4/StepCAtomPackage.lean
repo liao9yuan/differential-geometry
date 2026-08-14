@@ -1,16 +1,15 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomJoin
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
-/-!
-# Finite Step-C atom and weight limit package
 
-This file consumes the common live-slot metric/transition refinement, discards
-one further finite prefix on which the source-ball and strict-inner cover data
-hold simultaneously, and packages the actual finite atom and normalized-weight
-families as Pi-valued maps converging in `C^infty` on compact subsets.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,6 +28,10 @@ variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
+
+
+
 
 /-- Packages per-slot distance-atom limits into the finite Pi-valued atom and
 normalized-weight limits.  The only geometric normalization premise is the
@@ -238,6 +241,7 @@ theorem atomWeightOn_of_atoms
 
 /-- Compatibility form of `atomWeightOn_of_atoms` for the selected legacy
 framed normal charts. -/
+
 theorem atomWeight_of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
@@ -254,7 +258,7 @@ theorem atomWeight_of_atoms
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma))
     (aInf : Fin (pb.A r) → E → Real)
     (hdead : ∀ gamma : Fin (pb.A r),
@@ -285,12 +289,111 @@ theorem atomWeight_of_atoms
     (∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (weight k) U) ∧
     ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
     MapCInfConvOnCompacts U weight weightInf := by
-  exact atomWeightOn_of_atoms (I := I) (legacyChartFamily (I := I) X)
-    hD P L hre pb r hr hgp beta U hU hcoverU aInf hdead hatom
-      hatomSmooth hatomInfSmooth
+  classical
+  let atom : Nat → Fin (pb.A r) → E → Real := fun k gamma =>
+    seqAtomChart (I := I) hd hD P L pb r beta gamma k
+  let atomPi : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma => atom k gamma z
+  let atomInf : E → (Fin (pb.A r) → Real) := fun z gamma => aInf gamma z
+  have hatomPi : MapCInfConvOnCompacts U atomPi atomInf :=
+    mapCInfConv_pi (E' := E) (Q := Real) hU hatom
+      (fun gamma k => hatomSmooth k gamma) hatomInfSmooth
+  have hatomPiSmooth (k : Nat) :
+      ContDiffOn Real (∞ : WithTop ℕ∞) (atomPi k) U :=
+    contDiffOn_pi.mpr fun gamma => hatomSmooth k gamma
+  have hatomInfPiSmooth :
+      ContDiffOn Real (∞ : WithTop ℕ∞) atomInf U :=
+    contDiffOn_pi.mpr hatomInfSmooth
+  let i0 := baseIndex hd hre pb hr
+  have hcover (k : Nat) (z : E) (hz : z ∈ U) :
+      ∃ gamma, atom k gamma z = 1 := by
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    obtain ⟨gamma, hgamma⟩ := Set.mem_iUnion.mp (hcoverU k hz)
+    refine ⟨gamma, ?_⟩
+    change seqAtom hd hD P L pb r k gamma
+      (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z) = 1
+    exact seqAtom_one hd hD P L pb r k (hgp k) gamma hgamma
+  have hbase (k : Nat) (z : E) (_hz : z ∈ U) :
+      atom k i0 z ∈ Set.Icc (0 : Real) 1 := by
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    change seqAtom hd hD P L pb r k i0
+      (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z) ∈
+        Set.Icc (0 : Real) 1
+    exact seqAtom_Icc hd hD P L pb r k i0 _
+  have hnn (k : Nat) (z : E) (_hz : z ∈ U) :
+      ∀ gamma, 0 ≤ atom k gamma z := by
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    intro gamma
+    change 0 ≤ seqAtom hd hD P L pb r k gamma
+      (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+    exact seqAtom_nonneg hd hD P L pb r k gamma _
+  have hweight (gamma : Fin (pb.A r)) :=
+    cutWeights_conv hU hatom (fun k gamma => hatomSmooth k gamma)
+      hatomInfSmooth i0 hbase hnn hcover gamma
+  have hraw (gamma : Fin (pb.A r)) :=
+    cutRaw_conv hU hatom (fun k gamma => hatomSmooth k gamma)
+      hatomInfSmooth i0 gamma
+  have hrawc (k : Nat) (gamma : Fin (pb.A r)) :=
+    cutRaw_contDiffOn (fun q => hatomSmooth k q) i0 gamma
+  have hrawcinf (gamma : Fin (pb.A r)) :=
+    cutRaw_contDiffOn hatomInfSmooth i0 gamma
+  have hden (k : Nat) (z : E) (hz : z ∈ U) :
+      (∑ gamma, cutRaw (atom k i0) (atom k) i0 gamma z) ≠ 0 := by
+    have hh := cutRaw_sum_half (hbase k z hz) (hnn k z hz) (hcover k z hz)
+    linarith
+  have hdenInf (z : E) (hz : z ∈ U) :
+      (∑ gamma, cutRaw (aInf i0) aInf i0 gamma z) ≠ 0 := by
+    have hsum : Filter.Tendsto
+        (fun k => ∑ gamma, cutRaw (atom k i0) (atom k) i0 gamma z)
+        Filter.atTop (nhds (∑ gamma, cutRaw (aInf i0) aInf i0 gamma z)) :=
+      tendsto_finset_sum Finset.univ fun gamma _ => tendsto_of_cInf (hraw gamma) hz
+    have hh : (1 / 2 : Real) ≤ ∑ gamma, cutRaw (aInf i0) aInf i0 gamma z :=
+      ge_of_tendsto hsum (Filter.Eventually.of_forall fun k =>
+        cutRaw_sum_half (hbase k z hz) (hnn k z hz) (hcover k z hz))
+    linarith
+  have hweightSmooth (k : Nat) (gamma : Fin (pb.A r)) :
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (fun z => rawWeights (cutRaw (atom k i0) (atom k) i0) z gamma) U := by
+    simpa only [rawWeights, normWeights] using
+      normWeights_contDiffOn (fun q => hrawc k q) (fun z hz => hden k z hz) gamma
+  have hweightInfSmooth (gamma : Fin (pb.A r)) :
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (fun z => rawWeights (cutRaw (aInf i0) aInf i0) z gamma) U := by
+    simpa only [rawWeights, normWeights] using
+      normWeights_contDiffOn hrawcinf hdenInf gamma
+  let weight : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma =>
+    rawWeights (cutRaw (atom k i0) (atom k) i0) z gamma
+  let weightInf : E → (Fin (pb.A r) → Real) := fun z gamma =>
+    rawWeights (cutRaw (aInf i0) aInf i0) z gamma
+  have hweightPi : MapCInfConvOnCompacts U weight weightInf :=
+    mapCInfConv_pi (E' := E) (Q := Real) hU hweight
+      (fun gamma k => hweightSmooth k gamma) hweightInfSmooth
+  have hweightPiSmooth (k : Nat) :
+      ContDiffOn Real (∞ : WithTop ℕ∞) (weight k) U :=
+    contDiffOn_pi.mpr fun gamma => hweightSmooth k gamma
+  have hweightInfPiSmooth :
+      ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U :=
+    contDiffOn_pi.mpr hweightInfSmooth
+  dsimp only
+  exact ⟨hdead, hatomPiSmooth, hatomInfPiSmooth, hatomPi,
+    hweightPiSmooth, hweightInfPiSmooth, hweightPi⟩
 
-/-- Common atom/weight packaging after the live metric-transition refinement
-has already been extracted. -/
+
+
 private theorem existsAtomWeightCore
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
@@ -307,7 +410,7 @@ private theorem existsAtomWeightCore
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric (beta k)))
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (beta k)))
     (hcoverU : ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -315,7 +418,7 @@ private theorem existsAtomWeightCore
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma))
     (hjoint :
       ∃ (psi : Nat → Nat)
@@ -373,7 +476,7 @@ private theorem existsAtomWeightCore
        letI : T2Space (TangentBundle I (X.obj (L.φ (psi0 k))).M) :=
           (X.obj (L.φ (psi0 k))).t2TangentBundle
        U ⊆ Metric.ball (0 : E)
-          (expRadiusGp (I := I) (X.obj (L.φ (psi0 k))).metric
+          (expMapC2Radius (I := I) (X.obj (L.φ (psi0 k))).metric
             (beta (psi0 k)))) ∧
       (letI : TopologicalSpace (X.obj (L.φ (psi0 k))).M :=
           (X.obj (L.φ (psi0 k))).topology
@@ -384,7 +487,7 @@ private theorem existsAtomWeightCore
        letI : T2Space (TangentBundle I (X.obj (L.φ (psi0 k))).M) :=
           (X.obj (L.φ (psi0 k))).t2TangentBundle
        Set.MapsTo
-          (fun z => framedExpDiffeo (I := I) (X.obj (L.φ (psi0 k))).metric
+          (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi0 k))).metric
             (beta (psi0 k)) z)
           U (⋃ gamma : Fin (pb.A r),
             L.innerBall hd D P pb r (psi0 k) gamma)) ∧
@@ -446,8 +549,8 @@ private theorem existsAtomWeightCore
       letI : T2Space (Xpsi.obj k).M := (Xpsi.obj k).t2
       letI : T2Space (TangentBundle I (Xpsi.obj k).M) :=
         (Xpsi.obj k).t2TangentBundle
-      framedExpDiffeo (I := I) (Xpsi.obj k).metric (betapsi k) z ∈
-        (framedChartAt (I := I) (Xpsi.obj k).metric (center gamma k)).source := by
+      expMapDiffeo (I := I) (Xpsi.obj k).metric (betapsi k) z ∈
+        (normalChartAt (I := I) (Xpsi.obj k).metric (center gamma k)).source := by
     letI : TopologicalSpace (X.obj (L.φ (psi k))).M :=
       (X.obj (L.φ (psi k))).topology
     letI : ChartedSpace H (X.obj (L.φ (psi k))).M :=
@@ -457,9 +560,9 @@ private theorem existsAtomWeightCore
     letI : T2Space (X.obj (L.φ (psi k))).M := (X.obj (L.φ (psi k))).t2
     letI : T2Space (TangentBundle I (X.obj (L.φ (psi k))).M) :=
       (X.obj (L.φ (psi k))).t2TangentBundle
-    change framedExpDiffeo (I := I) (X.obj (L.φ (psi k))).metric
+    change expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
         (beta (psi k)) z ∈
-      (framedChartAt (I := I) (X.obj (L.φ (psi k))).metric
+      (normalChartAt (I := I) (X.obj (L.φ (psi k))).metric
         (seqCenterD hd P L (psi k) (gamma.1 : Nat))).source
     simpa only [psi, Function.comp_apply] using
       (((hJ gamma).2.2.2.1 (tau k)) z hz).2
@@ -490,8 +593,7 @@ private theorem existsAtomWeightCore
   have hgpPsi (k : Nat) : Item3GpScaleAt (I := I) hd D P Lpsi pb r k := by
     exact (htailAt k).2.2
   have hatom0 :=
-    seqAtoms_conv (I := I) hd hD P Lpsi pb r hgpPsi
-      betapsi hU aInf hliveForSeq
+    seqAtoms_conv (I := I) hd hD P Lpsi pb r hgpPsi betapsi hU aInf hliveForSeq
   have hatom : ∀ gamma : Fin (pb.A r),
       MapCInfConvOnCompacts U
         (fun k => seqAtomChart (I := I) hd hD P Lpsi pb r betapsi gamma k)
@@ -513,7 +615,7 @@ private theorem existsAtomWeightCore
       letI : T2Space (TangentBundle I (X.obj (Lpsi.φ k)).M) :=
         (X.obj (Lpsi.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (Lpsi.φ k)).metric (betapsi k)) := by
+        (expMapC2Radius (I := I) (X.obj (Lpsi.φ k)).metric (betapsi k)) := by
     letI : TopologicalSpace (X.obj (L.φ (psi k))).M :=
       (X.obj (L.φ (psi k))).topology
     letI : ChartedSpace H (X.obj (L.φ (psi k))).M :=
@@ -523,7 +625,7 @@ private theorem existsAtomWeightCore
     letI : T2Space (TangentBundle I (X.obj (L.φ (psi k))).M) :=
       (X.obj (L.φ (psi k))).t2TangentBundle
     change U ⊆ Metric.ball (0 : E)
-      (expRadiusGp (I := I) (X.obj (L.φ (psi k))).metric (beta (psi k)))
+      (expMapC2Radius (I := I) (X.obj (L.φ (psi k))).metric (beta (psi k)))
     exact (htailAt k).1
   have hatomSmooth (k : Nat) (gamma : Fin (pb.A r)) :
       ContDiffOn Real (∞ : WithTop ℕ∞)
@@ -551,7 +653,7 @@ private theorem existsAtomWeightCore
       letI : T2Space (TangentBundle I (X.obj (Lpsi.φ k)).M) :=
         (X.obj (Lpsi.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (Lpsi.φ k)).metric (betapsi k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (Lpsi.φ k)).metric (betapsi k) z)
         U (⋃ gamma : Fin (pb.A r), Lpsi.innerBall hd D P pb r k gamma) := by
     letI : TopologicalSpace (X.obj (L.φ (psi k))).M :=
       (X.obj (L.φ (psi k))).topology
@@ -562,7 +664,7 @@ private theorem existsAtomWeightCore
     letI : T2Space (TangentBundle I (X.obj (L.φ (psi k))).M) :=
       (X.obj (L.φ (psi k))).t2TangentBundle
     intro z hz
-    have hm : framedExpDiffeo (I := I) (X.obj (L.φ (psi k))).metric
+    have hm : expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
           (beta (psi k)) z ∈
         ⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r (psi k) gamma := by
       simpa only [psi, Function.comp_apply] using (htailAt k).2.1 hz
@@ -573,8 +675,8 @@ private theorem existsAtomWeightCore
   exact atomWeight_of_atoms (I := I) hD P Lpsi hre pb r hr hgpPsi betapsi U hU
     hcoverPsi aInf hdead hatom hatomSmooth hatomInfSmooth
 
-/-- The H6 metric-jet producer supplies finite Step-C atom and normalized-weight
-limits on a chart domain whose image lies in the strict inner-ball cover. -/
+
+
 theorem existsAtomWeightH6_of_innerCover
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -597,7 +699,7 @@ theorem existsAtomWeightH6_of_innerCover
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric (beta k)))
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (beta k)))
     (hmapsJ : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -605,9 +707,11 @@ theorem existsAtomWeightH6_of_innerCover
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z) U
-        (framedExpMap (I := I) (X.obj (L.φ k)).metric
-          (seqCenterD hd P L k (gamma.1 : Nat)) '' Metric.ball (0 : E) rho))
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z) U
+        ((fun v : E => (expMap (I := I) (X.obj (L.φ k)).metric
+            (seqCenterD hd P L k (gamma.1 : Nat))
+            (show TangentSpace I (seqCenterD hd P L k (gamma.1 : Nat)) from v) :
+              (X.obj (L.φ k)).M)) '' Metric.ball (0 : E) rho))
     (hVmetric : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
         (metricInput.radius (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat))))
@@ -618,7 +722,7 @@ theorem existsAtomWeightH6_of_innerCover
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric
           (seqCenterD hd P L k (gamma.1 : Nat))))
     (hcoverU : ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
@@ -627,7 +731,7 @@ theorem existsAtomWeightH6_of_innerCover
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma)) :
     ∃ (psi : Nat -> Nat) (hpsi : StrictMono psi)
         (aInf : Fin (pb.A r) -> E -> Real),
@@ -655,8 +759,8 @@ theorem existsAtomWeightH6_of_innerCover
     (existsLiveJointH6 (I := I) metricInput P L pb r rho beta U hU
       hovlJ hUmetric hUexp hmapsJ hVmetric hVexp)
 
-/-- Compatibility form of the H6 atom/weight producer for chart domains whose
-images lie in the fixed closed source ball. -/
+
+
 theorem existsAtomWeightH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -679,7 +783,7 @@ theorem existsAtomWeightH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric (beta k)))
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (beta k)))
     (hmapsJ : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -687,9 +791,11 @@ theorem existsAtomWeightH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z) U
-        (framedExpMap (I := I) (X.obj (L.φ k)).metric
-          (seqCenterD hd P L k (gamma.1 : Nat)) '' Metric.ball (0 : E) rho))
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z) U
+        ((fun v : E => (expMap (I := I) (X.obj (L.φ k)).metric
+            (seqCenterD hd P L k (gamma.1 : Nat))
+            (show TangentSpace I (seqCenterD hd P L k (gamma.1 : Nat)) from v) :
+              (X.obj (L.φ k)).M)) '' Metric.ball (0 : E) rho))
     (hVmetric : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
         (metricInput.radius (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat))))
@@ -700,7 +806,7 @@ theorem existsAtomWeightH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric
           (seqCenterD hd P L k (gamma.1 : Nat))))
     (hbetaU : ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
@@ -709,7 +815,7 @@ theorem existsAtomWeightH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U (L.hatSourceBall hd P r k)) :
     ∃ (psi : Nat -> Nat) (hpsi : StrictMono psi)
         (aInf : Fin (pb.A r) -> E -> Real),
@@ -740,7 +846,7 @@ theorem existsAtomWeightH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma) := by
     filter_upwards [hbetaU, hcover] with k hmap hinner
     letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology

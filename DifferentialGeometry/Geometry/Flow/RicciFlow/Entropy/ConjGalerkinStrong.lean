@@ -8,15 +8,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinLimit
 import Mathlib.Analysis.Normed.Operator.BanachSteinhaus
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
-/-!
-# Strong scalar conjugate-heat limit from Galerkin compactness
 
-This file identifies the all-order coefficient limit produced by
-`scalar_gal_subseq` with an actual `H¹_t H⁰_x` solution.  The proof stays in
-the intrinsic spectral scale: first pass the finite coordinate ODEs to the
-limit, then reconstruct the vector-valued Bochner integral identity and use
-the existing `timeH1` constructor.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,7 +34,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -44,7 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- The Galerkin limit, continuously extended from its compact time interval. -/
+
 noncomputable def galLimExt
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -62,7 +62,7 @@ noncomputable def galLimExt
       (S.family.metric (T : Real)) 0 0 (m : Real) :=
   Set.IccExtend hτ (galLimPath hlim m)
 
-/-- On the Galerkin interval, `galLimExt` is the original spectral limit. -/
+
 @[simp] theorem galLimExt_mem
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -81,8 +81,8 @@ noncomputable def galLimExt
   rw [galLimExt, Set.IccExtend_of_mem hτ _ ht]
   rfl
 
-/-- On the Galerkin interval, the all-order spectral limit commutes with the
-canonical inclusions between natural Sobolev orders. -/
+
+
 theorem galLimExt_inc
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -108,7 +108,7 @@ theorem galLimExt_inc
   funext i
   simp only [tensorHsInclusion_coeff_apply, galLimHs]
 
-/-- The extended Galerkin limit is continuous at every finite Sobolev order. -/
+
 theorem galLimExt_cont
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -125,7 +125,7 @@ theorem galLimExt_cont
     Continuous (galLimExt hτ hlim m) := by
   exact Continuous.Icc_extend' (galLimPath_cont hlim m)
 
-/-- The `H⁰` velocity represented by the limiting conjugate-heat equation. -/
+
 noncomputable def galLimVel
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -145,8 +145,8 @@ noncomputable def galLimVel
       (galLimExt hτ hlim 2 t) +
     scalarGalPert (I := I) (M := M) S T t (galLimExt hτ hlim 2 t)
 
-/-- The genuine all-scale conjugate-heat velocity obtained from the frozen
-Laplacian, the moving-metric Laplacian difference, and the scalar potential. -/
+
+
 noncomputable def galLimVelHs
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -178,8 +178,8 @@ noncomputable def galLimVelHs
     scalarPotHs (I := I) (M := M) q
       (conjCoeff (I := I) (M := M) S ((T : Real) - t)) m Um
 
-/-- The canonical `H^m` limiting velocity is the all-scale velocity at order
-`m + 1`, included once into order `m`. -/
+
+
 noncomputable def galLimVelCan
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -201,8 +201,8 @@ noncomputable def galLimVelCan
       (m : Real) ≤ ((m + 1 : Nat) : Real))
     (galLimVelHs hτ hlim (m + 1) t)
 
-/-- The limiting equation's `H⁰` velocity is continuous on the Galerkin
-interval. -/
+
+
 theorem galLimVel_cont
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -224,8 +224,8 @@ theorem galLimVel_cont
         (S.family.metric (T : Real))).continuous.comp_continuousOn hU).add
       (hlim.pert_cont.clm_apply hU)
 
-/-- On one positive backward-time slab, the limiting conjugate-heat velocity
-has a continuous lift to every natural Sobolev order. -/
+
+
 theorem galLimVel_lift
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -596,7 +596,7 @@ theorem galLimVel_lift
   · intro t
     simp only [w, W, galLimVelCan, q]
 
-/-- Coordinate form of the limiting velocity on the Galerkin interval. -/
+
 theorem galLimVel_coeff
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -620,12 +620,10 @@ theorem galLimVel_coeff
   simp only [galLimVel, tensorHs.add_coeff, scalarScaleLap_coeff,
     galLimExt_mem hτ hlim 2 ht, galLimHs]
 
-set_option maxHeartbeats 800000 in
-/-- Every limiting spectral coordinate satisfies the integral form of the
-conjugate-heat equation. -/
-theorem galLim_mode_ftc
-    {D : RealTimeInterval}
-    {S : SolutionOn (I := I) (M := M) D}
+
+
+private lemma conjGalSubseq_mode_rhs_bounds
+    {D : RealTimeInterval} {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
     {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
@@ -634,17 +632,25 @@ theorem galLim_mode_ftc
     {ulim : Real → TensorEigenIdx (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0 → Real}
     (hτ : 0 < tau)
-    (hlim : IsConjGalSubseq (I := I) (M := M)
-      S T tau u0 V phi ulim)
-    (t : Real) (ht : t ∈ Icc (0 : Real) tau)
-    (i : TensorEigenIdx (I := I) (M := M)
-      (S.family.metric (T : Real)) 0 0) :
-    ulim t i =
-      tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M)
-            (S.family.metric (T : Real)) 0 0)
-          (SmoothCcTensor.toL2 u0) i +
-        ∫ r in (0 : Real)..t, (galLimVel hτ.le hlim r).coeff i := by
+    (hlim : IsConjGalSubseq (I := I) (M := M) S T tau u0 V phi ulim) :
+    ∃ A K : Real, 0 ≤ A ∧ 0 ≤ K ∧
+      (∀ (N : Nat) (j : TensorEigenIdx (I := I) (M := M)
+          (S.family.metric (T : Real)) 0 0),
+        ContinuousOn (fun r =>
+          -TensorEigenIdx.lambda (I := I) (M := M) j * V N r j +
+            (scalarGalPert (I := I) (M := M) S T r
+              (scalarGalVec (I := I) (M := M) (S.family.metric (T : Real))
+                (eigenFinset (I := I) (M := M)
+                  (S.family.metric (T : Real)) 0 0 N) (V N r) 2)).coeff j)
+          (Icc (0 : Real) tau)) ∧
+      (∀ (N : Nat) (r : Real), r ∈ Icc (0 : Real) tau →
+        ∀ j : TensorEigenIdx (I := I) (M := M) (S.family.metric (T : Real)) 0 0,
+          ‖-TensorEigenIdx.lambda (I := I) (M := M) j * V N r j +
+            (scalarGalPert (I := I) (M := M) S T r
+              (scalarGalVec (I := I) (M := M) (S.family.metric (T : Real))
+                (eigenFinset (I := I) (M := M)
+                  (S.family.metric (T : Real)) 0 0 N) (V N r) 2)).coeff j‖ ≤
+            TensorEigenIdx.lambda (I := I) (M := M) j * A + K) := by
   classical
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   let Fs : Nat → Finset (TensorEigenIdx (I := I) (M := M) q 0 0) :=
@@ -655,6 +661,7 @@ theorem galLim_mode_ftc
     fun N r j =>
       -TensorEigenIdx.lambda (I := I) (M := M) j * V N r j +
         (scalarGalPert (I := I) (M := M) S T r (U N r)).coeff j
+  have h0mem : (0 : Real) ∈ Icc (0 : Real) tau := ⟨le_rfl, hτ.le⟩
   obtain ⟨B0, hB0⟩ := hlim.energy 0
   obtain ⟨B2, hB2⟩ := hlim.energy 2
   have h0mem : (0 : Real) ∈ Icc (0 : Real) tau := ⟨le_rfl, hτ.le⟩
@@ -783,6 +790,43 @@ theorem galLim_mode_ftc
             Kpert * Real.sqrt B2 :=
           add_le_add (mul_le_mul_of_nonneg_left (hcoord N r hr j) hlam)
             (hforce N r hr j)
+  exact ⟨Real.sqrt B0, Kpert * Real.sqrt B2, Real.sqrt_nonneg _,
+    mul_nonneg hKpert_nonneg (Real.sqrt_nonneg _), hRcont, hRbound⟩
+
+theorem galLim_mode_ftc
+    {D : RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {T : D.RegularTime} {tau : Real}
+    {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
+    {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    {phi : Nat → Nat}
+    {ulim : Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    (hτ : 0 < tau)
+    (hlim : IsConjGalSubseq (I := I) (M := M)
+      S T tau u0 V phi ulim)
+    (t : Real) (ht : t ∈ Icc (0 : Real) tau)
+    (i : TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0) :
+    ulim t i =
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M)
+            (S.family.metric (T : Real)) 0 0)
+          (SmoothCcTensor.toL2 u0) i +
+        ∫ r in (0 : Real)..t, (galLimVel hτ.le hlim r).coeff i := by
+  classical
+  let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
+  let Fs : Nat → Finset (TensorEigenIdx (I := I) (M := M) q 0 0) :=
+    fun N => eigenFinset (I := I) (M := M) q 0 0 N
+  let U : Nat → Real → tensorHs (I := I) (M := M) q 0 0 2 :=
+    fun N r => scalarGalVec (I := I) (M := M) q (Fs N) (V N r) 2
+  let R : Nat → Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real :=
+    fun N r j =>
+      -TensorEigenIdx.lambda (I := I) (M := M) j * V N r j +
+        (scalarGalPert (I := I) (M := M) S T r (U N r)).coeff j
+  obtain ⟨A, K, hA0, hK0, hRcont, hRbound⟩ :=
+    conjGalSubseq_mode_rhs_bounds hτ hlim
   have hsub : Ι (0 : Real) t ⊆ Icc (0 : Real) tau := by
     intro r hr
     rw [uIoc_of_le ht.1] at hr
@@ -794,16 +838,14 @@ theorem galLim_mode_ftc
     exact ((hRcont (phi n) i).mono hsub).aestronglyMeasurable measurableSet_uIoc
   have hbound : ∀ᶠ n in atTop, ∀ᵐ r ∂volume, r ∈ Ι (0 : Real) t →
       ‖R (phi n) r i‖ ≤
-        TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
-          Kpert * Real.sqrt B2 := by
+        TensorEigenIdx.lambda (I := I) (M := M) i * A + K := by
     filter_upwards with n
     filter_upwards with r
     intro hr
     exact hRbound (phi n) r (hsub hr) i
   have hbound_int : IntervalIntegrable
       (fun _ : Real =>
-        TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
-          Kpert * Real.sqrt B2) volume 0 t :=
+        TensorEigenIdx.lambda (I := I) (M := M) i * A + K) volume 0 t :=
     continuousOn_const.intervalIntegrable
   have hpoint : ∀ᵐ r ∂volume, r ∈ Ι (0 : Real) t →
       Tendsto (fun n => R (phi n) r i) atTop
@@ -838,8 +880,7 @@ theorem galLim_mode_ftc
       (𝓝 (∫ r in (0 : Real)..t, (galLimVel hτ.le hlim r).coeff i)) :=
     intervalIntegral.tendsto_integral_filter_of_dominated_convergence
       (fun _ : Real =>
-        TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
-          Kpert * Real.sqrt B2)
+        TensorEigenIdx.lambda (I := I) (M := M) i * A + K)
       hmeas hbound hbound_int hpoint
   have hFs : Tendsto (fun n => Fs (phi n)) atTop atTop := by
     have hbase : Tendsto Fs atTop atTop := by
@@ -889,8 +930,8 @@ theorem galLim_mode_ftc
       exact hn.symm)
   simpa only [q] using tendsto_nhds_unique hleft hright'
 
-/-- Every limiting spectral coordinate has the equation velocity as its
-ordinary derivative at interior times. -/
+
+
 theorem galLim_mode_deriv
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -937,7 +978,7 @@ theorem galLim_mode_deriv
   filter_upwards [Icc_mem_nhds ht.1 ht.2] with r hr
   simpa only [c, f, q] using galLim_mode_ftc hτ hlim r hr i
 
-/-- Every limiting spectral coordinate is `C¹` at interior times. -/
+
 theorem galLim_mode_c1
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -970,8 +1011,8 @@ theorem galLim_mode_c1
           (galLimVel_cont hτ.le hlim)).mono Ioo_subset_Icc_self
     exact hvel.congr fun t ht ↦ (galLim_mode_deriv hτ hlim ht i).deriv
 
-/-- The limiting coefficient identities assemble into the `H⁰`-valued
-fundamental theorem of calculus, with the `H²` companion retained explicitly. -/
+
+
 theorem galLim_ftc
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1008,8 +1049,8 @@ theorem galLim_ftc
     tensorHs.add_coeff, ccTensorToHs_coeff]
   rw [galLim_mode_ftc hτ hlim t ht i, hmap]
 
-/-- On one positive backward-time slab, the all-order Galerkin limit is
-strongly differentiable in every natural Sobolev space. -/
+
+
 theorem galLimExt_deriv
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1117,8 +1158,8 @@ theorem galLimExt_deriv
   filter_upwards [Icc_mem_nhds ht.1 ht.2] with r hr
   exact hftc r hr
 
-/-- On one positive backward-time slab, the derivative of every all-order
-Galerkin limit is its canonical all-scale velocity. -/
+
+
 theorem galLimExt_ode
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1145,8 +1186,8 @@ theorem galLimExt_ode
   rw [hwCan t ⟨ht.1.le, ht.2.le⟩] at h
   exact h
 
-/-- On one positive backward-time interior, the Galerkin limit is a smooth
-time path in every natural scalar Sobolev order. -/
+
+
 theorem galLimExt_smooth
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1275,8 +1316,8 @@ theorem galLimExt_smooth
   intro k
   exact hfin k m
 
-/-- A Galerkin subsequential limit is a genuine `H¹_t H⁰_x` solution whose
-represented path is the `H²` spectral limit included into `H⁰`. -/
+
+
 theorem scalar_gal_limit
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}

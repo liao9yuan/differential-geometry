@@ -12,12 +12,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
-/-! # The realized DeTurck-Ricci metric PDE
 
-Interior and initial-time forms of the realized metric PDE
-`∂_t g = -2 Ric(g) + 𝓛_X g`.  The canonical parabolic short-time-existence
-producer is `ShortTime.DeTurckInitialDataExistence`; it is intentionally not
-restated in this realization module. -/
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -39,44 +39,43 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
-/-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**
 
-The interior one-sided time-derivative of the **linear** realized metric
-`g_DT s` (`hreal : (g_DT s).inner = g_bg.inner + ccTensorBilinSymm (T_s s)`) is
-the geometric DeTurck–Ricci right-hand side evaluated at `g_DT t`.
 
-Re-anchored off the finite-support-gated `deTurckGeometricN`: the carrier-scale
-derivative hypothesis `hreg` now routes the nonlinearity through the *continuous*
-realize-based nonlinearity `N_cont` (the SAME data as in
-`deturck_mildsolution_timeh1` / `forcing_continuous_interior` /
-`deturckN_hscale_lipschitz`), so the carrier solves the genuine ungated PDE that
-the parent mild-solution node produces and the node applies to the genuine
-infinite-support solution (where `deTurckGeometricN`, being forced to `0` off
-finite support by `deTurckGeometricN_of_not_realizable`, would degenerate the
-flow to the pure linear heat flow and contradict the nonlinear RHS).
 
-Dependency-sufficiency: `hreg` (ungated carrier derivative) pushed through `ℓ_a`
-by `pointwise_deriv_through_realize`, composed with `rhs_matches_deturck_at_solution`
-(now concluding `deTurckRicciRHS g_bg (g_DT t)`, the SAME continuous `N_cont` and
-the SAME linear `g_DT`), yields the conclusion. The construction data `N_cont`,
-`repr`, `Nsec` and the hypotheses `hN_coeff`, `hNsec_realize`, `hrepr_small` are
-IDENTICAL in shape to A3/A4/A5/parent (coordinate/realize identities, NOT the
-`HasDerivWithinAt` conclusion). Non-leaking: all data constrains the internal
-carrier `u₂`/`T_s`/`g_DT`/`N_cont`, never `g₀`/the headline. `hrepr_small` is the
-honestly-flagged open analytic input, consistent with A4/A5.
 
-(`hsmall` is a genuine blueprint-contract signature hypothesis — the fibre-small
-realize datum on `T_s`, consumed by the parent assembly — that this interior
-derivative proof routes through `hreal`/`hsmoothrepr`/`hNsec_geom` rather than
-textually, so the unused-binder linter is narrowly suppressed.) -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem deturck_metric_pde_interior
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -105,7 +104,7 @@ theorem deturck_metric_pde_interior
         ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
     (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g_bg
+        metricCauchySchwarzBound (I := I) (M := M) g_bg
           (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       HasDerivAt
@@ -115,8 +114,8 @@ theorem deturck_metric_pde_interior
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
-    (hsmall : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
-      gFibreOpBound (I := I) (M := M) g_bg
+    (_hsmall : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
+      metricCauchySchwarzBound (I := I) (M := M) g_bg
         (ccTensorBilinSymm (I := I) g_bg (T_s s)) δ')
     (hsmoothrepr : ∀ (s : ℝ)
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -167,6 +166,8 @@ theorem deturck_metric_pde_interior
   exact hpush
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_metric_pde_at_zero
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x)

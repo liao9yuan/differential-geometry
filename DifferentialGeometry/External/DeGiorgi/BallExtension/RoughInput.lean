@@ -311,7 +311,8 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero_p
     Tendsto (fun n => ∫ x, f x * g n x ∂μ) atTop (nhds 0) := by
   have hpqR : p.HolderConjugate q := Real.holderConjugate_iff.mpr ⟨hp, hpq⟩
   let C : ℝ := MeasureTheory.lpNorm f (ENNReal.ofReal q) μ
-  have hlim' : Tendsto (fun n => MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ) atTop (nhds 0) := by
+  have hlim' : Tendsto (fun n => MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ) atTop
+    (nhds 0) := by
     have hlim_toReal :
         Tendsto (fun n => (eLpNorm (g n) (ENNReal.ofReal p) μ).toReal) atTop (nhds 0) :=
       (ENNReal.tendsto_toReal_zero_iff (fun n => (hg n).eLpNorm_ne_top)).2 hlim
@@ -783,7 +784,8 @@ private theorem measurable_unitBallRetraction :
   classical
   unfold unitBallRetraction
   refine Measurable.piecewise (measurableSet_le measurable_norm measurable_const) measurable_id ?_
-  refine Measurable.piecewise (measurableSet_lt measurable_norm measurable_const) ?_ measurable_const
+  refine Measurable.piecewise (measurableSet_lt measurable_norm measurable_const) ?_
+    measurable_const
   exact ((measurable_norm.pow_const 2).inv).smul measurable_id
 
 omit [NeZero d] in

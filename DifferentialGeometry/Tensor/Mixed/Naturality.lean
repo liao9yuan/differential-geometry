@@ -1,35 +1,12 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Mixed.DualFiber
-
-/-!
-# Naturality lemmas for the tensor-hom and dual-multilinear equivalences
-
-Proves the naturality results needed for the trivialization compatibility of the
-mixed-to-tensor bundle equivalence:
-
-1. `dualTensorHomEquiv_symm_naturality` — algebraic tensor-hom iso
-   `(V →ₗ W) ≃ₗ (V* ⊗ W)` is natural w.r.t. pre/post-composition.
-2. `dualMultilinearEquivMultilinearOfDual_compCCLM` — the dual-multilinear iso
-   commutes with precomposition by a continuous linear map in each slot.
-3. `multilinearHomEquivDualMultilinearTensor_naturality` — combined naturality for
-   `multilinearHomEquivDualMultilinearTensor`, intertwining conjugation on the hom
-   side with `TensorProduct.map` on the tensor side.
-
-## Tags
-
-naturality, tensor-hom, dual multilinear, equivariance
--/
 
 noncomputable section
 
 open TensorProduct
 
-/-! ### Algebraic naturality of `dualTensorHomEquiv` -/
-
-/-- `dualTensorHomEquiv.symm` interleaves hom-conjugation by `(φ, ψ)` with
-`TensorProduct.map (φ⁻ᵀ, ψ)`. -/
 theorem dualTensorHomEquiv_symm_naturality
     {𝕜 : Type*} [CommRing 𝕜]
     {V : Type*} [AddCommGroup V] [Module 𝕜 V] [Module.Free 𝕜 V] [Module.Finite 𝕜 V]
@@ -53,15 +30,11 @@ theorem dualTensorHomEquiv_symm_naturality
       dualTensorHom_apply, TensorProduct.map_tmul, LinearMap.dualMap_apply,
       LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, map_smul]
 
-/-! ### `ContinuousMultilinearMap` naturality lemmas -/
-
 namespace ContinuousMultilinearMap
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
 
-/-- Pointwise naturality of `dualMultilinearEquivMultilinearOfDual` w.r.t. precomposition
-by `L : F →L[𝕜] F` in each slot. -/
 theorem dualMultilinearEquivMultilinearOfDual_compCCLM (r : ℕ) (L : F →L[𝕜] F)
     (ω : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)
     (α : Fin r → (F →L[𝕜] 𝕜)) :
@@ -73,7 +46,6 @@ theorem dualMultilinearEquivMultilinearOfDual_compCCLM (r : ℕ) (L : F →L[�
     ω (tensorOfDualLinearForms 𝕜 F r (fun i => (α i).comp L))
   congr 1
 
-/-- Multilinear-map-level form of `dualMultilinearEquivMultilinearOfDual_compCCLM`. -/
 theorem dualMultilinearEquivMultilinearOfDual_compCCLM_ext (r : ℕ) (L : F →L[𝕜] F)
     (ω : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜) :
     dualMultilinearEquivMultilinearOfDual 𝕜 F r
@@ -85,7 +57,6 @@ theorem dualMultilinearEquivMultilinearOfDual_compCCLM_ext (r : ℕ) (L : F →L
     compContinuousLinearMapL_apply, compContinuousLinearMap_apply]
   rfl
 
-/-- `homEquivCDualTensor.symm` on a pure tensor: `(η ⊗ w) ↦ (v ↦ η(v) • w)`. -/
 theorem homEquivCDualTensor_symm_tmul
     {V : Type*} [NormedAddCommGroup V] [NormedSpace 𝕜 V] [FiniteDimensional 𝕜 V]
     {W : Type*} [NormedAddCommGroup W] [NormedSpace 𝕜 W] [FiniteDimensional 𝕜 W]
@@ -100,15 +71,70 @@ theorem homEquivCDualTensor_symm_tmul
     rfl
   exact h_inner
 
-/-! ### Combined naturality for `multilinearHomEquivDualMultilinearTensor` -/
 
-set_option maxHeartbeats 800000 in
--- Elaboration through `homEquivCDualTensor` and the outer `TensorProduct.congr`
--- (with a diamond on the tensor fiber's `AddCommMonoid` instance) exceeds default.
-/-- `multilinearHomEquivDualMultilinearTensor` intertwines conjugation by
-`compContinuousLinearMapL Φ` on the hom side with `TensorProduct.map` of
-`compContinuousLinearMapL (precomp Φ)` and `compContinuousLinearMapL Φ.symm`
-on the tensor side. -/
+private lemma multilinearHomEquivDualMultilinearTensor_naturality_tmul
+    (r s : ℕ) (Φ : F ≃L[𝕜] F)
+    (α : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
+    (β : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :
+    multilinearHomEquivDualMultilinearTensor 𝕜 F r s
+        ((compContinuousLinearMapL (fun _ : Fin s => Φ.symm.toContinuousLinearMap)).comp
+          (((multilinearHomEquivDualMultilinearTensor 𝕜 F r s).symm (α ⊗ₜ[𝕜] β)).comp
+            (compContinuousLinearMapL (fun _ : Fin r => Φ.toContinuousLinearMap)))) =
+      TensorProduct.map
+        (compContinuousLinearMapL (fun _ : Fin r =>
+          (ContinuousLinearMap.compL 𝕜 F F 𝕜).flip Φ.toContinuousLinearMap)).toLinearMap
+        (compContinuousLinearMapL
+          (fun _ : Fin s => Φ.symm.toContinuousLinearMap)).toLinearMap (α ⊗ₜ[𝕜] β) := by
+  haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) :=
+    continuousMultilinearMap_finiteDimensional r
+  haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :=
+    continuousMultilinearMap_finiteDimensional s
+  set MHE := multilinearHomEquivDualMultilinearTensor 𝕜 F r s with hMHE_def
+  set η := (dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm α with hη_def
+  have hMHE_symm_tmul : MHE.symm (α ⊗ₜ[𝕜] β) =
+      (homEquivCDualTensor 𝕜
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)).symm (η ⊗ₜ[𝕜] β) := by
+    change ((homEquivCDualTensor 𝕜 _ _).trans (TensorProduct.congr
+        (dualMultilinearEquivMultilinearOfDual 𝕜 F r) (LinearEquiv.refl 𝕜 _))).symm
+          (α ⊗ₜ[𝕜] β) = _
+    simp only [LinearEquiv.symm_trans_apply, TensorProduct.congr_symm_tmul,
+      LinearEquiv.refl_symm, LinearEquiv.refl_apply]
+    rfl
+  rw [hMHE_symm_tmul]
+  have hconj :
+      (compContinuousLinearMapL (fun _ : Fin s => Φ.symm.toContinuousLinearMap)).comp
+          (((homEquivCDualTensor 𝕜 _ _).symm (η ⊗ₜ[𝕜] β)).comp
+            (compContinuousLinearMapL (fun _ : Fin r => Φ.toContinuousLinearMap))) =
+        (homEquivCDualTensor 𝕜 _ _).symm
+          ((η.comp (compContinuousLinearMapL
+              (fun _ : Fin r => Φ.toContinuousLinearMap))) ⊗ₜ[𝕜]
+            ((compContinuousLinearMapL
+              (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) β)) := by
+    ext M'
+    simp only [ContinuousLinearMap.comp_apply, homEquivCDualTensor_symm_tmul, map_smul]
+  rw [hconj]
+  have hMHE_apply_h_symm :
+      MHE ((homEquivCDualTensor 𝕜 _ _).symm
+          ((η.comp (compContinuousLinearMapL
+              (fun _ : Fin r => Φ.toContinuousLinearMap))) ⊗ₜ[𝕜]
+            ((compContinuousLinearMapL
+              (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) β))) =
+        dualMultilinearEquivMultilinearOfDual 𝕜 F r
+            (η.comp (compContinuousLinearMapL
+              (fun _ : Fin r => Φ.toContinuousLinearMap))) ⊗ₜ[𝕜]
+          ((compContinuousLinearMapL
+            (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) β) := by
+    change ((homEquivCDualTensor 𝕜 _ _).trans (TensorProduct.congr
+        (dualMultilinearEquivMultilinearOfDual 𝕜 F r) (LinearEquiv.refl 𝕜 _))) _ = _
+    simp only [LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply,
+      TensorProduct.congr_tmul, LinearEquiv.refl_apply]
+  rw [hMHE_apply_h_symm,
+    dualMultilinearEquivMultilinearOfDual_compCCLM_ext r Φ.toContinuousLinearMap η,
+    hη_def, LinearEquiv.apply_symm_apply]
+  rfl
+
+
 theorem multilinearHomEquivDualMultilinearTensor_naturality
     (r s : ℕ) (Φ : F ≃L[𝕜] F)
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜]
@@ -155,52 +181,7 @@ theorem multilinearHomEquivDualMultilinearTensor_naturality
       ContinuousLinearMap.comp_add, LinearEquiv.map_add MHE, ih₁, ih₂,
       (TensorProduct.map _ _).map_add]
   | tmul α β =>
-    set η := (dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm α with hη_def
-
-    have hMHE_symm_tmul : MHE.symm (α ⊗ₜ[𝕜] β) =
-        (homEquivCDualTensor 𝕜
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)).symm (η ⊗ₜ[𝕜] β) := by
-      change ((homEquivCDualTensor 𝕜 _ _).trans (TensorProduct.congr
-          (dualMultilinearEquivMultilinearOfDual 𝕜 F r) (LinearEquiv.refl 𝕜 _))).symm
-            (α ⊗ₜ[𝕜] β) = _
-      simp only [LinearEquiv.symm_trans_apply, TensorProduct.congr_symm_tmul,
-        LinearEquiv.refl_symm, LinearEquiv.refl_apply]
-      rfl
-    rw [hMHE_symm_tmul]
-
-    have hconj :
-        (compContinuousLinearMapL (fun _ : Fin s => Φ.symm.toContinuousLinearMap)).comp
-            (((homEquivCDualTensor 𝕜 _ _).symm (η ⊗ₜ[𝕜] β)).comp
-              (compContinuousLinearMapL (fun _ : Fin r => Φ.toContinuousLinearMap))) =
-          (homEquivCDualTensor 𝕜 _ _).symm
-            ((η.comp (compContinuousLinearMapL
-                (fun _ : Fin r => Φ.toContinuousLinearMap))) ⊗ₜ[𝕜]
-              ((compContinuousLinearMapL
-                (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) β)) := by
-      ext M'
-      simp only [ContinuousLinearMap.comp_apply, homEquivCDualTensor_symm_tmul, map_smul]
-    rw [hconj]
-
-    have hMHE_apply_h_symm :
-        MHE ((homEquivCDualTensor 𝕜 _ _).symm
-            ((η.comp (compContinuousLinearMapL
-                (fun _ : Fin r => Φ.toContinuousLinearMap))) ⊗ₜ[𝕜]
-              ((compContinuousLinearMapL
-                (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) β))) =
-          dualMultilinearEquivMultilinearOfDual 𝕜 F r
-              (η.comp (compContinuousLinearMapL
-                (fun _ : Fin r => Φ.toContinuousLinearMap))) ⊗ₜ[𝕜]
-            ((compContinuousLinearMapL
-              (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) β) := by
-      change ((homEquivCDualTensor 𝕜 _ _).trans (TensorProduct.congr
-          (dualMultilinearEquivMultilinearOfDual 𝕜 F r) (LinearEquiv.refl 𝕜 _))) _ = _
-      simp only [LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply,
-        TensorProduct.congr_tmul, LinearEquiv.refl_apply]
-    rw [hMHE_apply_h_symm,
-      dualMultilinearEquivMultilinearOfDual_compCCLM_ext r Φ.toContinuousLinearMap η,
-      hη_def, LinearEquiv.apply_symm_apply]
-    rfl
+    exact multilinearHomEquivDualMultilinearTensor_naturality_tmul r s Φ α β
 
 end ContinuousMultilinearMap
 

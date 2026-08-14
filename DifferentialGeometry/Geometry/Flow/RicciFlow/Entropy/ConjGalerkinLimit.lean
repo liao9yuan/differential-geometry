@@ -5,14 +5,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinEnergy
 
 set_option autoImplicit false
 
-/-!
-# Scalar conjugate-heat Galerkin compactness
 
-Uniform finite-dimensional energy bounds give one modewise uniformly convergent
-subsequence.  The limiting coefficients retain every finite Sobolev mass bound.
-The finite Galerkin equations are kept in the output for the later limit
-identification theorem; no PDE conclusion is asserted in this file.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,7 +28,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -39,9 +39,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 open Classical in
-/-- The exact finite Galerkin data and limiting coefficient properties produced
-by scalar conjugate-heat compactness.  This predicate deliberately stops before
-identifying the limit with a strong or classical PDE solution. -/
 structure IsConjGalSubseq
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (tau : Real) (u0 : SmoothCcTensor
@@ -94,6 +91,8 @@ structure IsConjGalSubseq
         (ulim t i) ^ 2 ≤ Bound
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem gal_lim_mass
     (q : SmoothRiemannianMetric I M) {tau : Real}
     (Fs : Nat → Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -188,7 +187,34 @@ private theorem supp_right_lip
     · simpa only [f', if_pos hi] using hdu N t ht i hi
     · simpa only [f', if_neg hi, norm_zero] using (L i).property
 
-set_option maxHeartbeats 800000 in
+
+
+
+private lemma real_abs_neg_mul_add_le {lam v c A K : ℝ} (hlam : 0 ≤ lam)
+    (hv : |v| ≤ A) (hc : |c| ≤ K) : |-lam * v + c| ≤ lam * A + K := by
+  calc |-lam * v + c| ≤ |-lam * v| + |c| := abs_add_le _ _
+    _ = lam * |v| + |c| := by rw [abs_mul, abs_neg, abs_of_nonneg hlam]
+    _ ≤ lam * A + K := add_le_add (mul_le_mul_of_nonneg_left hv hlam) hc
+
+private lemma scalarGalPert_continuousOn_of_parts
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (T : D.RegularTime) {tau : Real}
+    (h2 : ContinuousOn (fun t => lapDiffA20 (I := I) (M := M) S.family T t)
+      (Icc (0 : Real) tau))
+    (h1 : ContinuousOn (fun t => conjA1 (I := I) (M := M) S T t)
+      (Icc (0 : Real) tau)) :
+    ContinuousOn (fun t => scalarGalPert (I := I) (M := M) S T t)
+      (Icc (0 : Real) tau) := by
+  let Inc : tensorHs (I := I) (M := M) (S.family.metric (T : Real)) 0 0 2 →L[Real]
+      tensorHs (I := I) (M := M) (S.family.metric (T : Real)) 0 0 1 :=
+    tensorHsInclusion (I := I) (M := M)
+      (g := S.family.metric (T : Real)) (r := 0) (s := 0)
+      (show (1 : Real) ≤ 2 by norm_num)
+  have hPot := h1.clm_comp
+    (continuousOn_const : ContinuousOn (fun _ : Real => Inc) (Icc (0 : Real) tau))
+  have hsum := h2.add hPot
+  exact hsum
+
 /-- Exact-interval energy bounds and perturbation continuity produce a
 modewise uniformly convergent Galerkin subsequence on that same interval. -/
 theorem gal_subseq_on
@@ -338,25 +364,8 @@ theorem gal_subseq_on
     have ht' : t ∈ Icc (0 : Real) tau := Set.Ico_subset_Icc_self ht
     have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
       tensor_lambda_nonneg (I := I) (M := M) i
-    calc
-      ‖rhs N t i‖ =
-          |-(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i +
-            (scalarGalPert (I := I) (M := M) S T t
-              (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| := by
-                simp only [Real.norm_eq_abs, rhs]
-      _ ≤ |-(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i| +
-            |(scalarGalPert (I := I) (M := M) S T t
-              (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| :=
-          abs_add_le _ _
-      _ = TensorEigenIdx.lambda (I := I) (M := M) i * |V N t i| +
-            |(scalarGalPert (I := I) (M := M) S T t
-              (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| := by
-          rw [abs_mul, abs_neg, abs_of_nonneg hlam]
-      _ ≤ TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
-            Kpert * Real.sqrt B2 :=
-          add_le_add (mul_le_mul_of_nonneg_left (hcoord N t ht' i) hlam)
-            (hforce N t ht' i)
-      _ = (L i : Real) := rfl
+    have h := real_abs_neg_mul_add_le hlam (hcoord N t ht' i) (hforce N t ht' i)
+    simpa only [Real.norm_eq_abs, rhs] using h
   have hlip := supp_right_lip (tau := tau) Fs V rhs L hcont
     (by
       intro N t ht i hi
@@ -396,7 +405,8 @@ theorem gal_subseq_on
     lim_mass := by simpa only [q] using hlim_mass
   }⟩
 
-set_option maxHeartbeats 800000 in
+
+
 /-- Every smooth scalar initial datum has, on one common time interval, a
 modewise uniformly convergent subsequence of genuine finite Galerkin solutions.
 The limit inherits the all-order weighted spectral mass bounds. -/
@@ -485,7 +495,7 @@ noncomputable def galLimHs
   coeff := ulim t
   weighted_summable := ((hlim.lim_mass m).choose_spec t ht).1
 
-/-- The order-`m` Galerkin limit as a path on its compact time interval. -/
+
 noncomputable def galLimPath
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -502,8 +512,8 @@ noncomputable def galLimPath
       (S.family.metric (T : Real)) 0 0 (m : Real) :=
   fun t => galLimHs hlim m t t.2
 
-/-- The all-order coefficient limit is continuous in every finite Sobolev
-order on the compact Galerkin interval. -/
+
+
 theorem galLimPath_cont
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -546,8 +556,8 @@ theorem galLimPath_cont
   rw [heq] at hcont
   exact hcont
 
-/-- At every fixed time, the extracted finite Galerkin vectors converge to the
-spectral limit after one strict Sobolev downshift. -/
+
+
 theorem galLim_tendsto
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}

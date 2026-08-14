@@ -4,38 +4,39 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 set_option autoImplicit false
 
-/-!
-# Metric-frame regularity on positive-time tails
 
-This module packages the carrier-level spacetime regularity of a Ricci-flow
-metric in a fixed smooth local frame after restricting away from the initial
-time. The new closed-left carrier lies in the original open regular set.
--/
+
+
+
+
+
+
 
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
+attribute [local instance] Fintype.ofFinite
+
 open Bundle Filter Set
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
 omit [I.Boundaryless] in
-/-- Fixed-time spatial differentiability of Ricci components in a smooth local
-frame. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciFrame_mdiffAt
-    {Idx : Type} [Fintype Idx]
+    {Idx : Type} [Finite Idx]
     (g : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
@@ -58,8 +59,10 @@ theorem ricciFrame_mdiffAt
     rw [hy i, hy j, metricRicciAt_apply_eq_ricciTensor]
   exact hsmooth.mdifferentiableAt (by simp)
 
-/-- On a strictly positive-time tail, a Ricci-flow solution supplies the full
-spacetime metric regularity package in every smooth local frame. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailFrameSpaceReg
     {Idx : Type} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}

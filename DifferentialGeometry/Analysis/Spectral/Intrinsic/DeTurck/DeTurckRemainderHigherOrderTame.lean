@@ -1,13 +1,14 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
-import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
-import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorFiberNormBound
+
 
 noncomputable section
 
@@ -23,12 +24,20 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem mixed_continuous_rfns
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
@@ -38,8 +47,8 @@ private theorem mixed_continuous_rfns
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
-set_option linter.unusedSectionVars false in
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem mixed_real_holder_two_nonneg
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
     (hφc : Continuous φ) (hψc : Continuous ψ)
@@ -98,7 +107,6 @@ private theorem mixed_real_holder_two_nonneg
   have hrhs_nn : 0 ≤ (∫ x, φ x ^ p ∂μ) ^ (1 / p) * (∫ x, ψ x ^ q ∂μ) ^ (1 / q) := by positivity
   exact (ENNReal.ofReal_le_ofReal_iff hrhs_nn).mp hHolder
 
-set_option linter.unusedSectionVars false in
 
 private theorem mixed_young_arm_split
     (wi wl CS CT ΛS ΛT NS NT Iφp Iψq : ℝ)
@@ -137,7 +145,6 @@ private theorem mixed_young_arm_split
         mul_le_mul_of_nonneg_left hyoung (by positivity)
 
 open DifferentialGeometry.Analysis.Sobolev.Tensor in
-
 private theorem appCc_integrated_grid_twoArm_mixed
     (g : SmoothRiemannianMetric I M) (r s₁ s₂ k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -165,11 +172,13 @@ private theorem appCc_integrated_grid_twoArm_mixed
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
   set CSf : ℕ → ℝ := fun m =>
     if h : 1 ≤ m then
-      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs (I := I) (M := M) g r s₁ m h).choose
+      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs (I := I) (M := M) g r s₁ m
+        h).choose
     else 0 with hCSf
   set CTf : ℕ → ℝ := fun m =>
     if h : 1 ≤ m then
-      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs (I := I) (M := M) g 0 s₂ m h).choose
+      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs (I := I) (M := M) g 0 s₂ m
+        h).choose
     else 0 with hCTf
   have hCSf_nn : ∀ m, 0 ≤ CSf m := by
     intro m; rw [hCSf]; dsimp only; split
@@ -247,9 +256,11 @@ private theorem appCc_integrated_grid_twoArm_mixed
   have hTj_nn : ∀ b x, 0 ≤ Tj b x := fun b x => by
     rw [hTj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
   have hSj_int : ∀ a, Integrable (Sj a) μ := fun a => by
-    rw [hμ]; exact (hSj_cont a).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+    rw [hμ]; exact (hSj_cont a).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
   have hTj_int : ∀ b, Integrable (Tj b) μ := fun b => by
-    rw [hμ]; exact (hTj_cont b).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+    rw [hμ]; exact (hTj_cont b).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
   have hint_cell : ∀ a b, Integrable (fun x => Sj a x * Tj b x) μ := fun a b => by
     rw [hμ]
     exact ((hSj_cont a).mul (hTj_cont b)).integrable_of_hasCompactSupport
@@ -509,7 +520,7 @@ private theorem appCc_integrated_grid_twoArm_mixed
   rw [hc]
   ring
 
-theorem appCc_topOrder_l2_twoArm_mixed_le
+theorem ccTensorContract_topOrder_l2_twoArm_mixed_le
     (g₀ : SmoothRiemannianMetric I M) (b₀ s₀ q : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (Φ : SmoothCcTensor g₀ b₀ s₀) (W : SmoothCcTensor g₀ 0 b₀) (ΛΦ ΛW : ℝ),
@@ -517,7 +528,7 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ b₀ s₀ x (Φ.toSection x) ≤ ΛΦ ^ 2) →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 b₀ x (W.toSection x) ≤ ΛW ^ 2) →
         ‖iteratedCovGrad (I := I) g₀ 0 s₀ q
-            (appCc (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
+            (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
           C * (ΛW ^ 2 * ∑ i ∈ Finset.range (q + 1),
                 ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2
               + ΛΦ ^ 2 * ∑ l ∈ Finset.range (q + 1),
@@ -529,17 +540,14 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
   haveI : BorelSpace M := ⟨rfl⟩
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
-
   obtain ⟨Cgrid, hCgrid_nn, hCgrid⟩ :=
     appCc_integrated_grid_twoArm_mixed (I := I) g₀ b₀ s₀ b₀ q
-
-  set Gk : ℝ := appCcGdiag (E := E) q with hGk
+  set Gk : ℝ := diagonalGridGrowthFactor (E := E) q with hGk
   have hGk_nn : 0 ≤ Gk := appCcGdiag_nonneg (E := E) q
   refine ⟨Gk * Cgrid, by positivity, ?_⟩
   intro Φ W ΛΦ ΛW hΛΦ hΛW hΦsup hWsup
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
-  set P : SmoothCcTensor g₀ 0 s₀ := appCc (I := I) (M := M) g₀ b₀ s₀ Φ W with hP
-
+  set P : SmoothCcTensor g₀ 0 s₀ := operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W with hP
   have hLHS_eq : ‖iteratedCovGrad (I := I) g₀ 0 s₀ q P‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) x
         ((iteratedCovGrad (I := I) g₀ 0 s₀ q P).toSection x) ∂μ := by
@@ -551,27 +559,24 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
           ((iteratedCovGrad (I := I) g₀ 0 s₀ q P).toSection x) := rfl
     rw [hfun]
     exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) _
-
   set grid : M → ℝ := fun x => ∑ i ∈ Finset.range (q + 1),
       riemannianFiberNormSq (I := I) (M := M) g₀ b₀ (s₀ + i) x
           ((iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ).toSection x)
         * ∑ l ∈ Finset.range (q + 1 - i),
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (b₀ + l) x
               ((iteratedCovGrad (I := I) g₀ 0 b₀ l W).toSection x) with hgrid
-
   have hptwise : ∀ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) x
         ((iteratedCovGrad (I := I) g₀ 0 s₀ q P).toSection x) ≤ Gk * grid x := by
     intro x
     rw [hGk, hgrid, hP]
-    exact appCc_iteratedCovGrad_diagonalProductGrid_le (I := I) g₀ b₀ s₀ Φ W q x
-
+    exact riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) g₀ b₀ s₀ Φ W q
+      x
   have hgrid_cont : Continuous grid := by
     rw [hgrid]
     refine continuous_finset_sum _ (fun i _ => (mixed_continuous_rfns g₀ b₀ (s₀ + i) _).mul ?_)
     exact continuous_finset_sum _ (fun l _ => mixed_continuous_rfns g₀ 0 (b₀ + l) _)
   have hgrid_int : Integrable grid μ := by
     rw [hμ]; exact hgrid_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-
   have hmono : ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) x
         ((iteratedCovGrad (I := I) g₀ 0 s₀ q P).toSection x) ∂μ ≤
       Gk * ∫ x, grid x ∂μ := by
@@ -580,7 +585,6 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s₀ + q) x _)) ?_
       (Eventually.of_forall hptwise)
     exact hgrid_int.const_mul _
-
   have hgrid_bound := hCgrid Φ W ΛΦ ΛW hΛΦ hΛW hΦsup hWsup
   rw [hLHS_eq]
   calc ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) x
@@ -597,10 +601,9 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
           + ΛΦ ^ 2 * ∑ l ∈ Finset.range (q + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2) := by ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
 theorem deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -741,6 +744,8 @@ theorem deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
           (le_trans hcs (mul_le_mul_of_nonneg_left hwin2 (by positivity))) (by positivity)
     _ = (3 * D ^ 2 * ((L + 1 : ℕ) : ℝ)) * RHS := by ring
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_compWindow_l2_eq
     (g₀ : SmoothRiemannianMetric I M) (m l : ℕ) (W : SmoothCcTensor g₀ 0 2) :
     ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l (iteratedCovGrad (I := I) g₀ 0 2 m W)‖ ^ 2 =
@@ -763,9 +768,11 @@ private theorem iteratedCovGrad_compWindow_l2_eq
       (iteratedCovGrad (I := I) g₀ 0 2 (m + l) W)
   rw [hbridgeL, hbridgeR]
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-  have hrw := rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l W x
+  have hrw := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l W x
   simpa only [Nat.add_assoc] using hrw
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_compWindow_jetSum_le
     (g₀ : SmoothRiemannianMetric I M) (q m : ℕ) (W : SmoothCcTensor g₀ 0 2) :
     (∑ l ∈ Finset.range (q + 1),

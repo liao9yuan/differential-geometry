@@ -22,7 +22,7 @@ namespace Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -59,6 +59,8 @@ def curveMean (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   trace (curveShape (I := I) g γ V t)
 
 omit [Fintype ι] [DecidableEq ι] in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- For pointwise Jacobi fields, the mixed Gram derivative is curvature plus
 the derivative-field Gram matrix. -/
 theorem mixedDeriv_eq
@@ -73,7 +75,7 @@ theorem mixedDeriv_eq
   rw [jacobi_d2_eq (I := I) g γ (V i) (hJ i)]
   simp only [map_neg, ContinuousLinearMap.neg_apply]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- If the covariant derivatives have coefficient matrix `a`, Wronskian
 symmetry identifies the mixed Gram matrix with `G * aᵀ`. -/
@@ -96,7 +98,7 @@ theorem mixed_eq_gram_mul
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- The shape matrix is the transpose of any coefficient matrix expanding the
 covariant derivatives in a linearly independent Wronskian-symmetric family. -/
@@ -114,7 +116,7 @@ theorem shape_eq_coeff
   rw [curveShape, mixed_eq_gram_mul (I := I) g γ V t a hDV hW]
   exact Matrix.nonsing_inv_mul_cancel_left _ _ hdet
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- If the covariant derivatives remain in the span of a linearly independent
 Wronskian-symmetric family, their Gram matrix is the shape projection
@@ -154,7 +156,7 @@ theorem derivGram_eq_proj
       rw [Matrix.mul_assoc, Matrix.nonsing_inv_mul_cancel_left G aᵀ hdet]
     _ = Mx * G⁻¹ * Mx := by rw [hM]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- A maximal linearly independent family in the orthogonal complement of a
 nonzero vector spans every vector perpendicular to that vector. -/
@@ -212,7 +214,7 @@ theorem exists_perp_coeff
   symm at hco
   simpa only [a, zW, vW, hbW, Submodule.coe_sum, Submodule.coe_smul_of_tower] using hco
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 /-- Covariant-derivative specialization of `exists_perp_coeff`. -/
 theorem exists_deriv_coeff
@@ -231,6 +233,8 @@ theorem exists_deriv_coeff
     (fun i => covDerivAlong (I := I) g γ (V i) t) u
     hcard hu hVperp hDVperp hLI
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- Trace Riccati equation for a Jacobi family, conditional only on the exact
 projection identity for its derivative-field Gram matrix. -/
 theorem hasDerivAt_mean
@@ -280,6 +284,8 @@ theorem hasDerivAt_mean
     (-curveCurvGram (I := I) g γ V t) t hGram hMixed hunit
   simpa only [curveMean, curveShape, Matrix.mul_neg, Matrix.trace_neg] using hric
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- Trace Riccati equation when the Jacobi family and its covariant derivative
 fill the orthogonal complement of a nonzero vector. -/
 theorem hasDerivAt_mean_perp

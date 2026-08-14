@@ -28,7 +28,7 @@ namespace Sobolev
 namespace Chart
 
 variable {E H : Type*}
-  [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -44,9 +44,9 @@ off a fixed set. -/
 def compactRep (K : Set EuclN) (v : EuclN → ℝ) : EuclN → ℝ :=
   K.indicator v
 
+omit [FiniteDimensional ℝ E] in
 /-- The closed-set representative has topological support inside the fixed
 closed set. -/
-omit [FiniteDimensional ℝ E] in
 lemma compactRep_support {K : Set EuclN} (hK : IsClosed K) (v : EuclN → ℝ) :
     tsupport (compactRep K v) ⊆ K := by
   change closure (Function.support (K.indicator v)) ⊆ K
@@ -55,9 +55,9 @@ lemma compactRep_support {K : Set EuclN} (hK : IsClosed K) (v : EuclN → ℝ) :
       closure_mono Set.support_indicator_subset
     _ = K := hK.closure_eq
 
+omit [FiniteDimensional ℝ E] in
 /-- If `v` vanishes almost everywhere on `Ω \ K`, its closed-set indicator is
 almost everywhere equal to `v` on `Ω`. -/
-omit [FiniteDimensional ℝ E] in
 lemma compactRep_ae {Ω K : Set EuclN} (hK : MeasurableSet K)
     {v : EuclN → ℝ}
     (hv : v =ᵐ[(volume : Measure EuclN).restrict (Ω \ K)] 0) :
@@ -69,6 +69,7 @@ lemma compactRep_ae {Ω K : Set EuclN} (hK : MeasurableSet K)
     (indicator_ae_eq_of_restrict_compl_ae_eq_zero
       (μ := (volume : Measure EuclN).restrict Ω) hK hv')
 
+omit [IsManifold I ∞ M] in
 /-- Raw pushforward after pulling back through the same chart recovers the
 Euclidean input on that chart target. -/
 lemma rawPullback_self (α : M) (v : EuclN → ℝ) {y : EuclN}
@@ -193,14 +194,14 @@ theorem crossChartAeJoint
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
               (chartPullback I α v))
             (chartTargetEuclid (I := I) (M := M) γ) ∧
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
               (chartPullback I α v))
             (chartTargetEuclid (I := I) (M := M) γ) ≤
           ENNReal.ofReal C *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k p v
               (chartTargetEuclid (I := I) (M := M) α) := by
   let K_E : Set EuclN :=
@@ -240,13 +241,13 @@ theorem crossChartAeJoint
       (chartTargetEuclid_isOpen (I := I) (M := M) γ) hout_ae).mp hj.1
   refine ⟨hout_mem, ?_⟩
   calc
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
           (chartPullback I α v))
         (chartTargetEuclid (I := I) (M := M) γ) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
@@ -256,11 +257,11 @@ theorem crossChartAeJoint
         (d := Module.finrank ℝ E) hp_one
         (chartTargetEuclid_isOpen (I := I) (M := M) γ) hout_ae).symm
     _ ≤ ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p vK
           (chartTargetEuclid (I := I) (M := M) α) := hj.2
     _ = ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p v
           (chartTargetEuclid (I := I) (M := M) α) := by
       rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae

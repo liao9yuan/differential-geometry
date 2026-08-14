@@ -2,35 +2,33 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Window-uniform metric preconvergence — flow-data inputs (P3 C-II-final, in progress)
 
-This file threads the P2 flow machinery into the hypotheses of
-`windowPreconv_of_perTime` (`MetricPreconvBridge.lean`), the genuine P3 window
-endpoint (the ABSTRACT window convergence on `M`; NOT the P4
-`SourceMetricCPConvOnWindow` pullback object — see `P3_PLAN.md` PLANNER
-CORRECTION).
 
-**Landed here so far:**
-* `evolNorm_bound_of_ricBound` — the `hbound` input of
-  `timeLipschitz_of_hasDerivAt` at order `N`: the evolution field
-  `-2·∇ᴺRc = -2·nablaRicReal` has uniformly bounded `gRef`-norm on `K × [β,ψ]`,
-  from `ric_bound_field` (P2) + the `(Bₙ)` window cap + `sqrt_normSq0S_smul`.
-* `hgLip_orderN_of_solutions` — the order-`N` time-Lipschitz of the flow
-  metric, = `timeLipschitz_of_hasDerivAt ∘ hevComp_of_solutions ∘
-  evolNorm_bound_of_ricBound`.  The reusable order-`N` core that the endpoint's
-  uniform-over-`a ≤ p` `hgLip` maxes.
 
-**Remaining for the endpoint (the dedicated brick, NOT done here):** the
-`gInf : ℝ → SmoothRiemannianMetric` family (a `metricPreconvInf`-scale
-construction — master diagonal over a dense time net + all-`t` Cauchy-in-`Cᵖ`
-convergence + per-`t` smoothness via `smoothMetric_of_localCoeff`), the
-uniform-over-`a ≤ p` assembly of `hgLip` (maxing the order-`a` cores), `hInfLip`,
-and the final `windowPreconv_of_perTime` application.  See `MetricPreconvWindow.md`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -45,22 +43,25 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-/-- **The `hbound` input of `timeLipschitz_of_hasDerivAt` at order `N`.**  The
-flow evolution field `-2·∇ᴺRc = (-2)•nablaRicReal` has `gRef`-norm uniformly
-bounded by `L = 2·(Cpp·Cₙ + Cppp)` on `K × [β,ψ]`, where `Cpp, Cppp` are the
-`ric_bound_field` (P2) constants and `Cₙ` caps `metricCovDerivNorm N` (the
-`(Bₙ)` window bound).  The `|-2| = 2` factor enters via `sqrt_normSq0S_smul`. -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem evolNorm_bound_of_ricBound
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M} {N : Nat}
@@ -96,15 +97,19 @@ theorem evolNorm_bound_of_ricBound
           mul_le_mul_of_nonneg_left hmcd hpp0
         linarith
 
-/-- **Order-`N` time-Lipschitz of the flow metric** (the reusable core of the
-endpoint's `hgLip`).  From a sequence of Ricci-flow solutions realizing `gSeq`
-+ the P2 `ric_bound_field` inputs + the `(Bₙ)` cap + the per-level swaps, the
-order-`N` background covariant derivative norm of the moving metric is
-`L`-Lipschitz in time on `K × [β,ψ]`, uniformly in the sequence index.
-Assembles `timeLipschitz_of_hasDerivAt` from `hevComp_of_solutions` (`hev`) and
-`evolNorm_bound_of_ricBound` (`hbound`).  The endpoint's full `hgLip` maxes
-these over `a ≤ p`. -/
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem hgLip_orderN_of_solutions
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M} {N : Nat}

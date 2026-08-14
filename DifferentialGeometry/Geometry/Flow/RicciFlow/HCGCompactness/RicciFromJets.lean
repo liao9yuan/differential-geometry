@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConvTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RicciDiffAffine
@@ -10,45 +10,40 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciConti
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 800000
 
-/-!
-# Ricci convergence from covariant metric convergence (P4 Brick 6 `hRicConv` producer)
 
-MSM135 chapter3.tex:853–856: "since all derivatives of the metric converge, the Ricci
-curvature of `g_k(t)` converges to the Ricci curvature of `g_∞(t)`."  This file proves
-the quantitative form: a **pair-uniform** estimate
 
-`|ricciTensor u x v w − ricciTensor u' x v w| ≤ C · Σ_{a ≤ 2} metricDerivNorm a u u' gRef x`
 
-with `C` depending only on the point, the reference metric, an equivalence lower bound
-`lam` and covariant bounds `B` for the two metrics — NOT on the pair itself — and its
-sequence corollary `ricciConv_of_dnConv`, the `hRicConv` input of
-`LimitSolutionEquation.metricLimit_pde`.
 
-Route (see `RicciFromJets.md`): the chart 2-jets of the Gram matrix at
-`α := extChartAt I x x` are expanded into covariant tower values by iterating the P3
-tower identity `fderiv_chartRep_eq_towerStep` (`MetricPreconv.lean`), then bounded via
-the pointwise Cauchy–Schwarz `abs_apply_le_sqrt_normSq0S`; the chart-Ricci difference is
-bounded by the 2-jet difference by re-assembling the DeTurck-coefficient perturbation
-layer (`ChristoffelPerturbation.lean` / `RicciDiffAffine.lean`) with pair-uniform
-constants; the manifold bridge is `ricciTensor_eq_chartRicciSwap_of_basis_identity`
-(unconditional via `chartRiemannBasisIdentity_holds`).
 
-Main statements:
-* `jet2Diff_le_dNorm` — the covariant→chart-jet conversion: `chartMetricJet2DiffSup` at
-  `α` is controlled by `Σ_{a ≤ 2} metricDerivNorm a · · gRef x`, with a pair-independent
-  constant.  This is the "missing conversion lemma" of `LimitSolutionEquation.md`.
-* `gramJet_le_covNorm` — single-metric chart-jet bounds from `metricCovDerivNorm`.
-* `invGram_le_of_low` — inverse chart-Gram entry bound from a metric lower bound at `x`.
-* `chartRicci_sub_le` — pair-uniform chart-Ricci difference bound.
-* `ricciSub_le_dNorm` — the manifold-level per-pair estimate.
-* `ricciConv_of_dnConv` — the `hRicConv` producer (window/sequence form).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -63,25 +58,24 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-! ## Part 1: chart jets of the Gram matrix as covariant tower values -/
+
 
 section JetExpansion
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-/-- The chart representative of the level-`p` tower scalar of an arbitrary
-`(0,2)`-tensor field `A0` on section slots `W` (the object of the P3 tower engine,
-abbreviated). -/
+
+
+
 private def sRep
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
@@ -91,9 +85,13 @@ private def sRep
   writtenInExtChartAt I 𝓘(Real, Real) x
     (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => W a w))
 
-/-- `sRep` is differentiable at every chart-target point (in particular at
-`extChartAt I x x`). -/
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_diffAt
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -106,9 +104,13 @@ private lemma sRep_diffAt
     h.differentiableOn (by simp)
   exact h1.differentiableAt ((isOpen_extChartAt_target (I := I) x).mem_nhds hz)
 
-/-- Germ form of the tower identity at `Kc = {x}`: the `v`-directional chart
-derivative of `sRep` is the chart rep of `towerStep`, near `extChartAt I x x`. -/
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_fderiv_germ
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -124,9 +126,14 @@ private lemma sRep_fderiv_germ
   fderiv_chartRep_eq_towerStep (I := I) gRef A0 p W x v σ hσ
     (Set.singleton_subset_iff.mpr (mem_chart_source H x)) rfl
 
-/-- Value form of the tower identity: a chart partial of `sRep` at
-`extChartAt I x x` is the `towerStep` value at `x`. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_pd_val
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -148,10 +155,13 @@ private lemma sRep_pd_val
     _ = towerStep (I := I) gRef A0 p W σ x := by
         rw [writtenInExtChartAt_real_apply, hx]
 
-/-- Pointwise split of the chart rep of `towerStep` into `sRep`s: the leading
-level-`(p+1)` scalar with the direction slot prepended, plus the `covSection`
-corrections. -/
+
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towerStep_rep_split
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -181,9 +191,14 @@ private lemma towerStep_rep_split
     · subst h; simp [covSection_apply]
     · simp [Function.update_of_ne h]
 
-/-- Second-order value form: an iterated chart partial of the order-`0` `sRep` at
-`extChartAt I x x`, expanded into `towerStep` values at `x`. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_pd2_val
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (W : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -204,7 +219,6 @@ private lemma sRep_pd2_val
                     (I := I) gRef) σm (W a))) σmm x := by
   have hαtgt : extChartAt I x x ∈ (extChartAt I x).target :=
     (extChartAt I x).map_source (mem_extChartAt_source (I := I) x)
-  -- the inner partial is germ-equal to the chart rep of the level-0 towerStep
   have hgerm := sRep_fderiv_germ gRef x A0 0 W ((chartModelBasis E) m) σm hσm
   have hinner : partialDeriv (E := E) m (sRep gRef x A0 0 W)
       = fun z : E => fderiv Real (sRep gRef x A0 0 W) z ((chartModelBasis E) m) := rfl
@@ -214,7 +228,6 @@ private lemma sRep_pd2_val
           (towerStep (I := I) gRef A0 0 W σm)) (extChartAt I x x) := by
     rw [hinner]
     exact hgerm.fderiv_eq
-  -- split the towerStep rep into differentiable pieces and differentiate the sum
   set corr : Fin 2 → (E → Real) := fun a =>
     sRep gRef x A0 0
       (Function.update W a
@@ -273,10 +286,14 @@ private lemma sRep_pd2_val
             = partialDeriv (E := E) mm (corr a) (extChartAt I x x) from rfl]
         exact sRep_pd_val gRef x A0 0 _ mm σmm hσmm
 
-/-- **Pointwise Cauchy–Schwarz packaging.**  For fixed slot vectors at `x`, every
-`(0,s)`-tensor value is bounded by the `gRef`-norm of the tensor times a fixed
-constant. -/
-private lemma eval_le (s : ℕ) (slots : Fin s → TangentSpace I x) :
+
+
+
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma eval_le
+    [Module.Finite ℝ E]
+    (s : ℕ) (slots : Fin s → TangentSpace I x) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ T : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
           (I := I) (M := M) s x,
@@ -293,10 +310,13 @@ private lemma eval_le (s : ℕ) (slots : Fin s → TangentSpace I x) :
           * Real.sqrt (normSq0S (I := I) gRef x s T) := by
         rw [mul_comm]
 
-/-- The `towerStep` value difference at `x` for two `(0,2)`-fields, bounded by the
-`gRef`-norms of the covariant value differences at orders `p` and `p + 1`, with a
-field-independent constant. -/
+
+
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towVal_le
+    [Module.Finite ℝ E]
     (p : ℕ)
     (W : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -390,9 +410,12 @@ private lemma towVal_le
         have hs : 0 ≤ ∑ a : Fin (p + 2), Ca a := Finset.sum_nonneg fun a _ => hCann a
         nlinarith
 
-/-- Single-field variant of `towVal_le`: the `towerStep` value at `x` is bounded by
-the `gRef`-norms of the covariant values at orders `p` and `p + 1`. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towVal_le'
+    [Module.Finite ℝ E]
     (p : ℕ)
     (W : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -443,10 +466,13 @@ private lemma towVal_le'
         have hs : 0 ≤ ∑ a : Fin (p + 2), Ca a := Finset.sum_nonneg fun a _ => hCann a
         nlinarith
 
-/-- **Gram germ bridge**: near `extChartAt I x x`, the chart-Gram entry function of a
-metric `u` agrees with the chart rep of the order-`0` tower scalar of
-`metricTensorField u` on the `σ`-slots. -/
+
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma gram_germ
+    [Module.Finite ℝ E]
     (u : SmoothRiemannianMetric I M)
     (i j : Fin (Module.finrank Real E))
     (σi σj : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -492,8 +518,12 @@ private lemma gram_germ
   rw [chartGramMatrix_apply]
   congr 1
 
-/-- Order-`0` Gram-entry difference bound at `x`. -/
-private lemma gram0_le :
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma gram0_le
+    [Module.Finite ℝ E]
+    :
     ∃ C : Real, 0 ≤ C ∧ ∀ (u u' : SmoothRiemannianMetric I M)
       (i j : Fin (Module.finrank Real E)),
       |chartGramMatrix (I := I) u x x i j - chartGramMatrix (I := I) u' x x i j| ≤
@@ -522,8 +552,10 @@ private lemma gram0_le :
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hu hu'
     change u.inner x _ _ - u'.inner x _ _
       = (metricCovDeriv (I := I) u gRef 0 x) _ - (metricCovDeriv (I := I) u' gRef 0 x) _
-    rw [show (metricCovDeriv (I := I) u gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u x from rfl,
-      show (metricCovDeriv (I := I) u' gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u' x from rfl,
+    rw [show (metricCovDeriv (I := I) u gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u x
+      from rfl,
+      show (metricCovDeriv (I := I) u' gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u' x
+        from rfl,
       hu, hu']
   rw [hentry]
   have h := hCf (i, j) (metricDiffCovDerivAt (I := I) 0 u u' gRef x)
@@ -539,8 +571,13 @@ private lemma gram0_le :
         mul_le_mul_of_nonneg_right hle hnn
     _ = (∑ t, Cf t) * metricDerivNorm (I := I) 0 u u' gRef x := rfl
 
-/-- The first chart partial of the Gram entry of a metric, as a `towerStep` value. -/
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram_pd_eq
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -559,9 +596,14 @@ private lemma gram_pd_eq
     rw [hg.fderiv_eq]
   rw [h1, sRep_pd_val gRef x _ 0 ![σs i, σs j] m (σs m) (hσs m)]
 
-/-- The second chart partial of the Gram entry of a metric, expanded into
-`towerStep` values. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram_pd2_eq
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -601,8 +643,13 @@ private lemma gram_pd2_eq
   rw [h1]
   exact sRep_pd2_val gRef x _ ![σs i, σs j] m mm (σs m) (σs mm) (hσs m) (hσs mm)
 
-/-- Order-`1` Gram-partial difference bound at `extChartAt I x x`. -/
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram1_le
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -649,8 +696,13 @@ private lemma gram1_le
     add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   exact mul_le_mul_of_nonneg_right hle hnn
 
-/-- Order-`2` Gram-partial difference bound at `extChartAt I x x`. -/
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram2_le
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -665,13 +717,13 @@ private lemma gram2_le
             + metricDerivNorm (I := I) 1 u u' gRef x
             + metricDerivNorm (I := I) 0 u u' gRef x) := by
   classical
-  -- level-1 leading terms
   have hC1 : ∀ t : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E), ∃ C : Real, 0 ≤ C ∧
       ∀ A0 A0' : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
           (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2,
         |towerStep (I := I) gRef A0 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1) x
-          - towerStep (I := I) gRef A0' 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1) x| ≤
+          - towerStep (I := I) gRef A0' 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1) x|
+            ≤
         C * (Real.sqrt (normSq0S (I := I) gRef x (1 + 1 + 2)
               (covDerivOfField (I := I) gRef A0 (1 + 1) x
                 - covDerivOfField (I := I) gRef A0' (1 + 1) x))
@@ -679,7 +731,6 @@ private lemma gram2_le
               (covDerivOfField (I := I) gRef A0 1 x
                 - covDerivOfField (I := I) gRef A0' 1 x))) :=
     fun t => towVal_le gRef x 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1)
-  -- level-0 correction terms
   have hC0 : ∀ t : ((Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) × Fin 2,
       ∃ C : Real, 0 ≤ C ∧
@@ -830,9 +881,13 @@ section JetEndpoints
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-/-- Existence of the chart-constant slot sections at `x` (the `σ`-family of the
-tower engine, at `Kc = {x}`). -/
-private lemma exists_slotSections :
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [I.Boundaryless] [IsManifold I 2 M] in
+private lemma exists_slotSections
+    [Module.Finite ℝ E]
+    :
     ∃ σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M → Type _),
       ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -847,12 +902,16 @@ private lemma exists_slotSections :
   choose σs hσs using hσex
   exact ⟨σs, hσs⟩
 
-/-- **The covariant→chart-jet conversion** (the missing lemma of
-`LimitSolutionEquation.md`): the chart `2`-jet difference seminorm of two metrics at
-`extChartAt I x x` is controlled by the MSM135 covariant seminorms
-`metricDerivNorm a` (`a ≤ 2`) at `x`, with a constant depending only on `(gRef, x)` —
-NOT on the metric pair. -/
-theorem jet2Diff_le_dNorm :
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem jet2Diff_le_dNorm
+    [Module.Finite ℝ E]
+    :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       chartMetricJet2DiffSup (I := I) (M := M) u u' x (extChartAt I x x) ≤
         C * ∑ a ∈ Finset.range 3, metricDerivNorm (I := I) a u u' gRef x := by
@@ -949,11 +1008,16 @@ theorem jet2Diff_le_dNorm :
         exact add_le_add (add_le_add hA hB) hCc
     _ ≤ (n2 * C0 + n3 * C1 + n4 * C2 + 1) * S := by nlinarith
 
-/-- **Single-metric chart-jet bounds from covariant bounds**: the first and second
-chart partials of the Gram entries at `extChartAt I x x` are controlled by
-`Σ_{a ≤ 2} metricCovDerivNorm a · gRef x`, with a constant depending only on
-`(gRef, x)`. -/
-theorem gramJet_le_covNorm :
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+theorem gramJet_le_covNorm
+    [Module.Finite ℝ E]
+    :
     ∃ C : Real, 0 < C ∧ ∀ u : SmoothRiemannianMetric I M,
       (∀ m i j : Fin (Module.finrank Real E),
         |partialDeriv (E := E) m (chartGramOnE (I := I) u x i j) (extChartAt I x x)| ≤
@@ -965,7 +1029,6 @@ theorem gramJet_le_covNorm :
           C * ∑ a ∈ Finset.range 3, metricCovDerivNorm (I := I) a u gRef x) := by
   classical
   obtain ⟨σs, hσs⟩ := exists_slotSections (I := I) x
-  -- first-partial constants
   have hK1 : ∀ t : Fin (Module.finrank Real E) × Fin (Module.finrank Real E)
       × Fin (Module.finrank Real E), ∃ C : Real, 0 ≤ C ∧
       ∀ A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -976,7 +1039,6 @@ theorem gramJet_le_covNorm :
             + Real.sqrt (normSq0S (I := I) gRef x (0 + 2)
               (covDerivOfField (I := I) gRef A0 0 x))) :=
     fun t => towVal_le' gRef x 0 ![σs t.2.1, σs t.2.2] (σs t.1)
-  -- second-partial leading constants
   have hK2 : ∀ t : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E), ∃ C : Real, 0 ≤ C ∧
       ∀ A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -987,7 +1049,6 @@ theorem gramJet_le_covNorm :
             + Real.sqrt (normSq0S (I := I) gRef x (1 + 2)
               (covDerivOfField (I := I) gRef A0 1 x))) :=
     fun t => towVal_le' gRef x 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1)
-  -- second-partial correction constants
   have hK0 : ∀ t : ((Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) × Fin 2,
       ∃ C : Real, 0 ≤ C ∧
@@ -1108,7 +1169,7 @@ theorem gramJet_le_covNorm :
 
 end JetEndpoints
 
-/-! ## Part 2: inverse chart-Gram entry bound from a metric lower bound at `x` -/
+
 
 section InvGram
 
@@ -1116,8 +1177,12 @@ open Matrix
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-/-- Euclidean lower bound for the `gRef` chart-Gram quadratic form at `x`. -/
-private lemma gram_quad_low :
+
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] in
+private lemma gram_quad_low
+    [Module.Finite ℝ E]
+    :
     ∃ c0 : Real, 0 < c0 ∧ ∀ ξ : Fin (Module.finrank Real E) → Real,
       c0 * (ξ ⬝ᵥ ξ) ≤ ξ ⬝ᵥ (chartGramMatrix (I := I) gRef x x) *ᵥ ξ := by
   classical
@@ -1226,10 +1291,14 @@ private lemma gram_quad_low :
           rw [← hr2]
           field_simp
 
-/-- **Inverse chart-Gram entry bound from a pointwise metric lower bound**: if
-`lam · gRef ≤ u` as quadratic forms at `x`, every entry of the inverse chart-Gram
-matrix of `u` at `x` is bounded by a constant depending only on `(gRef, x, lam)`. -/
-theorem invGram_le_of_low (lam : Real) (hlam : 0 < lam) :
+
+
+
+omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+theorem invGram_le_of_low
+    [Module.Finite ℝ E]
+    (lam : Real) (hlam : 0 < lam) :
     ∃ Mb : Real, 0 ≤ Mb ∧ ∀ u : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       ∀ k l : Fin (Module.finrank Real E),
@@ -1242,7 +1311,6 @@ theorem invGram_le_of_low (lam : Real) (hlam : 0 < lam) :
   refine ⟨(lam * c0)⁻¹, (inv_nonneg).mpr hμ.le, fun u hlow k l => ?_⟩
   have hdet : IsUnit (chartGramMatrix (I := I) u x x).det :=
     (chartGramMatrix_det_pos (I := I) u x hxbase).ne'.isUnit
-  -- pair-uniform quadratic lower bound for `u`
   have hulow : ∀ ξ : Fin (Module.finrank Real E) → Real,
       lam * c0 * (ξ ⬝ᵥ ξ) ≤ ξ ⬝ᵥ (chartGramMatrix (I := I) u x x) *ᵥ ξ := by
     intro ξ
@@ -1258,7 +1326,6 @@ theorem invGram_le_of_low (lam : Real) (hlam : 0 < lam) :
       _ ≤ u.inner x (∑ i, ξ i • chartBasisVecFiber (I := I) x i x)
             (∑ j, ξ j • chartBasisVecFiber (I := I) x j x) := hlow _
       _ = ξ ⬝ᵥ (chartGramMatrix (I := I) u x x) *ᵥ ξ := hu.symm
-  -- the `l`-th column of the inverse
   set η : Fin (Module.finrank Real E) → Real :=
     (chartGramMatrix (I := I) u x x)⁻¹ *ᵥ Pi.single l 1 with hη
   have hGη : (chartGramMatrix (I := I) u x x) *ᵥ η = Pi.single l 1 := by
@@ -1310,24 +1377,28 @@ theorem invGram_le_of_low (lam : Real) (hlam : 0 < lam) :
 
 end InvGram
 
-/-! ## Part 3: pair-uniform chart-Ricci difference bound -/
+
 
 section RicciAssembly
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-/-- Triangle bound for a three-term combination `|A + B - C| ≤ |A| + |B| + |C|`. -/
+
 private lemma abs_add_sub_le (A B C : Real) : |A + B - C| ≤ |A| + |B| + |C| := by
   calc |A + B - C| = |A + B + (-C)| := by ring_nf
     _ ≤ |A + B| + |(-C)| := abs_add_le _ _
     _ ≤ (|A| + |B|) + |(-C)| := by gcongr; exact abs_add_le _ _
     _ = |A| + |B| + |C| := by rw [abs_neg]
 
-/-- **Pair-uniform chart-Ricci difference bound at `x`.**  Under a common metric
-lower bound `lam · gRef` and common covariant bounds `B` (orders `≤ 2`) at `x`, the
-chart-Ricci entry difference at `extChartAt I x x` is bounded by
-`C · chartMetricJet2DiffSup`, with `C = C(gRef, x, lam, B)` independent of the pair. -/
-theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem chartRicci_sub_le
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
@@ -1349,30 +1420,62 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     exact hαtgt
   have hψ : (extChartAt I x).symm (extChartAt I x x) = x :=
     (extChartAt I x).left_inv (mem_extChartAt_source (I := I) x)
-  -- fixed constants
   set nR : Real := (Module.finrank Real E : Real) with hnR
   have hnR0 : 0 ≤ nR := Nat.cast_nonneg _
   set Q : Real := CJ * (3 * B) with hQdef
-  have hQ0 : 0 ≤ Q := by positivity
+  have hQ0 : 0 ≤ Q := by
+    rw [hQdef]
+    exact mul_nonneg hCJ0.le (mul_nonneg (by norm_num) hB)
   set P : Real := 3 * Q with hPdef
-  have hP0 : 0 ≤ P := by positivity
+  have hP0 : 0 ≤ P := by
+    rw [hPdef]
+    exact mul_nonneg (by norm_num) hQ0
   set Cinv : Real := nR ^ 2 * Mb ^ 2 with hCinvdef
-  have hCinv0 : 0 ≤ Cinv := by positivity
+  have hCinv0 : 0 ≤ Cinv := by
+    rw [hCinvdef]
+    exact mul_nonneg (sq_nonneg nR) (sq_nonneg Mb)
   set D : Real := nR ^ 2 * (Mb ^ 2 * Q) with hDdef
-  have hD0 : 0 ≤ D := by positivity
+  have hD0 : 0 ≤ D := by
+    rw [hDdef]
+    exact mul_nonneg (sq_nonneg nR) (mul_nonneg (sq_nonneg Mb) hQ0)
   set R : Real := 3 * Q with hRdef
-  have hR0 : 0 ≤ R := by positivity
+  have hR0 : 0 ≤ R := by
+    rw [hRdef]
+    exact mul_nonneg (by norm_num) hQ0
   set Mg : Real := (1 / 2) * nR * (Mb * P) with hMgdef
-  have hMg0 : 0 ≤ Mg := by positivity
+  have hMg0 : 0 ≤ Mg := by
+    rw [hMgdef]
+    exact mul_nonneg (mul_nonneg (by norm_num) hnR0) (mul_nonneg hMb0 hP0)
   set Cd : Real := nR ^ 2 * (2 * Cinv * Mb * Q + Mb ^ 2) with hCddef
-  have hCd0 : 0 ≤ Cd := by positivity
+  have hCd0 : 0 ≤ Cd := by
+    rw [hCddef]
+    exact mul_nonneg (sq_nonneg nR)
+      (add_nonneg
+        (mul_nonneg
+          (mul_nonneg (mul_nonneg (by norm_num) hCinv0) hMb0) hQ0)
+        (sq_nonneg Mb))
   set Clip : Real := (1 / 2) * nR * (Cinv * P + 3 * Mb) with hClipdef
-  have hClip0 : 0 ≤ Clip := by positivity
+  have hClip0 : 0 ≤ Clip := by
+    rw [hClipdef]
+    exact mul_nonneg (mul_nonneg (by norm_num) hnR0)
+      (add_nonneg (mul_nonneg hCinv0 hP0) (mul_nonneg (by norm_num) hMb0))
   set Cdiff : Real := (1 / 2) * nR * (Cd * P + 3 * D + Cinv * R + 3 * Mb) with hCdiffdef
-  have hCdiff0 : 0 ≤ Cdiff := by positivity
-  refine ⟨2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1, by positivity,
+  have hCdiff0 : 0 ≤ Cdiff := by
+    rw [hCdiffdef]
+    exact mul_nonneg (mul_nonneg (by norm_num) hnR0)
+      (add_nonneg
+        (add_nonneg
+          (add_nonneg (mul_nonneg hCd0 hP0) (mul_nonneg (by norm_num) hD0))
+          (mul_nonneg hCinv0 hR0))
+        (mul_nonneg (by norm_num) hMb0))
+  have hSecondCoeff0 : 0 ≤ 2 * nR * Cdiff :=
+    mul_nonneg (mul_nonneg (by norm_num) hnR0) hCdiff0
+  have hFirstCoeff0 : 0 ≤ 4 * nR ^ 2 * Clip * Mg :=
+    mul_nonneg
+      (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg nR)) hClip0) hMg0
+  refine ⟨2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1,
+    add_pos_of_nonneg_of_pos (add_nonneg hSecondCoeff0 hFirstCoeff0) zero_lt_one,
     fun u u' hlowu hlowu' hcovu hcovu' i k => ?_⟩
-  -- covariant sums ≤ 3B
   have hcS : ∀ (w : SmoothRiemannianMetric I M),
       (∀ a : ℕ, a ≤ 2 → metricCovDerivNorm (I := I) a w gRef x ≤ B) →
       (∑ a ∈ Finset.range 3, metricCovDerivNorm (I := I) a w gRef x) ≤ 3 * B := by
@@ -1382,7 +1485,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     have h1 := hw 1 (by norm_num)
     have h2 := hw 2 (by norm_num)
     linarith
-  -- first- and second-partial bounds for both metrics
   have hQu : ∀ m a b : Fin (Module.finrank Real E),
       |partialDeriv (E := E) m (chartGramOnE (I := I) u x a b) (extChartAt I x x)| ≤ Q := by
     intro m a b
@@ -1402,7 +1504,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     refine ((hCJ u).2 mm m a b).trans ?_
     rw [hQdef]
     exact mul_le_mul_of_nonneg_left (hcS u hcovu) hCJ0.le
-  -- inverse-Gram entry bounds at the chart point
   have hMbα : ∀ (w : SmoothRiemannianMetric I M),
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ w.inner x ξ ξ) →
       ∀ k' l : Fin (Module.finrank Real E),
@@ -1412,7 +1513,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     exact hMb w hloww k' l
   have hMbu := hMbα u hlowu
   have hMbu' := hMbα u' hlowu'
-  -- 0-jet inverse-Gram Lipschitz (α-form)
   have hCinvα : ∀ k' l : Fin (Module.finrank Real E),
       |chartInvGramOnE (I := I) u x k' l (extChartAt I x x)
         - chartInvGramOnE (I := I) u' x k' l (extChartAt I x x)| ≤
@@ -1424,7 +1524,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       hxbase (fun p q => hMb u hlowu p q) (fun p q => hMb u' hlowu' p q) k' l
     rw [hCinvdef, hnR]
     exact h
-  -- gramBracket bounds for `u`
   have hPu : ∀ i' j l : Fin (Module.finrank Real E),
       |gramBracket (I := I) u x i' j l (extChartAt I x x)| ≤ P := by
     intro i' j l
@@ -1443,7 +1542,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     have h3 := hQu l i' j
     rw [hPdef]
     linarith
-  -- gramBracketDeriv bounds for `u`
   have hRu : ∀ m i' j l : Fin (Module.finrank Real E),
       |gramBracketDeriv (I := I) u x m i' j l (extChartAt I x x)| ≤ R := by
     intro m i' j l
@@ -1468,7 +1566,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     have h3 := hQQu m l i' j
     rw [hRdef]
     linarith
-  -- inverse-Gram partial bound for `u'`
   have hDu' : ∀ m k' l : Fin (Module.finrank Real E),
       |partialDeriv (E := E) m (chartInvGramOnE (I := I) u' x k' l) (extChartAt I x x)| ≤ D := by
     intro m k' l
@@ -1513,7 +1610,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       _ = nR * (nR * (Mb * Mb * Q)) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hnR]
       _ = D := by rw [hDdef]; ring
-  -- Christoffel bounds for both metrics
   have hMgb : ∀ (w : SmoothRiemannianMetric I M),
       (∀ k' l : Fin (Module.finrank Real E),
         |chartInvGramOnE (I := I) w x k' l (extChartAt I x x)| ≤ Mb) →
@@ -1540,7 +1636,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
           exact mul_le_mul (hMbw k' l) (hPw i' j l) (abs_nonneg _) hMb0
       _ = nR * (Mb * P) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hnR]
-  -- gramBracket bound for `u'` (needed for its Christoffel bound)
   have hPu' : ∀ i' j l : Fin (Module.finrank Real E),
       |gramBracket (I := I) u' x i' j l (extChartAt I x x)| ≤ P := by
     intro i' j l
@@ -1561,7 +1656,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     linarith
   have hMgu := hMgb u hMbu hPu
   have hMgu' := hMgb u' hMbu' hPu'
-  -- inverse-Gram partial-derivative Lipschitz
   have hCdα : ∀ (m k' l : Fin (Module.finrank Real E)),
       |partialDeriv (E := E) m (chartInvGramOnE (I := I) u x k' l) (extChartAt I x x)
         - partialDeriv (E := E) m (chartInvGramOnE (I := I) u' x k' l) (extChartAt I x x)| ≤
@@ -1571,7 +1665,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       hMb0 hQ0 hCinv0 hMbu hMbu' (fun m' a b => hQu m' a b) hCinvα m k' l
     rw [hCddef, hnR]
     exact h
-  -- Christoffel Lipschitz
   have hClipα : ∀ i' j k' : Fin (Module.finrank Real E),
       |chartChristoffel (I := I) u x i' j k' (extChartAt I x x)
         - chartChristoffel (I := I) u' x i' j k' (extChartAt I x x)| ≤
@@ -1581,7 +1674,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       hP0 hMb0 hMbu' hPu hCinvα hCinv0 i' j k'
     rw [hClipdef, hnR]
     exact h
-  -- Christoffel-derivative Lipschitz
   have hCdiffα : ∀ m i' j k' : Fin (Module.finrank Real E),
       |partialDeriv (E := E) m (chartChristoffel (I := I) u x i' j k') (extChartAt I x x)
         - partialDeriv (E := E) m (chartChristoffel (I := I) u' x i' j k') (extChartAt I x x)| ≤
@@ -1593,7 +1685,6 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       (fun i'' j' l => hRu m i'' j' l) hCinvα
     rw [hCdiffdef, hnR]
     exact h
-  -- assemble (mirror of `exists_chartRicciTensor_lipschitz_on_compact`)
   set jet2 : Real := chartMetricJet2DiffSup (I := I) (M := M) u u' x (extChartAt I x x)
     with hjet2def
   have hjet2nn : 0 ≤ jet2 := chartMetricJet2DiffSup_nonneg _ _ _ _
@@ -1619,7 +1710,7 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       4 * nR ^ 2 * Clip * Mg * jet2 := by
     refine h1st.trans ?_
     rw [hnR]
-    exact mul_le_mul_of_nonneg_left hjet1le (by positivity)
+    exact mul_le_mul_of_nonneg_left hjet1le hFirstCoeff0
   have h2nd' : |chartRicciSecondOrderTerm (I := I) u x i k (extChartAt I x x)
       - chartRicciSecondOrderTerm (I := I) u' x i k (extChartAt I x x)| ≤
       2 * nR * Cdiff * jet2 := by
@@ -1630,22 +1721,28 @@ theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
       + |chartRicciFirstOrderTerm (I := I) u x i k (extChartAt I x x)
           - chartRicciFirstOrderTerm (I := I) u' x i k (extChartAt I x x)|
       ≤ 2 * nR * Cdiff * jet2 + 4 * nR ^ 2 * Clip * Mg * jet2 := add_le_add h2nd' h1st'
-    _ ≤ (2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1) * jet2 := by nlinarith
+    _ = (2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg) * jet2 := by ring
+    _ ≤ (2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1) * jet2 :=
+      mul_le_mul_of_nonneg_right (le_add_of_nonneg_right zero_le_one) hjet2nn
 
 end RicciAssembly
 
-/-! ## Part 4: manifold endpoints -/
+
 
 section Endpoints
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-/-- **Per-pair Ricci coefficient estimate** (MSM135 chapter3.tex:853–856,
-quantitative form): for metrics with a common lower bound `lam · gRef` and common
-covariant bounds `B` (orders `≤ 2`) at `x`, the canonical Ricci coefficients differ
-by at most `C · Σ_{a ≤ 2} metricDerivNorm a u u' gRef x`, with
-`C = C(gRef, x, lam, B, v, w)` independent of the pair. -/
-theorem ricciSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem ricciSub_le_dNorm
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
     (v w : TangentSpace I x) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
@@ -1715,12 +1812,15 @@ theorem ricciSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
         rw [Finset.sum_mul]
     _ ≤ (crep * (CR * CJ2) + 1) * S := by nlinarith
 
-/-- **The `hRicConv` producer** (P4 Brick 6): uniform-in-time convergence of the
-canonical Ricci coefficients at a fixed point from uniform-in-time `C²`-covariant
-seminorm smallness at that point, under window-uniform equivalence lower bounds and
-covariant bounds for both the sequence and the limit family.  This is the exact
-input shape of `LimitSolutionEquation.metricLimit_pde`. -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
 theorem ricciConv_of_dnConv
+    [Module.Finite ℝ E]
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M)
     (β ψ lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
@@ -1765,24 +1865,28 @@ theorem ricciConv_of_dnConv
 
 end Endpoints
 
-/-! ## Part 6: scalar-curvature endpoints (P4 Brick 6 scalar producer)
 
-Scalar mirror of the Ricci pair: `metricScalarAt` is expanded through the chart trace
-`metricScalar_chartTrace_eq` at `α := x` (good-set self-point), the trace difference is
-split into an inverse-Gram difference term and a Ricci difference term, and each factor
-is bounded pair-uniformly (`invGram_le_of_low`, `gram0_le`, `Matrix.inv_sub_inv`,
-`ricciSub_le_dNorm`, and a `gRef`-anchored single-metric Ricci bound via
-`derivNorm_le_cov_add`). -/
+
+
+
+
+
+
+
 
 section ScalarEndpoints
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-/-- Pair-uniform inverse-chart-Gram entry-difference bound at `x`:
-`A⁻¹ − B⁻¹ = A⁻¹ (B − A) B⁻¹` (`Matrix.inv_sub_inv`, dets are units by
-`chartGramMatrix_det_pos`), with `invGram_le_of_low` bounding the inverse factors and
-`gram0_le` bounding the Gram-entry difference by `metricDerivNorm 0`. -/
-private lemma invGram_sub_le (lam : Real) (hlam : 0 < lam) :
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma invGram_sub_le
+    [Module.Finite ℝ E]
+    (lam : Real) (hlam : 0 < lam) :
     ∃ C : Real, 0 ≤ C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
@@ -1851,12 +1955,16 @@ private lemma invGram_sub_le (lam : Real) (hlam : 0 < lam) :
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   exact le_of_eq (by ring)
 
-/-- `gRef`-anchored single-metric Ricci coefficient bound: under the standard
-lower/covariant bounds at `x`, `|ricciTensor u x v w|` is bounded by a constant
-depending only on `(gRef, x, lam, B, v, w)` — not on `u`.  Applies
-`ricciSub_le_dNorm` to the pair `(u, gRef)` with `lam' := min lam 1`,
-`B' := max B B0`, and converts the pair seminorm via `derivNorm_le_cov_add`. -/
-private lemma ricci_abs_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+private lemma ricci_abs_le
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
     (v w : TangentSpace I x) :
     ∃ C : Real, 0 ≤ C ∧ ∀ u : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
@@ -1932,13 +2040,17 @@ private lemma ricci_abs_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
           mul_le_mul_of_nonneg_left hdsum hCA0.le
         linarith [hsub]
 
-/-- **Per-pair scalar-curvature estimate** (MSM135 chapter3.tex:853–856, trace form):
-for metrics with a common lower bound `lam · gRef` and common covariant bounds `B`
-(orders `≤ 2`) at `x`, the scalar curvatures differ by at most
-`C · Σ_{a ≤ 2} metricDerivNorm a u u' gRef x`, with `C = C(gRef, x, lam, B)`
-independent of the pair.  Scalar mirror of `ricciSub_le_dNorm` through the chart trace
-expansion `metricScalar_chartTrace_eq` at `α := x`. -/
-theorem scalarSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem scalarSub_le_dNorm
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
@@ -2049,12 +2161,15 @@ theorem scalarSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
   rw [hEq]
   exact mul_le_mul_of_nonneg_right (by linarith) hS0
 
-/-- **The scalar-curvature convergence producer** (P4 Brick 6, scalar bullet):
-uniform-in-time convergence of scalar curvature at a fixed point from uniform-in-time
-`C²`-covariant seminorm smallness at that point, under window-uniform equivalence
-lower bounds and covariant bounds for both the sequence and the limit family.
-Scalar mirror of `ricciConv_of_dnConv` (same hypothesis package). -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
 theorem scalarConv_of_dnConv
+    [Module.Finite ℝ E]
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M)
     (β ψ lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
@@ -2150,6 +2265,7 @@ private lemma mul4_le_mul4
     mul_le_mul hAB hc hc0 (mul_nonneg hA0 hB0)
   exact mul_le_mul hABC hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
 
+omit [IsManifold I 2 M] in
 /-- Pair-uniform convergence estimate for the intrinsic squared Ricci norm.
 Both inverse-metric contractions and both Ricci factors are allowed to vary. -/
 theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
@@ -2396,8 +2512,9 @@ theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
   rw [hEq]
   exact mul_le_mul_of_nonneg_right (by linarith) hS0
 
-/-- Uniform-in-time convergence of the intrinsic squared Ricci norm at a fixed
-point from the same `C²` metric-jet convergence package as Ricci and scalar
+  omit [IsManifold I 2 M] in
+  /-- Uniform-in-time convergence of the intrinsic squared Ricci norm at a fixed
+  point from the same `C²` metric-jet convergence package as Ricci and scalar
 curvature convergence. -/
 theorem ricNormConv_of_dn
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)

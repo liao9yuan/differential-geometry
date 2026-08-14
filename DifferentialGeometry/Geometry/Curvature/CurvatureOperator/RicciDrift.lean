@@ -8,18 +8,16 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerProduct
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# The Ricci drift current
 
-This file constructs the canonical vector field
-`Ric♯(∇f) - (R / 2) ∇f` and computes its divergence.  The calculation is
-the invariant contracted-Bianchi bridge used in Perelman's weighted Hessian
-square completion.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,18 +29,18 @@ open scoped Manifold ContDiff BigOperators
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- The one-form `Ric(∇f, ·)` associated to a smooth metric and function. -/
+
 noncomputable def ricGradForm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) :
@@ -51,6 +49,7 @@ noncomputable def ricGradForm [I.Boundaryless]
   partialEval0SField (I := I) (metricRicci (I := I) (M := M) g)
     (grad_g (I := I) g hf)
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradForm_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -59,7 +58,7 @@ noncomputable def ricGradForm [I.Boundaryless]
         (metricRicciAt (I := I) (M := M) g x) (grad_g (I := I) g hf x) := by
   simp [ricGradForm]
 
-/-- The raised Ricci-gradient field `Ric♯(∇f)`. -/
+
 noncomputable def ricGradVec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) :
@@ -73,6 +72,7 @@ noncomputable def ricGradVec [I.Boundaryless]
           cotangentSection_chartComponent_contMDiffOn
             (I := I) (ricGradForm (I := I) g hf) a j))
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradVec_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -80,7 +80,7 @@ noncomputable def ricGradVec [I.Boundaryless]
       cotangentSharp_gen (I := I) g x (ricGradForm (I := I) g hf x) :=
   rfl
 
-/-- The Ricci drift current `Ric♯(∇f) - (R / 2) ∇f`. -/
+
 noncomputable def ricDriftVec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) :
@@ -93,6 +93,7 @@ noncomputable def ricDriftVec [I.Boundaryless]
       ((contMDiff_const.mul (metricScalar_smooth (I := I) (M := M) g)).smul_section
         (grad_g (I := I) g hf).contMDiff))
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricDriftVec_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -286,8 +287,8 @@ private theorem div_ricGrad [I.Boundaryless]
       rw [hRicPart, hHessPart]
     _ = _ := by rfl
 
-/-- The divergence of the Ricci drift current is the Ricci--Hessian
-contraction minus one half of scalar curvature times the Laplacian. -/
+
+
 theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -326,7 +327,7 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
         a x * divergence (I := I) cov (fun y : M => G y) x +
           extDerivFun (I := I) a x (G x) := by
     simpa only [Pi.smul_apply] using
-      (divergence_smul (I := I) (X := fun y : M => G y) (x := x) cov haMD
+      (divergence_smul (I := I) (X := fun y : M => G y) (x := x) cov inferInstance haMD
         (G.contMDiff.contMDiffAt.mdifferentiableAt (by simp)))
   have hLap :
       divergence (I := I) cov (fun y : M => G y) x = Δ_g (I := I) g hf x := by
@@ -357,8 +358,9 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
       dsimp only [a]
       ring
 
-/-- The Ricci drift current acting on its potential equals the Ricci gradient
-quadratic form minus one half scalar curvature times `|∇f|²`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem ricDriftAct [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :

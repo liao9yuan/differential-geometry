@@ -4,15 +4,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.FirstVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PotentialGeometry
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Evolution of Perelman's reconstructed potential
 
-This file transfers a positive classical heat-potential solution through the
-logarithmic density parametrization.  The result is pointwise and uses only the
-positive spatial slice at the time being evaluated.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -30,8 +29,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-/-- At a positive regular time, Perelman's reconstructed potential is smooth
-on the whole spatial slice. -/
+
+
 theorem potential_slice
     (D : RealTimeInterval)
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -61,8 +60,8 @@ theorem potential_slice
       (f := fun z : M => u s z / perelmanDensityPrefactor n s)
       (x := y) hquot).neg
 
-/-- A positive heat-potential slice, reconstructed as Perelman's potential,
-satisfies the pointwise logarithmic evolution equation. -/
+
+
 theorem potential_pde
     (D : RealTimeInterval)
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -176,8 +175,8 @@ theorem potential_pde
   convert htime using 1
   rw [hspace]
 
-/-- Perelman's reconstructed potential is jointly spacetime smooth wherever
-the heat-potential solution is positive and the time parameter is positive. -/
+
+
 theorem potential_joint
     (D : RealTimeInterval)
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -251,9 +250,9 @@ theorem potential_joint
           u q.1 q.2 / perelmanDensityPrefactor n q.1) (x := p) hquot
   simpa only [perelmanPotential] using hlog.neg.contMDiffWithinAt
 
-/-- At positive regular times, the spatial differential of Perelman's
-reconstructed potential differentiates to the spatial differential of its
-pointwise evolution velocity. -/
+
+
+
 theorem potential_df_time
     [I.Boundaryless]
     (D : RealTimeInterval)

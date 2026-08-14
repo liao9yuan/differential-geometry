@@ -24,8 +24,9 @@ namespace Tensor
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +52,7 @@ noncomputable def fineBlock
     (canonFlatBase (I := I) (M := M) rFine hr z)
     (fun Q => canonCutMul (I := I) (M := M) rFine hr z (u Q))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem memWkp_sum
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {U : Set EuclN} (hU : IsOpen U)
     {A : Type*} (t : Finset A) (f : A → EuclN → ℝ)
@@ -76,7 +78,7 @@ The input components are full-Euclidean Sobolev representatives. -/
 theorem fineBlock_comp_mem
     (rFine : M → ℝ) (hr : ∀ α, 0 < rFine α)
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (∞ : ℝ≥0∞))
     (z : CanonFineFlat (I := I) (M := M) rFine hr)
     (u : TensorCompIdx (E := E) r s → EuclN → ℝ)
     (hu : ∀ Q, MemWkp (d := Module.finrank ℝ E) k p (u Q) Set.univ)
@@ -111,13 +113,12 @@ theorem fineBlock_comp_mem
       (fun y => ∑ Q : TensorCompIdx (E := E) r s,
         fineSecTerm (I := I) (M := M) rFine hr r s z α P Q (v Q) y)
       (Chart.chartTargetEuclid (I := I) (M := M) α) := by
-    simpa only [Finset.sum_univ] using
-      memWkp_sum (E := E) hp
-        (Chart.chartTargetEuclid_isOpen (I := I) (M := M) α)
-        Finset.univ
-        (fun Q => fineSecTerm (I := I) (M := M)
-          rFine hr r s z α P Q (v Q))
-        (fun Q _ => hterm Q)
+    exact memWkp_sum (E := E) hp
+      (Chart.chartTargetEuclid_isOpen (I := I) (M := M) α)
+      Finset.univ
+      (fun Q => fineSecTerm (I := I) (M := M)
+        rFine hr r s z α P Q (v Q))
+      (fun Q _ => hterm Q)
   have heq := finePullEq (I := I) (M := M) rFine hr r s z v
     (fun Q => canonCutMul_supp (I := I) (M := M) rFine hr z (u Q)) α P
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E) hp
@@ -128,7 +129,7 @@ section. -/
 theorem fineBlock_mem
     (rFine : M → ℝ) (hr : ∀ α, 0 < rFine α)
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (∞ : ℝ≥0∞))
     (z : CanonFineFlat (I := I) (M := M) rFine hr)
     (u : TensorCompIdx (E := E) r s → EuclN → ℝ)
     (hu : ∀ Q, MemWkp (d := Module.finrank ℝ E) k p (u Q) Set.univ) :
@@ -144,20 +145,20 @@ indices, Sobolev order, and exponent. -/
 theorem fineBlock_bound
     (rFine : M → ℝ) (hr : ∀ α, 0 < rFine α)
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (∞ : ℝ≥0∞))
     (z : CanonFineFlat (I := I) (M := M) rFine hr)
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ K : TensorCompIdx (E := E) r s → ℝ,
       (∀ Q, 0 < K Q) ∧
       ∀ (u : TensorCompIdx (E := E) r s → EuclN → ℝ),
         (∀ Q, MemWkp (d := Module.finrank ℝ E) k p (u Q) Set.univ) →
-        wkpNorm (d := Module.finrank ℝ E) k p
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
             (secChartComp (I := I) (M := M) r s
               (fineBlock (I := I) (M := M) rFine hr r s z u) α P.1 P.2)
             (Chart.chartTargetEuclid (I := I) (M := M) α) ≤
           ∑ Q : TensorCompIdx (E := E) r s,
             ENNReal.ofReal (K Q) *
-              wkpNorm (d := Module.finrank ℝ E) k p (u Q) Set.univ := by
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p (u Q) Set.univ := by
   classical
   obtain ⟨Kc, hKc, hcut⟩ :=
     canonCut_joint (I := I) (M := M) rFine hr z k hp hp_top
@@ -191,20 +192,20 @@ theorem fineBlock_bound
       rFine hr r s z α P Q (v Q))
     (fun Q _ => hterm_mem Q)
   have hsum' :
-      wkpNorm (d := Module.finrank ℝ E) k p
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
           (fun y => ∑ Q : TensorCompIdx (E := E) r s,
             fineSecTerm (I := I) (M := M)
               rFine hr r s z α P Q (v Q) y)
           (Chart.chartTargetEuclid (I := I) (M := M) α) ≤
         ∑ Q : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) k p
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
             (fineSecTerm (I := I) (M := M)
               rFine hr r s z α P Q (v Q))
             (Chart.chartTargetEuclid (I := I) (M := M) α) := by
-    simpa only [Finset.sum_univ] using hsum
+    exact hsum
   have heq := finePullEq (I := I) (M := M) rFine hr r s z v
     (fun Q => canonCutMul_supp (I := I) (M := M) rFine hr z (u Q)) α P
-  rw [wkpNorm_congr_ae (d := Module.finrank ℝ E) hp
+  rw [fineBlock, wkpNorm_congr_ae (d := Module.finrank ℝ E) hp
     (Chart.chartTargetEuclid_isOpen (I := I) (M := M) α) heq]
   refine hsum'.trans ?_
   refine Finset.sum_le_sum ?_
@@ -216,22 +217,22 @@ theorem fineBlock_bound
       (canonFlatBase (I := I) (M := M) rFine hr z))
     (Set.subset_univ _) (hv Q)
   calc
-    wkpNorm (d := Module.finrank ℝ E) k p
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
         (fineSecTerm (I := I) (M := M) rFine hr r s z α P Q (v Q))
         (Chart.chartTargetEuclid (I := I) (M := M) α) ≤
       ENNReal.ofReal (Kt Q) *
-        wkpNorm (d := Module.finrank ℝ E) k p (v Q)
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p (v Q)
           (Chart.chartTargetEuclid (I := I) (M := M)
             (canonFlatBase (I := I) (M := M) rFine hr z)) := hQ.2
     _ ≤ ENNReal.ofReal (Kt Q) *
-        wkpNorm (d := Module.finrank ℝ E) k p (v Q) Set.univ :=
-      mul_le_mul_left' hmono _
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p (v Q) Set.univ :=
+      mul_le_mul_right hmono _
     _ ≤ ENNReal.ofReal (Kt Q) *
         (ENNReal.ofReal Kc *
-          wkpNorm (d := Module.finrank ℝ E) k p (u Q) Set.univ) :=
-      mul_le_mul_left' (hcut (hu Q)).2 _
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p (u Q) Set.univ) :=
+      mul_le_mul_right (hcut (hu Q)).2 _
     _ = ENNReal.ofReal (Kt Q * Kc) *
-        wkpNorm (d := Module.finrank ℝ E) k p (u Q) Set.univ := by
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p (u Q) Set.univ := by
       rw [ENNReal.ofReal_mul (hKt Q).le]
       simp only [mul_assoc]
 

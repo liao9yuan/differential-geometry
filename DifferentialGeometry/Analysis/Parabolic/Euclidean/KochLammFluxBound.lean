@@ -34,7 +34,7 @@ theorem klFluxKern_fac {R : ℝ} (hR : 0 < R) (w x : V) :
         ‖klFluxKernel (R ^ 2) w x z‖ ^ klPDual V
           ∂(klVolume : Measure (ℝ × V))) ^ (1 / klPDual V) ≤
       ‖w‖ * klLate1C V * klLpScaleR (V := V) R := by
-  have hp : 0 < klPDual V := (klP_holder (V := V)).pos
+  have hp : 0 < klPDual V := (klPDual_holder (V := V)).pos
   have hki : Integrable
       (fun z : ℝ × V ↦
         ‖klFluxKernel (R ^ 2) w x z‖ ^ klPDual V)
@@ -129,7 +129,7 @@ theorem klFluxSrc_fac {T R : ℝ} {A₂ Aₚ : ℝ≥0}
         ∂(klVolume : Measure (ℝ × V))) ^ (1 / klPReal V) ≤
       (klLpScaleR (V := V) R)⁻¹ * (Aₚ : ℝ) := by
   let μ := (klVolume : Measure (ℝ × V)).restrict (klLateCyl x R)
-  have hq : 0 < klPReal V := (klP_holder (V := V)).symm.pos
+  have hq : 0 < klPReal V := (klPDual_holder (V := V)).symm.pos
   have hf : MemLp f (ENNReal.ofReal (klPReal V)) μ := by
     simpa only [klPReal_ofReal] using
       (klFluxSrc_memLp (V := V) h x hR hRT)

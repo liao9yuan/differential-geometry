@@ -3,29 +3,27 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# All-compacts, all-orders window preconvergence endpoint
 
-This file upgrades the single-`(K, p)` window preconvergence extractor
-`windowGInf` to `windowGInfAll`: from the same raw hypotheses (time-Lipschitz on
-every compact, uniform covariant-derivative bounds on every compact, a uniform
-lower bound) it produces a SINGLE subsequence `φ` and a SINGLE limit family
-`gInf : ℝ → SmoothRiemannianMetric I M` such that the displayed `C^p` seminorm
-converges to `0` uniformly on the window `[β, ψ]`, for EVERY compact `K` and
-EVERY order `p`.
 
-Route: a compact exhaustion `K_j` of the σ-compact base, per-`j` window
-extraction retaining BOTH the pointwise `metricDerivNorm` window convergence on
-`K_j` (through order `j`) and the pointwise inner-product convergence of the
-window-limit family at every base point (so the limits are forced UNIQUE by
-`tendsto_nhds_unique`), one master diagonal subsequence via `exists_diag_subseq`,
-identification of all per-`j` limits with a single family `gInf`, and the
-supremum bound `metricDerivNormSupOn_le_of_forall` to reduce an arbitrary
-`(K, p)` to `(K_j, j)`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -40,19 +38,21 @@ open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-/-- Two smooth Riemannian metrics on `TM` are equal as soon as their pointwise
-inner-product bilinear forms agree at every base point. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metric_ext_inner
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (h : forall x : M, g₁.inner x = g₂.inner x) :
@@ -61,10 +61,14 @@ theorem metric_ext_inner
   simp only [Bundle.ContMDiffRiemannianMetric.mk.injEq]
   funext x; exact h x
 
-/-- **Bilinear metric-difference bound by the order-0 seminorm.**  Any single
-component `A.inner x v w - B.inner x v w` of the metric difference is controlled
-by the MSM135 Definition-3.1 `C⁰` seminorm `metricDerivNorm 0 A B gRef x`, via
-polarization and the quadratic-form bound `tensor02_quadForm_abs_le_normSq0S`. -/
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricInnerApply_diff_le
     (A B gRef : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |A.inner x v w - B.inner x v w|
@@ -74,7 +78,6 @@ theorem metricInnerApply_diff_le
   classical
   set n : Real := (Module.finrank Real (TangentSpace I x) : Real) with hn
   set D := metricDiffCovDerivAt (I := I) 0 A B gRef x with hD
-  -- the difference tensor is symmetric, so polarize
   have hsymmA : A.inner x v w = A.inner x w v := A.symm x v w
   have hsymmB : B.inner x v w = B.inner x w v := B.symm x v w
   have hpol : A.inner x v w - B.inner x v w
@@ -82,7 +85,6 @@ theorem metricInnerApply_diff_le
          - (A.inner x v v - B.inner x v v)
          - (A.inner x w w - B.inner x w w)) / 2 := by
     rw [metric_add_self A x v w, metric_add_self B x v w]; rw [hsymmA, hsymmB]; ring
-  -- bound each quadratic-form term by `n · metricDerivNorm 0 · gRef(·,·)`
   have hqf : forall u : TangentSpace I x,
       |A.inner x u u - B.inner x u u|
         <= n * metricDerivNorm (I := I) 0 A B gRef x * gRef.inner x u u := fun u =>
@@ -112,8 +114,12 @@ theorem metricInnerApply_diff_le
     mul_nonneg (mul_nonneg hmn hmd) (hgnn w),
     mul_nonneg (mul_nonneg hmn hmd) (hgnn (v + w))]
 
-/-- Compact-open smooth convergence of metrics implies pointwise convergence of every scalar
-component of the metric inner product, independently of the chosen fixed reference metric. -/
+
+
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCInf_inner
     (gSeq : ℕ → SmoothRiemannianMetric I M) (gInf gRef : SmoothRiemannianMetric I M)
     (hconv : MetricCInfConvOnCompacts (I := I) gSeq gInf gRef)
@@ -157,8 +163,12 @@ theorem metricCInf_inner
     nlinarith [hε, mul_nonneg hn hS]
   exact lt_of_le_of_lt (le_trans hbound hprod) hfrac
 
-/-- A metric sequence has at most one compact-open smooth limit, even when the two convergence
-statements use different fixed reference metrics. -/
+
+
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCInf_unique
     (gSeq : ℕ → SmoothRiemannianMetric I M)
     (A B gRefA gRefB : SmoothRiemannianMetric I M)
@@ -170,9 +180,13 @@ theorem metricCInf_unique
     (metricCInf_inner (I := I) gSeq A gRefA hA x v w)
     (metricCInf_inner (I := I) gSeq B gRefB hB x v w)
 
-/-- **Scalar Cauchy from order-0 seminorm Cauchy.**  If the order-0 metric
-difference seminorm `metricDerivNorm 0 (gk m) (gk l) gRef x` is Cauchy, then each
-scalar component `k ↦ (gk k).inner x v w` is a Cauchy real sequence. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricInner_cauchy
     (gk : Nat -> SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x)
@@ -193,7 +207,6 @@ theorem metricInner_cauchy
   have hnnn : 0 <= n := by rw [hn]; positivity
   rw [Metric.cauchySeq_iff]
   intro eps heps
-  -- choose the seminorm threshold small enough
   obtain ⟨k0, hk0⟩ := hcauchy (eps / (n * S + 1)) (by positivity)
   refine ⟨k0, fun m hm l hl => ?_⟩
   rw [Real.dist_eq]
@@ -206,7 +219,6 @@ theorem metricInner_cauchy
     hk0 m hm l hl
   have hmdnn : 0 <= metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x := Real.sqrt_nonneg _
   have hdenpos : 0 < n * S + 1 := by positivity
-  -- `|Δ| ≤ n · md · S ≤ (n·S)·(eps/(nS+1)) < eps`
   have hkey : n * metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x * S <
       eps := by
     have hprod : n * metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x * S
@@ -224,10 +236,13 @@ theorem metricInner_cauchy
       <= n * metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x * S := hbound
     _ < eps := hkey
 
-/-- **Uniqueness of subsequential inner limits.**  If a metric sequence `gk` has,
-at every base point, a `metricDerivNorm 0`-Cauchy component sequence (so its
-scalar components `gk (·) x v w` are Cauchy in `ℝ`), and two metrics `A`, `B` are
-each pointwise inner limits of subsequences of `gk`, then `A = B`. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metricLimit_uniq
     (gk : Nat -> SmoothRiemannianMetric I M) (A B : SmoothRiemannianMetric I M)
     (hcauchy : forall x : M, forall v w : TangentSpace I x,
@@ -241,7 +256,6 @@ theorem metricLimit_uniq
     A = B := by
   refine metric_ext_inner A B fun x => ?_
   refine ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => ?_
-  -- reduce CLM-limit to scalar-limit by evaluating at `v, w`
   have hAvw : Filter.Tendsto (fun m => (gk (psiA m)).inner x v w) Filter.atTop
       (nhds (A.inner x v w)) := by
     have hc : Continuous fun T : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real =>
@@ -256,7 +270,6 @@ theorem metricLimit_uniq
       (ContinuousLinearMap.apply Real Real w).continuous.comp
         (ContinuousLinearMap.apply Real (TangentSpace I x →L[Real] Real) v).continuous
     exact (hc.tendsto _).comp (hB x)
-  -- the full scalar sequence converges (Cauchy + a convergent subsequence)
   have hfullA : Filter.Tendsto (fun k => (gk k).inner x v w) Filter.atTop
       (nhds (A.inner x v w)) :=
     tendsto_nhds_of_cauchySeq_of_subseq (hcauchy x v w) hpsiA.tendsto_atTop hAvw
@@ -265,14 +278,14 @@ theorem metricLimit_uniq
     tendsto_nhds_of_cauchySeq_of_subseq (hcauchy x v w) hpsiB.tendsto_atTop hBvw
   exact tendsto_nhds_unique hfullA hfullB
 
-/-- **Pointwise window convergence extractor with the limit's inner-tendsto
-exposed.**  This is `windowGInf` strengthened in two ways: the window
-convergence is delivered in POINTWISE form (`metricDerivNorm ... < ε` for each
-`a ≤ p` and `x ∈ K`), and the window-limit family `gInf t` is returned together
-with a per-time strictly monotone subsequence `psi t` along which the sequence
-inner products converge to `gInf t` at EVERY base point.  Both are read off the
-existing internals of `windowGInf` (the `metricPreconvFull` limit `gAt` carries
-the all-point inner convergence). -/
+
+
+
+
+
+
+
+
 theorem windowGInfPt (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -368,7 +381,6 @@ theorem windowGInfPt (hne : Nonempty M)
         forall a : Nat, a <= p -> forall x, x ∈ K ->
           metricDerivNorm (I := I) a (gInf s) (gInf t) gRef x <= L * |s - t| :=
     infLipOfConv (I := I) K beta psiT p gSeq gInf gRef phi L hgLip hfull
-  -- the pointwise window convergence via `windowPreconv`'s core three-term split
   have hwinPt : forall eps : Real, 0 < eps -> exists k0 : Nat, forall k : Nat, k0 <= k ->
       forall t, t ∈ Set.Icc beta psiT -> forall a : Nat, a <= p -> forall x, x ∈ K ->
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x < eps := by
@@ -376,7 +388,8 @@ theorem windowGInfPt (hne : Nonempty M)
     have hLpos : (0 : Real) < L + 1 := by linarith
     set delta : Real := eps / (3 * (L + 1)) with hdeltadef
     have hdeltapos : 0 < delta := by rw [hdeltadef]; positivity
-    have hcover : Set.Icc beta psiT ⊆ ⋃ tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
+    have hcover : Set.Icc beta psiT ⊆ ⋃ tau :
+      {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         Metric.ball (tau : Real) delta := by
       intro t ht
       obtain ⟨n, hn⟩ := hdense t ht delta hdeltapos
@@ -389,7 +402,8 @@ theorem windowGInfPt (hne : Nonempty M)
       (fun _ => Metric.isOpen_ball) hcover
     have hk0 : forall tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= p -> forall x, x ∈ K ->
-          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps /
+            3 :=
       fun tau => hfull (tau : Real) tau.2.2 (eps / 3) (by positivity)
     choose k0fun hk0fun using hk0
     refine ⟨F.sup k0fun, fun k hk t ht a hap x hxK => ?_⟩
@@ -403,15 +417,18 @@ theorem windowGInfPt (hne : Nonempty M)
         <= L * |t - (tau : Real)| := by
       have := hInfLip (tau : Real) tau.2.2 t ht a hap x hxK
       rwa [abs_sub_comm] at this
-    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x <
+      eps / 3 :=
       hk0fun tau k (le_trans (Finset.le_sup htauF) hk) a hap x hxK
     have htri : metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x <=
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) gRef x
         + (metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x
           + metricDerivNorm (I := I) a (gInf (tau : Real)) (gInf t) gRef x) := by
       refine le_trans
-        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t) gRef x) ?_
-      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) (gInf t) gRef x
+        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t)
+          gRef x) ?_
+      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real))
+        (gInf t) gRef x
       linarith
     have hdb : L * |t - (tau : Real)| <= L * delta := mul_le_mul_of_nonneg_left hdist.le hL
     have hsmall : 2 * L * delta < 2 * eps / 3 := by
@@ -426,12 +443,12 @@ theorem windowGInfPt (hne : Nonempty M)
   rw [hgInf_t]
   exact (hgAt t ht).1
 
-/-- **All-compacts, all-orders window preconvergence.**  From time-Lipschitz
-control on every compact and every order, uniform covariant-derivative bounds on
-every compact, and a uniform lower bound, there is a SINGLE subsequence `φ` and a
-SINGLE limit family `gInf : ℝ → SmoothRiemannianMetric I M` such that the
-displayed `C^p` seminorm converges to `0` uniformly on the window `[β, ψ]`, for
-EVERY compact `K` and EVERY order `p`. -/
+
+
+
+
+
+
 theorem windowGInfAll
     [WeaklyLocallyCompactSpace M]
     (hne : Nonempty M)
@@ -460,12 +477,8 @@ theorem windowGInfAll
             forall t, t ∈ Set.Icc beta psiT ->
               metricDerivNormSupOn (I := I) K p (gSeq (phi k) t) (gInf t) gRef < eps := by
   classical
-  -- compact exhaustion of the σ-compact base
   let Kx : CompactExhaustion M := CompactExhaustion.choice M
   have hKxc : forall j : Nat, IsCompact (Kx j) := fun j => Kx.isCompact j
-  -- the diagonalized property: per-`j` net-time convergence on `Kx j` through
-  -- order `j`, together with the GLOBAL pointwise inner convergence of the
-  -- net-time limits (which forces those limits to be unique).
   set P : Nat -> (Nat -> Nat) -> Prop := fun j phi =>
     exists gNet : Nat -> SmoothRiemannianMetric I M,
       (forall n : Nat, forall x : M,
@@ -512,7 +525,6 @@ theorem windowGInfAll
       simp only [Nat.sub_add_cancel (show m <= k by omega)] at hval
       exact hval
   obtain ⟨phi, hphi, hPphi⟩ := exists_diag_subseq P hstep hsub hextend
-  -- collapse all per-`j` net-time limits into one global family via uniqueness
   choose gNetF hgNetTend hgNetConv using hPphi
   have hgNetUniq : forall i j : Nat, gNetF i = gNetF j := by
     intro i j
@@ -524,20 +536,18 @@ theorem windowGInfAll
         (nhds ((gNet n).inner x)) := hgNetTend 0
   have hnetConv : forall j : Nat, forall n : Nat, forall eps : Real, 0 < eps ->
       exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= j ->
-        forall z, z ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) (e n)) (gNet n) gRef z < eps := by
+        forall z, z ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) (e n)) (gNet n) gRef z <
+          eps := by
     intro j n eps heps
     have := hgNetConv j n eps heps
     rw [show gNetF j = gNet from (hgNetUniq j 0)] at this
     exact this
-  -- per-order Lipschitz constants on each exhaustion piece
   choose Lf hLf using fun j : Nat => hgLip (Kx j) (hKxc j) j
   have hLfnn : forall j, 0 <= Lf j := fun j => (hLf j).1
-  -- the all-`k` Lipschitz bound on `Kx j` (shape needed by `netCauchyAt` / `infLipOfConv`)
   have hLipAll : forall j : Nat, forall k : Nat, forall s, s ∈ Set.Icc beta psiT ->
       forall t, t ∈ Set.Icc beta psiT -> forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
         metricDerivNorm (I := I) a (gSeq k s) (gSeq k t) gRef x <= Lf j * |s - t| :=
     fun j => (hLf j).2
-  -- GLOBAL order-0 seminorm Cauchy of the master sequence, at every base point
   have hcauchy0 : forall t, t ∈ Set.Icc beta psiT -> forall x : M,
       forall eps : Real, 0 < eps -> exists k0 : Nat, forall m : Nat, k0 <= m ->
         forall l : Nat, k0 <= l ->
@@ -554,7 +564,6 @@ theorem windowGInfAll
     intro t ht x v w
     exact metricInner_cauchy (I := I) (fun k => gSeq (phi k) t) gRef x v w
       (fun eps heps => hcauchy0 t ht x eps heps)
-  -- the single global window family: the metricPreconvFull limit on `Kx 0`
   have htime0 : forall t, t ∈ Set.Icc beta psiT ->
       exists psi : Nat -> Nat, StrictMono psi /\
         exists gT : SmoothRiemannianMetric I M,
@@ -579,12 +588,10 @@ theorem windowGInfAll
     fun t => if ht : t ∈ Set.Icc beta psiT then gAt0 t ht else gRef with hgInfDef
   have hgInf_eq : forall t (ht : t ∈ Set.Icc beta psiT), gInf t = gAt0 t ht := by
     intro t ht; rw [hgInfDef]; exact dif_pos ht
-  -- per-`j` all-`t` pointwise window convergence to `gInf` on `Kx j` through order `j`
   have hfullj : forall j : Nat, forall t, t ∈ Set.Icc beta psiT -> forall eps : Real, 0 < eps ->
       exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x < eps := by
     intro j t ht eps heps
-    -- order-`j` limit on `Kx j` and identification with `gInf t`
     obtain ⟨psi, hpsi, gT, hinnerT, hnormT⟩ :=
       metricPreconvFull (I := I) hne (Kx j) (hKxc j) j gRef (fun k => gSeq (phi k) t)
         (hbdd phi hphi t ht) (hlow phi hphi t ht)
@@ -609,22 +616,22 @@ theorem windowGInfAll
         hcauchyj hsubj eps heps
     refine ⟨k0, fun k hk a ha x hx => ?_⟩
     rw [← hgTeq]; exact hk0 k hk a ha x hx
-  -- gInf is time-Lipschitz on each `Kx j`
   have hInfLipj : forall j : Nat,
       forall s, s ∈ Set.Icc beta psiT -> forall t, t ∈ Set.Icc beta psiT ->
         forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
           metricDerivNorm (I := I) a (gInf s) (gInf t) gRef x <= Lf j * |s - t| := fun j =>
     infLipOfConv (I := I) (Kx j) beta psiT j gSeq gInf gRef phi (Lf j) (hLipAll j)
       (fun t ht eps heps => hfullj j t ht eps heps)
-  -- t-UNIFORM pointwise window convergence on each `Kx j` (dense-net upgrade)
   have hwinj : forall j : Nat, forall eps : Real, 0 < eps -> exists k0 : Nat,
       forall k : Nat, k0 <= k -> forall t, t ∈ Set.Icc beta psiT -> forall a : Nat, a <= j ->
-        forall x, x ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x < eps := by
+        forall x, x ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x <
+          eps := by
     intro j eps heps
     have hLpos : (0 : Real) < Lf j + 1 := by linarith [hLfnn j]
     set delta : Real := eps / (3 * (Lf j + 1)) with hdeltadef
     have hdeltapos : 0 < delta := by rw [hdeltadef]; positivity
-    have hcover : Set.Icc beta psiT ⊆ ⋃ tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
+    have hcover : Set.Icc beta psiT ⊆ ⋃ tau :
+      {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         Metric.ball (tau : Real) delta := by
       intro t ht
       obtain ⟨n, hn⟩ := hdense t ht delta hdeltapos
@@ -636,7 +643,8 @@ theorem windowGInfAll
       (fun _ => Metric.isOpen_ball) hcover
     have hk0 : forall tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
-          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps /
+            3 :=
       fun tau => hfullj j (tau : Real) tau.2.2 (eps / 3) (by positivity)
     choose k0fun hk0fun using hk0
     refine ⟨F.sup k0fun, fun k hk t ht a hap x hxK => ?_⟩
@@ -649,15 +657,18 @@ theorem windowGInfAll
         <= Lf j * |t - (tau : Real)| := by
       have := hInfLipj j (tau : Real) tau.2.2 t ht a hap x hxK
       rwa [abs_sub_comm] at this
-    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x <
+      eps / 3 :=
       hk0fun tau k (le_trans (Finset.le_sup htauF) hk) a hap x hxK
     have htri : metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x <=
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) gRef x
         + (metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x
           + metricDerivNorm (I := I) a (gInf (tau : Real)) (gInf t) gRef x) := by
       refine le_trans
-        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t) gRef x) ?_
-      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) (gInf t) gRef x
+        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t)
+          gRef x) ?_
+      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real))
+        (gInf t) gRef x
       linarith
     have hdb : Lf j * |t - (tau : Real)| <= Lf j * delta :=
       mul_le_mul_of_nonneg_left hdist.le (hLfnn j)
@@ -667,7 +678,6 @@ theorem windowGInfAll
         rw [hdeltadef]; field_simp
       linarith
     nlinarith [htri, h1, h2, h3, hdb, hsmall]
-  -- assemble the final all-compacts / all-orders conclusion
   refine ⟨phi, hphi, gInf, ?_⟩
   intro K hK p eps heps
   obtain ⟨j1, hj1⟩ := Kx.exists_superset_of_isCompact hK

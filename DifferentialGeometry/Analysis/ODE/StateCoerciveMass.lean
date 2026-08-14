@@ -44,9 +44,9 @@ theorem coerOn_of_lip
     simpa only [mem_closedBall, dist_zero_right] using hu
   have hdiff : ‖B u - B 0‖ ≤ (K : ℝ) * R := by
     calc
-      ‖B u - B 0‖ = dist (B u) (B 0) := (dist_eq_norm _ _).symm
-      _ ≤ (K : ℝ) * dist u 0 := hB_lip.dist_le_mul u hu 0 hzero
-      _ = (K : ℝ) * ‖u‖ := by rw [dist_zero_right]
+      ‖B u - B 0‖ ≤ (K : ℝ) * ‖u‖ := by
+        simpa only [dist_eq_norm, sub_zero] using
+          hB_lip.dist_le_mul u hu 0 hzero
       _ ≤ (K : ℝ) * R :=
         mul_le_mul_of_nonneg_left huR K.coe_nonneg
   let D : V →L[ℝ] V →L[ℝ] ℝ := B u - B 0
@@ -58,7 +58,6 @@ theorem coerOn_of_lip
         exact mul_le_mul_of_nonneg_right (D.le_opNorm v) (norm_nonneg v)
       _ ≤ (((K : ℝ) * R) * ‖v‖) * ‖v‖ := by
         gcongr
-        simpa only [D] using hdiff
       _ ≤ ((c / 2) * ‖v‖) * ‖v‖ := by
         exact mul_le_mul_of_nonneg_right
           (mul_le_mul_of_nonneg_right hKR (norm_nonneg v)) (norm_nonneg v)
@@ -107,6 +106,7 @@ theorem stateMass_exists
             HasDerivWithinAt γ (vel t) (Icc (0 : ℝ) τ) t) ∧
           ∀ t, t ∈ Icc (0 : ℝ) τ →
             mass t (γ t) (vel t) = resid t (γ t) := by
+  classical
   let cinv : ℝ≥0 := ⟨c⁻¹, inv_nonneg.mpr hc.le⟩
   let An : ℝ≥0 := ⟨A, hA⟩
   let Lf : ℝ≥0 := cinv * An
@@ -187,7 +187,8 @@ theorem stateMass_exists
             c⁻¹ * (((Km : ℝ) * ‖u - v‖) * (c⁻¹ * A)) := by
             gcongr
             exact hres_bound t htT v hv
-      _ = (Kf : ℝ) * ‖u - v‖ := by
+      _ = (Kf : ℝ) * dist u v := by
+            rw [dist_eq_norm]
             simp only [Kf, cinv, An, NNReal.coe_add, NNReal.coe_mul,
               NNReal.coe_mk]
             ring
@@ -207,17 +208,16 @@ theorem stateMass_exists
     have happ := hsharp.clm_apply hr
     convert happ using 1
     funext t
-    simp only [f, Set.restrict_apply, dif_pos (htime_sub t.2), dif_pos hu,
-      hcsub, hco]
+    simp only [f, Set.restrict_apply, dif_pos (htime_sub t.2), dif_pos hu]
   let tzero : Icc (0 : ℝ) τ := ⟨0, by exact ⟨le_rfl, hτ.le⟩⟩
   let aN : ℝ≥0 := ⟨R, hR.le⟩
-  have hPL : IsPicardLindelof f tzero (0 : V) aN 0 Lf Kf where
-    lipschitzOnWith := hflip
-    continuousOn := hftime
-    norm_le := fun t _ u _ ↦ hfnorm t u
-    mul_max_le := by
-      change (Lf : ℝ) * max (τ - 0) (0 - 0) ≤ R - 0
-      simpa only [sub_zero, max_eq_left hτ.le] using hLfR
+  have hPL : IsPicardLindelof f tzero (0 : V) aN 0 Lf Kf :=
+    { lipschitzOnWith := hflip
+      continuousOn := hftime
+      norm_le := fun t _ u _ ↦ hfnorm t u
+      mul_max_le := by
+        change (Lf : ℝ) * max (τ - 0) (0 - 0) ≤ R - 0
+        simpa only [sub_zero, max_eq_left hτ.le] using hLfR }
   obtain ⟨γ, hγ0, hγderiv⟩ :=
     hPL.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
   have hγcont : ContinuousOn γ (Icc (0 : ℝ) τ) :=

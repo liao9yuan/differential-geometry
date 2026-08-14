@@ -92,8 +92,8 @@ noncomputable def intrinsicFramedExp
   fun z => expMapIntrinsic (I := I) g hEnorm p
     (show TangentSpace I p from intrFrameCLM (I := I) g p z)
 
-omit [CompleteSpace E] [T2Space (TangentBundle I M)]
-  [ConnectedSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 @[simp] theorem intrFrame_apply
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -108,8 +108,8 @@ omit [CompleteSpace E] [T2Space (TangentBundle I M)]
         (normalFrame (I := I) g p z) := by
   rw [intrinsicFramedExp, intrFrameCLM_apply]
 
-omit [CompleteSpace E] [T2Space (TangentBundle I M)]
-  [ConnectedSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 /-- The intrinsic framed exponential is globally smooth in its model-vector
 argument. -/
 theorem intrFrame_smooth
@@ -126,7 +126,8 @@ theorem intrFrame_smooth
   exact (intrinsicFiber_smooth (I := I) g hEnorm p).comp
     (intrFrameCLM (I := I) g p).contMDiff
 
-omit [ConnectedSpace M] in
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 /-- The intrinsic framed exponential sends the model origin to its center. -/
 @[simp] theorem intrFrame_zero
     [PseudoEMetricSpace M]
@@ -191,7 +192,8 @@ theorem intrFrame_deriv_zero
     hchain.trans (ContinuousLinearMap.id_comp L)
   simpa only [intrinsicFramedExp, F, L, Function.comp_apply] using hchain'
 
-omit [ConnectedSpace M] in
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 /-- The differential of the intrinsic framed exponential is the endpoint
 variation Jacobi field with normal-frame initial direction. -/
 theorem intrFrame_mfderiv
@@ -235,7 +237,8 @@ theorem intrFrame_mfderiv
     ContinuousLinearMap.comp_apply, intrFrameCLM_apply] using
       happ.trans hjac.symm
 
-omit [ConnectedSpace M] in
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 /-- On a positive model ball, the intrinsic framed exponential agrees with
 the existing chart-fixed framed exponential. -/
 theorem exists_intrFrame_eq
@@ -273,7 +276,8 @@ noncomputable def intrFrameRadius
     (p : M) : Real :=
   Classical.choose (exists_intrFrame_eq (I := I) g hEnorm p)
 
-omit [ConnectedSpace M] in
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 theorem intrFrameRadius_pos
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -286,7 +290,8 @@ theorem intrFrameRadius_pos
     0 < intrFrameRadius (I := I) g hEnorm p :=
   (Classical.choose_spec (exists_intrFrame_eq (I := I) g hEnorm p)).1
 
-omit [ConnectedSpace M] in
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 theorem intrFrame_eq_of_mem
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -454,8 +459,8 @@ noncomputable def intrFrameMetric
     (ContinuousLinearMap.precomp Real D).comp
       ((g.inner (F z)).comp D)
 
-omit [CompleteSpace E] [T2Space (TangentBundle I M)]
-  [ConnectedSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem intrFrameMetric_apply
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

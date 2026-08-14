@@ -32,13 +32,14 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Metric equivalence gives one entrywise inverse-Gram bound on a fixed
 compact chart buffer.  The equivalence hypothesis may be supplied globally;
 it is stated only on the buffer to make restriction explicit. -/
@@ -63,7 +64,9 @@ theorem invGram_buffer_bnd
           |chartInvGramOnE (I := I) (gSeq k) α i j
             (extChartAt I α b)| ≤ M_b := by
   have hbufferCpt : IsCompact (chartBuffer (extChartAt I α) K r₀) :=
-    chartBuffer_cpt (extChartAt I α) r₀ hK hKsrc hcollar
+    chartBuffer_cpt_of_continuousOn (extChartAt I α) r₀
+      (continuousOn_extChartAt α) (continuousOn_extChartAt_symm α)
+      hK hKsrc hcollar
   have hbufferBase :
       chartBuffer (extChartAt I α) K r₀ ⊆
         (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -71,7 +74,7 @@ theorem invGram_buffer_bnd
     rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]
     have hbsrc : b ∈ (extChartAt I α).source :=
       chartBuffer_src (extChartAt I α) K r₀ hcollar hb
-    simpa only [extChartAt_source_eq_chartAt_source] using hbsrc
+    simpa only [extChartAt_source] using hbsrc
   obtain ⟨M_b, hM_b, hquad⟩ :=
     chartInvGram_unif_ub (I := I) (M := M) gBase gSeq α
       hbufferCpt hbufferBase Λ hΛ hequiv
@@ -84,6 +87,11 @@ theorem invGram_buffer_bnd
   simpa only [chartInvGramOnE_def,
     (extChartAt I α).left_inv hbsrc] using hentry
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- An order-one raw Gram operator-norm bound on a chart buffer gives a
 uniform bound for every first coordinate partial there. -/
 theorem gramD_buffer_bnd
@@ -104,17 +112,17 @@ theorem gramD_buffer_bnd
           C * ∑ a : Fin (Module.finrank ℝ E),
             ‖(chartModelBasis E) a‖ := by
   classical
-  let Cᴱ : ℝ := ∑ a : Fin (Module.finrank ℝ E),
+  let CE : ℝ := ∑ a : Fin (Module.finrank ℝ E),
     ‖(chartModelBasis E) a‖
   intro k b hb m i j
-  have hm_le : ‖(chartModelBasis E) m‖ ≤ Cᴱ :=
+  have hm_le : ‖(chartModelBasis E) m‖ ≤ CE :=
     Finset.single_le_sum
       (fun a _ => norm_nonneg ((chartModelBasis E) a))
       (Finset.mem_univ m)
   rw [partial_eq_iter1, ← Real.norm_eq_abs]
   change ‖iteratedFDeriv ℝ 1
       (chartGramOnE (I := I) (gSeq k) α i j)
-        (extChartAt I α b) ![(chartModelBasis E) m]‖ ≤ C * Cᴱ
+        (extChartAt I α b) ![(chartModelBasis E) m]‖ ≤ C * CE
   calc
     ‖iteratedFDeriv ℝ 1
         (chartGramOnE (I := I) (gSeq k) α i j)
@@ -128,9 +136,13 @@ theorem gramD_buffer_bnd
     _ = ‖iteratedFDeriv ℝ 1
           (chartGramOnE (I := I) (gSeq k) α i j)
             (extChartAt I α b)‖ * ‖(chartModelBasis E) m‖ := by simp
-    _ ≤ C * Cᴱ :=
+    _ ≤ C * CE :=
       mul_le_mul (hgram k b hb i j) hm_le (norm_nonneg _) hC
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Entrywise inverse-Gram and first Gram-partial bounds control every first
 coordinate partial of the inverse Gram matrix on the fixed buffer. -/
 theorem invGramD_buffer_bnd
@@ -166,6 +178,11 @@ theorem invGramD_buffer_bnd
   exact invGramD_abs_le (I := I) (gSeq k) α hbint hM_b_nn
     (hM_b k b hb) (hQ k b hb) m i j
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Uniform first coordinate partial bounds give a full Fréchet derivative
 operator-norm bound for each inverse-Gram entry. -/
 theorem invGram_fderiv_bnd
@@ -207,6 +224,10 @@ theorem invGram_fderiv_bnd
             ((chartModelBasis E).coord m)‖) * D := by
       rw [Finset.sum_mul]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A derivative bound on the fixed buffer gives the uniform Lipschitz
 freezing estimate on every smaller coordinate closed ball. -/
 theorem invGram_freeze_lip
@@ -228,38 +249,42 @@ theorem invGram_freeze_lip
         chartInvGramOnE (I := I) (gSeq k) α i j
           (extChartAt I α x)| ≤
       L * ‖y - extChartAt I α x‖ := by
-  let e : OpenPartialHomeomorph M E := extChartAt I α
-  have hximage : e x ∈ e '' K := ⟨x, hx, rfl⟩
-  have hballBuffer : Metric.closedBall (e x) R ⊆
-      Metric.cthickening r₀ (e '' K) :=
+  have hximage :
+      extChartAt I α x ∈ (extChartAt I α) '' K := ⟨x, hx, rfl⟩
+  have hballBuffer : Metric.closedBall (extChartAt I α x) R ⊆
+      Metric.cthickening r₀ ((extChartAt I α) '' K) :=
     (Metric.closedBall_subset_cthickening hximage R).trans
-      (Metric.cthickening_mono hR (e '' K))
-  have hballTarget : Metric.closedBall (e x) R ⊆ e.target :=
+      (Metric.cthickening_mono hR ((extChartAt I α) '' K))
+  have hballTarget : Metric.closedBall (extChartAt I α x) R ⊆
+      (extChartAt I α).target :=
     hballBuffer.trans hcollar
-  have hcenter : e x ∈ Metric.closedBall (e x) R :=
+  have hcenter :
+      extChartAt I α x ∈ Metric.closedBall (extChartAt I α x) R :=
     Metric.mem_closedBall_self hR_nn
-  have hsegBall : segment ℝ (e x) y ⊆ Metric.closedBall (e x) R :=
-    (convex_closedBall (e x) R).segment_subset hcenter hy
-  have hdiff : ∀ q ∈ segment ℝ (e x) y,
+  have hsegBall : segment ℝ (extChartAt I α x) y ⊆
+      Metric.closedBall (extChartAt I α x) R :=
+    (convex_closedBall (extChartAt I α x) R).segment_subset hcenter hy
+  have hdiff : ∀ q ∈ segment ℝ (extChartAt I α x) y,
       DifferentiableAt ℝ
         (chartInvGramOnE (I := I) (gSeq k) α i j) q := by
     intro q hq
-    have hqtgt : q ∈ e.target := hballTarget (hsegBall hq)
+    have hqtgt : q ∈ (extChartAt I α).target := hballTarget (hsegBall hq)
     exact (((chartInvGramOnE_contDiffOn (I := I) (gSeq k) α i j)
       q hqtgt).contDiffAt
-        (e.open_target.mem_nhds hqtgt)).differentiableAt (by simp)
-  have hbound : ∀ q ∈ segment ℝ (e x) y,
+        ((isOpen_extChartAt_target α).mem_nhds hqtgt)).differentiableAt (by simp)
+  have hbound : ∀ q ∈ segment ℝ (extChartAt I α x) y,
       ‖fderiv ℝ (chartInvGramOnE (I := I) (gSeq k) α i j) q‖ ≤ L := by
     intro q hq
-    have hqball : q ∈ Metric.closedBall (e x) R := hsegBall hq
-    have hqtgt : q ∈ e.target := hballTarget hqball
-    have hqbuffer : e.symm q ∈ chartBuffer e K r₀ :=
+    have hqball : q ∈ Metric.closedBall (extChartAt I α x) R := hsegBall hq
+    have hqtgt : q ∈ (extChartAt I α).target := hballTarget hqball
+    have hqbuffer :
+        (extChartAt I α).symm q ∈ chartBuffer (extChartAt I α) K r₀ :=
       ⟨q, hballBuffer hqball, rfl⟩
-    have hqL := hL k (e.symm q) hqbuffer i j
-    simpa only [e.right_inv hqtgt] using hqL
-  have hmvt := (convex_segment (e x) y).norm_image_sub_le_of_norm_fderiv_le
-    hdiff hbound (left_mem_segment ℝ (e x) y)
-      (right_mem_segment ℝ (e x) y)
-  simpa only [e, Real.norm_eq_abs] using hmvt
+    have hqL := hL k ((extChartAt I α).symm q) hqbuffer i j
+    simpa only [(extChartAt I α).right_inv hqtgt] using hqL
+  have hmvt := (convex_segment (extChartAt I α x) y).norm_image_sub_le_of_norm_fderiv_le
+    hdiff hbound (left_mem_segment ℝ (extChartAt I α x) y)
+      (right_mem_segment ℝ (extChartAt I α x) y)
+  simpa only [Real.norm_eq_abs] using hmvt
 
 end DifferentialGeometry.PDE.RicciFlow

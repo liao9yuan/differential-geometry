@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.TailFrameRegularity
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
-/-!
-# Christoffel evolution on positive-time tails
 
-This module removes the metric-frame and spatial-regularity inputs from the
-solution-level Christoffel evolution theorem after restricting a half-open
-Ricci flow to a strictly later half-open time interval.
--/
+
+
+
+
+
+
 
 set_option autoImplicit false
 
@@ -17,23 +17,26 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
+attribute [local instance] Fintype.ofFinite
+
 open Bundle Filter Set
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem ricciFrameDiffAt
-    {Idx : Type} [Fintype Idx]
+    {Idx : Type} [Finite Idx]
     (g : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
@@ -56,12 +59,14 @@ private theorem ricciFrameDiffAt
     rw [hy i, hy j, metricRicciAt_apply_eq_ricciTensor]
   exact hsmooth.mdifferentiableAt (by simp)
 
-/-- On every strictly positive-time tail, a Ricci-flow solution supplies its
-Christoffel evolution equation in any `C^∞` local frame.  The inverse metric,
-its time derivative, and all mixed/spatial regularity inputs are constructed
-from the solution and the local frame. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailChristoffel
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type} [Fintype Idx]
     {u : Set M}
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -80,6 +85,7 @@ theorem tailChristoffel
         (fun (t : Real) (x : M) (d a b : Idx) => ricciCovDerivCompInFrame (I := I)
           (S.timeRestrict (RealTimeInterval.closedOpen t₀ omega ht₀ω))
           frame t x d a b) := by
+  classical
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     { linearIndependent := hframe.linearIndependent
       generating := hframe.generating
@@ -139,8 +145,10 @@ theorem tailChristoffel
       (localFrameInvDt (E := E) (I := I) S' frame hframe)
       frame hframe1 hu htime hSmooth hFdiff hFtdiff
 
-/-- On a positive-time tail, package the full metric-frame spacetime
-regularity together with the Christoffel evolution equation. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailChristoffelReg
     {Idx : Type} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
@@ -175,11 +183,13 @@ theorem tailChristoffelReg
   refine ⟨hframe1, ?_, hchr⟩
   exact tailFrameSpaceReg (I := I) hS hAlphaT0 hT0Omega frame hframe hu
 
-/-- At a time when the local frame is orthonormal, the positive-tail
-Christoffel producer supplies both the time derivative and the unraised book
-formula `-nabla_i Ric_jk - nabla_j Ric_ik + nabla_k Ric_ij`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailChrOrtho
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type} [Finite Idx] [DecidableEq Idx]
     {u : Set M}
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

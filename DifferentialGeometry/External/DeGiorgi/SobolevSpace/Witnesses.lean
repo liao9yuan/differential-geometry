@@ -373,7 +373,8 @@ theorem MemW01p.add
               eLpNorm (fun x => φv n x - v x) 2 (volume.restrict Ω))
           atTop (nhds (0 + 0)) :=
       hφu_fun.add hφv_fun
-    refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun n => zero_le _) hupper
+    refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun n => zero_le _)
+      hupper
     simpa using hsum
   · intro i
     have hupper :
@@ -398,9 +399,11 @@ theorem MemW01p.add
           (fun x => (fderiv ℝ (φv n) x) ei) :=
         ((hφv_smooth n).fderiv_right (m := (⊤ : ℕ∞)) (by norm_cast)).clm_apply contDiff_const
       have hderiv_u_mem : MemLp (fun x => (fderiv ℝ (φu n) x) ei) 2 (volume.restrict Ω) :=
-        (hderiv_u_smooth.continuous.memLp_of_hasCompactSupport ((hφu_compact n).fderiv_apply (𝕜 := ℝ) ei)).restrict Ω
+        (hderiv_u_smooth.continuous.memLp_of_hasCompactSupport
+          ((hφu_compact n).fderiv_apply (𝕜 := ℝ) ei)).restrict Ω
       have hderiv_v_mem : MemLp (fun x => (fderiv ℝ (φv n) x) ei) 2 (volume.restrict Ω) :=
-        (hderiv_v_smooth.continuous.memLp_of_hasCompactSupport ((hφv_compact n).fderiv_apply (𝕜 := ℝ) ei)).restrict Ω
+        (hderiv_v_smooth.continuous.memLp_of_hasCompactSupport
+          ((hφv_compact n).fderiv_apply (𝕜 := ℝ) ei)).restrict Ω
       have hdu_mem :
           MemLp (fun x => (fderiv ℝ (φu n) x) ei - hwu.weakGrad x i) 2 (volume.restrict Ω) :=
         hderiv_u_mem.sub (hwu.weakGrad_component_memLp i)
@@ -437,7 +440,8 @@ theorem MemW01p.add
                 2 (volume.restrict Ω))
           atTop (nhds (0 + 0)) :=
       (hφu_grad i).add (hφv_grad i)
-    refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun n => zero_le _) hupper
+    refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun n => zero_le _)
+      hupper
     simpa using hsum
 
 /-- `H₀¹(Ω)` is closed under scalar multiplication. -/

@@ -24,7 +24,6 @@ The two final statements are the exact identities used by completeness:
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -39,7 +38,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,6 +52,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- A target POU weight absorbs its chart-kernel cutoff pointwise. -/
 theorem pouCutoffMul (α : M) (x : M) (v : ℝ) :
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v =
@@ -70,6 +70,7 @@ theorem pouCutoffMul (α : M) (x : M) (v : ℝ) :
       chartKernelCutoff_eqOn_one (I := I) (M := M) α hx_supp
     rw [hχ, one_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 /-- Reading a POU-weighted component at the Euclidean coordinate of a source
 point recovers the manifold-side POU component. -/
 theorem secComp_coord
@@ -85,6 +86,7 @@ theorem secComp_coord
   rw [symm_toEuclidean_symm_toEuclidean_extChartAt
     (I := I) (M := M) α hx]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The POU-weighted raw transition formula for an arbitrary genuine tensor
 section.  This is the smooth-section lemma from the spectral construction with
 the unnecessary smoothness hypothesis removed. -/
@@ -122,6 +124,7 @@ theorem pouRawTrans
     rw [hχβ]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- A pointwise-supported weak source component absorbs both cutoff factors of
 the global transition coefficient after multiplication by the target POU
 weight. -/
@@ -140,7 +143,7 @@ theorem repCoeffEq
   by_cases hρα : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0
   · rw [hρα, zero_mul, zero_mul]
   by_cases hvx : v (toEuclidean (E := E) (extChartAt I β x)) = 0
-  · rw [hvx, mul_zero, mul_zero]
+  · simp only [hvx, mul_zero]
   have hxα_supp : x ∈ tsupport
       (fun z : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) z) :=
     subset_tsupport _ hρα
@@ -177,7 +180,7 @@ theorem repCoeffEq
 component formula in every target chart, modulo the chart-target measure. -/
 theorem secPullLimitEq
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -223,12 +226,31 @@ theorem secPullLimitEq
         (secModelLimit (I := I) (M := M) g r s k hp hp_top u h_cauchy β) x = 0 := by
       unfold secModelPull
       rw [dif_neg hxβ]
-    unfold secCompRaw secTriv
-    rw [hpull, map_zero, map_zero, mul_zero]
+    have htriv :
+        secTriv (I := I) (M := M) r s
+            (secModelPull (I := I) (M := M) r s β
+              (secModelLimit (I := I) (M := M) g r s k hp hp_top u h_cauchy β))
+            α x = 0 := by
+      unfold secTriv
+      let L : TensorRSSpace r s I x →L[ℝ] TensorRSModel r s ℝ E :=
+        (trivializationAt (TensorRSModel r s ℝ E)
+          (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ x
+      change L
+        (secModelPull (I := I) (M := M) r s β
+          (secModelLimit (I := I) (M := M) g r s k hp hp_top u h_cauchy β) x) = 0
+      rw [hpull]
+      exact L.map_zero
+    have hproj :
+        tensorChartComponentProjection (E := E) r s P.1 P.2
+            (0 : TensorRSModel r s ℝ E) = 0 :=
+      (tensorChartComponentProjection (E := E) r s P.1 P.2).map_zero
+    unfold secCompRaw
+    rw [htriv, hproj, mul_zero]
     refine (Finset.sum_eq_zero (fun Q _ => ?_)).symm
     unfold secTransTerm chartPushed
     rw [chartPullback_apply_of_notMem (I := I) (M := M) β _ hxβ, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Every component of an arbitrary genuine tensor section is the finite sum
 of the transported POU components from the canonical active chart set. -/
 theorem secCompDecomp

@@ -2,17 +2,15 @@ import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 Step C center-of-mass wrapper
 
-This file specializes the general center-of-mass theorems from
-`Geometry/Comparison/CenterOfMass.lean` to the HCG Step-C input package.  The
-only geometric producer still carried as input here is the book-cited strict
-Hessian/strict-convexity conclusion packaged by `StrictDistInput`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,7 +28,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -38,8 +36,8 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
 
-/-- Full C1 center-of-mass input, excluding only the already packaged strict
-Hessian/strict-convexity datum. -/
+
+
 structure CenterInput (g : SmoothRiemannianMetric I M)
     {ι : Type} [Fintype ι] (μ : ι → ℝ) (pts : ι → M)
     (join : M → M → ℝ → M) (p : M) (r : ℝ) : Prop where
@@ -72,7 +70,7 @@ namespace CenterInput
 variable {g : SmoothRiemannianMetric I M} {ι : Type} [Fintype ι]
   {μ : ι → ℝ} {pts : ι → M} {join : M → M → ℝ → M} {p : M} {r : ℝ}
 
-/-- The underlying general center-of-mass existence and uniqueness theorem. -/
+
 theorem exists_cm (h : CenterInput (I := I) g μ pts join p r) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -91,7 +89,7 @@ theorem exists_cm (h : CenterInput (I := I) g μ pts join p r) :
 
 end CenterInput
 
-/-- The Step-C center of mass selected from the unique minimizer package. -/
+
 noncomputable def centerOfMass (g : SmoothRiemannianMetric I M)
     {ι : Type} [Fintype ι] (μ : ι → ℝ) (pts : ι → M)
     (join : M → M → ℝ → M) (p : M) (r : ℝ)
@@ -109,7 +107,8 @@ variable {g : SmoothRiemannianMetric I M} {ι : Type} [Fintype ι]
   {μ : ι → ℝ} {pts : ι → M} {join : M → M → ℝ → M} {p : M} {r : ℝ}
   (h : CenterInput (I := I) g μ pts join p r)
 
-/-- The self-summand gradient identity for `1/2 d(·, q)^2` at `q`. -/
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem grad_half_self (q : M)
     (hdiff :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -147,7 +146,7 @@ theorem grad_half_self (q : M)
     exact NormalCoordinates.normalChartAt_centre (I := I) g q
   rw [hgrad0, hchart0, neg_zero]
 
-/-- The selected center lies in the closed `2r` ball. -/
+
 theorem mem :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -162,7 +161,7 @@ theorem mem :
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact (Classical.choose_spec h.exists_cm).1
 
-/-- The selected center is a global minimizer of the weighted center energy. -/
+
 theorem min :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -180,7 +179,7 @@ theorem min :
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact (Classical.choose_spec h.exists_cm).2.1
 
-/-- The selected center is the unique global minimizer. -/
+
 theorem unique :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -198,8 +197,8 @@ theorem unique :
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact (Classical.choose_spec h.exists_cm).2.2
 
-/-- Stability clause: if all points are within `ε` of `qstar`, the selected
-center is within `2ε` of `qstar`. -/
+
+
 theorem dist_le {qstar : M} {ε : ℝ} (hε : 0 ≤ ε)
     (hnear :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -226,8 +225,10 @@ theorem dist_le {qstar : M} {ε : ℝ} (hε : 0 ≤ ε)
   have hq_eq : q = centerOfMass (I := I) g μ pts join p r h := unique h q hqmin
   simpa [hq_eq] using hqdist
 
-/-- Differentiability of the finite center energy follows from differentiability
-of all half-squared-distance summands. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_diff {x : M}
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -262,12 +263,12 @@ theorem centerEnergy_diff {x : M}
       intro i _hi
       exact (hdiffSummands i).const_smul (μ i))
 
-/-- Conditional book-form center equation, specialized to the selected center.
 
-The differentiability and one-summand gradient formula hypotheses are kept
-explicit here; `HalfSqDistGradMain.lean` supplies the non-self first-variation
-formula, while later Step-C radius/smoothness producers can discharge these
-pointwise hypotheses in the concrete averaging setup. -/
+
+
+
+
+
 theorem expInv_eqn
     (hdiffEnergy :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -314,8 +315,8 @@ theorem expInv_eqn
   exact CenterOfMass.sum_expInv_eq_zero (I := I) (κ := ι) g μ pts
     (centerOfMass (I := I) g μ pts join p r h) (min h) hdiffEnergy hdiffSummands hgrad
 
-/-- A selected center satisfies the weighted inverse-vector equation whenever
-the summand gradients are the negatives of the supplied tangent family. -/
+
+
 theorem invB_eqn
     (invB : ι → TangentSpace I (centerOfMass (I := I) g μ pts join p r h))
     (hdiffSummands :
@@ -364,9 +365,9 @@ theorem invB_eqn
     simpa only [Finset.sum_neg_distrib, smul_neg] using hneg
   exact neg_eq_zero.mp hsum_neg
 
-/-- Local-radius version of the book-form center equation.  The one-summand
-gradient hypothesis in `expInv_eqn` is discharged from `grad_halfSqDist` for
-non-self summands and from `grad_half_self` for self summands. -/
+
+
+
 theorem expInv_eqn_local
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -424,10 +425,10 @@ theorem expInv_eqn_local
     exact grad_half_self (I := I) (g := g) q hdiffSelf
   · exact hgradρ (hsrc i) hself (hsmall i hself) (hdiffSummands i)
 
-/-- A canonical positive radius on which the one-summand squared-distance
-gradient is the negative inverse exponential at the selected center.  This is
-the chosen-radius companion to `expInv_eqn_local`, intended for downstream
-configuration predicates that must name the admissible radius. -/
+
+
+
+
 noncomputable def eqnRadius : ℝ :=
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
     ⟨g.toRiemannianMetric⟩
@@ -439,7 +440,7 @@ noncomputable def eqnRadius : ℝ :=
   Classical.choose (grad_halfSqDist (I := I) g h.enorm
     (centerOfMass (I := I) g μ pts join p r h))
 
-/-- The canonical center-equation radius is positive. -/
+
 theorem eqnRadius_pos : 0 < eqnRadius (I := I) h := by
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
     ⟨g.toRiemannianMetric⟩
@@ -451,8 +452,8 @@ theorem eqnRadius_pos : 0 < eqnRadius (I := I) h := by
   exact (Classical.choose_spec (grad_halfSqDist (I := I) g h.enorm
     (centerOfMass (I := I) g μ pts join p r h))).1
 
-/-- Inside `eqnRadius`, a differentiable non-self squared-distance summand has
-gradient equal to the negative normal-chart inverse exponential. -/
+
+
 theorem grad_eq_of_lt {pt : M}
     (hsrc : pt ∈ (NormalCoordinates.normalChartAt (I := I) g
       (centerOfMass (I := I) g μ pts join p r h)).source)
@@ -492,8 +493,8 @@ theorem grad_eq_of_lt {pt : M}
   exact (Classical.choose_spec (grad_halfSqDist (I := I) g h.enorm
     (centerOfMass (I := I) g μ pts join p r h))).2 hsrc hne hsmall hdiff
 
-/-- The selected center satisfies the inverse-exponential equation whenever
-every non-self summand lies inside the canonical center-equation radius. -/
+
+
 theorem expInv_eqn_of_lt
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -554,13 +555,13 @@ theorem expInv_eqn_of_lt
 
 end centerOfMass
 
-/-- **Continuity of the center of mass in its parameters** (the `hc_cont` producer for `lbl430`(i)).
-If the weight and point families `μ, pts` are continuous over a first-countable parameter space `P`
-and each `a : P` carries the center-of-mass data `H a`, the selected center is continuous:
-`Tendsto (fun a => centerOfMass g (μ a) (pts a) join p r (H a)) (𝓝 p₀) (𝓝 (centerOfMass … p₀))`.
-Assembles `CenterOfMass.metricEnergy_argmin_stable` (argmin-stability) from the center's
-`min`/`mem`/`unique` package (converted `centerEnergy → metricEnergy` by `centerEnergy_eq_dist`) and
-the compactness of `closedBall p (2r)` (`ProperSpace` from `HopfRinow`). -/
+
+
+
+
+
+
+
 theorem centerOfMass_cont {P : Type*} [TopologicalSpace P] [FirstCountableTopology P]
     (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (μ : P → ι → ℝ) (pts : P → ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ) (p₀ : P)

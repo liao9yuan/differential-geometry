@@ -3,33 +3,29 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.FrozenSlot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReactionBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# The all-`k` covariant-derivative conversion for the spatial-commutator term-B
 
-`spatialComm_nablaKRm_split` (`Evolution/StarSum/RoughLapNablaK.lean`) leaves the
-residual **term-B**, the slots-`(1,2)` antisymmetrisation of `∇^{k+3}Rm`:
 
-`∇^{k+3}Rm(eᵢ, eⱼ, X, t) − ∇^{k+3}Rm(eᵢ, X, eⱼ, t) = ∇_{eᵢ}([∇_{eⱼ},∇_X]∇ᵏRm)`.
 
-This file ports the k=1 conversion `nabla3_antisym_eq_covDeriv_curvatureAction_covConst`
-(`Evolution/NablaRiemannReactionBound.lean:378`) to all `k`: on sections
-covariantly constant at `x₀`, term-B equals `extDerivFun(K)` where
-`K(y) = curvatureAction(rm13)(∇ᵏRm y)(Vb y, Vc y, Vm·y)`.  The proof is the
-mechanical rank-uniform generalisation — the slot sections are the same `Fin.cons`
-construction (now `Fin (4+k+2)`), `∇^{k+3}Rm = ∇(∇^{k+2}Rm)` via
-`nablaKRm04Field_realizes S t (k+2)`, the correction sums vanish on cov-constant
-slots, and the difference field is the level-`k` Ricci identity
-`nablaKRm04_ricciIdentityAt … k`.
 
-This is the route-4 continuation: combined with the (existing) raise-form
-`curvatureAction0SAt_eq_rm04` + the per-`q` contraction Leibniz, `extDerivFun(K)`
-becomes the controlled `∇Rm∗∇ᵏRm + Rm∗∇^{k+1}Rm` star terms.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -40,20 +36,20 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-! ## The level-`k` frozen-slot one-form of `∇ᵏRm` and its covariant derivative
 
-Ports of `rmFrozenSlotField` / `nablaRmFrozenSlotField` (`Evolution/RmFrozenSlotField.lean`)
-from `Rm04` to `∇ᵏRm`, via the rank-generic `freezeAllBut0SField`. -/
 
-/-- **The level-`k` frozen-slot one-form field of `∇ᵏRm`.**  Freeze all but slot `q`
-of `∇ᵏRm` against the sections `Y`. -/
+
+
+
+
+
 def nablaKRmFrozenSlotField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -63,6 +59,8 @@ def nablaKRmFrozenSlotField
       (n := (∞ : WithTop ℕ∞)) 1 :=
   freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlotField_apply_vec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -73,7 +71,7 @@ theorem nablaKRmFrozenSlotField_apply_vec
       nablaKRm04Field (I := I) S t k x (Function.update (fun i : Fin (4 + k) => Y i x) q W) :=
   freezeAllBut0SField_apply_vec (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y x W
 
-/-- **The canonical `(0,1)` covariant derivative of the level-`k` frozen one-form.** -/
+
 def nablaKRmNablaFrozenSlotField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -87,6 +85,8 @@ def nablaKRmNablaFrozenSlotField
       1 (S.family.connection t) (connSmoothInf (I := I) S t)
       (nablaKRmFrozenSlotField (I := I) S t k q Y))
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmNablaFrozenSlotField_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -102,9 +102,11 @@ theorem nablaKRmNablaFrozenSlotField_realizes
       (nablaKRmFrozenSlotField (I := I) S t k q Y))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Chart-basis smoothness of the level-`k` frozen one-form field — port of
-`rmFrozenSlot_chartBasis_contMDiffOn`.  The component is `freezeAllBut0SField`
-evaluated on a smooth chart-basis section, hence smooth on the chart source. -/
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -130,7 +132,8 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
           exact hx₀))
   have h_eval := TensorMultilinear.contMDiffAt_section_apply_gen
     (𝕜 := Real) (I := I) (M := M) (n := 1) (x₀ := x₀)
-    (T := fun b : M => (freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y) b)
+    (T := fun b : M => (freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y)
+      b)
     ((freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y).contMDiff x₀)
     (v := fun _ : Fin 1 => fun b : M => chartBasisVecFiber (I := I) α j b)
     (fun _ => hv_at)
@@ -138,8 +141,6 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
     tensor0SSpace_continuousLinearEquiv_apply] using h_eval
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- The raised frozen one-form field `y ↦ g♯ (β_q y)` of the level-`k` frozen
-one-form, bundled as a smooth tangent section — port of `rmFrozenSlotSharpSection`. -/
 def nablaKRmFrozenSlotSharpSection
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -154,7 +155,10 @@ def nablaKRmFrozenSlotSharpSection
       (β := fun y : M => nablaKRmFrozenSlotField (I := I) S t k q Y y)
       (fun α j => nablaKRmFrozenSlot_chartBasis_contMDiffOn (I := I) S t k q Y α j))
 
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem nablaKRmFrozenSlotSharpSection_apply
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -166,9 +170,10 @@ def nablaKRmFrozenSlotSharpSection
   rfl
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **`MDiffAt` of the raised level-`k` frozen one-form field** — port of
-`rmFrozenSlotSharp_mdiffAt`.  Discharges `hSharp` of the sharp-parallelism. -/
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlotSharp_mdiffAt
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -182,10 +187,11 @@ theorem nablaKRmFrozenSlotSharp_mdiffAt
     (β := fun y : M => nablaKRmFrozenSlotField (I := I) S t k q Y y)
     (fun α j => nablaKRmFrozenSlot_chartBasis_contMDiffOn (I := I) S t k q Y α j) x
 
-/-- **The all-`k` frozen-slot covariant-derivative identity** — port of
-`nablaRmFrozenSlot_eval`.  `∇(frozen one-form of ∇ᵏRm at slot q)` evaluated on
-`(X x₀, U)` is `∇^{k+1}Rm` with the derivative slot leading and the live slot `q`
-carrying `U`, on frozen sections cov-constant at `x₀`. -/
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_eval
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -227,9 +233,9 @@ theorem nablaKRmFrozenSlot_eval
   exact allBut0SFreezeNabla (I := I) (S.family.connection (t : Real)) hcov
     (nablaKRm04Field (I := I) S (t : Real) k) q X Y hYzero U
 
-/-- The four outer-`Rm04` slot sections for the `q`-th raise-form summand of the
-level-`k` curvature action: `Vb, Vc, Vm q`, and the raised level-`k` frozen one-form.
-Port of `rmRaiseSlotSections` (the outer `Rm04` is always rank 4). -/
+
+
+
 def nablaKRmRaiseSlotSections
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -240,11 +246,10 @@ def nablaKRmRaiseSlotSections
   ![Vb, Vc, Vm q, nablaKRmFrozenSlotSharpSection (I := I) S t k q Vm]
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **The all-`k` per-`q` contraction Leibniz.**  Covariant derivative of one
-raise-form summand `y ↦ Rm04(Vb, Vc, Vm_q, g♯β_q)` of the level-`k` curvature action,
-on cov-constant sections.  The outer `Rm04` is rank 4 (`k`-independent); only the
-frozen one-form `β_q` is at level `k`.  Verbatim port of `rmRaise_summand_covDeriv`. -/
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmRaise_summand_covDeriv
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -362,9 +367,9 @@ theorem nablaKRmRaise_summand_covDeriv
   rw [hcorr] at heval
   linarith [heval]
 
-/-- **The all-`k` `∇^{k+2}Rm` slot sections.**  Two derivative directions `Vb, Vc`
-prepended to the `(4+k)` `∇ᵏRm`-slots `Vm`, giving the `Fin (4+k+2)` slot family of
-`∇^{k+2}Rm`.  The rank-uniform generalisation of `nabla2SlotSections`. -/
+
+
+
 def nablaKSlotSections {k : ℕ}
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -372,8 +377,10 @@ def nablaKSlotSections {k : ℕ}
     Fin (4 + (k + 2)) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
   Fin.cons Vb (Fin.cons Vc Vm)
 
-/-- The `Fin (4+k+2)` slot sections evaluated at a point form the `metricTraceInput`
-of the two derivative directions and the `(4+k)` `∇ᵏRm`-slots. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaKSlotSections_apply {k : ℕ}
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -387,13 +394,17 @@ theorem nablaKSlotSections_apply {k : ℕ}
     · rfl
     · rfl
 
-/-- **The all-`k` generic-frame term-B reduction on cov-constant sections.**  At
-`x₀`, for a Ricci-flow solution at a regular time, with sections `X` (derivative),
-`Vb`, `Vc`, `Vm` covariantly constant at `x₀` along `X`, the `∇^{k+3}Rm`
-slots-`(1,2)` antisymmetrisation equals the covariant derivative `∇_X K` of the
-level-`k` curvature action `K(y) = curvatureAction(rm13)(∇ᵏRm y)(Vb, Vc, Vm)`.
-Rank-uniform port of `nabla3_antisym_eq_covDeriv_curvatureAction_covConst`. -/
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaK_antisym_eq_covDeriv_curvatureAction
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -423,7 +434,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   set cov := S.family.connection (t : Real) with hcov_def
   set Wbc := nablaKSlotSections (I := I) (k := k) Vb Vc Vm with hWbc_def
   set Wcb := nablaKSlotSections (I := I) (k := k) Vc Vb Vm with hWcb_def
-  -- The slots are covariantly constant at `x₀`.
   have hWbc_cov : ∀ a : Fin (4 + (k + 2)), (cov (fun p : M => Wbc a p) x₀) (X x₀) = 0 := by
     intro a
     refine Fin.cases ?_ (fun j => ?_) a
@@ -438,7 +448,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
     · refine Fin.cases ?_ (fun l => ?_) j
       · simpa [hWcb_def, nablaKSlotSections] using hVb
       · simpa [hWcb_def, nablaKSlotSections] using hVm l
-  -- `∇^{k+3} = ∇(∇^{k+2})`, evaluated via `eval_smooth_slots`; corrections vanish.
   have hbc :=
     (nablaKRm04Field_realizes (I := I) S (t : Real) (k + 2)).eval_smooth_slots X Wbc x₀
   have hcb :=
@@ -470,8 +479,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   rw [hcb_corr, sub_zero] at hcb
   rw [hWbc_x] at hbc
   rw [hWcb_x] at hcb
-  -- Coerce the realization output (`∇^{(k+2)+1}Rm`) to the statement form (`∇^{k+3}Rm`)
-  -- via defeq, and rewrite the goal.
   have ebc :
       nablaKRm04Field (I := I) S (t : Real) (k + 3) x₀
           (Fin.cons (X x₀)
@@ -492,14 +499,16 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   have hmdiff_bc :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun p : M =>
-          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wbc a p)) x₀ :=
+          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wbc a p))
+            x₀ :=
     (tensor0SField_eval_smooth_slots_contMDiffAt
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (nablaKRm04Field (I := I) S (t : Real) (k + 2)) Wbc x₀).mdifferentiableAt (by simp)
   have hmdiff_cb :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun p : M =>
-          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wcb a p)) x₀ :=
+          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wcb a p))
+            x₀ :=
     (tensor0SField_eval_smooth_slots_contMDiffAt
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (nablaKRm04Field (I := I) S (t : Real) (k + 2)) Wcb x₀).mdifferentiableAt (by simp)
@@ -507,7 +516,8 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   have hfield :
       (fun y : M =>
           nablaKRm04Field (I := I) S (t : Real) (k + 2) y (fun a : Fin (4 + (k + 2)) => Wbc a y) -
-            nablaKRm04Field (I := I) S (t : Real) (k + 2) y (fun a : Fin (4 + (k + 2)) => Wcb a y)) =
+            nablaKRm04Field (I := I) S (t : Real) (k + 2) y (fun a : Fin (4 + (k + 2)) => Wcb a y))
+              =
         fun y : M =>
           curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
             (nablaKRm04Field (I := I) S (t : Real) k y)
@@ -519,17 +529,19 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
       (Vb y) (Vc y) (fun i : Fin (4 + k) => Vm i y)
   rw [hfield]
 
-/-- **The all-`k` raise-Leibniz for term-B.**  On cov-constant sections, the
-`∇^{k+3}Rm` slots-`(1,2)` antisymmetrisation (`= ∇_X([∇_b,∇_c]∇ᵏRm)`) is the negated
-sum of the two `Rm04 ∗ ∇Rm04`/`Rm04 ∗ ∇^{k+1}Rm` raise contractions
 
-`= -Σ_q [ (∇Rm04)(X, Vb, Vc, Vm_q, g♯β_q) + Rm04(Vb, Vc, Vm_q, g♯(∇_X β_q)) ]`,
 
-`β_q = nablaKRmFrozenSlotField` the level-`k` frozen one-form of `∇ᵏRm`.  This is the
-covariant Leibniz `∇(Rm ∗ ∇ᵏRm) = ∇Rm ∗ ∇ᵏRm + Rm ∗ ∇^{k+1}Rm` for the curvature
-action, derived through the metric-raising form (no `∇rm13`).  Rank-uniform port of
-`nablaLapComm_T1_eq_rm04_raise_leibniz`. -/
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem nablaK_antisym_eq_rm04_raise_leibniz
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -561,7 +573,6 @@ theorem nablaK_antisym_eq_rm04_raise_leibniz
                   (nablaKRmNablaFrozenSlotField (I := I) S (t : Real) k q Vm x₀) (X x₀))))) := by
   classical
   rw [nablaK_antisym_eq_covDeriv_curvatureAction (I := I) S hS t k x₀ X Vb Vc Vm hVb hVc hVm]
-  -- Step 2: rewrite `K` pointwise via the raise form (generic in `α = ∇ᵏRm`).
   have hKfield :
       (fun y : M =>
           curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
@@ -625,24 +636,26 @@ theorem nablaK_antisym_eq_rm04_raise_leibniz
   rw [hg_def]
   exact nablaKRmRaise_summand_covDeriv (I := I) S t x₀ k q X Vb Vc Vm hVb hVc (fun i => hVm i)
 
-/-! ## The all-`k` term-B norm bound -/
+
 
 section AllKBound
 
 variable {n : ℕ}
 
-/-- **The all-`k` term-B quantitative bound on covariantly-constant sections.**
 
-At `x₀`, in a `g`-orthonormal basis realised by cov-constant sections, term-B
-`= ∇([∇,∇]∇ᵏRm)` is bounded by
 
-`|term-B| ≤ (4+k)·card·(|∇Rm|·|∇ᵏRm| + |Rm|·|∇^{k+1}Rm|)`,
 
-the two BBS reaction star terms `∇Rm∗∇ᵏRm + Rm∗∇^{k+1}Rm`.  Port of
-`abs_nablaLapComm_T1_covConst_le` (which is the `k = 0` case, where `|∇⁰Rm| = |Rm|`
-and `|∇¹Rm| = |∇Rm|` collapse the two terms).  Norms: `Nnab = |∇Rm|` (rank 5),
-`NRm = |Rm|` (rank 4), `Nk = |∇ᵏRm|`, `Nk1 = |∇^{k+1}Rm|`. -/
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_nablaK_antisym_covConst_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -711,7 +724,6 @@ theorem abs_nablaK_antisym_covConst_le
           (Fintype.card (Fin n) : Real) * (NRm * Nk1) := by
     intro q
     refine le_trans (abs_add_le _ _) ?_
-    -- Bound `T₁a_q ≤ card·Nnab·Nk`.
     have hT1a :
         |nablaRm04Field (I := I) S (t : Real) x₀
             (vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -760,7 +772,6 @@ theorem abs_nablaK_antisym_covConst_le
           (nablaKRm04Field (I := I) S (t : Real) k x₀) basis m q
       exact mul_le_mul_of_nonneg_left
         (mul_le_mul hf1 hf2 (Real.sqrt_nonneg _) hNnabnn) hcardnn
-    -- Bound `T₁b_q ≤ card·NRm·Nk1`.
     have hT1b :
         |S.base.rm04 (t : Real) x₀
             (vec4 (I := I) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -841,11 +852,13 @@ theorem abs_nablaK_antisym_covConst_le
   push_cast
   ring
 
-/-- **The all-`k` term-B norm bound on basis vectors.**  Consumer-facing form of
-`abs_nablaK_antisym_covConst_le`: the basis vectors are realised by covariantly-constant
-sections (`exists_cov_zero_at_apply`), so the bound holds for the `∇^{k+3}Rm`
-slots-`(1,2)` antisymmetrisation evaluated directly on the orthonormal basis. -/
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_nablaK_antisym_basis_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -889,12 +902,14 @@ theorem abs_nablaK_antisym_basis_le
   exact abs_nablaK_antisym_covConst_le (I := I) S hS t k x₀ basis horth Xa Vb Vc Vm
     a b c m hXa hVb hVc hVm (hVbcov Xa) (hVccov Xa) (fun i => hVmcov i Xa)
 
-/-- **The per-`(i,j)` spatial-commutator bracket bound (orthonormal frame).**  The
-bracket appearing in `spatialComm_nablaKRm_split` — term-B (slots-`(1,2)` swap of
-`∇^{k+3}Rm`) plus the controlled level-`k+1` curvature action — is bounded by the two
-BBS reaction star terms `∇Rm∗∇ᵏRm + Rm∗∇^{k+1}Rm` (from `abs_nablaK_antisym_basis_le`)
-plus `Rm∗∇^{k+1}Rm` (from `abs_curvatureAction0SAt_orthoBasis_le`). -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_spatialBracket_nablaKRm_ortho_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -931,9 +946,6 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
               nablaKRm04Field (I := I) S (t : Real) (k + 1) x₀ (fun p => basis (idx p))))) := by
   classical
   refine le_trans (abs_add_le _ _) ?_
-  -- Convert the term-B slot tuples `metricTraceInput → Fin.cons` via `congrArg`
-  -- (cheap, tuple-level) to match `abs_nablaK_antisym_basis_le` without forcing a
-  -- whole-`∇^{k+3}Rm` defeq.
   have hAB1 := congrArg (nablaKRm04Field (I := I) S (t : Real) (k + 3) x₀)
     (show metricTraceInput (I := I) (basis i) (basis j)
           (Fin.cons (basis c') (fun p : Fin (4 + k) => basis (m' p)))
@@ -948,9 +960,6 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
       from rfl)
   rw [hAB1, hAB2]
   refine add_le_add (abs_nablaK_antisym_basis_le (I := I) S hS t k x₀ basis horth i j c' m') ?_
-  -- controlled curvature half (`abs_curvatureAction0SAt_orthoBasis_le`, `alpha = ∇^{k+1}Rm`).
-  -- Align the curvature-action slot `Fin.cons (basis j) (basis∘m')` with the
-  -- `fun p => basis (sidx p)` form (not defeq for open `p`; funext + `Fin.cases`).
   have hslot :
       (Fin.cons (basis j) (fun p : Fin (4 + k) => basis (m' p)) :
           Fin (4 + k + 1) → TangentSpace I x₀) =
@@ -967,12 +976,14 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
   rw [← compNormSqMulti_eq_compNormSq4_basis (I := I) (S.base.rm04 (t : Real) x₀) basis] at hC
   exact hC
 
-/-- **The full all-`k` spatial-commutator `[Δ,∇]∇ᵏRm` bound in a `g`-orthonormal basis.**
-With `gInv = δ`, `spatialComm_nablaKRm_split` collapses to the diagonal sum of brackets,
-each bounded by `abs_spatialBracket_nablaKRm_ortho_le`; hence the rough-Laplacian/∇
-commutator on `∇ᵏRm` is bounded by the BBS reaction star terms `card·(∇Rm∗∇ᵏRm +
-Rm∗∇^{k+1}Rm + Rm∗∇^{k+1}Rm)`. -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_spatialComm_nablaKRm_ortho_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -1024,7 +1035,6 @@ theorem abs_spatialComm_nablaKRm_ortho_le
       · intro h; exact absurd (Finset.mem_univ j) h
   rw [spatialComm_nablaKRm_split (I := I) S hS t k basis gInv hinv (basis c')
     (fun p : Fin (4 + k) => basis (m' p))]
-  -- `gInv = δ` collapses the inner sum to the diagonal.
   simp only [hgInv, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
   refine le_trans (Finset.sum_le_sum fun i _ =>

@@ -25,7 +25,7 @@ namespace Integral
 namespace Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -35,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 /-- Joint continuity of chart density follows from joint continuity of every
 chart Gram-matrix entry.  This is the `C^0` core of
 `continuousOn_chartDensity_family`, separated from its stronger time-derivative
@@ -190,6 +191,7 @@ theorem volume_density_bdd
   · exact hforward.trans (mul_le_mul_of_nonneg_right hCalpha (Real.sqrt_nonneg _))
   · exact hreverse.trans (mul_le_mul_of_nonneg_right hCalpha (Real.sqrt_nonneg _))
 
+omit [CompactSpace M] in
 /-- Comparison of one POU-weighted chart-local lower integral from a pointwise
 chart-density bound on the POU `tsupport`. -/
 lemma chart_lintegral_le
@@ -234,7 +236,7 @@ lemma chart_lintegral_le
               have := ENNReal.ofReal_le_ofReal hd
               rw [ENNReal.ofReal_mul hC] at this
               exact this
-            have hmul := mul_le_mul_right'
+            have hmul := mul_le_mul_left
               hd_en (ENNReal.ofReal (rho (symm y)) * F (symm y))
             simpa only [mul_assoc] using hmul
     _ = ENNReal.ofReal C *

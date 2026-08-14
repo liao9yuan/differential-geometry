@@ -71,7 +71,7 @@ theorem appD2_pair_h2
       simpa only [H2] using
         covsum_hs_two (I := I) (M := M) g 2 hact W)
   have hA : ‖A‖ ≤ B * (h2CovsumC K * H2) := by
-    have happ := appCc_l2_le_of_pointwise_fiberNormSq_bound_left
+    have happ := operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
       (I := I) (M := M) g 4 2 Φ
       (iteratedCovGrad (I := I) g 0 2 2 W) B hB hΦ
     exact happ.trans (mul_le_mul_of_nonneg_left hW2 hB)

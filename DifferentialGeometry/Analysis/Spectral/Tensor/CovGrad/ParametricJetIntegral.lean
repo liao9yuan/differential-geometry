@@ -1,13 +1,13 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 
-/-!
-# Covariant jet bounds for smooth parameter integrals
 
-This file transfers a uniform finite covariant `L²` jet bound for a jointly
-smooth one-parameter tensor family to its interval integral.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -27,7 +27,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (jointContMDiff_toModel_continuous_slice)
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -37,11 +37,8 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Jointly smooth mixed-tensor families are closed under fibrewise subtraction. -/
 theorem joint_rs_sub {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -75,11 +72,8 @@ theorem joint_rs_sub {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Jointly smooth mixed-tensor families are closed under fibrewise addition. -/
 theorem joint_rs_add {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -113,10 +107,9 @@ theorem joint_rs_add {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rfns_joint_cont
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -176,8 +169,7 @@ private theorem rfns_joint_cont
       ((Φ t).toSection x),
     DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem path_field_congr
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -199,8 +191,7 @@ private theorem path_field_congr
   intro x
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem icg_joint_smooth
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -219,8 +210,7 @@ private theorem icg_joint_smooth
     exact covGrad_step_jointContMDiffOn (I := I) (M := M) g₀ r (s + j)
       (fun t => iteratedCovGrad (I := I) g₀ r s j (Φ t)) S ih
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem icg_rfns_cont
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -238,8 +228,7 @@ private theorem icg_rfns_cont
     (by rw [Set.uIcc_of_le (zero_le_one (α := ℝ))] at hSI; exact hSI)
     (icg_joint_smooth (I := I) g₀ r s i Φ S hjoint)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem icg_norm_sq_int
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -284,10 +273,9 @@ private theorem icg_norm_sq_int
   rw [heq]
   exact hcontInt.intervalIntegrable_of_Icc (by norm_num)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- Iterated covariant differentiation commutes with the coefficient-field
-path integral for a jointly smooth family. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem icg_path_comm
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -324,10 +312,9 @@ theorem icg_path_comm
       (fun t => iteratedCovGrad (I := I) g₀ r s (j + 1) (Φ t)) S hS hSI hjgsucc hji
       (by funext t; rw [iteratedCovGrad_succ])
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- A uniform covariant `L²` jet bound for a jointly smooth parameter family
-passes unchanged to its interval-integrated coefficient field. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem path_jetL2_le
     (g₀ : SmoothRiemannianMetric I M) (r s a : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)

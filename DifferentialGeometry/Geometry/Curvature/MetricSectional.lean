@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CoordRm04Bridge
 import DifferentialGeometry.Geometry.Curvature.Scaling
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Sectional curvature determines metric curvature
@@ -26,7 +24,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private noncomputable def negRmForm
@@ -42,6 +39,7 @@ private noncomputable def metricModel
   fun X Y Z W =>
     g.inner x X Z * g.inner x Y W - g.inner x Y Z * g.inner x X W
 
+omit [SigmaCompactSpace M] in
 private theorem negRm_isAlg
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsAlgCurvForm (negRmForm (I := I) (M := M) g x) := by
@@ -113,6 +111,13 @@ private theorem negRm_isAlg
     dsimp [negRmForm]
     linarith [hfirst X Y Z W]
 
+omit [FiniteDimensional ℝ E]
+  [CompleteSpace E]
+  [IsManifold I 1 M]
+  [IsManifold I 2 M]
+  [IsManifold I 3 M]
+  [SigmaCompactSpace M]
+  [T2Space M] in
 private theorem metricModel_isAlg
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsAlgCurvForm (metricModel (I := I) (M := M) g x) := by
@@ -139,6 +144,7 @@ private theorem metricModel_isAlg
     rw [g.symm x Y X, g.symm x Z X, g.symm x Z Y]
     ring
 
+omit [SigmaCompactSpace M] in
 /-- A pointwise constant-sectional-curvature identity determines the full
 canonical lowered Riemann tensor. -/
 theorem metricRm_of_sec
@@ -180,10 +186,13 @@ theorem metricRm_of_sec
   dsimp [B, negRmForm, S, metricModel] at h
   linarith
 
+omit [IsManifold I 2 M]
+  [IsManifold I 3 M]
+  [SigmaCompactSpace M] in
 /-- A full lowered metric-curvature formula determines the corresponding
 curvature operator by nondegeneracy of the metric. -/
 theorem riemannOp_of_rm
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+    [NeZero (Module.finrank Real E)]
     [I.Boundaryless] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (x : M) (c : Real)
     (hRm : ∀ X Y Z W : TangentSpace I x,
@@ -203,6 +212,7 @@ theorem riemannOp_of_rm
   simp only [map_smul, map_sub, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.sub_apply, smul_eq_mul]
 
+omit [SigmaCompactSpace M] in
 /-- Scaling a positive constant-sectional-curvature metric by its curvature
 constant gives the full curvature-one Riemann formula. -/
 theorem metricRm_scale_one

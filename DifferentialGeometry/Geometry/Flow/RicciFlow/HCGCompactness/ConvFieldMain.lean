@@ -2,39 +2,37 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldAsse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Brick 5 of the P4 conv engine — one global `gInf` and the conv-field bridge
 
-Applies the all-compacts Arzelà–Ascoli endpoint `windowGInfAll`
-(`MetricPreconvWindowAll.lean`) to the bump-extended sequence `gSeqExt`
-(`ConvFieldAssembly.lean`, Brick 4), packages the output as DATA (`ConvOut`:
-one subsequence `φ`, one global limit family `gInf`, the sup-level window
-convergence `conv` and its pointwise companion `convPt` along the SAME `φ`),
-and proves the conv-field bridge: the `SourceDomainMetricData.ofRestrictPullback`
-seminorm `derivNormSupOn` of the pulled-back flows against the limit family is
-eventually small on every compact of the limit manifold `P.M`
-(`ofRP_supOn_conv`), via the per-index three-slot identification
-`ofRP_supOn_eq`.  Time-0 identification `gInf_zero_eq` closes the Brick-7
-`hL0` reduction: `gInf 0` equals any pointwise time-0 limit of the pulled-back
-source metrics.
 
-Cited inputs (threaded through at the exact Brick-4 granularity, dischargers
-unchanged): the uniform source lower bound (`hbound`, for `hlow_gSeqExt`), the
-uniform tail covariant bound (`hcovTail`, for `hbdd_gSeqExt`), the tail/source
-time-Lipschitz bounds (`hlipTail`/`hlipSrc`, for `hgLip_gSeqExt`), and — for
-the time-0 identification only — the pointwise time-0 convergence of the
-pulled-back source metrics (`hconv0`, discharged at Brick 7 from
-`mc.convergence`).
 
-The slot identification never compares metrics across nested subtypes: the
-pullback slot is swapped against `resSrc (gSeqExt k t)` pointwise on a sub-open
-`O ⊆ SourceDomain Φ k` where the bump is identically `1` (`BumpFamily.chi_one`),
-using restriction-invariance (`metricDerivNorm_restrictOpen`) twice and the
-`metricTensorField`-congruence `derivNorm_congr_left`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -46,26 +44,29 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [finiteE : FiniteDimensional Real E] [CompleteSpace E]
+  [neZeroE : NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-! ### Generic seminorm congruence lemmas
 
-Candidates for relocation next to `metricDerivNorm`/`metricDerivNormSupOn`
-(`PointedConvergence.lean`); kept here to avoid invalidating the deep import
-chain mid-phase. -/
+
+
+
+
 
 section CongrLemmas
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-/-- The MSM135 seminorm depends on its first metric slot only through the
-metric tensor field: metrics with equal `metricTensorField` have equal
-seminorms against any second slot and any reference. -/
+
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem derivNorm_congr_left
+    [Module.Finite ℝ E]
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (a : Nat) (g₁ g₂ gI gRef : SmoothRiemannianMetric I M) (x : M)
     (h : Tensor0SBundle.metricTensorField (I := I) g₁
@@ -75,9 +76,12 @@ theorem derivNorm_congr_left
   rw [metricCovDeriv_eq_covDerivOfField (I := I) g₁ gRef a,
     metricCovDeriv_eq_covDerivOfField (I := I) g₂ gRef a, h]
 
-/-- The raw `C^p` sup seminorm is unchanged when the first metric slot is
-replaced by a metric with pointwise-equal seminorms on the sup set. -/
+
+
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem supOn_congr_left
+    [Module.Finite ℝ E]
     (K : Set M) (p : Nat) (g₁ g₂ gI gRef : SmoothRiemannianMetric I M)
     (h : forall x, x ∈ K -> forall a : Nat, a <= p ->
       metricDerivNorm (I := I) a g₁ gI gRef x = metricDerivNorm (I := I) a g₂ gI gRef x) :
@@ -102,10 +106,13 @@ variable {P : PointedRiemannianManifold (I := I)}
 variable {subseq : Nat -> Nat}
 variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
-/-- The image of a limit-manifold set viewed inside a source domain is the set
-itself, provided the set lies in that source.  (The inline computation of
-`sourceCompactSet_isCompact`, extracted.) -/
-theorem sourceCompactSet_image_eq (k : Nat) {K : Set P.M}
+
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
+theorem sourceCompactSet_image_eq
+    (k : Nat) {K : Set P.M}
     (hKsrc : letI : TopologicalSpace P.M := P.topology; K ⊆ Φ.source k) :
     Subtype.val '' (sourceCompactSet (I := I) Φ k K) = K := by
   ext y
@@ -115,10 +122,10 @@ theorem sourceCompactSet_image_eq (k : Nat) {K : Set P.M}
   · intro hy
     exact ⟨⟨y, hKsrc hy⟩, hy, rfl⟩
 
-/-- Restriction of a limit-manifold metric to the `k`th source domain, with the
-`restrictOpen` instances converted across the `SourceDomain Φ k` vs
-`↥(sourceOpen Φ k)` spelling gap and passed explicitly (the `refRes` idiom;
-`refRes Φ R hsrc k` is definitionally `resSrc Φ hsrc k R`). -/
+
+
+
+
 noncomputable def resSrc (hsrc : SrcSigma Φ) (k : Nat)
     (g : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -142,9 +149,12 @@ noncomputable def resSrc (hsrc : SrcSigma Φ) (k : Nat)
     P.M P.topology P.charted P.smooth inferInstance
     g (sourceOpen (I := I) Φ k) sourceSigma sourceT2
 
-/-- Pointwise evaluation of `resSrc`: restriction does not change inner
-products. -/
-theorem resSrc_inner (hsrc : SrcSigma Φ) (k : Nat)
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
+theorem resSrc_inner
+    (hsrc : SrcSigma Φ) (k : Nat)
     (g : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
@@ -160,8 +170,10 @@ theorem resSrc_inner (hsrc : SrcSigma Φ) (k : Nat)
     letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
     (resSrc (I := I) Φ hsrc k g).inner y v w = g.inner (y : P.M) v w := rfl
 
-/-- The restricted reference metric `refRes` is the `resSrc` restriction of the
-reference. -/
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem refRes_eq_resSrc
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -169,10 +181,13 @@ theorem refRes_eq_resSrc
     (hsrc : SrcSigma Φ) (k : Nat) :
     refRes (I := I) Φ R hsrc k = resSrc (I := I) Φ hsrc k R := rfl
 
-/-- **Sup-level restriction invariance for `resSrc`.**  The source-domain `C^p`
-seminorm of three restricted metrics over a set equals the limit-manifold
-seminorm over its image. -/
-theorem supOn_resSrc_eq (hsrc : SrcSigma Φ) (k : Nat)
+
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
+theorem supOn_resSrc_eq
+    (hsrc : SrcSigma Φ) (k : Nat)
     (g₁ g₂ g₃ : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
@@ -200,17 +215,16 @@ theorem supOn_resSrc_eq (hsrc : SrcSigma Φ) (k : Nat)
   letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
   letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) := sourceDomSigmaOf (I := I) Φ k (hsrc k)
-  let sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := by
+  letI sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := by
     change SigmaCompactSpace (SourceDomain (I := I) Φ k)
     exact sourceDomSigmaOf (I := I) Φ k (hsrc k)
-  let sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
+  letI sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
     change T2Space (SourceDomain (I := I) Φ k)
     exact sourceDomT2 (I := I) Φ k
-  exact @metricDerivNormSupOn_restrictOpen E _ _ _ _ _ H _ I _
-    P.M P.topology P.charted P.t2 P.smooth P.sigmaCompact
+  exact @metricDerivNormSupOn_restrictOpen E _ _ finiteE _ H _ I
+    P.M P.topology P.charted P.t2 P.smooth
     g₁ g₂ g₃ (sourceOpen (I := I) Φ k) sourceSigma sourceT2 C p
 
-/-! ### The Brick-5 output data -/
 
 /-- **The Brick-5 output package** (ruling 5a: data, not bare existentials).
 One subsequence `φ`, one global limit family `gInf` on the limit manifold
@@ -227,15 +241,15 @@ structure ConvOut
   /-- The single subsequence serving all spatial compacts and orders on the
   fixed window `[β, ψ]`. -/
   φ : Nat -> Nat
-  /-- Strict monotonicity of the subsequence. -/
+
   hφ : StrictMono φ
-  /-- The single global limit metric family on the limit manifold. -/
+
   gInf : letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : IsManifold I ∞ P.M := P.smooth
     Real -> SmoothRiemannianMetric I P.M
-  /-- The `windowGInfAll` conclusion for `gSeqExt` along `φ` toward `gInf`:
-  sup-level `C^p` window smallness on every compact, every order. -/
+
+
   conv : letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : T2Space P.M := P.t2
@@ -246,8 +260,8 @@ structure ConvOut
         forall t, t ∈ Set.Icc β ψ ->
           metricDerivNormSupOn (I := I) K p
             (gSeqExt (I := I) Φ R bf hsrc htgt (φ k) t) (gInf t) R < ε
-  /-- Pointwise companion of `conv` along the SAME `φ` (each order `a ≤ p`,
-  each point of the compact). -/
+
+
   convPt : letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : T2Space P.M := P.t2
@@ -261,8 +275,6 @@ structure ConvOut
 
 namespace ConvOut
 
-/-- Restrict a fixed-window convergence output to a smaller closed time
-window, retaining the same subsequence and limit metric family. -/
 noncomputable def restrict
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -403,11 +415,9 @@ noncomputable def convOut
   intro K hK p ε hε
   obtain ⟨k0, hk0⟩ := hAA.choose_spec.2.choose_spec K hK p ε hε
   refine ⟨k0, fun k hk t ht a hap x hx => ?_⟩
-  -- uniform covariant bounds along the extracted subsequence at time `t`
   choose Cf hCf using fun q : Nat =>
     hbdd_gSeqExt (I := I) Φ R bf hsrc htgt β ψ hcovTail
       hAA.choose hAA.choose_spec.1 t ht q K hK
-  -- `BddAbove` for the `(K, p)` sup set at `(k, t)` via a singleton-tail split
   have hbddAbove : BddAbove {r : Real | exists b : Nat, b <= p ∧ exists z : P.M, z ∈ K ∧
       metricDerivNorm (I := I) b (gSeqExt (I := I) Φ R bf hsrc htgt (hAA.choose k) t)
         (hAA.choose_spec.2.choose t) R z = r} := by
@@ -441,11 +451,13 @@ noncomputable def convOut
       (Finset.le_sup' (fun b => Cf b + Cf b + 1) (Finset.mem_range.2 (Nat.lt_succ_of_le hbp)))
   exact lt_of_le_of_lt (le_csSup hbddAbove ⟨a, hap, x, hx, rfl⟩) (hk0 k hk t ht)
 
-/-! ### Step 3: the conv-field bridge -/
 
-/-- Definitional unfolding of the `ofRestrictPullback` seminorm: pullback slot
-= the Brick-2 source-flow metric, limit slot = the restricted limit-flow
-metric, reference slot = the restricted reference. -/
+
+
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 private theorem ofRP_supOn_def
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -476,16 +488,8 @@ private theorem ofRP_supOn_def
           (refRes (I := I) Φ R hsrc k) := rfl
 
 open Tensor0SBundle in
-/-- **Brick-5 Step 3, per index: the three-slot identification.**  On a compact
-`K` inside the bump agreement region `grow k`, the `ofRestrictPullback`
-seminorm of the `k`th pulled-back flow against the limit metric `gIt`
-(hypothesis `hmet`: the limit-flow metric at time `t` is `gIt`) and the
-restricted reference `refRes` equals the fixed-manifold seminorm of the
-bump-extended metric against `gIt` and `R` on `P.M`.  Pullback slot: `gSeqExt`
-agrees with the source metric on the open where the bump is `1`
-(`BumpFamily.chi_one` + `gSeqExt_inner_of_mem`), so the seminorms agree
-pointwise over `K` by restriction-invariance and `metricTensorField`
-congruence; limit and reference slots are definitionally restrictions. -/
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_eq
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -529,11 +533,8 @@ theorem ofRP_supOn_eq
       (by decide : (1 : WithTop ℕ∞) <= ∞)
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
     change IsManifold I ∞ (SourceDomain (I := I) Φ k); infer_instance
-  -- membership bookkeeping
   have hKsrc : K ⊆ Φ.source k := hKgrow.trans (bf.grow_subset k)
-  -- the open where the bump is identically 1
   obtain ⟨W, hWopen, hgrowW, hW1⟩ := bf.chi_one k
-  -- the sub-open of the source domain over that set
   let O : TopologicalSpace.Opens (SourceDomain (I := I) Φ k) :=
     ⟨Subtype.val ⁻¹' W, hWopen.preimage continuous_subtype_val⟩
   letI : ChartedSpace H ↥O :=
@@ -546,8 +547,6 @@ theorem ofRP_supOn_eq
       (by decide : (1 : WithTop ℕ∞) <= ∞)
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥O := by
     change IsManifold I ∞ ↥O; infer_instance
-  -- the pullback slot and the restricted bump-extension have equal tensor
-  -- fields after restriction to `O` (the bump is 1 there)
   have hmTF : metricTensorField (I := I)
         ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O)
       = metricTensorField (I := I)
@@ -570,7 +569,6 @@ theorem ofRP_supOn_eq
       ((y : SourceDomain (I := I) Φ k) : P.M) hysrc (v 0) (v 1)]
     rw [hW1 _ hyW]
     simp
-  -- pointwise slot swap over the sup set
   have hpt : forall z, z ∈ sourceCompactSet (I := I) Φ k K -> forall a : Nat, a <= p ->
       metricDerivNorm (I := I) a (srcMetric (I := I) Φ hsrc htgt k t)
         (resSrc (I := I) Φ hsrc k gIt) (refRes (I := I) Φ R hsrc k) z
@@ -598,8 +596,6 @@ theorem ofRP_supOn_eq
             (resSrc (I := I) Φ hsrc k (gSeqExt (I := I) Φ R bf hsrc htgt k t))
             (resSrc (I := I) Φ hsrc k gIt) (refRes (I := I) Φ R hsrc k) z :=
           metricDerivNorm_restrictOpen (I := I) _ _ _ O a (⟨z, hzW⟩ : ↥O)
-  -- assemble: definitional unfolding, limit-slot rewrite, pointwise swap,
-  -- sup-level restriction invariance, image identification
   calc (SourceDomainMetricData.ofRestrictPullback (I := I) (Φ := Φ) (k := k)
         (hsrc k) (htgt k)
         (fun _ => refRes (I := I) Φ R hsrc k) gInf).derivNormSupOn (I := I) K p t
@@ -627,14 +623,16 @@ theorem ofRP_supOn_eq
           (gSeqExt (I := I) Φ R bf hsrc htgt k t) gIt R := by
         rw [sourceCompactSet_image_eq (I := I) Φ k hKsrc]
 
-/-- **Brick-5 Step 3: the conv-field bridge.**  Given the Brick-5 output
-`co : ConvOut` and the limit-metric identification `hmetric` (the limit-flow
-metric on the window is `co.gInf` — discharged by `rfl` once the Brick-6 flow
-is built with metric `gInf`), the `ofRestrictPullback` seminorm of the
-`co.φ k`-th pulled-back flow, measured against the restricted reference
-`refRes`, is eventually smaller than any `ε` on every compact `K ⊆ P.M`,
-every order `p`, uniformly over the window — the `FlowLimitData.conv` shape at
-subsequence granularity. -/
+
+
+
+
+
+
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_conv
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -673,15 +671,17 @@ theorem ofRP_supOn_conv
     (hmetric t ht) hkg]
   exact hk0c k (le_trans (le_max_left _ _) hk) t ht
 
-/-! ### Step 4: time-0 identification of the limit -/
 
-/-- **Brick-5 Step 4: `gInf 0` is the time-0 Cheeger–Gromov limit metric.**
-From the pointwise time-0 convergence of the pulled-back source metrics toward
-`g0` (hypothesis `hconv0`, in `Φ`/`rmaps` terms — its Brick-7 discharger is
-`mc.convergence`) and the Brick-5 window convergence at `t = 0`, the two limits
-agree pointwise (`tendsto_nhds_unique`), hence as metrics
-(`metric_ext_inner`).  This is the input for the Brick-7 `hL0` reduction via
-`flowOfMetric_atTime`. -/
+
+
+
+
+
+
+
+
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem gInf_zero_eq
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -716,13 +716,11 @@ theorem gInf_zero_eq
   refine metric_ext_inner (I := I) (co.gInf 0) g0 (fun x => ?_)
   refine ContinuousLinearMap.ext (fun v => ?_)
   refine ContinuousLinearMap.ext (fun w => ?_)
-  -- nonnegativity of the reference quadratic form
   have hRnn : forall u : TangentSpace I x, 0 <= R.inner x u u := by
     intro u
     by_cases hu : u = 0
     · subst hu; simp
     · exact (R.pos x u hu).le
-  -- T1: the bump-extended sequence converges to `gInf 0` at `x` (from `convPt`)
   have hT1 : Tendsto
       (fun k => (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) 0).inner x v w)
       atTop (nhds ((co.gInf 0).inner x v w)) := by
@@ -758,8 +756,6 @@ theorem gInf_zero_eq
             rw [mul_comm]
             exact div_mul_cancel₀ ε hden.ne'
     exact lt_of_le_of_lt (le_trans hbound h1) h2
-  -- T2: the same sequence converges to `g0` at `x` (bump = 1 eventually +
-  -- the cited time-0 convergence)
   have hT2 : Tendsto
       (fun k => (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) 0).inner x v w)
       atTop (nhds (g0.inner x v w)) := by

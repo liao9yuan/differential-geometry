@@ -3,21 +3,19 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
-/-!
-# Second covariant derivatives and curvature
 
-This file records the vector-field computation behind Remark 14.8.  The
-torsion-free curvature formula is exposed as a corollary of the general
-torsion-correction identity.
--/
+
+
+
+
+
+
 
 suppress_compilation
 
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
@@ -30,9 +28,9 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The second covariant derivative of a vector field in two vector-field
-directions:
-`(nabla^2 Z)(X,Y) = nabla_X (nabla_Y Z) - nabla_{nabla_X Y} Z`. -/
+
+
+
 def nabla2VectorField
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z : RawTangentField (I := I) (M := M)) :
@@ -41,6 +39,7 @@ def nabla2VectorField
     (cov (fun p : M => (cov Z p) (Y p)) x) (X x) -
       (cov Z x) ((cov Y x) (X x))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp]
 theorem nabla2VectorField_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -50,8 +49,8 @@ theorem nabla2VectorField_apply
         (cov Z x) ((cov Y x) (X x)) :=
   rfl
 
-/-- Skewing the second covariant derivative gives curvature with the standard
-torsion correction. -/
+
+
 theorem nabla2VectorField_skew_eq_curvature_sub_torsion
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -65,8 +64,8 @@ theorem nabla2VectorField_skew_eq_curvature_sub_torsion
   simp [sub_eq_add_neg, map_add, add_assoc, add_left_comm, add_comm]
   abel
 
-/-- Corrected Remark 14.8: for a torsion-free pair of directions at `x`,
-curvature is the skew of the second covariant derivative. -/
+
+
 theorem connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -81,8 +80,8 @@ theorem connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zer
   rw [htor, map_zero, sub_zero] at h
   exact h.symm
 
-/-- The same torsion-free formula stated for the auxiliary Riemann operator used
-to construct the pointwise curvature tensor. -/
+
+
 theorem riemannCurvatureAux_eq_nabla2VectorField_skew_of_torsion_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -95,9 +94,9 @@ theorem riemannCurvatureAux_eq_nabla2VectorField_skew_of_torsion_zero
   exact connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
     (I := I) cov hX hY htor
 
-/-- Levi-Civita specialization: curvature is the skew of the second covariant
-derivative, with the torsion correction discharged by the constructed
-Levi-Civita connection. -/
+
+
+
 theorem leviCivita_connectionRiemannCurvatureField_eq_nabla2VectorField_skew
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -106,17 +105,20 @@ theorem leviCivita_connectionRiemannCurvatureField_eq_nabla2VectorField_skew
     connectionRiemannCurvatureField (I := I)
         (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x =
       nabla2VectorField (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x -
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x
+            -
         nabla2VectorField (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Y X Z x := by
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Y X Z
+            x := by
   refine connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
-    (I := I) (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) hX hY ?_
+    (I := I) (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) hX
+      hY ?_
   have htf :=
     DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree (I := I) g
-  change (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g).torsion x
+  change (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g).torsion
+    x
     (X x) (Y x) = 0
   rw [htf x]
   simp
 
 end DifferentialGeometry.Integral.Connection
-

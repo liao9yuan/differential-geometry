@@ -4,12 +4,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerRegularity
 
 set_option autoImplicit false
 
-/-!
-# Joint coordinate regularity of the curvature tower
 
-The coordinate-frame Christoffel and lowered-Riemann producers feed the pure
-component recursion, giving joint spacetime smoothness at every finite level.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -20,15 +20,15 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Every finite level of the realized coordinate-frame curvature tower is
 jointly smooth at regular spacetime points in the chart good set. -/
 theorem coordTowerSmooth

@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Curvature.Realized.TimeInterval
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Open-time convergence for the P4 metric field
@@ -23,8 +21,8 @@ open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -69,6 +67,8 @@ structure BumpMetricConv
 
 namespace BumpMetricConv
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Compact-window convergence persists under a further strict subsequence. -/
 theorem comp
     {R : letI : TopologicalSpace P.M := P.topology
@@ -97,6 +97,8 @@ theorem comp
     simpa only [Function.comp_apply] using
       hk₀ (η k) (hk.trans (hη.id_le k)) t ht a ha x hx
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Read convergence proved after reindexing the comparison maps as convergence
 of the original bump-extended sequence along the composed subsequence. -/
 theorem of_compSubseq
@@ -127,6 +129,8 @@ theorem of_compSubseq
     simpa only [Function.comp_apply, gSeqExt_compSubseq] using
       hk₀ k hk t ht a ha x hx
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- If a tail of a reindexed metric sequence converges on a compact window,
 then the whole reindexed sequence has the same asymptotic convergence. -/
 theorem of_tail
@@ -156,6 +160,8 @@ theorem of_tail
     have hval := hk₀ (k - m) (by omega) t ht a ha x hx
     simpa only [Nat.sub_add_cancel (show m ≤ k by omega)] using hval
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Window convergence restricts to a smaller closed time interval. -/
 theorem mono
     {R : letI : TopologicalSpace P.M := P.topology
@@ -180,6 +186,8 @@ theorem mono
     obtain ⟨k₀, hk₀⟩ := h.convPt K hK p ε hε
     exact ⟨k₀, fun k hk t ht => hk₀ k hk t (hsub ht)⟩
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Window convergence is unchanged by pointwise replacement of the limit
 family on that window. -/
 theorem congr
@@ -207,6 +215,8 @@ theorem congr
     refine ⟨k₀, fun k hk t ht a ha x hx => ?_⟩
     simpa only [← hAB t ht] using hk₀ k hk t ht a ha x hx
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Two window limits of the same reindexed bump-extended sequence agree at
 every time belonging to both windows. -/
 theorem unique
@@ -243,6 +253,8 @@ end BumpMetricConv
 
 namespace ConvOut
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Forget a fixed-window `ConvOut` down to the convergence predicate used by
 the open-window diagonal. -/
 theorem bump_conv
@@ -298,6 +310,8 @@ noncomputable def at_window
   conv := (co.convOn n).conv
   convPt := (co.convOn n).convPt
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- The open-interval output supplies the same convergence on every closed
 time interval compactly contained in the open interval. -/
 theorem conv_Icc
@@ -315,6 +329,8 @@ theorem conv_Icc
 
 end OpenConvOut
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Diagonalize compatible fixed-window convergence producers and glue their
 uniquely determined metric limits into one open-interval output.  The bump
 family and the underlying extended metric sequence are fixed before this
@@ -388,6 +404,7 @@ theorem exists_openConv
       BumpMetricConv.congr (Φ := Φ) (hgN n) fun t ht => (hgInf n t ht).symm
   }⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Produce one open-interval convergence output from the four raw
 fixed-window hypotheses of `convOut`, supplied on every canonical compact
 window.  The original bump family is fixed once; each prescribed refinement

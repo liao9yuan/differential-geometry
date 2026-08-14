@@ -1,16 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Components
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Lowered connection-pairing evolution
 
-Koszul and Ricci-flow lowered pairing identities for connection variation.
--/
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +20,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -32,25 +28,26 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- The Koszul/Levi-Civita variation identity specialized to Ricci flow:
-the lowered connection derivative is
-`-∇_i Ric_jl - ∇_j Ric_il + ∇_l Ric_ij`. -/
+
+
+
 def KoszulConnectionVariationInFrame
     (pairDt nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
   forall t x i j l,
     pairDt t x i j l =
       christoffelVariationLoweredRHSInFrame nablaRic t x i j l
 
-/-- The lowered pairing variation formula for the connection along Ricci flow.
 
-The metric is frozen at the differentiating time `t`; only the connection
-family varies in the scalar function. -/
+
+
+
 def ConnectionVariationPairingEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j l : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j l : Idx),
     HasDerivWithinAt
       (fun s : Real =>
         (S.family.metric (t : Real)).inner x (frame l x)
@@ -59,14 +56,15 @@ def ConnectionVariationPairingEquationInFrameOn
       D.carrier
       (t : Real)
 
-/-- Local lowered pairing variation equation. -/
+
 def ConnectionVariationPairingEquationInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j l : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -76,8 +74,10 @@ def ConnectionVariationPairingEquationInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- Component identity behind the general first variation formula, obtained
-by differentiating the finite-difference Koszul identity in time. -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem connectionPairDt_eq_metricVariationRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -94,7 +94,8 @@ theorem connectionPairDt_eq_metricVariationRHS
         (I := I) S frame u metricCovDerivDt)
     (hunique : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real))
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (hx : x ∈ u)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (hx : x ∈ u)
     (i j l : Idx) :
     pairDt (t : Real) x i j l =
       connectionVariationLoweredRHSFromMetricVariationInFrame
@@ -145,8 +146,10 @@ theorem connectionPairDt_eq_metricVariationRHS
   unfold connectionVariationLoweredRHSFromMetricVariationInFrame
   linarith
 
-/-- General first variation of Christoffel symbols in lowered-pairing form:
-`pairDt = 1/2 (nabla_i h_jl + nabla_j h_il - nabla_l h_ij)`. -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem connectionVariationPairing_of_metricVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -166,7 +169,8 @@ theorem connectionVariationPairing_of_metricVariation
         (I := I) S frame u metricCovDerivDt)
     (hunique : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x
+      ∈ u ->
       forall i j l : Idx,
         HasDerivWithinAt
           (fun s : Real =>
@@ -182,8 +186,10 @@ theorem connectionVariationPairing_of_metricVariation
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt
       hvarDiff hmetric hunique t x hx i j l)
 
-/-- Ricci-flow specialization of the general Christoffel first variation,
-using `partial_t g = -2 Ric`. -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem connectionVariationPairing_of_ricciFlow
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -221,8 +227,10 @@ theorem connectionVariationPairing_of_ricciFlow
     hmetricRicci (t : Real) x l i j]
   ring
 
-/-- Lemma 6.2, lowered-pairing form, from the connection derivative and the
-Ricci-flow Koszul variation identity. -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connectionVariationPairing_of_koszul
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

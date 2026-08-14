@@ -1,19 +1,17 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompContr
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Component-`ℓ²` norm bound for the natural contraction
 
-`ric_bound` (MSM135 Lemma 3.11, Claim 1) bounds `√normSq0S` of a contraction by the
-product of the factor norms.  In a `gRef`-orthonormal frame `normSq0S = ∑ component²`
-(`normSq0S_identity_eq_sum_sq`), so the component-level inequality
-`|A ∗ B|² ≤ |A|² · |B|²` (Cauchy–Schwarz on the contracted index, then the free index
-sums factor) is the base case (`m = 0`) of the iterated-Leibniz norm bound and the
-per-term bound `|∇ᶜA ∗ ∇^{m−c}B| ≤ |∇ᶜA| |∇^{m−c}B|`.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,14 +21,16 @@ open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- Squared component `ℓ²`-norm of a raw component array. -/
+
 def compL2Sq {r : ℕ} (T : (Fin r → Idx) → Real) : Real :=
   ∑ idx : Fin r → Idx, (T idx) ^ 2
 
+omit [DecidableEq Idx] in
 theorem compL2Sq_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2Sq T :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
-/-- Reindex a sum over `(r+1)`-tuples as a sum over the first `r` slots and the last. -/
+
+omit [DecidableEq Idx] in
 private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
     (∑ f : Fin (p + 1) → Idx, F f) =
       ∑ g : Fin p → Idx, ∑ c : Idx, F (Fin.snoc g c) := by
@@ -46,7 +46,8 @@ private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
   exact Fintype.sum_equiv e F (fun gc => F (Fin.snoc gc.1 gc.2))
     (fun f => by simp only [e, Equiv.coe_fn_mk, Fin.snoc_init_self])
 
-/-- Reindex a sum over `(p+q)`-tuples as a double sum over the two free blocks. -/
+
+omit [DecidableEq Idx] in
 private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real) :
     (∑ idx : Fin (p + q) → Idx, F idx) =
       ∑ a : Fin p → Idx, ∑ b : Fin q → Idx, F (Fin.append a b) := by
@@ -73,8 +74,9 @@ private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real
   · simp [Fin.append_left]
   · simp [Fin.append_right]
 
-/-- **The contraction is `ℓ²`-norm sub-multiplicative.**  `|A ∗ B|² ≤ |A|² · |B|²`,
-by Cauchy–Schwarz on the contracted index and factoring the free-index sums. -/
+
+
+omit [DecidableEq Idx] in
 theorem compL2Sq_contrTail_le {p q : ℕ}
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
     compL2Sq (contrTail A B) ≤ compL2Sq A * compL2Sq B := by
@@ -105,17 +107,20 @@ theorem compL2Sq_contrTail_le {p q : ℕ}
           rw [compL2Sq, compL2Sq, sum_snoc_split (F := fun f => A f ^ 2),
             sum_snoc_split (F := fun f => B f ^ 2)]
 
-/-- The component `ℓ²`-norm. -/
+
 def compL2 {r : ℕ} (T : (Fin r → Idx) → Real) : Real := Real.sqrt (compL2Sq T)
 
+omit [DecidableEq Idx] in
 theorem compL2_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2 T :=
   Real.sqrt_nonneg _
 
+omit [DecidableEq Idx] in
 theorem compL2_sq {r : ℕ} (T : (Fin r → Idx) → Real) : compL2 T ^ 2 = compL2Sq T := by
   rw [compL2, Real.sq_sqrt (compL2Sq_nonneg T)]
 
-/-- `compL2Sq` is invariant under reindexing the slots by an equivalence (the squared
-norm is a sum over all index tuples, which the reindexing merely permutes). -/
+
+
+omit [DecidableEq Idx] in
 theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
     compL2Sq (fun idx : Fin r' → Idx => T (fun i => idx (e i))) = compL2Sq T := by
   classical
@@ -129,19 +134,22 @@ theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin
     simp [Equiv.arrowCongr_apply, Equiv.symm_symm]
   rw [hfun]
 
-/-- `compL2` is invariant under reindexing the slots by an equivalence. -/
+
+omit [DecidableEq Idx] in
 theorem compL2_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
     compL2 (fun idx : Fin r' → Idx => T (fun i => idx (e i))) = compL2 T := by
   rw [compL2, compL2, compL2Sq_comp_equiv]
 
-/-- The contraction is `ℓ²`-norm sub-multiplicative (the `√` form). -/
+
+omit [DecidableEq Idx] in
 theorem compL2_contrTail_le {p q : ℕ}
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
     compL2 (contrTail A B) ≤ compL2 A * compL2 B := by
   rw [compL2, compL2, compL2, ← Real.sqrt_mul (compL2Sq_nonneg A)]
   exact Real.sqrt_le_sqrt (compL2Sq_contrTail_le A B)
 
-/-- **Minkowski for the component `ℓ²`-norm**: the triangle inequality. -/
+
+omit [DecidableEq Idx] in
 theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     compL2 (fun idx => T idx + U idx) ≤ compL2 T + compL2 U := by
   have hCS : (∑ idx : Fin r → Idx, T idx * U idx) ≤ compL2 T * compL2 U := by
@@ -170,22 +178,25 @@ theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     _ = compL2 T + compL2 U :=
           Real.sqrt_sq (add_nonneg (compL2_nonneg T) (compL2_nonneg U))
 
-/-- Negation preserves the component `ℓ²`-norm (`(-T)² = T²`). -/
+
+omit [DecidableEq Idx] in
 theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
     compL2 (fun idx => -T idx) = compL2 T := by
   simp only [compL2, compL2Sq]
   congr 1
   exact Finset.sum_congr rfl fun idx _ => by ring
 
-/-- **Minkowski for a difference**: `|T - U| ≤ |T| + |U|` (triangle inequality, the `-` form
-used by the residual `D_m` bound). -/
+
+
+omit [DecidableEq Idx] in
 theorem compL2_sub_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     compL2 (fun idx => T idx - U idx) ≤ compL2 T + compL2 U := by
   have h := compL2_add_le T (fun idx => -U idx)
   rw [compL2_neg] at h
   simpa only [sub_eq_add_neg] using h
 
-/-- The component `ℓ²`-norm is absolutely homogeneous: `|c • T| = |c|·|T|`. -/
+
+omit [DecidableEq Idx] in
 theorem compL2_smul {r : ℕ} (c : Real) (T : (Fin r → Idx) → Real) :
     compL2 (fun idx => c * T idx) = |c| * compL2 T := by
   rw [compL2, compL2,
@@ -200,9 +211,9 @@ namespace DifferentialGeometry.HCGCompactness
 
 open scoped BigOperators
 
-/-- **Pascal convolution identity** (the combinatorial heart of the binomial induction):
-shifting one factor's index combines two `\binom m ·` sums into a `\binom{m+1} ·` sum.
-Shared by the bundled (`ProductMFoldNorm`) and component (`AkMFold`) m-fold norm bounds. -/
+
+
+
 theorem pascal_sum (m : ℕ) (g : ℕ → ℝ) :
     (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g (c + 1)) +
         (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g c)
@@ -216,9 +227,9 @@ theorem pascal_sum (m : ℕ) (g : ℕ → ℝ) :
   simp only [Nat.cast_zero, zero_mul, add_zero]
   ring
 
-/-- **Pascal convolution WITHOUT the top term** (the `ISO` isolation shape): when the
-shifted sum stops at `m - 1`, the assembled `\binom{m+1}` sum stops at `m` — its
-`c = m + 1` top term is absent.  Subtract the matching top terms from `pascal_sum`. -/
+
+
+
 theorem pascal_sum_notop (m : ℕ) (g : ℕ → ℝ) :
     (∑ c ∈ Finset.range m, (m.choose c : ℝ) * g (c + 1)) +
         (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g c)

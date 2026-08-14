@@ -29,24 +29,34 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+/-- On a boundaryless manifold, the extended chart is an open partial
+homeomorphism into the ambient model vector space. -/
+def extChartOpenPartialHomeomorph (x : M) : OpenPartialHomeomorph M E where
+  toPartialEquiv := extChartAt I x
+  open_source := isOpen_extChartAt_source x
+  open_target := isOpen_extChartAt_target x
+  continuousOn_toFun := continuousOn_extChartAt x
+  continuousOn_invFun := continuousOn_extChartAt_symm x
 
 /-- The part of a coordinate ball which lies in the source of an open partial
 homeomorphism. -/
 def chartBall (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ) : Set M :=
   e.source ∩ e ⁻¹' Metric.ball z r
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [T2Space M] [SigmaCompactSpace M] in
 theorem isOpen_chartBall (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ) :
     IsOpen (chartBall e z r) :=
   e.isOpen_inter_preimage Metric.isOpen_ball
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [T2Space M] [SigmaCompactSpace M] in
 theorem chartBall_mono (e : OpenPartialHomeomorph M E) (z : E)
     {r R : ℝ} (hrR : r ≤ R) :
@@ -58,27 +68,36 @@ theorem chartBall_mono (e : OpenPartialHomeomorph M E) (z : E)
 partial homeomorphism.  Downstream coefficient estimates use this compact set
 rather than merely the support of the outer cutoff, because it also contains
 the straight coordinate segments from the freeze center. -/
-def chartClosedBall (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ) : Set M :=
+def chartClosedBall (e : PartialEquiv M E) (z : E) (r : ℝ) : Set M :=
   e.symm '' Metric.closedBall z r
+
+omit [T2Space M] [SigmaCompactSpace M] in
+theorem chartClosedBall_cpt_of_continuousOn
+    (e : PartialEquiv M E) (z : E) (r : ℝ)
+    (he : ContinuousOn e.symm e.target)
+    (hball : Metric.closedBall z r ⊆ e.target) :
+    IsCompact (chartClosedBall e z r) := by
+  exact (isCompact_closedBall z r).image_of_continuousOn
+    (he.mono hball)
 
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem chartClosedBall_cpt (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ)
     (hball : Metric.closedBall z r ⊆ e.target) :
-    IsCompact (chartClosedBall e z r) := by
-  exact (isCompact_closedBall z r).image_of_continuousOn
-    (e.continuousOn_symm.mono hball)
+    IsCompact (chartClosedBall e.toPartialEquiv z r) :=
+  chartClosedBall_cpt_of_continuousOn e.toPartialEquiv z r
+    e.continuousOn_symm hball
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [NormedSpace ℝ E] [FiniteDimensional ℝ E] [TopologicalSpace M]
   [T2Space M] [SigmaCompactSpace M] in
-theorem chartClosedBall_src (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ)
+theorem chartClosedBall_src (e : PartialEquiv M E) (z : E) (r : ℝ)
     (hball : Metric.closedBall z r ⊆ e.target) :
     chartClosedBall e z r ⊆ e.source := by
   rintro x ⟨y, hy, rfl⟩
   exact e.map_target (hball hy)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [NormedSpace ℝ E] [FiniteDimensional ℝ E] [TopologicalSpace M]
   [T2Space M] [SigmaCompactSpace M] in
-theorem chartClosedBall_map (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ)
+theorem chartClosedBall_map (e : PartialEquiv M E) (z : E) (r : ℝ)
     (hball : Metric.closedBall z r ⊆ e.target) {x : M}
     (hx : x ∈ chartClosedBall e z r) :
     e x ∈ Metric.closedBall z r := by
@@ -89,22 +108,33 @@ theorem chartClosedBall_map (e : OpenPartialHomeomorph M E) (z : E) (r : ℝ)
 /-- A fixed compact coordinate collar around `K`.  Its radius is chosen before
 any coefficient constant and is therefore the non-circular domain on which
 uniform raw coefficient bounds are first obtained. -/
-def chartBuffer (e : OpenPartialHomeomorph M E) (K : Set M) (r : ℝ) : Set M :=
+def chartBuffer (e : PartialEquiv M E) (K : Set M) (r : ℝ) : Set M :=
   e.symm '' Metric.cthickening r (e '' K)
+
+omit [T2Space M] [SigmaCompactSpace M] in
+theorem chartBuffer_cpt_of_continuousOn
+    (e : PartialEquiv M E) {K : Set M} (r : ℝ)
+    (he : ContinuousOn e e.source)
+    (he_symm : ContinuousOn e.symm e.target)
+    (hK : IsCompact K) (hKsrc : K ⊆ e.source)
+    (hbuffer : Metric.cthickening r (e '' K) ⊆ e.target) :
+    IsCompact (chartBuffer e K r) := by
+  have hKimage : IsCompact (e '' K) :=
+    hK.image_of_continuousOn (he.mono hKsrc)
+  exact hKimage.cthickening.image_of_continuousOn
+    (he_symm.mono hbuffer)
 
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem chartBuffer_cpt (e : OpenPartialHomeomorph M E) {K : Set M} (r : ℝ)
     (hK : IsCompact K) (hKsrc : K ⊆ e.source)
     (hbuffer : Metric.cthickening r (e '' K) ⊆ e.target) :
-    IsCompact (chartBuffer e K r) := by
-  have hKimage : IsCompact (e '' K) :=
-    hK.image_of_continuousOn (e.continuousOn.mono hKsrc)
-  exact hKimage.cthickening.image_of_continuousOn
-    (e.continuousOn_symm.mono hbuffer)
+    IsCompact (chartBuffer e.toPartialEquiv K r) :=
+  chartBuffer_cpt_of_continuousOn e.toPartialEquiv r e.continuousOn
+    e.continuousOn_symm hK hKsrc hbuffer
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [NormedSpace ℝ E] [FiniteDimensional ℝ E] [TopologicalSpace M]
   [T2Space M] [SigmaCompactSpace M] in
-theorem chartBuffer_src (e : OpenPartialHomeomorph M E) (K : Set M) (r : ℝ)
+theorem chartBuffer_src (e : PartialEquiv M E) (K : Set M) (r : ℝ)
     (hbuffer : Metric.cthickening r (e '' K) ⊆ e.target) :
     chartBuffer e K r ⊆ e.source := by
   rintro x ⟨y, hy, rfl⟩
@@ -113,30 +143,46 @@ theorem chartBuffer_src (e : OpenPartialHomeomorph M E) (K : Set M) (r : ℝ)
 omit [T2Space M] [SigmaCompactSpace M] in
 /-- A compact subset of one chart source has a positive fixed coordinate
 collar whose closed thickening stays in the chart target. -/
-theorem exists_chartBuffer
-    (e : OpenPartialHomeomorph M E) {K : Set M}
+theorem exists_chartBuffer_of_continuousOn
+    (e : PartialEquiv M E) {K : Set M}
+    (he : ContinuousOn e e.source)
+    (he_symm : ContinuousOn e.symm e.target)
+    (he_target : IsOpen e.target)
     (hK : IsCompact K) (hKsrc : K ⊆ e.source) :
     ∃ r₀ : ℝ, 0 < r₀ ∧
       Metric.cthickening r₀ (e '' K) ⊆ e.target ∧
       IsCompact (chartBuffer e K r₀) ∧
       chartBuffer e K r₀ ⊆ e.source := by
   have hKimage : IsCompact (e '' K) :=
-    hK.image_of_continuousOn (e.continuousOn.mono hKsrc)
+    hK.image_of_continuousOn (he.mono hKsrc)
   have hKimage_target : e '' K ⊆ e.target := by
     rintro y ⟨x, hxK, rfl⟩
     exact e.map_source (hKsrc hxK)
   obtain ⟨r₀, hr₀, hbuffer⟩ :=
-    hKimage.exists_cthickening_subset_open e.open_target hKimage_target
+    hKimage.exists_cthickening_subset_open he_target hKimage_target
   exact ⟨r₀, hr₀, hbuffer,
-    chartBuffer_cpt e r₀ hK hKsrc hbuffer,
+    chartBuffer_cpt_of_continuousOn e r₀ he he_symm hK hKsrc hbuffer,
     chartBuffer_src e K r₀ hbuffer⟩
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [T2Space M] [SigmaCompactSpace M] in
+/-- The open-partial-homeomorphism specialization of
+`exists_chartBuffer_of_continuousOn`. -/
+theorem exists_chartBuffer
+    (e : OpenPartialHomeomorph M E) {K : Set M}
+    (hK : IsCompact K) (hKsrc : K ⊆ e.source) :
+    ∃ r₀ : ℝ, 0 < r₀ ∧
+      Metric.cthickening r₀ (e '' K) ⊆ e.target ∧
+      IsCompact (chartBuffer e.toPartialEquiv K r₀) ∧
+      chartBuffer e.toPartialEquiv K r₀ ⊆ e.source :=
+  exists_chartBuffer_of_continuousOn e.toPartialEquiv e.continuousOn
+    e.continuousOn_symm e.open_target hK hKsrc
+
+omit [NormedSpace ℝ E] [FiniteDimensional ℝ E] [TopologicalSpace M]
   [T2Space M] [SigmaCompactSpace M] in
 /-- Every refined outer closed ball whose radius is at most the fixed collar
 radius pulls back into the fixed chart buffer. -/
 theorem outer_subset_buffer
-    (e : OpenPartialHomeomorph M E) {K : Set M} {x : M} (hx : x ∈ K)
+    (e : PartialEquiv M E) {K : Set M} {x : M} (hx : x ∈ K)
     {R r₀ : ℝ} (hR : R ≤ r₀) :
     chartClosedBall e (e x) R ⊆ chartBuffer e K r₀ := by
   apply Set.image_mono

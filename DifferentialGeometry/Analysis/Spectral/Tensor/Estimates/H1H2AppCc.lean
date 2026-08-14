@@ -23,13 +23,14 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem h1_norm_sq_jet
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -54,7 +55,7 @@ theorem appCc_h1_h2_h1
         (∑ j ∈ Finset.range 2,
           ‖iteratedCovGrad (I := I) g r c j Φ‖ ^ 2) ≤ A ^ 2 →
         ‖ccTensorToHs (I := I) (M := M) g c (1 : ℝ)
-            (appCc (I := I) (M := M) g r c Φ U)‖ ≤
+            (operatorFieldApply (I := I) (M := M) g r c Φ U)‖ ≤
           C * A *
             ‖ccTensorToHs (I := I) (M := M) g r (2 : ℝ) U‖ := by
   classical
@@ -76,7 +77,7 @@ theorem appCc_h1_h2_h1
   let G : SmoothCcTensor g 0 (r + 1) :=
     covGrad (I := I) (M := M) g 0 r U
   let Y : SmoothCcTensor g 0 c :=
-    appCc (I := I) (M := M) g r c Φ U
+    operatorFieldApply (I := I) (M := M) g r c Φ U
   have hN : 0 ≤ N := norm_nonneg _
   have hΦsq :
       ‖Φ‖ ^ 2 + ‖covGrad (I := I) (M := M) g r c Φ‖ ^ 2 ≤ A ^ 2 := by
@@ -166,7 +167,7 @@ theorem appCc_h1_h2_h1
         mul_le_mul_of_nonneg_right hΦ0 (mul_nonneg hCpt hN)
       _ = Cpt * A * N := by ring
   have hcross :
-      ‖appCc (I := I) (M := M) g r (c + 1)
+      ‖operatorFieldApply (I := I) (M := M) g r (c + 1)
           (covGrad (I := I) (M := M) g r c Φ) U‖ ≤ Cpt * A * N := by
     have hc := appCc_l2_right
       (I := I) (M := M) g r (c + 1)
@@ -178,7 +179,7 @@ theorem appCc_h1_h2_h1
         mul_le_mul_of_nonneg_right hΦ1 (mul_nonneg hCpt hN)
       _ = Cpt * A * N := by ring
   have hslot :
-      ‖appCc (I := I) (M := M) g (r + 1) (c + 1)
+      ‖operatorFieldApply (I := I) (M := M) g (r + 1) (c + 1)
           (slotExtend (I := I) (M := M) g r c Φ) G‖ ≤ Ks * A * N := by
     have hp := appCc_l6_l3_l2 (I := I) (M := M) g (r + 1) (c + 1)
       (slotExtend (I := I) (M := M) g r c Φ) G
@@ -200,17 +201,17 @@ theorem appCc_h1_h2_h1
       ‖covGrad (I := I) (M := M) g 0 c Y‖ ≤
         (Cpt + Ks) * A * N := by
     rw [show covGrad (I := I) (M := M) g 0 c Y =
-        appCc (I := I) (M := M) g r (c + 1)
+        operatorFieldApply (I := I) (M := M) g r (c + 1)
             (covGrad (I := I) (M := M) g r c Φ) U +
-          appCc (I := I) (M := M) g (r + 1) (c + 1)
+          operatorFieldApply (I := I) (M := M) g (r + 1) (c + 1)
             (slotExtend (I := I) (M := M) g r c Φ) G by
       dsimp [Y, G]
-      exact covGrad_appCc_eq (I := I) (M := M) g r c Φ U]
+      exact covGrad_operatorFieldApply_eq (I := I) (M := M) g r c Φ U]
     calc
       _ ≤
-          ‖appCc (I := I) (M := M) g r (c + 1)
+          ‖operatorFieldApply (I := I) (M := M) g r (c + 1)
               (covGrad (I := I) (M := M) g r c Φ) U‖ +
-            ‖appCc (I := I) (M := M) g (r + 1) (c + 1)
+            ‖operatorFieldApply (I := I) (M := M) g (r + 1) (c + 1)
               (slotExtend (I := I) (M := M) g r c Φ) G‖ := norm_add_le _ _
       _ ≤ Cpt * A * N + Ks * A * N := add_le_add hcross hslot
       _ = (Cpt + Ks) * A * N := by ring

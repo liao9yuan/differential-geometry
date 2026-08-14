@@ -6,38 +6,39 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ForwardIntegralCurveUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.SeeleyTimeExtension
 
+
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff NNReal
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+  [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M]
 
-private noncomputable def wchCutoffEta (a b δ : ℝ) (s : ℝ) : ℝ :=
+noncomputable def timeWindowBump (a b δ : ℝ) (s : ℝ) : ℝ :=
   Real.smoothTransition ((s - (a - 2 * δ)) / δ) *
     Real.smoothTransition (((b + 2 * δ) - s) / δ)
 
-private theorem wchCutoffEta_contDiff (a b δ : ℝ) : ContDiff ℝ ∞ (wchCutoffEta a b δ) := by
-  unfold wchCutoffEta
+theorem timeWindowBump_contDiff (a b δ : ℝ) : ContDiff ℝ ∞ (timeWindowBump a b δ) := by
+  unfold timeWindowBump
   exact (Real.smoothTransition.contDiff.comp (by fun_prop)).mul
     (Real.smoothTransition.contDiff.comp (by fun_prop))
 
-private theorem wchCutoffEta_eq_one (a b δ s : ℝ) (hδ : 0 < δ) (hs : s ∈ Set.Ioo (a - δ) (b + δ)) :
-    wchCutoffEta a b δ s = 1 := by
+theorem timeWindowBump_eq_one (a b δ s : ℝ) (hδ : 0 < δ) (hs : s ∈ Set.Ioo (a - δ) (b + δ)) :
+    timeWindowBump a b δ s = 1 := by
   obtain ⟨hs1, hs2⟩ := hs
-  unfold wchCutoffEta
+  unfold timeWindowBump
   rw [Real.smoothTransition.one_of_one_le, Real.smoothTransition.one_of_one_le, mul_one]
   · rw [le_div_iff₀ hδ]; linarith
   · rw [le_div_iff₀ hδ]; linarith
 
-private theorem wchCutoffEta_mem_Icc_of_ne_zero (a b δ s : ℝ) (hδ : 0 < δ)
-    (hs : wchCutoffEta a b δ s ≠ 0) : s ∈ Set.Icc (a - 2 * δ) (b + 2 * δ) := by
-  unfold wchCutoffEta at hs
+theorem timeWindowBump_mem_Icc_of_ne_zero (a b δ s : ℝ) (hδ : 0 < δ)
+    (hs : timeWindowBump a b δ s ≠ 0) : s ∈ Set.Icc (a - 2 * δ) (b + 2 * δ) := by
+  unfold timeWindowBump at hs
   refine ⟨?_, ?_⟩
   · by_contra h
     have hlt : s < a - 2 * δ := lt_of_not_ge h
@@ -53,15 +54,13 @@ private theorem wchCutoffEta_mem_Icc_of_ne_zero (a b δ s : ℝ) (hδ : 0 < δ)
     exact hs rfl
 
 omit [IsManifold I ∞ M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
-  [SigmaCompactSpace M] [CompactSpace M] [FiniteDimensional ℝ E]
-  [NeZero (Module.finrank ℝ E)] in
-private theorem wchCutoffEta_section_contMDiff (a b δ : ℝ) :
-    ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => wchCutoffEta a b δ q.1) :=
-  (wchCutoffEta_contDiff a b δ).contMDiff.comp contMDiff_fst
-
-set_option linter.unusedSectionVars false in
-
-private theorem wch_smul_tangentMap_cmdwa
+  [SigmaCompactSpace M] [CompleteSpace E] [CompactSpace M] [FiniteDimensional ℝ E] in
+theorem timeWindowBump_section_contMDiff (a b δ : ℝ) :
+    ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => timeWindowBump a b δ q.1) :=
+  (timeWindowBump_contDiff a b δ).contMDiff.comp contMDiff_fst
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem smul_tangentBundleSection_contMDiffWithinAt
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ)
     {u : Set (ℝ × M)} {q₀ : ℝ × M}
     (hη : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => η q.1) u q₀)
@@ -85,10 +84,9 @@ private theorem wch_smul_tangentMap_cmdwa
     simpa using (e.linear ℝ hx).2 (η x.1) (X x.1 x.2)
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).2 (η q₀.1) (X q₀.1 q₀.2)
-
-set_option linter.unusedSectionVars false in
-
-private theorem wch_smul_tangentMap_global
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem smul_tangentBundleSection_contMDiff
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ) (T : ℝ)
     (hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => η q.1))
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -106,7 +104,7 @@ private theorem wch_smul_tangentMap_global
   have honU : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M =>
         (TotalSpace.mk' E q.2 (η q.1 • X q.1 q.2) : TangentBundle I M)) U :=
-    fun q hq => wch_smul_tangentMap_cmdwa X η (hηsm.contMDiffOn q hq) (hX q hq)
+    fun q hq => smul_tangentBundleSection_contMDiffWithinAt X η (hηsm.contMDiffOn q hq) (hX q hq)
   have honV : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M =>
         (TotalSpace.mk' E q.2 (η q.1 • X q.1 q.2) : TangentBundle I M)) V := by
@@ -128,16 +126,14 @@ private theorem wch_smul_tangentMap_global
     · exact Or.inl (htsupp h)
     · exact Or.inr h
   exact contMDiff_of_contMDiffOn_union_of_isOpen honU honV hcover hUopen hVopen
-
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-
-private theorem interior_field_global_cutoff_extension_loc
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem interior_field_global_cutoff_extension_loc
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    {a b : ℝ} (hab : 0 < a) (hab' : a < b) (hbT : b < T) :
+    {a b : ℝ} (hab : 0 < a) (_hab' : a < b) (hbT : b < T) :
     ∃ (Xt : ℝ → ∀ x : M, TangentSpace I x) (δ : ℝ), 0 < δ ∧
       (∀ s ∈ Set.Ioo (a - δ) (b + δ), ∀ x : M, Xt s x = X_DT s x) ∧
       ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -159,48 +155,47 @@ private theorem interior_field_global_cutoff_extension_loc
     have : 2 * (min a (T - b) / 3) ≤ 2 * ((T - b) / 3) :=
       mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
     linarith
-  refine ⟨fun s x => wchCutoffEta a b δ s • X_DT s x, δ, hδ_pos, ?_, ?_, ?_⟩
+  refine ⟨fun s x => timeWindowBump a b δ s • X_DT s x, δ, hδ_pos, ?_, ?_, ?_⟩
   · intro s hs x
-    simp only [wchCutoffEta_eq_one a b δ s hδ_pos hs, one_smul]
+    simp only [timeWindowBump_eq_one a b δ s hδ_pos hs, one_smul]
   · have hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun q : ℝ × M => wchCutoffEta a b δ q.1) := wchCutoffEta_section_contMDiff a b δ
-    have htsupp : tsupport (fun q : ℝ × M => wchCutoffEta a b δ q.1) ⊆
+        (fun q : ℝ × M => timeWindowBump a b δ q.1) := timeWindowBump_section_contMDiff a b δ
+    have htsupp : tsupport (fun q : ℝ × M => timeWindowBump a b δ q.1) ⊆
         Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
       have hclosed : IsClosed (Set.Icc (a - 2 * δ) (b + 2 * δ) ×ˢ (Set.univ : Set M)) :=
         isClosed_Icc.prod isClosed_univ
-      have hsupp_sub : Function.support (fun q : ℝ × M => wchCutoffEta a b δ q.1) ⊆
+      have hsupp_sub : Function.support (fun q : ℝ × M => timeWindowBump a b δ q.1) ⊆
           Set.Icc (a - 2 * δ) (b + 2 * δ) ×ˢ (Set.univ : Set M) := by
         intro q hq
         rw [Function.mem_support] at hq
-        exact ⟨wchCutoffEta_mem_Icc_of_ne_zero a b δ q.1 hδ_pos hq, Set.mem_univ _⟩
+        exact ⟨timeWindowBump_mem_Icc_of_ne_zero a b δ q.1 hδ_pos hq, Set.mem_univ _⟩
       refine (closure_minimal hsupp_sub hclosed).trans ?_
       refine Set.prod_mono (fun x hx => ?_) (subset_refl _)
       exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
-    exact wch_smul_tangentMap_global X_DT (wchCutoffEta a b δ) T hηsm hint htsupp
+    exact smul_tangentBundleSection_contMDiff X_DT (timeWindowBump a b δ) T hηsm hint htsupp
   · have hsm : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M =>
-          (TotalSpace.mk' E q.2 (wchCutoffEta a b δ q.1 • X_DT q.1 q.2) :
+          (TotalSpace.mk' E q.2 (timeWindowBump a b δ q.1 • X_DT q.1 q.2) :
             TangentBundle I M)) := by
       have hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          (fun q : ℝ × M => wchCutoffEta a b δ q.1) := wchCutoffEta_section_contMDiff a b δ
-      have htsupp : tsupport (fun q : ℝ × M => wchCutoffEta a b δ q.1) ⊆
+          (fun q : ℝ × M => timeWindowBump a b δ q.1) := timeWindowBump_section_contMDiff a b δ
+      have htsupp : tsupport (fun q : ℝ × M => timeWindowBump a b δ q.1) ⊆
           Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
         have hclosed : IsClosed (Set.Icc (a - 2 * δ) (b + 2 * δ) ×ˢ (Set.univ : Set M)) :=
           isClosed_Icc.prod isClosed_univ
-        have hsupp_sub : Function.support (fun q : ℝ × M => wchCutoffEta a b δ q.1) ⊆
+        have hsupp_sub : Function.support (fun q : ℝ × M => timeWindowBump a b δ q.1) ⊆
             Set.Icc (a - 2 * δ) (b + 2 * δ) ×ˢ (Set.univ : Set M) := by
           intro q hq
           rw [Function.mem_support] at hq
-          exact ⟨wchCutoffEta_mem_Icc_of_ne_zero a b δ q.1 hδ_pos hq, Set.mem_univ _⟩
+          exact ⟨timeWindowBump_mem_Icc_of_ne_zero a b δ q.1 hδ_pos hq, Set.mem_univ _⟩
         refine (closure_minimal hsupp_sub hclosed).trans ?_
         refine Set.prod_mono (fun x hx => ?_) (subset_refl _)
         exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
-      exact wch_smul_tangentMap_global X_DT (wchCutoffEta a b δ) T hηsm hint htsupp
-    exact autonomizedFieldJointC1_of_contMDiff (fun s x => wchCutoffEta a b δ s • X_DT s x) hsm
-
-set_option linter.unusedSectionVars false in
-
-private theorem wch_slice_smooth_of_jointOn
+      exact smul_tangentBundleSection_contMDiff X_DT (timeWindowBump a b δ) T hηsm hint htsupp
+    exact autonomizedFieldJointC1_of_contMDiff (fun s x => timeWindowBump a b δ s • X_DT s x) hsm
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem contMDiff_timeSlice_of_jointlyContMDiffOn
     {Ψ : M → ℝ → M} {a b : ℝ} (t : ℝ) (ht : t ∈ Set.Ioo a b)
     (hsm : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Ψ q.2 q.1)
       (Set.Ioo a b ×ˢ (Set.univ : Set M))) :
@@ -216,10 +211,9 @@ private theorem wch_slice_smooth_of_jointOn
         (Set.Ioo a b ×ˢ (Set.univ : Set M)) (t, x) := hsm (t, x) hmem
     exact h1.comp x (hpair x).contMDiffWithinAt hmaps
   exact hcomp.contMDiffAt (by simp)
-
-set_option linter.unusedSectionVars false in
-
-private theorem wch_piecewise_bare_velocity
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem hasMFDerivWithinAt_piecewise_of_agree_at_junction
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (f1 f2 : ℝ → M) {c c' : ℝ} (hcc' : c < c')
     (hagree : f1 c = f2 c)
@@ -297,9 +291,9 @@ private theorem wch_piecewise_bare_velocity
           = ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (f2 t))) by rw [hval]]
       exact hmono.congr_of_eventuallyEq heq hval
 
-set_option linter.unusedSectionVars false in
 
-private theorem wch_anchored_window_flow
+omit [SigmaCompactSpace M] in
+theorem exists_local_flow_anchored_at_interior_time
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
@@ -354,10 +348,9 @@ private theorem wch_anchored_window_flow
     rw [show ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ p t)))
         = ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ p t))) by rw [heq]]
     exact hbare
-
-set_option linter.unusedSectionVars false in
-
-private theorem wch_interior_coherence
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
+theorem integralCurves_eqOn_Icc_of_agree_at_left
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
@@ -396,12 +389,16 @@ private theorem wch_interior_coherence
     rw [hXt_eq t (hsub ht) (Φ' t x')]; exact hflow' t ht
   exact bare_forward_flow_eqOn_of_jointC1 Xt hXt_auto Φ Φ' x x' hflowXt hflowXt' hstart
 
+omit [CompactSpace M]
+  [I.Boundaryless]
+  [SigmaCompactSpace M]
+  [FiniteDimensional ℝ E] in
 /-- Two forward bare integral curves of a field which is smooth for positive
 time agree on the whole common half-open interval once the field has one
 uniform chart-Lipschitz window at each initial point.
 
 The endpoint window is handled by `bare_fromZero_local`.  After choosing one
-positive time in that window, `wch_interior_coherence` propagates equality to
+positive time in that window, `integralCurves_eqOn_Icc_of_agree_at_left` propagates equality to
 an arbitrary later target using only the positive-time joint smoothness of the
 field. -/
 theorem bare_fromZero_full
@@ -453,9 +450,10 @@ theorem bare_fromZero_full
       intro s hs
       exact (hflow' s ⟨le_trans he0.le hs.1, lt_of_le_of_lt hs.2 ht.2⟩).mono
         (fun u hu => le_trans he0.le hu.1)
-    exact wch_interior_coherence X T hint Φ Φ' x x' he0 het ht.2
+    exact integralCurves_eqOn_Icc_of_agree_at_left X T hint Φ Φ' x x' he0 het ht.2
           hflowIcc hflowIcc' heq t ⟨het.le, le_rfl⟩
 
+omit [CompactSpace M] in
 /-- Forward uniqueness on a half-open interval for a field which is jointly smooth on the
 closed slab.  Seeley extension turns the closed-slab field into a globally smooth field; the
 existing one-sided autonomous uniqueness theorem then applies on each compact initial segment.
@@ -507,11 +505,10 @@ theorem bare_Ico_unique
     exact bare_forward_flow_eqOn_of_jointC1 Xext hXc1 Φ Φ' x x'
       hflowIcc hflowIcc' hstart t ⟨ht0.le, le_rfl⟩
 
-set_option linter.unusedSectionVars false in
 
-set_option linter.unusedVariables false in
 
-private theorem wch_uniform_interior_window
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+theorem exists_uniformRadius_local_flow_cover_of_compact_Icc
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
@@ -662,31 +659,32 @@ private theorem wch_uniform_interior_window
     have he_b : e ≤ b := he.2
     apply Set.Ioo_subset_Ioo <;> · linarith
 
-private def whzReached (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) (s : ℝ) : Prop :=
+private def existsForwardIntegralCurveUpTo (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) (s : ℝ) :
+    Prop :=
   ∃ c : ℝ → M, c 0 = x ∧
     ∀ t ∈ Set.Ico (0:ℝ) s,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I c (Set.Ici (0:ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (c t)))
-
-set_option linter.unusedSectionVars false in
-
-private theorem whzReached_mono (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s s' : ℝ}
-    (hss : s' ≤ s) (h : whzReached X x s) : whzReached X x s' := by
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private theorem existsForwardIntegralCurveUpTo_mono (X : ℝ → ∀ x : M, TangentSpace I x) (x : M)
+    {s s' : ℝ}
+    (hss : s' ≤ s) (h : existsForwardIntegralCurveUpTo X x s) : existsForwardIntegralCurveUpTo X x
+      s' := by
   obtain ⟨c, hc0, hc⟩ := h
   exact ⟨c, hc0, fun t ht => hc t ⟨ht.1, lt_of_lt_of_le ht.2 hss⟩⟩
-
-set_option linter.unusedSectionVars false in
-
-private theorem whzReached_extend
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private theorem existsForwardIntegralCurveUpTo_extend
     (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s e ρ : ℝ}
     (he0 : 0 < e) (hes : e < s) (hρ : 0 < ρ)
-    (hR : whzReached X x s)
+    (hR : existsForwardIntegralCurveUpTo X x s)
     (W : M → ℝ → M)
     (hW : ∀ p, ∀ t ∈ Set.Ioo (e - ρ) (e + ρ),
       HasMFDerivAt 𝓘(ℝ, ℝ) I (fun u => W p u) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (W p t))))
     (hWinit : ∀ p, W p e = p) :
-    whzReached X x (e + ρ) := by
+    existsForwardIntegralCurveUpTo X x (e + ρ) := by
   classical
   obtain ⟨c, hc0, hc⟩ := hR
   set f2 : ℝ → M := fun u => W (c e) u with hf2def
@@ -705,30 +703,29 @@ private theorem whzReached_extend
       have htw : t ∈ Set.Ioo (e - ρ) (e + ρ) := ⟨by linarith [ht.1], ht.2⟩
       exact (hW (c e) t htw).hasMFDerivWithinAt
     have hagree : c e = f2 e := by rw [hf2def]; exact (hWinit (c e)).symm
-    exact wch_piecewise_bare_velocity X c f2 (c := e) (c' := e + ρ)
+    exact hasMFDerivWithinAt_piecewise_of_agree_at_junction X c f2 (c := e) (c' := e + ρ)
       (by linarith) hagree hf1 hf1c hf2
-
-set_option linter.unusedSectionVars false in
-
-private theorem whzReached_chain
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private theorem existsForwardIntegralCurveUpTo_chain
     (X : ℝ → ∀ x : M, TangentSpace I x) (x : M)
     {δ β r : ℝ} (hδ : 0 < δ) (hr : 0 < r)
-    (hRδ : whzReached X x δ)
+    (hRδ : existsForwardIntegralCurveUpTo X x δ)
     (hwin : ∀ e ∈ Set.Icc (δ/2) β, ∃ W : M → ℝ → M,
         (∀ p, W p e = p) ∧
         (∀ p, ∀ t ∈ Set.Ioo (e - r) (e + r),
           HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => W p s) t
             ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (W p t))))) :
-    whzReached X x β := by
+    existsForwardIntegralCurveUpTo X x β := by
   classical
   set step : ℝ := r / 4 with hstep
   have hstep_pos : 0 < step := by rw [hstep]; positivity
-  have key : ∀ n : ℕ, whzReached X x (min (δ + n * step) β) := by
+  have key : ∀ n : ℕ, existsForwardIntegralCurveUpTo X x (min (δ + n * step) β) := by
     intro n
     induction n with
     | zero =>
         simp only [Nat.cast_zero, zero_mul, add_zero]
-        exact whzReached_mono X x (min_le_left _ _) hRδ
+        exact existsForwardIntegralCurveUpTo_mono X x (min_le_left _ _) hRδ
     | succ k ih =>
         set s : ℝ := min (δ + (k:ℝ) * step) β with hs
         by_cases hsβ : δ + (k:ℝ) * step < β
@@ -752,8 +749,8 @@ private theorem whzReached_chain
             linarith
           have he_le : e ≤ β := le_of_lt (lt_trans hes hs_lt_β)
           obtain ⟨W, hWinit, hWbare⟩ := hwin e ⟨he_ge, he_le⟩
-          have hext : whzReached X x (e + r) :=
-            whzReached_extend X x he0 hes hr ih W hWbare hWinit
+          have hext : existsForwardIntegralCurveUpTo X x (e + r) :=
+            existsForwardIntegralCurveUpTo_extend X x he0 hes hr ih W hWbare hWinit
           have hmr : m ≤ step := min_le_left _ _
           have hge : δ + ((k:ℝ)+1) * step ≤ e + r := by
             have hee : e + r = s - m + r := by rw [he]
@@ -764,7 +761,7 @@ private theorem whzReached_chain
             push_cast
             calc min (δ + ((k:ℝ)+1) * step) β ≤ δ + ((k:ℝ)+1) * step := min_le_left _ _
               _ ≤ e + r := hge
-          exact whzReached_mono X x hbig hext
+          exact existsForwardIntegralCurveUpTo_mono X x hbig hext
         · have hsβ' : β ≤ δ + (k:ℝ) * step := not_lt.mp hsβ
           have hs_eq : s = β := by rw [hs, min_eq_right hsβ']
           have h1 : β ≤ δ + ((k:ℝ)+1) * step := by nlinarith [hstep_pos.le]

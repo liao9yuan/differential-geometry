@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLieOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 
 /-!
 # Class-first mixed-connection H1 bound
@@ -51,7 +52,8 @@ private theorem amix_jet_two
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro j _
-  rw [iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+  rw [DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real,
+    norm_smul, Real.norm_eq_abs]
   norm_num
   ring
 

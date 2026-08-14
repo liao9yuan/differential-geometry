@@ -1,6 +1,7 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBoundPolarized
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePathPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 
 /-!
 # Pointwise bound for the path-integrated closed-edge partner

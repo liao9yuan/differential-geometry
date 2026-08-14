@@ -2,15 +2,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CovOrderTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Fixed-reference metric bounds on a Ricci-flow tail
 
-This module combines arbitrary-order moving Shi estimates with the
-constants-first Lemma 3.11 tower. The result is the fixed-reference,
-all-orders-on-demand input used by metric precompactness.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,16 +22,16 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- A bounded-curvature dimension-three Ricci flow with a uniform tail metric
-equivalence has fixed-reference covariant metric bounds through every
-prescribed finite order on a later common tail. -/
+
+
+
 theorem covTailBoundSol
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

@@ -1,18 +1,15 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
 
-/-!
-# Ricci-Flow Metric Evolution in a Fixed Frame
 
-This file translates the first Section 6.2 metric calculation into the realized
-interval API.  The core geometric input is the Ricci-flow equation
-`partial_t g = -2 Ric`; the inverse-metric result is obtained by differentiating
-the frame identity `g^{-1} g = I`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,7 +24,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -71,6 +68,7 @@ noncomputable def frameGInvCLM
   ∑ i : Idx, ∑ j : Idx,
     gInv p.1 p.2 i j • frameEntryCLM (Idx := Idx) i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem frameGramCLM_apply
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -82,6 +80,7 @@ noncomputable def frameGInvCLM
   classical
   simp [frameGramCLM, Finset.sum_apply, mul_comm]
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem frameGInvCLM_apply
     [DecidableEq Idx]
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -103,6 +102,8 @@ noncomputable def matrixCLM
   classical
   simp [matrixCLM, Finset.sum_apply]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_finset_sum
     {ι V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     {n : WithTop ℕ∞}
@@ -129,6 +130,7 @@ theorem contMDiffOn_finset_sum
       exact ih (fun x hx => hf x (Finset.mem_insert_of_mem hx))
     simpa [Finset.sum_insert ha] using hfa.add hsum
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -239,6 +241,7 @@ theorem matrixInvDerivEntry
           refine Finset.sum_congr rfl fun b _hb => ?_
           rw [hsymm b j]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_comp_frameGInvCLM
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -258,6 +261,7 @@ theorem frameGramCLM_comp_frameGInvCLM
       (fun a b => (hinv p.1 p.2 a b).2)
       v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_comp_frameGramCLM
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -277,6 +281,7 @@ theorem frameGInvCLM_comp_frameGramCLM
       (fun a b => (hinv p.1 p.2 a b).1)
       v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_isInvertible
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -290,6 +295,7 @@ theorem frameGramCLM_isInvertible
     (frameGramCLM_comp_frameGInvCLM (I := I) S gInv frame hinv p)
     (frameGInvCLM_comp_frameGramCLM (I := I) S gInv frame hinv p)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_eq_inverse
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -304,6 +310,7 @@ theorem frameGInvCLM_eq_inverse
     (frameGramCLM_comp_frameGInvCLM (I := I) S gInv frame hinv p)
     (frameGInvCLM_comp_frameGramCLM (I := I) S gInv frame hinv p)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_comp_frameGInvCLM_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -329,6 +336,7 @@ theorem frameGramCLM_comp_frameGInvCLM_at
       (gInv := fun a b => gInv p.1 p.2 a b)
       hright v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_comp_frameGramCLM_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -354,6 +362,7 @@ theorem frameGInvCLM_comp_frameGramCLM_at
       (gInv := fun a b => gInv p.1 p.2 a b)
       hleft v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_isInvertible_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -374,6 +383,7 @@ theorem frameGramCLM_isInvertible_at
     (frameGramCLM_comp_frameGInvCLM_at (I := I) S gInv frame p hleft hright)
     (frameGInvCLM_comp_frameGramCLM_at (I := I) S gInv frame p hleft hright)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_eq_inverse_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -395,6 +405,7 @@ theorem frameGInvCLM_eq_inverse_at
     (frameGramCLM_comp_frameGInvCLM_at (I := I) S gInv frame p hleft hright)
     (frameGInvCLM_comp_frameGramCLM_at (I := I) S gInv frame p hleft hright)
 
+omit [SigmaCompactSpace M] in
 theorem frameGramCLM_hasDerivWithinAt
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -460,7 +471,8 @@ theorem coordInvCLM_eq
     (hx : x ∈ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
     (s : Real) :
     ContinuousLinearMap.inverse
-        (frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+        (frameGramCLM (I := I) S
+          (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
           (s, x)) =
       frameGInvCLM (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E)
         (coordInv (I := I) S x0) (s, x) := by
@@ -474,12 +486,15 @@ theorem coordInvCLM_eq
       (by
         intro a b
         simpa [coordInv, metricCompInFrame,
-          DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).1)
+          DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+            (hbasis a b).1)
         (by
           intro a b
           simpa [coordInv, metricCompInFrame,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+              (hbasis a b).2)
 
+omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_spacetimeSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -490,7 +505,8 @@ theorem coordFrameGramCLM_spacetimeSmooth
         (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ∞
       (fun p : Real × M =>
-        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p)
+        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I)
+          x0) p)
       (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   classical
   unfold frameGramCLM
@@ -553,15 +569,16 @@ theorem coordFrameGInvCLM_spacetimeSmooth
           ContinuousLinearMap.inverse
             (frameGramCLM (I := I) S
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) q))
-        (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) p := by
+        (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+          p := by
     simpa [Function.comp_def] using (hinvAt.of_le le_top).comp_contMDiffWithinAt hgram
   refine hcomp.congr_of_eventuallyEq_of_mem ?_ hp
   filter_upwards [self_mem_nhdsWithin] with q hq
   exact
     (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
 
-/-- Canonical coordinate inverse metric components are jointly smooth on the
-coordinate-frame spacetime domain. -/
+
+
 theorem coordInvSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -591,19 +608,23 @@ theorem coordInvSmooth
         (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
     exact (contMDiffOn_const
       (I := 𝓘(Real, Real).prod I)
-      (I' := 𝓘(Real, (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real] Real))
-      (n := ∞) (s := D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+      (I' := 𝓘(Real, (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+        →L[Real] Real))
+      (n := ∞) (s := D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet
+        (I := I) x0)
       (c := LinearMap.toContinuousLinearMap
         (LinearMap.proj (R := Real)
-          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real) i))).clm_apply happ
+          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real)
+            i))).clm_apply happ
   refine hcoord.congr ?_
   intro p hp
   simpa using
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
 
-/-- Carrier-continuity of the coordinate-frame Gram CLM (up to `t = 0`), the
-continuity twin of `coordFrameGramCLM_spacetimeSmooth`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_contOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -611,7 +632,8 @@ theorem coordFrameGramCLM_contOn
     (x0 : M) :
     ContinuousOn
       (fun p : Real × M =>
-        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p)
+        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I)
+          x0) p)
       (D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   classical
   unfold frameGramCLM
@@ -621,10 +643,10 @@ theorem coordFrameGramCLM_contOn
   intro j _hj
   exact (coordMetricContOn (I := I) S hS x0 i j).smul continuousOn_const
 
-/-- Carrier-continuity of the coordinate-frame inverse Gram CLM (up to `t = 0`),
-the continuity twin of `coordFrameGInvCLM_spacetimeSmooth`: the Gram is jointly
-continuous and everywhere invertible, and `ContinuousLinearMap.inverse` is
-continuous at invertible points. -/
+
+
+
+
 theorem coordFrameGInvCLM_contOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -672,21 +694,22 @@ theorem coordFrameGInvCLM_contOn
           ContinuousLinearMap.inverse
             (frameGramCLM (I := I) S
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) q))
-        (D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) p := by
+        (D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+          p := by
     simpa [Function.comp_def] using hinvAt.comp_continuousWithinAt hgram
   refine hcomp.congr (fun q hq => ?_) ?_
   · exact (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
   · exact (coordInvCLM_eq (I := I) S x0 (x := p.2) hp.2 p.1).symm
 
-/-- Continuity of the canonical coordinate inverse-metric components up to the
-closed initial endpoint `t = 0`.
 
-The interior `C∞` version is `coordInvSmooth` (on `D.regular`); this is the
-carrier-continuity form that up-to-`t=0` consumers (e.g. the Ricci-norm slab
-continuity in `Evolution/ImprovedPinching/Estimate.lean`) need, which
-`coordInvSmooth` no longer provides after `MetricFamilySmoothOn` was weakened to
-interior `C∞` + carrier continuity.  It mirrors `coordInvSmooth`, sourcing the
-inverse Gram from `coordFrameGInvCLM_contOn`. -/
+
+
+
+
+
+
+
+
 theorem coordInvContOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -715,15 +738,16 @@ theorem coordInvContOn
     (continuousOn_const
       (c := LinearMap.toContinuousLinearMap
         (LinearMap.proj (R := Real)
-          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real) i))).clm_apply happ
+          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real)
+            i))).clm_apply happ
   refine hcoord.congr ?_
   intro p hp
   simpa using
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
 
-/-- Pointwise spacetime smoothness of canonical coordinate inverse metric
-components at regular times and coordinate-frame points. -/
+
+
 theorem coordInvSmoothAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -748,13 +772,8 @@ noncomputable def coordInvDt
   fun t x i j =>
     derivWithin (fun s : Real => coordInv (I := I) S x0 s x i j) D.carrier t
 
-/-- Time regularity of the canonical coordinate inverse metric on the
-coordinate-frame domain.
-
-This is the frame-local inverse-derivative field of
-`MetricFrameTimeRegularityInFrameOnLocal` for `coordInv`.  Only the local form is
-available: `coordInv` is read through the chart at `x0` and carries no
-information outside `coordinateFrameSet x0`. -/
+/-- Time regularity of the canonical coordinate inverse metric on its frame
+domain. -/
 theorem coordInvDerivLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -775,6 +794,7 @@ theorem coordInvDerivLocal
   simpa [coordInvDt] using
     (hcd.differentiableAt (by simp)).differentiableWithinAt.hasDerivWithinAt
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -840,15 +860,16 @@ theorem frameGInvCLM_spacetimeSmooth
   exact (frameGInvCLM_eq_inverse_at (I := I) S gInv frame q
     hleftq hrightq).symm
 
-/-- Spacetime smoothness of the supplied inverse-metric components.
 
-Dependencies:
-* `frameMetricSpacetimeSmooth` supplies smooth frame Gram entries.
-* `nondegenerateGram` identifies `gInv` as the two-sided inverse matrix.
-* `ContinuousLinearMap.IsInvertible.contDiffAt_map_inverse` supplies smoothness
-  of inversion on finite-dimensional continuous linear maps.
-* `gInvDt` is threaded only because the existing regularity structure carries it;
-  this theorem does not use the time derivative field directly. -/
+
+
+
+
+
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem gInv_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -889,8 +910,9 @@ theorem gInv_spacetimeSmooth
   simpa using
     (sum_mul_pi_single (Idx := Idx) (fun k => gInv p.1 p.2 i k) j).symm
 
-/-- Fixed-time spatial differentiability of inverse metric components, extracted
-from the spacetime metric regularity package. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -922,8 +944,9 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
       exact ⟨ht, hy⟩)
   exact (hcomp.contMDiffAt (hu.mem_nhds hx)).mdifferentiableAt (by simp)
 
-/-- Fixed-time spatial differentiability of metric frame components, extracted
-from the spacetime metric regularity package. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

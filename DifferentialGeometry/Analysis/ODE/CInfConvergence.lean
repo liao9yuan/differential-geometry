@@ -8,14 +8,14 @@ import Mathlib.Topology.MetricSpace.Thickening
 
 set_option autoImplicit false
 
-/-!
-# Compact-open C∞ stability for ODE endpoints
 
-This module records the analysis-layer endpoint needed to pass compact-open
-`C∞` convergence of time-dependent vector fields and initial data to selected
-solution families at a fixed terminal time.  It is independent of metrics,
-normal coordinates, and Ricci-flow compactness data.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -273,8 +273,8 @@ private theorem ode_c0_on_compact
           (fun q : P × ℝ => γInf q.1 q.2) atTop ∅)
     · simp
 
-/-- Uniform convergence, on a compact parameter-time cylinder, of one fixed
-parameter derivative order of a family of selected ODE solutions. -/
+
+
 private theorem ode_iterated_compact
     {P : Type uP}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
@@ -474,9 +474,9 @@ private theorem ode_iterated_compact
       simpa only [iteratedFDeriv_succ_eq_comp_right, Function.comp_apply,
         LinearIsometryEquiv.dist_map] using hsecond
 
-/-- Universe-polymorphic entry to the fixed-universe derivative induction.
-The first tangent lift moves the state into the common maximum universe; all
-remaining lifts are then handled by `ode_iterated_compact`. -/
+
+
+
 private theorem ode_iterated_any
     {P : Type uP}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
@@ -653,8 +653,8 @@ private theorem ode_iterated_any
       simpa only [iteratedFDeriv_succ_eq_comp_right, Function.comp_apply,
         LinearIsometryEquiv.dist_map] using hsecond
 
-/-- A `C^p` tail reindexed by a fixed additive shift gives the same `C^p`
-tail for the original sequence. -/
+
+
 private theorem mapCP_of_comp_add
     {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -670,8 +670,8 @@ private theorem mapCP_of_comp_add
   have hb := hk₀ (k - N) (Nat.le_sub_of_add_le hk) r hr x hx
   simpa only [Nat.sub_add_cancel hNk] using hb
 
-/-- `C∞` stability, in the initial parameter, of selected solutions of
-a time-dependent ODE on a common compact time interval. -/
+
+
 theorem MapCInfConvOnCompacts.ode_solutionAt
     {P X : Type*}
     [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]

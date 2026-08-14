@@ -3,14 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-/-!
-# Uniform intrinsic buffers for the finite source cover
 
-This file converts the fixed coordinate buffers retained by the Step-C source
-cover into intrinsic metric buffers.  The conversion is producer-owned: it
-uses the normal-coordinate metric bounds and a first-exit argument, and adds no
-radius hypothesis to the Step-B1 endpoint.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,8 +36,8 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- A path which starts in the interior of a closed set and ends outside it
-has a first exit point. -/
+
+
 private theorem exists_exit_time
     {Z : Type*} [TopologicalSpace Z] {K : Set Z} (hK : IsClosed K)
     {gamma : Real → Z} {b : Real} (hb : 0 < b)
@@ -91,9 +91,9 @@ private theorem exists_exit_time
   · rw [frontier, hK.closure_eq]
     exact ⟨htK, htNot⟩
 
-/-- The coordinate displacement along an initial segment of the selected
-minimizing join is controlled by its intrinsic speed, provided that initial
-segment stays in the controlled normal chart. -/
+
+
+
 private theorem NormalCoordMetricEquivOn.chart_join_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -134,8 +134,8 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
       letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
       Set.MapsTo (minJoin (I := I) Y.metric hEnorm x y)
         (Set.Icc (0 : Real) t)
-        ((framedChartAt (I := I) Y.metric c).source ∩
-          (framedChartAt (I := I) Y.metric c) ⁻¹' U)) :
+        ((normalChartAt (I := I) Y.metric c).source ∩
+          (normalChartAt (I := I) Y.metric c) ⁻¹' U)) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -156,8 +156,8 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
         (fun z : Y.M ↦ TangentSpace I z) := Y.riemBundle_cont (I := I)
     letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
     letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
-    dist (framedChartAt (I := I) Y.metric c x)
-        (framedChartAt (I := I) Y.metric c
+    dist (normalChartAt (I := I) Y.metric c x)
+        (normalChartAt (I := I) Y.metric c
           (minJoin (I := I) Y.metric hEnorm x y t)) ≤
       Real.sqrt 2 * (riemannianEDist I x y).toReal * t := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -182,8 +182,8 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   let w : TangentSpace I x := minimizingVec (I := I) Y.metric hEnorm x y
   let gamma : Real → Y.M := minJoin (I := I) Y.metric hEnorm x y
-  let chi := framedChartAt (I := I) Y.metric c
-  let e := framedExpDiffeo (I := I) Y.metric c
+  let chi := normalChartAt (I := I) Y.metric c
+  let e := expMapDiffeo (I := I) Y.metric c
   let eta : Real → E := chi ∘ gamma
   let d : Real := (riemannianEDist I x y).toReal
   have hd : 0 ≤ d := ENNReal.toReal_nonneg
@@ -241,7 +241,7 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
     have hetaVel : mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta s 1 =
         deriv eta s := by
       rw [mfderiv_eq_fderiv]
-      exact fderiv_apply_one_eq_deriv
+      exact fderiv_apply_one_eq_deriv (𝕜 := Real) (f := eta) (x := s)
     have hvel : mfderiv 𝓘(Real, E) I e (eta s) (deriv eta s) =
         mfderiv 𝓘(Real, Real) I gamma s 1 := by
       have hv := DFunLike.congr_fun hcomp (1 : Real)
@@ -291,10 +291,10 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
   have ht_abs : |t| = t := abs_of_nonneg ht.1
   simpa only [Real.norm_eq_abs, sub_zero, ht_abs, d, mul_assoc] using hmean
 
-/-- A fixed coordinate closed-ball buffer yields both an intrinsic metric
-buffer inside the same normal-coordinate core and the expected coordinate
-distance estimate there.  The proof uses first exits of the selected
-minimizing join; no global convexity of the coordinate core is assumed. -/
+
+
+
+
 theorem NormalCoordMetricEquivOn.ball_core_dist
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -317,7 +317,7 @@ theorem NormalCoordMetricEquivOn.ball_core_dist
       letI : ChartedSpace H Y.M := Y.charted
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      U ⊆ (framedChartAt (I := I) Y.metric c).target)
+      U ⊆ (normalChartAt (I := I) Y.metric c).target)
     {z : E} {eta rho : Real} (heta : 0 < eta)
     (hclosed : Metric.closedBall z eta ⊆ interior C)
     (hrhoeta : Real.sqrt 2 * rho < eta) :
@@ -332,11 +332,11 @@ theorem NormalCoordMetricEquivOn.ball_core_dist
     letI : RiemannianBundle (fun x : Y.M ↦ TangentSpace I x) :=
       Y.riemBundle (I := I)
     {x | (riemannianEDist I
-      ((framedChartAt (I := I) Y.metric c).symm z) x).toReal < rho} ⊆
-      {x | x ∈ (framedChartAt (I := I) Y.metric c).symm '' interior C ∧
-        dist ((framedChartAt (I := I) Y.metric c) x) z ≤
+      ((normalChartAt (I := I) Y.metric c).symm z) x).toReal < rho} ⊆
+      {x | x ∈ (normalChartAt (I := I) Y.metric c).symm '' interior C ∧
+        dist ((normalChartAt (I := I) Y.metric c) x) z ≤
           Real.sqrt 2 * (riemannianEDist I
-            ((framedChartAt (I := I) Y.metric c).symm z) x).toReal} := by
+            ((normalChartAt (I := I) Y.metric c).symm z) x).toReal} := by
   classical
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -359,7 +359,7 @@ theorem NormalCoordMetricEquivOn.ball_core_dist
   letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   letI : MetricSpace Y.M := HopfRinow.riemMetricSpace (I := I) (M := Y.M)
-  let chi := framedChartAt (I := I) Y.metric c
+  let chi := normalChartAt (I := I) Y.metric c
   let B := Metric.closedBall z eta
   let K : Set Y.M := chi.symm '' B
   have hBC : B ⊆ interior C := hclosed
@@ -501,8 +501,8 @@ theorem NormalCoordMetricEquivOn.ball_core_dist
       _ ≤ Real.sqrt 2 * (riemannianEDist I (chi.symm z) x).toReal := hfull'
   exact ⟨hxcore, hcoord⟩
 
-/-- The intrinsic-buffer inclusion obtained by forgetting the coordinate
-distance estimate from `ball_core_dist`. -/
+
+
 theorem NormalCoordMetricEquivOn.ball_subset_core
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -525,7 +525,7 @@ theorem NormalCoordMetricEquivOn.ball_subset_core
       letI : ChartedSpace H Y.M := Y.charted
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      U ⊆ (framedChartAt (I := I) Y.metric c).target)
+      U ⊆ (normalChartAt (I := I) Y.metric c).target)
     {z : E} {eta rho : Real} (heta : 0 < eta)
     (hclosed : Metric.closedBall z eta ⊆ interior C)
     (hrhoeta : Real.sqrt 2 * rho < eta) :
@@ -540,16 +540,16 @@ theorem NormalCoordMetricEquivOn.ball_subset_core
     letI : RiemannianBundle (fun x : Y.M ↦ TangentSpace I x) :=
       Y.riemBundle (I := I)
     {x | (riemannianEDist I
-      ((framedChartAt (I := I) Y.metric c).symm z) x).toReal < rho} ⊆
-      (framedChartAt (I := I) Y.metric c).symm '' interior C := by
+      ((normalChartAt (I := I) Y.metric c).symm z) x).toReal < rho} ⊆
+      (normalChartAt (I := I) Y.metric c).symm '' interior C := by
   intro x hx
   exact (NormalCoordMetricEquivOn.ball_core_dist Y hcomplete hconn hEnorm
     h hCU hUtgt heta hclosed hrhoeta hx).1
 
-/-- The retained finite source cover has one positive intrinsic buffer radius,
-uniform in the source slot and in every stage of the extracted subsequence.
-The same source slot and coordinate center control every point of the intrinsic
-ball, including its coordinate displacement. -/
+
+
+
+
 theorem HasSuppConvData.metric_buffer
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -581,15 +581,15 @@ theorem HasSuppConvData.metric_buffer
       letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
       ∀ y ∈ Lphi.hatSourceBall inp.decay P r k,
         ∃ (alpha : LiveSlot L inp.pack r) (z : E),
-          (framedChartAt (I := I) Y.metric
+          (normalChartAt (I := I) Y.metric
             (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z = y ∧
           Metric.ball y rho ⊆
-            (framedChartAt (I := I) Y.metric
+            (normalChartAt (I := I) Y.metric
               (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm ''
                 interior (C0 alpha) ∧
           ∀ x ∈ Metric.ball y rho,
             dist
-                ((framedChartAt (I := I) Y.metric
+                ((normalChartAt (I := I) Y.metric
                   (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))) x) z ≤
               Real.sqrt 2 * inp.decay.dist (Lphi.φ k) x y := by
   classical
@@ -647,7 +647,7 @@ theorem HasSuppConvData.metric_buffer
   obtain ⟨hUmetric, hUexp, _hUmap⟩ :=
     h.geom_on inp P L r hr U C0 C1 aInf Jinf Jbarinf k alpha
   let c : Y.M := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
-  let chi := framedChartAt (I := I) Y.metric c
+  let chi := normalChartAt (I := I) Y.metric c
   have hequiv : NormalCoordMetricEquivOn (I := I) Y c (U alpha) := by
     intro w hw v
     exact inp.normalBounds.metric_equiv (Lphi.φ k) c w (hUmetric hw) v
@@ -655,11 +655,8 @@ theorem HasSuppConvData.metric_buffer
     intro w hw
     have hwBall := hUexp hw
     rw [Metric.mem_ball, dist_zero_right] at hwBall
-    change w ∈ (framedExpDiffeo (I := I) Y.metric c).source
-    rw [framedExp_source]
-    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric c
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric c
-    simpa only [normalFrame_sqrt] using hwBall
+    change w ∈ (expMapDiffeo (I := I) Y.metric c).source
+    exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric c hwBall
   letI : RiemannianBundle (fun q : Y.M ↦ TangentSpace I q) := Y.riemBundle (I := I)
   have hcore := NormalCoordMetricEquivOn.ball_core_dist Y
     (hcomplete (Lphi.φ k)) (hconn (Lphi.φ k))

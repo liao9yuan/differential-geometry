@@ -3,12 +3,12 @@ import DifferentialGeometry.Analysis.ODE.PhaseFlowSmallness
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
-/-!
-# Quantitative inverse for a retained phase endpoint
 
-This file packages the direct `ApproximatesLinearOn` construction for a map
-close to the free retained-endpoint equivalence.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -20,8 +20,8 @@ namespace PhaseFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 
-/-- On a nontrivial phase space, the reciprocal inverse norm of the free
-retained-endpoint equivalence is positive. -/
+
+
 theorem freeDiagInv_pos [Nontrivial E] :
     0 < ‖((freeDiagCLE (E := E)).symm : (E × E) →L[Real] (E × E))‖₊⁻¹ := by
   let L : (E × E) →L[Real] (E × E) :=
@@ -39,8 +39,8 @@ theorem freeDiagInv_pos [Nontrivial E] :
   have hnn : (0 : NNReal) < ‖L‖₊ := by exact_mod_cast hnorm
   exact inv_pos.mpr hnn
 
-/-- Below the inverse threshold, the quantitative inverse error is monotone
-in the forward approximation error. -/
+
+
 theorem invErr_mono {N c c' : NNReal} (hcc' : c ≤ c') (hc' : c' < N⁻¹) :
     N * (N⁻¹ - c)⁻¹ * c ≤ N * (N⁻¹ - c')⁻¹ * c' := by
   have hnum : N * c ≤ N * c' :=
@@ -51,8 +51,8 @@ theorem invErr_mono {N c c' : NNReal} (hcc' : c ≤ c') (hc' : c' < N⁻¹) :
     div_le_div₀ (mul_nonneg N.2 c'.2) hnum hden_pos hden
   simpa only [div_eq_mul_inv, mul_assoc, mul_comm, mul_left_comm] using hfrac
 
-/-- A sufficiently small forward error makes the quantitative inverse error
-strictly smaller than one. -/
+
+
 theorem invErr_lt_one {N c : NNReal}
     (hc : c < N⁻¹ / (2 * (N + 1))) :
     N * (N⁻¹ - c)⁻¹ * c < 1 := by
@@ -88,8 +88,8 @@ theorem invErr_lt_one {N c : NNReal}
       ring
     _ < 1 := (div_lt_one hdiff).2 hnum
 
-/-- Fixing the endpoint in a quantitative inverse of the retained phase map
-gives an inverse-velocity map close to `-id`. -/
+
+
 theorem invVel_approx
     {F : E × E → E × E} {s : Set (E × E)} {c : NNReal}
     (hF : ApproximatesLinearOn F
@@ -121,9 +121,9 @@ theorem invVel_approx
     _ ≤ (c : Real) * ‖z - z'‖ := hfull
     _ = (c : Real) * ‖x - x'‖ := by rw [hprod]
 
-/-- At a differentiability point whose fixed-endpoint slice lies locally in
-the approximation domain, the inverse-velocity derivative is close to
-`-id`. -/
+
+
+
 theorem invVel_fderiv_le
     {F : E × E → E × E} {s : Set (E × E)} {c : NNReal}
     (hF : ApproximatesLinearOn F
@@ -140,9 +140,9 @@ theorem invVel_fderiv_le
   simpa only [sub_neg_eq_add] using
     (invVel_approx hF y).fderiv_sub_le hs' hslice
 
-/-- An open partial homeomorphism whose source and forward map realize a
-quantitative approximation has a smooth inverse whenever its forward map is
-smooth on that source. -/
+
+
+
 theorem inv_smooth_of_approx [CompleteSpace E] [FiniteDimensional Real E]
     {f : E → E} {A : E ≃L[Real] E} {s : Set E} {c : NNReal}
     (hf : ApproximatesLinearOn f (A : E →L[Real] E) s c)
@@ -194,8 +194,8 @@ theorem inv_smooth_of_approx [CompleteSpace E] [FiniteDimensional Real E]
     exact hsmx
   exact (e.contDiffAt_symm hy heD' hesm).contDiffWithinAt
 
-/-- The inverse of the exact quantitative partial homeomorphism is smooth on
-its target whenever the forward map is smooth on the approximation domain. -/
+
+
 theorem quantInv_smooth [CompleteSpace E] [FiniteDimensional Real E]
     {f : E → E} {A : E ≃L[Real] E} {s : Set E} {c : NNReal}
     (hf : ApproximatesLinearOn f (A : E →L[Real] E) s c)
@@ -208,11 +208,11 @@ theorem quantInv_smooth [CompleteSpace E] [FiniteDimensional Real E]
   · rfl
   · rfl
 
-/-- A map uniformly close to the free retained-endpoint equivalence on a
-positive closed ball has a quantitative inverse branch on the corresponding
-open ball.  Its target contains the displayed positive closed ball, and the
-inverse retains the quantitative approximation supplied by the inverse
-function theorem. -/
+
+
+
+
+
 theorem exists_quant_inv_bi [CompleteSpace E]
     {f : E × E → E × E} {q c : NNReal}
     (hq : 0 < q)
@@ -276,8 +276,8 @@ theorem exists_quant_inv_bi [CompleteSpace E]
   · rfl
   · simpa [e, δ, s, NNReal.coe_sub hc.le] using htarget
 
-/-- Compatibility projection of `exists_quant_inv_bi` retaining the original
-existence interface. -/
+
+
 theorem exists_quant_inv [CompleteSpace E]
     {f : E × E → E × E} {q c : NNReal}
     (hq : 0 < q)

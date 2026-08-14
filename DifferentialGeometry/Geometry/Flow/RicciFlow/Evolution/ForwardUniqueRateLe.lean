@@ -256,7 +256,7 @@ private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g x
   rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
         (TensorRSSpace.toModel W) (TensorRSSpace.toModel W) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel W))
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel W)) from rfl]
   rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (0 + s)

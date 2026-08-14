@@ -1,10 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 
+
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -18,7 +16,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -27,6 +25,9 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private lemma sqrt_g0_inner_add_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g₀.inner x (a + b) (a + b)) ≤
@@ -66,12 +67,14 @@ private lemma sqrt_g0_inner_add_le
       ≤ Real.sqrt ((na + nb) ^ 2) := Real.sqrt_le_sqrt hle_sq
     _ = na + nb := by rw [Real.sqrt_sq hsum_pos_nn]
 
-theorem sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
+theorem norm_inverseMetricSharpFib_g0Flat_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (x : M) (v : TangentSpace I x) :
     Real.sqrt (g₀.inner x
         (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v))
@@ -80,10 +83,10 @@ theorem sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
   have hcoeff : 0 < 1 - δ := by linarith
   have hsplit :
       inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v)
-        = gInvDiffRaisedEndo (I := I) g₀ g₁ x v + v := by
+        = metricComparisonDiffEndo (I := I) g₀ g₁ x v + v := by
     rw [gInvDiffRaisedEndo_apply, sub_add_cancel]
   rw [hsplit]
-  set Dv : TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x v with hDv
+  set Dv : TangentSpace I x := metricComparisonDiffEndo (I := I) g₀ g₁ x v with hDv
   have htri := sqrt_g0_inner_add_le (I := I) (M := M) g₀ x Dv v
   have hdiff := sqrt_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v
   rw [← hDv] at hdiff

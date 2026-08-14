@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSFirstDerivativeBound
 
-/-!
-# First-derivative Lipschitz bounds for the Ricci--DeTurck right-hand side
 
-This file supplies the coefficient-difference estimates needed to make one
-chart derivative of the Ricci--DeTurck right-hand side vanish linearly with the
-metric chart `3`-jet difference.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
@@ -17,7 +17,7 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -94,9 +94,10 @@ private lemma sum_pair_sub_bnd
     ring
   · ring
 
-/-- Second chart partials of the DeTurck vector field are Lipschitz in the
-metric chart `3`-jet when inverse-Gram and Christoffel differences are controlled
-through order two. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD2_sub
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -300,8 +301,9 @@ theorem deTurckVFD2_sub
       _ = K * J := by dsimp [K]; ring
   · ring
 
-/-- One chart derivative of a Riemann component is Lipschitz in the metric
-chart `3`-jet under uniform Christoffel bounds through first order. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannD_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -461,7 +463,8 @@ theorem chartRiemannD_sub
       dsimp [K]
       ring
 
-/-- One chart derivative of Ricci is Lipschitz in the metric chart `3`-jet. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciD_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -504,8 +507,9 @@ theorem chartRicciD_sub
       hCdΓ_nn hG₁_nn hΓ₁ hΓD₂ hΓ hΓD hΓD2
   · ring
 
-/-- One chart derivative of the DeTurck Lie term is Lipschitz in the metric
-chart `3`-jet when the DeTurck vector field is controlled through order two. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLieD_sub
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)

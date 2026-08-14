@@ -1,15 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceFibreBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SharpFlatEndoField
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIdentification
 
+
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -27,7 +25,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +34,100 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
+theorem g0FlatField_contMDiff (g₀ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel 1 ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SSpace 1 I z) x
+        (g0FlatCLM (I := I) g₀ x)) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
+    (F₂ := Tensor0SModel 1 ℝ E) (V₂ := fun z : M => Tensor0SSpace 1 I z)
+    (φ := fun x : M => g0FlatCLM (I := I) g₀ x)
+  intro Z
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 1
+  refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x : M => (g0FlatCLM (I := I) g₀ x (Z x) :
+        Bundle.continuousMultilinearMap ℝ 1 E (TangentSpace I) x))).mpr ?_
+  intro σ x₀
+  set b := Module.finBasis ℝ E with hb
+  set e₁ := trivializationAt E (TangentSpace I : M → Type _) x₀ with he₁def
+  have he₁ : x₀ ∈ e₁.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x₀
+  have hframe := e₁.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) b
+  obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
+  have hscalar : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => g₀.inner x (Z x) (Y (σ 0) x)) x₀ := by
+    have h_total : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) ∞
+        (fun b : M => (⟨b, g₀.inner b (Z b) (Y (σ 0) b)⟩ :
+          TotalSpace ℝ (Bundle.Trivial M ℝ))) x₀ :=
+      (ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ) (b := id)
+        g₀.contMDiff.contMDiffOn Z.contMDiff.contMDiffOn
+        (Y (σ 0)).contMDiff.contMDiffOn x₀ (mem_univ x₀)).contMDiffAt univ_mem
+    rw [Bundle.contMDiffAt_totalSpace] at h_total
+    exact h_total.2
+  refine hscalar.congr_of_eventuallyEq ?_
+  have h_base₁ : ∀ᶠ x in 𝓝 x₀, x ∈ e₁.baseSet := e₁.open_baseSet.mem_nhds he₁
+  filter_upwards [h_base₁, hY] with x hx₁ hYx
+  rw [continuousMultilinearMap_basis_repr]
+  have hframe0 : e₁.symmL ℝ x (b (σ 0)) = (Y (σ 0)) x := by
+    rw [hYx (σ 0), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
+    simp [Trivialization.basisAt]
+  change (g0FlatCLM (I := I) g₀ x (Z x)) (fun j : Fin 1 => e₁.symmL ℝ x (b (σ j))) = _
+  rw [show (fun j : Fin 1 => e₁.symmL ℝ x (b (σ j))) = (fun _ : Fin 1 => e₁.symmL ℝ x (b (σ 0)))
+    from by
+    funext j; fin_cases j; rfl]
+  rw [hframe0]
+  rw [g0FlatCLM_apply, dualToCotangent_apply]
+  rfl
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
+theorem sharpFlatEndoCcFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E →L[ℝ] Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 1 ℝ E →L[ℝ] Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SSpace 1 I z →L[ℝ] Tensor0SSpace 1 I z) x
+        ((g0FlatCLM (I := I) g₀ x).comp (inverseMetricSharpFib (I := I) g₁ x))) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun z : M => Tensor0SSpace 1 I z)
+    (F₂ := Tensor0SModel 1 ℝ E) (V₂ := fun z : M => Tensor0SSpace 1 I z)
+    (φ := fun x : M => (g0FlatCLM (I := I) g₀ x).comp (inverseMetricSharpFib (I := I) g₁ x))
+  intro Y
+  have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+        (inverseMetricSharpFib (I := I) g₁ x (Y x))) :=
+    ContMDiff.clm_bundle_apply (b := id)
+      (inverseMetricSharpField_contMDiff (I := I) g₁) Y.contMDiff
+  have hflatsharpY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SSpace 1 I z) x
+        (g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₁ x (Y x)))) :=
+    ContMDiff.clm_bundle_apply (b := id)
+      (g0FlatField_contMDiff (I := I) g₀) hsharpY
+  refine hflatsharpY.congr (fun x => ?_)
+  rfl
+
+def sharpFlatEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 1 where
+  toSection :=
+    { toFun := fun x : M => TensorRSSpace.ofCLM
+        ((g0FlatCLM (I := I) g₀ x).comp (inverseMetricSharpFib (I := I) g₁ x))
+      contMDiff_toFun := sharpFlatEndoCcFib_contMDiff (I := I) g₀ g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+@[simp] lemma sharpFlatEndoCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (sharpFlatEndoCc (I := I) g₀ g₁).toSection x =
+      TensorRSSpace.ofCLM
+        ((g0FlatCLM (I := I) g₀ x).comp (inverseMetricSharpFib (I := I) g₁ x)) := rfl
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -91,6 +183,8 @@ def sharpFlatRaiseEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
   (inverseMetricSharpFib (I := I) g₀ x).comp (g0FlatCLM (I := I) g₁ x)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma sharpFlatRaiseEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     sharpFlatRaiseEndo (I := I) g₀ g₁ x v =
@@ -100,6 +194,9 @@ def sharpFlatRaiseEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (a b : TangentSpace I x) : TangentSpace I x :=
   sharpFlatRaiseEndo (I := I) g₀ g₁ x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma raisedKoszulVec_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (a b : TangentSpace I x) :
     raisedKoszulVec (I := I) g₀ g₁ x a b =
@@ -107,7 +204,9 @@ def sharpFlatRaiseEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
         (g0FlatCLM (I := I) g₁ x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)) := by
   unfold raisedKoszulVec; rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma raisedKoszulVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Continuous (fun p : TangentSpace I x × TangentSpace I x =>
       raisedKoszulVec (I := I) g₀ g₁ x p.1 p.2) := by
@@ -123,7 +222,6 @@ lemma raisedKoszulVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (x 
   rw [heq]
   exact (sharpFlatRaiseEndo (I := I) g₀ g₁ x).continuous.comp hcd
 
-set_option maxHeartbeats 6400000 in
 def raisedKoszulPairing (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
@@ -156,11 +254,17 @@ def raisedKoszulPairing (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
           (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)).comp
           (continuous_pi (fun _ => hbil))) } : Tensor0SSpace 2 I x)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma raisedKoszulPairing_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     (raisedKoszulPairing (I := I) g₀ g₁ x om) YZ =
       om (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ x (YZ 0) (YZ 1)) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma raisedKoszulPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om om' : Tensor0SSpace 1 I x) :
     raisedKoszulPairing (I := I) g₀ g₁ x (om + om') =
@@ -169,6 +273,9 @@ lemma raisedKoszulPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   intro YZ
   exact ContinuousMultilinearMap.add_apply om om' _
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma raisedKoszulPairing_smul (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (c : ℝ) (om : Tensor0SSpace 1 I x) :
     raisedKoszulPairing (I := I) g₀ g₁ x (c • om) =
@@ -185,11 +292,16 @@ def raisedKoszulFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
         map_add' := raisedKoszulPairing_add g₀ g₁ x
         map_smul' := raisedKoszulPairing_smul g₀ g₁ x })
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma raisedKoszulFib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from raisedKoszulFib (I := I) g₀ g₁ x) om =
       raisedKoszulPairing (I := I) g₀ g₁ x om := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem sharpFlatRaiseEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -214,6 +326,8 @@ theorem sharpFlatRaiseEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   refine hsharpflatY.congr (fun x => ?_)
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem raisedKoszulFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
@@ -289,18 +403,23 @@ def raisedKoszul (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 
       contMDiff_toFun := raisedKoszulFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma raisedKoszul_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (raisedKoszul (I := I) g₀ g₁).toSection x = raisedKoszulFib (I := I) g₀ g₁ x := rfl
 
 def symmSCovGrad3 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 3 :=
-  covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)
+  covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma symmSCovGrad3_def (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     symmSCovGrad3 (I := I) (M := M) g₀ T =
-      covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T) := rfl
+      covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma connDiffPairing_eq_raisedKoszul_sharpFlat (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     om (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1)) =
@@ -322,12 +441,16 @@ private lemma connDiffPairing_eq_raisedKoszul_sharpFlat (g₀ g₁ : SmoothRiema
   rw [g₀.symm x u P]
   have hPval : P = inverseMetricSharpFib (I := I) g₀ x (g0FlatCLM (I := I) g₁ x D) := by
     rw [hPdef, raisedKoszulVec_apply]
-  have hPinner : g₀.inner x P u = cotangentToDual (I := I) (x := x) (g0FlatCLM (I := I) g₁ x D) u := by
+  have hPinner : g₀.inner x P u = cotangentToDual (I := I) (x := x) (g0FlatCLM (I := I) g₁ x D)
+    u := by
     rw [hPval, ← cotangentToDualLinear_apply (I := I) (x := x)]
     rw [inverseMetricSharpFib_inner (I := I) g₀ x (g0FlatCLM (I := I) g₁ x D) u]
   rw [hPinner, cotangentToDual_g0FlatCLM (I := I) g₁ x D u]
   rw [g₁.symm x D u, hu]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma connDiffVec_eq_invSharp_koszul
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -336,6 +459,7 @@ private lemma connDiffVec_eq_invSharp_koszul
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) :=
   connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ X Y x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffInner_g1_eq_half_covGradSymmS
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -344,13 +468,13 @@ theorem connDiffInner_g1_eq_half_covGradSymmS
     g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b) c =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 3
-            (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![b, a, c]
+            (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![b, a, c]
           + unitModel (I := I) (M := M) g₀ 3
-              (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![a, b, c]
+              (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, b, c]
           - unitModel (I := I) (M := M) g₀ 3
-              (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![c, b, a]) := by
+              (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![c, b, a]) := by
   have hbil : ∀ (b' : M) (u w : TangentSpace I b'),
-      ccTensorBilin (I := I) g₀ (symmS (I := I) g₀ T) b' u w =
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) b' u w =
         g₁.inner b' u w - g₀.inner b' u w :=
     symmS_hbil_of_realize (I := I) (M := M) g₀ g₁ T hg₁
   set af : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -363,27 +487,33 @@ theorem connDiffInner_g1_eq_half_covGradSymmS
   have hbb : bf x = b := smoothExtensionTangent_eq (I := I) x b
   have hcc : cf x = c := smoothExtensionTangent_eq (I := I) x c
   have h := koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁
-    (symmS (I := I) g₀ T) hbil bf af cf x
+    (ccTensor02Symm (I := I) g₀ T) hbil bf af cf x
   rw [koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ bf af x (cf x)] at h
   rw [haa, hbb, hcc] at h
   rw [h]
   rw [show unitModel (I := I) (M := M) g₀ 3
-        (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![b, a, c]
+        (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![b, a, c]
       = unitModel (I := I) (M := M) g₀ 3
-          (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![bf x, af x, cf x] from by
+          (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![bf x, af x, cf x]
+            from by
     rw [haa, hbb, hcc]]
   rw [show unitModel (I := I) (M := M) g₀ 3
-        (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![a, b, c]
+        (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, b, c]
       = unitModel (I := I) (M := M) g₀ 3
-          (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![af x, bf x, cf x] from by
+          (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![af x, bf x, cf x]
+            from by
     rw [haa, hbb, hcc]]
   rw [show unitModel (I := I) (M := M) g₀ 3
-        (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![c, b, a]
+        (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![c, b, a]
       = unitModel (I := I) (M := M) g₀ 3
-          (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![cf x, bf x, af x] from by
+          (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)) x ![cf x, bf x, af x]
+            from by
     rw [haa, hbb, hcc]]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
@@ -447,11 +577,12 @@ theorem covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms
     exact h]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
-      appCcRS (I := I) (M := M) g₀ 1 1 2
+      ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 2
         (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -477,15 +608,20 @@ theorem connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc
 
 def dualCotangentCLM (x : M) :
     (TangentSpace I x →L[ℝ] ℝ) →L[ℝ] Tensor0SSpace 1 I x :=
-  (tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 1 x).symm.toContinuousLinearMap.comp
+  (tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 1
+    x).symm.toContinuousLinearMap.comp
     (continuousMultilinearCurryFin1 ℝ (TangentSpace I x) ℝ).symm.toContinuousLinearMap
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_apply_vec (x : M) (α : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     cotangentToCLM (I := I) α w = α (fun _ : Fin 1 => w) := by
   have h := cotangentToDual_apply (I := I) α w
   rw [show cotangentToDual (I := I) α w = cotangentToCLM (I := I) α w from rfl] at h
   exact h
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_add (x : M) (om om' : Tensor0SSpace 1 I x) :
     cotangentToCLM (I := I) (om + om') =
       cotangentToCLM (I := I) om + cotangentToCLM (I := I) om' := by
@@ -494,6 +630,8 @@ private lemma cotangentToCLM_add (x : M) (om om' : Tensor0SSpace 1 I x) :
   rw [ContinuousLinearMap.add_apply, cotangentToCLM_apply_vec, cotangentToCLM_apply_vec,
     cotangentToCLM_apply_vec, ContinuousMultilinearMap.add_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_smul (x : M) (c : ℝ) (om : Tensor0SSpace 1 I x) :
     cotangentToCLM (I := I) (c • om) = c • cotangentToCLM (I := I) om := by
   apply ContinuousLinearMap.ext
@@ -501,6 +639,8 @@ private lemma cotangentToCLM_smul (x : M) (c : ℝ) (om : Tensor0SSpace 1 I x) :
   rw [ContinuousLinearMap.smul_apply, cotangentToCLM_apply_vec, cotangentToCLM_apply_vec,
     ContinuousMultilinearMap.smul_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_sub (x : M) (om om' : Tensor0SSpace 1 I x) :
     cotangentToCLM (I := I) (om - om') =
       cotangentToCLM (I := I) om - cotangentToCLM (I := I) om' := by
@@ -509,6 +649,8 @@ private lemma cotangentToCLM_sub (x : M) (om om' : Tensor0SSpace 1 I x) :
   rw [ContinuousLinearMap.sub_apply, cotangentToCLM_apply_vec, cotangentToCLM_apply_vec,
     cotangentToCLM_apply_vec, ContinuousMultilinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma dualCotangentCLM_eq (x : M) (φ : TangentSpace I x →L[ℝ] ℝ) :
     dualCotangentCLM (I := I) (x := x) φ = dualToCotangent (I := I) (x := x) φ.toLinearMap := by
   apply cotangentToDualLinear_injective (I := I) (x := x)
@@ -545,6 +687,9 @@ def flatArmVec (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
         (-(cotangentToCLM (I := I) om).comp
             ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v0)).toLinearMap)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma flatArmVecCLM_apply (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) (v0 : TangentSpace I x) :
     flatArmVecCLM (I := I) g₀ g₁ kind x om v0 = flatArmVec (I := I) g₀ g₁ kind x om v0 := by
@@ -557,6 +702,9 @@ private lemma flatArmVecCLM_apply (g₀ g₁ : SmoothRiemannianMetric I M) (kind
       simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.neg_apply,
         ContinuousLinearMap.compL_apply, dualCotangentCLM_eq]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma flatArmVec_add_om (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om om' : Tensor0SSpace 1 I x) (v0 : TangentSpace I x) :
     flatArmVec (I := I) g₀ g₁ kind x (om + om') v0 =
@@ -576,6 +724,9 @@ private lemma flatArmVec_add_om (g₀ g₁ : SmoothRiemannianMetric I M) (kind :
         rw [ContinuousLinearMap.add_comp, neg_add]]
       rw [map_add, map_add]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma flatArmVec_smul_om (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (c : ℝ) (om : Tensor0SSpace 1 I x) (v0 : TangentSpace I x) :
     flatArmVec (I := I) g₀ g₁ kind x (c • om) v0 =
@@ -593,19 +744,27 @@ private lemma flatArmVec_smul_om (g₀ g₁ : SmoothRiemannianMetric I M) (kind 
         rw [ContinuousLinearMap.smul_comp, smul_neg]]
       rw [map_smul, map_smul]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma flatArmVec_add_v0 (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) (v0 v0' : TangentSpace I x) :
     flatArmVec (I := I) g₀ g₁ kind x om (v0 + v0') =
       flatArmVec (I := I) g₀ g₁ kind x om v0 + flatArmVec (I := I) g₀ g₁ kind x om v0' := by
   rw [← flatArmVecCLM_apply, ← flatArmVecCLM_apply, ← flatArmVecCLM_apply, map_add]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma flatArmVec_smul_v0 (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (c : ℝ) (om : Tensor0SSpace 1 I x) (v0 : TangentSpace I x) :
     flatArmVec (I := I) g₀ g₁ kind x om (c • v0) =
       c • flatArmVec (I := I) g₀ g₁ kind x om v0 := by
   rw [← flatArmVecCLM_apply, ← flatArmVecCLM_apply, map_smul]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma flatArmVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) :
     Continuous (fun v0 : TangentSpace I x => flatArmVec (I := I) g₀ g₁ kind x om v0) := by
@@ -615,7 +774,6 @@ lemma flatArmVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (kind : 
   rw [heq]
   exact (flatArmVecCLM (I := I) g₀ g₁ kind x om).continuous
 
-set_option maxHeartbeats 6400000 in
 def flatArmPairing (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
@@ -648,11 +806,17 @@ def flatArmPairing (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M
             g₀.inner x p.1 p.2) := (g₀.inner x).continuous₂
         exact hbil.comp (hvec.prodMk (continuous_apply 1)) } : Tensor0SSpace 2 I x)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma flatArmPairing_apply (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     (flatArmPairing (I := I) g₀ g₁ kind x om) YZ =
       g₀.inner x (flatArmVec (I := I) g₀ g₁ kind x om (YZ 0)) (YZ 1) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma flatArmPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om om' : Tensor0SSpace 1 I x) :
     flatArmPairing (I := I) g₀ g₁ kind x (om + om') =
@@ -665,6 +829,9 @@ lemma flatArmPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) 
   rw [flatArmPairing_apply, flatArmPairing_apply, flatArmPairing_apply,
     flatArmVec_add_om, map_add, ContinuousLinearMap.add_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma flatArmPairing_smul (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (c : ℝ) (om : Tensor0SSpace 1 I x) :
     flatArmPairing (I := I) g₀ g₁ kind x (c • om) =
@@ -685,6 +852,9 @@ def flatArmFib (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
         map_add' := flatArmPairing_add g₀ g₁ kind x
         map_smul' := flatArmPairing_smul g₀ g₁ kind x })
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma flatArmFib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from flatArmFib (I := I) g₀ g₁ kind x) om =
@@ -696,6 +866,9 @@ def flatArmCovec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (-(cotangentToCLM (I := I) om).comp
         ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v0)).toLinearMap
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma flatArmCovec_eval (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (v0 w : TangentSpace I x) :
     flatArmCovec (I := I) g₀ g₁ x om v0 (fun _ : Fin 1 => w) =
@@ -705,6 +878,9 @@ private lemma flatArmCovec_eval (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     ContinuousLinearMap.coe_coe, ContinuousLinearMap.flip_apply]
   rw [cotangentToCLM_apply_vec]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma flatArmCovec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x))
     (V0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -748,12 +924,16 @@ private lemma flatArmCovec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric
     rw [hYx (σ 0), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
     simp [Trivialization.basisAt]
   change (flatArmCovec (I := I) g₀ g₁ x (om x) (V0 x)) (fun j : Fin 1 => e₁.symmL ℝ x (b (σ j))) = _
-  rw [show (fun j : Fin 1 => e₁.symmL ℝ x (b (σ j))) = (fun _ : Fin 1 => e₁.symmL ℝ x (b (σ 0))) from by
+  rw [show (fun j : Fin 1 => e₁.symmL ℝ x (b (σ j))) = (fun _ : Fin 1 => e₁.symmL ℝ x (b (σ 0)))
+    from by
     funext j; fin_cases j; rfl]
   rw [hframe0]
   rw [flatArmCovec_eval]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma flatArmVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool)
     (om : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x))
     (V0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -791,6 +971,9 @@ private lemma flatArmVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I
       simp only [flatArmVec, if_neg (by decide : ¬ (false = true))]
       rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma flatArmScalar_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool)
     (om : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x))
     (V0 V1 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x₀ : M) :
@@ -806,6 +989,9 @@ private lemma flatArmScalar_section_contMDiff (g₀ g₁ : SmoothRiemannianMetri
   rw [Bundle.contMDiffAt_totalSpace] at h_total
   exact h_total.2
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem flatArmFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
@@ -860,6 +1046,8 @@ def flatArmCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : SmoothCcT
       contMDiff_toFun := flatArmFib_contMDiff (I := I) g₀ g₁ kind }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma flatArmCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
     (flatArmCc (I := I) g₀ g₁ kind).toSection x = flatArmFib (I := I) g₀ g₁ kind x := rfl
 
@@ -870,11 +1058,13 @@ def omRecoverEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
       contMDiff_toFun := sharpFlatEndoCcFib_contMDiff (I := I) g₁ g₀ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma omRecoverEndoCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (omRecoverEndoCc (I := I) g₀ g₁).toSection x =
       TensorRSSpace.ofCLM
         ((g0FlatCLM (I := I) g₁ x).comp (inverseMetricSharpFib (I := I) g₀ x)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma omRecoverEndoCc_apply_covec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
@@ -883,6 +1073,7 @@ private lemma omRecoverEndoCc_apply_covec (g₀ g₁ : SmoothRiemannianMetric I 
   rw [omRecoverEndoCc_toSection]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma sharpFlatEndoCc_toSection_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
@@ -891,6 +1082,7 @@ private lemma sharpFlatEndoCc_toSection_apply (g₀ g₁ : SmoothRiemannianMetri
   rw [sharpFlatEndoCc_toSection]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma omRecoverEndoCc_comp_sharpFlatEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
         (omRecoverEndoCc (I := I) g₀ g₁).toSection x).comp
@@ -907,9 +1099,11 @@ private lemma omRecoverEndoCc_comp_sharpFlatEndoCc (g₀ g₁ : SmoothRiemannian
   rw [g0FlatCLM_inverseMetricSharpFib (I := I) g₁ x om]
 
 def flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : SmoothCcTensor g₀ 1 2 :=
-  appCcRS (I := I) (M := M) g₀ 1 1 2
+  ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 2
     (flatArmCc (I := I) g₀ g₁ kind) (omRecoverEndoCc (I := I) g₀ g₁)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma flatArmCoeffCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
     (flatArmCoeffCc (I := I) g₀ g₁ kind).toSection x =
       (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -918,10 +1112,11 @@ def flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : Smoo
           (omRecoverEndoCc (I := I) g₀ g₁).toSection x) := by
   rw [flatArmCoeffCc, appCcRS_toSection]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem flatArmCc_eq_appCcRS_flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) :
     flatArmCc (I := I) g₀ g₁ kind =
-      appCcRS (I := I) (M := M) g₀ 1 1 2
+      ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 2
         (flatArmCoeffCc (I := I) g₀ g₁ kind) (sharpFlatEndoCc (I := I) g₀ g₁) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -944,6 +1139,8 @@ theorem flatArmCc_eq_appCcRS_flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric 
   rw [omRecoverEndoCc_comp_sharpFlatEndoCc (I := I) g₀ g₁ x]
   rw [ContinuousLinearMap.comp_id]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem raisedKoszulVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     {σ τ : Π x : M, TangentSpace I x}
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun x : M =>
@@ -967,7 +1164,7 @@ theorem raisedKoszulVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [raisedKoszulVec_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_tensorCovDerivAt_homSplit
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1007,7 +1204,8 @@ private lemma raisedKoszul_tensorCovDerivAt_homSplit
   rw [hsplit, hval]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma tensorSectionMDiffAt_raisedKoszulPairing
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯) (x : M) :
@@ -1041,6 +1239,8 @@ private lemma tensorSectionMDiffAt_raisedKoszulPairing
       (raisedKoszul (I := I) g₀ g₁).toSection y))
     (v := fun y : M => om y) hτ hw
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 theorem cotangentToCLMField_contMDiff
     (Dsec : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x)) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -1070,6 +1270,7 @@ theorem cotangentToCLMField_contMDiff
   rw [cotangentToCLM_apply_vec]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma sharpFlatEndoCc_apply_covec (g₀ g₁ : SmoothRiemannianMetric I M) (y : M)
     (D : Tensor0SSpace 1 I y) :
     (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 1 I y from
@@ -1078,6 +1279,8 @@ private lemma sharpFlatEndoCc_apply_covec (g₀ g₁ : SmoothRiemannianMetric I 
   rw [sharpFlatEndoCc_toSection]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_eq_metricFlat_g0Flat_sharp
     (g₀ g₁ : SmoothRiemannianMetric I M) (y : M) (D : Tensor0SSpace 1 I y) :
     cotangentToCLM (I := I)
@@ -1089,6 +1292,8 @@ private lemma cotangentToCLM_eq_metricFlat_g0Flat_sharp
   rw [cotangentToCLM_apply_vec, ← cotangentToDual_apply,
     cotangentToDual_g0FlatCLM, Integral.Connection.metricFlat_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensor0SDeriv_one_D_eq_dualToCotangent_cotangentCov
     (g₀ : SmoothRiemannianMetric I M)
     (Dsec : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x))
@@ -1131,7 +1336,7 @@ private lemma tensor0SDeriv_one_D_eq_dualToCotangent_cotangentCov
   rw [hbridge, hpair]
   simp only [add_sub_cancel_right, ContinuousLinearMap.coe_coe]
 
-set_option maxHeartbeats 6400000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cotangentToCLM_tensorCovDerivAt_sharpFlatEndoCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 1 I x) (v0 w : TangentSpace I x) :
@@ -1158,7 +1363,8 @@ private lemma cotangentToCLM_tensorCovDerivAt_sharpFlatEndoCc_eq
         Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
           (fun y : M => g0FlatCLM (I := I) g₀ y
             (inverseMetricSharpFib (I := I) g₁ y (Dsec y))) x v0 := by
-    have hfun : (fun y : M => (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 1 I y from τ.toSection y)
+    have hfun : (fun y : M =>
+      (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 1 I y from τ.toSection y)
           (Dsec y)) =
         (fun y : M => g0FlatCLM (I := I) g₀ y
           (inverseMetricSharpFib (I := I) g₁ y (Dsec y))) := by
@@ -1312,6 +1518,8 @@ private lemma cotangentToCLM_tensorCovDerivAt_sharpFlatEndoCc_eq
     rw [map_neg, ContinuousLinearMap.neg_apply]]
   ring
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_tensor0SOne_eq_cotangentToCLM (x : M)
     (α : Tensor0SSpace 1 I x) (w : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel α w = cotangentToCLM (I := I) α (w 0) := by
@@ -1319,7 +1527,7 @@ private lemma toModel_tensor0SOne_eq_cotangentToCLM (x : M)
   congr 1
   funext i; fin_cases i; rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszulPairing_covariantDerivative02_eval
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1328,12 +1536,15 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
         (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
           (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) x (X x))
         (Fin.cons (Y x) ![Z x]) =
-      Integral.Connection.directionalDerivAt (I := I)
-          (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x)
+      Integral.Connection.directionalDeriv (I := I)
+          (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x
+            (X x)
         - om x (fun _ : Fin 1 =>
-            raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x))
+            raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x))
+              (Z x))
         - om x (fun _ : Fin 1 =>
-            raisedKoszulVec (I := I) g₀ g₁ x (Y x) ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
+            raisedKoszulVec (I := I) g₀ g₁ x (Y x)
+              ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
       := by
   classical
   set V : Π b : M, Tensor0SSpace 2 I b :=
@@ -1364,11 +1575,12 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
         (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
           (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (Z b)) x (X x))
         (fun i => Fin.elim0 i) =
-      Integral.Connection.directionalDerivAt (I := I)
-        (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x) := by
+      Integral.Connection.directionalDeriv (I := I)
+        (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x
+          (X x) := by
     rw [Integral.Connection.tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
       (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (Z b)) x (X x)]
-    rw [Integral.Connection.directionalDerivAt_eq]
+    rw [Integral.Connection.directionalDeriv_eq]
     refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_
     funext b
     rw [Integral.Connection.scalarFn_eq_toModel_elim0 (I := I) (M := M)]
@@ -1389,7 +1601,8 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
   have hcorr2 : Tensor0SSpace.toModel (W₁ x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) (fun i => Fin.elim0 i)) =
       om x (fun _ : Fin 1 =>
-        raisedKoszulVec (I := I) g₀ g₁ x (Y x) ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
+        raisedKoszulVec (I := I) g₀ g₁ x (Y x)
+          ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
       := by
     have hW₁x : W₁ x = Tensor0SNabla.curriedSection I M V x (Y x) := rfl
     rw [hW₁x, Tensor0SNabla.curriedSection_apply]
@@ -1404,7 +1617,8 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x))
           (Fin.cons (Z x) (fun i => Fin.elim0 i))) =
       om x (fun _ : Fin 1 =>
-        raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x))
+        raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x))
+          (Z x))
       := by
     simp only [hVdef]
     rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
@@ -1416,7 +1630,7 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
   rw [hpeel2, hbase, hcorr2, hcorr1]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma raisedKoszulPairing_covariantDerivative01_eval
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1425,8 +1639,9 @@ private lemma raisedKoszulPairing_covariantDerivative01_eval
         (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
           (fun y : M => om y) x (X x))
         (Fin.cons (Y x) ![Z x]) =
-      Integral.Connection.directionalDerivAt (I := I)
-          (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x)
+      Integral.Connection.directionalDeriv (I := I)
+          (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x
+            (X x)
         - om x (fun _ : Fin 1 =>
             (LeviCivita (I := I) g₀).toFun
               (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)) := by
@@ -1436,7 +1651,8 @@ private lemma raisedKoszulPairing_covariantDerivative01_eval
         (raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) :=
     raisedKoszulVec_contMDiff (I := I) g₀ g₁ Y.contMDiff Z.contMDiff
   set WYZ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
-    ContMDiffSection.mk (fun b : M => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) hWYZ with hWYZdef
+    ContMDiffSection.mk (fun b : M => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) hWYZ with
+      hWYZdef
   have hom_mdiff : Integral.Connection.TensorSectionMDiffAt (I := I) 1 (fun y : M => om y) x :=
     om.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hpeel := Integral.Connection.tensor0SCovariantDerivative_succ_consEval_peel
@@ -1461,11 +1677,12 @@ private lemma raisedKoszulPairing_covariantDerivative01_eval
         (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
           (fun y : M => Tensor0SNabla.curriedSection I M (fun y : M => om y) y (WYZ y)) x (X x))
         (fun i => Fin.elim0 i) =
-      Integral.Connection.directionalDerivAt (I := I)
-        (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x) := by
+      Integral.Connection.directionalDeriv (I := I)
+        (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x
+          (X x) := by
     rw [Integral.Connection.tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
       (fun y : M => Tensor0SNabla.curriedSection I M (fun y : M => om y) y (WYZ y)) x (X x)]
-    rw [Integral.Connection.directionalDerivAt_eq]
+    rw [Integral.Connection.directionalDeriv_eq]
     refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_
     funext b
     rw [Integral.Connection.scalarFn_eq_toModel_elim0 (I := I) (M := M)]
@@ -1481,7 +1698,8 @@ private lemma raisedKoszulPairing_covariantDerivative01_eval
     rw [hWYZdef]
     rfl
   have hcorr : Tensor0SSpace.toModel ((fun y : M => om y) x)
-        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => WYZ b) x (X x)) (fun i => Fin.elim0 i)) =
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => WYZ b) x (X x)) (fun i => Fin.elim0 i))
+          =
       om x (fun _ : Fin 1 =>
         (LeviCivita (I := I) g₀).toFun
           (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)) := by
@@ -1502,7 +1720,7 @@ def covDerivRaisedKoszulVec (g₀ g₁ : SmoothRiemannianMetric I M)
     - raisedKoszulVec (I := I) g₀ g₁ x (Y x)
         ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem raisedKoszul_covGrad_eq_covDerivRaisedKoszulVec
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1562,7 +1780,8 @@ theorem raisedKoszul_covGrad_eq_covDerivRaisedKoszulVec
             ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) := rfl
   rw [show (fun _ : Fin 1 => covDerivRaisedKoszulVec (I := I) g₀ g₁ X Y Z x)
       = (fun _ : Fin 1 =>
-          (LeviCivita (I := I) g₀).toFun (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)
+          (LeviCivita (I := I) g₀).toFun (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x
+            (X x)
             - raisedKoszulVec (I := I) g₀ g₁ x
                 ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
             - raisedKoszulVec (I := I) g₀ g₁ x (Y x)
@@ -1571,7 +1790,7 @@ theorem raisedKoszul_covGrad_eq_covDerivRaisedKoszulVec
   rw [tensor0SOne_apply_sub' (I := I) x (om x), tensor0SOne_apply_sub' (I := I) x (om x)]
   ring
 
-set_option maxHeartbeats 6400000 in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_sharpFlatEndoCc_eq_arms (g₀ g₁ : SmoothRiemannianMetric I M) :
     covGrad (I := I) (M := M) g₀ 1 1 (sharpFlatEndoCc (I := I) g₀ g₁) =
       flatArmCc (I := I) g₀ g₁ true + flatArmCc (I := I) g₀ g₁ false := by
@@ -1617,12 +1836,11 @@ theorem covGrad_sharpFlatEndoCc_eq_arms (g₀ g₁ : SmoothRiemannianMetric I M)
     rfl
   rw [hRHS]
 
-set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
+theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
         ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
-      appCcGdiag (E := E) j *
+      diagonalGridGrowthFactor (E := E) j *
         ∑ i ∈ Finset.range (j + 1),
           riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
               ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x) *
@@ -1631,11 +1849,15 @@ theorem rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
                 ((iteratedCovGrad (I := I) g₀ 1 1 l
                   (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x) := by
   rw [connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc (I := I) g₀ g₁]
-  exact rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le (I := I) (M := M) g₀ j 1 1 2
+  exact riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    (I := I) (M := M) g₀ j 1 1 2
     (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) x
 
-set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_connDiffSection_le
+/-- Compatibility name for the connection-difference diagonal product-grid estimate. -/
+alias rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le :=
+  riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
+
+theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)
     (B S : ℕ → ℝ)
     (hKos : ∀ i ≤ j,
@@ -1648,9 +1870,10 @@ theorem rfns_iteratedCovGrad_connDiffSection_le
     (hS0 : ∀ l, 0 ≤ S l) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
         ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
-      appCcGdiag (E := E) j *
+      diagonalGridGrowthFactor (E := E) j *
         ∑ i ∈ Finset.range (j + 1), B i * ∑ l ∈ Finset.range (j + 1 - i), S l := by
-  refine (rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le (I := I) (M := M)
+  refine (riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le (I := I)
+    (M := M)
     g₀ g₁ j x).trans ?_
   refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
   refine Finset.sum_le_sum (fun i hi => ?_)
@@ -1681,6 +1904,8 @@ theorem rfns_iteratedCovGrad_connDiffSection_le
     _ ≤ B i * ∑ l ∈ Finset.range (j + 1 - i), S l :=
         mul_le_mul_of_nonneg_right (hKos i hile) hinnerS_nn
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -1691,8 +1916,8 @@ private lemma riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s :
     tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_sharpFlatEndoCc_succ_le_arms
+omit [NeZero (Module.finrank ℝ E)] in
+theorem riemannianFiberNormSq_iteratedCovGrad_sharpFlatEndoCc_succ_le_arms
     (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + (m + 1)) x
         ((iteratedCovGrad (I := I) g₀ 1 1 (m + 1)
@@ -1759,29 +1984,33 @@ private lemma diagonalGrid_power_closure (G Bc : ℝ) (hG : 0 ≤ G) (hB : 0 ≤
         mul_le_mul_of_nonneg_left hsum hG
     _ = (G * (↑(j + 1) * Bc) ^ 2) * r ^ (2 * (j + 2)) := by ring
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_iteratedCovGrad_two_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M) :
-    letI : Bundle.RiemannianBundle
+    letI instTens : Bundle.RiemannianBundle
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
-    ‖((iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)).toSection x :
+    letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+      fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 4 (h := instTens) y
+    ‖((iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
         Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ≤
       ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
           Tensor0SBundle.TensorRSSpace 0 4 I x)‖ := by
   letI instTens : Bundle.RiemannianBundle
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+  letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+    fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 4 (h := instTens) y
   set Tsw : SmoothCcTensor g₀ 0 2 :=
     domDomCongrSection (I := I) g₀ (Equiv.swap 0 1) T with hTsw_def
-  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T) =
+  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T) =
       (1 / 2 : ℝ) • (iteratedCovGrad (I := I) g₀ 0 2 2 T +
         iteratedCovGrad (I := I) g₀ 0 2 2 Tsw) := by
     rw [hTsw_def, smul_add]
     exact iteratedCovGrad_symmS_eq (I := I) (M := M) g₀ T 2
-  have htoSec : ((iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)).toSection x :
+  have htoSec : ((iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
         Tensor0SBundle.TensorRSSpace 0 4 I x) =
       (1 / 2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x +
         (iteratedCovGrad (I := I) g₀ 0 2 2 Tsw).toSection x) := by
@@ -1814,6 +2043,7 @@ theorem norm_iteratedCovGrad_two_symmS_le
   nlinarith [htri, norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
     Tensor0SBundle.TensorRSSpace 0 4 I x)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivConnDiff_g1inner_eq_half_secondCovGrad_sub_connDiffSq
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -1824,11 +2054,12 @@ theorem covDerivConnDiff_g1inner_eq_half_secondCovGrad_sub_connDiffSq
         (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x) ζ =
       (1 / 2 : ℝ) *
         ( unitModel (I := I) (M := M) g₀ 4
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, Z x, Y x, ζ]
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, Z x, Y x, ζ]
         + unitModel (I := I) (M := M) g₀ 4
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, Y x, Z x, ζ]
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, Y x, Z x, ζ]
         - unitModel (I := I) (M := M) g₀ 4
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, ζ, Z x, Y x] )
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, ζ, Z x, Y x]
+              )
       - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
           (inverseMetricSharpFib (I := I) g₁ x
             (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X
@@ -1840,7 +2071,7 @@ theorem covDerivConnDiff_g1inner_eq_half_secondCovGrad_sub_connDiffSq
   rw [covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms (I := I) (M := M) g₀ g₁ X Y Z x ζ]
   have hbil := symmS_hbil_of_realize (I := I) (M := M) g₀ g₁ T hg₁
   have hTerm1 := koszulCovGradCovec_covDeriv_eq_secondCovGrad (I := I) (M := M) g₀ g₁
-    (symmS (I := I) g₀ T) hbil X Y Z x ζ
+    (ccTensor02Symm (I := I) g₀ T) hbil X Y Z x ζ
   have e1 : ((cotangentCov (LeviCivita (I := I) g₀)).toFun
         (fun b : M => cotangentToCLM (I := I)
           (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ

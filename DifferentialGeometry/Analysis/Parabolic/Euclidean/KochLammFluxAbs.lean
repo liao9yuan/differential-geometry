@@ -63,7 +63,7 @@ theorem klFluxPiece_abs {T R k : ℝ} {A₂ Aₚ : ℝ≥0}
           (∫ z : ℝ × V, ‖f z‖ ^ klPReal V ∂μ) ^
             (1 / klPReal V) := by
         simpa only [norm_norm] using
-          (integral_mul_norm_le_Lp_mul_Lq (klP_holder (V := V))
+          (integral_mul_norm_le_Lp_mul_Lq (klPDual_holder (V := V))
             hkMem hfMem.norm)
   have hkern := klFluxTailKern (V := V) hR hk w x hSm hfar
   have hsrc := klFluxPiece_src (V := V) h c hR hRT hS

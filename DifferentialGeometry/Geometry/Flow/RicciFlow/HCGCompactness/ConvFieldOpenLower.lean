@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldLower
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Positive lower bounds on an open-window metric limit
@@ -21,8 +20,8 @@ open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -34,6 +33,8 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace OpenConvOut
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Windowwise positive lower bounds along the selected sequence give a
 positive global lower bound for the limit metric at each interior time. -/
 theorem metric_lower

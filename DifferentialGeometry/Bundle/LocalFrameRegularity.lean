@@ -3,23 +3,20 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Smooth
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
-set_option linter.flexible false
 
-/-!
-# Local-frame regularity for covariant derivatives
 
-This module contains the metric-free local-frame reconstruction machinery used
-by connection smoothness proofs.  Metric and Koszul facts belong in the
-Levi-Civita layer; this file only packages the vector-bundle/local-frame API.
--/
+
+
+
+
+
+
 
 noncomputable section
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
 open Tensor0SBundle
@@ -30,15 +27,16 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-/-! ## Local-frame connection reconstruction algebra
 
-The next smoothness step is a local-frame reconstruction theorem for
-connections.  The first metric-free ingredient is the pointwise coefficient
-formula below: in a trivialization-induced local frame, the coefficient of
-`∇_{eᵢ} σ` is the directional derivative of the corresponding section
-coefficient plus the Christoffel correction.
--/
 
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem covariantDerivative_finset_sum_tangent
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (t : Finset ι) (σ : ι → (x : M) → TangentSpace I x)
@@ -66,8 +64,9 @@ theorem covariantDerivative_finset_sum_tangent
               rw [ih]
               simp [Finset.sum_insert, hit]
 
+omit [CompleteSpace E] in
 theorem covariantDerivative_localFrame_coeff_eq
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -173,14 +172,15 @@ theorem covariantDerivative_localFrame_coeff_eq
   rw [hderiv_sum, hchristoffel_sum]
   rfl
 
-/-- Arbitrary-direction version of
-`covariantDerivative_localFrame_coeff_eq`.
 
-The proof keeps the local-frame API high-level: both sides are continuous
-linear maps in the tangent input, and the existing basis-direction formula
-proves equality on the local-frame basis. -/
+
+
+
+
+
+omit [CompleteSpace E] in
 theorem covariantDerivative_localFrame_coeff_eq_along
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -213,15 +213,15 @@ theorem covariantDerivative_localFrame_coeff_eq_along
   have happly := congrArg (fun L : TangentSpace I x →ₗ[Real] Real => L v) hlin
   simpa [lhs, rhs, f, Finset.sum_apply] using happly
 
-/-! ## Hom-bundle coefficient identification
 
-The next smoothness step treats `x ↦ cov σ x` as a section of the Hom-bundle
-`TangentSpace I x →L[Real] TangentSpace I x`.  The scalar coefficient below is
-the `(k,i)` matrix entry after trivializing this Hom-bundle by the same tangent
-trivialization on source and target.  The lemma says that this Hom coefficient
-is exactly obtained by applying the endomorphism to the `i`-th domain local
-frame vector and then taking the `k`-th target local-frame coefficient.
--/
+
+
+
+
+
+
+
+
 
 noncomputable def homModelCoeff
     {ι : Type*} (b : Module.Basis ι Real E) (i k : ι) :
@@ -238,6 +238,7 @@ noncomputable def localHomCoeff
   (homModelCoeff (E := E) b i k).comp
     ((e.continuousLinearMap (RingHom.id Real) e).linearMapAt Real x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem localHomCoeff_apply
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -266,8 +267,9 @@ theorem localHomCoeff_apply
   simp [Bundle.Trivialization.basisAt, Bundle.Trivialization.continuousLinearMapAt_apply,
     e.coe_linearMapAt_of_mem hx]
 
+omit [CompleteSpace E] in
 theorem homLocalFrameCoeff_eq_localHomCoeff
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
     {x : M} (hx : x ∈ e.baseSet)
@@ -289,10 +291,11 @@ theorem homLocalFrameCoeff_eq_localHomCoeff
   simp only [eHom, bHom, hsx]
   simp [Bundle.Trivialization.basisAt, localHomCoeff, homModelCoeff,
     continuousLinearMap_homBasis_repr]
-  rw [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
+  simp only [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
 
+omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_eq
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -308,8 +311,9 @@ theorem covariantDerivative_localHomCoeff_eq
   rw [localHomCoeff_apply (I := I) e b hx (cov σ x) i k]
   exact covariantDerivative_localFrame_coeff_eq (I := I) cov e b hx hσ i k
 
+omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_eventuallyEq
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -326,8 +330,9 @@ theorem covariantDerivative_localHomCoeff_eventuallyEq
   filter_upwards [e.open_baseSet.mem_nhds hx, hσ] with y hy hσy
   exact covariantDerivative_localHomCoeff_eq (I := I) cov e b hy hσy i k
 
+omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -360,10 +365,11 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt
     exact ContMDiffAt.sum fun j _ => (hcoeff j).mul (hchristoffel j)
   exact hRhs.congr_of_eventuallyEq hEq
 
-/-- Finite-order `C^1` version of
-`covariantDerivative_localHomCoeff_contMDiffAt`. -/
+
+
+omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -396,21 +402,22 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt_one
     exact ContMDiffAt.sum fun j _ => (hcoeff j).mul (hchristoffel j)
   exact hRhs.congr_of_eventuallyEq hEq
 
-/-! ## Metric coordinate smoothness
 
-The Christoffel formula in `Torsion.lean` reduces smoothness of the
-Levi-Civita coefficients to smoothness of:
 
-* coordinate-frame metric components `g_{ij}`;
-* their coordinate directional derivatives;
-* inverse-metric components `g^{ij}`.
 
-This section discharges the first two directly from `g.contMDiff`. The inverse
-metric is the remaining nontrivial layer: it should be obtained from the
-smoothness of inversion on continuous linear maps, not assumed from a real
-coordinate model space.
--/
 
+
+
+
+
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem extDerivFun_apply_contMDiffAt_of_section
     {f : M -> Real} {X : (p : M) -> TangentSpace I p} {x₀ : M}
     (hf : ContMDiffAt I 𝓘(Real, Real) ∞ f x₀)
@@ -482,12 +489,13 @@ theorem extDerivFun_apply_contMDiffAt_of_section
     (mfderiv I 𝓘(Real, Real) f p) (e.symmL Real p (Xcoord p))
   rw [hcancel]
 
-/-- `C^2`/`C^1` finite-order version of
-`extDerivFun_apply_contMDiffAt_of_section`.
 
-This is the local scalar derivative regularity needed to prove that a smooth
-connection is a `C^1` covariant derivative: a `C^2` scalar coefficient
-differentiated along a `C^1` vector field is `C^1`. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem extDerivFun_apply_contMDiffAt_of_section_one
     {f : M -> Real} {X : (p : M) -> TangentSpace I p} {x₀ : M}
     (hf : ContMDiffAt I 𝓘(Real, Real) (2 : WithTop ℕ∞) f x₀)
@@ -555,6 +563,7 @@ theorem extDerivFun_apply_contMDiffAt_of_section_one
     (mfderiv I 𝓘(Real, Real) f p) (e.symmL Real p (Xcoord p))
   rw [hcancel]
 
+omit [CompleteSpace E] in
 theorem localFrameCoeff_extDeriv_contMDiffAt
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -583,8 +592,9 @@ theorem localFrameCoeff_extDeriv_contMDiffAt
     (f := (LinearMap.piApply (e.localFrame_coeff I b k)) σ)
     (X := e.localFrame b i) hcoeff hframe
 
-/-- `C^2`/`C^1` finite-order version of
-`localFrameCoeff_extDeriv_contMDiffAt`. -/
+
+
+omit [CompleteSpace E] in
 theorem localFrameCoeff_extDeriv_contMDiffAt_one
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -613,8 +623,9 @@ theorem localFrameCoeff_extDeriv_contMDiffAt_one
     (f := (LinearMap.piApply (e.localFrame_coeff I b k)) σ)
     (X := e.localFrame b i) hcoeff hframe
 
+omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -637,10 +648,11 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section
       (I := I) (V := TangentSpace I) (e := e) (b := b) (s := σ)
       (k := (∞ : WithTop ℕ∞)) hx hσ j
 
-/-- `C^2`/`C^1` finite-order version of
-`covariantDerivative_localHomCoeff_contMDiffAt_of_section`. -/
+
+
+omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -669,8 +681,9 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section_one
   · intro j
     exact (hchristoffel j).of_le (by simp : (1 : WithTop ℕ∞) ≤ ∞)
 
+omit [CompleteSpace E] in
 theorem covariantDerivative_homSection_contMDiffAt_of_coeff
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -709,10 +722,11 @@ theorem covariantDerivative_homSection_contMDiffAt_of_coeff
     exact homLocalFrameCoeff_eq_localHomCoeff (I := I) e b hy (cov σ y) i k
   exact hlocal.congr_of_eventuallyEq heq
 
-/-- `C^2`/`C^1` finite-order version of
-`covariantDerivative_homSection_contMDiffAt_of_coeff`. -/
+
+
+omit [CompleteSpace E] in
 theorem covariantDerivative_homSection_contMDiffAt_of_coeff_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)

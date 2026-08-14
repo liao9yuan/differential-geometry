@@ -5,73 +5,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorCh
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChartBound
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
-/-!
-# Per-`α` `eLpNorm` bound on the metric self-inner-product square-root of the
-gradient of the chart-frame scalar component
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and
-ranks `(r, s)`, this file collects the file-local elementary inequalities used
-to assemble the per-`α` `L²` bound
-
-```
-eLpNorm (b ↦ √ g.inner b (∇ u_α b) (∇ u_α b)) 2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊
-```
-
-where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`, the
-metric `g.inner` is the Riemannian fibre inner product on the tangent bundle,
-and the constant `C` depends only on `(g, r, s, α)`.
-
-## Strategy
-
-The complete proof combines:
-
-* the pointwise `ρ_α²`-weighted gradient bound
-  (`g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1`) and the
-  vanishing of the gradient off `tsupport ρ_α`
-  (`sqrt_g_inner_gradFun_tensorChartComponentScalar_eq_zero_outside_pouTsupport`),
-  giving, after taking square roots,
-  `√ g.inner b (∇u) (∇u) ≤ √A · |raw|_indicator
-                          + √B · ρ · √Tcov_sum + √B · ρ · √Tchr_sum`
-  globally on `M`;
-* the per-`α` `L²`-bound on the raw indicator
-  (`exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq`, G4);
-* the per-`α` `L²`-bound on the chart-covariant-derivative atom sum
-  (`exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq`, G2);
-* the per-`α` per-direction `L²`-bound on the chart-Christoffel-correction
-  atom (`exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`,
-  G3), bridged to the `G1` per-direction trivialised Christoffel correction
-  via the chart-twist inverse uniform operator-norm bound
-  (`chartRSTwistInv_pointwise_opNorm_isBounded_on_compact`) combined with a
-  square-of-sum bound;
-* `AEStronglyMeasurable` of each summand from the atom measurability
-  headlines (`aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov`,
-  `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction`,
-  `aestronglyMeasurable_indicator_tsupp_abs_raw`).
-
-Three Minkowski applications (`eLpNorm_add_le`) glue the three `eLpNorm`
-bounds into the headline.
-
-This module currently ships the elementary algebraic ingredients used in the
-final assembly. The remaining structural bridge between the trivialised
-Christoffel correction sum `Tchr_k = ‖triv(−Σ inputs + Σ outputs)‖²` and the
-non-trivialised slot-correction Euclidean square `(Σ ‖input‖² + Σ ‖output‖²)`,
-followed by the three-way Minkowski assembly, will land in a follow-up step
-in the same module.
-
-## File-local helper lemmas
-
-* `sqrt_add_le_sqrt_add_sqrt` — `√(a + b) ≤ √a + √b` for non-negative reals.
-* `sqrt_add3_le_sum` — `√(a + b + c) ≤ √a + √b + √c` for non-negative reals.
-* `coe_nnnorm_eq_ofReal_norm` — `(‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 2400000
-set_option maxHeartbeats 2400000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -87,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -98,7 +34,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For non-negative reals `a`, `b`, `√(a + b) ≤ √a + √b`. -/
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 lemma sqrt_add_le_sqrt_add_sqrt {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     Real.sqrt (a + b) ≤ Real.sqrt a + Real.sqrt b := by
   have h_sum_nn : 0 ≤ a + b := add_nonneg ha hb
@@ -114,7 +55,6 @@ lemma sqrt_add_le_sqrt_add_sqrt {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     rw [h_lhs_sq, h_rhs_sq]; linarith
   exact (abs_le_of_sq_le_sq' h_sq_le h_sum_sq_nn).2
 
-/-- For non-negative reals `a`, `b`, `c`, `√(a + b + c) ≤ √a + √b + √c`. -/
 lemma sqrt_add3_le_sum {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) :
     Real.sqrt (a + b + c) ≤ Real.sqrt a + Real.sqrt b + Real.sqrt c := by
   have h_ab_nn : 0 ≤ a + b := add_nonneg ha hb
@@ -124,18 +64,12 @@ lemma sqrt_add3_le_sum {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c
     sqrt_add_le_sqrt_add_sqrt ha hb
   linarith
 
-/-- For any element of a `SeminormedAddCommGroup`,
-`(‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖`. -/
 lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
     (x : X) :
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
-/-- For a finite indexing set `s : Finset ι` and a `NormedAddCommGroup`-valued
-family `x : ι → X`, the square of the norm of the sum is bounded by `|s|`
-times the sum of squared norms:
-`‖∑ i ∈ s, x i‖² ≤ |s| · ∑ i ∈ s, ‖x i‖²`. -/
 lemma sum_norm_sq_le_card_mul_sum_norm_sq
     {ι : Type*} {X : Type*} [SeminormedAddCommGroup X]
     (s : Finset ι) (x : ι → X) :
@@ -153,10 +87,6 @@ lemma sum_norm_sq_le_card_mul_sum_norm_sq
     sq_sum_le_card_mul_sum_sq
   exact h_sq_tri.trans h_pmi
 
-/-- For a `NormedAddCommGroup`-valued family `x : Fin r → X` and `y : Fin s → X`,
-the squared norm of `(−∑ x_i + ∑ y_l)` is bounded by twice the sum of squared
-sub-block norms:
-`‖−∑ i, x i + ∑ l, y l‖² ≤ 2·(‖∑ x_i‖² + ‖∑ y_l‖²)`. -/
 lemma norm_sq_neg_sum_add_sum_le_two_mul
     {r' s' : ℕ} {X : Type*} [SeminormedAddCommGroup X]
     (x : Fin r' → X) (y : Fin s' → X) :
@@ -181,9 +111,6 @@ lemma norm_sq_neg_sum_add_sum_le_two_mul
     linarith
   exact h_sq.trans h_abc
 
-/-- For a non-negative real-valued family `a : Fin n → ℝ`, the square root of
-the finite sum is bounded by the sum of square roots:
-`√(∑ k, a k) ≤ ∑ k, √(a k)`. -/
 lemma sqrt_sum_le_sum_sqrt_fin {n : ℕ} (a : Fin n → ℝ)
     (ha : ∀ k, 0 ≤ a k) :
     Real.sqrt (∑ k : Fin n, a k) ≤ ∑ k : Fin n, Real.sqrt (a k) := by
@@ -205,10 +132,127 @@ lemma sqrt_sum_le_sum_sqrt_fin {n : ℕ} (a : Fin n → ℝ)
       have h_sqrt_ind : Real.sqrt (∑ k ∈ s', a k) ≤ ∑ k ∈ s', Real.sqrt (a k) := ih
       linarith
 
+private lemma norm_sq_map_neg_sum_add_sum_le
+    {r' s' : ℕ} {X Y : Type*} [SeminormedAddCommGroup X]
+    [SeminormedAddCommGroup Y] (F : X → Y) (C M t : ℝ)
+    (hF : ∀ x, ‖F x‖ ≤ C * ‖x‖)
+    (a : Fin r' → X) (c : Fin s' → X)
+    (ha : ∀ i, ‖a i‖ ≤ M * t) (hc : ∀ l, ‖c l‖ ≤ M * t) :
+    ‖F (- (∑ i : Fin r', a i) + (∑ l : Fin s', c l))‖ ^ 2 ≤
+      C ^ 2 * (2 * ((r' : ℝ) + (s' : ℝ))) * ((r' : ℝ) + (s' : ℝ)) *
+        M ^ 2 * t ^ 2 := by
+  classical
+  set u : X := - (∑ i : Fin r', a i) + (∑ l : Fin s', c l) with hu_def
+  have hFu_sq : ‖F u‖ ^ 2 ≤ C ^ 2 * ‖u‖ ^ 2 := by
+    have hsq := mul_self_le_mul_self (norm_nonneg (F u)) (hF u)
+    nlinarith [hsq, sq_nonneg C, norm_nonneg u]
+  have hu_split : ‖u‖ ^ 2 ≤
+      2 * (‖∑ i : Fin r', a i‖ ^ 2 + ‖∑ l : Fin s', c l‖ ^ 2) := by
+    simpa [hu_def] using norm_sq_neg_sum_add_sum_le_two_mul a c
+  have ha_sum : ‖∑ i : Fin r', a i‖ ^ 2 ≤
+      (r' : ℝ) * ∑ i : Fin r', ‖a i‖ ^ 2 := by
+    simpa using sum_norm_sq_le_card_mul_sum_norm_sq
+      (s := (Finset.univ : Finset (Fin r'))) a
+  have hc_sum : ‖∑ l : Fin s', c l‖ ^ 2 ≤
+      (s' : ℝ) * ∑ l : Fin s', ‖c l‖ ^ 2 := by
+    simpa using sum_norm_sq_le_card_mul_sum_norm_sq
+      (s := (Finset.univ : Finset (Fin s'))) c
+  have ha_each : ∀ i, ‖a i‖ ^ 2 ≤ M ^ 2 * t ^ 2 := by
+    intro i
+    have hsq := mul_self_le_mul_self (norm_nonneg (a i)) (ha i)
+    nlinarith [hsq]
+  have hc_each : ∀ l, ‖c l‖ ^ 2 ≤ M ^ 2 * t ^ 2 := by
+    intro l
+    have hsq := mul_self_le_mul_self (norm_nonneg (c l)) (hc l)
+    nlinarith [hsq]
+  have ha_total : ∑ i : Fin r', ‖a i‖ ^ 2 ≤
+      (r' : ℝ) * (M ^ 2 * t ^ 2) := by
+    have hle := Finset.sum_le_sum (s := (Finset.univ : Finset (Fin r')))
+      (fun i _ => ha_each i)
+    simpa using hle
+  have hc_total : ∑ l : Fin s', ‖c l‖ ^ 2 ≤
+      (s' : ℝ) * (M ^ 2 * t ^ 2) := by
+    have hle := Finset.sum_le_sum (s := (Finset.univ : Finset (Fin s')))
+      (fun l _ => hc_each l)
+    simpa using hle
+  have hMt : 0 ≤ M ^ 2 * t ^ 2 := mul_nonneg (sq_nonneg M) (sq_nonneg t)
+  have hu_bound : ‖u‖ ^ 2 ≤
+      2 * ((r' : ℝ) + (s' : ℝ)) * (((r' : ℝ) + (s' : ℝ)) * M ^ 2 * t ^ 2) := by
+    nlinarith [hu_split, ha_sum, hc_sum, ha_total, hc_total,
+      Finset.sum_nonneg (s := (Finset.univ : Finset (Fin r')))
+        (fun i _ => sq_nonneg ‖a i‖),
+      Finset.sum_nonneg (s := (Finset.univ : Finset (Fin s')))
+        (fun l _ => sq_nonneg ‖c l‖), hMt]
+  calc
+    ‖F (- (∑ i : Fin r', a i) + (∑ l : Fin s', c l))‖ ^ 2
+        = ‖F u‖ ^ 2 := by rw [hu_def]
+    _ ≤ C ^ 2 * ‖u‖ ^ 2 := hFu_sq
+    _ ≤ C ^ 2 * (2 * ((r' : ℝ) + (s' : ℝ)) *
+          (((r' : ℝ) + (s' : ℝ)) * M ^ 2 * t ^ 2)) :=
+      mul_le_mul_of_nonneg_left hu_bound (sq_nonneg C)
+    _ = C ^ 2 * (2 * ((r' : ℝ) + (s' : ℝ))) * ((r' : ℝ) + (s' : ℝ)) *
+          M ^ 2 * t ^ 2 := by ring
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private theorem tchr_model_triv_per_direction_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (T : SmoothCcTensor g r s) {b : M}
+    (k : Fin (Module.finrank ℝ E)) (Cto M_F : ℝ) :
+    letI : Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    letI : NormedAddCommGroup (TensorRSSpace r s I b) :=
+      tensorRSRiemannianNormedAddCommGroup r s b
+    (∀ X : TensorRSSpace r s I b,
+        ‖(trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X‖ ≤
+          Cto * ‖X‖) →
+    (∀ i : Fin r,
+        ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+            (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b i‖ ≤
+          M_F * ‖T.toSection b‖) →
+    (∀ l : Fin s,
+        ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+            (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b l‖ ≤
+          M_F * ‖T.toSection b‖) →
+      ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+        (- (∑ i : Fin r,
+            chartTensorRSInputSlotCorrection (I := I) r s g α
+              (fun b' => T.toSection b')
+              (chartBasisVecFiber (I := I) α k) b i)
+          + (∑ l : Fin s,
+              chartTensorRSOutputSlotCorrection (I := I) r s g α
+                (fun b' => T.toSection b')
+                (chartBasisVecFiber (I := I) α k) b l))‖ ^ 2 ≤
+        Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ))) * ((r : ℝ) + (s : ℝ)) *
+          M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
+  classical
+  letI : Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  letI : NormedAddCommGroup (TensorRSSpace r s I b) :=
+    tensorRSRiemannianNormedAddCommGroup r s b
+  intro hCto hinput houtput
+  exact norm_sq_map_neg_sum_add_sum_le
+    (F := fun X =>
+      (trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X)
+    Cto M_F ‖T.toSection b‖ hCto
+    (fun i => chartTensorRSInputSlotCorrection (I := I) r s g α
+      (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b i)
+    (fun l => chartTensorRSOutputSlotCorrection (I := I) r s g α
+      (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b l)
+    hinput houtput
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace
+  Bundle.continuousMultilinearMap.instNormedAddCommGroup
+  Bundle.continuousMultilinearMap.instNormedSpace in
+omit [CompleteSpace E] in
 private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -252,6 +296,8 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
   refine ⟨Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ))) * (n : ℝ) *
       ((r : ℝ) + (s : ℝ)) * M_F ^ 2, by positivity, ?_⟩
   intro T b hb
+  letI tensorNorm : NormedAddCommGroup (TensorRSSpace r s I b) :=
+    tensorRSRiemannianNormedAddCommGroup r s b
   have h_sec_iso : ‖T.toSection b‖ ^ 2 =
       tensorInnerPointwise (I := I) (M := M) g r s b (T.toFun b) (T.toFun b) := by
     have h_inner : (⟪T.toSection b, T.toSection b⟫_ℝ : ℝ) =
@@ -275,94 +321,16 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
         Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ))) * ((r : ℝ) + (s : ℝ)) *
           M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
     intro k
-    set a : Fin r → TensorRSSpace r s I b := fun i =>
-      chartTensorRSInputSlotCorrection (I := I) r s g α
-        (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b i with ha_def
-    set c : Fin s → TensorRSSpace r s I b := fun l =>
-      chartTensorRSOutputSlotCorrection (I := I) r s g α
-        (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b l with hc_def
-    set X : TensorRSSpace r s I b := - (∑ i : Fin r, a i) + (∑ l : Fin s, c l)
-      with hX_def
-    have h_to : ‖(trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X‖ ≤
-        Cto * ‖X‖ := hCto_bound b hb X
-    have h_sq := mul_self_le_mul_self (norm_nonneg _) h_to
-    have h_model_le : ‖(trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X‖ ^ 2 ≤
-        Cto ^ 2 * ‖X‖ ^ 2 := by nlinarith [h_sq, sq_nonneg Cto, norm_nonneg X]
-    have h_X_sq_split : ‖X‖ ^ 2 ≤
-        2 * (‖∑ i : Fin r, a i‖ ^ 2 + ‖∑ l : Fin s, c l‖ ^ 2) :=
-      norm_sq_neg_sum_add_sum_le_two_mul (r' := r) (s' := s) a c
-    have h_sum_a_sq : ‖∑ i : Fin r, a i‖ ^ 2 ≤
-        (r : ℝ) * ∑ i : Fin r, ‖a i‖ ^ 2 := by
-      have h := sum_norm_sq_le_card_mul_sum_norm_sq
-        (s := (Finset.univ : Finset (Fin r))) a
-      rwa [Finset.card_univ, Fintype.card_fin] at h
-    have h_sum_c_sq : ‖∑ l : Fin s, c l‖ ^ 2 ≤
-        (s : ℝ) * ∑ l : Fin s, ‖c l‖ ^ 2 := by
-      have h := sum_norm_sq_le_card_mul_sum_norm_sq
-        (s := (Finset.univ : Finset (Fin s))) c
-      rwa [Finset.card_univ, Fintype.card_fin] at h
-    have h_a_each : ∀ i : Fin r, ‖a i‖ ^ 2 ≤ M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
-      intro i
-      have h0 : ‖a i‖ ≤ M_F_in * ‖T.toSection b‖ :=
-        hM_F_in_le (fun b' => T.toSection b') (b := b) hb k i
-      have h_bnd : ‖a i‖ ≤ M_F * ‖T.toSection b‖ :=
-        h0.trans (mul_le_mul_of_nonneg_right (le_max_left M_F_in M_F_out)
+    apply tchr_model_triv_per_direction_le (I := I) (M := M) g r s α T k Cto M_F
+    · exact hCto_bound b hb
+    · intro i
+      exact (hM_F_in_le (fun b' => T.toSection b') (b := b) hb k i).trans
+        (mul_le_mul_of_nonneg_right (le_max_left M_F_in M_F_out)
           (norm_nonneg (T.toSection b)))
-      have hsq := mul_self_le_mul_self (norm_nonneg (a i)) h_bnd
-      nlinarith [hsq, sq_nonneg M_F, norm_nonneg (T.toSection b)]
-    have h_c_each : ∀ l : Fin s, ‖c l‖ ^ 2 ≤ M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
-      intro l
-      have h0 : ‖c l‖ ≤ M_F_out * ‖T.toSection b‖ :=
-        hM_F_out_le (fun b' => T.toSection b') (b := b) hb k l
-      have h_bnd : ‖c l‖ ≤ M_F * ‖T.toSection b‖ :=
-        h0.trans (mul_le_mul_of_nonneg_right (le_max_right M_F_in M_F_out)
+    · intro l
+      exact (hM_F_out_le (fun b' => T.toSection b') (b := b) hb k l).trans
+        (mul_le_mul_of_nonneg_right (le_max_right M_F_in M_F_out)
           (norm_nonneg (T.toSection b)))
-      have hsq := mul_self_le_mul_self (norm_nonneg (c l)) h_bnd
-      nlinarith [hsq, sq_nonneg M_F, norm_nonneg (T.toSection b)]
-    have h_sum_a_M : ∑ i : Fin r, ‖a i‖ ^ 2 ≤
-        (r : ℝ) * (M_F ^ 2 * ‖T.toSection b‖ ^ 2) := by
-      have h_le := Finset.sum_le_sum (s := (Finset.univ : Finset (Fin r)))
-        (fun i _ => h_a_each i)
-      rwa [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h_le
-    have h_sum_c_M : ∑ l : Fin s, ‖c l‖ ^ 2 ≤
-        (s : ℝ) * (M_F ^ 2 * ‖T.toSection b‖ ^ 2) := by
-      have h_le := Finset.sum_le_sum (s := (Finset.univ : Finset (Fin s)))
-        (fun l _ => h_c_each l)
-      rwa [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h_le
-    have h_a_sum_nn : 0 ≤ ∑ i : Fin r, ‖a i‖ ^ 2 :=
-      Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-    have h_c_sum_nn : 0 ≤ ∑ l : Fin s, ‖c l‖ ^ 2 :=
-      Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-    have h_secsq_nn : 0 ≤ ‖T.toSection b‖ ^ 2 := sq_nonneg _
-    have h_MF_sq_nn : 0 ≤ M_F ^ 2 := sq_nonneg _
-    have h_r_le : (r : ℝ) ≤ (r : ℝ) + (s : ℝ) := by
-      have : (0 : ℝ) ≤ (s : ℝ) := by positivity
-      linarith
-    have h_s_le : (s : ℝ) ≤ (r : ℝ) + (s : ℝ) := by
-      have : (0 : ℝ) ≤ (r : ℝ) := by positivity
-      linarith
-    have h_X_sq_bound : ‖X‖ ^ 2 ≤
-        2 * ((r : ℝ) + (s : ℝ)) * (((r : ℝ) + (s : ℝ)) * M_F ^ 2 *
-          ‖T.toSection b‖ ^ 2) := by
-      have h_sum_le : (∑ i : Fin r, ‖a i‖ ^ 2) + (∑ l : Fin s, ‖c l‖ ^ 2) ≤
-          ((r : ℝ) + (s : ℝ)) * M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
-        have hab := add_le_add h_sum_a_M h_sum_c_M
-        have hr := mul_le_mul_of_nonneg_right h_r_le (mul_nonneg h_MF_sq_nn h_secsq_nn)
-        have hs := mul_le_mul_of_nonneg_right h_s_le (mul_nonneg h_MF_sq_nn h_secsq_nn)
-        nlinarith [hab, hr, hs]
-      nlinarith [h_X_sq_split, h_sum_le, h_a_sum_nn, h_c_sum_nn,
-        mul_nonneg h_MF_sq_nn h_secsq_nn]
-    have h_Cto_sq_nn : 0 ≤ Cto ^ 2 := sq_nonneg _
-    calc ‖(trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X‖ ^ 2
-        ≤ Cto ^ 2 * ‖X‖ ^ 2 := h_model_le
-      _ ≤ Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ)) *
-            (((r : ℝ) + (s : ℝ)) * M_F ^ 2 * ‖T.toSection b‖ ^ 2)) :=
-          mul_le_mul_of_nonneg_left h_X_sq_bound h_Cto_sq_nn
-      _ = Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ))) * ((r : ℝ) + (s : ℝ)) *
-            M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by ring
   calc (∑ k : Fin n,
           ‖(trivializationAt (TensorRSModel r s ℝ E)
               (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -390,21 +358,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace in
-/-- **Unconditional Riemannian-norm twin of the G5 headline.** For a closed
-Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart base point `α : M`,
-there is a non-negative constant `C` (depending only on `(g, r, s, α)`) such
-that for every smooth compactly-supported `H¹` tensor section
-`S : SmoothCcTensorH1 g r s` and every chart-frame multi-index choice
-`(Idx, Jdx)`,
-```
-eLpNorm
-    (fun b => √ g.inner b (∇u_α b) (∇u_α b)) 2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊,
-```
-where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`. The
-Christoffel slot-correction atom is routed through its intrinsic
-Riemannian-fibre-norm operator bounds, so no chart-locality predicate is
-required. -/
+omit [CompleteSpace E] in
 theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.IntrinsicJacobiJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CurvOpTower
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -371,7 +372,7 @@ theorem CurvJetTerm.allAtoms_true :
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E]
   [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Time-zero identification for an open-window metric limit
@@ -20,8 +19,8 @@ open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -33,6 +32,8 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace OpenConvOut
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Identify the time-zero open-window limit with any pointwise time-zero
 limit of the pulled-back source metrics along the underlying sequence. -/
 theorem gInf_zero_eq

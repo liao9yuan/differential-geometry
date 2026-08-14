@@ -8,21 +8,19 @@ import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
-/-!
-# Pointwise Riemann and Ricci tensors
 
-This file starts a definition-first curvature layer.  The auxiliary curvature
-operator is the usual vector-field formula, and the pointwise tensors are the
-objects intended for downstream use.  The constructors use chart-constant
-tangent-field representatives; arbitrary smooth-field tensoriality is a separate
-extension theorem frontier, not part of these definitions.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped BigOperators Manifold ContDiff Topology
@@ -41,6 +39,7 @@ noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
     TangentSpace I p :=
   TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem tangentConstAt_self (x : M) (v : TangentSpace I x) :
     tangentConstAt (I := I) x v x = v := by
   unfold tangentConstAt
@@ -56,6 +55,7 @@ noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
   rw [hL]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem mdifferentiableAt_tangentConstAt_self
     (x : M) (v : TangentSpace I x) :
     MDiffAt (T% (tangentConstAt (I := I) x v : (p : M) → TangentSpace I p)) x := by
@@ -64,6 +64,7 @@ theorem mdifferentiableAt_tangentConstAt_self
     (𝕜 := Real) (I := I) (x₀ := x) (p := x) v
     (mem_baseSet_trivializationAt E (TangentSpace I) x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem tangentConstAt_add (x : M) (v w : TangentSpace I x) :
     (tangentConstAt (I := I) x (v + w) : (p : M) → TangentSpace I p) =
       (tangentConstAt (I := I) x v : (p : M) → TangentSpace I p) +
@@ -71,12 +72,14 @@ theorem mdifferentiableAt_tangentConstAt_self
   unfold tangentConstAt
   exact TensorLieDeriv.tangentConstInChart_add (𝕜 := Real) (I := I) x v w
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem tangentConstAt_smul (x : M) (a : Real) (v : TangentSpace I x) :
     (tangentConstAt (I := I) x (a • v) : (p : M) → TangentSpace I p) =
       a • (tangentConstAt (I := I) x v : (p : M) → TangentSpace I p) := by
   unfold tangentConstAt
   exact TensorLieDeriv.tangentConstInChart_smul (𝕜 := Real) (I := I) x a v
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_apply_mdiffAt_self
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -128,6 +131,7 @@ theorem cov_tangentConst_apply_mdiffAt_self
     (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact h_at.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_smooth_apply_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -168,6 +172,7 @@ theorem cov_smooth_apply_mdiffAt
     (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact h_at.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_smooth_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -206,6 +211,7 @@ theorem cov_smooth_apply_contMDiffAt
     simpa [e] using hcovY.clm_bundle_apply hX
   exact (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_smooth_apply_raw_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -245,6 +251,7 @@ theorem cov_smooth_apply_raw_mdiffAt
     (hcovY_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact (hcovY_at.mdifferentiableAt (by simp)).clm_bundle_apply hX
 
+omit [FiniteDimensional ℝ E] in
 theorem curvField_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -296,6 +303,7 @@ theorem curvField_contMDiffAt
   simpa [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZ, XZ, B] using
     (h1.sub_section h2).sub_section h3
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem metric_inner_contMDiffAt
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) → TangentSpace I p} {x : M} {n : WithTop ℕ∞}
@@ -323,6 +331,7 @@ theorem metric_inner_contMDiffAt
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_add_apply_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (x : M) (v₁ v₂ w : TangentSpace I x) :
@@ -348,6 +357,7 @@ theorem cov_tangentConst_add_apply_eventuallyEq
   rw [cov.isCovariantDerivativeOnUniv.add hv₁ hv₂]
   simp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_smul_apply_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (x : M) (a : Real) (v w : TangentSpace I x) :
@@ -368,11 +378,11 @@ theorem cov_tangentConst_smul_apply_eventuallyEq
   rw [cov.isCovariantDerivativeOnUniv.smul_const a hv]
   simp [Pi.smul_apply]
 
-/-- The curvature operator of a covariant derivative, before tensorial descent.
 
-The sign convention is
-`∇_X ∇_Y Z - ∇_Y ∇_X Z - ∇_[X,Y] Z`.
--/
+
+
+
+
 def riemannCurvatureAux
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z : (p : M) → TangentSpace I p) (x : M) : TangentSpace I x :=
@@ -380,6 +390,7 @@ def riemannCurvatureAux
     (cov (fun p => (cov Z p) (X p)) x) (Y x) -
       (cov Z x) (VectorField.mlieBracket I X Y x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp]
 theorem riemannCurvatureAux_eq_connectionRiemannCurvatureField
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -387,8 +398,9 @@ theorem riemannCurvatureAux_eq_connectionRiemannCurvatureField
     riemannCurvatureAux cov X Y Z x =
       connectionRiemannCurvatureField cov X Y Z x := rfl
 
-/-- Germ congruence for the connection curvature operator on smooth bundled
-tangent sections. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -465,6 +477,7 @@ theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
   simp [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, hcovZY, hcovZX,
     hZ_at, hXx, hYx, hbr]
 
+omit [FiniteDimensional ℝ E] in
 theorem connectionRiemannCurvatureField_tensorial_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -517,6 +530,7 @@ theorem connectionRiemannCurvatureField_tensorial_left
     simp [map_add]
     module
 
+omit [FiniteDimensional ℝ E] in
 theorem connectionRiemannCurvatureField_tensorial_middle
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -556,9 +570,9 @@ theorem connectionRiemannCurvatureField_tensorial_middle
     rw [hleft]
     module
 
-/-- Pointwise tensoriality in the two curvature-direction slots.  The third
-slot is harder because its scalar rule contains the second-derivative bracket
-commutator cancellation. -/
+
+
+
 theorem connectionRiemannCurvatureField_congr_first_two_point
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -595,12 +609,12 @@ theorem connectionRiemannCurvatureField_congr_first_two_point
           (connectionRiemannCurvatureField_tensorial_middle
             (I := I) cov hcov X' Z x).pointwise hYmd hY'md hY
 
-/-- Smooth scalar linearity in the curvature-output slot.
 
-This is the Leibniz-expansion cancellation:
-the extra coefficient is
-`X(Y f) - Y(X f) - [X,Y] f`, hence vanishes by the scalar Lie-bracket
-commutator formula. -/
+
+
+
+
+
 private theorem connectionRiemannCurvatureField_smul_right_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -710,7 +724,8 @@ private theorem connectionRiemannCurvatureField_smul_right_smooth
   simp [YZ, XZ, Xf, Yf, hscalar]
   module
 
-/-- Smooth additivity in the curvature-output slot. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem connectionRiemannCurvatureField_add_right_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -785,6 +800,7 @@ private theorem connectionRiemannCurvatureField_add_right_smooth
   simp [YZ, YZ', XZ, XZ']
   module
 
+omit [CompleteSpace E] in
 private theorem smooth_linear_tangentSection_pointwise
     [T2Space M]
     {x : M}
@@ -929,13 +945,13 @@ private theorem smooth_linear_tangentSection_pointwise
   rw [hsum_zero, sub_zero] at hloc
   exact hloc
 
-/-- Pointwise tensoriality of the connection curvature operator on smooth
-bundled tangent sections.
 
-This is the central curvature tensoriality frontier.  Mathlib's covariant
-derivative congruence gives germ dependence of one derivative; this stronger
-statement needs the usual `C∞(M)`-linearity cancellation in all three curvature
-slots. -/
+
+
+
+
+
+
 theorem connectionRiemannCurvatureField_congr_point
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

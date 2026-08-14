@@ -2,14 +2,14 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 
-/-!
-# Rank-zero metric inner-product bridges
 
-At upper rank zero, metric index lowering contracts no upper slots.  This file
-records the resulting applied bridge from the canonical covariant lift
-`Tensor0SSpace.toRS0` to the covariant pointwise inner product.  The proof stays
-at the fully applied multilinear level and does not compare whole Hom models.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,22 +30,22 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-- The covariant pointwise inner product is unchanged by the canonical slot
-transport induced by an equality of tensor valences. -/
+
+
 lemma inner_nat_cast
     (g : SmoothRiemannianMetric I M) (x : M) {a b : ℕ} (h : a = b)
     (A B : ContinuousMultilinearMap ℝ (fun _ : Fin b => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) a g x
+    covariantTensorInnerPointwise (I := I) (M := M) a g x
         (A.domDomCongr (finCongr h.symm))
         (B.domDomCongr (finCongr h.symm)) =
-      tensorInnerPointwise_0s (I := I) (M := M) b g x A B := by
+      covariantTensorInnerPointwise (I := I) (M := M) b g x A B := by
   subst a
   simpa only [finCongr_refl] using
     (tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x b
       (Equiv.refl (Fin b)) A B)
 
-/-- Lowering the canonical upper-rank-zero lift recovers the covariant tensor
-model, up to the canonical `Fin (0 + s)` slot identification. -/
+
+
 lemma lower_toRS0
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) :
@@ -84,20 +84,20 @@ lemma lower_toRS0
   congr 1
   exact (Fin.ext (by simp)).symm
 
-/-- The mixed pointwise inner product of two canonical upper-rank-zero lifts
-is the covariant pointwise inner product. -/
+
+
 lemma inner_toRS0
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A B : Tensor0SSpace s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
         (TensorRSSpace.toModel (Tensor0SSpace.toRS0 A))
         (TensorRSSpace.toModel (Tensor0SSpace.toRS0 B)) =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x
+      covariantTensorInnerPointwise (I := I) (M := M) s g x
         (Tensor0SSpace.toModel A) (Tensor0SSpace.toModel B) := by
   rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
       (TensorRSSpace.toModel (Tensor0SSpace.toRS0 A))
       (TensorRSSpace.toModel (Tensor0SSpace.toRS0 B)) =
-        tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+        covariantTensorInnerPointwise (I := I) (M := M) (0 + s) g x
           (lowerAllUpperIndices (I := I) (M := M) g 0 s x
             (TensorRSSpace.toModel (Tensor0SSpace.toRS0 A)))
           (lowerAllUpperIndices (I := I) (M := M) g 0 s x
@@ -107,8 +107,8 @@ lemma inner_toRS0
   exact inner_nat_cast (I := I) (M := M) g x (Nat.zero_add s)
     (Tensor0SSpace.toModel A) (Tensor0SSpace.toModel B)
 
-/-- At covariant rank zero, the mixed pointwise inner product is the product
-of the two scalar fibre readouts. -/
+
+
 lemma inner_toRS0_zero
     (g : SmoothRiemannianMetric I M) (x : M)
     (A B : Tensor0SSpace 0 I x) :
@@ -121,8 +121,8 @@ lemma inner_toRS0_zero
     Tensor0SSpace.evalScalar_apply, Tensor0SSpace.evalScalar_apply]
   rfl
 
-/-- At covariant rank zero, the pointwise inner product of canonical scalar
-lifts is ordinary multiplication. -/
+
+
 lemma inner_toRS0_scalar
     (g : SmoothRiemannianMetric I M) (x : M) (a b : ℝ) :
     tensorInnerPointwise (I := I) (M := M) g 0 0 x

@@ -3,14 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebr
 
 set_option autoImplicit false
 
-/-!
-# Joint scalar-curvature regularity
 
-The Ricci-flow equation identifies the Ricci components in any fixed local
-frame with one half of the time derivative of the metric components.  Joint
-smoothness of the metric and its inverse therefore gives joint smoothness of
-the scalar trace without expanding the curvature formula.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -31,8 +31,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- The scalar curvature of a Ricci-flow solution is jointly smooth at all
-regular spacetime points. -/
+
+
 theorem scalar_joint
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :

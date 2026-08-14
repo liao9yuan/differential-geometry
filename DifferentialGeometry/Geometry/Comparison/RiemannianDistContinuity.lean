@@ -5,37 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Instances.ENNReal.Lemmas
 
-/-!
-# Continuity of the Riemannian extended distance from a fixed base point
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` and a fixed
-base point `p : M`, the map `q ↦ riemannianEDist I p q` is continuous for
-the manifold topology on `M`.
-
-The proof installs, from the metric data `g`, the auxiliary fibre instances
-`Bundle.RiemannianBundle (TangentSpace I)` (from `g.toRiemannianMetric`)
-and `IsContinuousRiemannianBundle E (TangentSpace I)` (from the
-smooth-implies-continuous inner product of `g`), then builds Mathlib's
-`PseudoEMetricSpace.ofRiemannianMetric I M`. By construction (via
-`PseudoEMetricSpace.ofEDistOfTopology`) this pseudo-emetric structure has
-
-* `edist = riemannianEDist I` (definitionally), and
-* a topology *definitionally equal* to the ambient manifold topology
-  (`UniformSpace.ofFunOfHasBasis` sets `toTopologicalSpace := t`).
-
-Continuity of the extended distance (`Continuous.edist`) for this
-pseudo-emetric structure therefore yields continuity of
-`q ↦ riemannianEDist I p q` for the manifold topology directly.
-
-The regularity hypothesis `[RegularSpace M]` required by
-`PseudoEMetricSpace.ofRiemannianMetric` is discharged from the manifold
-structure: a finite-dimensional manifold is locally compact
-(`Manifold.locallyCompact_of_finiteDimensional`), and a weakly locally
-compact `R1` (here Hausdorff) space is regular.
-
-This is the prerequisite continuity input for the open/closed clopen
-decomposition in radial-geodesic surjectivity arguments.
--/
 
 open Set Function Filter Bundle Manifold Metric MeasureTheory
 open scoped Topology Manifold ContDiff ENNReal NNReal
@@ -49,12 +18,11 @@ namespace Riemannian
 open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-omit [InnerProductSpace ℝ E] in
 /-- **Continuity of the Riemannian extended distance from a fixed base point.**
 
 For a smooth Riemannian metric `g` and a fixed `p : M`, the map
@@ -93,7 +61,7 @@ theorem continuous_riemannianEDist
 attribute [local instance] normedAddCommGroupTangentSpaceVectorSpace
 attribute [local instance] normedSpaceTangentSpaceVectorSpace
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M]
   [T2Space M] in
 /-- On a sufficiently small convex extended-chart ball, the chart inverse is
 Lipschitz for the Riemannian extended distance. -/
@@ -161,7 +129,7 @@ theorem chart_symm_edist_le
   · simp only [mfderivWithin_eq_fderivWithin]
     exact le_of_eq rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M]
   [T2Space M] in
 /-- A fixed smooth parametrization is locally Lipschitz for Riemannian
 extended distance at every point of its source. -/
@@ -233,7 +201,7 @@ theorem diffeo_edist_le
       gcongr
       exact le_add_of_nonneg_right (by positivity)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M]
   [T2Space M] in
 /-- A pointwise speed bound along a model segment controls the Riemannian
 extended distance between the corresponding parametrized endpoints. -/
@@ -309,7 +277,7 @@ theorem param_edist_le
       rw [Real.volume_Icc]
       norm_num
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M]
   [T2Space M] in
 /-- The inverse of a fixed extended chart is locally Lipschitz for the
 Riemannian extended distance at every point of its target. -/
@@ -380,7 +348,6 @@ theorem chart_inv_edist_le
         ≤ C * (K * edist y z) := mul_right_mono (hKt hyt hzt)
     _ = (C * K) * edist y z := by simp only [mul_assoc]
 
-omit [InnerProductSpace ℝ E] in
 /-- **Continuity on the finite locus of the real Riemannian distance from a fixed
 base point.**
 

@@ -1,62 +1,10 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.ChartPulledCovDerivChartCompBound
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 
-/-!
-# Bound on the Fréchet derivative of the chart-pulled intrinsic piece of the
-first covariant derivative
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, a smooth
-compactly supported `(r, s)`-tensor section `T`, and a smooth tangent vector
-field `B`, the *intrinsic piece* of the chart-α-pulled first covariant
-derivative is
-
-  `Ψ(y) := fderiv ℝ (tensorRSChartE_section_repr r s α T.toFun ∘ symm) y
-            (trivToE α (symm y) (B (symm y)))`,
-
-an element of the model fibre `TensorRSModel r s ℝ E`, parametrised by
-`y ∈ E` in the chart target. This file ships the uniform bound
-
-  `‖fderiv ℝ Ψ (extChartAt I α b)‖
-      ≤ K * (‖iteratedFDeriv ℝ 2 (repr T ∘ symm) (extChartAt I α b)‖
-             + ‖fderiv ℝ (repr T ∘ symm) (extChartAt I α b)‖)`
-
-valid for all `b` in the intersection of the chart-α partition-of-unity
-tsupport and the chart-α Levi-Civita good set, provided the chart-pulled
-representation `repr T ∘ symm` is twice Fréchet-differentiable at
-`extChartAt I α b`. The constant `K` depends only on the metric `g`, the
-chart at `α`, the locality hypothesis, the ranks `r`, `s`, and `B`; in
-particular `K` is independent of `T` and `b`.
-
-## Strategy
-
-Write `c(y) := fderiv ℝ F y` (where `F := repr T ∘ symm`) and
-`u(y) := trivToE α (symm y) (B (symm y)) = (chartE_section_repr α B ∘ symm) y`.
-Then `Ψ(y) = c(y) (u(y))`. By `fderiv_clm_apply` (valid when both `c` and
-`u` are differentiable at the point),
-
-  `fderiv ℝ Ψ x = (c x).comp (fderiv u x) + (fderiv c x).flip (u x)`.
-
-The operator norm of the first summand is bounded by `‖c x‖ * ‖fderiv u x‖`,
-and of the second by `‖fderiv c x‖ * ‖u x‖`. We then use:
-
-* `‖fderiv c x‖ = ‖fderiv ℝ (fderiv ℝ F) x‖ = ‖iteratedFDeriv ℝ 2 F x‖`
-  via `norm_iteratedFDeriv_one` and `norm_iteratedFDeriv_fderiv`;
-* `‖u x‖` and `‖fderiv u x‖`, uniformly bounded over the POU tsupport by
-  continuity of `u` and `fderiv u` on the chart-target image of the chart
-  source (which contains the chart-target image of POU tsupport).
-
-The differentiability hypothesis on `fderiv ℝ F` at the point is discharged
-at the call site (where smoothness of `T` makes it trivial). The
-differentiability of `u` follows from smoothness of `u` on the open
-chart-target image of the chart-α Levi-Civita good set (here equal to the
-chart source under `[I.Boundaryless]`). -/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -79,8 +27,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The operator norm of `fderiv ℝ (fderiv ℝ F) x` equals the norm of
-`iteratedFDeriv ℝ 2 F x`. -/
+private local instance intrinsicPieceTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance intrinsicPieceTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
     {N : Type*} [NormedAddCommGroup N] [NormedSpace ℝ N]
     (F : E → N) (x : E) :
@@ -93,8 +48,39 @@ private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
     norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 1)
   rw [h1, h2]
 
-/-- Smoothness on the chart-target image of the chart-α Levi-Civita good set of
-the chart-pulled representation `chartE_section_repr α B ∘ symm`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private lemma fderiv_fderiv_apply_norm_le
+    {N : Type*} [NormedAddCommGroup N] [NormedSpace ℝ N]
+    (F : E → N) (u : E → E) (x : E)
+    (hF : DifferentiableAt ℝ (fderiv ℝ F) x)
+    (hu : DifferentiableAt ℝ u x) :
+    ‖fderiv ℝ (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+      ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ +
+        ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ := by
+  rw [fderiv_clm_apply hF hu]
+  refine le_trans (norm_add_le _ _) ?_
+  have h1 : ‖(fderiv ℝ F x).comp (fderiv ℝ u x)‖ ≤
+      ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ :=
+    ContinuousLinearMap.opNorm_comp_le _ _
+  have h2 : ‖(fderiv ℝ (fderiv ℝ F) x).flip (u x)‖ ≤
+      ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ := by
+    refine le_trans (ContinuousLinearMap.le_opNorm _ (u x)) ?_
+    rw [ContinuousLinearMap.opNorm_flip,
+      norm_fderiv_fderiv_eq_iteratedFDeriv_two (F := F) (x := x)]
+  exact add_le_add h1 h2
+
+private lemma two_product_sum_le
+    {C a b p q : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hp : p ≤ C) (hq : q ≤ C) :
+    b * p + a * q ≤ C * (a + b) := by
+  calc
+    b * p + a * q ≤ b * C + a * C :=
+      add_le_add (mul_le_mul_of_nonneg_left hp hb)
+        (mul_le_mul_of_nonneg_left hq ha)
+    _ = C * (a + b) := by ring
+
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma u_contDiffOn_goodSet
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -109,21 +95,19 @@ private lemma u_contDiffOn_goodSet
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
-/-- Under `[I.Boundaryless]`, the chart-α Levi-Civita good set equals the
-chart source. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have h_eq :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
     (I := I) α
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
-/-- Uniform op-norm bound on `fderiv ℝ u` and on `u`, evaluated at
-`extChartAt I α b` for `b` in the POU tsupport. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma u_and_fderiv_u_bound
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -189,21 +173,7 @@ private lemma u_and_fderiv_u_bound
   · have h1 := hCu_mem ⟨b, hb, rfl⟩
     exact le_trans (le_trans h1 (le_max_left _ _)) (le_max_left _ _)
 
-/-- **Bound on the Fréchet derivative of the chart-pulled intrinsic piece of
-the first covariant derivative.**
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, and a
-smooth tangent vector field `B`, there is a constant `K ≥ 0` (depending on
-`g`, the chart at `α`, the ranks `r`, `s`, and `B`, but independent of `T`
-and `b`) such that for any smooth compactly supported `(r, s)`-tensor section
-`T` and any `b` in the intersection of the chart-α partition-of-unity
-tsupport and the chart-α Levi-Civita good set, provided the chart-pulled
-representation `repr T ∘ symm` is differentiable in its Fréchet derivative
-at `extChartAt I α b` (`hF2_diff`), the operator norm of the Fréchet
-derivative of the intrinsic piece is bounded by
-
-  `K * (‖iteratedFDeriv ℝ 2 (repr T ∘ symm) (extChartAt I α b)‖
-        + ‖fderiv ℝ (repr T ∘ symm) (extChartAt I α b)‖)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem intrinsic_piece_fderiv_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -266,64 +236,25 @@ theorem intrinsic_piece_fderiv_bound
       exact absurd h (by simp)
     exact ((hu_cd.differentiableOn hne) x hx_mem).differentiableAt
       (hU_open.mem_nhds hx_mem)
-  set c : E → (E →L[ℝ] TensorRSModel r s ℝ E) := fderiv ℝ F with hc_def
-  have hc_diff : DifferentiableAt ℝ c x := hF2_diff
-  have h_clm : fderiv ℝ (fun y : E => c y (u y)) x
-      = (c x).comp (fderiv ℝ u x) + (fderiv ℝ c x).flip (u x) :=
-    fderiv_clm_apply hc_diff hu_diff
   have h_goalLHS_fn : (fun y : E =>
         fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
             (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) y
           (trivToE (I := I) α ((extChartAt I α).symm y)
             (B.toFun ((extChartAt I α).symm y)))) =
-      (fun y : E => c y (u y)) := by
+      (fun y : E => (fderiv ℝ F y) (u y)) := by
     funext y; rfl
   rw [h_goalLHS_fn]
   have h_norm_le :
-      ‖fderiv ℝ (fun y : E => c y (u y)) x‖ ≤
-        ‖c x‖ * ‖fderiv ℝ u x‖ + ‖fderiv ℝ c x‖ * ‖u x‖ := by
-    rw [h_clm]
-    refine le_trans (norm_add_le _ _) ?_
-    have h1 : ‖(c x).comp (fderiv ℝ u x)‖ ≤ ‖c x‖ * ‖fderiv ℝ u x‖ :=
-      ContinuousLinearMap.opNorm_comp_le _ _
-    have h2 : ‖(fderiv ℝ c x).flip (u x)‖ ≤ ‖fderiv ℝ c x‖ * ‖u x‖ := by
-      have h2a : ‖(fderiv ℝ c x).flip (u x)‖
-          ≤ ‖(fderiv ℝ c x).flip‖ * ‖u x‖ :=
-        ContinuousLinearMap.le_opNorm _ (u x)
-      rw [ContinuousLinearMap.opNorm_flip] at h2a
-      exact h2a
-    linarith
-  have h_iter : ‖fderiv ℝ c x‖ = ‖iteratedFDeriv ℝ 2 F x‖ := by
-    rw [hc_def]
-    exact norm_fderiv_fderiv_eq_iteratedFDeriv_two
-      (N := TensorRSModel r s ℝ E) F x
-  rw [h_iter] at h_norm_le
-  have h_c_norm : ‖c x‖ = ‖fderiv ℝ F x‖ := by rw [hc_def]
-  rw [h_c_norm] at h_norm_le
+      ‖fderiv ℝ (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+        ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ +
+          ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ :=
+    fderiv_fderiv_apply_norm_le F u x hF2_diff hu_diff
   obtain ⟨hfd_le, hu_le⟩ := hC_bound b hb.1
-  set N1 : ℝ := ‖iteratedFDeriv ℝ 2 F x‖ with hN1_def
-  set N2 : ℝ := ‖fderiv ℝ F x‖ with hN2_def
-  have hN1_nn : 0 ≤ N1 := norm_nonneg _
-  have hN2_nn : 0 ≤ N2 := norm_nonneg _
-  have h_b1 : N2 * ‖fderiv ℝ u x‖ ≤ C * N2 := by
-    have h := mul_le_mul_of_nonneg_left hfd_le hN2_nn
-    have : N2 * ‖fderiv ℝ u x‖ ≤ N2 * C := h
-    have hcomm : N2 * C = C * N2 := by ring
-    linarith
-  have h_b2 : N1 * ‖u x‖ ≤ C * N1 := by
-    have h := mul_le_mul_of_nonneg_left hu_le hN1_nn
-    have : N1 * ‖u x‖ ≤ N1 * C := h
-    have hcomm : N1 * C = C * N1 := by ring
-    linarith
   have h_final :
       ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ +
         ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ ≤
-        C * (N1 + N2) := by
-    have e1 : ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ = N2 * ‖fderiv ℝ u x‖ := by
-      rw [hN2_def]
-    have e2 : ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ = N1 * ‖u x‖ := by rw [hN1_def]
-    have expand : C * (N1 + N2) = C * N1 + C * N2 := by ring
-    linarith
+        C * (‖iteratedFDeriv ℝ 2 F x‖ + ‖fderiv ℝ F x‖) :=
+    two_product_sum_le (norm_nonneg _) (norm_nonneg _) hfd_le hu_le
   exact le_trans h_norm_le h_final
 
 end Connection

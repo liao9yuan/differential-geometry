@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTame
 
-/-!
-# Scalar Laplacian-difference core realization
 
-This file connects the genuine finite spectral Laplacian-difference core to
-the fixed-background coefficient expression used by the scalar tame estimate.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,11 +32,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
+
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem clm0_ext {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 0 I x}
     (h : Tensor0SSpace.toModel
@@ -57,6 +60,8 @@ private theorem clm0_ext {x : M}
   rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D,
     map_smul, map_smul, hunit]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem traceFib_diag
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
@@ -80,6 +85,7 @@ private theorem traceFib_diag
   fin_cases a <;> rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem lapTrace_diag
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
@@ -139,6 +145,8 @@ private theorem lapTrace_diag
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem trace_eq_lap
     (a : SmoothRiemannianMetric I M) (x : M)
     (D Hs : Tensor0SSpace 2 I x)
@@ -160,6 +168,8 @@ private theorem trace_eq_lap
   refine Finset.sum_congr rfl fun i _ => ?_
   exact hdiag i
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem lift_unit {x : M} (c : ℝ) :
     Tensor0SSpace.toModel
         ((Tensor0SSpace.toRS0
@@ -178,6 +188,8 @@ private theorem lift_unit {x : M} (c : ℝ) :
       ((Tensor0SNabla.tensor0Iso I M x).symm c) = c
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem one0_eq_unit (x : M) :
     Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
         (I := I) (M := M) (∞ : WithTop ℕ∞) x =
@@ -191,6 +203,7 @@ private theorem one0_eq_unit (x : M) :
       (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) slots
   rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem grad_cc_apply
     (g : SmoothRiemannianMetric I M) (U : SmoothCcTensor g 0 0)
     (x : M) (X : TangentSpace I x) :
@@ -242,6 +255,7 @@ private theorem grad_cc_apply
         (extDerivFun (I := I) f x X)) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem grad2_cc_diag
     (g : SmoothRiemannianMetric I M) (U : SmoothCcTensor g 0 0)
     (B : ContMDiffSection I E ∞ (TangentSpace I : M → Type _)) (x : M) :
@@ -307,8 +321,8 @@ private theorem grad2_cc_diag
           (vec2 (I := I) (B x) (B x)))) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-/-- The scalar readout of the fixed-background coefficient expression is the
-moving-minus-fixed Laplace--Beltrami operator on the underlying scalar. -/
+
+
 theorem scalarLapDiff_eq
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -424,8 +438,8 @@ theorem scalarLapDiff_eq
     laplacian_levi_eq (I := I) q hf x] at hlap
   simpa only [Hs, Corr, f, hf] using hlap.symm
 
-/-- Scalar unit readout of the genuine finite-core Laplacian difference agrees
-with the applied fixed-background coefficient expression. -/
+
+
 private theorem lapDiff_unit
     (q h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) q) (x : M) :
@@ -448,8 +462,8 @@ private theorem lapDiff_unit
     TensorRSField.rs0_apply, one0_eq_unit (I := I) (M := M)] at hvalue
   exact hvalue.symm
 
-/-- The genuine finite spectral Laplacian-difference core is the `L²`
-realization of the fixed-background scalar coefficient expression. -/
+
+
 theorem lapDiffCore_eq_cc
     (q h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) q) :

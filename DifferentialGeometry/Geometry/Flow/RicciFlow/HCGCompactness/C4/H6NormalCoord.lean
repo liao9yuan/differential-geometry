@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialRadius
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
+import DifferentialGeometry.Analysis.Calculus.MapConvergenceDeriv
 import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.IntrinsicBallDiffeo
 import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicGronwall
@@ -8,8 +9,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEme
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # H6 normal-coordinate metric bridges
@@ -80,7 +79,7 @@ theorem intr_metric_eq
     ∀ {z : E}, z ∈
         (intrFrameDiffeo (I := I) Y.metric hEnorm x).source →
       intrFrameMetric (I := I) Y.metric hEnorm x z =
-        normalCoordMetric (I := I) Y x z := by
+        NormalCoordinates.framedMetric (I := I) Y.metric x z := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -110,10 +109,9 @@ theorem intr_metric_eq
   change ∀ {z : E}, z ∈
       (intrFrameDiffeo (I := I) Y.metric hEnorm x).source →
     intrFrameMetric (I := I) Y.metric hEnorm x z =
-      normalCoordMetric (I := I) Y x z
+      NormalCoordinates.framedMetric (I := I) Y.metric x z
   intro z hz
-  simpa only [normalCoordMetric] using
-    (intrFrameMetric_eq (I := I) Y.metric hEnorm x (z := z) hz)
+  exact intrFrameMetric_eq (I := I) Y.metric hEnorm x (z := z) hz
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -152,7 +150,7 @@ theorem exists_intr_eq_ball
           (I := I) Y.metric y w)
     ∃ r : Real, 0 < r ∧ ∀ z ∈ Metric.ball (0 : E) r,
       intrFrameMetric (I := I) Y.metric hEnorm x z =
-        normalCoordMetric (I := I) Y x z := by
+        NormalCoordinates.framedMetric (I := I) Y.metric x z := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -181,12 +179,33 @@ theorem exists_intr_eq_ball
         (I := I) Y.metric y w)
   change ∃ r : Real, 0 < r ∧ ∀ z ∈ Metric.ball (0 : E) r,
     intrFrameMetric (I := I) Y.metric hEnorm x z =
-      normalCoordMetric (I := I) Y x z
+      NormalCoordinates.framedMetric (I := I) Y.metric x z
   obtain ⟨r, hr, hball⟩ :=
     Metric.isOpen_iff.mp (intrFrameDiffeo (I := I) Y.metric hEnorm x).open_source
       0 (zero_mem_intrFrame_source (I := I) Y.metric hEnorm x)
   refine ⟨r, hr, fun z hz => ?_⟩
   exact intr_metric_eq (I := I) Y hcomplete hconn x (hball hz)
+
+
+/-- Uniform Euclidean quadratic-form equivalence for the metric pulled back
+through an orthonormally framed exponential chart. -/
+def FramedNormalCoordMetricEquivOn
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) (U : Set E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    Prop := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  exact ∀ z ∈ U, ∀ v : E,
+    (1 / 2 : Real) * ‖v‖ ^ 2 ≤
+        NormalCoordinates.framedMetric (I := I) Y.metric x z v v ∧
+      NormalCoordinates.framedMetric (I := I) Y.metric x z v v ≤
+        2 * ‖v‖ ^ 2
 
 /-- The framed model-space radius corresponding to the canonical clamped
 Jacobi launch radius. -/
@@ -262,6 +281,8 @@ def FramedRm04Bound
         (radialCurve (I := I) Y.metric x
           (normalFrame (I := I) Y.metric x z) t))) ≤ R
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Uniform bounded geometry supplies the radial Rm04 bound along every
 framed normal-coordinate ray in every sequence member. -/
 theorem framed_rm04_of_seq
@@ -374,6 +395,7 @@ theorem intr_rm04_of_seq
     (intrinsicGeodesic (I := I) (X.obj k).metric hEnorm x
       (normalFrame (I := I) (X.obj k).metric x z) t)
 
+
 /-- The public normal-coordinate metric is the endpoint Gram form of radial
 Jacobi fields launched through its orthonormal frame. -/
 theorem framed_metric_jacobi
@@ -386,7 +408,7 @@ theorem framed_metric_jacobi
     letI : SigmaCompactSpace Y.M := Y.sigmaCompact
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ‖z‖ < expRadiusGp (I := I) Y.metric x →
-    normalCoordMetric (I := I) Y x z v w =
+    NormalCoordinates.framedMetric (I := I) Y.metric x z v w =
       Y.metric.inner
         (expMap (I := I) Y.metric x (normalFrame (I := I) Y.metric x z))
         (radialJacobiField (I := I) Y.metric x
@@ -412,7 +434,7 @@ theorem framed_metric_jacobi
   have hraw : normalFrame (I := I) Y.metric x z ∈
       (expMapDiffeo (I := I) Y.metric x).source := by
     simpa only [framedExp_source] using hsrc
-  rw [normalCoordMetric_apply (I := I), framedExp_apply,
+  rw [NormalCoordinates.framedMetric_apply (I := I), framedExp_apply,
     mfderiv_framedExp (I := I) Y.metric x hsrc]
   rw [expMapDiffeo_apply_eq (I := I) Y.metric x hraw,
     expDiffeo_mfderiv (I := I) Y.metric x hraw]
@@ -464,8 +486,10 @@ theorem framed_rm04_bounds
     letI : T2Space Y.M := Y.t2
     letI : SigmaCompactSpace Y.M := Y.sigmaCompact
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    Blo ≤ Real.sqrt (normalCoordMetric (I := I) Y x z v v) ∧
-      Real.sqrt (normalCoordMetric (I := I) Y x z v v) ≤ Bhi := by
+    Blo ≤ Real.sqrt
+        (NormalCoordinates.framedMetric (I := I) Y.metric x z v v) ∧
+      Real.sqrt
+        (NormalCoordinates.framedMetric (I := I) Y.metric x z v v) ≤ Bhi := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -576,6 +600,7 @@ private lemma exists_pos_mul_sq_le {S κ : Real} (hκ : 0 < κ) :
     _ = T * (κ / T) := by rw [Real.sq_sqrt hdiv.le]
     _ = κ := by field_simp [hT.ne']
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma exists_smul_lt (v : E) {r : Real} (hr : 0 < r) :
     ∃ a : Real, 0 < a ∧ ‖a • v‖ < r := by
   let d : Real := ‖v‖ + 1
@@ -1088,6 +1113,7 @@ theorem exists_intr_control
   · intro z
     exact hlocal k x ⟨z.1, hlocalSub z.2⟩
 
+
 /-- A uniform zeroth-order curvature bound gives one model-space radius on
 which every framed normal-coordinate metric in the sequence satisfies the
 book's half/two quadratic-form estimate.  The usable radius is still clamped
@@ -1107,7 +1133,7 @@ theorem exists_rm04_radii
       letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
-      NormalCoordMetricEquivOn (I := I) (X.obj k) x
+      FramedNormalCoordMetricEquivOn (I := I) (X.obj k) x
         (Metric.ball (0 : E)
           (min (framedJacobiRadius (I := I) (X.obj k) x) r₀)) := by
   obtain ⟨κ, buffer, hκ, hbuffer, hsmall⟩ :=
@@ -1184,7 +1210,8 @@ theorem exists_rm04_radii
     have hpos := expRadiusGp_pos (I := I) (X.obj k).metric x
     linarith
   have hmetricNonneg :
-      0 ≤ normalCoordMetric (I := I) (X.obj k) x z v v := by
+      0 ≤ NormalCoordinates.framedMetric
+        (I := I) (X.obj k).metric x z v v := by
     rw [framed_metric_jacobi (I := I) (X.obj k) x z v v hzGp]
     let q : (X.obj k).M :=
       expMap (I := I) (X.obj k).metric x
@@ -1200,12 +1227,14 @@ theorem exists_rm04_radii
     · exact ((X.obj k).metric.pos q J hJ).le
   have hlowerSq :
       ((3 / 4 : Real) * ‖v‖) ^ 2 ≤
-        (Real.sqrt (normalCoordMetric (I := I) (X.obj k) x z v v)) ^ 2 :=
+        (Real.sqrt (NormalCoordinates.framedMetric
+          (I := I) (X.obj k).metric x z v v)) ^ 2 :=
     (sq_le_sq₀
       (mul_nonneg (by norm_num) (norm_nonneg v))
       (Real.sqrt_nonneg _)).2 hbounds.1
   have hupperSq :
-      (Real.sqrt (normalCoordMetric (I := I) (X.obj k) x z v v)) ^ 2 ≤
+      (Real.sqrt (NormalCoordinates.framedMetric
+        (I := I) (X.obj k).metric x z v v)) ^ 2 ≤
         ((5 / 4 : Real) * ‖v‖) ^ 2 :=
     (sq_le_sq₀
       (Real.sqrt_nonneg _)
@@ -1244,7 +1273,7 @@ theorem framed_equiv_jacobi
             (normalFrame (I := I) Y.metric x z)
             (normalFrame (I := I) Y.metric x v) 1) ≤
               2 * ‖v‖ ^ 2) →
-    NormalCoordMetricEquivOn (I := I) Y x U := by
+    FramedNormalCoordMetricEquivOn (I := I) Y x U := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -1255,6 +1284,7 @@ theorem framed_equiv_jacobi
   rw [framed_metric_jacobi (I := I) Y x z v v (hsmall z hz)]
   exact hJ z hz v
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma half_two_of_close
     (G G₀ : E →L[Real] E →L[Real] Real)
     (hG : ‖G - G₀‖ ≤ 1 / 2)
@@ -1278,6 +1308,76 @@ private lemma half_two_of_close
   obtain ⟨hlower, hupper⟩ := abs_le.mp habs
   constructor <;> nlinarith [sq_nonneg ‖v‖]
 
+omit [NeZero (Module.finrank ℝ E)] in
+/-- On the framed exponential source, the framed metric is the pullback of the
+raw tangent-model normal-coordinate metric by the fixed orthonormal frame. -/
+theorem framedMetric_eq_pullback_normalCoordMetric
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
+    (z : E)
+    (hz : letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      z ∈ (framedExpDiffeo (I := I) Y.metric x).source) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    framedMetric (I := I) Y.metric x z =
+      pullbackForm
+        (normalCoordMetric (I := I) Y x
+            (normalFrame (I := I) Y.metric x z),
+          (normalFrame (I := I) Y.metric x).toContinuousLinearMap) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  ext v w
+  rw [pullbackForm_apply, framedMetric_apply, normalCoordMetric_apply,
+    framedExp_apply, mfderiv_framedExp (I := I) Y.metric x hz]
+  rfl
+
+/-- The framed normal-coordinate metric is continuous at the chart center. -/
+theorem framedMetric_continuousAt_zero
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContinuousAt (framedMetric (I := I) Y.metric x) 0 := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  let L : E →L[Real] E :=
+    (normalFrame (I := I) Y.metric x).toContinuousLinearMap
+  let raw := normalCoordMetric (I := I) Y x
+  let F : E → E →L[Real] E →L[Real] Real :=
+    fun z => pullbackForm (raw (L z), L)
+  have hzeroRaw :
+      (0 : E) ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) := by
+    simpa only [Metric.mem_ball, dist_self] using
+      expMapC2Radius_pos (I := I) Y.metric x
+  have hraw : ContinuousAt raw 0 :=
+    ((normalCoordMetric_contDiffOn_expBall (I := I) Y x).contDiffAt
+      (Metric.isOpen_ball.mem_nhds hzeroRaw)).continuousAt
+  have hrawL : ContinuousAt (fun z => raw (L z)) 0 := by
+    simpa only [Function.comp_apply] using
+      hraw.comp_of_eq L.continuous.continuousAt (map_zero L)
+  have hpair : ContinuousAt (fun z => (raw (L z), L)) 0 :=
+    hrawL.prodMk continuousAt_const
+  have hF : ContinuousAt F 0 :=
+    pullbackForm.contDiff.continuous.continuousAt.comp hpair
+  have hev :
+      framedMetric (I := I) Y.metric x =ᶠ[nhds (0 : E)] F := by
+    filter_upwards [
+      (framedExpDiffeo (I := I) Y.metric x).open_source.mem_nhds
+        (zero_mem_framedExp_source (I := I) Y.metric x)] with z hz
+    dsimp only [F]
+    exact framedMetric_eq_pullback_normalCoordMetric (I := I) Y x z hz
+  exact hF.congr hev.symm
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private lemma exists_close_ball
@@ -1307,19 +1407,15 @@ theorem exists_equiv_ball
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∃ r : Real, 0 < r ∧ r ≤ expRadiusGp (I := I) Y.metric x ∧
-      NormalCoordMetricEquivOn (I := I) Y x (Metric.ball (0 : E) r) := by
+      FramedNormalCoordMetricEquivOn (I := I) Y x
+        (Metric.ball (0 : E) r) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  let f := normalCoordMetric (I := I) Y x
-  have hzero : (0 : E) ∈
-      Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) := by
-    simp only [Metric.mem_ball, dist_self]
-    exact expRadiusGp_pos (I := I) Y.metric x
-  have hcont : ContinuousAt f 0 :=
-    ((normalCoordMetric_contDiffOn_expBall (I := I) Y x).contDiffAt
-      (Metric.isOpen_ball.mem_nhds hzero)).continuousAt
+  let f := NormalCoordinates.framedMetric (I := I) Y.metric x
+  have hcont : ContinuousAt f 0 := by
+    simpa only [f] using framedMetric_continuousAt_zero (I := I) Y x
   obtain ⟨r₀, hr₀, hclose⟩ := exists_close_ball (E := E) f hcont
   let r := min r₀ (expRadiusGp (I := I) Y.metric x)
   refine ⟨r, lt_min hr₀ (expRadiusGp_pos (I := I) Y.metric x),
@@ -1333,7 +1429,7 @@ theorem exists_equiv_ball
     calc
       f 0 w w =
           (innerSL Real : E →L[Real] E →L[Real] Real) w w :=
-        congrArg (fun G => G w w) (normalMetric_zero (I := I) Y x)
+        congrArg (fun G => G w w) (framedMetric_zero (I := I) Y.metric x)
       _ = Inner.inner Real w w := rfl
       _ = ‖w‖ ^ 2 := real_inner_self_eq_norm_sq w
   exact half_two_of_close (E := E) (f z) (f 0) (hclose z hz₀) hzero_eval v
@@ -1351,7 +1447,7 @@ theorem exists_equiv_radii
           (X.obj k).t2TangentBundle
         0 < radius k x ∧
           radius k x ≤ expRadiusGp (I := I) (X.obj k).metric x ∧
-          NormalCoordMetricEquivOn (I := I) (X.obj k) x
+      FramedNormalCoordMetricEquivOn (I := I) (X.obj k) x
             (Metric.ball (0 : E) (radius k x)) := by
   choose radius hpos hle hequiv using fun k x =>
     exists_equiv_ball (I := I) (X.obj k) x

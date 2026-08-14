@@ -2,40 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrd
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 
-/-!
-# Iterated Sobolev embedding to `C^∞` on Euclidean open sets
-
-For a function `u : EuclideanSpace ℝ (Fin d) → ℝ` lying in the `L²`-based
-iterated Sobolev space `MemWkp k 2` for **every** order `k`, on an open set
-`Ω`, the main theorem produces a `C^∞` representative on `Ω`:
-
-    `contDiffOn_of_forall_memWkp_two` :
-      `IsOpen Ω → (∀ k, MemWkp k 2 u Ω) →`
-      `∃ u_smooth, ContDiffOn ℝ ∞ u_smooth Ω ∧ u =ᵐ[volume.restrict Ω] u_smooth`.
-
-## Route
-
-The proof combines two existing Euclidean engines:
-
-* the Gagliardo–Nirenberg–Sobolev tower `MemWkp (k+1) p ↪ MemWkp k (d p / (d - p))`
-  (`TowerStep.MemWkp_subcritical_iterated`), which raises the integrability
-  exponent at the cost of one derivative order;
-* the higher-order Morrey representative
-  (`EuclideanMorrey.morrey_iteratedFDeriv_representative`), which yields a `C^m`
-  representative from `MemWkp (m+1) p` once `p > d`.
-
-For a fixed target order `m`, a smooth cutoff localises `u` to a compactly
-supported function on a ball; the integrability exponent is lowered to a
-*regular* value `p₀ < 2` (avoiding the finitely many borderline exponents `d/j`
-at which the tower would land on the Sobolev critical value `d`); the tower is
-iterated finitely many times until the exponent exceeds `d`; and Morrey
-delivers a `C^m` representative on a smaller ball. Uniqueness of continuous
-representatives on open sets identifies the order-`0` representative with each
-order-`m` representative, giving a single function that is `C^m` for all `m`,
-hence `C^∞`, on a neighbourhood of every point. The local representatives are
-glued along their pairwise overlaps (where they agree, being continuous and
-a.e.-equal to `u`) into a single global `C^∞` representative on `Ω`.
--/
 
 noncomputable section
 
@@ -54,9 +20,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-/-- A smooth cutoff `χ` adapted to `ball x₀ (2 R)`: `χ = 1` on
-`closedBall x₀ R`, `tsupport χ ⊆ closedBall x₀ (3 R / 2) ⊂ ball x₀ (2 R)`,
-with `χ ∈ [0, 1]` and compact support. -/
+omit [NeZero d] in
 private theorem exists_cutoff_ball
     {x₀ : EuN} {R : ℝ} (hR : 0 < R) :
     ∃ χ : EuN → ℝ,
@@ -103,8 +67,7 @@ private theorem exists_cutoff_ball
   · intro x hx
     exact (hχ_one_iff x).1 hx
 
-/-- Iterated derivatives of a smooth compactly-supported function are
-uniformly bounded over orders `j ≤ m`. -/
+omit [NeZero d] in
 private lemma exists_uniform_iteratedFDeriv_bound
     {χ : EuN → ℝ} (hχ : ContDiff ℝ (⊤ : ℕ∞) χ) (hχ_compact : HasCompactSupport χ)
     (m : ℕ) :
@@ -134,8 +97,7 @@ private lemma exists_uniform_iteratedFDeriv_bound
   exact le_trans (hCj_bound j x)
     (hC_ge j (Finset.mem_range.mpr (Nat.lt_succ_of_le hj)))
 
-/-- The cutoff product `χ · u` lies in `MemWkp k 2` on the ball whenever `u`
-does, for every order `k`. -/
+omit [NeZero d] in
 private lemma cutoff_memWkp_two
     {x₀ : EuN} {R : ℝ} (hR : 0 < R)
     {χ : EuN → ℝ} (hχ : ContDiff ℝ (⊤ : ℕ∞) χ) (hχ_compact : HasCompactSupport χ)
@@ -154,10 +116,6 @@ private lemma cutoff_memWkp_two
       ‖iteratedFDeriv ℝ j χ x‖ ≤ C := fun j hj x _ => hC_bound j hj x
   exact MemWkp.smul_smooth_bounded (d := d) k hp_one hball_open hχ hχ_bound hu_ball
 
-/-- The inductive tower driver. From `MemWkp (m + 1 + s) (ofReal p) f Ω` for a
-compactly-supported `f` with `tsupport f ⊆ Ω`, where `p` is regular at depth
-`s + 1` and `(s + 1) p > d`, produce an exponent `q > d` with `1 ≤ q` and
-`MemWkp (m + 1) (ofReal q) f Ω`. -/
 private theorem tower_to_supercritical
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) (m : ℕ) :
     ∀ (s : ℕ) {p : ℝ}, 1 ≤ p →
@@ -213,9 +171,6 @@ private theorem tower_to_supercritical
         exact ih hp_1_one hreg_p_1 hkp_next hf_cpt hf_supp h_mem_p1'
       · exact ⟨p, hp_one, hp_gt, MemWkp.le_of_le (by omega) hf⟩
 
-/-- For a function lying in `MemWkp k 2 u Ω` for every `k`, on an open set `Ω`,
-and a ball `ball x₀ (2 R) ⊆ Ω`, there is — for every order `m` — a `C^m`
-function on `ball x₀ (R / 2)` a.e.-equal to `u` there. -/
 private theorem exists_contDiff_m_rep_ball
     {x₀ : EuN} {R : ℝ} (hR : 0 < R)
     {u : EuN → ℝ} {Ω : Set EuN} (hΩ : IsOpen Ω)
@@ -304,9 +259,6 @@ private theorem exists_contDiff_m_rep_ball
     exact hf_ae
   exact hu_eq_v.trans hv_eq_f
 
-/-- The order-`0` representative on a ball is in fact `C^∞` there: it agrees,
-on the open ball, with each order-`m` representative (both being continuous and
-a.e.-equal to `u`), hence is `C^m` for all `m`. -/
 private theorem exists_contDiffOn_top_rep_ball
     {x₀ : EuN} {R : ℝ} (hR : 0 < R)
     {u : EuN → ℝ} {Ω : Set EuN} (hΩ : IsOpen Ω)
@@ -334,8 +286,6 @@ private theorem exists_contDiffOn_top_rep_ball
   intro x hx
   exact h_eqOn hx
 
-/-- Per-point local representative: for every point of `Ω`, there is a ball
-`ball x r ⊆ Ω` on which `u` has a `C^∞` representative. -/
 private theorem exists_contDiffOn_top_rep_nhd
     {u : EuN → ℝ} {Ω : Set EuN} (hΩ : IsOpen Ω)
     (hu : ∀ k : ℕ, MemWkp (d := d) k 2 u Ω) {x : EuN} (hx : x ∈ Ω) :
@@ -358,12 +308,6 @@ private theorem exists_contDiffOn_top_rep_nhd
   exact ⟨R / 2, by linarith, fun y hy => hball_subset (by
     rw [Metric.mem_ball] at hy ⊢; linarith), f, hf_cdiff, hf_ae⟩
 
-/-- **Iterated Sobolev embedding to `C^∞` on Euclidean open sets.**
-
-If `u : EuclideanSpace ℝ (Fin d) → ℝ` lies in the `L²`-based iterated Sobolev
-space `MemWkp k 2` for *every* order `k`, on an open set `Ω`, then `u` has a
-`C^∞` representative on `Ω`: there is a function `u_smooth` with
-`ContDiffOn ℝ ∞ u_smooth Ω` and `u =ᵐ[volume.restrict Ω] u_smooth`. -/
 theorem contDiffOn_of_forall_memWkp_two
     {u : EuN → ℝ} {Ω : Set EuN} (hΩ : IsOpen Ω)
     (hu : ∀ k : ℕ, MemWkp (d := d) k 2 u Ω) :

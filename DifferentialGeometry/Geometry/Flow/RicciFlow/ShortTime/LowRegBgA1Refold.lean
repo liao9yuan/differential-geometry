@@ -233,7 +233,9 @@ private theorem refold_first
     refold_c1 (I := I) (M := M) g hρ hδ0 hδ_le hreal T
   simp only [iteratedCovGrad_zero, LowBaseActionData.a1] at hzero
   rw [LowBaseActionData.a1, LowBaseActionData.a1]
-  rw [hF0, hF1, appCc_add_left, hzero]
+  rw [hF0, hF1]
+  simp only [appCc] at hzero ⊢
+  rw [appCc_add_left, hzero]
   abel
 
 private theorem refold_second
@@ -436,7 +438,9 @@ private theorem refoldBg_first
     rw [← appCc_add_left, sub_add_cancel]
   simp only [iteratedCovGrad_zero, LowBaseActionData.a1] at hzero
   rw [LowBaseActionData.a1, LowBaseActionData.a1]
-  rw [hF0, hF1, appCc_add_left, appCc_add_left, hkey, hzero]
+  rw [hF0, hF1]
+  simp only [appCc] at hkey hzero ⊢
+  rw [appCc_add_left, appCc_add_left, hkey, hzero]
   abel
 
 private theorem refoldBg_second

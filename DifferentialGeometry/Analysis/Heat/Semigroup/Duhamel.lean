@@ -2,39 +2,6 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
-/-!
-# Duhamel mild solution of the inhomogeneous heat equation on `L²`
-
-For a closed Riemannian manifold `(M, g)`, given an initial datum
-`u_0 : Lp ℝ 2 μ_g` and a continuous forcing term `f : ℝ → Lp ℝ 2 μ_g`,
-the **Duhamel mild solution** of the inhomogeneous heat equation
-`∂_t u = Δ_g u + f`, `u(0) = u_0`, is the function
-
-  `u(t) := heatSemigroup g t u_0 + ∫_0^t heatSemigroup g (t - s) (f s) ds`,
-
-where the second summand is a Bochner-valued interval integral on `[0, t]`.
-
-This file constructs `mildSolution` and establishes its basic properties:
-the initial value, linearity in the data, continuity in time, and the
-homogeneous reduction `f ≡ 0 ⟹ u = e^{tΔ} u_0`.
-
-## Main definitions
-
-* `mildSolution g u_0 f t` — the Duhamel formula.
-
-## Main results
-
-* `heatSemigroup_continuous_at_pos` — strong continuity at `t₀ > 0`.
-* `heatSemigroup_continuous_on_nonneg` — strong continuity on `[0, ∞)`.
-* `heatSemigroup_apply_f_continuous` — continuity of
-  `s ↦ heatSemigroup g (t - s) (f s)` on `[0, t]`.
-* `mildSolution_zero` — `mildSolution g u_0 f 0 = u_0`.
-* `mildSolution_add_initial`, `mildSolution_smul_initial`,
-  `mildSolution_add_forcing` — linearity in the data.
-* `mildSolution_continuous` — continuity on `[0, ∞)`.
-* `mildSolution_zero_forcing` — homogeneous reduction.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -61,9 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- Contractive comparison estimate: for `t, t₀ ≥ 0`,
-`‖heatSemigroup g t v − heatSemigroup g t₀ v‖ ≤
-  ‖heatSemigroup g |t − t₀| v − v‖`. -/
 private lemma norm_heatSemigroup_sub_le_heatSemigroup_diff
     (g : SmoothRiemannianMetric I M)
     {t t₀ : ℝ} (ht : 0 ≤ t) (ht₀ : 0 ≤ t₀)
@@ -165,8 +129,6 @@ private lemma norm_heatSemigroup_sub_le_heatSemigroup_diff
             rw [one_mul, h_norm_swap]
       _ = ‖heatSemigroup (I := I) (M := M) g |t - t₀| v - v‖ := by rw [h_abs]
 
-/-- Strong continuity of the heat semigroup at every interior nonneg time
-`t₀ > 0`. -/
 theorem heatSemigroup_continuous_at_pos
     (g : SmoothRiemannianMetric I M) {t₀ : ℝ} (ht₀ : 0 < t₀)
     (v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -221,8 +183,6 @@ theorem heatSemigroup_continuous_at_pos
     (x := heatSemigroup (I := I) (M := M) g t₀ v))
   simpa using h_added
 
-/-- `ContinuousOn` packaging on `[0, ∞)`: combine right-continuity at `0`
-and two-sided continuity at every `t₀ > 0`. -/
 theorem heatSemigroup_continuous_on_nonneg
     (g : SmoothRiemannianMetric I M)
     (v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -387,9 +347,6 @@ theorem heatSemigroup_apply_f_continuous
     (x := heatSemigroup (I := I) (M := M) g (t - s₀) (f s₀)))
   simpa using h_added
 
-/-- The Duhamel mild solution of the inhomogeneous heat equation
-`∂_t u = Δ_g u + f`, `u(0) = u_0`, on the closed Riemannian manifold
-`(M, g)`. -/
 noncomputable def mildSolution
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -399,7 +356,7 @@ noncomputable def mildSolution
   heatSemigroup (I := I) (M := M) g t u_0 +
     ∫ s in (0 : ℝ)..t, heatSemigroup (I := I) (M := M) g (t - s) (f s)
 
-/-- At `t = 0` the mild solution recovers the initial datum. -/
+@[simp]
 theorem mildSolution_zero
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -410,8 +367,6 @@ theorem mildSolution_zero
   rw [heatSemigroup_zero (I := I) (M := M) g]
   rfl
 
-/-- The integrand `s ↦ heatSemigroup g (t - s) (f s)` is interval-integrable
-on `[0, t]` for `t ≥ 0` and continuous `f`. -/
 private lemma integrable_heatSemigroup_apply_f
     (g : SmoothRiemannianMetric I M)
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -424,9 +379,6 @@ private lemma integrable_heatSemigroup_apply_f
   rw [← h_uIcc] at h_cont
   exact h_cont.intervalIntegrable
 
-/-- Linearity of the mild solution in the initial datum: additivity.
-The contribution of the additional initial datum `v_0` enters as the
-homogeneous part `mildSolution g v_0 0`. -/
 theorem mildSolution_add_initial
     (g : SmoothRiemannianMetric I M)
     (u_0 v_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -455,9 +407,6 @@ theorem mildSolution_add_initial
   rw [h_add]
   abel
 
-/-- Linearity of the mild solution in the initial datum: scalar homogeneity.
-The forcing-term contribution stays unscaled; only the heat-semigroup part
-scales with `c`. -/
 theorem mildSolution_smul_initial
     (g : SmoothRiemannianMetric I M)
     (c : ℝ) (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -484,8 +433,6 @@ theorem mildSolution_smul_initial
   rw [h_zero_int, add_zero, h_heat_zero, zero_add]
   rw [(heatSemigroup (I := I) (M := M) g t).map_smul]
 
-/-- Linearity of the mild solution in the forcing term: additivity (with the
-homogeneous-initial-datum splitting). -/
 theorem mildSolution_add_forcing
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -518,16 +465,12 @@ theorem mildSolution_add_forcing
     (integrable_heatSemigroup_apply_f (I := I) (M := M) g hh ht)]
   abel
 
-/-- The clipped kernel: `heatSemigroup g (max 0 (t - s)) (f s)`. Globally
-jointly continuous in `(t, s)`, and equal to the Duhamel integrand on
-`s ∈ [0, t]` for `t ≥ 0`. -/
 private noncomputable def clippedKernel
     (g : SmoothRiemannianMetric I M)
     (f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (t s : ℝ) : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   heatSemigroup (I := I) (M := M) g (max 0 (t - s)) (f s)
 
-/-- Joint continuity of the clipped kernel. -/
 private lemma continuous_clippedKernel
     (g : SmoothRiemannianMetric I M)
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -639,7 +582,6 @@ private lemma continuous_clippedKernel
     simpa using h_added
   exact h_target
 
-/-- The mild solution is continuous on `[0, ∞)`. -/
 theorem mildSolution_continuous
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -691,7 +633,6 @@ theorem mildSolution_continuous
     exact h_clip_eq t (Set.mem_Ici.mp ht)
   · exact h_clip_eq t₀ h_t₀_nn
 
-/-- With `f ≡ 0`, the mild solution reduces to `heatSemigroup g t u_0`. -/
 theorem mildSolution_zero_forcing
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

@@ -4,12 +4,12 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TensorRS
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 
-/-!
-# Smooth bundled tensor covariant derivatives
 
-Convenience wrappers around the raw bundled `nabla*` constructors using the
-proved regularity theorems.
--/
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -20,16 +20,14 @@ open scoped Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Bundled smooth covariant derivative of a covariant tensor field, using the
-proved regularity theorem. -/
+
+
 noncomputable def nabla0S_smooth (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -42,8 +40,8 @@ noncomputable def nabla0S_smooth (s : ℕ)
   nabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α
     (nabla0S_reg (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov hcov X α)
 
-/-- Bundled smooth covariant derivative of a mixed tensor field, using the
-proved regularity theorem. -/
+
+
 noncomputable def nablaRS_smooth (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

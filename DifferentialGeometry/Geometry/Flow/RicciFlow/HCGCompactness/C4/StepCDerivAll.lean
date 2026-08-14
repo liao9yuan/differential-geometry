@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Calculus.RingInverseDeriv
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # MSM135 C2 (`lbl430`(i)) — sub-brick (c4): the bilinear collection at `compL`

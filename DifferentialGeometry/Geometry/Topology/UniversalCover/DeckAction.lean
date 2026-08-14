@@ -155,7 +155,7 @@ theorem proj_eq_iff_smul
 section Smooth
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -164,8 +164,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless]
+omit [FiniteDimensional ℝ E] [I.Boundaryless]
   [IsManifold I ∞ M] in
+omit [T2Space M]
+  [SigmaCompactSpace M]
+  [ConnectedSpace M] in
 /-- A continuous self-map of the universal cover that preserves the projection
 is smooth. -/
 theorem contMDiff_of_proj_eq
@@ -186,8 +189,11 @@ theorem contMDiff_of_proj_eq
   rw [hcharts]
   exact contMDiffAt_extChartAt
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless]
-  [IsManifold I ∞ M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless]
+  [IsManifold I ∞ M]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [ConnectedSpace M] in
 /-- Every fundamental-group deck transformation is smooth. -/
 theorem deckAct_contMDiff
     (g : FundamentalGroup M (default : M)) :

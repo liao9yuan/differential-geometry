@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
@@ -6,17 +6,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEme
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# HCG bridge to local ball-volume comparison
 
-This file consumes the comparison-layer small-ball volume endpoint for one
-pointed Riemannian manifold.  It stays in the C4/HCG application layer because
-it installs the pointed manifold's Riemannian emetric and completeness
-instances before calling the lower-level `Volume.BallVolume` theorem.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,17 +27,17 @@ open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- Bounded geometry supplies the curvature input for the local small-ball
-volume comparison at a point of a pointed Riemannian manifold.
 
-The remaining theorem-facing inputs are exactly the HCG metric-realization
-inputs: metric completeness and connectedness, which install the Riemannian
-metric-space/finite-distance context used by the comparison theorem. -/
+
+
+
+
+
 theorem exists_pairR_of_boundedGeometry
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -121,12 +119,12 @@ theorem exists_pairR_of_boundedGeometry
       (rm04Bound_of_geom (I := I) hgeom)
   exact ⟨C, D, Blo, A, δ, hC, hD, hBlo, hδ, hsmall⟩
 
-/-- Sequence-level form of `exists_pairR_of_boundedGeometry`.
 
-Uniform bounded geometry supplies the same zeroth-order curvature constant
-`hgeom.C 0` for every member of the sequence; metric completeness and
-connectedness are still theorem-facing inputs for the Hopf--Rinow metric
-realization used by the comparison endpoint. -/
+
+
+
+
+
 theorem exists_pairR_of_seqBoundedGeometry
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -211,6 +209,7 @@ theorem exists_pairR_of_seqBoundedGeometry
   intro s hs hsd
   simpa [Y, hgeom_k] using hsmall (s := s) hs hsd
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Uniform bounded geometry gives the common lower Ricci bound used by the
 Bishop--Gromov stage of the volume-comparison route. -/
 theorem ricciLower_of_seq
@@ -236,31 +235,26 @@ theorem ricciLower_of_seq
   simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound] using
     (rm04Bound_of_seq (I := I) hgeom k)
 
-/-- Uniform local-volume packing input for the Step A volume-comparison field.
-
-This is an honest input boundary: it records constants and a radius cap that are
-uniform in the sequence index and center.  The fields are exactly the ENNReal
-small-ball lower and containing-ball upper estimates consumed by the checked
-finite-packing core in `Volume/Packing.lean`. -/
+/-- Uniform local-volume packing input for the Step A volume-comparison field. -/
 structure UniformBallPack
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-  /-- The distance function used by Step A. -/
+
   dist : PointedSeqDistance (I := I) X
-  /-- A concrete metric realizing the balls used in the packing estimate. -/
+
   ms : ∀ k : Nat, MetricSpace (X.obj k).M
-  /-- The Step A distance is the distance of `ms`. -/
+
   dist_eq : ∀ k : Nat, ∀ x y : (X.obj k).M,
     dist k x y =
       (letI : MetricSpace (X.obj k).M := ms k
        @Dist.dist (X.obj k).M _ x y)
-  /-- The radius cap below which the uniform local-volume estimates apply. -/
+
   r0 : Real
   r0_pos : 0 < r0
-  /-- Multiplicity cap as a function of the containment-to-separation ratio. -/
+
   Imult : Real → Nat
-  /-- Uniform lower volume constant for small balls at scale `r / 2`. -/
+
   L : Real → Real → Real
-  /-- Uniform upper volume constant for containing balls at scale `(m + 1 / 2) r`. -/
+
   U : Real → Real → Real
   L_pos : ∀ m r : Real, 0 < r → m * r ≤ r0 → 0 < L m r
   U_nonneg : ∀ m r : Real, 0 < r → m * r ≤ r0 → 0 ≤ U m r
@@ -306,12 +300,12 @@ structure UniformBallPack
 
 namespace UniformBallPack
 
-/-- A uniform local-volume packing input produces the Step A
-`VolumeComparisonInput`.
 
-The proof contains no Bishop--Gromov content: it only converts the uniform
-volume bounds into the bounded-overlap field using the checked finite-packing
-lemmas. -/
+
+
+
+
+
 def toVCInput {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : UniformBallPack (I := I) X) :
     VolumeComparisonInput (I := I) X where

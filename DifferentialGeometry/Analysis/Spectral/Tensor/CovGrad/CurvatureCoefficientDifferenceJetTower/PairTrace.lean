@@ -33,7 +33,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,7 +53,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 lemma appCcRS_zero_left_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (W : SmoothCcTensor g₀ a b) :
-    appCcRS (I := I) (M := M) g₀ a b c (0 : SmoothCcTensor g₀ b c) W = 0 := by
+    ccOperatorFieldComp (I := I) (M := M) g₀ a b c (0 : SmoothCcTensor g₀ b c) W = 0 := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -75,7 +75,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 lemma appCcRS_right_zero_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) :
-    appCcRS (I := I) (M := M) g₀ a b c Φ (0 : SmoothCcTensor g₀ a b) = 0 := by
+    ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ (0 : SmoothCcTensor g₀ a b) = 0 := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -1615,12 +1615,19 @@ set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 lemma appCcRS_add_left_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) :
-    appCcRS (I := I) (M := M) g₀ a b c (Φ₁ + Φ₂) W =
-      appCcRS (I := I) (M := M) g₀ a b c Φ₁ W + appCcRS (I := I) (M := M) g₀ a b c Φ₂ W := by
-  have h := appCcRS_sub_left_cc (I := I) (M := M) g₀ a b c (Φ₁ + Φ₂) Φ₂ W
-  rw [add_sub_cancel_right] at h
-  rw [h]
-  abel
+    ccOperatorFieldComp (I := I) (M := M) g₀ a b c (Φ₁ + Φ₂) W =
+      ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ₁ W +
+        ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ₂ W := by
+  exact appCcRS_add_left (I := I) (M := M) g₀ a b c Φ₁ Φ₂ W
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+lemma appCcRS_add_right_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g₀ b c) (W₁ W₂ : SmoothCcTensor g₀ a b) :
+    appCcRS (I := I) (M := M) g₀ a b c Φ (W₁ + W₂) =
+      appCcRS (I := I) (M := M) g₀ a b c Φ W₁ +
+        appCcRS (I := I) (M := M) g₀ a b c Φ W₂ := by
+  exact appCcRS_add_right (I := I) (M := M) g₀ a b c Φ W₁ W₂
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -1974,7 +1981,7 @@ lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetric I M) 
   rw [pureDoubleTraceField_eq_trace_fullRaised (I := I) (M := M) g₀ g₁ s]
   rw [fullRaisedEndoField_diff_split_c (I := I) (M := M) g₀ g₁]
   rw [slotInsertEndoCc_add_endo_c (I := I) (M := M) g₀ (s + 1)]
-  rw [appCcRS_add_right (I := I) (M := M) g₀ (s + 2) (s + 2) s
+  rw [appCcRS_add_right_cc (I := I) (M := M) g₀ (s + 2) (s + 2) s
     (cometricDoubleTraceField (I := I) g₀ s)]
   rw [appCcRS_slotInsert_id_eq (I := I) (M := M) g₀ (s + 1) s
     (cometricDoubleTraceField (I := I) g₀ s)]

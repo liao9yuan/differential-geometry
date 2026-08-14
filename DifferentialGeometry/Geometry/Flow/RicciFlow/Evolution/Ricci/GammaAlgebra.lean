@@ -1,16 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution GammaAlgebra
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +21,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -33,32 +29,33 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-! ## Ricci variation route for Lemma 6.3 -/
 
-/-- Trace of the covariant derivative of the infinitesimal connection
-variation:
-`∇_k A^k_ij - ∇_i A^k_kj`.
 
-Here `nablaGammaDt t x d k i j` denotes the fixed-frame component
-`(∇_d A)^k_ij`, where `A^k_ij = ∂_t Γ^k_ij`. -/
+
+
+
+
+
+
 def ricciVariationFromConnectionRHSInFrame
     (nablaGammaDt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   (∑ k : Idx, nablaGammaDt t x k k i j) -
     (∑ k : Idx, nablaGammaDt t x i k k j)
 
-/-- Ricci variation formula in a fixed frame:
-`∂_t Ric_ij = ∇_k A^k_ij - ∇_i A^k_kj`.
 
-This is the realized component target obtained by differentiating the
-curvature trace of the connection using the current `(1,3)` convention
-`Ric(e_i,e_j) = trace (e_k ↦ R(e_k,e_i)e_j)`. -/
+
+
+
+
+
 def RicciVariationFormulaInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaGammaDt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (ricciVariationFromConnectionRHSInFrame (M := M) nablaGammaDt
@@ -66,14 +63,15 @@ def RicciVariationFormulaInFrameOn
       D.carrier
       (t : Real)
 
-/-- Local version of the Ricci variation formula in a fixed frame domain. -/
+
 def RicciVariationFormulaInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nablaGammaDt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j : Idx,
       HasDerivWithinAt
         (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
@@ -82,8 +80,8 @@ def RicciVariationFormulaInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- Local version of Lemma 6.3's Ricci evolution equation in a fixed frame
-domain. -/
+
+
 def RicciEvolutionEquationInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -92,7 +90,8 @@ def RicciEvolutionEquationInFrameOnLocal
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j : Idx,
       HasDerivWithinAt
         (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
@@ -101,7 +100,10 @@ def RicciEvolutionEquationInFrameOnLocal
         D.carrier
         (t : Real)
 
-@[deprecated "use the OnLocal predicate or a pointwise frame statement instead" (since := "2026-05-22")]
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
+@[deprecated "use the OnLocal predicate or a pointwise frame statement instead"
+    (since := "2026-05-22")]
 theorem ricciVariationFormulaInFrameOn_of_local_cover
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -115,14 +117,14 @@ theorem ricciVariationFormulaInFrameOn_of_local_cover
   intro t x i j
   exact hlocal t x (hcover x) i j
 
-/-- The covariant derivative of the Ricci-flow connection variation after
-substituting
-`A^k_ij = -g^{kl} nabla_i Ric_jl - g^{kl} nabla_j Ric_il
-  + g^{kl} nabla_l Ric_ij`.
 
-Here `nabla2Ric t x d a i j` denotes `(nabla_d nabla_a Ric)_ij`.  Metric
-compatibility is already reflected in this component expression: no derivative
-falls on `gInv`. -/
+
+
+
+
+
+
+
 def nablaGammaDtFromNabla2RicInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -458,6 +460,8 @@ private theorem trace23_contract_covD_of_inv_zero
 
 end RaisedContractAlgebra
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem ricci_mdiffAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -476,6 +480,8 @@ private theorem ricci_mdiffAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -507,6 +513,8 @@ theorem ricci_extDerivFun_finset_sum
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_mul
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -522,6 +530,8 @@ theorem ricci_extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_add
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -532,6 +542,8 @@ theorem ricci_extDerivFun_add
     (I := I) (g := f) (g' := g) (x := x) hf hg) v)
   simpa [Pi.add_apply] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_neg
     {f : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
@@ -547,6 +559,8 @@ theorem ricci_extDerivFun_neg
     hf v
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul] using hprod
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_sub
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -559,6 +573,8 @@ theorem ricci_extDerivFun_sub
     (x := x) hf hg.neg) v)
   simpa [Pi.add_apply, sub_eq_add_neg, hneg] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_congr_eventually
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
@@ -568,6 +584,8 @@ theorem ricci_extDerivFun_congr_eventually
   unfold extDerivFun
   rw [hmf, hx]
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTrace13CovDeriv_eq_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -686,6 +704,8 @@ theorem contractedTrace13CovDeriv_eq_nabla2RicTrace
           refine Finset.sum_congr rfl fun l _ => ?_
           dsimp [covD3, Γ, G, N, dN, ricciSecondCovDerivCompInFrame]
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTrace23CovDeriv_eq_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -804,6 +824,8 @@ theorem contractedTrace23CovDeriv_eq_nabla2RicTrace
           refine Finset.sum_congr rfl fun l _ => ?_
           dsimp [covD3, Γ, G, N, dN, ricciSecondCovDerivCompInFrame]
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTraceBianchiCovDeriv_eq_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -925,6 +947,9 @@ theorem contractedTraceBianchiCovDeriv_eq_nabla2RicTrace
           dsimp [covD3, Γ, G, N, dN, B, dB, ricciSecondCovDerivCompInFrame]
           ring
 
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTrace23_mdiffAt
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)

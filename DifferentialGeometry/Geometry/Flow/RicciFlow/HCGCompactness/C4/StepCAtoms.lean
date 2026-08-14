@@ -580,3 +580,4 @@ theorem seqWeights_zero_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
 
 end HCGCompactness
 end DifferentialGeometry
+

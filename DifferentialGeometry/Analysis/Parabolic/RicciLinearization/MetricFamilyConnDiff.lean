@@ -2,19 +2,19 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBridge
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
-/-!
-# Joint smoothness of metric-family connection differences
 
-This file promotes joint chart Christoffel smoothness for a realized metric family to joint
-smoothness of its connection-difference `(1, 2)`-tensor against a fixed background metric.
--/
+
+
+
+
+
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,11 +36,29 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance connDiffJointTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance connDiffJointTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance connDiffJointTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance connDiffJointTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem const_gram_joint
     (q : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
-    GenJointGram (I := I) (fun _ : ℝ => q) α S := by
+    ChartGramFamilyJointSmoothNondegenerate (I := I) (fun _ : ℝ => q) α S := by
   refine ⟨?_, ?_⟩
   · intro a b t₀ y₀ _ht hy
     have hsnd : ContDiffAt ℝ ∞ (Prod.snd : ℝ × E → E) (t₀, y₀) := contDiffAt_snd
@@ -50,6 +68,8 @@ private theorem const_gram_joint
     exact chartGramMatrix_det_pos (I := I) q α hx
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem christ_const_joint
     (q : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
@@ -103,6 +123,10 @@ private theorem covComp_joint
     hbase.comp contMDiffOn_fst (fun _p hp => hp.1)
   simpa only [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hcomp
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem conn_pair_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -149,6 +173,8 @@ private theorem conn_pair_joint
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [map_smul, smul_eq_mul, hφapply]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem connDiff_app_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -248,7 +274,8 @@ private theorem connDiff_app_joint
       (Bcmm.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap.contMDiffAt
         (x := Bcmm.equivFun
           (e ⟨p₀.1, (show Tensor0SSpace 1 I p₀.1 →L[ℝ] Tensor0SSpace 2 I p₀.1 from
-            (connDiffSection (I := I) (G.metric p₀.2) q).toSection p₀.1) (om p₀.1)⟩).2)).comp_contMDiffWithinAt
+            (connDiffSection (I := I) (G.metric p₀.2) q).toSection p₀.1)
+              (om p₀.1)⟩).2)).comp_contMDiffWithinAt
         p₀ hcoordVec
     refine hequiv.congr_of_eventuallyEq ?_ ?_
     · filter_upwards [self_mem_nhdsWithin] with z _
@@ -256,8 +283,10 @@ private theorem connDiff_app_joint
     · exact (Bcmm.equivFun.symm_apply_apply _).symm
   exact hfinal
 
-/-- A jointly smooth realized metric family has a jointly smooth connection-difference tensor
-against any fixed smooth background metric on its regular time set. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -268,7 +297,7 @@ theorem connDiff_joint
         (E := fun x : M => TensorRSSpace 1 2 I x) p.1
         ((connDiffSection (I := I) (G.metric p.2) q).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
     (φ := fun p : M × ℝ =>

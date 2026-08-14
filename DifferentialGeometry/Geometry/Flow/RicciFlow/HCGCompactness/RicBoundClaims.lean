@@ -1,48 +1,44 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45Engine
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 
-/-!
-# ric_bound Step 3: the geometric Claims 1 and 2 (MSM135 Lemma 3.11)
 
-The two bookkeeping claims of the Lemma 3.11 proof (MSM135 Ch. 3, Step 3), in
-frame-component tower form over the Claim-1 machinery (`AkMFold.lean`) and the
-connection-change engine (`Lemma45Engine.lean`):
 
-* **`claim1_LC`** — geometric Claim 1.  For the Levi-Civita frame Christoffels of a
-  moving metric `g` and a fixed reference `gRef`, the `gRef`-tower of the
-  difference-Christoffel array is bounded by `C·(1 + |∇_H^{m+1} g|)` once the lower
-  `gRef`-derivatives of the `g`-components are bounded.  This is `AkMFold.claim1`
-  with its `hkoszul` input discharged by `hkoszul_of_leviCivita`.
 
-* **`mixed_oneStep_rev`** — the reversed one-step estimate: the pure `chrH`-tower
-  `|∇_H^{k+1} X|` is bounded by the mixed tower `|∇_H^k (∇_G X)|` plus the
-  difference-correction block.  Same array identity as `mixed_oneStep_le`
-  (`iterCov_one_chr_change`), read in the other direction: this is the direction
-  that converts fixed-connection derivatives into moving-connection derivatives
-  plus `A`-corrections (the book's `∇ = ∇_k + A_k` expansion).
 
-* **`claim2Double`** — the abstract Claim-2 induction: a doubly-indexed family
-  `W i k` with `W i 0 ≤ K` (the Shi input) and the reversed one-step recursion is
-  uniformly bounded on `{i + k ≤ L}`.  Strong induction on the second index; the
-  constant depends only on `(A, K, L)`, so it is uniform over the family — the
-  geometric theorem can place `∃ C` before `∀ x ∈ u`.
 
-* **`claim2_component`** — geometric Claim 2 (mixed derivatives): if the
-  `chrH`-towers of the difference array are bounded (`hDbound`, Claim 1's output)
-  and the pure `chrG`-towers of `T` are bounded (`hShi`, the Shi input), then all
-  mixed towers `|∇_H^a (∇_G^b T)|` with `a + b ≤ L` are bounded.
 
-Orientation: in the ric_bound application, `chrG` is the MOVING metric's connection
-(`∇_k`, with Shi bounds on its pure towers of curvature) and `chrH` is the FIXED
-reference connection (`∇`, the outer towers).  `claim1_LC` produces bounds on
-exactly the `chrDiffField chrG chrH`-towers that `mixed_oneStep_rev` consumes —
-no sign flip is needed anywhere.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -60,13 +56,12 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-! ## R1: geometric Claim 1 -/
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **Geometric Claim 1** (ric_bound Step 3, MSM135 Lemma 3.11).  On a local-frame
 domain `u`, let `chrG`/`chrH` be the frame Christoffels of the Levi-Civita
 connections of the moving metric `g` and the fixed reference `gRef`.  If the
@@ -152,6 +147,7 @@ theorem claim1_LC_bound {u : Set M} (hu : IsOpen u)
     norm_num
   simpa only [hKR] using hmain
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `claim1_LC_bound`. -/
 theorem claim1_LC {u : Set M} (hu : IsOpen u)
     (gRef : SmoothRiemannianMetric I M)
@@ -204,11 +200,13 @@ theorem claim1_LC {u : Set M} (hu : IsOpen u)
   exact ⟨claim1Const C0 (3 / 2) K m, claim1Const_nonneg C0 (3 / 2) K m,
     claim1_LC_bound hu gRef frame hframe hframeS hchrH C0 K m⟩
 
-/-! ## R2a: the reversed one-step estimate
 
-Private copies of two generic helpers that are `private` in `Lemma45Engine.lean`
-(finite sums of `ContMDiffOn` functions; Minkowski for finite sums of arrays). -/
 
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (f : ι → M → Real) (hf : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => f i y) u) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ i ∈ t, f i y) u := by
@@ -221,6 +219,7 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     exact (hf a (Finset.mem_insert_self a t)).add
       (ih fun i hi => hf i (Finset.mem_insert_of_mem hi))
 
+omit [DecidableEq Idx] in
 private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
     (f : ι → (Fin r → Idx) → Real) :
     compL2 (fun n : Fin r → Idx => ∑ i ∈ t, f i n) ≤ ∑ i ∈ t, compL2 (f i) := by
@@ -238,13 +237,15 @@ private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
     rw [hrw, Finset.sum_insert hb]
     exact le_trans (compL2_add_le _ _) (by linarith [ih])
 
-/-- **The reversed mixed-tower one-step estimate** — the Claim-2 engine:
-`|∇_H^{k+1} X| ≤ |∇_H^k (∇_G X)| + ε·oneStepConst B k r·Σ_{j≤k} |∇_H^j X|`, from the
-bounds `|∇_{H,U}^c (Γ_G − Γ_H)| ≤ B c·ε` on the difference-Christoffel tower
-(`hDbound`).  Same split as `mixed_oneStep_le` (`iterCov_one_chr_change`), read in
-the other direction: the pure `chrH`-step is the `chrG`-step PLUS the per-slot
-corrections, so the pure tower is bounded by the mixed tower plus the correction
-block.  This is the book's `∇ = ∇_k + A_k` expansion direction. -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -269,7 +270,6 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
   set D : M → Idx → Idx → Idx → Real := fun z d b p => chrG z d b p - chrH z d b p with hDdef
   have hDsm : ∀ d b p : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => D y d b p) u :=
     fun d b p => (hchrG d b p).sub (hchrH d b p)
-  -- split the base field through the connection change
   have hsplit : (fun y => iterCovComp (I := I) frame chrG X 1 y) =
       fun z (n : Fin (r + 1) → Idx) =>
         iterCovComp (I := I) frame chrH X 1 z n -
@@ -285,7 +285,6 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
   have hcorrSum_sm : ∀ m : Fin (r + 1) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ s : Fin r, chrCorrField D X s y m) u :=
     fun m => contMDiffOn_finsetSum' Finset.univ _ (fun s _ => hcorr_sm s m)
-  -- rearranged triangle: the pure tower ≤ the mixed tower + the corrections
   have htri : compL2 (iterCovComp (I := I) frame chrH
       (fun z m => iterCovComp (I := I) frame chrH X 1 z m) k x) ≤
       compL2 (iterCovComp (I := I) frame chrH
@@ -302,7 +301,6 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
         iterCovComp (I := I) frame chrH
             (fun y => iterCovComp (I := I) frame chrG X 1 y) k x n +
           ∑ s : Fin r, iterCovComp (I := I) frame chrH (chrCorrField D X s) k x n
-      -- the split-field tower identity at `n` (the `mixed_oneStep_le` array identity)
       have h : iterCovComp (I := I) frame chrH
           (fun y => iterCovComp (I := I) frame chrG X 1 y) k x n =
           iterCovComp (I := I) frame chrH
@@ -321,12 +319,10 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
     have hsum := compL2_finsetSum_le (Finset.univ : Finset (Fin r))
       (fun s => iterCovComp (I := I) frame chrH (chrCorrField D X s) k x)
     linarith
-  -- the leading term is the shifted tower
   have hshift : compL2 (iterCovComp (I := I) frame chrH X (k + 1) x) =
       compL2 (iterCovComp (I := I) frame chrH
         (fun z m => iterCovComp (I := I) frame chrH X 1 z m) k x) :=
     compL2_iterCovComp_shift frame chrH X k x
-  -- the correction block
   have hXsum0 : (0 : Real) ≤ ∑ j ∈ Finset.range (k + 1),
       compL2 (iterCovComp (I := I) frame chrH X j x) :=
     Finset.sum_nonneg fun j _ => compL2_nonneg _
@@ -345,7 +341,6 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
         norm_num
       rw [h0, mul_zero, zero_mul]
     | succ r' =>
-      -- each slot is bounded by the same `P(m)`-block
       have hslot : ∀ s : Fin (r' + 1),
           compL2 (iterCovComp (I := I) frame chrH (chrCorrField D X s) k x) ≤
             eps * (∑ c ∈ Finset.range (k + 1), (k.choose c : Real) * B c) *
@@ -418,13 +413,15 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
             compL2 (iterCovComp (I := I) frame chrH X j x) := by
         linarith [hcorrBound]
 
-/-- **The top-split reversed one-step estimate** — the (A_N) engine of ric_bound
-Step 4: `|∇_H^{k+1} X| ≤ |∇_H^k (∇_G X)| + r·|∇_{H,U}^k D|·|X| + oneStepConst B k r·Σ_{j≤k}|∇_H^j X|`,
-with uniform difference-tower bounds required only BELOW the top order
-(`hDbound`, `c < k`).  The isolated top factor `|∇_{H,U}^k D|` is the term that
-Claim 1 bounds pointwise by `C·(1 + |∇_H^{k+1} g|)` — the `|∇^N g|`-carrying term
-of the book's `(A_N)`.  Same split as `mixed_oneStep_rev`; the correction block
-peels the `c = k` summand via `Finset.sum_range_succ`. -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -466,7 +463,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
   have hcorrSum_sm : ∀ m : Fin (r + 1) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ s : Fin r, chrCorrField D X s y m) u :=
     fun m => contMDiffOn_finsetSum' Finset.univ _ (fun s _ => hcorr_sm s m)
-  -- rearranged triangle: the pure tower ≤ the mixed tower + the corrections
   have htri : compL2 (iterCovComp (I := I) frame chrH
       (fun z m => iterCovComp (I := I) frame chrH X 1 z m) k x) ≤
       compL2 (iterCovComp (I := I) frame chrH
@@ -505,7 +501,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
       compL2 (iterCovComp (I := I) frame chrH
         (fun z m => iterCovComp (I := I) frame chrH X 1 z m) k x) :=
     compL2_iterCovComp_shift frame chrH X k x
-  -- the correction block, with the `c = k` term isolated
   have hXsum0 : (0 : Real) ≤ ∑ j ∈ Finset.range (k + 1),
       compL2 (iterCovComp (I := I) frame chrH X j x) :=
     Finset.sum_nonneg fun j _ => compL2_nonneg _
@@ -527,7 +522,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
       rw [h0, Nat.cast_zero]
       norm_num
     | succ r' =>
-      -- the `c = k` summand of `P(m)`, converted to the public `chrDiffField` form
       have htopEq : (k.choose k : Real) *
           compL2 (iterCovCompU (I := I) frame chrH
             (fun y (v : Fin (2 + 1) → Idx) => D y (v 0) (v 1) (v 2)) k x) *
@@ -536,7 +530,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
             compL2 (X x) := by
         rw [Nat.choose_self, Nat.sub_self, Nat.cast_one, one_mul]
         rfl
-      -- each slot: the `P(m)`-block with the top term split off
       have hslot : ∀ s : Fin (r' + 1),
           compL2 (iterCovComp (I := I) frame chrH (chrCorrField D X s) k x) ≤
             compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) k x) *
@@ -548,7 +541,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
         refine le_trans (compL2_iterCov_chrCorr_le hu frame chrH hframe hchrH D hDsm X hX
           s k hx) ?_
         rw [Finset.sum_range_succ, htopEq]
-        -- the `c < k` block is absorbed into the cumulative sum
         have hblock : (∑ c ∈ Finset.range k, (k.choose c : Real) *
               compL2 (iterCovCompU (I := I) frame chrH
                 (fun y (v : Fin (2 + 1) → Idx) => D y (v 0) (v 1) (v 2)) c x) *
@@ -595,7 +587,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
             (Finset.range_subset_range.mpr (Nat.le_succ k))
             (fun c _ _ => mul_nonneg (Nat.cast_nonneg _) (hB c))
         linarith
-      -- sum over the slots
       have hsumslot := Finset.sum_le_sum fun s (_ : s ∈ (Finset.univ : Finset (Fin (r' + 1)))) =>
         hslot s
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin] at hsumslot
@@ -619,13 +610,13 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
             compL2 (iterCovComp (I := I) frame chrH X j x) := by
         linarith [hcorrBound]
 
-/-! ## R2b: the abstract Claim-2 induction -/
 
-/-- Per-order constants for the Claim-2 induction: for each second index `k` there
-is a constant bounding `W i k` on `{i + k ≤ L}`, uniformly over all admissible
-families `W`.  Strong induction on `k`: the base row is the `K`-bound, and the
-reversed one-step recursion bounds row `k + 1` by row `k` (at `i + 1`) plus the
-`A`-weighted partial sums of the lower rows. -/
+
+
+
+
+
+
 private theorem claim2DoubleAux (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
     (K : Real) (hK0 : 0 ≤ K) :
     ∀ k : ℕ, ∃ Ck : Real, 0 ≤ Ck ∧
@@ -641,7 +632,6 @@ private theorem claim2DoubleAux (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 
     | zero =>
       exact ⟨K, hK0, fun W hW0 hBase hOne i' hi' => hBase i' (by omega)⟩
     | succ k' =>
-      -- the IH constants for every lower row, totalized
       have hCj : ∀ j : ℕ, ∃ Cj : Real, 0 ≤ Cj ∧ (j < k' + 1 →
           ∀ W : ℕ → ℕ → Real, (∀ i' k'', 0 ≤ W i' k'') →
             (∀ i', i' ≤ L → W i' 0 ≤ K) →
@@ -675,13 +665,13 @@ private theorem claim2DoubleAux (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 
         mul_le_mul_of_nonneg_left h3 (hA k')
       linarith
 
-/-- **Abstract Claim 2** (the mixed-derivative induction of MSM135 Lemma 3.11,
-Step 3).  A doubly-indexed nonnegative family `W i k` with the base row bounded
-(`W i 0 ≤ K`, the Shi input) and the reversed one-step recursion
-`W i (k+1) ≤ W (i+1) k + A k·Σ_{j≤k} W i j` (the `∇ = ∇_k + A_k` expansion) is
-uniformly bounded on `{i + k ≤ L}`.  The constant depends only on `(A, K, L)` —
-the family is quantified inside, so geometric consumers get a constant uniform
-over the domain. -/
+
+
+
+
+
+
+
 theorem claim2Double (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
     (K : Real) (hK0 : 0 ≤ K) :
     ∃ C : Real, 0 ≤ C ∧
@@ -739,6 +729,8 @@ theorem claim2Const_spec (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A
 
 /-! ## R2: geometric Claim 2 -/
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- **Geometric Claim 2** (mixed derivatives, ric_bound Step 3).  If the
 `chrH`-towers of the difference-Christoffel array are bounded below order `L`
 (`hDbound`, Claim 1's output) and the pure `chrG`-towers of `T` are bounded up to
@@ -772,12 +764,10 @@ theorem claim2_component_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
   have hX_sm : ∀ i : ℕ, ∀ kk : Fin (r₀ + i) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => iterCovComp (I := I) frame chrG T i y kk) u :=
     fun i => iterCovComp_contMDiffOn hu frame chrG T hframe hchrG hT i
-  -- base row: `W i 0 = |∇_G^i T|` is the Shi input (`iterCovComp _ 0` is the base)
   have hbase : ∀ i : ℕ, i ≤ L →
       compL2 (iterCovComp (I := I) frame chrH
         (iterCovComp (I := I) frame chrG T i) 0 x) ≤ K :=
     fun i hi => hShi x hx i hi
-  -- one-step row recursion from `mixed_oneStep_rev` at `ε = 1`
   have hone : ∀ i k : ℕ, i + k + 1 ≤ L →
       compL2 (iterCovComp (I := I) frame chrH
         (iterCovComp (I := I) frame chrG T i) (k + 1) x) ≤
@@ -832,6 +822,8 @@ theorem claim2_component_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       (iterCovComp (I := I) frame chrG T i) k x))
     (fun i k => compL2_nonneg _) hbase hone b a (by omega)
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- Existential compatibility form of `claim2_component_bound`. -/
 theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -859,7 +851,8 @@ theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 /-! ## R3b: the (A_N) descent -/
 
-/-- Finite descent chain: `V 0 ≤ V N + Σ_{i<N} Q i` from the per-step bounds. -/
+
+
 private theorem chain_le (V Q : ℕ → Real) (N : ℕ)
     (hstep : ∀ i, i < N → V i ≤ V (i + 1) + Q i) :
     V 0 ≤ V N + ∑ i ∈ Finset.range N, Q i := by
@@ -892,6 +885,8 @@ theorem mixedDescentConst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {C₂ K : Rea
       (mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (by linarith)) hC₂)
       (mul_nonneg hOS (mul_nonneg (Nat.cast_nonneg N) hC₂))))
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- **The mixed descent** — the analytic core of ric_bound Step 4's `(A_N)`:
 `|∇_H^N T| ≤ C·(1 + |∇_{H,U}^{N-1} D|)` pointwise on `u`, from uniform
 difference-tower bounds BELOW the top order (`hDlow`), mixed-tower bounds up to
@@ -939,7 +934,6 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     fun i => iterCovComp_contMDiffOn hu frame chrG T hframe hchrG hT i
   have hd0 : (0 : Real) ≤ compL2 (iterCovCompU (I := I) frame chrH
       (chrDiffField chrG chrH) (N - 1) x) := compL2_nonneg _
-  -- the per-step bound, uniform in `i`
   have hstep : ∀ i, i < N →
       compL2 (iterCovComp (I := I) frame chrH
         (iterCovComp (I := I) frame chrG T i) (N - i) x) ≤
@@ -953,7 +947,6 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     have e1 : N - i = (N - i - 1) + 1 := by omega
     have e2 : N - (i + 1) = N - i - 1 := by omega
     rw [e1, e2]
-    -- the top-split one-step at `k := N - i - 1`
     have htop : compL2 (iterCovComp (I := I) frame chrH
         (iterCovComp (I := I) frame chrG T i) ((N - i - 1) + 1) x) ≤
         compL2 (iterCovComp (I := I) frame chrH
@@ -968,7 +961,6 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       mixed_oneStep_top hu frame chrG chrH hframe hchrG hchrH
         (iterCovComp (I := I) frame chrG T i) (hX_sm i) B hB (N - i - 1)
         (fun c hc z hz => hDlow c (by omega) z hz) hx
-    -- the D-factor is dominated by `|∇^{N-1}D| + Σ B` in both cases
     have hDfac : compL2 (iterCovCompU (I := I) frame chrH
         (chrDiffField chrG chrH) (N - i - 1) x) ≤
         compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) (N - 1) x) +
@@ -985,7 +977,6 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           Finset.single_le_sum (f := fun c => B c) (fun c _ => hB c)
             (Finset.mem_range.mpr (by omega))
         linarith
-    -- the `X`-factor and the cumulative sum are Claim-2 bounded
     have hXi : compL2 (iterCovComp (I := I) frame chrG T i x) ≤ C₂ :=
       hmix x hx i 0 (by omega)
     have hcast : ((r₀ + i : ℕ) : Real) ≤ ((r₀ + N : ℕ) : Real) := by
@@ -1043,7 +1034,6 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
         (∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N)) * ((N : Real) * C₂) :=
       mul_le_mul hOSi hSum (Finset.sum_nonneg fun j _ => compL2_nonneg _) hOS0
     linarith
-  -- the chain, with the constant per-step cost collapsed
   have hchain : compL2 (iterCovComp (I := I) frame chrH
       (iterCovComp (I := I) frame chrG T 0) (N - 0) x) ≤
       compL2 (iterCovComp (I := I) frame chrH
@@ -1062,12 +1052,10 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
         (∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N)) * ((N : Real) * C₂))
       N hstep
   rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul] at hchain
-  -- terminal: the pure `chrG`-tower is the Shi input
   have hVN : compL2 (iterCovComp (I := I) frame chrH
       (iterCovComp (I := I) frame chrG T N) (N - N) x) ≤ K := by
     rw [Nat.sub_self]
     exact hShiN x hx
-  -- head identification (defeq: `N - 0 ≡ N`, `∇_G^0 T ≡ T`)
   have hhead : compL2 (iterCovComp (I := I) frame chrH T N x) ≤
       compL2 (iterCovComp (I := I) frame chrH
         (iterCovComp (I := I) frame chrG T N) (N - N) x) +
@@ -1084,6 +1072,8 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (Nat.cast_nonneg N)
       (Nat.cast_nonneg N)) hOS0) hC₂0) hd0]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- Existential compatibility form of `mixed_descent_bound`. -/
 theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1119,10 +1109,9 @@ theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 The component-level heart of ric_bound Step 4, stated generically in the two
 frame Christoffels and the metric component field, taking Claim 1's two outputs
 (`hDlow` = the lower-order difference-tower constants, `hDtop` = the top
-difference-tower bounded linearly by `|∇_H^N g|`) as hypotheses.  Composing
+difference-tower bounded linearly by `|∇_H^N g|`) as hypotheses. Composing
 `claim2_component` (the mixed bounds), `mixed_descent` (the `(A_N)` descent),
 and `hDtop` gives the linear bound `|∇_H^N T| ≤ Cpp·|∇_H^N g| + Cppp`. -/
-
 /-- The explicit slope and offset in the per-frame component `(A_N)` bound. -/
 noncomputable def aNConst (r₀ N : ℕ) (B : ℕ → Real) (Ctop KShi : Real) :
     Real × Real :=
@@ -1152,6 +1141,8 @@ theorem aNConst_snd_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
       hKShi)
     (by linarith)
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- **Per-frame component `(A_N)`** (ric_bound Step 4, component form).  On a
 smooth frame domain `u`, for two connections whose difference-Christoffel tower
 satisfies the Claim-1 bounds — lower orders bounded by constants (`hDlow`, the
@@ -1216,6 +1207,8 @@ theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
       Cdesc * (1 + Ctop)
   nlinarith [hd, hkey]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- Existential compatibility form of `aN_component_bound`. -/
 theorem aN_component {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)

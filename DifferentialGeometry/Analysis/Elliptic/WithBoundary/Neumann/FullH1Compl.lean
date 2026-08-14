@@ -10,41 +10,6 @@ import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# H¹ Hilbert space, L² inclusion and Lax–Milgram resolvent
-for the full Neumann variant (with-boundary, half-space model)
-
-The Hausdorff completion of `FullSmoothScalar g` (the pre-Hilbert space of
-*all* smooth real-valued functions on a closed Riemannian
-manifold-with-boundary `(M, g)` modelled on `EuclideanHalfSpace n`, with
-no support restriction) carries the canonical Hilbert-space structure.
-This file packages:
-
-* `H1ComplFullNeumann g`: the completion, a real Hilbert space.
-* `smoothToH1ComplFullNeumann`: the canonical embedding
-  `FullSmoothScalar g →L[ℝ] H1ComplFullNeumann g`.
-* `smoothToLpFullNeumann`: the L² inclusion
-  `FullSmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`.
-* `H1ComplFullNeumannToLp`: the unique continuous linear extension of
-  `smoothToLpFullNeumann` along `smoothToH1ComplFullNeumann`, i.e. the
-  H¹ → L² inclusion.
-
-It also exposes the Lax–Milgram resolvent for the bilinear form
-`B(u, v) := ⟨u, v⟩` (the inner product itself), which is trivially
-coercive with constant `1`. By the Riesz representation theorem, for
-every `f ∈ Lp ℝ 2 μ_g` there is a unique
-`u = resolventFullNeumann g f ∈ H1ComplFullNeumann g` satisfying
-`⟨u, v⟩_{H¹} = ⟨H1ComplFullNeumannToLp v, f⟩_{L²}`
-for every test `v`.
-
-Mathematically this corresponds to the natural variational space for the
-Neumann Laplacian on a manifold-with-boundary, *without* any trace
-constraint imposed on test functions: the natural Neumann boundary
-condition `∂_ν u = 0` arises from the variational principle when the
-test space is the full smooth scalars rather than the
-interior-supported subspace.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -72,20 +37,15 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The H¹ Hilbert space for the full Neumann variant on `(M, g)`,
-defined as the Hausdorff completion of the pre-Hilbert space
-`FullSmoothScalar g`. -/
 abbrev H1ComplFullNeumann (g : SmoothRiemannianMetric (I_half n) M) : Type _ :=
   UniformSpace.Completion (FullSmoothScalar g)
 
-/-- The canonical embedding `FullSmoothScalar g →L[ℝ] H1ComplFullNeumann g`. -/
 noncomputable def smoothToH1ComplFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
     FullSmoothScalar g →L[ℝ] H1ComplFullNeumann g :=
@@ -96,9 +56,6 @@ noncomputable def smoothToH1ComplFullNeumann
     (f : FullSmoothScalar g) :
     smoothToH1ComplFullNeumann g f = (f : H1ComplFullNeumann g) := rfl
 
-/-- A smooth scalar function on a closed manifold-with-boundary lies in
-`MemLp 2`: it is continuous and supported in a compact set (since `M`
-itself is compact). -/
 lemma FullSmoothScalar.memLp_two
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     MemLp f.toFun 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) := by
@@ -108,7 +65,6 @@ lemma FullSmoothScalar.memLp_two
   exact f.smooth.continuous.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The linear map from full smooth scalars to `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpLinFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
     FullSmoothScalar g →ₗ[ℝ]
@@ -151,8 +107,6 @@ lemma FullSmoothScalar.norm_smoothToLp_sq
   rw [integral_congr_ae hae] at h
   exact h.symm
 
-/-- The squared seminorm of a full smooth scalar in pre-H¹ equals the H¹
-self-pairing. -/
 lemma FullSmoothScalar.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     ‖f‖ ^ 2 = fullSmoothScalarH1Inner f f := by
@@ -160,7 +114,6 @@ lemma FullSmoothScalar.norm_sq_eq_inner_self
   rw [FullSmoothScalar.inner_def] at h
   exact h.symm
 
-/-- Squared L² norm is bounded by the squared pre-H¹ norm. -/
 lemma FullSmoothScalar.norm_smoothToLp_sq_le
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     ‖smoothToLpLinFullNeumann g f‖ ^ 2 ≤ ‖f‖ ^ 2 := by
@@ -173,7 +126,6 @@ lemma FullSmoothScalar.norm_smoothToLp_sq_le
     f.integral_inner_grad_self_nonneg
   linarith
 
-/-- L²-norm of the smooth-inclusion is bounded by the pre-H¹ norm. -/
 lemma FullSmoothScalar.norm_smoothToLp_le
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     ‖smoothToLpLinFullNeumann g f‖ ≤ ‖f‖ := by
@@ -187,7 +139,6 @@ lemma FullSmoothScalar.norm_smoothToLp_le_one_mul
     ‖smoothToLpLinFullNeumann g f‖ ≤ 1 * ‖f‖ := by
   rw [one_mul]; exact f.norm_smoothToLp_le
 
-/-- The continuous linear map from full smooth scalars to `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
     FullSmoothScalar g →L[ℝ]
@@ -223,8 +174,6 @@ private lemma isUniformInducing_toComplL_fullSmoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (FullSmoothScalar g)
 
-/-- The continuous linear extension of `smoothToLpFullNeumann` along the
-dense embedding `smoothToH1ComplFullNeumann`. -/
 noncomputable def H1ComplFullNeumannToLp
     (g : SmoothRiemannianMetric (I_half n) M) :
     H1ComplFullNeumann g →L[ℝ]
@@ -244,9 +193,6 @@ noncomputable def H1ComplFullNeumannToLp
     (denseRange_toComplL_fullSmoothScalar g)
     (isUniformInducing_toComplL_fullSmoothScalar g) f
 
-/-- The bilinear form `B(u, v) := ⟨u, v⟩` packaged as a continuous
-bilinear map on `H1ComplFullNeumann g`. This is the inner product
-itself. -/
 noncomputable def H1ComplFullNeumannBilin
     (g : SmoothRiemannianMetric (I_half n) M) :
     H1ComplFullNeumann g →L[ℝ] H1ComplFullNeumann g →L[ℝ] ℝ :=
@@ -257,7 +203,6 @@ noncomputable def H1ComplFullNeumannBilin
     (u v : H1ComplFullNeumann g) :
     H1ComplFullNeumannBilin g u v = ⟪u, v⟫_ℝ := rfl
 
-/-- Coercivity: `B(u, u) = ‖u‖²`. -/
 lemma H1ComplFullNeumannBilin_isCoercive
     (g : SmoothRiemannianMetric (I_half n) M) :
     IsCoercive (H1ComplFullNeumannBilin g) := by
@@ -269,7 +214,6 @@ lemma H1ComplFullNeumannBilin_isCoercive
   ring_nf
   exact le_refl _
 
-/-- The map `f ↦ L_f` where `L_f v := ⟨H1ComplFullNeumannToLp v, f⟩_{L²}`. -/
 noncomputable def lpFunctionalCLMFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) →L[ℝ]
@@ -308,8 +252,6 @@ noncomputable def H1ComplFullNeumannLaxMilgramEquiv
     ⟪H1ComplFullNeumannLaxMilgramEquiv g u, w⟫_ℝ = ⟪u, w⟫_ℝ :=
   IsCoercive.continuousLinearEquivOfBilin_apply _ u w
 
-/-- The Riesz representative of an element of the dual of
-`H1ComplFullNeumann g`. -/
 noncomputable def H1ComplFullNeumannRieszRepr
     (g : SmoothRiemannianMetric (I_half n) M) :
     (H1ComplFullNeumann g →L[ℝ] ℝ) →L[ℝ] H1ComplFullNeumann g :=
@@ -331,7 +273,6 @@ noncomputable def H1ComplFullNeumannRieszRepr
       exact le_of_eq
         ((InnerProductSpace.toDual ℝ (H1ComplFullNeumann g)).symm.norm_map φ))
 
-/-- Defining property of `H1ComplFullNeumannRieszRepr`. -/
 lemma H1ComplFullNeumannRieszRepr_inner
     (g : SmoothRiemannianMetric (I_half n) M)
     (φ : H1ComplFullNeumann g →L[ℝ] ℝ) (w : H1ComplFullNeumann g) :
@@ -341,15 +282,12 @@ lemma H1ComplFullNeumannRieszRepr_inner
   exact InnerProductSpace.toDual_symm_apply (𝕜 := ℝ)
     (E := H1ComplFullNeumann g) (x := w) (y := φ)
 
-/-- The full Neumann resolvent operator
-`(1 - Δ_g)⁻¹ : Lp ℝ 2 μ_g →L[ℝ] H1ComplFullNeumann g`. -/
 noncomputable def resolventFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) →L[ℝ]
       H1ComplFullNeumann g :=
   (H1ComplFullNeumannRieszRepr g).comp (lpFunctionalCLMFullNeumann g)
 
-/-- Defining property of the full Neumann resolvent. -/
 theorem resolventFullNeumann_inner_eq_lpFunctional
     (g : SmoothRiemannianMetric (I_half n) M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g))

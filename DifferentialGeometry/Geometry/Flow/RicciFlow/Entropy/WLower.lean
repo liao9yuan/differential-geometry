@@ -5,13 +5,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 
 set_option autoImplicit false
 
-/-!
-# Fixed-metric lower bound for Perelman's W functional
 
-The logarithmic Sobolev estimate controls the entropy term uniformly for
-scales in a bounded interval.  Compactness controls scalar curvature, and the
-density prefactor cancels the remaining logarithmic scale term.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -29,10 +29,10 @@ private local instance instMeasurableSpaceM
 private local instance instBorelSpaceM
     {M : Type*} [TopologicalSpace M] : BorelSpace M := ⟨rfl⟩
 
-/-- Perelman's `W` functional is bounded below at bounded positive scales on
-a fixed closed three-manifold. -/
+
+
 theorem w_fixed_lower
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -208,10 +208,10 @@ theorem w_fixed_lower
   rw [hW, hpref]
   nlinarith [mul_nonneg htau0.le hA0]
 
-/-- The fixed-metric `W` lower bound in the density normal form used by the
-conjugate-heat flow. -/
+
+
 theorem w_density_lower
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

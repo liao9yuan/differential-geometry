@@ -7,14 +7,14 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
 
-/-!
-# Finite scalar Galerkin solutions for reversed conjugate heat
 
-The frozen scalar heat operator is diagonal in the fixed terminal-time
-eigenbasis.  The moving-Laplacian difference and scalar-curvature multiplier
-form a time-dependent bounded linear perturbation.  Restricting this operator
-to any finite spectral set gives a globally Lipschitz finite-dimensional ODE.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,7 +30,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -45,8 +45,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 open Classical in
-/-- A scalar spectral vector with prescribed coefficients on one finite set and
-zero coefficients off that set. -/
 def scalarGalVec
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -61,7 +59,8 @@ def scalarGalVec
 
 open Classical in
 omit [BoundarylessManifold I M] in
-/-- Coefficients of a finite scalar spectral vector. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalVec_coeff
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -73,7 +72,8 @@ omit [BoundarylessManifold I M] in
 
 open Classical in
 omit [BoundarylessManifold I M] in
-/-- The support of a finite scalar spectral vector lies in its defining set. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_supp
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -91,7 +91,8 @@ theorem scalarGalVec_supp
 
 open Classical in
 omit [BoundarylessManifold I M] in
-/-- A finite scalar spectral vector has finite coefficient support. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_finite
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -102,7 +103,8 @@ theorem scalarGalVec_finite
 
 open Classical in
 omit [BoundarylessManifold I M] in
-/-- Sobolev-scale inclusion preserves a finite scalar spectral vector. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_inc
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -116,8 +118,6 @@ theorem scalarGalVec_inc
   simp only [tensorHsInclusion_coeff_apply, scalarGalVec_coeff]
 
 omit [BoundarylessManifold I M] in
-/-- The smooth representative of a finite scalar coordinate family is
-independent of the Sobolev exponent used to package that family. -/
 theorem scalarGalRepr_eq
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -157,7 +157,7 @@ private noncomputable def scalarGalEmbedLM
         smul_eq_mul]
     · simp only [if_neg hi, mul_zero]
 
-/-- The continuous embedding of finite scalar coordinates into `H²`. -/
+
 noncomputable def scalarGalEmbed
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0)) :
@@ -167,7 +167,8 @@ noncomputable def scalarGalEmbed
 
 open Classical in
 omit [BoundarylessManifold I M] in
-/-- The finite scalar embedding has the expected coefficient vector. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalEmbed_apply
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -179,8 +180,8 @@ omit [BoundarylessManifold I M] in
 
 open Classical in
 omit [BoundarylessManifold I M] in
-/-- A finite scalar spectral vector is continuous when all of its supported
-coordinates are continuous. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_cont
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -213,7 +214,7 @@ theorem scalarGalVec_cont
     exact hwt.symm
   · simp only [if_neg hi, dif_neg hi]
 
-/-- Restrict an order-zero scalar spectral vector to finite coordinates. -/
+
 noncomputable def scalarGalRestrict
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0)) :
@@ -225,7 +226,8 @@ noncomputable def scalarGalRestrict
         (I := I) (M := M) (a := (0 : Real)) j.1))
 
 omit [BoundarylessManifold I M] in
-/-- Evaluation of finite scalar coordinate restriction. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalRest_apply
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -251,7 +253,7 @@ private noncomputable def scalarGalDiagLM
     simp only [WithLp.ofLp_smul, Pi.smul_apply, RingHom.id_apply, smul_eq_mul]
     ring
 
-/-- The diagonal frozen scalar heat operator on finite coordinates. -/
+
 noncomputable def scalarGalDiag
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0)) :
@@ -260,7 +262,8 @@ noncomputable def scalarGalDiag
   (scalarGalDiagLM (I := I) (M := M) q F).toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-/-- Evaluation of the frozen scalar heat diagonal. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalDiag_apply
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -269,8 +272,8 @@ omit [BoundarylessManifold I M] in
       -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * w j :=
   rfl
 
-/-- The moving scalar conjugate-heat perturbation, viewed on the fixed
-`H² → H⁰` scale. -/
+
+
 noncomputable def scalarGalPert
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) :
@@ -281,7 +284,6 @@ noncomputable def scalarGalPert
       (tensorHsInclusion (I := I) (M := M)
         (g := S.family.metric (T : Real)) (r := 0) (s := 0)
         (show (1 : Real) ≤ 2 by norm_num))
-
 /-- A pointwise finite-core realization of the moving Laplacian induces the
 corresponding coefficient identity for the full Galerkin perturbation. -/
 theorem galPert_fin_of
@@ -369,6 +371,7 @@ theorem galPert_fin_of
           (show (1 : Real) ≤ 2 by norm_num)) v2).coeff i = _
   rw [hA2, hA1, map_add, tensorL2Coeff_add]
 
+
 /-- On the finite scalar core, each Galerkin perturbation coordinate is the
 coefficient of the genuine moving-Laplacian plus scalar-potential expression. -/
 theorem scalarGalPert_fin
@@ -415,7 +418,7 @@ noncomputable def scalarGalField
         (scalarGalEmbed (I := I) (M := M)
           (S.family.metric (T : Real)) F))
 
-/-- Coordinate evaluation of the scalar Galerkin field. -/
+
 @[simp] theorem scalarGalField_app
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime)
@@ -437,7 +440,7 @@ noncomputable def scalarGalField
             (S.family.metric (T : Real)) F w)) j = _
   rw [scalarGalDiag_apply, scalarGalRest_apply]
 
-/-- The scalar coordinate right-hand side of a finite Galerkin system. -/
+
 noncomputable def scalarGalRhs
     (q : SmoothRiemannianMetric I M)
     (A : Real → tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
@@ -449,8 +452,34 @@ noncomputable def scalarGalRhs
     (A t (scalarGalVec (I := I) (M := M) q F (V t) 2)).coeff i
 
 open Classical in
-/-- A coefficient family solving one finite reversed conjugate-heat Galerkin
-system on a common time interval. -/
+noncomputable def scalarGalCoefficients
+    (q : SmoothRiemannianMetric I M)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
+    (γ : Real → EuclideanSpace Real {i // i ∈ F}) :
+    Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real :=
+  fun t i => if h : i ∈ F then (γ t).ofLp ⟨i, h⟩ else 0
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
+theorem scalarGalCoefficients_of_mem
+    (q : SmoothRiemannianMetric I M)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
+    (γ : Real → EuclideanSpace Real {i // i ∈ F})
+    (t : Real) (i : TensorEigenIdx (I := I) (M := M) q 0 0) (hi : i ∈ F) :
+    scalarGalCoefficients (I := I) (M := M) q F γ t i = (γ t).ofLp ⟨i, hi⟩ := by
+  classical
+  simp only [scalarGalCoefficients, dif_pos hi]
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
+theorem scalarGalCoefficients_of_not_mem
+    (q : SmoothRiemannianMetric I M)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
+    (γ : Real → EuclideanSpace Real {i // i ∈ F})
+    (t : Real) (i : TensorEigenIdx (I := I) (M := M) q 0 0) (hi : i ∉ F) :
+    scalarGalCoefficients (I := I) (M := M) q F γ t i = 0 := by
+  classical
+  simp only [scalarGalCoefficients, dif_neg hi]
+
+open Classical in
 structure IsConjGalSol
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (tau : Real)
@@ -468,13 +497,13 @@ structure IsConjGalSol
   init : ∀ i ∈ F, V 0 i = u0.coeff i
   support : ∀ t i, i ∉ F → V t i = 0
 
-/-- A common time length for all finite reversed conjugate-heat Galerkin
-systems. -/
+
+
 structure ConjGalTime where
   tau : Real
 
-/-- A common Galerkin time is positive, at most one, and supports every finite
-spectral initial-value problem. -/
+
+
 structure IsConjGalTime
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (G : ConjGalTime) : Prop where
@@ -489,6 +518,195 @@ structure IsConjGalTime
           (S.family.metric (T : Real)) 0 0 → Real,
         IsConjGalSol (I := I) (M := M) S T G.tau u0 F V
 
+noncomputable def scalarGalFieldBound
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (T : D.RegularTime)
+    (F : Finset (TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0)) (C : Real) : Real :=
+  let q := S.family.metric (T : Real)
+  let Inc := tensorHsInclusion (I := I) (M := M)
+    (g := q) (r := 0) (s := 0) (show (1 : Real) ≤ 2 by norm_num)
+  ‖scalarGalDiag (I := I) (M := M) q F‖ +
+    ‖scalarGalRestrict (I := I) (M := M) q F‖ *
+      (1 + C * ‖Inc‖) *
+        ‖scalarGalEmbed (I := I) (M := M) q F‖
+
+
+theorem scalarGalField_norm_le
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (T : D.RegularTime)
+    (F : Finset (TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0)) (t : Real) (C : NNReal)
+    (hLap : ‖lapDiffA20 (I := I) (M := M) S.family T t‖ ≤ 1)
+    (hPot : ‖conjA1 (I := I) (M := M) S T t‖ ≤ (C : Real))
+    (w : EuclideanSpace Real {i // i ∈ F}) :
+    ‖scalarGalField (I := I) (M := M) S T F t w‖ ≤
+      scalarGalFieldBound (I := I) (M := M) S T F C * ‖w‖ := by
+  let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
+  let Inc :
+      tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
+        tensorHs (I := I) (M := M) q 0 0 1 :=
+    tensorHsInclusion (I := I) (M := M)
+      (g := q) (r := 0) (s := 0)
+      (show (1 : Real) ≤ 2 by norm_num)
+  let Emb :
+      EuclideanSpace Real {i // i ∈ F} →L[Real]
+        tensorHs (I := I) (M := M) q 0 0 2 :=
+    scalarGalEmbed (I := I) (M := M) q F
+  let Rst :
+      tensorHs (I := I) (M := M) q 0 0 0 →L[Real]
+        EuclideanSpace Real {i // i ∈ F} :=
+    scalarGalRestrict (I := I) (M := M) q F
+  let Diag :
+      EuclideanSpace Real {i // i ∈ F} →L[Real]
+        EuclideanSpace Real {i // i ∈ F} :=
+    scalarGalDiag (I := I) (M := M) q F
+  let Lap :
+      tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
+        tensorHs (I := I) (M := M) q 0 0 0 :=
+    lapDiffA20 (I := I) (M := M) S.family T t
+  let Pot :
+      tensorHs (I := I) (M := M) q 0 0 1 →L[Real]
+        tensorHs (I := I) (M := M) q 0 0 0 :=
+    conjA1 (I := I) (M := M) S T t
+  let Pert :
+      tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
+        tensorHs (I := I) (M := M) q 0 0 0 :=
+    scalarGalPert (I := I) (M := M) S T t
+  have hPert_apply
+      (v : tensorHs (I := I) (M := M) q 0 0 2) :
+      ‖Pert v‖ ≤ (1 + (C : Real) * ‖Inc‖) * ‖v‖ := by
+    calc
+      ‖Pert v‖ = ‖Lap v + Pot (Inc v)‖ := by
+        simp only [Pert, scalarGalPert, Lap, Pot, Inc, q,
+          ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply]
+      _ ≤ ‖Lap v‖ + ‖Pot (Inc v)‖ := norm_add_le _ _
+      _ ≤ ‖Lap‖ * ‖v‖ + ‖Pot‖ * ‖Inc v‖ :=
+        add_le_add (Lap.le_opNorm v) (Pot.le_opNorm (Inc v))
+      _ ≤ ‖Lap‖ * ‖v‖ + ‖Pot‖ * (‖Inc‖ * ‖v‖) := by
+        exact add_le_add le_rfl
+          (mul_le_mul_of_nonneg_left (Inc.le_opNorm v) (norm_nonneg Pot))
+      _ ≤ 1 * ‖v‖ + (C : Real) * (‖Inc‖ * ‖v‖) := by
+        exact add_le_add
+          (mul_le_mul_of_nonneg_right hLap (norm_nonneg v))
+          (mul_le_mul_of_nonneg_right hPot
+            (mul_nonneg (norm_nonneg Inc) (norm_nonneg v)))
+      _ = (1 + (C : Real) * ‖Inc‖) * ‖v‖ := by ring
+  have hfac : 0 ≤ 1 + (C : Real) * ‖Inc‖ := by
+    positivity
+  calc
+    ‖scalarGalField (I := I) (M := M) S T F t w‖ =
+        ‖Diag w + Rst (Pert (Emb w))‖ := by
+      simp only [scalarGalField, q, Diag, Rst, Pert, Emb,
+        ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply]
+    _ ≤ ‖Diag w‖ + ‖Rst (Pert (Emb w))‖ := norm_add_le _ _
+    _ ≤ ‖Diag‖ * ‖w‖ + ‖Rst‖ * ‖Pert (Emb w)‖ :=
+      add_le_add (Diag.le_opNorm w) (Rst.le_opNorm (Pert (Emb w)))
+    _ ≤ ‖Diag‖ * ‖w‖ +
+        ‖Rst‖ * ((1 + (C : Real) * ‖Inc‖) * ‖Emb w‖) := by
+      exact add_le_add le_rfl
+        (mul_le_mul_of_nonneg_left (hPert_apply (Emb w)) (norm_nonneg Rst))
+    _ ≤ ‖Diag‖ * ‖w‖ +
+        ‖Rst‖ * ((1 + (C : Real) * ‖Inc‖) * (‖Emb‖ * ‖w‖)) := by
+      exact add_le_add le_rfl
+        (mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left (Emb.le_opNorm w) hfac)
+          (norm_nonneg Rst))
+    _ = scalarGalFieldBound (I := I) (M := M) S T F C * ‖w‖ := by
+      dsimp only [scalarGalFieldBound, q, Inc, Emb, Rst, Diag]
+      ring
+
+
+theorem scalarGalCoefficients_isConjGalSol
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (T : D.RegularTime) (tau : Real)
+    (u0 : tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 0)
+    (F : Finset (TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0))
+    (γ : Real → EuclideanSpace Real {i // i ∈ F})
+    (hγ0 : γ 0 = WithLp.toLp 2
+      (fun j : {i // i ∈ F} => u0.coeff j.1))
+    (hγcont : ContinuousOn γ (Set.Icc (0 : Real) tau))
+    (hγderiv : ∀ t ∈ Set.Ico (0 : Real) tau,
+      HasDerivWithinAt γ
+        (scalarGalField (I := I) (M := M) S T F t (γ t))
+        (Set.Ici (0 : Real)) t) :
+    IsConjGalSol (I := I) (M := M) S T tau u0 F
+      (scalarGalCoefficients (I := I) (M := M)
+        (S.family.metric (T : Real)) F γ) := by
+  let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
+  let V : Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real :=
+    scalarGalCoefficients (I := I) (M := M) q F γ
+  have hV_mem : ∀ t i (hi : i ∈ F), V t i = (γ t).ofLp ⟨i, hi⟩ :=
+    fun t i hi => scalarGalCoefficients_of_mem (I := I) (M := M) q F γ t i hi
+  have hV_not_mem : ∀ t i (hi : i ∉ F), V t i = 0 :=
+    fun t i hi => scalarGalCoefficients_of_not_mem (I := I) (M := M) q F γ t i hi
+  change IsConjGalSol (I := I) (M := M) S T tau u0 F V
+  refine { cont := ?_, deriv := ?_, init := ?_, support := ?_ }
+  · intro i hi
+    have hcoord : ContinuousOn (fun t => (γ t).ofLp ⟨i, hi⟩)
+        (Set.Icc (0 : Real) tau) := by
+      have hproj : Continuous (fun y : EuclideanSpace Real {i // i ∈ F} =>
+          y.ofLp (⟨i, hi⟩ : {i // i ∈ F})) :=
+        (EuclideanSpace.proj (𝕜 := Real)
+          (⟨i, hi⟩ : {i // i ∈ F})).continuous
+      exact hproj.comp_continuousOn hγcont
+    refine hcoord.congr (fun t _ => ?_)
+    exact hV_mem t i hi
+  · intro t ht i hi
+    have hderiv_proj :=
+      ((EuclideanSpace.proj (𝕜 := Real)
+        (⟨i, hi⟩ : {i // i ∈ F})).hasFDerivAt
+          (x := γ t)).comp_hasDerivWithinAt t (hγderiv t ht)
+    have hderiv_proj' :
+        HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
+          ((EuclideanSpace.proj (𝕜 := Real) ⟨i, hi⟩)
+            (scalarGalField (I := I) (M := M) S T F t (γ t)))
+          (Set.Ici (0 : Real)) t :=
+      hderiv_proj
+    have hembed : scalarGalEmbed (I := I) (M := M) q F (γ t) =
+        scalarGalVec (I := I) (M := M) q F (V t) 2 := by
+      apply tensorHs.ext
+      funext j
+      rw [scalarGalEmbed_apply, scalarGalVec_coeff, scalarGalVec_coeff]
+      by_cases hj : j ∈ F
+      · simp only [dif_pos hj, if_pos hj, hV_mem t j hj]
+      · simp only [dif_neg hj, if_neg hj]
+    have hRHS :
+        (EuclideanSpace.proj (𝕜 := Real) ⟨i, hi⟩)
+            (scalarGalField (I := I) (M := M) S T F t (γ t)) =
+          scalarGalRhs (I := I) (M := M) q
+            (scalarGalPert (I := I) (M := M) S T) F V t i := by
+      change scalarGalField (I := I) (M := M) S T F t (γ t) ⟨i, hi⟩ = _
+      change scalarGalField (I := I) (M := M) S T F t (γ t) ⟨i, hi⟩ =
+        -(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
+          (scalarGalPert (I := I) (M := M) S T t
+            (scalarGalVec (I := I) (M := M) q F (V t) 2)).coeff i
+      rw [scalarGalField_app, hembed]
+      rw [hV_mem t i hi]
+    have hfinal : HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
+        (scalarGalRhs (I := I) (M := M) q
+          (scalarGalPert (I := I) (M := M) S T) F V t i)
+        (Set.Ici (0 : Real)) t :=
+      hRHS ▸ hderiv_proj'
+    have hIci :
+        HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
+          (scalarGalRhs (I := I) (M := M) q
+            (scalarGalPert (I := I) (M := M) S T) F V t i)
+          (Set.Ici t) t :=
+      DifferentialGeometry.Analysis.ODE.hasDerivWithinAt_Ici_of_Ici_zero
+        hfinal ht.1
+    have hcongr : (fun r => V r i) = (fun r => (γ r).ofLp ⟨i, hi⟩) := by
+      funext r
+      exact hV_mem r i hi
+    rw [hcongr]
+    exact hIci
+  · intro i hi
+    rw [hV_mem 0 i hi]
+    rw [hγ0]
+  · intro t i hi
+    exact hV_not_mem t i hi
 /-- A continuous Galerkin perturbation is uniformly bounded on a compact
 time interval. -/
 theorem galPert_bdd_on
@@ -514,7 +732,6 @@ theorem galPert_bdd_on
   change ‖scalarGalPert (I := I) (M := M) S T t‖ ≤ max C 0
   exact (hC ⟨t, ht, rfl⟩).trans (le_max_left _ _)
 
-set_option maxHeartbeats 800000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- Prescribed-interval scalar Galerkin existence from continuity of the full
 perturbation.  The interval is independent of the finite spectral set. -/
@@ -617,69 +834,9 @@ theorem gal_exists_on
       (E := EuclideanSpace Real {i // i ∈ F})
       (f := fun t => scalarGalField (I := I) (M := M) S T F t)
       htau (show (0 : Real) ≤ 0 by rfl) hlip_t hcont_t haff_t w0
-  let V : Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real :=
-    fun t i => if h : i ∈ F then (γ t).ofLp ⟨i, h⟩ else 0
-  refine ⟨V, { cont := ?_, deriv := ?_, init := ?_, support := ?_ }⟩
-  · intro i hi
-    have hcoord : ContinuousOn (fun t => (γ t).ofLp ⟨i, hi⟩)
-        (Set.Icc (0 : Real) tau) := by
-      have hproj : Continuous (fun y : EuclideanSpace Real {i // i ∈ F} =>
-          y.ofLp (⟨i, hi⟩ : {i // i ∈ F})) :=
-        (EuclideanSpace.proj (𝕜 := Real)
-          (⟨i, hi⟩ : {i // i ∈ F})).continuous
-      exact hproj.comp_continuousOn hγcont
-    refine hcoord.congr (fun t _ => ?_)
-    simp only [V, dif_pos hi]
-  · intro t ht i hi
-    have hderiv_proj :=
-      ((EuclideanSpace.proj (𝕜 := Real)
-        (⟨i, hi⟩ : {i // i ∈ F})).hasFDerivAt
-          (x := γ t)).comp_hasDerivWithinAt t (hγderiv t ht)
-    have hderiv_proj' :
-        HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
-          ((EuclideanSpace.proj (𝕜 := Real) ⟨i, hi⟩)
-            (scalarGalField (I := I) (M := M) S T F t (γ t)))
-          (Set.Ici (0 : Real)) t :=
-      hderiv_proj
-    have hembed : scalarGalEmbed (I := I) (M := M) q F (γ t) =
-        scalarGalVec (I := I) (M := M) q F (V t) 2 := by
-      apply tensorHs.ext
-      funext j
-      simp only [scalarGalEmbed_apply, scalarGalVec_coeff, V]
-    have hRHS :
-        (EuclideanSpace.proj (𝕜 := Real) ⟨i, hi⟩)
-            (scalarGalField (I := I) (M := M) S T F t (γ t)) =
-          scalarGalRhs (I := I) (M := M) q
-            (scalarGalPert (I := I) (M := M) S T) F V t i := by
-      change scalarGalField (I := I) (M := M) S T F t (γ t) ⟨i, hi⟩ = _
-      change scalarGalField (I := I) (M := M) S T F t (γ t) ⟨i, hi⟩ =
-        -(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
-          (scalarGalPert (I := I) (M := M) S T t
-            (scalarGalVec (I := I) (M := M) q F (V t) 2)).coeff i
-      rw [scalarGalField_app, hembed]
-      simp only [V, dif_pos hi]
-    have hfinal : HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
-        (scalarGalRhs (I := I) (M := M) q
-          (scalarGalPert (I := I) (M := M) S T) F V t i)
-        (Set.Ici (0 : Real)) t :=
-      hRHS ▸ hderiv_proj'
-    have hIci :
-        HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
-          (scalarGalRhs (I := I) (M := M) q
-            (scalarGalPert (I := I) (M := M) S T) F V t i)
-          (Set.Ici t) t :=
-      DifferentialGeometry.Analysis.ODE.hasDerivWithinAt_Ici_of_Ici_zero
-        hfinal ht.1
-    have hcongr : (fun r => V r i) = (fun r => (γ r).ofLp ⟨i, hi⟩) := by
-      funext r
-      simp only [V, dif_pos hi]
-    rw [hcongr]
-    exact hIci
-  · intro i hi
-    simp only [V, dif_pos hi]
-    rw [hγ0]
-  · intro t i hi
-    simp only [V, dif_neg hi]
+  refine ⟨scalarGalCoefficients (I := I) (M := M) q F γ, ?_⟩
+  exact scalarGalCoefficients_isConjGalSol (I := I) (M := M)
+    S T tau u0 F γ (by simpa only [w0] using hγ0) hγcont hγderiv
 
 /-- Restrict a common Galerkin existence interval to a shorter positive
 interval. -/
@@ -703,7 +860,6 @@ theorem gal_time_mono
   · intro t ht i hi
     exact hV.deriv t ⟨ht.1, ht.2.trans_le hle⟩ i hi
 
-set_option maxHeartbeats 800000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- On one time interval independent of the finite spectral set, every scalar
 Galerkin truncation of the reversed conjugate-heat equation has a solution. -/

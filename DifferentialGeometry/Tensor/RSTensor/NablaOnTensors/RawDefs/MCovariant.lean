@@ -2,15 +2,14 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Nabla0S
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Raw model-centered tensor covariant derivative definitions
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -30,10 +29,11 @@ section SmoothVectorFieldRSNabla
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
 
-/-- The fixed-chart model of the raw mixed covariant derivative is the direct
-model-space covariant derivative.  This is the public projection lemma for
-consumers that need to cross the mixed-tensor bundle trivialization without
-unfolding its Hom implementation. -/
+
+
+
+
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 theorem modelAt_mcovRS {r s : ℕ}
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (ΓX : E → E →L[𝕜] E)
@@ -57,6 +57,8 @@ theorem modelAt_mcovRS {r s : ℕ}
   rfl
 
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
+omit [CompleteSpace 𝕜] in
 theorem mcovariantDeriv_tensor0SWithin_apply_slots {s : ℕ}
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (ΓX : E → E →L[𝕜] E)

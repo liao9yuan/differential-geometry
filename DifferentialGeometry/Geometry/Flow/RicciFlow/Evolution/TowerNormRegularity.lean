@@ -3,14 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHea
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 
-/-!
-# Joint regularity of intrinsic curvature-tower norms
 
-Coordinate components of the realized curvature tower and of the inverse
-metric are jointly smooth at regular spacetime points.  The coordinate formula
-for the covariant-tensor norm turns these producers into joint smoothness of
-the intrinsic squared norm.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -21,17 +21,14 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-/-- The intrinsic squared norm of every finite curvature-derivative level is
-jointly smooth at regular spacetime points of a Ricci-flow solution. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem towerNorm_joint
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

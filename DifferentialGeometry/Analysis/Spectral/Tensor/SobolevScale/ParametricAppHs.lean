@@ -2,13 +2,13 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricAppCcJetBou
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Parametric tensor actions on the spectral Sobolev scale
 
-This file converts a common pointwise coefficient-jet envelope into a
-support-independent bound for the induced tensor action at every natural
-spectral Sobolev order.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +25,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,8 +34,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- A common coefficient-jet envelope bounds the induced tensor action on
-every natural spectral Sobolev order, uniformly in the parameter. -/
+
+
 theorem app_hs_unif
     (g : SmoothRiemannianMetric I M) (b c : ℕ) {α : Type*}
     (Φ : α → SmoothCcTensor g b c) (K : Set α) (B : ℕ → ℝ)
@@ -46,7 +46,7 @@ theorem app_hs_unif
     ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧
       ∀ t, t ∈ K → ∀ W : SmoothCcTensor g 0 b,
         ‖ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖ ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤
           C * ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖ := by
   classical
   obtain ⟨D, hD_nn, hD⟩ :=
@@ -63,7 +63,7 @@ theorem app_hs_unif
     ‖iteratedCovGrad (I := I) g 0 b j W‖
   have hterm (j : ℕ) (hj : j ∈ Finset.range (n + 1)) :
       ‖iteratedCovGrad (I := I) g 0 c j
-          (appCc (I := I) (M := M) g b c (Φ t) W)‖ ≤
+          (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤
         D j * Jin := by
     have hjn : j + 1 ≤ n + 1 :=
       Nat.succ_le_succ (Nat.le_of_lt_succ (Finset.mem_range.mp hj))
@@ -82,12 +82,12 @@ theorem app_hs_unif
   have hsum :
       (∑ j ∈ Finset.range (n + 1),
           ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖) ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖) ≤
         Dsum * Jin := by
     calc
       (∑ j ∈ Finset.range (n + 1),
           ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖) ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖) ≤
           ∑ j ∈ Finset.range (n + 1), D j * Jin := by
             exact Finset.sum_le_sum fun j hj ↦ hterm j hj
       _ = Dsum * Jin := by simp only [Dsum, Finset.sum_mul]
@@ -95,10 +95,10 @@ theorem app_hs_unif
     simpa only [Jin] using hCin W
   calc
     ‖ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-        (appCc (I := I) (M := M) g b c (Φ t) W)‖ ≤
+        (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤
         Cout * (∑ j ∈ Finset.range (n + 1),
           ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖) :=
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖) :=
       hCout _
     _ ≤ Cout * (Dsum * Jin) :=
       mul_le_mul_of_nonneg_left hsum hCout_nn
@@ -109,9 +109,9 @@ theorem app_hs_unif
     _ = (Cout * Dsum * Cin) *
         ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖ := by ring
 
-/-- The spectral action estimate has a constant depending only on the fixed
-metric, tensor ranks, and Sobolev order, uniformly over the coefficient and
-its finite squared-jet envelope. -/
+
+
+
 theorem app_hs_const
     (g : SmoothRiemannianMetric I M) (b c n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ),
@@ -121,14 +121,14 @@ theorem app_hs_const
           ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i) →
       ∀ W : SmoothCcTensor g 0 b,
         ‖ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-            (appCc (I := I) (M := M) g b c Φ W)‖ ≤
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
           C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i) *
             ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖ := by
   classical
   obtain ⟨Cout, hCout_nn, hCout⟩ := hs_le_jet (I := I) (M := M) g c n
   obtain ⟨Cin, hCin_nn, hCin⟩ := hsJet_le (I := I) (M := M) g b n
   let Gsum : ℝ := ∑ j ∈ Finset.range (n + 1),
-    Real.sqrt (appCcGdiag (E := E) j)
+    Real.sqrt (diagonalGridGrowthFactor (E := E) j)
   have hGsum_nn : 0 ≤ Gsum := by
     exact Finset.sum_nonneg fun _ _ => Real.sqrt_nonneg _
   refine ⟨Cout * Gsum * Cin, by positivity, ?_⟩
@@ -143,8 +143,8 @@ theorem app_hs_const
     exact Finset.sum_nonneg fun _ _ => norm_nonneg _
   have hterm (j : ℕ) (hj : j ∈ Finset.range (n + 1)) :
       ‖iteratedCovGrad (I := I) g 0 c j
-          (appCc (I := I) (M := M) g b c Φ W)‖ ≤
-        Real.sqrt (appCcGdiag (E := E) j) * Real.sqrt Bsum * Jin := by
+          (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
+        Real.sqrt (diagonalGridGrowthFactor (E := E) j) * Real.sqrt Bsum * Jin := by
     have hjn : j ≤ n := Nat.le_of_lt_succ (Finset.mem_range.mp hj)
     have hsq := app_jet_sq_le (I := I) (M := M) g b c j Φ W B
       (fun i hi => hB_nn i (hi.trans hjn))
@@ -192,19 +192,19 @@ theorem app_hs_const
           mul_le_mul_of_nonneg_right hsmallB (sq_nonneg Jin)
     have hsquare :
         ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
-          (appCcGdiag (E := E) j * Bsum) * Jin ^ 2 := by
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+          (diagonalGridGrowthFactor (E := E) j * Bsum) * Jin ^ 2 := by
       refine hsq.trans ?_
       simpa only [mul_assoc] using
         (mul_le_mul_of_nonneg_left hgrid
           (appCcGdiag_nonneg (E := E) j))
     have htarget :
         ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
-          (Real.sqrt (appCcGdiag (E := E) j * Bsum) * Jin) ^ 2 := by
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+          (Real.sqrt (diagonalGridGrowthFactor (E := E) j * Bsum) * Jin) ^ 2 := by
       calc
-        _ ≤ (appCcGdiag (E := E) j * Bsum) * Jin ^ 2 := hsquare
-        _ = (Real.sqrt (appCcGdiag (E := E) j * Bsum) * Jin) ^ 2 := by
+        _ ≤ (diagonalGridGrowthFactor (E := E) j * Bsum) * Jin ^ 2 := hsquare
+        _ = (Real.sqrt (diagonalGridGrowthFactor (E := E) j * Bsum) * Jin) ^ 2 := by
           rw [mul_pow, Real.sq_sqrt]
           exact mul_nonneg (appCcGdiag_nonneg (E := E) j) hBsum_nn
     have hroot := le_of_sq_le_sq htarget
@@ -214,11 +214,11 @@ theorem app_hs_const
   have hsum :
       (∑ j ∈ Finset.range (n + 1),
         ‖iteratedCovGrad (I := I) g 0 c j
-          (appCc (I := I) (M := M) g b c Φ W)‖) ≤
+          (operatorFieldApply (I := I) (M := M) g b c Φ W)‖) ≤
         Gsum * (Real.sqrt Bsum * Jin) := by
     calc
       _ ≤ ∑ j ∈ Finset.range (n + 1),
-          Real.sqrt (appCcGdiag (E := E) j) * Real.sqrt Bsum * Jin := by
+          Real.sqrt (diagonalGridGrowthFactor (E := E) j) * Real.sqrt Bsum * Jin := by
         exact Finset.sum_le_sum fun j hj => hterm j hj
       _ = Gsum * (Real.sqrt Bsum * Jin) := by
         simp only [Gsum, Finset.sum_mul]
@@ -228,10 +228,10 @@ theorem app_hs_const
     simpa only [Jin] using hCin W
   calc
     ‖ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-        (appCc (I := I) (M := M) g b c Φ W)‖ ≤
+        (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
         Cout * (∑ j ∈ Finset.range (n + 1),
           ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c Φ W)‖) := hCout _
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)‖) := hCout _
     _ ≤ Cout * (Gsum * (Real.sqrt Bsum * Jin)) :=
       mul_le_mul_of_nonneg_left hsum hCout_nn
     _ ≤ Cout * (Gsum * (Real.sqrt Bsum *
@@ -243,8 +243,8 @@ theorem app_hs_const
     _ = (Cout * Gsum * Cin) * Real.sqrt Bsum *
         ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖ := by ring
 
-/-- A finite pointwise squared jet envelope controls the spectral action norm
-linearly in the square root of the envelope sum. -/
+
+
 theorem app_hs_small
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ)
@@ -254,7 +254,7 @@ theorem app_hs_small
         ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ W : SmoothCcTensor g 0 b,
       ‖ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-          (appCc (I := I) (M := M) g b c Φ W)‖ ≤
+          (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
         C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i) *
           ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖ := by
   obtain ⟨C, hC, happ⟩ := app_hs_const (I := I) (M := M) g b c n
@@ -264,14 +264,14 @@ private noncomputable def appCcLin
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) :
     SmoothCcTensor g 0 b →ₗ[ℝ] SmoothCcTensor g 0 c where
-  toFun := appCc (I := I) (M := M) g b c Φ
+  toFun := operatorFieldApply (I := I) (M := M) g b c Φ
   map_add' := appCc_add_right (I := I) (M := M) g b c Φ
   map_smul' := fun m W => by
     simpa only [RingHom.id_apply] using
       appCc_smul_right (I := I) (M := M) g b c m Φ W
 
-/-- The action of a fixed smooth tensor-valued operator, completed from
-smooth covariant tensors to the natural spectral Sobolev space. -/
+
+
 noncomputable def appHs
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : SmoothCcTensor g b c) :
@@ -281,8 +281,8 @@ noncomputable def appHs
       (appCcLin g b c Φ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g b (n : ℝ))
 
-/-- The completed action has one coefficient-independent constant for every
-fixed metric, pair of tensor ranks, and natural Sobolev order. -/
+
+
 theorem appHs_unif
     (g : SmoothRiemannianMetric I M) (b c n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ),
@@ -305,13 +305,13 @@ theorem appHs_unif
   intro W
   change
     ‖ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-        (appCc (I := I) (M := M) g b c Φ W)‖ ≤
+        (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
       (C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i)) *
         ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖
   exact happ Φ B hB_nn hB W
 
-/-- A finite squared coefficient-jet envelope controls the norm of the
-completed tensor action. -/
+
+
 theorem appHs_norm
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ)
@@ -325,15 +325,15 @@ theorem appHs_norm
   obtain ⟨C, hC_nn, hC⟩ := appHs_unif (I := I) (M := M) g b c n
   exact ⟨C, hC_nn, hC Φ B hB_nn hB⟩
 
-/-- The completed tensor action agrees with `appCc` on every smooth spectral
-embedding. -/
+
+
 theorem appHs_core
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) :
     appHs g b c n Φ
         (ccTensorToHs (I := I) (M := M) g b (n : ℝ) W) =
       ccTensorToHs (I := I) (M := M) g c (n : ℝ)
-        (appCc (I := I) (M := M) g b c Φ W) := by
+        (operatorFieldApply (I := I) (M := M) g b c Φ W) := by
   classical
   let B : ℕ → ℝ := fun i =>
     (exists_bound_riemannianFiberNormSq_smoothCcTensor
@@ -365,8 +365,8 @@ theorem appHs_core
   apply LinearMap.extendOfNorm_eq hdense
   exact ⟨C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i), happ⟩
 
-/-- The completed action is additive in its tensor coefficient after applying
-it to a Sobolev input. -/
+
+
 theorem appHs_add
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g b c)
@@ -386,8 +386,8 @@ theorem appHs_add
       ccTensorToHs_add])
   exact congrFun hLR U
 
-/-- The completed action is homogeneous in its tensor coefficient after
-applying it to a Sobolev input. -/
+
+
 theorem appHs_smul
     (g : SmoothRiemannianMetric I M) (b c n : ℕ) (a : ℝ)
     (Φ : SmoothCcTensor g b c)
@@ -405,8 +405,8 @@ theorem appHs_smul
     rw [appHs_core, appHs_core, appCc_smul_left, ccTensorToHs_smul])
   exact congrFun hLR U
 
-/-- The completed action is subtractive in its tensor coefficient after
-applying it to a Sobolev input. -/
+
+
 theorem appHs_sub
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g b c)

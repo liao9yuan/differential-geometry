@@ -27,12 +27,6 @@ increment vanishes as `t → 0` at the explicit rate `√t`.
   the *sub*-measure `timeMeasure t` and then monotonicity in the measure.
 * `TimeSobolev.timeH1.norm_toFun_sub_init_le` — the `√t` trace modulus
   `‖u.toFun t − u.init‖ ≤ √t · ‖u.deriv‖` on `[0,T]`.
-* `TimeSobolev.timeH1.state_le_of_sqrt_floor` — the *state* form of the modulus
-  for a zero-datum element: a horizon floor `√T · ‖u.deriv‖ ≤ B` bounds the
-  state itself, `‖u.toFun t‖ ≤ B`, at every time of `[0,T]`.
-* `TimeSobolev.timeH1.norm_le_of_ae_le` — the same conclusion from an a.e. state
-  ball: on `0 < T` an a.e.-in-time bound `‖u.toFun t‖ ≤ R` holds at every time of
-  the CLOSED interval `[0,T]`, endpoint included, by continuity of `u.toFun`.
 
 The canonical home of `integral_norm_Icc_le` would be `BochnerL2.lean` next to
 `integral_norm_le`; it is placed here to keep the change a single additive leaf.
@@ -48,7 +42,7 @@ namespace Analysis
 namespace Parabolic
 namespace TimeSobolev
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ}
 
 /-- **Sharp-horizon Cauchy–Schwarz bound for the interval integral.**  For an
@@ -122,17 +116,8 @@ theorem norm_toFun_sub_init_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Set.Icc (0
   · filter_upwards with s using norm_nonneg _
   · exact HasSubset.Subset.eventuallyLE Ioc_subset_Icc_self
 
-/-- **State bound from a horizon floor on the derivative.**  For a zero-datum
-element (`u.init = 0`), a floor `√T · ‖u.deriv‖ ≤ B` on the horizon bounds the
-state itself at every time of `[0,T]`:
-
-  `‖u.toFun t‖ ≤ B`   for `t ∈ [0,T]`.
-
-This is the state form of `norm_toFun_sub_init_le`: the `√t` modulus measures
-the increment away from the initial datum, so at datum `0` it measures the state,
-and monotonicity of `√·` folds the time-dependent factor `√t` into the horizon
-factor `√T`.  It converts a derivative-side smallness hypothesis into the
-trajectory-side ball membership that fibre-operator smallness arguments consume. -/
+/-- If the initial datum vanishes, a `√T` bound on the time derivative
+controls the represented state throughout the closed time interval. -/
 theorem state_le_of_sqrt_floor (u : timeH1 X T) (hinit : u.init = 0) {B : ℝ}
     (hfloor : Real.sqrt T * ‖u.deriv‖ ≤ B) :
     ∀ t ∈ Set.Icc (0 : ℝ) T, ‖u.toFun t‖ ≤ B := by
@@ -144,15 +129,8 @@ theorem state_le_of_sqrt_floor (u : timeH1 X T) (hinit : u.init = 0) {B : ℝ}
         mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg _)
     _ ≤ B := hfloor
 
-/-- **An almost-everywhere state ball holds everywhere on the closed interval.**
-On a nondegenerate horizon (`0 < T`) an a.e. bound `‖u.toFun t‖ ≤ R` for the
-carrier measure `timeMeasure T` upgrades to the bound at EVERY time of `[0,T]`,
-the closed endpoint `t = T` included.
-
-The upgrade is available because `u.toFun` is continuous on `[0,T]`
-(`timeH1.continuousOn_toFun`) and `[0,T]` is the closure of its interior when
-`0 ≠ T`: the truncation `min ‖u.toFun ·‖ R` agrees a.e. with `‖u.toFun ·‖`, both
-are continuous on `[0,T]`, hence they agree there. -/
+/-- An almost-everywhere bound on the continuous `timeH1` representative
+holds everywhere on a nondegenerate closed time interval. -/
 theorem norm_le_of_ae_le (u : timeH1 X T) (hT : 0 < T) {R : ℝ}
     (hae : ∀ᵐ t ∂timeMeasure T, ‖u.toFun t‖ ≤ R) :
     ∀ t ∈ Set.Icc (0 : ℝ) T, ‖u.toFun t‖ ≤ R := by

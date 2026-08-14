@@ -1,15 +1,15 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarFluxJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarGalerkinPairing
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 
-/-!
-# Uniform scalar nonautonomous pairings
 
-This file turns the compact-slab scalar-flux jet envelope into pairing
-constants that are uniform in backward time and in spectral support.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -53,16 +53,16 @@ private theorem appRS_jet_bdd
       ∀ i t, t ∈ A → ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) q p (b + i) x
           ((iteratedCovGrad (I := I) q p b i
-            (appCcRS (I := I) (M := M) q p a b (Phi t) (W t))).toSection x) ≤ D i := by
+            (ccOperatorFieldComp (I := I) (M := M) q p a b (Phi t) (W t))).toSection x) ≤ D i := by
   classical
-  let D : ℕ → ℝ := fun j => appCcGdiag (E := E) j *
+  let D : ℕ → ℝ := fun j => diagonalGridGrowthFactor (E := E) j *
     ∑ i ∈ Finset.range (j + 1), BPhi i *
       ∑ l ∈ Finset.range (j + 1 - i), BW l
   refine ⟨D, fun j => mul_nonneg (appCcGdiag_nonneg (E := E) j)
     (Finset.sum_nonneg fun i _ => mul_nonneg (hBPhi i)
       (Finset.sum_nonneg fun l _ => hBW l)), ?_⟩
   intro j t ht x
-  refine (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+  refine (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) q j p a b (Phi t) (W t) x).trans ?_
   refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
   refine Finset.sum_le_sum (fun i _ => ?_)
@@ -78,6 +78,7 @@ private theorem appRS_jet_bdd
       riemannianFiberNormSq_nonneg (I := I) (M := M) q p (a + l) x _)
     (hBPhi i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fixed_jet_bdd
     (q : SmoothRiemannianMetric I M) {r s : ℕ} (Phi : SmoothCcTensor q r s) :
     ∃ B : ℕ → ℝ, (∀ i, 0 ≤ B i) ∧ ∀ i x,
@@ -118,7 +119,7 @@ private theorem flux_jet_of_bdd
       (h t).inner y v w = q.inner y v w +
         ccTensorBilinSymm (I := I) q (P t) y v w)
     (hsmall : ∀ t, t ∈ A →
-      gFibreOpBound (I := I) q (ccTensorBilinSymm (I := I) q (P t)) (1 / 4 : ℝ))
+      metricCauchySchwarzBound (I := I) q (ccTensorBilinSymm (I := I) q (P t)) (1 / 4 : ℝ))
     (hP : ∀ i t, t ∈ A → ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) q 0 (2 + i) x
         ((iteratedCovGrad (I := I) q 0 2 i (P t)).toSection x) ≤ J i) :
@@ -160,7 +161,7 @@ theorem fluxDiv_jet_bdd
       ∀ i t, t ∈ A → ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) q 1 (0 + i) x
           ((iteratedCovGrad (I := I) q 1 0 i
-            (appCcRS (I := I) (M := M) q 1 2 0
+            (ccOperatorFieldComp (I := I) (M := M) q 1 2 0
               (cometricDoubleTraceField (I := I) q 0)
               (covGrad (I := I) (M := M) q 1 1 (C t)))).toSection x) ≤ D i := by
   obtain ⟨F, hF_nn, hF⟩ := fixed_jet_bdd (I := I) (M := M) q
@@ -261,8 +262,8 @@ private theorem traceCast_jet_bdd
     (add_le_add (mul_le_mul_of_nonneg_left (hscalar i t ht x) (by norm_num))
       (mul_le_mul_of_nonneg_left (hF i x) (by norm_num)))
 
-/-- On one short backward-time slab, the principal scalar commutator pairing
-has one support-independent constant at each connection-Laplacian order. -/
+
+
 theorem cc_comm_unif
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -273,14 +274,14 @@ theorem cc_comm_unif
         ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
           |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
               (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-              (appCc (I := I) (M := M) (G.metric (T : ℝ)) 2 0
+              (operatorFieldApply (I := I) (M := M) (G.metric (T : ℝ)) 2 0
                 (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
                   (G.metric ((T : ℝ) - s)))
                 (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 2 U)).toFun +
             tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n)
               (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 1 n
                 (covGrad (I := I) (M := M) (G.metric (T : ℝ)) 0 0 U)).toFun
-              (appCcRS (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n) (1 + n)
+              (ccOperatorFieldComp (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n) (1 + n)
                 (slotExtendIter (I := I) (M := M) (G.metric (T : ℝ)) 1 1 n
                   (scalarFluxCoeff (I := I) (G.metric (T : ℝ))
                     (G.metric ((T : ℝ) - s))))
@@ -298,7 +299,7 @@ theorem cc_comm_unif
   let C₀ : ℝ → SmoothCcTensor q 1 1 := fun s =>
     scalarFluxCoeff (I := I) q (G.metric ((T : ℝ) - s))
   let Φ : ℝ → SmoothCcTensor q 1 0 := fun s =>
-    appCcRS (I := I) (M := M) q 1 2 0
+    ccOperatorFieldComp (I := I) (M := M) q 1 2 0
       (cometricDoubleTraceField (I := I) q 0)
       (covGrad (I := I) (M := M) q 1 1 (C₀ s))
   have hC₀ : ∀ i s, s ∈ A → ∀ x : M,
@@ -323,24 +324,24 @@ theorem cc_comm_unif
   intro s hs U
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 2 0
+    (operatorFieldApply (I := I) (M := M) q 2 0
       (scalarTraceCoeff (I := I) q (G.metric ((T : ℝ) - s)))
       (iteratedCovGrad (I := I) q 0 0 2 U)).toFun
   let G₀ : ℝ := tensorL2Inner (I := I) (M := M) q 0 1
     (covGrad (I := I) (M := M) q 0 0
       (oneMinusConnLapSmoothIter (I := I) q 0 0 n U)).toFun
-    (appCc (I := I) (M := M) q 1 1 (C₀ s)
+    (operatorFieldApply (I := I) (M := M) q 1 1 (C₀ s)
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
   let Htop : ℝ := tensorL2Inner (I := I) (M := M) q 0 (1 + n)
     (iteratedCovGrad (I := I) q 0 1 n
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
-    (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n (C₀ s))
       (iteratedCovGrad (I := I) q 0 1 n
         (covGrad (I := I) (M := M) q 0 0 U))).toFun
   let R : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 1 0 (Φ s)
+    (operatorFieldApply (I := I) (M := M) q 1 0 (Φ s)
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
   let J : ℝ := (∑ j ∈ Finset.range (n + 1),
       ‖iteratedCovGrad (I := I) q 0 0 j U‖) *
@@ -368,8 +369,8 @@ theorem cc_comm_unif
     _ ≤ Ct * J + Cd * J := add_le_add htrans hder
     _ = (Ct + Cd) * J := by ring
 
-/-- On one backward-time slab, the second- and first-order scalar Laplacian
-difference coefficients have common pointwise covariant-jet envelopes. -/
+
+
 theorem lapCoeff_slab
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -411,7 +412,7 @@ theorem lapCoeff_slab
     rw [metricDiff_bilin (I := I) (M := M)]
     ring
   have hsmall : ∀ s, s ∈ A →
-      gFibreOpBound (I := I) q
+      metricCauchySchwarzBound (I := I) q
         (ccTensorBilinSymm (I := I) q (P s)) (1 / 4 : ℝ) := by
     intro s hs
     simpa only [q, P, gm] using (hdata s hs).2.1
@@ -476,8 +477,8 @@ theorem lapCoeff_slab
   · intro i x
     simpa only [q, gm, Phi] using hPhi i s hs x
 
-/-- On one backward-time slab, the traced connection-difference arm has one
-support-independent adjacent-window constant at every order. -/
+
+
 theorem cc_conn_unif
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -489,7 +490,7 @@ theorem cc_conn_unif
         ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
           |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
               (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-              (appCc (I := I) (M := M) (G.metric (T : ℝ)) 1 0
+              (operatorFieldApply (I := I) (M := M) (G.metric (T : ℝ)) 1 0
                 (connTraceCoeff (I := I) (G.metric (T : ℝ))
                   (G.metric ((T : ℝ) - s)))
                 (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 1 U)).toFun| ≤
@@ -524,9 +525,9 @@ theorem cc_conn_unif
     intro s hs U
     simpa only [q, A, Phi, gm] using hC s hs U
 
-/-- On one backward-time slab, the complete scalar moving-minus-fixed
-Laplacian pairing has the fixed top coefficient `1/3` and a time-uniform
-adjacent-window remainder. -/
+
+
+
 theorem cc_lap_unif
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -542,7 +543,7 @@ theorem cc_lap_unif
                 (G.metric ((T : ℝ) - s)) U).toFun ≤
             ((1 : ℝ) / 3) *
                 ‖SmoothCcTensor.toL2
-                  (castRankCc_db (I := I) (M := M) (G.metric (T : ℝ)) 0
+                  (castCcTensorRank (I := I) (M := M) (G.metric (T : ℝ)) 0
                     (by omega : 0 + (n + 1) = 1 + n)
                     (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 (n + 1) U))‖ ^ 2 +
               C * ((∑ j ∈ Finset.range (n + 1),
@@ -587,24 +588,24 @@ theorem cc_lap_unif
     simp only [k, K]
     rw [metricDiff_bilin (I := I) (M := M)]
     ring
-  have hsmall : gFibreOpBound (I := I) q k (1 / 4 : ℝ) := by
+  have hsmall : metricCauchySchwarzBound (I := I) q k (1 / 4 : ℝ) := by
     simpa only [q, h, K, k] using (hm s hsm).2.1
   let X : SmoothCcTensor q 0 0 :=
     oneMinusConnLapSmoothIter (I := I) q 0 0 n U
   let A : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
+    operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 U)
   let B : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
+    operatorFieldApply (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 U)
   let Atop : SmoothCcTensor q 0 (1 + n) :=
-    castRankCc_db (I := I) (M := M) q 0
+    castCcTensorRank (I := I) (M := M) q 0
       (by omega : 0 + (n + 1) = 1 + n)
       (iteratedCovGrad (I := I) q 0 0 (n + 1) U)
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0 X.toFun A.toFun
   let Q : ℝ := tensorL2Inner (I := I) (M := M) q 0 0 X.toFun B.toFun
   let Htop : ℝ := tensorL2Inner (I := I) (M := M) q 0 (1 + n) Atop.toFun
-    (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n
         (scalarFluxCoeff (I := I) q h)) Atop).toFun
   let Dtop : ℝ := ((1 : ℝ) / 3) * ‖SmoothCcTensor.toL2 Atop‖ ^ 2
@@ -673,7 +674,7 @@ theorem finite_lap_unif
           (scalarLapDiffCc (I := I) q (h t) U).toFun ≤
         ((1 : ℝ) / 3) *
             ‖SmoothCcTensor.toL2
-              (castRankCc_db (I := I) (M := M) q 0
+              (castCcTensorRank (I := I) (M := M) q 0
                 (by omega : 0 + (n + 1) = 1 + n)
                 (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2 +
           Clap * ((∑ j ∈ Finset.range (n + 1),
@@ -717,12 +718,13 @@ theorem finite_lap_unif
   let Hhi : ℝ := ‖ccTensorToHs (I := I) (M := M) q 0 ((n + 1 : ℕ) : ℝ) U‖
   have hcastNorm :
       ‖SmoothCcTensor.toL2
-          (castRankCc_db (I := I) (M := M) q 0
+          (castCcTensorRank (I := I) (M := M) q 0
             (by omega : 0 + (n + 1) = 1 + n)
             (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ =
         ‖SmoothCcTensor.toL2
           (iteratedCovGrad (I := I) q 0 0 (n + 1) U)‖ := by
-    rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2, norm_castRankCc_db]
+    rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2,
+      DiffBilinOp.norm_castCcTensorRank]
   have hlapU :
       tensorL2Inner (I := I) (M := M) q 0 0
           (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun L.toFun ≤
@@ -811,8 +813,8 @@ theorem finite_lap_unif
   rw [hpair]
   simpa only [U, L] using hmain'
 
-/-- A single backward-time slab supports the finite scalar `A2` closure at
-every order, with the lower constant chosen before time and spectral support. -/
+
+
 theorem cc_a2_unif
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -860,7 +862,7 @@ theorem cc_a2_unif
           (scalarLapDiffCc (I := I) q (gm s) U).toFun ≤
         ((1 : ℝ) / 3) *
             ‖SmoothCcTensor.toL2
-              (castRankCc_db (I := I) (M := M) q 0
+              (castCcTensorRank (I := I) (M := M) q 0
                 (by omega : 0 + (n + 1) = 1 + n)
                 (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2 +
           Clap * ((∑ j ∈ Finset.range (n + 1),

@@ -25,7 +25,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -163,7 +163,7 @@ theorem branchRadius_ray
     branchRadius_exp (I := I) B hs,
     sqrt_gInner_smul_self (I := I) g p hsp.le x]
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+omit [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -554,13 +554,11 @@ theorem branchRadius_diff
     simp only [e2, e, Pi.smul_apply, smul_eq_mul, q,
       branchEnergy_exp (I := I) B hu]
     ring
-  have hsqrt :
-      DifferentiableAt Real Real.sqrt (e2 q) := by
+  have hsqrt : DifferentiableAt Real Real.sqrt (e2 q) := by
     rw [he2_val]
     exact (Real.hasDerivAt_sqrt hu_pos.ne').differentiableAt
   rw [branchRadius_eq (I := I) g B]
-  change MDifferentiableAt I 𝓘(Real, Real)
-    (fun z : M => Real.sqrt (e2 z)) q
+  change MDifferentiableAt I 𝓘(Real, Real) (fun z : M => Real.sqrt (e2 z)) q
   exact
     (hsqrt.hasFDerivAt.hasMFDerivAt.comp q
       he2_diff.hasMFDerivAt).mdifferentiableAt

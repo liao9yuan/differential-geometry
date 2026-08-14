@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,24 +16,27 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Realized canonical curvature endpoints
 
-Split-out component of `DifferentialGeometry.Integral.Connection.Curvature`.
--/
 
-/-! ## Static metric Bianchi producers
 
-The algebraic Bianchi file consumes pointwise second-Bianchi and trace data.
-The canonical metric producer belongs here, where the Levi-Civita curvature
-constructors and curvature symmetries are available without creating an import
-cycle.
--/
 
-/-- Canonical scalar trace derivative for the Levi-Civita Ricci tensor. -/
+
+
+
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [IsManifold I 1 M] in
+omit [SigmaCompactSpace M] in
 theorem canScalTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -44,10 +45,11 @@ theorem canScalTrace
     (hinv : MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     let scalar : M -> Real :=
       fun y => metricTracePair0SAt (I := I) g (Ric y)
     let nablaRic :=
@@ -60,10 +62,11 @@ theorem canScalTrace
   intro X
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let scalar : M -> Real :=
     fun y => metricTracePair0SAt (I := I) g (Ric y)
   let nablaRic :=
@@ -72,10 +75,11 @@ theorem canScalTrace
   let dScalar := differential1FormFun (I := I) scalar x
   simpa [cov, hcov, Ric, scalar, nablaRic, dScalar] using
     nablaTrace02 (I := I) (M := M) cov g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) g)
       Ric basis gInv hinv X
 
-/-- Canonical scalar Hessian is the metric trace of canonical `∇²Ric`. -/
+
 theorem canScalHess
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -85,10 +89,11 @@ theorem canScalHess
     (i j : Idx) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     let nablaRic :=
       totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 cov Ric (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
@@ -105,16 +110,17 @@ theorem canScalHess
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let hcov1 :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (1 : WithTop ℕ∞) := by
     simpa [cov] using
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) g)
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let scalar : M -> Real := fun y => metricTracePair0SAt (I := I) g (Ric y)
   let hscalar : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) scalar :=
     trace02_smooth (I := I) g Ric
@@ -128,14 +134,17 @@ theorem canScalHess
       3 cov nablaRic x
   have hleft :=
     nabla2Trace02 (I := I) (M := M) cov hcov hcov1 g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) g)
       Ric basis gInv hinv (basis i) (basis j)
   have hright :=
     nabla2Trace02 (I := I) (M := M) cov hcov hcov1 g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) g)
       Ric basis gInv hinv (basis j) (basis i)
   have hsymm :=
-    DifferentialGeometry.Integral.Connection.hessSymm (I := I) (M := M) g scalar hscalar (basis i) (basis j)
+    DifferentialGeometry.Integral.Connection.hessSymm (I := I) (M := M) g scalar hscalar (basis i)
+      (basis j)
   calc
     (∑ k : Idx, ∑ l : Idx,
         gInv k l * nabla2Ric (vec4 (I := I) (basis i) (basis j)
@@ -169,6 +178,8 @@ private theorem update_comp_perm {s : ℕ} {β : Type*}
       exact σ.injective (by simpa using h)
     simp [Function.update, hq, hne]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor0S_update_zero {s : ℕ} {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (slots : Fin s -> TangentSpace I x) (a : Fin s) :
@@ -176,6 +187,7 @@ private theorem tensor0S_update_zero {s : ℕ} {x : M}
   exact A.map_coord_zero a (by simp)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem nabla0SFun_perm
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -297,6 +309,8 @@ private theorem nabla0SFun_perm
   rw [hleft, hright, hderiv, hsum]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem finCons_vec4_eq_vec5 {x : M}
     (A W X Y Z : TangentSpace I x) :
     Fin.cons A (vec4 (I := I) W X Y Z) =
@@ -304,18 +318,23 @@ private theorem finCons_vec4_eq_vec5 {x : M}
   funext q
   fin_cases q <;> rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem slots4_eq_vec4 {x : M}
     (slots : Fin 4 -> TangentSpace I x) :
     slots = vec4 (I := I) (slots 0) (slots 1) (slots 2) (slots 3) := by
   funext q
   fin_cases q <;> rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem slots5_eq_vec5 {x : M}
     (slots : Fin 5 -> TangentSpace I x) :
     slots = vec5 (I := I) (slots 0) (slots 1) (slots 2) (slots 3) (slots 4) := by
   funext q
   fin_cases q <;> rfl
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- The covariant derivative of an all-point output-skew `(0,4)` tensor field
 is last-pair-skew in its curvature slots. -/
 theorem nabla4OutSkew
@@ -344,8 +363,9 @@ theorem nabla4OutSkew
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Y Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-/-- The covariant derivative of an all-point input-skew `(0,4)` tensor field
-is first-pair-skew in its curvature slots. -/
+
+
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4InSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -374,8 +394,9 @@ theorem nabla4InSkew
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) Y W Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-/-- The covariant derivative of an all-point pair-symmetric `(0,4)` tensor
-field is pair-symmetric in its curvature slots. -/
+
+
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4Pair
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -404,13 +425,15 @@ theorem nabla4Pair
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Y Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-/-- Canonical Levi-Civita `∇Rm04` inherits the lowered-Riemann symmetries. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem canRmSymm
     (g : SmoothRiemannianMetric I M)
     {x : M} :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
@@ -424,10 +447,10 @@ theorem canRmSymm
   · intro A W X Y Z
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let hcov1 :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
@@ -464,7 +487,7 @@ theorem canRmSymm
   · intro A W X Y Z
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
@@ -500,10 +523,10 @@ theorem canRmSymm
   · intro A W X Y Z
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let hcov1 :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
@@ -537,14 +560,16 @@ theorem canRmSymm
     rw [hleft, hright]
     exact hsymm
 
-/-- Canonical Levi-Civita `∇Rm04` satisfies the lowered second Bianchi
-identity. -/
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem canRmSecond
     (g : SmoothRiemannianMetric I M)
     {x : M} :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
@@ -555,10 +580,10 @@ theorem canRmSecond
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let hcov1 :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
@@ -588,7 +613,8 @@ theorem canRmSecond
         exact DifferentialGeometry.Integral.Connection.CovariantDerivative.curvField_contMDiffAt
           (I := I) cov hcov Xsec Ysec Zsec p⟩
   have hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g
+    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+      (I := I) g
   have term_eq
       (D : ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M -> Type _))
@@ -696,19 +722,22 @@ theorem canRmSecond
           (TangentSpace I : M -> Type _) :=
         ⟨fun p : M => (cov (fun q : M => P q) p) (D p), by
           intro p
-          exact DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+          exact
+            CovariantDerivative.cov_smooth_apply_contMDiffAt
             (I := I) cov hcov D P p⟩
       let DQ : ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M -> Type _) :=
         ⟨fun p : M => (cov (fun q : M => Q q) p) (D p), by
           intro p
-          exact DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+          exact
+            CovariantDerivative.cov_smooth_apply_contMDiffAt
             (I := I) cov hcov D Q p⟩
       let DR : ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M -> Type _) :=
         ⟨fun p : M => (cov (fun q : M => R q) p) (D p), by
           intro p
-          exact DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+          exact
+            CovariantDerivative.cov_smooth_apply_contMDiffAt
             (I := I) cov hcov D R p⟩
       have hzero_first
           (U V T : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -719,7 +748,7 @@ theorem canRmSecond
           connectionRiemannCurvatureField (I := I) cov
             X (fun p : M => V p) (fun p : M => T p) x
         have hTens : TensorialAt I E Φ x :=
-          DifferentialGeometry.Integral.Connection.CovariantDerivative.connectionRiemannCurvatureField_tensorial_left
+          CovariantDerivative.connectionRiemannCurvatureField_tensorial_left
             (I := I) cov hcov V T x
         have hUmd : MDiffAt (T% fun p : M => U p) x :=
           (U.contMDiff.contMDiffAt (x := x)).mdifferentiableAt (by simp)
@@ -741,7 +770,7 @@ theorem canRmSecond
           connectionRiemannCurvatureField (I := I) cov
             (fun p : M => U p) Y (fun p : M => T p) x
         have hTens : TensorialAt I E Φ x :=
-          DifferentialGeometry.Integral.Connection.CovariantDerivative.connectionRiemannCurvatureField_tensorial_middle
+          CovariantDerivative.connectionRiemannCurvatureField_tensorial_middle
             (I := I) cov hcov U T x
         have hVmd : MDiffAt (T% fun p : M => V p) x :=
           (V.contMDiff.contMDiffAt (x := x)).mdifferentiableAt (by simp)
@@ -760,7 +789,7 @@ theorem canRmSecond
           connectionRiemannCurvatureField (I := I) cov
               (fun p : M => U p) (fun p : M => V p) (fun p : M => T p) x = 0 := by
         have hcong :=
-          DifferentialGeometry.Integral.Connection.CovariantDerivative.connectionRiemannCurvatureField_congr_point
+          CovariantDerivative.connectionRiemannCurvatureField_congr_point
             (I := I) cov hcov U U V V T Z0 rfl rfl hT
         have hz :
             connectionRiemannCurvatureField (I := I) cov
@@ -899,7 +928,8 @@ theorem canRmSecond
       term_eq Ysec Y hYsec Asec Xsec Zsec hcovA hcovX hcovZ
   have hb :=
     curvSecondBianchi (I := I) cov hcov
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree (I := I) g)
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree (I := I)
+        g)
       Asec Xsec Ysec Zsec x
   have hinner :
       g.inner x W
@@ -912,30 +942,34 @@ theorem canRmSecond
   simpa [add_assoc] using hinner
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The canonical Levi-Civita Ricci section is the metric trace of the
-canonical lowered Riemann section. -/
+
+
+omit [I.Boundaryless] in
 theorem canRicField
     (g : SmoothRiemannianMetric I M) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     Ric = trace04Field (I := I) (M := M) g Rm04 := by
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Rm13 : Tensor13Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.rm13Section (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.rm13Section (I := I) (M := M) cov
+      hcov
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   have hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13 := by
     intro y
     simp [Ric, Rm13,
@@ -956,11 +990,13 @@ theorem canRicField
   let gInv : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E ->
       DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
     fun k l =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g y k l (extChartAt I y y)
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g y k
+        l (extChartAt I y y)
   have hinv :
       MetricInverseInBasis_gen (I := I) (M := M) g y basis gInv := by
     simpa [basis, gInv] using
-      (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g y)
+      (Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+        (I := I) g y)
   have hInvSym : ∀ i j, gInv i j = gInv j i := by
     intro i j
     simpa [gInv] using
@@ -1006,8 +1042,8 @@ theorem canRicField
         (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by
         simp [metricTraceFirstTwo0STensor_apply, metricTraceFirstTwo0SAt]
 
-/-- Canonical Levi-Civita `∇Ric` is the first metric trace of canonical
-`∇Rm04`. -/
+
+
 theorem canRicTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1016,12 +1052,13 @@ theorem canRicTrace
     (hinv : MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     let nablaRm04 :=
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         4 cov Rm04 x
@@ -1032,12 +1069,13 @@ theorem canRicTrace
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let nablaRm04 :=
     totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       4 cov Rm04 x
@@ -1053,11 +1091,12 @@ theorem canRicTrace
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (1 : WithTop ℕ∞) := by
     simpa [cov] using
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) g)
   have htrace :=
     nablaTrace04 (I := I) (M := M) cov hcov1 g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) g)
       Rm04 basis gInv hinv A B C
   simpa [cov, hcov, Rm04, Ric, nablaRm04, nablaRic, hRicField,
     finCons_vec4_eq_vec5] using htrace
@@ -1223,6 +1262,7 @@ theorem canNabla2RicTrace
   simpa [cov, hcov, Rm04, Ric, nablaRm04, nabla2Rm04, nablaRic, nabla2Ric,
     metricTrace_finCons_vec3_eq_vec4] using hmain
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 /-- Canonical Levi-Civita `∇²Rm04` inherits the three algebraic Riemann
 symmetries in its four curvature slots. -/
@@ -1359,10 +1399,7 @@ theorem canRm2Symm
     rw [hleft, hright]
     simpa [σ, vec5, Equiv.ofBijective] using h
 
-/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric.
-
-The scalar trace derivative is deliberately excluded from this frontier; it is
-now supplied by `canScalTrace`. -/
+/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric. -/
 theorem canBianchiCore
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1371,12 +1408,13 @@ theorem canBianchiCore
     (hinv : MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     let nablaRm04 :=
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         4 cov Rm04 x
@@ -1389,12 +1427,13 @@ theorem canBianchiCore
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let nablaRm04 :=
     totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       4 cov Rm04 x
@@ -1412,12 +1451,12 @@ theorem canBianchiCore
       canRicTrace (I := I) (M := M) g basis gInv hinv
   exact ⟨hSecond, hSymm, hTrace⟩
 
-/-- Canonical fixed-time Bianchi and trace data for one smooth metric.
 
-This is the honest static frontier below the Ricci-flow coordinate consumer.
-The intended proof is the Levi-Civita second Bianchi identity, plus the
-metric-compatibility trace product rules for `Ric = tr_g Rm04` and
-`scalar = tr_g Ric`. -/
+
+
+
+
+
 theorem canSecondBianchi
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1426,12 +1465,13 @@ theorem canSecondBianchi
     (hinv : MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     let scalar : M -> Real :=
       fun y => metricTracePair0SAt (I := I) g (Ric y)
     let nablaRm04 :=
@@ -1448,12 +1488,13 @@ theorem canSecondBianchi
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let scalar : M -> Real :=
     fun y => metricTracePair0SAt (I := I) g (Ric y)
   let nablaRm04 :=
@@ -1475,8 +1516,8 @@ theorem canSecondBianchi
       canScalTrace (I := I) (M := M) g basis gInv hinv
   exact ⟨hcore.1, hcore.2.1, hcore.2.2, hscalar⟩
 
-/-- Static metric Bianchi package in the existential shape consumed by the
-Ricci-flow coordinate proof. -/
+
+
 theorem metricBianchiAt
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1485,10 +1526,11 @@ theorem metricBianchiAt
     (hinv : MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M)
+        cov hcov
     let scalar : M -> Real :=
       fun y => metricTracePair0SAt (I := I) g (Ric y)
     let nablaRic :=
@@ -1504,12 +1546,13 @@ theorem metricBianchiAt
   classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let scalar : M -> Real :=
     fun y => metricTracePair0SAt (I := I) g (Ric y)
   let nablaRm04 :=

@@ -6,26 +6,24 @@ import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Claim 1 geometric wiring (plan: `Claim1Wiring.md`)
 
-Discharges the hypotheses of `claim1` (AkMFold.lean) on the actual geometry.
-Canonical setting (design D2b): a tangent-bundle trivialization `e₀` with
-`frame := e₀.localFrame basisE`, `u := e₀.baseSet`.
 
-SIGN CONVENTION (`Claim1Wiring.md` §1b): `A_k = ∇_k − ∇_ref`, so the `A_k`
-component array is `chr(g_k) − chr(gRef)` and the lowered-Koszul coefficients
-are `(+½, +½, −½)`.
 
-This file so far: **B2** (smoothness inputs `hchr`, `hframe`, `hA`).
-TODO (B2 tail): `hg` = smoothness of `frameComp0S (metricTensorField g) frame`
-via `TensorMultilinear.contMDiffAt_section_apply_gen` (the (0,s) eval engine
-inside `tensorRS_eval_contMDiffAt`, `Tensor/RSTensor/LocalFrameRegularity.lean`)
-once the `metricTensorField`-as-smooth-section producer is located.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -43,20 +41,21 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-! ## B2: the smoothness inputs of `claim1` on a trivialization domain -/
 
-/-- **B2 `hchr`**: the Levi-Civita Christoffel array of `g` in the trivialization
-frame is `C^∞` on the trivialization domain (the `ContMDiffOn` form the component
-towers consume).  Analytic content = `lc_christoffel_contMDiffAt`
-(`LeviCivita/Smooth/MetricFlatBasis.lean`, the `localFrame_coeff` form); here we
-bridge `IsLocalFrameOn.coeff` to `localFrame_coeff` on the trivialization domain. -/
-theorem lcChrist_e_mdiffOn
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
+theorem lcChrist_e_mdiffOn [Finite Idx]
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
@@ -79,8 +78,11 @@ theorem lcChrist_e_mdiffOn
   simp [christoffelSymbolInFrame, IsLocalFrameOn.coeff, hz,
     Bundle.Trivialization.localFrame_coeff, hbasis]
 
-/-- **B2 `hframe`**: the trivialization frame vectors are smooth sections on the
-trivialization domain (the `TotalSpace.mk'` form the tower machinery consumes). -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [Fintype Idx] [DecidableEq Idx] in
 theorem frame_e_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -91,8 +93,10 @@ theorem frame_e_mdiffOn
   (e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE).contMDiffOn d
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The components of a smooth covariant tensor field in a trivialization frame
-are smooth on the trivialization domain. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem tensorComp_mdiffOn {r : ℕ}
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -118,9 +122,9 @@ theorem tensorComp_mdiffOn {r : ℕ}
     (v := fun (i : Fin r) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
 
-/-- The `A_k = ∇_k − ∇_ref` component field in the trivialization frame, with the
-contracted UPPER slot LAST (`m 2`), as the towers and `claim1` consume it:
-`A(m) = Γ(g_k)^{m 2}_{m 0, m 1} − Γ(gRef)^{m 2}_{m 0, m 1}`. -/
+
+
+
 def akCompField
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -134,9 +138,11 @@ def akCompField
       (fun a y' => e₀.localFrame basisE a y')
       (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y (m 0) (m 1) (m 2)
 
-/-- **B2 `hA`**: the `A_k` component field is `C^∞` on the trivialization domain
-(difference of the two smooth Christoffel arrays). -/
-theorem akCompField_mdiffOn
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
+theorem akCompField_mdiffOn [Finite Idx]
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (gK gRef : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
@@ -147,9 +153,11 @@ theorem akCompField_mdiffOn
     (lcChrist_e_mdiffOn e₀ gRef basisE (k 0) (k 1) (k 2))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **B2 `hg`**: the metric component field in the trivialization frame is `C^∞` on the
-trivialization domain (the smooth `(0,2)` section `metricTensorField g` evaluated on the
-smooth frame slots, via the `(0,s)` evaluation engine). -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem gCompField_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -173,13 +181,13 @@ theorem gCompField_mdiffOn
     (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
 
-/-! ## B3: the pointwise inverse metric array (`Ginv` + `hinv`)
 
-No smoothness of the inverse is needed anywhere (the `claim1` engine never
-differentiates `g⁻¹`) — only the pointwise inverse property and, later (B4), a
-norm bound. -/
 
-/-- The Gram matrix of `g` in the trivialization frame at `y`. -/
+
+
+
+
+
 def gramE
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -187,6 +195,9 @@ def gramE
     Matrix Idx Idx Real :=
   Matrix.of fun i j => g.inner y (e₀.localFrame basisE i y) (e₀.localFrame basisE j y)
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [Fintype Idx] [DecidableEq Idx] in
 theorem gramE_herm
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -196,8 +207,11 @@ theorem gramE_herm
   simp only [Matrix.conjTranspose_apply, star_trivial, gramE, Matrix.of_apply]
   exact g.symm y _ _
 
-/-- Quadratic-form expansion of the Gram matrix: `c ⬝ᵥ (G *ᵥ c) = g(W, W)` with
-`W = Σ cᵢ • frameᵢ`. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [DecidableEq Idx] in
 theorem gramE_dotVec
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -227,14 +241,17 @@ theorem gramE_dotVec
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
-/-- The Gram matrix is positive-definite on the trivialization domain (the frame is a
-basis there and `g` is positive). -/
-theorem gramE_posDef
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
+theorem gramE_posDef [Finite Idx]
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
     {y : M} (hy : y ∈ e₀.baseSet) :
     (gramE (I := I) e₀ g basisE y).PosDef := by
+  letI := Fintype.ofFinite Idx
   refine Matrix.PosDef.of_dotProduct_mulVec_pos (gramE_herm (I := I) e₀ g basisE y) ?_
   intro c hc
   rw [show (star c : Idx → Real) = c from funext fun i => star_trivial _, gramE_dotVec]
@@ -245,8 +262,8 @@ theorem gramE_posDef
     exact hc (funext (hli c hw0))
   exact g.pos y _ hwnz
 
-/-- The pointwise inverse-metric array in the `(Fin 2 → Idx)`-shape `claim1` consumes
-(the matrix inverse of the Gram matrix; junk off the trivialization domain). -/
+
+
 def ginvCompField
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -254,8 +271,9 @@ def ginvCompField
     M → (Fin (1 + 1) → Idx) → Real :=
   fun y m => (gramE (I := I) e₀ g basisE y)⁻¹ (m 0) (m 1)
 
-/-- **B3 `hinv`**: the defining inverse property, in the exact shape of `claim1`'s
-`hinv` hypothesis. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ginv_hinv
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -294,16 +312,20 @@ theorem ginv_hinv
   · simp
   · rw [if_neg h, if_neg fun hce => h hce.symm]
 
-/-! ## B1: the lowered-Koszul field identity (`hkoszul`)
 
-The intrinsic content is `Tensor0SBundle.koszul_difference`
-(`Tensor/RSTensor/NablaOnTensors/KoszulDifference.lean`); here we take its frame
-components: the LHS lowers through `christoffelSymbolDifferenceInFrame`
-(`Chart/Christoffel.lean`), the RHS realizes through `iterCov_realizes` +
-`iterCovComp_eq_iterCov`. -/
 
-/-- The two spellings of the Christoffel coefficient are definitionally equal
-(`Tensor.Coordinates` vs `Coordinates`, identical bodies). -/
+
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 private theorem chr_eq_chartChr {u : Set M}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -312,11 +334,13 @@ private theorem chr_eq_chartChr {u : Set M}
       DifferentialGeometry.Coordinates.christoffelSymbolInFrame cov frame hframe x i j k := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **B1 `hkoszul` (general frame)**: the lowered-Koszul component identity.  On the
-local-frame domain, the `g_K`-lowered connection difference (`contrTail` of the
-Christoffel-difference array against the metric array) is the Koszul combination of the
-first `∇_ref`-covariant-derivative tower of the metric components, with coefficients
-`(+½, +½, −½)` and slot permutations `(id, swap 0 1, (finRotate 3)⁻¹)`. -/
+
+
+
+
+
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem koszulComp_at
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
     (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
@@ -347,7 +371,6 @@ theorem koszulComp_at
             (fun j => idx ((finRotate 3).symm j))) := by
   classical
   funext idx
-  -- the three sections through the frame values
   obtain ⟨X, hX⟩ : ∃ X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
       X y = frame (idx 0) y :=
     ⟨(ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
@@ -366,7 +389,6 @@ theorem koszulComp_at
         (n := (⊤ : ℕ∞)) y (frame (idx 2) y)).choose,
       (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
         (n := (⊤ : ℕ∞)) y (frame (idx 2) y)).choose_spec⟩
-  -- the geometric Koszul identity
   have hmcK : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
       (I := I) (leviCivitaConnectionOfMetric (I := I) gK) gK :=
     leviCivitaConnectionOfMetric_isMetricCompatible (I := I) gK
@@ -380,23 +402,27 @@ theorem koszulComp_at
     (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
     gK hmcK htfK htfR X Y Z
   rw [hX, hY, hZ] at hkos
-  -- LHS: the lowered difference in components
   have hframe_b : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun z => TotalSpace.mk' E (E := TangentSpace I) z (frame (idx 1) z)) y :=
     ((hframe.contMDiffOn (idx 1)).contMDiffAt (hu.mem_nhds hy)).mdifferentiableAt (by simp)
   have hLHS : contrTail
         (fun m : Fin (2 + 1) → Idx =>
-          christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y (m 0) (m 1) (m 2) -
-            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y (m 0) (m 1) (m 2))
+          christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y (m 0)
+            (m 1) (m 2) -
+            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y
+              (m 0) (m 1) (m 2))
         (frameComp0S (I := I) (metricTensorField (I := I) gK) frame y) idx =
       gK.inner y
-        (((CovariantDerivative.difference (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef) y) (frame (idx 1) y)) (frame (idx 0) y))
+        (((CovariantDerivative.difference (leviCivitaConnectionOfMetric (I := I) gK)
+          (leviCivitaConnectionOfMetric (I := I) gRef) y) (frame (idx 1) y)) (frame (idx 0) y))
         (frame (idx 2) y) := by
     rw [contrTail_apply]
     have hsum : ∀ d : Idx,
         (fun m : Fin (2 + 1) → Idx =>
-            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y (m 0) (m 1) (m 2) -
-              christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y (m 0) (m 1) (m 2))
+            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y (m 0)
+              (m 1) (m 2) -
+              christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y
+                (m 0) (m 1) (m 2))
           (Fin.snoc (fun i : Fin 2 => idx (Fin.castAdd 1 i)) d) *
           frameComp0S (I := I) (metricTensorField (I := I) gK) frame y
             (Fin.snoc (fun j : Fin 1 => idx (Fin.natAdd 2 j)) d) =
@@ -427,13 +453,15 @@ theorem koszulComp_at
     rw [Finset.sum_congr rfl fun d _ => hsum d]
     have hlin : (∑ d : Idx,
           DifferentialGeometry.Coordinates.christoffelSymbolDifferenceInFrame
-              (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+              (leviCivitaConnectionOfMetric (I := I) gK)
+                (leviCivitaConnectionOfMetric (I := I) gRef)
               frame hframe y (idx 0) (idx 1) d *
             gK.inner y (frame (idx 2) y) (frame d y)) =
         gK.inner y (frame (idx 2) y)
           (∑ d : Idx,
             DifferentialGeometry.Coordinates.christoffelSymbolDifferenceInFrame
-                (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+                (leviCivitaConnectionOfMetric (I := I) gK)
+                  (leviCivitaConnectionOfMetric (I := I) gRef)
                 frame hframe y (idx 0) (idx 1) d • frame d y) := by
       rw [map_sum]
       refine Finset.sum_congr rfl fun d _ => ?_
@@ -443,7 +471,6 @@ theorem koszulComp_at
         (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
         frame hframe hy (idx 0) (idx 1),
       gK.symm y]
-  -- RHS: the three realization bridges
   have hreal := iterCov_realizes (I := I) gRef
     (T := metricTensorField (I := I) gK) 0
   have hbr : ∀ (W : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -470,37 +497,38 @@ theorem koszulComp_at
         frameTuple (I := I) frame y w := by
       funext q
       refine Fin.cases ?_ (fun q' => ?_) q
-      · show frame v0 y = frame (w 0) y
+      · change frame v0 y = frame (w 0) y
         rw [hw0]
       · refine Fin.cases ?_ (fun q'' => ?_) q'
-        · show (if (0 : Fin 2) = 0 then frame v1 y else frame v2 y) = frame (w 1) y
+        · change (if (0 : Fin 2) = 0 then frame v1 y else frame v2 y) = frame (w 1) y
           rw [if_pos rfl, hw1]
         · have hq2 : q'' = 0 := Subsingleton.elim _ _
           subst hq2
-          show (if (Fin.succ 0 : Fin 2) = 0 then frame v1 y else frame v2 y) =
+          change (if (Fin.succ 0 : Fin 2) = 0 then frame v1 y else frame v2 y) =
             frame (w 2) y
           rw [if_neg (by decide), hw2]
     rw [← h1', hW, hvw,
       ← iterCovComp_eq_iterCov (I := I) gRef (metricTensorField (I := I) gK)
         frame hframe hu 1 hy w]
-  -- the three instantiations
   have hb1 := hbr X (idx 0) (idx 1) (idx 2) (fun j => idx (Equiv.refl (Fin 3) j)) hX rfl rfl rfl
   have hb2 := hbr Y (idx 1) (idx 0) (idx 2) (fun j => idx (Equiv.swap (0 : Fin 3) 1 j)) hY
-    (by show idx (Equiv.swap (0 : Fin 3) 1 0) = idx 1; congr 1)
-    (by show idx (Equiv.swap (0 : Fin 3) 1 1) = idx 0; congr 1)
-    (by show idx (Equiv.swap (0 : Fin 3) 1 2) = idx 2; congr 1)
+    (by change idx (Equiv.swap (0 : Fin 3) 1 0) = idx 1; congr 1)
+    (by change idx (Equiv.swap (0 : Fin 3) 1 1) = idx 0; congr 1)
+    (by change idx (Equiv.swap (0 : Fin 3) 1 2) = idx 2; congr 1)
   have hb3 := hbr Z (idx 2) (idx 0) (idx 1) (fun j => idx ((finRotate 3).symm j)) hZ
-    (by show idx ((finRotate 3).symm 0) = idx 2; congr 1)
-    (by show idx ((finRotate 3).symm 1) = idx 0; congr 1)
-    (by show idx ((finRotate 3).symm 2) = idx 1; congr 1)
+    (by change idx ((finRotate 3).symm 0) = idx 2; congr 1)
+    (by change idx ((finRotate 3).symm 1) = idx 0; congr 1)
+    (by change idx ((finRotate 3).symm 2) = idx 1; congr 1)
   rw [hLHS, hkos, hb1, hb2, hb3]
   ring
 
-/-! ## B4: the inverse-array norm bound -/
 
-/-- **B4 core**: a quadratic lower bound `c·‖v‖² ≤ vᵀ(Gram)v` forces the inverse Gram
-array's `ℓ²` norm to be at most `√(card Idx)/c`.  Elementary: the `l`-th column
-`w = G⁻¹eₗ` satisfies `c·‖w‖² ≤ wᵀGw = wₗ ≤ ‖w‖`, so `‖w‖ ≤ 1/c`; no spectral theory. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem ginv_compL2_le
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -511,7 +539,6 @@ theorem ginv_compL2_le
     compL2 (ginvCompField (I := I) e₀ g basisE y) ≤
       Real.sqrt (Fintype.card Idx) / c := by
   classical
-  -- positivity (hence invertibility) from the quadratic bound
   have hpos : (gramE (I := I) e₀ g basisE y).PosDef := by
     refine Matrix.PosDef.of_dotProduct_mulVec_pos (gramE_herm (I := I) e₀ g basisE y) ?_
     intro v hv
@@ -523,7 +550,6 @@ theorem ginv_compL2_le
     exact lt_of_lt_of_le (mul_pos hc hvv) (hquad v)
   have hdet : IsUnit (gramE (I := I) e₀ g basisE y).det :=
     isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
-  -- the column bound `‖G⁻¹eₗ‖² ≤ 1/c²`
   have hcol : ∀ l : Idx,
       ((fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l) ⬝ᵥ
         (fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l)) ≤ (1 / c) ^ 2 := by
@@ -551,7 +577,6 @@ theorem ginv_compL2_le
       nlinarith [h3, hSpos]
     · rw [← hS0']
       positivity
-  -- assemble: `compL2Sq = Σₗ ‖column l‖² ≤ card/c²`
   have hsq : compL2Sq (ginvCompField (I := I) e₀ g basisE y) ≤
       (Real.sqrt (Fintype.card Idx) / c) ^ 2 := by
     have hre : compL2Sq (ginvCompField (I := I) e₀ g basisE y) =
@@ -581,12 +606,16 @@ theorem ginv_compL2_le
     _ = Real.sqrt (Fintype.card Idx) / c := Real.sqrt_sq
         (div_nonneg (Real.sqrt_nonneg _) hc.le)
 
-/-! ## B5: the pointwise norm bridge (component tower ↔ geometric tower) -/
 
-/-- **B5**: at a point where the frame is `gRef`-orthonormal (the pointwise
-`MetricInverseInBasis … identityInvMetric` condition), the `compL2` of the component
-tower equals the geometric `√normSq0S` of the `iterCov` tower — both sides of `claim1`'s
-conclusion convert to the textbook geometric norms. -/
+
+
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem compL2_tower_eq
     (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -617,16 +646,18 @@ theorem compL2_tower_eq
   rw [IsLocalFrameOn.toBasisAt_coe]
   rfl
 
-/-! ## B6: the assembled geometric Claim 1 -/
+
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Claim 1, geometric form** (MSM135 Lemma 3.11 bookkeeping, first assembly).
-On a tangent-trivialization domain, the `m`-fold upper covariant tower of the
-connection-difference components `A_k = Γ(g_K) − Γ(g_ref)` is controlled by the
-`(m+1)`-st metric-derivative tower: `|∇_U^m A_k| ≤ C·(1 + |∇^{m+1} g_K|)`, given the
-window bounds `|g_K⁻¹-array| ≤ C0` and `|∇^j g_K| ≤ K (1 ≤ j ≤ m)`.  All structural
-hypotheses of `claim1` are discharged by B1–B3 (`koszulComp_at`, `ginv_hinv`, the B2
-smoothness producers); only the numeric window bounds remain as inputs (B4/B5). -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem claim1_geom
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]

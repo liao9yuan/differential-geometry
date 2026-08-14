@@ -1,15 +1,15 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRealizeUnitModel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSThreeArmCancel
 
-/-!
-# Integrated three-arm form of the Ricci--DeTurck RHS
 
-This module integrates the exact complete Ricci--DeTurck slope along the
-realized metric segment.  The zero- and one-order coefficient fields are
-public path integrals; the second-order field is the existing combined top
-coefficient integral.  Thus the Ricci and DeTurck principal terms are combined
-before integration and before any norm estimate.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,7 +30,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -72,12 +72,12 @@ private theorem unitModel_sub_app
       ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub]
   rw [hfun, ContinuousMultilinearMap.sub_apply]
 
-/-- The genuine Ricci--DeTurck RHS at a realized metric, re-tagged by the
-fixed metric used for the Sobolev scale. -/
+
+
 def realizedRHSArm
     (g₀ g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     SmoothCcTensor g₀ 0 2 where
   toSection :=
     (deTurckRHSSection (I := I) g_bg
@@ -86,16 +86,12 @@ def realizedRHSArm
     (deTurckRHSSection (I := I) g_bg
       (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).hasCompactSupport
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- The complete top coefficient is jointly smooth along the realized metric
-segment. -/
 theorem rhsTop_path_joint
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
       (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
         (realizedFam (I := I) g₀ T T' hδ hδ' s)) (δ := δ) (δ' := δ') := by
@@ -127,14 +123,14 @@ theorem rhsTop_path_joint
     SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
-/-- The complete second-order coefficient integrated along the realized
-metric segment. -/
+
+
 def rhsTopPathIntegral
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     SmoothCcTensor g₀ 4 2 :=
   pathIntegralCoeffField (I := I) (M := M) g₀ 4 2
     (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
@@ -145,14 +141,14 @@ def rhsTopPathIntegral
       exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (rhsTop_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ')
 
-/-- The complete zero-order coefficient integrated along the realized metric
-segment. -/
+
+
 def rhsLow0PathIntegral
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     SmoothCcTensor g₀ 2 2 :=
   pathIntegralCoeffField (I := I) (M := M) g₀ 2 2
     (fun s => rhsLow0Coeff (I := I) (M := M) g₀ g_bg T T' hδ hδ' s)
@@ -162,14 +158,14 @@ def rhsLow0PathIntegral
       exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (rhsLow0_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ')
 
-/-- The complete one-order coefficient integrated along the realized metric
-segment. -/
+
+
 def rhsLow1PathIntegral
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     SmoothCcTensor g₀ 3 2 :=
   pathIntegralCoeffField (I := I) (M := M) g₀ 3 2
     (fun s => rhsLow1Coeff (I := I) (M := M) g₀ g_bg T T' hδ hδ' s)
@@ -179,14 +175,14 @@ def rhsLow1PathIntegral
       exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (rhsLow1_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ')
 
-/-- At the terminal endpoint, the chart sum is the unit-model readout of the
-realized Ricci--DeTurck RHS arm. -/
+
+
 theorem rhsChartSum_one
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) :
     rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w 1 =
       unitModel (I := I) (M := M) g₀ 2
@@ -225,14 +221,14 @@ theorem rhsChartSum_one
     _ = _ := unitModel_basis_expand_two (I := I) (M := M) g₀
       (realizedRHSArm (I := I) g₀ g_bg T hδ_lt hδ) x ![v, w]
 
-/-- At the initial endpoint, the chart sum is the unit-model readout of the
-realized Ricci--DeTurck RHS arm. -/
+
+
 theorem rhsChartSum_zero
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) :
     rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w 0 =
       unitModel (I := I) (M := M) g₀ 2
@@ -271,33 +267,27 @@ theorem rhsChartSum_zero
     _ = _ := unitModel_basis_expand_two (I := I) (M := M) g₀
       (realizedRHSArm (I := I) g₀ g_bg T' hδ'_lt hδ') x ![v, w]
 
-set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 3200000 in
-/-- The difference of two realized Ricci--DeTurck right-hand sides is exactly
-the sum of the integrated zero-, one-, and two-order background-covariant
-arms.  The top path coefficient is already the combined Ricci--DeTurck
-coefficient, so no high-regularity metric bound enters this identity. -/
 theorem rhsArm_sub_eq_paths
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
     (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     realizedRHSArm (I := I) g₀ g_bg T hδ_lt hδ -
         realizedRHSArm (I := I) g₀ g_bg T' hδ'_lt hδ' =
-      appCc (I := I) (M := M) g₀ 2 2
+      operatorFieldApply (I := I) (M := M) g₀ 2 2
           (rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T'
             hδ_lt hδ hδ'_lt hδ')
           (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-        appCc (I := I) (M := M) g₀ 3 2
+        operatorFieldApply (I := I) (M := M) g₀ 3 2
           (rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T'
             hδ_lt hδ hδ'_lt hδ')
           (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
-        appCc (I := I) (M := M) g₀ 4 2
+        operatorFieldApply (I := I) (M := M) g₀ 4 2
           (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
             hδ_lt hδ hδ'_lt hδ')
           (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) := by
@@ -366,7 +356,7 @@ theorem rhsArm_sub_eq_paths
   rw [rhsSum_sub_eq_int (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x]
   have hI0 : IntervalIntegrable (fun s : ℝ =>
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
           (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x ![v 0, v 1])
       volume 0 1 :=
     coeffApp_integrable (I := I) (M := M) g₀ 2 2 Ψ₀
@@ -374,7 +364,7 @@ theorem rhsArm_sub_eq_paths
       (realizedSmallSet (δ := δ) (δ' := δ')) hSI hc0 x ![v 0, v 1]
   have hI1 : IntervalIntegrable (fun s : ℝ =>
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+        (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
           (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x ![v 0, v 1])
       volume 0 1 :=
     coeffApp_integrable (I := I) (M := M) g₀ 3 2 Ψ₁
@@ -382,7 +372,7 @@ theorem rhsArm_sub_eq_paths
       (realizedSmallSet (δ := δ) (δ' := δ')) hSI hc1 x ![v 0, v 1]
   have hI2 : IntervalIntegrable (fun s : ℝ =>
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
           (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x ![v 0, v 1])
       volume 0 1 :=
     coeffApp_integrable (I := I) (M := M) g₀ 4 2 Ψ₂
@@ -392,13 +382,13 @@ theorem rhsArm_sub_eq_paths
       rhsSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
           x (v 0) (v 1) s =
         unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x ![v 0, v 1] +
           unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+            (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x ![v 0, v 1] +
           unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+            (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x ![v 0, v 1] := by
     rw [MeasureTheory.ae_iff]
     have hnull : volume ({1} : Set ℝ) = 0 := by simp

@@ -127,7 +127,6 @@ private theorem sq_le_of_le_rpow_half_mul {a b c : ℝ}
     rw [ha2, hb2]
   linarith
 
-set_option maxHeartbeats 800000 in
 /-- The norm of `matMulE (A.a x) ξ` is a.e. strongly measurable when composed with
 a Sobolev weak gradient. -/
 private theorem aestronglyMeasurable_norm_matMulE_weakGrad
@@ -186,7 +185,6 @@ private theorem aestronglyMeasurable_norm_matMulE_weakGrad
     exact hnorm_sq_meas.sqrt
   exact hmeas_norm.aestronglyMeasurable
 
-set_option maxHeartbeats 800000 in
 /-- MemLp of `|f| * ‖A∇u‖` at exponent 2, given integrability of `f² * ‖A∇u‖²`.
 Extracted as a standalone helper to keep elaboration manageable. -/
 private theorem memLp_abs_mul_norm_matMulE

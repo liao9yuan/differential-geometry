@@ -3,13 +3,13 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 
-/-!
-# Finite spectral pairing
 
-This file identifies the integer-weighted spectral pairing of a finitely
-supported covariant tensor with the `L²` pairing against the corresponding
-iterate of `1 - Δ_∇`.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -33,8 +33,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Eigenbasis coordinates of an integer iterate of `1 - Δ_∇` are
-multiplied by the corresponding integer Sobolev weight. -/
+
+
 theorem cc_iter_coeff
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (U : SmoothCcTensor g 0 s)
@@ -60,8 +60,6 @@ theorem cc_iter_coeff
       ring
 
 omit [BoundarylessManifold I M] in
-/-- Parseval identifies the `L²` pairing of two smooth covariant tensors
-with the sum of the products of their intrinsic eigenbasis coordinates. -/
 theorem cc_l2_pair_tsum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) :
@@ -92,8 +90,8 @@ theorem cc_l2_pair_tsum
   rw [show (⟪SmoothCcTensor.toL2 A, b i⟫_ℝ : ℝ) =
       ⟪b i, SmoothCcTensor.toL2 A⟫_ℝ from real_inner_comm _ _]
 
-/-- The integer-weighted spectral cross pairing equals the `L²` pairing
-against the matching iterate of `1 - Δ_∇`. -/
+
+
 theorem cc_pair_tsum
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (U A : SmoothCcTensor g 0 s) :
@@ -123,7 +121,7 @@ theorem cc_pair_tsum
   ring
 
 /-- Splitting an integer Sobolev weight as `a + b` places `b` iterates of
-`1 - Δ∇` on the first tensor and `a` iterates on the second tensor. -/
+`1 - Delta_nabla` on the first tensor and `a` iterates on the second tensor. -/
 theorem cc_pair_tsum_split
     (g : SmoothRiemannianMetric I M) (s a b : ℕ)
     (U A : SmoothCcTensor g 0 s) :
@@ -156,8 +154,8 @@ theorem cc_pair_tsum_split
   ring
 
 /-- The finite weighted pairing of coefficients `c` with a smooth `(0, 2)`
-tensor splits as an `L²` pairing with complementary integer iterates of
-`1 - Δ∇`. -/
+tensor splits as an `L2` pairing with complementary integer iterates of
+`1 - Delta_nabla`. -/
 theorem finite_pair_split
     (g : SmoothRiemannianMetric I M)
     (F : Finset
@@ -224,10 +222,10 @@ theorem finite_pair_split
       (finiteEigenCombo (I := I) (M := M) g F c) A
 
 private theorem connIter_smul
-    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (θ : ℝ)
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (theta : ℝ)
     (T : SmoothCcTensor g r s) :
-    oneMinusConnLapSmoothIter (I := I) g r s k (θ • T) =
-      θ • oneMinusConnLapSmoothIter (I := I) g r s k T := by
+    oneMinusConnLapSmoothIter (I := I) g r s k (theta • T) =
+      theta • oneMinusConnLapSmoothIter (I := I) g r s k T := by
   induction k with
   | zero => simp only [oneMinusConnLapSmoothIter_zero]
   | succ k ih =>
@@ -235,20 +233,21 @@ private theorem connIter_smul
       unfold oneMinusConnLapSmooth
       have hraw :
           rawTensorConnLapSmooth (I := I) g r s
-              (θ • oneMinusConnLapSmoothIter (I := I) g r s k T) =
-            θ • rawTensorConnLapSmooth (I := I) g r s
+              (theta • oneMinusConnLapSmoothIter (I := I) g r s k T) =
+            theta • rawTensorConnLapSmooth (I := I) g r s
               (oneMinusConnLapSmoothIter (I := I) g r s k T) := by
         change rawConnLapLin (I := I) g r s
-              (θ • oneMinusConnLapSmoothIter (I := I) g r s k T) =
-            θ • rawConnLapLin (I := I) g r s
+              (theta • oneMinusConnLapSmoothIter (I := I) g r s k T) =
+            theta • rawConnLapLin (I := I) g r s
               (oneMinusConnLapSmoothIter (I := I) g r s k T)
-        exact map_smul (rawConnLapLin (I := I) g r s) θ
+        exact map_smul (rawConnLapLin (I := I) g r s) theta
           (oneMinusConnLapSmoothIter (I := I) g r s k T)
       rw [hraw, smul_sub]
 
 private theorem connIter_symmS
     (g : SmoothRiemannianMetric I M) (k : ℕ) (T : SmoothCcTensor g 0 2) :
-    oneMinusConnLapSmoothIter (I := I) g 0 2 k (symmS (I := I) (M := M) g T) =
+    oneMinusConnLapSmoothIter (I := I) g 0 2 k
+        (symmS (I := I) (M := M) g T) =
       symmS (I := I) (M := M) g
         (oneMinusConnLapSmoothIter (I := I) g 0 2 k T) := by
   induction k with
@@ -261,7 +260,7 @@ private theorem connIter_symmS
             symmS (I := I) (M := M) g
               (rawTensorConnLapSmooth (I := I) g 0 2
                 (oneMinusConnLapSmoothIter (I := I) g 0 2 k T)) := by
-        unfold symmS
+        unfold symmS ccTensor02Symm
         have hsmul :
             rawTensorConnLapSmooth (I := I) g 0 2
                 ((1 / 2 : ℝ) •
@@ -307,7 +306,8 @@ private theorem connIter_symmS
             (Equiv.swap (0 : Fin 2) 1)]
       rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_succ, ih]
       unfold oneMinusConnLapSmooth
-      rw [hraw, symmS_sub]
+      rw [hraw]
+      exact (symmS_sub (I := I) (M := M) g _ _).symm
 
 /-- Scaling and symmetrizing a finite `(0, 2)` spectral combination places the
 scaled symmetric tensor in the first slot of the complementary iterate pairing. -/
@@ -318,16 +318,16 @@ theorem finite_symm_scale
         (I := I) (M := M) g 0 2))
     (c : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g 0 2 → ℝ)
-    (A : SmoothCcTensor g 0 2) (a b : ℕ) (θ : ℝ)
+    (A : SmoothCcTensor g 0 2) (a b : ℕ) (theta : ℝ)
     (hA : symmS (I := I) (M := M) g A = A) :
-    θ * (∑ i ∈ F,
+    theta * (∑ i ∈ F,
         tensorSobolevWeight (I := I) (M := M) i (((a + b : ℕ) : ℝ)) *
           (c i * tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
             (SmoothCcTensor.toL2 A) i)) =
       tensorL2Inner (I := I) (M := M) g 0 2
         (oneMinusConnLapSmoothIter (I := I) g 0 2 b
-          (θ • symmS (I := I) (M := M) g
+          (theta • symmS (I := I) (M := M) g
             (finiteEigenCombo (I := I) (M := M) g F c))).toFun
         (oneMinusConnLapSmoothIter (I := I) g 0 2 a A).toFun := by
   rw [finite_pair_split (I := I) (M := M) g F c A a b]
@@ -343,15 +343,15 @@ theorem finite_symm_scale
           S.toFun (symmS (I := I) (M := M) g T).toFun := by
     rw [← SmoothCcTensor.inner_def (I := I) (M := M),
       ← SmoothCcTensor.inner_def (I := I) (M := M)]
-    unfold symmS
+    unfold symmS ccTensor02Symm
     rw [real_inner_smul_left, real_inner_smul_right, inner_add_left, inner_add_right,
       inner_domDomCongrSection_swap (I := I) (M := M) g]
   rw [connIter_smul (I := I) (M := M),
     connIter_symmS (I := I) (M := M), SmoothCcTensor.toFun_smul,
     tensorL2Inner_smul_left, hsymm_pair, hsymmA]
 
-/-- The spectral Sobolev norm of the smooth representative of a
-finitely-supported tensor is its finite weighted coefficient energy. -/
+
+
 theorem finite_repr_norm
     (g : SmoothRiemannianMetric I M) (s m : ℕ)
     (T : tensorHs (I := I) (M := M) g 0 s 0)
@@ -393,9 +393,9 @@ theorem finite_repr_norm
         exact hi (hT.mem_toFinset.mpr (Function.mem_support.mpr hne))
       norm_num [hcoeff]
 
-/-- For a finitely-supported spectral tensor, the finite weighted coordinate
-pairing is the `L²` pairing of its smooth representative after applying the
-matching iterate of `1 - Δ_∇`. -/
+
+
+
 theorem finite_cc_pair
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (T : tensorHs (I := I) (M := M) g 0 s 0)

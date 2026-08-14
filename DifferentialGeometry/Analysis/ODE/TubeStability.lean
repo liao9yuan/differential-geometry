@@ -4,21 +4,21 @@ import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
 
-/-!
-# Compact-tube stability for time-dependent ODEs
 
-This file contains the first-exit and Grönwall tools used to compare selected
-integral curves on a common compact time interval.  The main theorem derives
-large-stage containment in a moving tube around a limit curve; it does not
-assume that the stage curves remain in that tube.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Analysis.ODE
 
 open Filter Metric Set Topology
 
-/-- A continuous real-valued function that starts below a level and later
-reaches it has a first hitting time on a compact interval. -/
+
+
 theorem exists_first_hit_Icc
     {f : ℝ → ℝ} {a b r : ℝ}
     (hab : a ≤ b)
@@ -66,8 +66,8 @@ theorem exists_first_hit_Icc
   subst s
   exact (not_lt_of_ge hτeq.le) hrs
 
-/-- The Grönwall bound tends jointly to zero with its initial and forcing
-errors, with the Lipschitz and time parameters fixed. -/
+
+
 theorem tendsto_gronwallBound_zero_zero (L T : ℝ) :
     Tendsto
       (fun z : ℝ × ℝ => gronwallBound z.1 L z.2 T)
@@ -105,9 +105,9 @@ private theorem exists_pos_gronwallBound_lt
   · simpa [Real.dist_eq, abs_of_pos hen] using hnSmall
   · exact (le_abs_self _).trans_lt (by simpa [Real.dist_eq] using hnBound)
 
-/-- Uniform convergence of selected integral curves inside a moving tube around
-the limit family.  Stage-family containment is a conclusion of the first-exit
-argument, not a premise. -/
+
+
+
 theorem integralCurve_tendstoUniformlyOn_of_limit_tube
     {P X : Type*}
     [NormedAddCommGroup X] [NormedSpace ℝ X]

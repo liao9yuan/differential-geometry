@@ -3,32 +3,28 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45Covari
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.KoszulDifference
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 
-/-!
-# The ε-homogeneous Claim-1 bound (the Lemma 4.5 engine layer)
 
-`claim1_eps`: the ε-tracked sibling of `claim1_abstract` (`AkMFold.lean`).  In the
-approximate-isometry setting of MSM135 Lemma 4.5 (`lbl370`) the comparison metric's
-covariant derivatives are uniformly ε-small (`|∇^j g| ≤ ε` for `1 ≤ j ≤ m+1`), and the
-connection-difference array inherits ε-LINEAR bounds `|∇_U^m A| ≤ C(m, C0, KR)·ε` —
-not just the `C·(1+|∇^{m+1}g|)` shape of `claim1_abstract`, whose constant absorbs the
-lower-order block and so loses the ε-homogeneity that `lemma45Double`'s `hOne`
-correction term (`+ ε·oneStepConst·Σ`) requires.
 
-The proof is the same strong induction as `claim1_abstract` (invert
-`compL2_le_contrTail_inv` + isolated top `compL2_contrTail_topU_le` + the Koszul
-relation bound `hrelB`); the only change is the numeric assembly: every term of the
-expansion carries at least one ε-small metric-derivative factor, and the quadratic
-`ε²` contributions from the lower-order block are absorbed via `ε ≤ 1`.
 
-This is the all-orders `hA` input for the `hOne` interface of `lemma45Double`
-(`Lemma45CovariantAbstract.lean`) — the one-step engine of F3 (Lemma 4.5), consuming
-the Claim-1 machinery of the parallel `ric_bound` track without modifying it.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -46,20 +42,19 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- The data-independent constant for the scaled ε-homogeneous Claim 1
-induction.  Its inputs are only the inverse bound, the relation bound, the
-component-loss factor, and the derivative order. -/
+
+
+
 noncomputable def claim1MulConst (C0 KR L : Real) (m : ℕ) : Real :=
   Nat.strongRecOn' m fun n C =>
     max C0 0 * (max KR 0 * L +
       ∑ c : Fin n, (n.choose c : Real) * C c c.isLt * L)
 
-/-- Unfolding equation for `claim1MulConst`. -/
+
 theorem claim1MulConst_eq (C0 KR L : Real) (m : ℕ) :
     claim1MulConst C0 KR L m =
       max C0 0 * (max KR 0 * L +
@@ -67,8 +62,8 @@ theorem claim1MulConst_eq (C0 KR L : Real) (m : ℕ) :
   rw [claim1MulConst, Nat.strongRecOn'_beta, ← Fin.sum_univ_eq_sum_range]
   rfl
 
-/-- The scaled Claim 1 constant is nonnegative when the component-loss factor
-is nonnegative. -/
+
+
 theorem claim1MulConst_nonneg {C0 KR L : Real} (hL : 0 ≤ L) (m : ℕ) :
     0 ≤ claim1MulConst C0 KR L m := by
   induction m using Nat.strong_induction_on with
@@ -78,9 +73,10 @@ theorem claim1MulConst_nonneg {C0 KR L : Real} (hL : 0 ≤ L) (m : ℕ) :
       exact Finset.sum_nonneg fun c hc =>
         mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (ih c (Finset.mem_range.mp hc))) hL
 
-/-- Explicit-constant form of scaled ε-homogeneous Claim 1.  Unlike the
-existential wrapper below, this exposes that the bound is independent of all
-frame and metric data. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps_mul_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -216,12 +212,13 @@ theorem claim1_eps_mul_bound {u : Set M} (hu : IsOpen u)
         rw [claim1MulConst_eq, hSdef]
         ring
 
-/-- **Scaled ε-homogeneous abstract Claim 1.**  On the smooth frame domain, if the metric
-component field satisfies `|∇^j g| ≤ L * ε` for `1 ≤ j ≤ m+1`, the lowered relation
-`|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` holds up to order `m`, and `Ginv` is the pointwise
-inverse of `g` with `|Ginv| ≤ C0`, then the upper tower of `A` is ε-linearly small:
-`|∇_U^m A| ≤ C·ε` with `C = C(m, C0, KR, L)` independent of ε.  Strong induction;
-the `L * ε²` lower-order products are absorbed by `ε ≤ 1`. -/
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps_mul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -252,8 +249,9 @@ theorem claim1_eps_mul {u : Set M} (hu : IsOpen u)
     claim1_eps_mul_bound hu frame chr hframe hchr g hg Ginv A hA hinv C0 KR L eps
       hL heps0 heps1 hGinv m hK hrelB⟩
 
-/-- **ε-homogeneous abstract Claim 1.**  This is `claim1_eps_mul` with unit
-component-loss factor. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -284,30 +282,30 @@ theorem claim1_eps {u : Set M} (hu : IsOpen u)
     zero_le_one heps0 heps1 hGinv m ?_
   simpa only [one_mul] using hK
 
-/-! ## The connection-change one-step (W2)
 
-`∇_G X = ∇_H X − Σ_s (D ∗_s X)` at the component-tower level, where
-`D = Γ_G − Γ_H` is the difference-Christoffel array and `∗_s` the per-slot
-contraction.  Each per-slot correction is `contrTail` of the rank-`(2+1)`
-difference field against a slot-rotation of `X`, reindexed by an explicit slot
-equivalence — the form `P(m)` (`compL2_iterCovComp_contrTail_le`) consumes. -/
 
-/-- The difference-Christoffel array as a rank-`(2+1)` component field (the
-contracted upper slot LAST, as `contrTail`'s first factor expects). -/
+
+
+
+
+
+
+
+
 def chrDiffField (chrG chrH : M → Idx → Idx → Idx → Real) :
     M → (Fin (2 + 1) → Idx) → Real :=
   fun y v => chrG y (v 0) (v 1) (v 2) - chrH y (v 0) (v 1) (v 2)
 
-/-- The per-slot Christoffel correction field: slot `s` of `X` contracted against
-the upper index of `D`, with the new (first) slot carrying `D`'s derivative index. -/
+
+
 def chrCorrField (D : M → Idx → Idx → Idx → Real) {r : ℕ}
     (X : M → (Fin r → Idx) → Real) (s : Fin r) :
     M → (Fin (r + 1) → Idx) → Real :=
   fun y n => ∑ p : Idx,
     D y (n 0) (Fin.tail n s) p * X y (Function.update (Fin.tail n) s p)
 
-/-- The slot rotation moving slot `s` to the last position (`s ↦ last`,
-`s.succAbove i ↦ castSucc i`). -/
+
+
 def slotRotEquiv {r' : ℕ} (s : Fin (r' + 1)) : Fin (r' + 1) ≃ Fin (r' + 1) :=
   (finSuccEquiv' s).trans (finSuccEquiv' (Fin.last r')).symm
 
@@ -320,10 +318,10 @@ theorem slotRotEquiv_succAbove {r' : ℕ} (s : Fin (r' + 1)) (i : Fin r') :
   simp only [slotRotEquiv, Equiv.trans_apply, finSuccEquiv'_succAbove,
     finSuccEquiv'_symm_some, Fin.succAbove_last]
 
-/-- The slot map threading the per-slot correction into `contrTail` form:
-`castAdd 0 ↦ 0` (the derivative slot), `castAdd 1 ↦ s.succ` (the contracted
-slot's position in the stepped array), `natAdd i ↦ (s.succAbove i).succ`
-(the remaining slots in order). -/
+
+
+
+
 def corrSlotMap {r' : ℕ} (s : Fin (r' + 1)) : Fin (2 + r') → Fin (r' + 1 + 1) :=
   Fin.addCases (fun i : Fin 2 => if i = 0 then 0 else s.succ)
     (fun i : Fin r' => (s.succAbove i).succ)
@@ -335,8 +333,7 @@ theorem corrSlotMap_injective {r' : ℕ} (s : Fin (r' + 1)) :
     (fun ia => Fin.addCases (fun ib => ?_) (fun ib => ?_) b) a <;>
     intro hab <;>
     simp only [corrSlotMap, Fin.addCases_left, Fin.addCases_right] at hab
-  · -- left-left
-    congr 1
+  · congr 1
     by_cases h1 : ia = 0 <;> by_cases h2 : ib = 0
     · rw [h1, h2]
     · rw [if_pos h1, if_neg h2] at hab
@@ -344,22 +341,19 @@ theorem corrSlotMap_injective {r' : ℕ} (s : Fin (r' + 1)) :
     · rw [if_neg h1, if_pos h2] at hab
       exact absurd hab (Fin.succ_ne_zero s)
     · omega
-  · -- left-right: values `0`/`s.succ` vs `(s.succAbove ib).succ`
-    by_cases h1 : ia = 0
+  · by_cases h1 : ia = 0
     · rw [if_pos h1] at hab
       exact absurd hab.symm (Fin.succ_ne_zero _)
     · rw [if_neg h1] at hab
       have hs := Fin.succ_injective _ hab
       exact absurd hs.symm (Fin.succAbove_ne s ib)
-  · -- right-left
-    by_cases h2 : ib = 0
+  · by_cases h2 : ib = 0
     · rw [if_pos h2] at hab
       exact absurd hab (Fin.succ_ne_zero _)
     · rw [if_neg h2] at hab
       have hs := Fin.succ_injective _ hab
       exact absurd hs (Fin.succAbove_ne s ia)
-  · -- right-right
-    have hs := Fin.succ_injective _ hab
+  · have hs := Fin.succ_injective _ hab
     have hi : ia = ib := Fin.succAbove_right_injective (p := s) hs
     rw [hi]
 
@@ -368,13 +362,15 @@ theorem corrSlotMap_bijective {r' : ℕ} (s : Fin (r' + 1)) :
   rw [Fintype.bijective_iff_injective_and_card]
   exact ⟨corrSlotMap_injective s, by simp [Fintype.card_fin]; omega⟩
 
-/-- The per-slot correction's slot equivalence. -/
+
 def corrSlotEquiv {r' : ℕ} (s : Fin (r' + 1)) : Fin (2 + r') ≃ Fin (r' + 1 + 1) :=
   Equiv.ofBijective (corrSlotMap s) (corrSlotMap_bijective s)
 
-/-- **The per-slot correction in `contrTail` form.**  The slot-`s` Christoffel
-correction of `X` is the natural last-slot contraction of the difference field
-against the slot-rotated `X`, reindexed by `corrSlotEquiv s`. -/
+
+
+
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem chrCorrField_eq_contrTail {r' : ℕ}
     (D : M → Idx → Idx → Idx → Real) (X : M → (Fin (r' + 1) → Idx) → Real)
     (s : Fin (r' + 1)) :
@@ -386,15 +382,15 @@ theorem chrCorrField_eq_contrTail {r' : ℕ}
   rw [chrCorrField, contrTail_apply]
   refine Finset.sum_congr rfl fun c _ => ?_
   have hcorr0 : corrSlotEquiv s (Fin.castAdd r' (0 : Fin 2)) = 0 := by
-    show corrSlotMap s (Fin.castAdd r' (0 : Fin 2)) = 0
+    change corrSlotMap s (Fin.castAdd r' (0 : Fin 2)) = 0
     rw [corrSlotMap, Fin.addCases_left, if_pos rfl]
   have hcorr1 : corrSlotEquiv s (Fin.castAdd r' (1 : Fin 2)) = s.succ := by
-    show corrSlotMap s (Fin.castAdd r' (1 : Fin 2)) = s.succ
+    change corrSlotMap s (Fin.castAdd r' (1 : Fin 2)) = s.succ
     rw [corrSlotMap, Fin.addCases_left, if_neg (by decide)]
   have hcorrR : ∀ i : Fin r',
       corrSlotEquiv s (Fin.natAdd 2 i) = (s.succAbove i).succ := by
     intro i
-    show corrSlotMap s (Fin.natAdd 2 i) = (s.succAbove i).succ
+    change corrSlotMap s (Fin.natAdd 2 i) = (s.succAbove i).succ
     rw [corrSlotMap, Fin.addCases_right]
   have h0 : (Fin.snoc (fun i : Fin 2 => n (corrSlotEquiv s (Fin.castAdd r' i))) c
       : Fin (2 + 1) → Idx) 0 = n 0 := by
@@ -417,9 +413,10 @@ theorem chrCorrField_eq_contrTail {r' : ℕ}
       rfl
   rw [h0, h1, h2, hX]
 
-/-- **The component one-step connection change**: the covariant step with `chrG`
-equals the step with `chrH` (same `ext`!) minus the difference-Christoffel
-correction sum. -/
+
+
+
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_chr_sub {r : ℕ}
     (ext : (Fin r → Idx) → Idx → Real) (chrG chrH : Idx → Idx → Idx → Real)
     (A : (Fin r → Idx) → Real) (n : Fin (r + 1) → Idx) :
@@ -432,9 +429,12 @@ theorem covDerivStepComp_chr_sub {r : ℕ}
   simp only [sub_mul, Finset.sum_sub_distrib]
   ring
 
-/-- **The field-level one-step connection change.**  One `chrG`-step of `X` equals
-one `chrH`-step minus the per-slot difference corrections (the `frameExtData` of
-the two steps coincide — it does not involve the connection). -/
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem iterCov_one_chr_change {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -443,12 +443,14 @@ theorem iterCov_one_chr_change {r : ℕ}
       iterCovComp (I := I) frame chrH X 1 y n -
         ∑ s : Fin r,
           chrCorrField (fun z d b p => chrG z d b p - chrH z d b p) X s y n := by
-  show covDerivStepComp (frameExtData (I := I) frame X y) (chrG y) (X y) n = _
+  change covDerivStepComp (frameExtData (I := I) frame X y) (chrG y) (X y) n = _
   rw [covDerivStepComp_chr_sub (frameExtData (I := I) frame X y) (chrG y) (chrH y) (X y) n]
   rfl
 
-/-! ## Smoothness, linearity, and norm bounds for the correction (W2 chunk B) -/
 
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (f : ι → M → Real) (hf : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => f i y) u) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ i ∈ t, f i y) u := by
@@ -461,7 +463,10 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     exact (hf a (Finset.mem_insert_self a t)).add
       (ih fun i hi => hf i (Finset.mem_insert_of_mem hi))
 
-/-- The per-slot correction field has smooth components on `u`. -/
+
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
     (D : M → Idx → Idx → Idx → Real)
     (hD : ∀ d b p : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => D y d b p) u)
@@ -471,7 +476,9 @@ theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrCorrField D X s y n) u :=
   contMDiffOn_finsetSum' Finset.univ _ (fun p _ => (hD _ _ p).mul (hX _))
 
-/-- The tower of the zero field vanishes. -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -489,7 +496,9 @@ theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
   rw [h, iterCovComp_smul hu frame chr 0 _ hframe hchr (fun _ => contMDiffOn_const) a y hy n,
     zero_mul]
 
-/-- The tower distributes over finite sums of base fields (on the smooth domain). -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_finsetSum {ι : Type*} {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -520,7 +529,8 @@ theorem iterCovComp_finsetSum {ι : Type*} {r : ℕ} {u : Set M} (hu : IsOpen u)
       ih (fun i hi m => hf i (Finset.mem_insert_of_mem hi) m) y hy n,
       Finset.sum_insert hb]
 
-/-- Minkowski for finite sums of component arrays. -/
+
+omit [DecidableEq Idx] in
 private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
     (f : ι → (Fin r → Idx) → Real) :
     compL2 (fun n : Fin r → Idx => ∑ i ∈ t, f i n) ≤ ∑ i ∈ t, compL2 (f i) := by
@@ -538,8 +548,10 @@ private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
     rw [hrw, Finset.sum_insert hb]
     exact le_trans (compL2_add_le _ _) (by linarith [ih])
 
-/-- **The per-slot correction tower bound** (`P(m)` through the slot reindex):
-`|∇_H^k (D ∗_s X)| ≤ Σ_c binom(k,c)·|∇_U^c D|·|∇_H^{k-c} X|`. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -574,7 +586,9 @@ theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [compL2_iterCovComp_compReindex (slotRotEquiv s) frame chrH X (k - c) x]
 
-/-- The tower distributes over differences of base fields (on the smooth domain). -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_sub {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -598,13 +612,15 @@ theorem iterCovComp_sub {r : ℕ} {u : Set M} (hu : IsOpen u)
     iterCovComp_smul hu frame chr (-1) f₂ hframe hchr hf₂ a y hy n]
   ring
 
-/-- **The mixed-tower one-step estimate** — the `hOne` engine of MSM135 Lemma 4.5:
-`|∇_H^k(∇_G X)| ≤ |∇_H^{k+1} X| + ε·oneStepConst B k r·Σ_{j≤k} |∇_H^j X|`, from the
-ε-linear bounds `|∇_{H,U}^c (Γ_G − Γ_H)| ≤ B c·ε` on the difference-Christoffel
-tower (`hDbound`).  One `chrG`-step splits into the `chrH`-step plus the per-slot
-difference corrections; the corrections are bounded by `P(m)` through the slot
-reindex, the slot sum contributes the rank factor `r`, and each lower-order
-`X`-norm is absorbed into the cumulative sum. -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -629,7 +645,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
   set D : M → Idx → Idx → Idx → Real := fun z d b p => chrG z d b p - chrH z d b p with hDdef
   have hDsm : ∀ d b p : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => D y d b p) u :=
     fun d b p => (hchrG d b p).sub (hchrH d b p)
-  -- split the base field through the connection change
   have hsplit : (fun y => iterCovComp (I := I) frame chrG X 1 y) =
       fun z (n : Fin (r + 1) → Idx) =>
         iterCovComp (I := I) frame chrH X 1 z n -
@@ -645,7 +660,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
   have hcorrSum_sm : ∀ m : Fin (r + 1) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ s : Fin r, chrCorrField D X s y m) u :=
     fun m => contMDiffOn_finsetSum' Finset.univ _ (fun s _ => hcorr_sm s m)
-  -- the tower of the split field, as an array identity at `x`
   have harr : iterCovComp (I := I) frame chrH
       (fun y => iterCovComp (I := I) frame chrG X 1 y) k x =
       fun n => iterCovComp (I := I) frame chrH
@@ -659,7 +673,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
         hframe hchrH hHstep_sm hcorrSum_sm k x hx n,
       iterCovComp_finsetSum hu frame chrH hframe hchrH Finset.univ
         (fun s => chrCorrField D X s) (fun s _ m => hcorr_sm s m) k x hx n]
-  -- triangle + per-slot bounds
   have htri : compL2 (iterCovComp (I := I) frame chrH
       (fun y => iterCovComp (I := I) frame chrG X 1 y) k x) ≤
       compL2 (iterCovComp (I := I) frame chrH
@@ -670,12 +683,10 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
     have hsum := compL2_finsetSum_le (Finset.univ : Finset (Fin r))
       (fun s => iterCovComp (I := I) frame chrH (chrCorrField D X s) k x)
     linarith
-  -- the leading term is the shifted tower
   have hshift : compL2 (iterCovComp (I := I) frame chrH
       (fun z m => iterCovComp (I := I) frame chrH X 1 z m) k x) =
       compL2 (iterCovComp (I := I) frame chrH X (k + 1) x) :=
     (compL2_iterCovComp_shift frame chrH X k x).symm
-  -- the correction block
   have hXsum0 : (0 : Real) ≤ ∑ j ∈ Finset.range (k + 1),
       compL2 (iterCovComp (I := I) frame chrH X j x) :=
     Finset.sum_nonneg fun j _ => compL2_nonneg _
@@ -694,7 +705,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
         norm_num
       rw [h0, mul_zero, zero_mul]
     | succ r' =>
-      -- each slot is bounded by the same `P(m)`-block
       have hslot : ∀ s : Fin (r' + 1),
           compL2 (iterCovComp (I := I) frame chrH (chrCorrField D X s) k x) ≤
             eps * (∑ c ∈ Finset.range (k + 1), (k.choose c : Real) * B c) *
@@ -766,15 +776,17 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
         rw [hshift]
         linarith [hcorrBound]
 
-/-! ## MSM135 Lemma 4.5, component-tower form (W3) -/
 
-/-- **MSM135 Lemma 4.5 (component-tower form).**  For two connections whose
-difference-Christoffel tower is ε-linearly small (`hDbound`, the `claim1_eps`
-output), the `chrG`-derivative norms of any smooth tensor component field are
-controlled by its `chrH`-derivative norms:
-`|∇_G^{i+ρ} T| ≤ |∇_H^ρ (∇_G^i T)| + ε·lemma45Const B p (r₀+i)·Σ_{j<ρ} |∇_H^j (∇_G^i T)|`.
-This discharges `lemma45Double`'s `hOne` interface with `mixed_oneStep_le`
-(`W i k := |∇_H^k ∇_G^i T|`); the book statement is the case `i = 0`. -/
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem lemma45_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -818,8 +830,10 @@ theorem lemma45_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       (iterCovComp (I := I) frame chrG T i') k x))
     (fun i' k => compL2_nonneg _) hOne
 
-/-- **MSM135 Lemma 4.5 (component-tower form, base case `i = 0`)** — the book
-statement: `|∇_G^ρ T| ≤ |∇_H^ρ T| + ε·lemma45Const B p r₀·Σ_{j<ρ} |∇_H^j T|`. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem lemma45_component₀ {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -844,12 +858,14 @@ theorem lemma45_component₀ {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
   rw [zero_add] at h
   exact h
 
-/-! ## The frame-general Koszul producer (W4-P2): claim1's `hkoszul`
 
-The lowered-by-`g` connection-difference array equals the `(½, ½, −½)` Koszul
-combination of the level-1 `gRef`-tower of the `g`-metric components, in ANY local
-frame on `u`.  Componentization of the intrinsic `Tensor0SBundle.koszul_difference`. -/
 
+
+
+
+
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -889,14 +905,12 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
   set covH := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
     with hcovH
   funext idx
-  -- the three sections through the frame values
   obtain ⟨Xa, hXa⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
     (V := TangentSpace I) (n := (⊤ : ℕ∞)) y (frame (idx 0) y)
   obtain ⟨Xb, hXb⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
     (V := TangentSpace I) (n := (⊤ : ℕ∞)) y (frame (idx 1) y)
   obtain ⟨Xe, hXe⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
     (V := TangentSpace I) (n := (⊤ : ℕ∞)) y (frame (idx 2) y)
-  -- the frame expansion at an arbitrary vector
   have hexp : ∀ v : TangentSpace I y, (∑ c : Idx, hframe.coeff c y v • frame c y) = v := by
     intro v
     have h := Module.Basis.sum_repr (hframe.toBasisAt hy) v
@@ -907,7 +921,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
           congr 1
           simp [IsLocalFrameOn.coeff, hy]
       _ = v := h
-  -- the LHS collapses to the metric pairing with the difference
   have hLHS : contrTail
       (chrDiffField
         (fun z => christoffelSymbolInFrame covG frame hframe z)
@@ -965,7 +978,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
               · rw [if_neg hq, show q = 1 from Fin.eq_one_of_ne_zero q hq, hB1]]
             simp]
           congr 1
-          -- the Christoffel difference is the frame coefficient of the difference tensor
           show christoffelSymbolInFrame covG frame hframe y (idx 0) (idx 1) c -
               christoffelSymbolInFrame covH frame hframe y (idx 0) (idx 1) c = _
           rw [show christoffelSymbolInFrame covG frame hframe y (idx 0) (idx 1) c =
@@ -989,7 +1001,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
             (((CovariantDerivative.difference covG covH y) (frame (idx 1) y))
               (frame (idx 0) y)) := by
           rw [hexp]
-  -- the per-permutation tower-to-directional conversion
   have htower : ∀ (P : Equiv.Perm (Fin 3))
       (S : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
       S y = frame (idx (P 0)) y →
@@ -1018,7 +1029,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
       have hq' : q' = 0 := Subsingleton.elim q' 0
       rw [hq']
       rfl
-  -- assemble through the intrinsic Koszul formula
   have hK := Tensor0SBundle.koszul_difference (I := I) covG covH g
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) g)
@@ -1034,7 +1044,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
     (by rw [hXb, show ((Equiv.swap (0 : Fin 3) 1) (0 : Fin 3)) = 1 from by decide])
   have h3 := htower ((finRotate 3).symm) Xe
     (by rw [hXe, show (((finRotate 3).symm) (0 : Fin 3)) = 2 from by decide])
-  -- reduce the permutation applications in the slot positions
   rw [show ((Equiv.refl (Fin 3)) (1 : Fin 3)) = 1 from rfl,
     show ((Equiv.refl (Fin 3)) (2 : Fin 3)) = 2 from rfl] at h1
   rw [show ((Equiv.swap (0 : Fin 3) 1) (1 : Fin 3)) = 0 from by decide,
@@ -1046,15 +1055,16 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
   rw [hLHS, h1, h2, h3]
   linarith [hK, hsymmg]
 
-/-! ## F3 = MSM135 Lemma 4.5, assembled (the goal endpoint)
 
-`claim1_eps_koszul` (the ε-homogeneous Claim 1 with the Koszul relation as input,
-mirroring `AkMFold.claim1`'s `hrelB` derivation), the bounded component Lemma 4.5
-(`lemma45_component_bdd`, over `lemma45DoubleBdd`), and the endpoint `lemma45_F3`
-with the geometric inputs discharged by `hkoszul_of_leviCivita`. -/
 
-/-- **Scaled ε-homogeneous Claim 1, Koszul-relation form** — `claim1_eps_mul`
-with `hrelB` derived from the lowered-Koszul field identity. -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1140,14 +1150,17 @@ theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
       funext (iterCovComp_add hu frame chr _ _ hframe hchr (hFsm c₂ P₂) (hFsm c₃ P₃) m' x hx)]
   have h23 := compL2_add_le
     (iterCovComp (I := I) frame chr
-      (fun z (k : Fin 3 → Idx) => c₂ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₂ j))) m' x)
+      (fun z (k : Fin 3 → Idx) => c₂ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₂ j))) m'
+        x)
     (iterCovComp (I := I) frame chr
-      (fun z (k : Fin 3 → Idx) => c₃ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₃ j))) m' x)
+      (fun z (k : Fin 3 → Idx) => c₃ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₃ j))) m'
+        x)
   rw [hterm c₂ P₂, hterm c₃ P₃] at h23
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
 
-/-- Existential wrapper around the explicit scaled Koszul Claim 1 bound. -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_koszul_mul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1180,8 +1193,9 @@ theorem claim1_koszul_mul {u : Set M} (hu : IsOpen u)
   exact claim1_koszul_bound hu frame chr hframe hchr g hg Ginv A hA hinv
     c₁ c₂ c₃ P₁ P₂ P₃ hkoszul C0 L eps hL heps0 heps1 hGinv m hK
 
-/-- **ε-homogeneous Claim 1, Koszul-relation form.**  This is
-`claim1_koszul_mul` with unit component-loss factor. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1213,9 +1227,11 @@ theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
     c₁ c₂ c₃ P₁ P₂ P₃ hkoszul C0 1 eps zero_le_one heps0 heps1 hGinv m ?_
   simpa only [one_mul] using hK
 
-/-- **Bounded component Lemma 4.5** — `lemma45_component` over the bounded double
-induction `lemma45DoubleBdd`: the difference-tower bounds are required only below
-the envelope `P`. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem lemma45_component_bdd {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -1260,14 +1276,16 @@ theorem lemma45_component_bdd {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       (iterCovComp (I := I) frame chrG T i') k x))
     (fun i' k => compL2_nonneg _) hOne
 
-/-- **Scaled F3 = MSM135 Lemma 4.5** (`lbl370`, component form).  If the
-`chrH`-derivatives of the `g`-components are bounded by `L * ε`, the final
-connection-change error remains ε-linear, with `L` absorbed into `C`.  Then for
-every smooth tensor component field `T` and every `0 < ρ ≤ p` there is `C ≥ 0` with
-`|∇_G^ρ T| ≤ |∇_H^ρ T| + ε·C·Σ_{j<ρ} |∇_H^j T|` at every `x ∈ u`.
-The geometric inputs are discharged by `hkoszul_of_leviCivita` (the lowered-Koszul
-identity), `claim1_koszul_mul` (the ε-linear difference-tower bounds), and
-`lemma45_component_bdd` (the bounded double induction over the `hOne` engine). -/
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1315,7 +1333,8 @@ theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range ρ,
             compL2 (iterCovComp (I := I) frame
               (fun z => christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef)
                 frame hframe z) T j x) := by
   classical
   set chrG : M → Idx → Idx → Idx → Real := fun z => christoffelSymbolInFrame
@@ -1347,7 +1366,9 @@ theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
   rw [zero_add] at h
   simpa only [B] using h
 
-/-- Existential wrapper around the explicit scaled component Lemma 4.5 bound. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1393,7 +1414,8 @@ theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range ρ,
             compL2 (iterCovComp (I := I) frame
               (fun z => christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef)
                 frame hframe z) T j x) := by
   let B : ℕ → Real := fun c =>
     claim1MulConst C0 (|(1 / 2 : Real)| + |(1 / 2 : Real)| + |-(1 / 2 : Real)|) L c
@@ -1402,8 +1424,10 @@ theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
   simpa only [B] using lemma45_F3_bound hu g gRef frame hframe hframeS hchrG hchrH
     hgsm T hT Ginv hinv C0 L eps hL heps0 heps1 hGinv p hgK
 
-/-- **F3 = MSM135 Lemma 4.5** (`lbl370`, book-facing component form).  This is
-`lemma45_F3_mul` with unit component-loss factor. -/
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_F3 {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1449,7 +1473,8 @@ theorem lemma45_F3 {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range ρ,
             compL2 (iterCovComp (I := I) frame
               (fun z => christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef)
                 frame hframe z) T j x) := by
   refine lemma45_F3_mul hu g gRef frame hframe hframeS hchrG hchrH hgsm T hT Ginv hinv
     C0 1 eps zero_le_one heps0 heps1 hGinv p ?_

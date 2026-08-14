@@ -3,14 +3,14 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricTimeDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 
-/-!
-# Time-dependent completed tensor actions
 
-This file transfers time regularity of a jointly smooth tensor coefficient
-family through the generic spectral Sobolev completion.  Proofs stay applied
-to a Sobolev input, and tensor-bundle identities are read only through fully
-evaluated fixed-fibre model components.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,7 +31,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (jointContMDiff_toModel_continuous_slice)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -40,8 +40,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Scalar time differentiation of a coefficient commutes with its smooth
-operator-field action after unit evaluation. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem appCc_time_deriv
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}
@@ -54,19 +56,19 @@ private theorem appCc_time_deriv
     (x : M) (slots : Fin c → E) :
     HasDerivAt
       (fun τ => unitModel (I := I) (M := M) g c
-        (appCc (I := I) (M := M) g b c (Φ τ) W) x slots)
+        (operatorFieldApply (I := I) (M := M) g b c (Φ τ) W) x slots)
       (unitModel (I := I) (M := M) g c
-        (appCc (I := I) (M := M) g b c (dΦ t) W) x slots) t := by
+        (operatorFieldApply (I := I) (M := M) g b c (dΦ t) W) x slots) t := by
   let A : Tensor0SSpace b I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace b I x from W.toSection x)
       (unitTensor (I := I) (M := M) x)
   have key (Ψ : SmoothCcTensor g b c) :
       unitModel (I := I) (M := M) g c
-          (appCc (I := I) (M := M) g b c Ψ W) x slots =
+          (operatorFieldApply (I := I) (M := M) g b c Ψ W) x slots =
         Tensor0SSpace.toModel ((Ψ.toSection x) A) slots := by
     simp only [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply, A]
   rw [show (fun τ => unitModel (I := I) (M := M) g c
-      (appCc (I := I) (M := M) g b c (Φ τ) W) x slots) =
+      (operatorFieldApply (I := I) (M := M) g b c (Φ τ) W) x slots) =
       (fun τ => Tensor0SSpace.toModel (((Φ τ).toSection x) A) slots) by
         funext τ
         exact key (Φ τ),
@@ -94,7 +96,6 @@ private theorem affine_uIcc {S : Set ℝ} {a h : ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Joint smoothness is preserved by an affine reparameterization of time. -/
 private theorem joint_affine
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}
@@ -120,8 +121,6 @@ private theorem joint_affine
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- A fixed smooth coefficient is jointly smooth after adjoining a dummy time
-parameter. -/
 private theorem joint_const
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (S : Set ℝ) :
@@ -135,8 +134,6 @@ private theorem joint_const
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- The affine-time difference from the centre coefficient is jointly smooth
-on the pulled-back time slab. -/
 private theorem joint_affine_sub
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}
@@ -161,8 +158,8 @@ private theorem joint_affine_sub
   simpa only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply] using hsub
 
-/-- The averaged coefficient remainder along the affine segment from `a` to
-`a + h`. -/
+
+
 private noncomputable def coeffRem
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) (S : Set ℝ) (hS : IsOpen S)
@@ -179,8 +176,8 @@ private noncomputable def coeffRem
     (affineSet_open hS a h) (affine_uIcc hseg)
     (joint_affine_sub (I := I) (M := M) g b c dΦ hdjoint a h)
 
-/-- A totalized averaged coefficient remainder, equal to zero away from time
-steps whose closed segment stays in the smooth parameter set. -/
+
+
 private noncomputable def coeffRem0
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) (S : Set ℝ) (hS : IsOpen S)
@@ -196,8 +193,8 @@ private noncomputable def coeffRem0
     coeffRem (I := I) (M := M) g b c dΦ S hS hdjoint a h hseg
   else 0
 
-/-- Sufficiently short time segments from an interior point remain in its
-open parameter set. -/
+
+
 private theorem segment_eventually {S : Set ℝ} {a : ℝ}
     (ha : S ∈ 𝓝 a) :
     ∀ᶠ h in 𝓝 (0 : ℝ), Set.uIcc a (a + h) ⊆ S := by
@@ -215,8 +212,8 @@ private theorem segment_eventually {S : Set ℝ} {a : ℝ}
       _ < δ := by simpa only [Metric.mem_ball] using hh
   exact (Real.dist_left_le_of_mem_uIcc ht).trans_lt hh'
 
-/-- A neighborhood property at `a` eventually holds along every point of the
-short affine path `a + h * θ`, uniformly for `θ ∈ [0, 1]`. -/
+
+
 private theorem affine_eventually {P : ℝ → Prop} {a : ℝ}
     (hP : ∀ᶠ t in 𝓝 a, P t) :
     ∀ᶠ h in 𝓝 (0 : ℝ), ∀ θ ∈ Set.Icc (0 : ℝ) 1, P (a + h * θ) := by
@@ -235,8 +232,9 @@ private theorem affine_eventually {P : ℝ → Prop} {a : ℝ}
         exact hθ.2) (abs_nonneg h)
     _ < δ := by simpa only [mul_one] using hh'
 
-/-- The first-order coefficient secant is the step size times the averaged
-derivative remainder. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem coeff_secant
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -372,8 +370,9 @@ private theorem coeff_secant
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.smul_apply,
     smul_eq_mul, eval_eq, f, f'] using hscalar
 
-/-- Every finite covariant jet of the averaged coefficient remainder is
-uniformly small for short time steps. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem coeffRem_jet
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -474,8 +473,8 @@ private theorem coeffRem_jet
     _ ≤ (Real.sqrt η) ^ 2 := hpath
     _ = η := Real.sq_sqrt hη.le
 
-/-- The completed action of the averaged coefficient remainder has vanishing
-operator norm for short time steps. -/
+
+
 private theorem coeffRemHs_small
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -515,8 +514,8 @@ private theorem coeffRemHs_small
   exact (happ _ (fun _ => η) (fun _ _ => hη.le)
     (fun i hi x => hh hseg i hi x)).trans_lt hηsmall
 
-/-- The totalized remainder action tends to zero after application to a fixed
-completed Sobolev input. -/
+
+
 private theorem coeffRem0_apply
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -560,8 +559,8 @@ private theorem coeffRem0_apply
     exact (mul_le_mul_of_nonneg_right (hh hseg).le (norm_nonneg U)).trans_lt hprod
   simpa only [heq, Real.dist_eq, sub_zero, abs_norm] using happ
 
-/-- The totalized coefficient remainder still vanishes when applied to a
-continuous moving Sobolev input. -/
+
+
 private theorem coeffRem0_move
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -623,8 +622,8 @@ private theorem coeffRem0_move
         field_simp
   simpa only [heq, Real.dist_eq, sub_zero, abs_norm] using happ
 
-/-- A jointly smooth tensor coefficient has a jointly smooth time derivative
-whose completed action is the strong derivative on every fixed Sobolev input. -/
+
+
 theorem exists_appHsDeriv
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -970,8 +969,8 @@ theorem exists_appHsDyn
         module
   exact htarget.congr' (hslope.mono fun _ hh => hh.symm)
 
-/-- A jointly smooth tensor coefficient acts continuously on every continuous
-completed Sobolev path. -/
+
+
 theorem appHs_dyn_cont
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -1121,8 +1120,8 @@ theorem appHs_dyn_cont
   have hAt : ContinuousAt (fun τ => appHs g b c n (Φ τ) (U τ)) t := hcomp
   exact hAt.continuousWithinAt
 
-/-- A jointly smooth tensor coefficient preserves every finite time
-differentiability order after application to a completed Sobolev path. -/
+
+
 theorem appHs_dyn_fin
     (g : SmoothRiemannianMetric I M) (b c n k : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -1172,8 +1171,8 @@ theorem appHs_dyn_fin
       intro hk
       norm_num at hk
 
-/-- A jointly smooth tensor coefficient preserves smooth time paths after
-fully applied completed Sobolev action. -/
+
+
 theorem appHs_dyn_cd
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -1190,8 +1189,8 @@ theorem appHs_dyn_cd
   intro k
   exact appHs_dyn_fin (I := I) (M := M) g b c n k Φ hS hjoint U (hU k)
 
-/-- Applying a jointly smooth tensor coefficient to one fixed completed
-Sobolev input gives a smooth path on every open time set. -/
+
+
 theorem appHs_path_cd
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)

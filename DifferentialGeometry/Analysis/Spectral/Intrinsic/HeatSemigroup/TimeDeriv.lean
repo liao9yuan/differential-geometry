@@ -6,56 +6,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Calculus.Deriv.Slope
 
-/-!
-# Time differentiability of the abstract spectral heat semigroup for `t > 0`
-
-For a real Hilbert space `X` with a `HilbertBasis ι ℝ X` of eigenvectors `b`
-and a non-negative eigenvalue family `lam : ι → ℝ`, the abstract spectral heat
-semigroup of `AbstractSpectralSemigroup.lean`
-
-  `S(t) v = ∑' i, exp(-(lam i) · t) • ⟪b i, v⟫ • b i`   (`t ≥ 0`)
-
-is, for every interior time `t > 0`, **differentiable in `t`** as an `X`-valued
-map, with derivative the spectrally-differentiated series
-
-  `D(t) v := ∑' i, (-(lam i) · exp(-(lam i) · t)) • ⟪b i, v⟫ • b i`.
-
-This is the missing *time-regularity* half of parabolic interior smoothing: the
-companion file `SpectralSmoothing.lean` already shows that for `t > 0` the
-output `S(t) u₀` lies in the spectral Sobolev space `Hˢ` for *every* `σ`
-(spatial smoothing); the present file shows the *same output is smooth in time*
-in the interior, with the time-derivative again diagonal on the eigenbasis.
-
-The mechanism is genuinely the parabolic gain: although the differentiated
-series picks up the unbounded factor `lam i`, the heat factor `exp(-(lam i) t)`
-beats it — `(lam i) · exp(-(lam i) t) ≤ 1 / (e · t)` for `t > 0` — so the
-differentiated coordinate family is bounded by `1 / (e · t)` times the original,
-square-summable coordinate family. Differentiation under the (orthogonal, `ℓ²`)
-sum is then justified by Tannery's theorem applied to the *squared-coordinate*
-remainder, whose `X`-norm equals the orthogonal `ℓ²` sum by Parseval.
-
-No trace-class / heat-trace summability is required: the argument exploits the
-orthonormality (Parseval) rather than `ℓ¹` domination of the summand norms (the
-latter genuinely fails at this abstract level). Consequently every hypothesis is
-the bare spectral data `(b, lam, hlam)`.
-
-## Main results
-
-* `expFactorDeriv_le` — the parabolic time-decay bound
-  `(lam i) · exp(-(lam i) t) ≤ 1 / (e · t)` for `t > 0`.
-* `heatCoeffHasDerivAt` — per-mode time derivative
-  `HasDerivAt (heatCoeff lam · i) (-(lam i) · heatCoeff lam t i) t`.
-* `abstractSpectralSemigroupDeriv` — the `X`-valued candidate derivative
-  operator `D(t)`, the spectrally-differentiated series, packaged as a `CLM`.
-* `abstractSpectralSemigroup_hasDerivAt` — **the headline**: for `t > 0`,
-  `HasDerivAt (fun u => S(u) v) (D(t) v) t`.
-
-## Sign convention
-
-Geometer convention `Δ = -∇*∇`, spectrum `⊆ (-∞, 0]`; `S(t) = e^{tΔ}` is the
-contraction `∑ exp(-(lam i) t) ⟪b i, ·⟫ b i` with `lam i ≥ 0`. Its
-time-derivative `D(t) = Δ S(t)` carries the factor `-(lam i)` per mode.
--/
 
 noncomputable section
 
@@ -69,11 +19,6 @@ namespace Parabolic
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-- **Parabolic time-decay of the differentiated heat factor.** For `a ≥ 0` and
-`t > 0`, `a · exp(-a t) ≤ 1 / (e · t)`. This is the elementary inequality that
-makes the differentiated spectral series — which carries the unbounded factor
-`a = lam i` — converge: the heat decay beats the polynomial growth, with a
-constant `1/(e t)` that blows up only as `t → 0+`. -/
 theorem expFactorDeriv_le {a t : ℝ} (ht : 0 < t) :
     a * Real.exp (-a * t) ≤ 1 / (Real.exp 1 * t) := by
   have hbound : Real.exp 1 * (a * t) ≤ Real.exp (a * t) := Real.exp_one_mul_le_exp
@@ -90,10 +35,6 @@ theorem expFactorDeriv_le {a t : ℝ} (ht : 0 < t) :
   rw [mul_inv_le_iff₀ hexp_pos, one_mul]
   exact hbound
 
-/-- **Uniform parabolic decay on a half-line.** For `0 ≤ a`, `0 < τ`, and any
-`s ≥ τ`, the differentiated heat factor obeys `|a · exp(-a s)| ≤ 1 / (e · τ)`.
-This is the uniform-in-`s` bound used to dominate the slope (difference quotient)
-of the heat factor over a segment contained in `[τ, ∞)`. -/
 theorem abs_expFactorDeriv_le_of_ge {a τ s : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
     (hs : τ ≤ s) :
     |a * Real.exp (-a * s)| ≤ 1 / (Real.exp 1 * τ) := by
@@ -106,8 +47,6 @@ theorem abs_expFactorDeriv_le_of_ge {a τ s : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
     mul_le_mul_of_nonneg_left hs (Real.exp_pos 1).le
   exact one_div_le_one_div_of_le heτ_pos hmono
 
-/-- The per-eigenvalue heat factor `t ↦ exp(-a t)` is differentiable with
-derivative `-a · exp(-a t)`. -/
 theorem expFactor_hasDerivAt (a t : ℝ) :
     HasDerivAt (fun s : ℝ => Real.exp (-a * s)) (-a * Real.exp (-a * t)) t := by
   have h1 : HasDerivAt (fun s : ℝ => -a * s) (-a) t := by
@@ -116,17 +55,10 @@ theorem expFactor_hasDerivAt (a t : ℝ) :
   rw [mul_comm] at h2
   exact h2
 
-/-- The per-eigenvalue heat factor `t ↦ exp(-a t)` is differentiable everywhere. -/
 theorem expFactor_differentiable (a : ℝ) :
     Differentiable ℝ (fun s : ℝ => Real.exp (-a * s)) :=
   fun t => (expFactor_hasDerivAt a t).differentiableAt
 
-/-- **Uniform Lipschitz bound for the heat-factor slope on a half-line.** For
-`0 ≤ a` and `0 < τ`, the heat factor `s ↦ exp(-a s)` is Lipschitz with constant
-`1/(e τ)` on `[τ, ∞)`; concretely, for `τ ≤ u` and `τ ≤ w`,
-`|exp(-a w) - exp(-a u)| ≤ (1/(e τ)) · |w - u|`. This is the mean-value bound
-that dominates the difference quotient of the heat factor by the
-`s`-independent constant `1/(e τ)`. -/
 theorem abs_expFactor_sub_le {a τ u w : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
     (hu : τ ≤ u) (hw : τ ≤ w) :
     |Real.exp (-a * w) - Real.exp (-a * u)| ≤
@@ -149,16 +81,12 @@ theorem abs_expFactor_sub_le {a τ u w : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
   rw [Real.norm_eq_abs, Real.norm_eq_abs] at hmvt
   exact hmvt
 
-/-- The differentiated heat coefficient `i ↦ -(lam i) · exp(-(lam i) t)`, the
-time-derivative of `heatCoeff lam · i`. -/
 def heatDerivCoeff (lam : ι → ℝ) (t : ℝ) (i : ι) : ℝ :=
   -(lam i) * heatCoeff lam t i
 
 lemma heatDerivCoeff_def (lam : ι → ℝ) (t : ℝ) (i : ι) :
     heatDerivCoeff lam t i = -(lam i) * Real.exp (-(lam i) * t) := rfl
 
-/-- For `t > 0`, the differentiated heat coefficient is bounded in magnitude by
-`1/(e t)`, uniformly in `i`. -/
 lemma abs_heatDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
     {t : ℝ} (ht : 0 < t) (i : ι) :
     |heatDerivCoeff lam t i| ≤ 1 / (Real.exp 1 * t) := by
@@ -166,10 +94,6 @@ lemma abs_heatDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
     -((lam i) * Real.exp (-(lam i) * t)) by ring, abs_neg]
   exact abs_expFactorDeriv_le_of_ge (hlam i) ht (le_refl t)
 
-/-- For `t > 0`, the differentiated heat-coefficient–weighted basis terms are
-summable: the orthogonal series `∑ -(lam i) exp(-(lam i)t) ⟪b i, v⟫ • b i`
-converges in `X`. The square of each coordinate is `≤ (1/(e t))²` times the
-(summable, by Parseval) original coordinate-square family. -/
 lemma summable_heatDerivTerm (b : HilbertBasis ι ℝ X) {lam : ι → ℝ}
     (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 < t) (v : X) :
     Summable (fun i : ι => heatDerivCoeff lam t i • ⟪b i, v⟫_ℝ • b i) := by
@@ -211,33 +135,19 @@ lemma summable_heatDerivTerm (b : HilbertBasis ι ℝ X) {lam : ι → ℝ}
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
 
-/-- **The time-derivative of the abstract spectral heat semigroup.** For `t : ℝ`
-and `v : X`, the spectrally-differentiated series
-
-  `D(t) v = ∑' i, (-(lam i) · exp(-(lam i) t)) • ⟪b i, v⟫ • b i`.
-
-For `t > 0` this is the genuine `X`-valued time-derivative of `u ↦ S(u) v` at
-`t` (`abstractSpectralSemigroup_hasDerivAt`); morally `D(t) = Δ S(t)`, the
-diagonal action of the (geometer-sign) Laplacian on the heat output. -/
 def abstractSpectralSemigroupDeriv (b : HilbertBasis ι ℝ X) (lam : ι → ℝ)
     (t : ℝ) (v : X) : X :=
   ∑' i : ι, heatDerivCoeff lam t i • ⟪b i, v⟫_ℝ • b i
 
+omit [CompleteSpace X] in
 lemma abstractSpectralSemigroupDeriv_def (b : HilbertBasis ι ℝ X) (lam : ι → ℝ)
     (t : ℝ) (v : X) :
     abstractSpectralSemigroupDeriv b lam t v =
       ∑' i : ι, heatDerivCoeff lam t i • ⟪b i, v⟫_ℝ • b i := rfl
 
-/-- The per-mode coefficient of the slope of `u ↦ S(u) v` between `t` and `s`,
-minus the candidate derivative coefficient at `t`:
-`(s - t)⁻¹ · (exp(-(lam i) s) - exp(-(lam i) t)) - heatDerivCoeff lam t i`. -/
 private def slopeMinusDerivCoeff (lam : ι → ℝ) (t s : ℝ) (i : ι) : ℝ :=
   (s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i) - heatDerivCoeff lam t i
 
-/-- **The slope-minus-derivative is a single spectral series.** For `0 < t`,
-`0 ≤ s`, the `X`-element
-`(s - t)⁻¹ • (S(s) v - S(t) v) - D(t) v` is the orthogonal series with per-mode
-coefficient `slopeMinusDerivCoeff lam t s i` against `⟪b i, v⟫ • b i`. -/
 private lemma slopeMinusDeriv_eq_tsum (b : HilbertBasis ι ℝ X) {lam : ι → ℝ}
     (hlam : ∀ i, 0 ≤ lam i) {t s : ℝ} (ht : 0 < t) (hs : 0 ≤ s) (v : X) :
     (s - t)⁻¹ • (abstractSpectralSemigroup b hlam s v -
@@ -272,10 +182,6 @@ private lemma slopeMinusDeriv_eq_tsum (b : HilbertBasis ι ℝ X) {lam : ι → 
   rw [slopeMinusDerivCoeff]
   module
 
-/-- **Per-mode scalar tendsto.** As `s → t`, the scalar slope-minus-derivative
-coefficient `slopeMinusDerivCoeff lam t s i` tends to `0`: this is exactly the
-statement that the heat factor `s ↦ exp(-(lam i) s)` has derivative
-`heatDerivCoeff lam t i` at `t`. -/
 private lemma slopeMinusDerivCoeff_tendsto (lam : ι → ℝ) (t : ℝ) (i : ι) :
     Tendsto (fun s : ℝ => slopeMinusDerivCoeff lam t s i) (𝓝[≠] t) (𝓝 0) := by
   have hderiv : HasDerivAt (fun s : ℝ => heatCoeff lam s i) (heatDerivCoeff lam t i) t := by
@@ -290,12 +196,6 @@ private lemma slopeMinusDerivCoeff_tendsto (lam : ι → ℝ) (t : ℝ) (i : ι)
   have := hslope'.sub (tendsto_const_nhds (x := heatDerivCoeff lam t i))
   simpa only [slopeMinusDerivCoeff, sub_self] using this
 
-/-- **Uniform domination of the scalar slope-minus-derivative coefficient.** For
-`0 < t`, `s ∈ [t/2, 3t/2]`, `s ≠ t`, the coefficient
-`slopeMinusDerivCoeff lam t s i` is bounded in magnitude by the
-`s`- and `i`-independent constant `2 / (e · (t/2))`. The slope is dominated by
-the MVT bound on `[t/2, ∞)` and the derivative coefficient by the parabolic
-decay; both share the constant `1/(e·(t/2))`. -/
 private lemma abs_slopeMinusDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
     {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 ≤ s) (hsne : s ≠ t) (i : ι) :
     |slopeMinusDerivCoeff lam t s i| ≤ 2 / (Real.exp 1 * (t / 2)) := by
@@ -331,12 +231,6 @@ private lemma abs_slopeMinusDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 �
         add_le_add hslope_bound hderiv_bound
     _ = 2 / (Real.exp 1 * (t / 2)) := by ring
 
-/-- **Squared-norm of the slope-minus-derivative tends to `0`.** For `t > 0`, as
-`s → t`, `‖(s - t)⁻¹ • (S(s) v - S(t) v) - D(t) v‖² → 0`. This is the analytic
-core: the Parseval squared-norm is the orthogonal `ℓ²` sum of the squared scalar
-slope-minus-derivative coefficients, each tending to `0` (scalar derivative) and
-uniformly dominated by `(2/(e (t/2)))²` times the (Parseval-summable) coordinate
-squares; Tannery's theorem then commutes the limit with the sum. -/
 private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 < t) (v : X) :
     Tendsto (fun s : ℝ =>
@@ -413,20 +307,6 @@ private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
   filter_upwards [h_event] with s hs
   exact (hs.1).symm
 
-/-- **Time differentiability of the abstract spectral heat semigroup for
-`t > 0`.** For every interior time `t > 0` and every `v : X`, the `X`-valued map
-`u ↦ S(u) v` is differentiable at `t`, with derivative the
-spectrally-differentiated series
-
-  `D(t) v = abstractSpectralSemigroupDeriv b lam t v
-          = ∑' i, (-(lam i) · exp(-(lam i) t)) • ⟪b i, v⟫ • b i`.
-
-This is the parabolic interior time-smoothing of the heat semigroup: the heat
-factor's positive-time decay beats the unbounded eigenvalue weight in the
-differentiated series, and Parseval's identity (orthonormality of `b`) plus
-Tannery's theorem justify differentiating the orthogonal sum term-by-term. No
-trace-class hypothesis is needed; the only input is the non-negativity `hlam` of
-the eigenvalue family. -/
 theorem abstractSpectralSemigroup_hasDerivAt (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 < t) (v : X) :
     HasDerivAt (fun u : ℝ => abstractSpectralSemigroup b hlam u v)
@@ -480,18 +360,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The intrinsic tensor heat output is differentiable in time for `t > 0`.**
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an `L²` initial datum
-`u₀`, and an interior time `t > 0`, the `TensorL2`-valued map
-`t ↦ tensorHeatSemigroup g r s t u₀ = e^{tΔ_∇} u₀` is differentiable
-at `t`, with derivative the spectrally-differentiated heat series
-`abstractSpectralSemigroupDeriv (intrinsic eigenbasis) (lambda) t u₀`.
-
-This is the genuine *time-regularity* of the geometric heat flow in the
-interior, the companion of the spatial `Hˢ`-smoothing
-`heat_semigroup_into_all_tensorHs`. It is fully unconditional: the only inputs
-are the spectral data of the connection Laplacian (its eigenbasis and the
-non-negativity of its eigenvalues), with no chart-selection hypothesis. -/
 theorem tensorHeatSemigroup_intrinsic_hasDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g) :

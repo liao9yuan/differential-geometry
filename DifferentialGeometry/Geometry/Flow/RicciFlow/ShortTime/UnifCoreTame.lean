@@ -173,8 +173,10 @@ theorem coreN_tame_unif
   have hδS := hreal S hS2
   have hδS' := hreal S' hS2'
   have hbase := hsmooth g hEq hjet S S'
-    (fun z v w => ccTensorBilin_symmS_symm' (I := I) (M := M) g X z v w)
-    (fun z v w => ccTensorBilin_symmS_symm' (I := I) (M := M) g Y z v w)
+    (fun z v w => ccTensorBilin_symmS_symm
+      (I := I) (M := M) g X z v w)
+    (fun z v w => ccTensorBilin_symmS_symm
+      (I := I) (M := M) g Y z v w)
     hδS hδS' R hR hRρ hS2 hS2'
   have hS3 :
       ‖smoothCcToTensorHs (I := I) (M := M) g (((1 : ℕ) : ℝ) + 2) S‖ ≤

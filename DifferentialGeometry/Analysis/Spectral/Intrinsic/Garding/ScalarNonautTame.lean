@@ -11,13 +11,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SlotTransportPai
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBridge
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 
-/-!
-# Scalar nonautonomous tame coefficients
 
-This file packages the moving-cometric principal coefficient over a fixed
-background metric.  The coefficient is kept as an intrinsic operator field;
-evaluation lemmas are scalarized before unfolding the Hom-bundle model.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,7 +35,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -44,19 +44,37 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The moving cometric double-trace field, retagged over a fixed background
-metric without changing its underlying section. -/
+private local instance scalarTameTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance scalarTameTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance scalarTameTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance scalarTameTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
+
+
 noncomputable def traceCast
     (q h : SmoothRiemannianMetric I M) : SmoothCcTensor q 2 0 :=
   SmoothCcTensor.retagEquiv h q 2 0
     (cometricDoubleTraceField (I := I) h 0)
 
-/-- The retagged moving trace factors through the fixed trace after retagging
-one covariant slot by `q♭ ∘ h♯`. -/
+
+
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem trace_retag_eq
     (q h : SmoothRiemannianMetric I M) :
     traceCast (I := I) q h =
-      appCcRS (I := I) (M := M) q 2 2 0
+      ccOperatorFieldComp (I := I) (M := M) q 2 2 0
         (cometricDoubleTraceField (I := I) q 0)
         (slotExtend (I := I) (M := M) q 1 1
           (sharpFlatEndoCc (I := I) q h)) := by
@@ -71,7 +89,9 @@ theorem trace_retag_eq
     ContinuousLinearMap.comp_apply]
   exact trace_slot_flat (I := I) q h x D
 
-/-- Retagging the fixed trace over its own metric leaves it unchanged. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceCast_self (q : SmoothRiemannianMetric I M) :
     traceCast (I := I) q q = cometricDoubleTraceField (I := I) q 0 := by
   apply SmoothCcTensor.ext
@@ -79,20 +99,21 @@ theorem traceCast_self (q : SmoothRiemannianMetric I M) :
   intro x
   rw [traceCast, SmoothCcTensor.retag_toSection]
 
-/-- The covector endomorphism measuring the moving inverse-cometric
-difference relative to the fixed background metric. -/
+
+
 noncomputable def scalarFluxCoeff
     (q h : SmoothRiemannianMetric I M) : SmoothCcTensor q 1 1 :=
   sharpFlatEndoCc (I := I) q h - sharpFlatEndoCc (I := I) q q
 
-/-- Scalar evaluation of the moving inverse-cometric flux coefficient. -/
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarFlux_eval (q h : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     cotangentToDual (I := I)
         ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
           (scalarFluxCoeff (I := I) q h).toSection x) om) w =
       cotangentToDual (I := I) om
-        (gInvDiffRaisedEndo (I := I) q h x w) := by
+        (metricComparisonDiffEndo (I := I) q h x w) := by
   rw [scalarFluxCoeff, SmoothCcTensor.toSection_sub,
     ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply]
   rw [show cotangentToDual (I := I)
@@ -111,18 +132,19 @@ theorem scalarFlux_eval (q h : SmoothRiemannianMetric I M) (x : M)
   rw [sharpFlatEndo_eval (I := I) (M := M),
     sharpFlatEndo_eval (I := I) (M := M)]
   rw [gInvRaisedEndo_eq_diff_add_id (I := I) q h x w]
-  have hself : gInvRaisedEndo (I := I) q q x w = w := by
+  have hself : metricComparisonEndo (I := I) q q x w = w := by
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]
   rw [hself, map_add]
   ring
 
-/-- The scalar inverse-cometric flux is the slot-zero action of the raised
-inverse-cometric difference field. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cc_flux_slot (q h : SmoothRiemannianMetric I M)
     (A : SmoothCcTensor q 0 1) :
-    appCc (I := I) (M := M) q 1 1 (scalarFluxCoeff (I := I) q h) A =
-      appCc (I := I) (M := M) q 1 1
-        (slotInsertEndoCc (I := I) (M := M) q 0
+    operatorFieldApply (I := I) (M := M) q 1 1 (scalarFluxCoeff (I := I) q h) A =
+      operatorFieldApply (I := I) (M := M) q 1 1
+        (endoSlotZeroCcTensor (I := I) (M := M) q 0
           (gInvDiffRaisedEndoField (I := I) q h)) A := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -141,26 +163,27 @@ theorem cc_flux_slot (q h : SmoothRiemannianMetric I M)
           A.toSection x) z)) w =
     cotangentToDual (I := I)
       (slotInsertEndoFib (I := I) (M := M) 1 0 x
-        (gInvDiffRaisedEndo (I := I) q h x)
+        (metricComparisonDiffEndo (I := I) q h x)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
           A.toSection x) z)) w
   rw [scalarFlux_eval (I := I) (M := M),
     cotangent_slot_apply (I := I) (M := M)]
 
-/-- The negative top slot pairing at every scalar derivative order is
-controlled by the order-zero metric perturbation. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem cc_top_pair
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) q k δ)
+    (hδ : metricCauchySchwarzBound (I := I) q k δ)
     (n : ℕ) (U : SmoothCcTensor q 0 0) :
     -tensorL2Inner (I := I) (M := M) q 0 (0 + n + 1)
         (iteratedCovGrad (I := I) q 0 0 (n + 1) U).toFun
-        (appCc (I := I) (M := M) q (0 + n + 1) (0 + n + 1)
-          (slotInsertEndoCc (I := I) (M := M) q (0 + n)
+        (operatorFieldApply (I := I) (M := M) q (0 + n + 1) (0 + n + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) q (0 + n)
             (gInvDiffRaisedEndoField (I := I) q h))
           (iteratedCovGrad (I := I) q 0 0 (n + 1) U)).toFun ≤
       (δ / (1 - δ)) *
@@ -169,8 +192,8 @@ theorem cc_top_pair
   let A : SmoothCcTensor q 0 (0 + n + 1) :=
     iteratedCovGrad (I := I) q 0 0 (n + 1) U
   let B : SmoothCcTensor q 0 (0 + n + 1) :=
-    appCc (I := I) (M := M) q (0 + n + 1) (0 + n + 1)
-      (slotInsertEndoCc (I := I) (M := M) q (0 + n)
+    operatorFieldApply (I := I) (M := M) q (0 + n + 1) (0 + n + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) q (0 + n)
         (gInvDiffRaisedEndoField (I := I) q h)) A
   have hBfun (x : M) :
       B.toFun x = TensorRSSpace.toModel
@@ -235,40 +258,41 @@ theorem cc_top_pair
   rw [hminus, hnorm] at hneg
   simpa only [A, B] using hneg
 
-/-- The negative inverse-cometric pairing in the last derivative slot is
-controlled sharply and uniformly in the derivative order. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem cc_last_pair
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) q k δ)
+    (hδ : metricCauchySchwarzBound (I := I) q k δ)
     (n : ℕ) (U : SmoothCcTensor q 0 0) :
     -tensorL2Inner (I := I) (M := M) q 0 (1 + n)
-        (castRankCc_db (I := I) (M := M) q 0
+        (castCcTensorRank (I := I) (M := M) q 0
           (by omega : 0 + (n + 1) = 1 + n)
           (iteratedCovGrad (I := I) q 0 0 (n + 1) U)).toFun
-        (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+        (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
           (slotExtendIter (I := I) (M := M) q 1 1 n
-            (slotInsertEndoCc (I := I) (M := M) q 0
+            (endoSlotZeroCcTensor (I := I) (M := M) q 0
               (gInvDiffRaisedEndoField (I := I) q h)))
-          (castRankCc_db (I := I) (M := M) q 0
+          (castCcTensorRank (I := I) (M := M) q 0
             (by omega : 0 + (n + 1) = 1 + n)
             (iteratedCovGrad (I := I) q 0 0 (n + 1) U))).toFun ≤
       (δ / (1 - δ)) *
         ‖SmoothCcTensor.toL2
-          (castRankCc_db (I := I) (M := M) q 0
+          (castCcTensorRank (I := I) (M := M) q 0
             (by omega : 0 + (n + 1) = 1 + n)
             (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2 := by
   let A : SmoothCcTensor q 0 (1 + n) :=
-    castRankCc_db (I := I) (M := M) q 0
+    castCcTensorRank (I := I) (M := M) q 0
       (by omega : 0 + (n + 1) = 1 + n)
       (iteratedCovGrad (I := I) q 0 0 (n + 1) U)
   let B : SmoothCcTensor q 0 (1 + n) :=
-    appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n
-        (slotInsertEndoCc (I := I) (M := M) q 0
+        (endoSlotZeroCcTensor (I := I) (M := M) q 0
           (gInvDiffRaisedEndoField (I := I) q h))) A
   have hBsec (x : M) :
       B.toSection x = gInvDiffSlotAt (I := I) q h (1 + n) ⟨n, by omega⟩ x
@@ -346,36 +370,37 @@ theorem cc_last_pair
   rw [hminus, hnorm] at hneg
   simpa only [A, B] using hneg
 
-/-- The principal coefficient in the scalar moving-minus-fixed Laplacian. -/
+
 noncomputable def scalarTraceCoeff
     (q h : SmoothRiemannianMetric I M) : SmoothCcTensor q 2 0 :=
   traceCast (I := I) q h - cometricDoubleTraceField (I := I) q 0
 
-/-- The scalar principal coefficient is the fixed cometric trace of the
-slot-extended inverse-cometric difference. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem scalar_trace_factor
     (q h : SmoothRiemannianMetric I M) :
     scalarTraceCoeff (I := I) q h =
-      appCcRS (I := I) (M := M) q 2 2 0
+      ccOperatorFieldComp (I := I) (M := M) q 2 2 0
         (cometricDoubleTraceField (I := I) q 0)
         (slotExtend (I := I) (M := M) q 1 1
           (scalarFluxCoeff (I := I) q h)) := by
-  rw [scalarTraceCoeff, scalarFluxCoeff, slotExtend_sub, appCcRS_sub_right]
+  rw [scalarTraceCoeff, scalarFluxCoeff, slotExtend_sub, ccOperatorFieldComp_sub_right]
   rw [← trace_retag_eq (I := I) (M := M) q h,
     ← trace_retag_eq (I := I) (M := M) q q, traceCast_self]
 
-/-- The scalar principal Hessian arm is a divergence-form flux minus the
-coefficient-derivative lower-order arm. -/
+
+
 theorem scalar_flux_split
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) :
-    appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
+    operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
         (iteratedCovGrad (I := I) q 0 0 2 U) =
       covDivergence (I := I) (M := M) q 0
-          (appCc (I := I) (M := M) q 1 1
+          (operatorFieldApply (I := I) (M := M) q 1 1
             (scalarFluxCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 1 U)) -
-        appCc (I := I) (M := M) q 1 0
-          (appCcRS (I := I) (M := M) q 1 2 0
+        operatorFieldApply (I := I) (M := M) q 1 0
+          (ccOperatorFieldComp (I := I) (M := M) q 1 2 0
             (cometricDoubleTraceField (I := I) q 0)
             (covGrad (I := I) (M := M) q 1 1
               (scalarFluxCoeff (I := I) q h)))
@@ -392,42 +417,42 @@ theorem scalar_flux_split
   rw [scalar_trace_factor, hdiv]
   abel
 
-/-- Pairing the scalar principal arm against a scalar test tensor splits into
-the Dirichlet flux term and the coefficient-derivative arm. -/
+
+
 theorem cc_pair_split
     (q h : SmoothRiemannianMetric I M) (X U : SmoothCcTensor q 0 0) :
     tensorL2Inner (I := I) (M := M) q 0 0
         X.toFun
-        (appCc (I := I) (M := M) q 2 0
+        (operatorFieldApply (I := I) (M := M) q 2 0
           (scalarTraceCoeff (I := I) q h)
           (iteratedCovGrad (I := I) q 0 0 2 U)).toFun =
       -tensorL2Inner (I := I) (M := M) q 0 1
           (covGrad (I := I) (M := M) q 0 0
             X).toFun
-          (appCc (I := I) (M := M) q 1 1
-            (slotInsertEndoCc (I := I) (M := M) q 0
+          (operatorFieldApply (I := I) (M := M) q 1 1
+            (endoSlotZeroCcTensor (I := I) (M := M) q 0
               (gInvDiffRaisedEndoField (I := I) q h))
             (iteratedCovGrad (I := I) q 0 0 1 U)).toFun -
         tensorL2Inner (I := I) (M := M) q 0 0
           X.toFun
-          (appCc (I := I) (M := M) q 1 0
-            (appCcRS (I := I) (M := M) q 1 2 0
+          (operatorFieldApply (I := I) (M := M) q 1 0
+            (ccOperatorFieldComp (I := I) (M := M) q 1 2 0
               (cometricDoubleTraceField (I := I) q 0)
               (covGrad (I := I) (M := M) q 1 1
                 (scalarFluxCoeff (I := I) q h)))
             (iteratedCovGrad (I := I) q 0 0 1 U)).toFun := by
   let B₀ : SmoothCcTensor q 0 1 :=
-    appCc (I := I) (M := M) q 1 1
+    operatorFieldApply (I := I) (M := M) q 1 1
       (scalarFluxCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 U)
   let B : SmoothCcTensor q 0 1 :=
-    appCc (I := I) (M := M) q 1 1
-      (slotInsertEndoCc (I := I) (M := M) q 0
+    operatorFieldApply (I := I) (M := M) q 1 1
+      (endoSlotZeroCcTensor (I := I) (M := M) q 0
         (gInvDiffRaisedEndoField (I := I) q h))
       (iteratedCovGrad (I := I) q 0 0 1 U)
   let D : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 1 0
-      (appCcRS (I := I) (M := M) q 1 2 0
+    operatorFieldApply (I := I) (M := M) q 1 0
+      (ccOperatorFieldComp (I := I) (M := M) q 1 2 0
         (cometricDoubleTraceField (I := I) q 0)
         (covGrad (I := I) (M := M) q 1 1
           (scalarFluxCoeff (I := I) q h)))
@@ -473,19 +498,19 @@ theorem cc_pair_split
   rw [← hB]
   linarith
 
-/-- The divergence-form principal flux has a Dirichlet upper bound whose
-coefficient depends only on the order-zero metric perturbation. -/
+
+
 theorem cc_principal_pair
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) q k δ)
+    (hδ : metricCauchySchwarzBound (I := I) q k δ)
     (U : SmoothCcTensor q 0 0) :
     tensorL2Inner (I := I) (M := M) q 0 0 U.toFun
         (covDivergence (I := I) (M := M) q 0
-          (appCc (I := I) (M := M) q 1 1
+          (operatorFieldApply (I := I) (M := M) q 1 1
             (scalarFluxCoeff (I := I) q h)
             (covGrad (I := I) (M := M) q 0 0 U))).toFun ≤
       (δ / (1 - δ)) *
@@ -494,7 +519,7 @@ theorem cc_principal_pair
   let A : SmoothCcTensor q 0 1 :=
     covGrad (I := I) (M := M) q 0 0 U
   let B : SmoothCcTensor q 0 1 :=
-    appCc (I := I) (M := M) q 1 1 (scalarFluxCoeff (I := I) q h) A
+    operatorFieldApply (I := I) (M := M) q 1 1 (scalarFluxCoeff (I := I) q h) A
   have hBsec (x : M) :
       B.toSection x =
         gInvDiffSlotApplied (I := I) q h 0 x (A.toSection x) := by
@@ -511,7 +536,7 @@ theorem cc_principal_pair
             A.toSection x) z)) w =
       cotangentToDual (I := I)
         (slotInsertEndoFib (I := I) (M := M) 1 0 x
-          (gInvDiffRaisedEndo (I := I) q h x)
+          (metricComparisonDiffEndo (I := I) q h x)
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
             A.toSection x) z)) w
     rw [scalarFlux_eval (I := I) (M := M),
@@ -586,21 +611,21 @@ theorem cc_principal_pair
   rw [hgreen, neg_neg] at hneg
   simpa only [A, B] using hneg
 
-/-- Commuting a scalar connection-Laplacian iterate through the principal
-moving-cometric arm leaves only the two adjacent covariant-jet windows. -/
+
+
 theorem cc_comm_pair (q h : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ U : SmoothCcTensor q 0 0,
       |tensorL2Inner (I := I) (M := M) q 0 0
           (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-          (appCc (I := I) (M := M) q 2 0
+          (operatorFieldApply (I := I) (M := M) q 2 0
             (scalarTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 2 U)).toFun +
         tensorL2Inner (I := I) (M := M) q 0 (1 + n)
           (iteratedCovGrad (I := I) q 0 1 n
             (covGrad (I := I) (M := M) q 0 0 U)).toFun
-          (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+          (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
             (slotExtendIter (I := I) (M := M) q 1 1 n
-              (slotInsertEndoCc (I := I) (M := M) q 0
+              (endoSlotZeroCcTensor (I := I) (M := M) q 0
                 (gInvDiffRaisedEndoField (I := I) q h)))
             (iteratedCovGrad (I := I) q 0 1 n
               (covGrad (I := I) (M := M) q 0 0 U))).toFun| ≤
@@ -609,10 +634,10 @@ theorem cc_comm_pair (q h : SmoothRiemannianMetric I M) (n : ℕ) :
           (∑ j ∈ Finset.range (n + 2),
             ‖iteratedCovGrad (I := I) q 0 0 j U‖)) := by
   let C₀ : SmoothCcTensor q 1 1 :=
-    slotInsertEndoCc (I := I) (M := M) q 0
+    endoSlotZeroCcTensor (I := I) (M := M) q 0
       (gInvDiffRaisedEndoField (I := I) q h)
   let Φ : SmoothCcTensor q 1 0 :=
-    appCcRS (I := I) (M := M) q 1 2 0
+    ccOperatorFieldComp (I := I) (M := M) q 1 2 0
       (cometricDoubleTraceField (I := I) q 0)
       (covGrad (I := I) (M := M) q 1 1
         (scalarFluxCoeff (I := I) q h))
@@ -623,24 +648,24 @@ theorem cc_comm_pair (q h : SmoothRiemannianMetric I M) (n : ℕ) :
   refine ⟨Ct + Cd, add_nonneg hCt_nn hCd_nn, fun U => ?_⟩
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 2 0
+    (operatorFieldApply (I := I) (M := M) q 2 0
       (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 U)).toFun
   let G : ℝ := tensorL2Inner (I := I) (M := M) q 0 1
     (covGrad (I := I) (M := M) q 0 0
       (oneMinusConnLapSmoothIter (I := I) q 0 0 n U)).toFun
-    (appCc (I := I) (M := M) q 1 1 C₀
+    (operatorFieldApply (I := I) (M := M) q 1 1 C₀
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
   let Htop : ℝ := tensorL2Inner (I := I) (M := M) q 0 (1 + n)
     (iteratedCovGrad (I := I) q 0 1 n
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
-    (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n C₀)
       (iteratedCovGrad (I := I) q 0 1 n
         (covGrad (I := I) (M := M) q 0 0 U))).toFun
   let D : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 1 0 Φ
+    (operatorFieldApply (I := I) (M := M) q 1 0 Φ
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
   let J : ℝ := (∑ j ∈ Finset.range (n + 1),
       ‖iteratedCovGrad (I := I) q 0 0 j U‖) *
@@ -667,24 +692,24 @@ theorem cc_comm_pair (q h : SmoothRiemannianMetric I M) (n : ℕ) :
     _ ≤ Ct * J + Cd * J := add_le_add htrans hder
     _ = (Ct + Cd) * J := by ring
 
-/-- The scalar principal moving-cometric arm has a sharp top-jet coefficient
-and only an adjacent-window commutator remainder. -/
+
+
 theorem cc_energy_diss
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) q k δ) (n : ℕ) :
+    (hδ : metricCauchySchwarzBound (I := I) q k δ) (n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ U : SmoothCcTensor q 0 0,
       tensorL2Inner (I := I) (M := M) q 0 0
           (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-          (appCc (I := I) (M := M) q 2 0
+          (operatorFieldApply (I := I) (M := M) q 2 0
             (scalarTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 2 U)).toFun ≤
         (δ / (1 - δ)) *
             ‖SmoothCcTensor.toL2
-              (castRankCc_db (I := I) (M := M) q 0
+              (castCcTensorRank (I := I) (M := M) q 0
                 (by omega : 0 + (n + 1) = 1 + n)
                 (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2 +
           C * ((∑ j ∈ Finset.range (n + 1),
@@ -694,18 +719,18 @@ theorem cc_energy_diss
   obtain ⟨C, hC_nn, hC⟩ := cc_comm_pair (I := I) (M := M) q h n
   refine ⟨C, hC_nn, fun U => ?_⟩
   let A : SmoothCcTensor q 0 (1 + n) :=
-    castRankCc_db (I := I) (M := M) q 0
+    castCcTensorRank (I := I) (M := M) q 0
       (by omega : 0 + (n + 1) = 1 + n)
       (iteratedCovGrad (I := I) q 0 0 (n + 1) U)
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 2 0
+    (operatorFieldApply (I := I) (M := M) q 2 0
       (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 U)).toFun
   let Htop : ℝ := tensorL2Inner (I := I) (M := M) q 0 (1 + n) A.toFun
-    (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n
-        (slotInsertEndoCc (I := I) (M := M) q 0
+        (endoSlotZeroCcTensor (I := I) (M := M) q 0
           (gInvDiffRaisedEndoField (I := I) q h))) A).toFun
   let J : ℝ := (∑ j ∈ Finset.range (n + 1),
       ‖iteratedCovGrad (I := I) q 0 0 j U‖) *
@@ -733,26 +758,27 @@ theorem cc_energy_diss
   change P ≤ (δ / (1 - δ)) * ‖SmoothCcTensor.toL2 A‖ ^ 2 + C * J
   linarith
 
-/-- The first-order coefficient obtained by tracing the connection difference
-with the moving cometric, represented over the fixed background metric. -/
+
+
 noncomputable def connTraceCoeff
     (q h : SmoothRiemannianMetric I M) : SmoothCcTensor q 1 0 :=
-  appCcRS (I := I) (M := M) q 1 2 0 (traceCast (I := I) q h)
+  ccOperatorFieldComp (I := I) (M := M) q 1 2 0 (traceCast (I := I) q h)
     (connDiffSection (I := I) h q)
 
-/-- The scalar moving-minus-fixed Laplacian coefficient expression over the
-fixed background: moving trace on the fixed Hessian, minus the traced
-connection-difference correction on the fixed gradient. -/
+
+
+
 noncomputable def scalarLapDiffCc
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) :
     SmoothCcTensor q 0 0 :=
-  appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
+  operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 U) -
-    appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
+    operatorFieldApply (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 U)
 
-/-- The fixed-background scalar Laplacian difference is additive in the scalar
-section. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarLapDiff_add
     (q h : SmoothRiemannianMetric I M) (U V : SmoothCcTensor q 0 0) :
     scalarLapDiffCc (I := I) q h (U + V) =
@@ -760,21 +786,22 @@ theorem scalarLapDiff_add
   simp only [scalarLapDiffCc, iteratedCovGrad_add, appCc_add_right]
   abel
 
-/-- The fixed-background scalar Laplacian difference commutes with real scalar
-multiplication. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarLapDiff_smul
     (q h : SmoothRiemannianMetric I M) (c : ℝ) (U : SmoothCcTensor q 0 0) :
     scalarLapDiffCc (I := I) q h (c • U) = c • scalarLapDiffCc (I := I) q h U := by
   simp only [scalarLapDiffCc, iteratedCovGrad_smul, appCc_smul_right]
   module
 
-/-- The traced connection-difference arm has a support-independent adjacent
-covariant-jet window bound. -/
+
+
 theorem cc_conn_pair (q h : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ U : SmoothCcTensor q 0 0,
       |tensorL2Inner (I := I) (M := M) q 0 0
           (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-          (appCc (I := I) (M := M) q 1 0
+          (operatorFieldApply (I := I) (M := M) q 1 0
             (connTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 1 U)).toFun| ≤
         C * ((∑ j ∈ Finset.range (n + 1),
@@ -785,22 +812,22 @@ theorem cc_conn_pair (q h : SmoothRiemannianMetric I M) (n : ℕ) :
     (iterL_pair_jet_le (I := I) (M := M) q 0 n
       (connTraceCoeff (I := I) q h))
 
-/-- The fixed-background scalar moving-minus-fixed Laplacian pairing has the
-sharp principal top coefficient and an adjacent covariant-jet remainder. -/
+
+
 theorem cc_lap_pair
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) q k δ) (n : ℕ) :
+    (hδ : metricCauchySchwarzBound (I := I) q k δ) (n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ U : SmoothCcTensor q 0 0,
       tensorL2Inner (I := I) (M := M) q 0 0
           (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
           (scalarLapDiffCc (I := I) q h U).toFun ≤
         (δ / (1 - δ)) *
             ‖SmoothCcTensor.toL2
-              (castRankCc_db (I := I) (M := M) q 0
+              (castCcTensorRank (I := I) (M := M) q 0
                 (by omega : 0 + (n + 1) = 1 + n)
                 (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2 +
           C * ((∑ j ∈ Finset.range (n + 1),
@@ -814,16 +841,16 @@ theorem cc_lap_pair
   let X : SmoothCcTensor q 0 0 :=
     oneMinusConnLapSmoothIter (I := I) q 0 0 n U
   let A : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
+    operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 U)
   let B : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
+    operatorFieldApply (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 U)
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0 X.toFun A.toFun
   let Q : ℝ := tensorL2Inner (I := I) (M := M) q 0 0 X.toFun B.toFun
   let D : ℝ := (δ / (1 - δ)) *
     ‖SmoothCcTensor.toL2
-      (castRankCc_db (I := I) (M := M) q 0
+      (castCcTensorRank (I := I) (M := M) q 0
         (by omega : 0 + (n + 1) = 1 + n)
         (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2
   let J : ℝ :=
@@ -857,12 +884,13 @@ theorem cc_lap_pair
     P + -Q ≤ (D + Cp * J) + Cc * J := add_le_add hp hq
     _ = D + (Cp + Cc) * J := by ring
 
-/-- Fully applied scalar normal form for the retagged moving trace. -/
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceCast_apply
     (q h : SmoothRiemannianMetric I M) (W : SmoothCcTensor q 0 2) (x : M) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 0 I x from
-            (appCc (I := I) (M := M) q 2 0
+            (operatorFieldApply (I := I) (M := M) q 2 0
               (traceCast (I := I) q h) W).toSection x)
           (unitZeroSec (I := I) (M := M) x))
         (fun i => Fin.elim0 i) =
@@ -876,13 +904,14 @@ theorem traceCast_apply
     SmoothCcTensor.retag_toSection, cometricDoubleTraceField_toSection]
   rfl
 
-/-- Fully applied scalar normal form for the moving-minus-fixed principal
-coefficient. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem scalarTrace_apply
     (q h : SmoothRiemannianMetric I M) (W : SmoothCcTensor q 0 2) (x : M) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 0 I x from
-            (appCc (I := I) (M := M) q 2 0
+            (operatorFieldApply (I := I) (M := M) q 2 0
               (scalarTraceCoeff (I := I) q h) W).toSection x)
           (unitZeroSec (I := I) (M := M) x))
         (fun i => Fin.elim0 i) =
@@ -900,11 +929,11 @@ theorem scalarTrace_apply
           (fun i => Fin.elim0 i) := by
   rw [scalarTraceCoeff, appCc_sub_left]
   have h_sec :
-      (appCc (I := I) (M := M) q 2 0 (traceCast (I := I) q h) W -
-          appCc (I := I) (M := M) q 2 0
+      (operatorFieldApply (I := I) (M := M) q 2 0 (traceCast (I := I) q h) W -
+          operatorFieldApply (I := I) (M := M) q 2 0
             (cometricDoubleTraceField (I := I) q 0) W).toSection x =
-        (appCc (I := I) (M := M) q 2 0 (traceCast (I := I) q h) W).toSection x -
-          (appCc (I := I) (M := M) q 2 0
+        (operatorFieldApply (I := I) (M := M) q 2 0 (traceCast (I := I) q h) W).toSection x -
+          (operatorFieldApply (I := I) (M := M) q 2 0
             (cometricDoubleTraceField (I := I) q 0) W).toSection x := rfl
   rw [h_sec]
   rw [ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
@@ -913,13 +942,15 @@ theorem scalarTrace_apply
   rw [appCc_toSection, cometricDoubleTraceField_toSection]
   rfl
 
-/-- Fully applied scalar normal form for the traced connection-difference
-coefficient. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTrace_apply
     (q h : SmoothRiemannianMetric I M) (W : SmoothCcTensor q 0 1) (x : M) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 0 I x from
-            (appCc (I := I) (M := M) q 1 0
+            (operatorFieldApply (I := I) (M := M) q 1 0
               (connTraceCoeff (I := I) q h) W).toSection x)
           (unitZeroSec (I := I) (M := M) x))
         (fun i => Fin.elim0 i) =
@@ -936,8 +967,9 @@ theorem connTrace_apply
     connDiffSection_toSection]
   rfl
 
-/-- Fully applied scalar decomposition of the moving-minus-fixed Laplacian
-coefficient expression. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarLapDiff_apply
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) (x : M) :
     Tensor0SSpace.toModel
@@ -967,13 +999,13 @@ theorem scalarLapDiff_apply
           (fun i => Fin.elim0 i) := by
   rw [scalarLapDiffCc]
   have h_sec :
-      (appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
+      (operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 2 U) -
-          appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
+          operatorFieldApply (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 1 U)).toSection x =
-        (appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
+        (operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 2 U)).toSection x -
-          (appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
+          (operatorFieldApply (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
             (iteratedCovGrad (I := I) q 0 0 1 U)).toSection x := rfl
   rw [h_sec, ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]

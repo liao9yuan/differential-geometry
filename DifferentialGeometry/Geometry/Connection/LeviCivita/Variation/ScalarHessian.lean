@@ -1,10 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.RicciCoord
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -22,11 +18,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-!
-# Levi-Civita Variation Scalar Hessian
 
-Split-out component of `DifferentialGeometry.Integral.Connection.Variation`.
--/
+
+
+
+
 
 section RicciCoordVariation
 
@@ -43,11 +39,13 @@ def scalarHessCoordAt
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 i j p *
         scalarCoordDerivAt (I := I) f x0 p
 
-/-- Covariant trace variation bridge.  Once the traced Christoffel variation
-one-form has derivative `1/2 * partial_i partial_j V` and pointwise value
-`1/2 * partial_a V`, the full covariant derivative is
-`1/2 * Hess_ij V`.  The middle connection-correction terms cancel by finite
-trace algebra. -/
+
+
+
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem gammaTraceCovVar
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -140,7 +138,7 @@ theorem gammaTraceCovVar
           rw [hsum_half]
           ring
 
-/-- Time derivative package for scalar first coordinate derivatives. -/
+
 def scalarFirstVarCoordAt
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M) : Prop :=
@@ -151,7 +149,7 @@ def scalarFirstVarCoordAt
       timeSet
       base
 
-/-- Time derivative package for scalar second coordinate derivatives. -/
+
 def scalarSecondVarCoordAt
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M) : Prop :=
@@ -162,8 +160,10 @@ def scalarSecondVarCoordAt
       timeSet
       base
 
-/-- A fixed-base mixed derivative rule for the scalar path produces the first
-coordinate-derivative variation package. -/
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarFirst_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -178,8 +178,10 @@ theorem scalarFirst_of_fixedBase
       (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
   simpa [scalarCoordDerivAt] using hderiv
 
-/-- Regular-time version of `scalarFirst_of_fixedBase`, used when the chart
-mixed-derivative theorem is available only at the base time. -/
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarFirst_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -195,8 +197,10 @@ theorem scalarFirst_of_fixedBaseRegular
       (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
   simpa [scalarCoordDerivAt] using hderiv
 
-/-- Fixed-base mixed derivative rules for the first scalar coordinate
-derivatives produce the second coordinate-derivative variation package. -/
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarSecond_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -212,8 +216,10 @@ theorem scalarSecond_of_fixedBase
       (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
   simpa [scalarCoordSecondAt] using hderiv
 
-/-- Regular-time version of `scalarSecond_of_fixedBase`, used when the mixed
-derivative of `∂_j f_s` is only produced at the base time. -/
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarSecond_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -231,8 +237,10 @@ theorem scalarSecond_of_fixedBaseRegular
       (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
   simpa [scalarCoordSecondAt] using hderiv
 
-/-- Coordinate-frame Hessian variation from Christoffel variation:
-`d Hess_ij(f_s) / ds = Hess_ij(h) - A^p_ij partial_p f`. -/
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcHessVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -257,11 +265,13 @@ theorem lcHessVarCoord
       HasDerivWithinAt
         (fun s : Real =>
           ∑ p : CoordinateIdx (𝕜 := Real) E,
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection s) x0 i j p *
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection s) x0
+              i j p *
               scalarCoordDerivAt (I := I) (f s) x0 p)
         (∑ p : CoordinateIdx (𝕜 := Real) E,
           (gammaDot x0 p i j * scalarCoordDerivAt (I := I) (f base) x0 p +
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection base) x0 i j p *
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection base)
+              x0 i j p *
               scalarCoordDerivAt (I := I) h x0 p))
         timeSet
         base := by
@@ -275,7 +285,8 @@ theorem lcHessVarCoord
         (scalarCoordSecondAt (I := I) h x0 i j -
           ∑ p : CoordinateIdx (𝕜 := Real) E,
             (gammaDot x0 p i j * scalarCoordDerivAt (I := I) (f base) x0 p +
-              DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection base) x0 i j p *
+              DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+                (G.connection base) x0 i j p *
                 scalarCoordDerivAt (I := I) h x0 p))
         timeSet
         base := by
@@ -284,9 +295,9 @@ theorem lcHessVarCoord
   simp [scalarHessCoordAt, Finset.sum_add_distrib, sub_eq_add_neg, add_comm,
     add_left_comm]
 
-/-- The weighted-divergence component
-`nabla_p A^p_ij - A^p_ij partial_p f`, i.e. the coordinate expression for
-`e^f nabla_p(e^{-f} A^p_ij)`. -/
+
+
+
 def gammaWeightedDivCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -299,8 +310,8 @@ def gammaWeightedDivCoordAt
     ∑ p : CoordinateIdx (𝕜 := Real) E,
       gammaDot x0 p i j * scalarCoordDerivAt (I := I) f x0 p
 
-/-- Coordinate RHS for the variation of `Ric_ij + Hess_ij f` before replacing
-`nabla_i A^p_pj` by the Hessian of the metric trace. -/
+
+
 def ricciHessVarCoordRHS
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -312,8 +323,9 @@ def ricciHessVarCoordRHS
     scalarHessCoordAt (I := I) cov h x0 i j -
       gammaTraceCovAt (I := I) cov gammaDot x0 i j
 
-/-- Coordinate-frame variation of `Ric_ij + Hess_ij f` in the pre-trace form:
-`nabla_p A^p_ij - A^p_ij partial_p f + Hess_ij h - nabla_i A^p_pj`. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -330,7 +342,8 @@ theorem lcRicciHessVarCoord
     (i j : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+          x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (ricciHessVarCoordRHS (I := I) (G.connection base) gammaDot
         (f base) h x0 i j)
@@ -347,9 +360,9 @@ theorem lcRicciHessVarCoord
     gammaTraceCovAt, scalarHessCoordAt, sub_eq_add_neg]
   ring
 
-/-- Shifted scalar Hessian term `Hess_ij(h - V/2)`, represented as
-`Hess_ij h - (1/2) Hess_ij V` to avoid needing linearity of the coordinate
-Hessian in this local producer. -/
+
+
+
 def shiftedScalarHessCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (h metricTrace : M -> Real) (x0 : M)
@@ -357,8 +370,9 @@ def shiftedScalarHessCoordAt
   scalarHessCoordAt (I := I) cov h x0 i j -
     (1 / 2 : Real) * scalarHessCoordAt (I := I) cov metricTrace x0 i j
 
-/-- Coordinate-frame variation of `Ric_ij + Hess_ij f` after identifying
-`nabla_i A^p_pj` with half the Hessian of the metric trace. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarShifted
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -379,7 +393,8 @@ theorem lcRicciHessVarShifted
           scalarHessCoordAt (I := I) (G.connection base) metricTrace x0 i j) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+          x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
           (f base) x0 i j +
@@ -394,9 +409,10 @@ theorem lcRicciHessVarShifted
   rw [htrace]
   ring_nf
 
-/-- Trace contraction of the shifted `Ric + Hess f` variation formula.  This is
-the scalar producer for the variation of `g^{ij}(Ric_ij + Hess_ij f)` before
-identifying the inverse-metric variation term with `-v_ij(Ric_ij+Hess_ij f)`. -/
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -428,12 +444,14 @@ theorem lcTraceVar
       (fun s : Real =>
         trace2 (gInvPath s)
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+              (G.connection s) x0 i j +
               scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
       ((Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun i =>
         (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun j =>
           gInvDot i j *
-            (DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection base)
+            (DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+              (G.connection base)
                 x0 i j +
               scalarHessCoordAt (I := I) (G.connection base) (f base)
                 x0 i j) +
@@ -449,8 +467,9 @@ theorem lcTraceVar
     exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
       metricTrace gammaDot hgamma hmix hfirst hsecond i j (htrace i j)
 
-/-- Coordinate-frame variation of `Ric_ij + Hess_ij f` with the trace
-covariant-derivative input produced from the traced Christoffel one-form. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessShifted_of_trace
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -484,7 +503,8 @@ theorem lcRicciHessShifted_of_trace
         (scalarCoordDerivFun (I := I) metricTrace x0 j) x0) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+          x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
           (f base) x0 i j +
@@ -502,8 +522,9 @@ theorem lcRicciHessShifted_of_trace
   exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
     metricTrace gammaDot hgamma hmix hfirst hsecond i j htrace_cov
 
-/-- Trace contraction of `lcRicciHessShifted_of_trace`.  This removes the
-pointwise `nabla_i A^p_pj` input from the scalar trace variation producer. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_of_trace
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -549,12 +570,14 @@ theorem lcTraceVar_of_trace
       (fun s : Real =>
         trace2 (gInvPath s)
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+              (G.connection s) x0 i j +
               scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
       ((Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun i =>
         (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun j =>
           gInvDot i j *
-            (DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection base)
+            (DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+              (G.connection base)
                 x0 i j +
               scalarHessCoordAt (I := I) (G.connection base) (f base)
                 x0 i j) +
@@ -572,10 +595,11 @@ theorem lcTraceVar_of_trace
       hgamma hmix hfirst hsecond i j (htrace_eventual j) htrace_point
       (hgamma_mdiff j) (hscalar_mdiff j)
 
-/-- Trace contraction of `Ric + Hess f` with the inverse-metric variation
-normalized as the contravariant metric-variation contraction.  This is the
-formula 5.10 scalar trace producer: the first term in the product rule is
-rewritten as `-v^{ij}(Ric_ij + Hess_ij f)`. -/
+
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_inv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -624,11 +648,13 @@ theorem lcTraceVar_inv
       (fun s : Real =>
         trace2 (gInvPath s)
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+              (G.connection s) x0 i j +
               scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
       (-trace2 metricVariation
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection base)
+            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+              (G.connection base)
                 x0 i j +
               scalarHessCoordAt (I := I) (G.connection base) (f base)
                 x0 i j) +
@@ -659,14 +685,16 @@ theorem lcTraceVar_inv
             metricTrace x0 i j))
     hcontra
 
-/-- Coordinate-frame shifted Ricci-plus-Hessian variation with the Christoffel
-trace inputs produced from the metric-trace and inverse-metric compatibility
-bridges. -/
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcTraceShifted
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+      (CoordinateIdx (𝕜 := Real) E))
     (timeSet : Set Real) (base : Real) (x0 : M)
     (f : Real -> M -> Real) (h metricTrace : M -> Real)
     (metricDot : M -> CoordinateIdx (𝕜 := Real) E ->
@@ -718,7 +746,8 @@ theorem lcTraceShifted
         (scalarCoordDerivFun (I := I) metricTrace x0 j) x0) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+          x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
           (f base) x0 i j +
@@ -735,7 +764,8 @@ theorem lcTraceShifted
   have hcoordGamma : gammaCoordDerivAt (I := I) G timeSet base x0 gammaDot := by
     intro a b c
     have h := hgammaLocal x0 hx0 a b c
-    simpa [gammaCoordDerivAt, DifferentialGeometry.Integral.Connection.christoffelCoordAt, frame, hframe] using
+    simpa [gammaCoordDerivAt, DifferentialGeometry.Integral.Connection.christoffelCoordAt, frame,
+      hframe] using
       h.hasDerivWithinAt
   have hcov :
       ∀ y : M, y ∈ u0 -> ∀ d a b : CoordinateIdx (𝕜 := Real) E,

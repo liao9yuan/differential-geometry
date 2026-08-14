@@ -1,17 +1,17 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
 
-/-!
-# P4 bridge: the local-frame residual heat bound
 
-The closed P3 endpoint `resStarLFU` realizes the residual `(∂ₜ − Δ)∇ᵏRm` as a `StarSum2` element
-`T` (with a uniform per-component time-derivative identity over a neighborhood `u`).  `StarSum2.bound`
-turns any `StarSum2` element into a Cauchy–Schwarz bound by the tower norms `stNormSq`.
 
-`resStarBoundLF` is the smallest honest composition of the two: it exposes both the witness `T` (with
-its derivative identity) AND a single nonnegative constant `C` controlling the frame components of `T`
-by `Σⱼ √wⱼ·√w_{k−j}`.  This is the first step of P4 toward `TowerHeatBoundOn`; the global
-scalar/Bernstein consumer (frame-existence + reaction assembly) is left for a later pass.
--/
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -20,28 +20,20 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Dim3Reaction in
-/-- **P4 residual bound (local-frame).**  Composing the P3 endpoint `resStarLFU` with
-`StarSum2.bound`: the heat residual `(∂ₜ − Δ)∇ᵏRm` is realized by a `StarSum2` witness `T` whose
-frame components are controlled, uniformly on `u`, by the tower norms
-
-`|T y (frame · y)| ≤ C · Σⱼ √(stNormSq j) · √(stNormSq (k−j))`,
-
-with the same per-component time-derivative identity that `resStarLFU` supplies.  Takes exactly the
-`resStarLFU` hypotheses (no new residual assumption). -/
+omit [Module.Finite ℝ E] in
 theorem resStarBoundLF
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
     {u : Set M}
@@ -89,7 +81,8 @@ theorem resStarBoundLF
         (fun s : Real =>
           extDerivFun (I := I)
             (fun z : M =>
-              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe) (lfBase (I := I) S frame)
+              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
+                (lfBase (I := I) S frame)
                 k' s z m) y (frame d y))
         (extDerivFun (I := I)
           (fun z : M =>
@@ -115,22 +108,20 @@ theorem resStarBoundLF
             C * ∑ j ∈ Finset.range (k + 1),
               Real.sqrt (stNormSq (I := I) S (t : Real) j y (hframe.toBasisAt hy)) *
                 Real.sqrt (stNormSq (I := I) S (t : Real) (k - j) y (hframe.toBasisAt hy))) := by
-  -- P3 endpoint: the residual is a `StarSum2` witness with the uniform derivative identity.
   obtain ⟨T, hTcost, hcomp⟩ :=
-    resStarLFU (I := I) S hS k t frame hframe hu hdim horthU hbase baseDt chrDt hrm hchr hchrId hswap
+    resStarLFU (I := I) S hS k t frame hframe hu hdim horthU hbase baseDt chrDt hrm hchr hchrId
+      hswap
   have hT := hTcost.mem
   have hC0 := hTcost.nonneg
   have hCbound := hTcost.bound
   refine ⟨T, hT, resStarCost k, rfl, hC0, hcomp, ?_⟩
   intro y hy m
-  -- Orthonormality for the `family` metric at the pointwise basis (`family = base`, `rfl`).
   have horthFam : ∀ i j : Fin 3,
       (S.family.metric (t : Real)).inner y ((hframe.toBasisAt hy) i) ((hframe.toBasisAt hy) j)
         = if i = j then (1 : Real) else 0 := by
     intro i j
     rw [hframe.toBasisAt_coe hy i, hframe.toBasisAt_coe hy j]
     exact horthU y hy i j
-  -- Specialize the bound; reduce the basis tuple to the frame tuple.
   have hb := hCbound y (hframe.toBasisAt hy) horthFam m
   have htuple : (fun p => (hframe.toBasisAt hy) (m p)) = (fun p => frame (m p) y) := by
     funext p; exact hframe.toBasisAt_coe hy (m p)

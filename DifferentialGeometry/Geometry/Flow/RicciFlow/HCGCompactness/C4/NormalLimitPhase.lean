@@ -2,13 +2,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-/-!
-# Normal phase for a limiting coordinate metric
 
-The normal-coordinate metric limit has the same quantitative acceleration
-bounds as the stage metrics.  Existing fenced-flow and quantitative inverse
-theorems then construct its phase and retained endpoint branch.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +28,8 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace NormalRadiusProfile
 
-/-- The limiting normal-coordinate acceleration inherits the uniform stage
-Lipschitz and size bounds on every fixed phase box. -/
+
+
 theorem limit_accel_bounds
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -66,7 +66,7 @@ theorem limit_accel_bounds
       (X.obj n).t2TangentBundle
     apply (normalCoordMetric_contDiffOn_expBall (I := I) (X.obj n) (c n)).mono
     exact (h.phaseRadius_exp (hc n)).trans (Metric.ball_subset_ball (by
-      nlinarith [Geometry.Riemannian.expRadiusGp_pos
+      nlinarith [Geometry.Riemannian.expMapC2Radius_pos
         (I := I) (X.obj n).metric (c n)]))
   have hg_co : ∀ n z, z ∈ U → IsCoercive (g n z) := by
     intro n z hz
@@ -126,8 +126,8 @@ theorem limit_accel_bounds
       normalAccel_norm (I := I) hb n (c n)
         (h.phaseRadius_metric (hc n)) (h.phaseRadius_exp (hc n)) V z hz)
 
-/-- A sufficiently small phase ball for the limiting coordinate metric has a
-confined exact time-one phase family with a smooth retained endpoint. -/
+
+
 theorem exists_limit_phase
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -300,8 +300,8 @@ theorem exists_limit_phase
       (fun z : E × E ↦ z.1) _).prodMk hslice.fst
   exact ⟨ΦInf, hinit, hcurve, hstay, hzeroEnd, happ, hendSmooth⟩
 
-/-- The limiting phase endpoint has a positive quantitative partial inverse
-with smooth forward and inverse branches. -/
+
+
 theorem exists_limit_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

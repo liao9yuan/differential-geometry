@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.EndpointShape
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicOffZero
 
-set_option linter.unusedSectionVars false
 
 /-!
 # The intrinsic-exponential density identity (L2 of the A0′ lane)
@@ -46,14 +45,21 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
-variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+variable [riemannianBundle : RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
+omit riemannianBundle
+  [NeZero (Module.finrank ℝ E)]
+  [CompleteSpace E]
+  [I.Boundaryless]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- **Chain-rule coordinate expansion of the differential of a `C¹` map into `M`**
 (diffeo-free port of `paramDeriv_chartBasis_eq_sum`).
 
@@ -130,6 +136,12 @@ theorem mfderiv_chartBasis
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)]
+  [CompleteSpace E]
+  [I.Boundaryless]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- **Diffeo-free Gram-determinant pullback** (port of `paramGramMatrix_det_pullback`).
 
 The determinant of the metric Gram matrix of the differential columns of a `C¹` map
@@ -204,6 +216,8 @@ theorem gramDiff_det
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E]
+  [T2Space (TangentBundle I M)] in
 /-- **The intrinsic-exponential density identity** (deliverable L2).
 
 For a base point `x`, a launch vector `v`, and a chart center `y₀` whose chart

@@ -97,7 +97,6 @@ theorem preapprox_pair
       (Φ.contMDiffOn_toFun.mono hKsrc) hTf (hfwd Gf hGfF)
   have hfwdF : PreApproxIsoDataOn (I := I) K eps p F g h :=
     hfwdΦ.congr (fun x hx ↦ (hevF x (hKK' hx)).symm)
-
   have himage : (Φ : M → N) '' K' = F '' K' :=
     Set.EqOn.image_eq (fun x hx ↦ hEq (hK'U hx))
   have hFK'c : IsCompact (F '' K') := by

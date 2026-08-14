@@ -49,7 +49,8 @@ noncomputable def symmRaiseEndoFib (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
   LinearMap.toContinuousLinearMap
-    { toFun := fun v => metricSharp (I := I) g x
+    { toFun := fun v => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (I := I) g x
         (ccTensorBilinSymm (I := I) g T x v).toLinearMap
       map_add' := fun v v' => by
         have h : ((ccTensorBilinSymm (I := I) g T x (v + v')).toLinearMap) =
@@ -57,7 +58,7 @@ noncomputable def symmRaiseEndoFib (g : SmoothRiemannianMetric I M)
               (ccTensorBilinSymm (I := I) g T x v').toLinearMap := by
           ext w
           simp [map_add]
-        rw [show metricSharp (I := I) g x
+        rw [show DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g x
             (ccTensorBilinSymm (I := I) g T x (v + v')).toLinearMap =
             (metricFlatMap (I := I) g x).symm
               (ccTensorBilinSymm (I := I) g T x (v + v')).toLinearMap from rfl,
@@ -68,7 +69,7 @@ noncomputable def symmRaiseEndoFib (g : SmoothRiemannianMetric I M)
             c • (ccTensorBilinSymm (I := I) g T x v).toLinearMap := by
           ext w
           simp [map_smul]
-        rw [show metricSharp (I := I) g x
+        rw [show DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g x
             (ccTensorBilinSymm (I := I) g T x (c • v)).toLinearMap =
             (metricFlatMap (I := I) g x).symm
               (ccTensorBilinSymm (I := I) g T x (c • v)).toLinearMap from rfl,
@@ -79,7 +80,7 @@ omit [BoundarylessManifold I M] in
 @[simp] lemma symmRaiseEndoFib_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v : TangentSpace I x) :
     symmRaiseEndoFib (I := I) (M := M) g T x v =
-      metricSharp (I := I) g x
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g x
         (ccTensorBilinSymm (I := I) g T x v).toLinearMap := by
   rw [symmRaiseEndoFib, LinearMap.coe_toContinuousLinearMap']
   rfl
@@ -91,7 +92,7 @@ lemma inner_symmRaiseEndo (g : SmoothRiemannianMetric I M)
     g.inner x (symmRaiseEndoFib (I := I) (M := M) g T x v) w =
       ccTensorBilinSymm (I := I) g T x v w := by
   rw [symmRaiseEndoFib_apply]
-  exact inner_metricSharp (I := I) g x
+  exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g x
     (ccTensorBilinSymm (I := I) g T x v).toLinearMap w
 
 private theorem symmRaiseEndo_smooth (g : SmoothRiemannianMetric I M)
@@ -136,13 +137,14 @@ private theorem symmRaiseEndo_smooth (g : SmoothRiemannianMetric I M)
     have hpb := happ b hb
     rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
     exact hpb.2
-  have hsmooth := metricSharp_contMDiff_total (I := I) g
+  have hsmooth := DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_contMDiff_total
+    (I := I) g
     (cv := fun b : M =>
       (ccTensorBilinSymm (I := I) g T b (Y b)).toLinearMap) hcv
   refine hsmooth.congr ?_
   intro x
   change TotalSpace.mk' E x
-      (metricSharp (I := I) g x
+      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g x
         (ccTensorBilinSymm (I := I) g T x (Y x)).toLinearMap) =
     TotalSpace.mk' E x
       (symmRaiseEndoFib (I := I) (M := M) g T x (Y x))

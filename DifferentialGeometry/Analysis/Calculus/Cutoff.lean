@@ -2,21 +2,21 @@ import Mathlib.Geometry.Manifold.PartitionOfUnity
 
 set_option autoImplicit false
 
-/-!
-# Smooth cutoffs on finite-dimensional vector spaces
 
-This module provides the two generic cutoff tools used to globalize a map that
-is smooth only on an open set: a compact plateau supported inside the open set,
-and smoothness of multiplication by such a cutoff.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Analysis
 
 open Filter Set
 open scoped ContDiff Manifold Topology
 
-/-- Multiplying a function smooth on an open set by a global smooth cutoff
-supported in that set gives a globally smooth function. -/
+
+
 theorem contDiff_cutoff_smul
     {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -40,9 +40,9 @@ theorem contDiff_cutoff_smul
       rw [image_eq_zero_of_notMem_tsupport hy, zero_smul]
     exact (contDiffAt_const.congr_of_eventuallyEq heq).contDiffWithinAt
 
-/-- A compact subset of an open finite-dimensional real vector-space domain
-admits a global smooth `[0,1]`-valued plateau equal to one on the compact set
-and with topological support contained in the domain. -/
+
+
+
 theorem exists_bump_one_on
     {E : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

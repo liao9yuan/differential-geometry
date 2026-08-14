@@ -156,7 +156,7 @@ private noncomputable def psiBgCorr
 private theorem psiBgCorr_eq
     (g gT gB : SmoothRiemannianMetric I M) :
     psiBgCorr (I := I) (M := M) g gT gB =
-      appCcRS (I := I) (M := M) g 1 1 2
+      ccOperatorFieldComp (I := I) (M := M) g 1 1 2
         (psiBgLeft (I := I) (M := M) g gT gB -
           psiBgLeft (I := I) (M := M) g gT g)
         (sharpFlatEndoCc (I := I) g gT) := by
@@ -190,12 +190,12 @@ private theorem psiBgCorr_pair
     (g gT gU gB : SmoothRiemannianMetric I M) :
     psiBgCorr (I := I) (M := M) g gT gB -
         psiBgCorr (I := I) (M := M) g gU gB =
-      appCcRS (I := I) (M := M) g 1 1 2
+      ccOperatorFieldComp (I := I) (M := M) g 1 1 2
           (psiBgLeft (I := I) (M := M) g gT gB -
             psiBgLeft (I := I) (M := M) g gT g)
           (sharpFlatEndoCc (I := I) g gT -
             sharpFlatEndoCc (I := I) g gU) +
-        appCcRS (I := I) (M := M) g 1 1 2
+        ccOperatorFieldComp (I := I) (M := M) g 1 1 2
           ((psiBgLeft (I := I) (M := M) g gT gB -
               psiBgLeft (I := I) (M := M) g gT g) -
             (psiBgLeft (I := I) (M := M) g gU gB -
@@ -211,17 +211,17 @@ private theorem psiBgCorr_pair
   let SU : SmoothCcTensor g 1 1 := sharpFlatEndoCc (I := I) g gU
   rw [psiBgCorr_eq (I := I) (M := M) g gT gB,
     psiBgCorr_eq (I := I) (M := M) g gU gB]
-  change appCcRS (I := I) (M := M) g 1 1 2 AT ST -
-      appCcRS (I := I) (M := M) g 1 1 2 AU SU =
-    appCcRS (I := I) (M := M) g 1 1 2 AT (ST - SU) +
-      appCcRS (I := I) (M := M) g 1 1 2 (AT - AU) SU
-  have hR : appCcRS (I := I) (M := M) g 1 1 2 AT (ST - SU) =
-      appCcRS (I := I) (M := M) g 1 1 2 AT ST -
-        appCcRS (I := I) (M := M) g 1 1 2 AT SU := by
+  change ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AT ST -
+      ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AU SU =
+    ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AT (ST - SU) +
+      ccOperatorFieldComp (I := I) (M := M) g 1 1 2 (AT - AU) SU
+  have hR : ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AT (ST - SU) =
+      ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AT ST -
+        ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AT SU := by
     rw [appCcRS_sub_right]
-  have hL : appCcRS (I := I) (M := M) g 1 1 2 (AT - AU) SU =
-      appCcRS (I := I) (M := M) g 1 1 2 AT SU -
-        appCcRS (I := I) (M := M) g 1 1 2 AU SU := by
+  have hL : ccOperatorFieldComp (I := I) (M := M) g 1 1 2 (AT - AU) SU =
+      ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AT SU -
+        ccOperatorFieldComp (I := I) (M := M) g 1 1 2 AU SU := by
     rw [appCcRS_sub_left]
   rw [hR, hL]
   module
@@ -537,9 +537,9 @@ theorem psiBg_pair_h2
       jet_neg1 (I := I) (M := M) g 2]
     exact hPbD
   let V1 : SmoothCcTensor g 1 2 :=
-    appCcRS (I := I) (M := M) g 1 1 2 LT (ST - SU)
+    ccOperatorFieldComp (I := I) (M := M) g 1 1 2 LT (ST - SU)
   let V2 : SmoothCcTensor g 1 2 :=
-    appCcRS (I := I) (M := M) g 1 1 2 (LT - LU) SU
+    ccOperatorFieldComp (I := I) (M := M) g 1 1 2 (LT - LU) SU
   let Z1 : ℝ := Ca * L0 * (Cs * N)
   let Z2 : ℝ := Ca * (Kp * (Ch * N)) * Bs
   have hZ1 : 0 ≤ Z1 :=
@@ -625,10 +625,10 @@ private theorem liePiece_add
     (g gm : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3))
     (P Q : SmoothCcTensor g 1 2) :
-    lieArm1Piece (I := I) (M := M) g gm σ ρ (P + Q) =
-      lieArm1Piece (I := I) (M := M) g gm σ ρ P +
-        lieArm1Piece (I := I) (M := M) g gm σ ρ Q := by
-  unfold lieArm1Piece
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g gm σ ρ (P + Q) =
+      deTurckLieTraceCoeffPiece (I := I) (M := M) g gm σ ρ P +
+        deTurckLieTraceCoeffPiece (I := I) (M := M) g gm σ ρ Q := by
+  unfold deTurckLieTraceCoeffPiece
   rw [slotExt_add (I := I) (M := M), slotExt_add (I := I) (M := M),
     appCcRS_add_right, reidx_add (I := I) (M := M)]
 
@@ -636,10 +636,10 @@ private theorem liePiece_sub
     (g gm : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3))
     (P Q : SmoothCcTensor g 1 2) :
-    lieArm1Piece (I := I) (M := M) g gm σ ρ (P - Q) =
-      lieArm1Piece (I := I) (M := M) g gm σ ρ P -
-        lieArm1Piece (I := I) (M := M) g gm σ ρ Q := by
-  unfold lieArm1Piece
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g gm σ ρ (P - Q) =
+      deTurckLieTraceCoeffPiece (I := I) (M := M) g gm σ ρ P -
+        deTurckLieTraceCoeffPiece (I := I) (M := M) g gm σ ρ Q := by
+  unfold deTurckLieTraceCoeffPiece
   rw [slotExtend_sub, slotExtend_sub, appCcRS_sub_right,
     reidx_sub (I := I) (M := M)]
 
@@ -670,6 +670,17 @@ private theorem lieBgCorr_eq
     connBg_self (I := I) (M := M) g gm,
     liePiece_add (I := I) (M := M)]
   unfold psiBgCorr
+  change _ =
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g gm lieArm1SigmaC
+        lieArm1RhoSlot0 (lieArm1FixCd (I := I) (M := M) g gB) +
+      deTurckLieTraceCoeffPiece (I := I) (M := M) g gm lieArm1SigmaA
+        (Equiv.refl (Fin 3))
+          (lieArm1PsiB (I := I) (M := M) g gm gB -
+            lieArm1PsiB (I := I) (M := M) g gm g) +
+      deTurckLieTraceCoeffPiece (I := I) (M := M) g gm lieArm1SigmaASwap
+        (Equiv.refl (Fin 3))
+          (lieArm1PsiB (I := I) (M := M) g gm gB -
+            lieArm1PsiB (I := I) (M := M) g gm g)
   rw [liePiece_sub (I := I) (M := M),
     liePiece_sub (I := I) (M := M)]
   module
@@ -1244,7 +1255,8 @@ private theorem lieBg_pair_h2
     unfold lowJetSq
     have hz (q : ℕ) : iteratedCovGrad (I := I) g 1 2 q
         (0 : SmoothCcTensor g 1 2) = 0 := by
-      have h := iteratedCovGrad_smul_real (I := I) (M := M) g 1 2 q
+      have h := DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real
+        (I := I) (M := M) g 1 2 q
         (0 : ℝ) (0 : SmoothCcTensor g 1 2)
       simpa only [zero_smul] using h
     simp only [hz, norm_zero]

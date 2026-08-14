@@ -11,46 +11,10 @@ import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-/-!
-# Uniform `L²` bound for chart-frame scalar components of tensor sections
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensor g r s`, this file shows that the
-`L²` norm of the chart-frame scalar component (associated with a chart
-`α : M` and a multi-index pair `(Idx, Jdx)`) is bounded by a fixed constant
-times the metric `L²` norm of `S`, where the constant depends only on
-`(g, r, s, α)` — independently of `S` and of the multi-index pair.
-
-The proof chains three pre-existing components:
-
-1. `‖T‖² ≤ K · chartTensorInnerPointwise_rs_model g r s α b T T` uniformly
-   for `b ∈ tsupport(POU_α)` and every model fibre tensor `T`
-   (`NormComparison`).
-2. `tensorTrivProj g r s S α b = chartRSTwistInv α b r s (S.toFun b)`
-   (`TrivProjBridge`), combined with `chartRSTwist (chartRSTwistInv T) = T`
-   on the chart base set (`ChartTensorInnerLowerBound`), folding the
-   chart-frame diagonal back to the bundle-fibre diagonal on `S.toFun b`.
-3. Operator-norm bound `|P_IJ T| ≤ ‖P_IJ‖ · ‖T‖` on the multi-index
-   projections; the uniform-in-`(Idx, Jdx)` constant is the sum of operator
-   norms over the (finite) multi-index set.
-
-Integrating the resulting pointwise bound against `riemannianVolumeMeasure g`
-and converting between `eLpNorm` and `Real.sqrt` of the `L²` integral gives
-the headline statement.
-
-## Public theorems
-
-* `tensorChartComponentScalar_eLpNorm_le_uniform`: the `L²` norm of every
-  chart-frame scalar component is bounded by a single constant (depending
-  only on `(g, r, s, α)`) times `tensorL2Norm g r s S.toFun`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -65,7 +29,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -76,6 +40,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -91,10 +57,7 @@ lemma chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
   rw [tensorTrivProj_eq_chartRSTwistInv_toFun (I := I) (M := M) g r s α S hb]
   rw [chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb r s (S.toFun b)]
 
-/-- Combined bundle-fibre quadratic-form bound on the trivialization
-projection: on `tsupport(POU_α)`,
-`‖tensorTrivProj S α b‖² ≤ K · tensorInnerPointwise g r s b (S.toFun b)
-(S.toFun b)` with `K ≥ 0` depending only on `(g, r, s, α)`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorTrivProj_norm_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -116,17 +79,17 @@ lemma tensorTrivProj_norm_sq_le_const_mul_tensorInner
   rwa [chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
     (I := I) (M := M) g r s α S hb_base] at h
 
-/-- A uniform operator-norm bound on the chart-frame multi-index projections:
-for every `(Idx, Jdx)`, `‖P_IJ‖ ≤ C_proj`. -/
 noncomputable def chartComponentProjectionUniformBound (r s : ℕ) : ℝ :=
   ∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
     ‖tensorChartComponentProjection (E := E) r s p.1 p.2‖
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartComponentProjectionUniformBound_nonneg (r s : ℕ) :
     0 ≤ chartComponentProjectionUniformBound (E := E) r s :=
   Finset.sum_nonneg (fun _ _ => norm_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorChartComponentProjection_norm_le_uniform (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -150,6 +113,7 @@ lemma tensorChartComponentProjection_norm_le_uniform (r s : ℕ)
     Finset.sum_nonneg (fun _ _ => norm_nonneg _)
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -257,21 +221,7 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
     rw [hzero_sq]
     exact h_RHS_nn
 
-/-- **Pointwise reverse fibre bound for the raw chart component.**
-On the closed support of the chart-atlas partition-of-unity weight at `α`, the
-square of the raw chart-frame scalar component `tensorChartComponentRaw g r s S α
-Idx Jdx b` is bounded by a uniform constant (depending only on `(g, r, s, α)`)
-times the model pointwise self-inner product `tensorInnerPointwise g r s b (S.toFun
-b) (S.toFun b)`.
-
-This is the un-partition-of-unity-weighted twin of
-`tensorChartComponentScalar_sq_le_const_mul_tensorInner`: the raw component is the
-fixed chart-frame projection of the trivialisation image `tensorTrivProj g r s S α
-b`, whose squared norm is controlled by the pointwise fibre inner product
-(`tensorTrivProj_norm_sq_le_const_mul_tensorInner`); the chart-frame projections
-have a uniform operator-norm bound. It is the converse of the forward bound
-`riemannianFiberNormSq_le_raw_components_on_pouTsupport`, supplying the order-`0`
-reverse fibre control consumed by the reverse-Christoffel order-peeling. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -378,6 +328,7 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -445,15 +396,7 @@ private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
   rw [h_int_const_mul] at h_lint_le
   exact h_lint_le
 
-/-- **Headline theorem (uniform `L²` bound for chart-frame scalar
-components).** For each chart `α : M` and ranks `(r, s)`, there is a
-non-negative real constant `C` (depending only on `(g, r, s, α)`) such
-that for every smooth compactly-supported tensor section
-`S : SmoothCcTensor g r s` and every multi-index pair `(Idx, Jdx)`, the
-`L²` norm of the chart-frame scalar component is bounded by
-`ENNReal.ofReal C` times `ENNReal.ofReal (tensorL2Norm g r s S.toFun)`.
-
-The constant `C` is independent of `S` and of `(Idx, Jdx)`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentScalar_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

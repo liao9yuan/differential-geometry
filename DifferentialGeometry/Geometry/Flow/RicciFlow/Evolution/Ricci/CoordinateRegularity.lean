@@ -1,16 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Commutator
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution CoordinateRegularity
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +21,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -37,8 +33,8 @@ section CoordinateFrameRicciEvolution
 
 open DifferentialGeometry.Tensor.Coordinates
 
-/-- Fixed-time spatial differentiability of canonical coordinate inverse
-metric components at the coordinate center. -/
+
+
 theorem coordInvMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -49,8 +45,8 @@ theorem coordInvMdiff
   simpa [coordInv] using
     DifferentialGeometry.Tensor.Coordinates.gInvComp_mdiffAt (I := I) (S.family.metric t) x₀ a b
 
-/-- Fixed-time spatial differentiability of canonical coordinate inverse
-metric components throughout the coordinate-frame domain. -/
+
+
 theorem coordInvMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -62,8 +58,9 @@ theorem coordInvMdiffOn
   simpa [coordInv] using
     DifferentialGeometry.Integral.Connection.coordGInvMdiff (I := I) (S.family.metric t) x₀ hx a b
 
-/-- Fixed-time spatial differentiability of coordinate-frame metric
-components at the coordinate center. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordMetricMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -73,15 +70,17 @@ theorem coordMetricMdiff
       (fun y : M =>
         metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
           t y a b) x₀ := by
-  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame] using
+  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame]
+    using
     DifferentialGeometry.Tensor.Coordinates.metricComp_mdiffAt (I := I) (S.family.metric t)
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
       (coordinateFrameSet_open (I := I) x₀)
       (coordinateFrameAt_mem (I := I) x₀) a b
 
-/-- Fixed-time spatial differentiability of coordinate-frame metric
-components throughout the coordinate-frame domain. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordMetricMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -92,15 +91,16 @@ theorem coordMetricMdiffOn
       (fun y : M =>
         metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
           t y a b) x := by
-  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame] using
+  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame]
+    using
     DifferentialGeometry.Tensor.Coordinates.metricComp_mdiffAt (I := I) (S.family.metric t)
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
       (coordinateFrameSet_open (I := I) x₀)
       hx a b
 
-/-- The canonical coordinate inverse metric is covariantly constant at the
-coordinate center. -/
+
+
 theorem coordInvCovZero
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -123,8 +123,8 @@ theorem coordInvCovZero
     (fun a b => coordMetricMdiff (I := I) S x₀ (t : Real) a b)
     d k l
 
-/-- The canonical coordinate inverse metric is covariantly constant
-throughout the coordinate-frame domain. -/
+
+
 theorem coordInvCovZeroOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -148,8 +148,9 @@ theorem coordInvCovZeroOn
     (fun a b => coordMetricMdiffOn (I := I) S x₀ (t : Real) x hx a b)
     d k l
 
-/-- Fixed-time spatial differentiability of canonical coordinate-frame Ricci
-components throughout the coordinate-frame domain. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordRicciMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -185,7 +186,8 @@ theorem coordRicciMdiff
         DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have hfun :
       (fun y : M => S.ricci t y (fun q : Fin 2 => V q y)) =
         fun y : M =>
@@ -203,8 +205,9 @@ theorem coordRicciMdiff
       (fun q => (hV q).of_le (by simp))
   simpa [hfun] using hEval
 
-/-- Fixed-time spatial differentiability of canonical coordinate components of
-`∇ Ric` at the coordinate center. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordNablaReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -252,10 +255,12 @@ theorem coordNablaReg
     · simpa [V] using hframeAt j
   have hslots : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hmdiff :=
     tensor0SField_eval_C1_slots_mdiffAt
       (I := I) (M := M) (α := derivs.nablaA) (V := V) x₀ hV_at
@@ -269,8 +274,9 @@ theorem coordNablaReg
       frame]
   simpa [hfun] using hmdiff
 
-/-- Fixed-time spatial differentiability of canonical coordinate components of
-`∇ Ric` throughout the coordinate-frame domain. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordNablaRegOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -318,10 +324,12 @@ theorem coordNablaRegOn
     · simpa [V] using hframeAt j
   have hslots : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hmdiff :=
     tensor0SField_eval_C1_slots_mdiffAt
       (I := I) (M := M) (α := derivs.nablaA) (V := V) x hV_at
@@ -335,8 +343,9 @@ theorem coordNablaRegOn
       frame]
   simpa [hfun] using hmdiff
 
-/-- The canonical coordinate components of `∇ Ric` realize the coordinate
-covariant-derivative formula at the center. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordNablaReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -401,13 +410,15 @@ theorem coordNablaReal
         DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have heval :=
     TotalNabla0SRealizes.eval_C1_slots (I := I) (s := 2)
       (h := (derivs.first)) X V x₀ hV_at
   have hcons :
       Fin.cons (X x₀) (fun q : Fin 2 => V q x₀) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀) (frame b x₀) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀)
+          (frame b x₀) := by
     rw [hX, hslots x₀]
     funext q
     fin_cases q <;> rfl
@@ -415,7 +426,8 @@ theorem coordNablaReal
   rw [hX] at heval
   have hleft :
       derivs.nablaA x₀
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀) (frame b x₀)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀)
+            (frame b x₀)) =
         nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀) t x₀ d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection,
       frame]
@@ -440,7 +452,8 @@ theorem coordNablaReal
             ((S.family.connection t) (frame a) x₀ (frame d x₀))
             (frame b x₀) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   have hterm1 :
@@ -458,7 +471,8 @@ theorem coordNablaReal
             (frame a x₀)
             ((S.family.connection t) (frame b) x₀ (frame d x₀)) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   rw [hleft, hfun] at heval
@@ -466,8 +480,9 @@ theorem coordNablaReal
   simpa [ricciCovDerivCompInFrame, frame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-/-- The canonical coordinate components of `∇ Ric` realize the coordinate
-covariant-derivative formula throughout the coordinate-frame domain. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordNablaRealOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -530,13 +545,15 @@ theorem coordNablaRealOn
         DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have heval :=
     TotalNabla0SRealizes.eval_C1_slots (I := I) (s := 2)
       (h := (derivs.first)) X V x hV_at
   have hcons :
       Fin.cons (X x) (fun q : Fin 2 => V q x) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+          (frame b x) := by
     rw [hX, hslots x]
     funext q
     fin_cases q <;> rfl
@@ -544,7 +561,8 @@ theorem coordNablaRealOn
   rw [hX] at heval
   have hleft :
       derivs.nablaA x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+            (frame b x)) =
         nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection,
       frame]
@@ -569,7 +587,8 @@ theorem coordNablaRealOn
             ((S.family.connection t) (frame a) x (frame d x))
             (frame b x) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   have hterm1 :
@@ -587,7 +606,8 @@ theorem coordNablaRealOn
             (frame a x)
             ((S.family.connection t) (frame b) x (frame d x)) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   rw [hleft, hfun] at heval
@@ -595,12 +615,12 @@ theorem coordNablaRealOn
   simpa [ricciCovDerivCompInFrame, frame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-/-- Canonical second Ricci derivative components agree with the coordinate
-formula used by `coordNab2Ric`.
 
-This is the local Section 6 producer that lets the contracted-commutator route
-use the intrinsic `∇² Ric` tensor while keeping the coordinate-frame component
-formula used by Lemma 6.3. -/
+
+
+
+
+
 theorem coordNab2Can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -675,13 +695,16 @@ theorem coordNab2Can
     · simpa [V] using hframeAt j
   have hslots3 : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hslots4 :
       Fin.cons (X x0) (fun q : Fin 3 => V q x0) =
-        DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0) (frame i x0)
+        DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0)
+          (frame i x0)
           (frame j x0) := by
     rw [hX, hslots3 x0]
     funext q
@@ -752,9 +775,11 @@ theorem coordNab2Can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame p x0) (frame i x0) (frame j x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame p x0) (frame i x0)
+                  (frame j x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 p i j]
           simp [N, smul_eq_mul]
@@ -805,9 +830,11 @@ theorem coordNab2Can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame p x0) (frame j x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame p x0)
+                  (frame j x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 a p j]
           simp [N, smul_eq_mul]
@@ -858,9 +885,11 @@ theorem coordNab2Can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame i x0) (frame p x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame i x0)
+                  (frame p x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 a i p]
           simp [N, smul_eq_mul]
@@ -876,7 +905,8 @@ theorem coordNab2Can
     rw [hterm0, hterm1, hterm2]
   calc
     nabla2A x0
-        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0) (frame i x0)
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0)
+          (frame i x0)
           (frame j x0)) =
         extDerivFun (I := I)
           (fun y : M =>
@@ -892,8 +922,9 @@ theorem coordNab2Can
           rw [hcorr]
           ring
 
-/-- Coordinate-frame fixed-base derivative of metric components, obtained
-directly from the Ricci-flow metric equation at regular times. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordMetricDeriv
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -928,8 +959,9 @@ theorem coordMetricDeriv
         (I := I) S hS (coordinateFrameAt (I := I) x₀)
         ⟨t, ht⟩ x a b
 
-/-- Coordinate-frame fixed-base metric covariant-derivative variation, once
-the scalar fixed-base mixed derivative of metric components is available. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem coordMetricMix
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -959,8 +991,8 @@ theorem coordMetricMix
     (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀))
     (coordNablaRealOn (I := I) S x₀)
 
-/-- Canonical coordinate-frame Christoffel evolution once the fixed-base
-metric mixed derivative has been produced. -/
+
+
 theorem coordGammaEvol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -995,8 +1027,9 @@ theorem coordGammaEvol
       (M := M)
       (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀)))
 
-/-- Coordinate Christoffel coefficients are the fixed-chart Christoffel formula
-for the metric at that time. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordGammaForm
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1013,8 +1046,9 @@ theorem coordGammaForm
     (DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
       (I := I) (g := S.family.metric s) x₀ hx i j k).symm
 
-/-- Fixed-time spatial differentiability of canonical coordinate Christoffel
-components. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordGammaMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1082,8 +1116,8 @@ theorem coordGammaMdiff
     rw [hbasis]
   exact hmdiff.congr_of_eventuallyEq heq.symm
 
-/-- Spatial differentiability of the canonical raised Ricci-flow Christoffel
-RHS. -/
+
+
 theorem coordGammaRhsMd
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1142,8 +1176,9 @@ theorem coordGammaRhsMd
     filter_upwards with y
     simp [Finset.sum_apply])
 
-/-- Spacetime smoothness of fixed-chart coordinate derivatives of metric
-components for the canonical metric family. -/
+
+
+omit [SigmaCompactSpace M] in
 private theorem coordDgSmAt
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1197,11 +1232,12 @@ private theorem coordDgSmAt
     have hflat :=
       DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component_deriv_of_mem
         (I := I) (g := S.family.metric p.1) x₀ hp a i j
-    simpa [F, X, frame, metricCompInFrame, DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
+    simpa [F, X, frame, metricCompInFrame,
+      DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
   exact hD.congr_of_eventuallyEq heq
 
-/-- Spacetime smoothness of the fixed-chart Christoffel formula for the
-canonical metric family. -/
+
+
 private theorem gammaRhsSm
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1240,12 +1276,12 @@ private theorem gammaRhsSm
   have h₃ := coordDgSmAt (I := I) S hS x₀ t x hx l i j
   exact hInv'.mul ((h₁.add h₂).sub h₃)
 
-/-- Spacetime (C^infty) regularity of canonical coordinate Christoffel components.
 
-This is the family version of the Levi-Civita Christoffel formula:
-`Γ = 1/2 g^{-1} * (∂g + ∂g - ∂g)`, with `g = S.family.metric t`.
-It should be proved from `coordMetricSmoothAt`, smooth inversion of the
-coordinate Gram matrix, and the fixed-chart Christoffel formula. -/
+
+
+
+
+
 theorem coordGammaSmoothInf
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1277,7 +1313,7 @@ theorem coordGammaSmoothInf
     exact coordGammaForm (I := I) S x₀ p.1 hp i j k
   exact hmodel.congr_of_eventuallyEq heq
 
-/-- Spacetime (C^2) regularity of canonical coordinate Christoffel components. -/
+
 theorem coordGammaSmoothAt
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1295,8 +1331,8 @@ theorem coordGammaSmoothAt
   exact (coordGammaSmoothInf (I := I) S hS x₀ t x hx i j k).of_le
     (WithTop.coe_le_coe.mpr le_top)
 
-/-- Regular-time fixed-base mixed derivative for canonical coordinate
-Christoffel components. -/
+
+
 theorem coordGammaMix
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1339,8 +1375,8 @@ theorem coordGammaMix
   · intro t ht x hx
     exact hGamma ⟨t, ht⟩ x hx i j k
 
-/-- The canonical coordinate second Ricci derivative is the coordinate-frame
-connection formula used by Lemma 6.3. -/
+
+
 theorem coordNab2At
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1354,8 +1390,8 @@ theorem coordNab2At
         t x₀ d a i j := by
   rfl
 
-/-- The canonical coordinate second Ricci derivative is the local-frame
-connection formula throughout the coordinate-frame domain. -/
+
+
 theorem coordNab2On
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -15,7 +15,6 @@ manifold-completeness construction.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -29,7 +28,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +39,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- A POU-weighted tensor chart component vanishes pointwise, inside the chart
 target, off the fixed Euclidean image of the POU kernel. -/
 theorem secComp_zero_kernel
@@ -61,7 +61,7 @@ theorem secComp_zero_kernel
 POU kernel as every member of the approximating sequence. -/
 theorem secCompLimit_ae_zero
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -155,7 +155,7 @@ theorem secCompLimit_ae_zero
 the chosen Sobolev component limit. -/
 theorem secCompRep_ae
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -180,7 +180,7 @@ theorem secCompRep_ae
 space as the chosen component limit. -/
 theorem secCompRep_mem
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -204,7 +204,7 @@ theorem secCompRep_mem
 closed-kernel representative. -/
 theorem secCompRep_tendsto
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -214,7 +214,7 @@ theorem secCompRep_tendsto
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     Tendsto
-      (fun n => wkpNorm (d := Module.finrank ℝ E) k p
+      (fun n => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
         (fun y =>
           secChartComp (I := I) (M := M) r s (u n).1 α Idx Jdx y -
             secCompRep (I := I) (M := M) g r s k hp hp_top u
@@ -222,13 +222,13 @@ theorem secCompRep_tendsto
         (chartTargetEuclid (I := I) (M := M) α))
       atTop (𝓝 0) := by
   have heq :
-      (fun n => wkpNorm (d := Module.finrank ℝ E) k p
+      (fun n => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
         (fun y =>
           secChartComp (I := I) (M := M) r s (u n).1 α Idx Jdx y -
             secCompRep (I := I) (M := M) g r s k hp hp_top u
               h_cauchy α Idx Jdx y)
         (chartTargetEuclid (I := I) (M := M) α)) =
-      (fun n => wkpNorm (d := Module.finrank ℝ E) k p
+      (fun n => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
         (fun y =>
           secChartComp (I := I) (M := M) r s (u n).1 α Idx Jdx y -
             secCompLimit (I := I) (M := M) g r s k hp hp_top u
@@ -248,7 +248,7 @@ theorem secCompRep_tendsto
 fixed compact POU image. -/
 theorem secCompRep_support
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →

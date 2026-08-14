@@ -1,18 +1,16 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 
-/-!
-# Parametric operator-field jet bounds
 
-This file converts compact-slab pointwise bounds for a jointly smooth
-operator-field family into one time-uniform `L²` jet window for its action.
--/
+
+
+
+
+
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -26,7 +24,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,8 +33,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Pointwise squared coefficient-jet bounds give the corresponding squared
-`L²` bound for one covariant derivative of a tensor action. -/
+
+
 theorem app_jet_sq_le
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (B : ℕ → ℝ)
@@ -45,14 +43,14 @@ theorem app_jet_sq_le
       riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
           ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i) :
     ‖iteratedCovGrad (I := I) g 0 c j
-        (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
-      appCcGdiag (E := E) j *
+        (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+      diagonalGridGrowthFactor (E := E) j *
         ∑ i ∈ Finset.range (j + 1), B i *
           ∑ l ∈ Finset.range (j + 1 - i),
             ‖iteratedCovGrad (I := I) g 0 b l W‖ ^ 2 := by
   classical
   let μ := riemannianVolumeMeasure (I := I) (M := M) g
-  set F : M → ℝ := fun x => appCcGdiag (E := E) j *
+  set F : M → ℝ := fun x => diagonalGridGrowthFactor (E := E) j *
     ∑ i ∈ Finset.range (j + 1), B i *
       ∑ l ∈ Finset.range (j + 1 - i),
         riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
@@ -66,10 +64,10 @@ theorem app_jet_sq_le
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (c + j) x
           ((iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
     intro x
     refine le_trans
-      (appCc_iteratedCovGrad_diagonalProductGrid_le
+      (riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le
         (I := I) (M := M) g b c Φ W j x) ?_
     rw [hF_def]
     refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
@@ -82,14 +80,14 @@ theorem app_jet_sq_le
   have hnorm := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     (I := I) (M := M) g 0 (c + j)
     (iteratedCovGrad (I := I) g 0 c j
-      (appCc (I := I) (M := M) g b c Φ W)) F hF_int hpt
+      (operatorFieldApply (I := I) (M := M) g b c Φ W)) F hF_int hpt
   refine le_trans hnorm (le_of_eq ?_)
   rw [hF_def, MeasureTheory.integral_const_mul,
     MeasureTheory.integral_finset_sum (Finset.range (j + 1)) (fun i _ =>
       (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i)) (fun l _ =>
         integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (b + l)
           (iteratedCovGrad (I := I) g 0 b l W))).const_mul (B i))]
-  apply congrArg (fun z : ℝ => appCcGdiag (E := E) j * z)
+  apply congrArg (fun z : ℝ => diagonalGridGrowthFactor (E := E) j * z)
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [MeasureTheory.integral_const_mul,
     MeasureTheory.integral_finset_sum (Finset.range (j + 1 - i)) (fun l _ =>
@@ -101,23 +99,10 @@ theorem app_jet_sq_le
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g 0 (b + l)])
 
-/-- **The head/tail `L²` Leibniz assembly of `appCc`: one Hölder side per
-Leibniz index.**
+/-- The head/tail `L²` Leibniz assembly of an operator-field action.
 
-`app_jet_sq_le` puts the coefficient in `L^∞` at *every* Leibniz index.  This
-sibling makes the opposite choice from index `1` on: index `0` keeps the
-coefficient in `L^∞` (one pointwise cap `B` on `Φ` itself) with the whole data
-window in `L²`, while every index `i ≥ 1` puts the *data window* `l ≤ j - i` in
-`L^∞` (its own cap `D i`) and reads the coefficient jet `∇ⁱΦ` in `L²`:
-
-`‖∇ʲ(appCc Φ W)‖² ≤ appCcGdiag j · (B · ∑_{l ≤ j} ‖∇ˡW‖²
-    + ∑_{1 ≤ i ≤ j} D i · ‖∇ⁱΦ‖²)`.
-
-This is the shape needed when the coefficient's *top* jets are expensive in
-`L^∞` — a coefficient whose `L²` tower already spends the state's own jets, so
-that the extra `+2` orders of the fibre Sobolev embedding would overshoot the
-budget — while the data is a low-order object whose sup norm is affordable.
-The constant is fixed before every argument and no Sobolev ball occurs. -/
+Index zero keeps the coefficient in `L∞`; every positive index puts the data
+window in `L∞` and reads the coefficient jet in `L²`. -/
 theorem app_jet_sq_head
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (B : ℝ) (D : ℕ → ℝ)
@@ -128,8 +113,8 @@ theorem app_jet_sq_head
           riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
             ((iteratedCovGrad (I := I) g 0 b l W).toSection x) ≤ D i) :
     ‖iteratedCovGrad (I := I) g 0 c j
-        (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
-      appCcGdiag (E := E) j *
+        (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+      diagonalGridGrowthFactor (E := E) j *
         (B * ∑ l ∈ Finset.range (j + 1),
             ‖iteratedCovGrad (I := I) g 0 b l W‖ ^ 2 +
           ∑ i ∈ Finset.Icc 1 j, D i *
@@ -146,7 +131,7 @@ theorem app_jet_sq_head
         ((iteratedCovGrad (I := I) g b c i Φ).toSection x)) μ := fun i =>
     integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g b (c + i)
       (iteratedCovGrad (I := I) g b c i Φ)
-  set F : M → ℝ := fun x => appCcGdiag (E := E) j *
+  set F : M → ℝ := fun x => diagonalGridGrowthFactor (E := E) j *
     (B * ∑ l ∈ Finset.range (j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
           ((iteratedCovGrad (I := I) g 0 b l W).toSection x) +
@@ -162,10 +147,10 @@ theorem app_jet_sq_head
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (c + j) x
           ((iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
     intro x
     refine le_trans
-      (appCc_iteratedCovGrad_diagonalProductGrid_le
+      (riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le
         (I := I) (M := M) g b c Φ W j x) ?_
     rw [hF_def]
     refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
@@ -188,7 +173,7 @@ theorem app_jet_sq_head
   have hnorm := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     (I := I) (M := M) g 0 (c + j)
     (iteratedCovGrad (I := I) g 0 c j
-      (appCc (I := I) (M := M) g b c Φ W)) F hF_int hpt
+      (operatorFieldApply (I := I) (M := M) g b c Φ W)) F hF_int hpt
   refine le_trans hnorm (le_of_eq ?_)
   rw [hF_def, MeasureTheory.integral_const_mul,
     MeasureTheory.integral_add
@@ -196,7 +181,7 @@ theorem app_jet_sq_head
         (fun l _ => hWint l)).const_mul B)
       (MeasureTheory.integrable_finset_sum (Finset.Icc 1 j)
         (fun i _ => (hCint i).const_mul (D i)))]
-  apply congrArg (fun z : ℝ => appCcGdiag (E := E) j * z)
+  apply congrArg (fun z : ℝ => diagonalGridGrowthFactor (E := E) j * z)
   refine congrArg₂ (· + ·) ?_ ?_
   · rw [MeasureTheory.integral_const_mul,
       MeasureTheory.integral_finset_sum (Finset.range (j + 1))
@@ -215,24 +200,11 @@ theorem app_jet_sq_head
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g b (c + i)]
 
-/-- **The mixed per-index Hölder split of the `appCc` Leibniz sum.**
+/-- The mixed per-index Hölder split of the operator-field Leibniz sum.
 
-`app_jet_sq_le` puts the coefficient in `L^∞` at *every* Leibniz index and
-`app_jet_sq_head` does so at index `0` only; this engine takes the choice as a
-parameter.  At the indices `i ∈ S` the coefficient jet `∇ⁱΦ` is capped
-pointwise (`B i`) and its companion data window `l ≤ j - i` is read in `L²`; at
-the indices `i ∉ S` the roles are exchanged — the data window is capped
-pointwise (`D i`) and `∇ⁱΦ` is read in `L²`:
-
-`‖∇ʲ(appCc Φ W)‖² ≤ appCcGdiag j · (∑_{i ∈ S} B i · ∑_{l ≤ j-i} ‖∇ˡW‖²`
-  `+ ∑_{i ∈ range (j+1) \ S} D i · ‖∇ⁱΦ‖²)`.
-
-`S = range (j+1)` is `app_jet_sq_le` and `S = {0}` is `app_jet_sq_head`.  The
-intended use is a threshold `S = range j`: a coefficient sup costs the fibre
-Sobolev embedding's `+2` orders on top of the coefficient's own tower index, so
-it stays inside an order budget exactly while that tower index is below the top
-one, and the last Leibniz index is priced from the data side instead.  The
-constant is fixed before every argument and no Sobolev ball occurs. -/
+At indices in `S`, the coefficient jet is capped pointwise; at complementary
+indices the data window is capped pointwise and the coefficient jet is read in
+`L²`. -/
 theorem app_jet_sq_split
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b)
@@ -245,8 +217,8 @@ theorem app_jet_sq_split
           riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
             ((iteratedCovGrad (I := I) g 0 b l W).toSection x) ≤ D i) :
     ‖iteratedCovGrad (I := I) g 0 c j
-        (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
-      appCcGdiag (E := E) j *
+        (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+      diagonalGridGrowthFactor (E := E) j *
         (∑ i ∈ S, B i * ∑ l ∈ Finset.range (j + 1 - i),
             ‖iteratedCovGrad (I := I) g 0 b l W‖ ^ 2 +
           ∑ i ∈ Finset.range (j + 1) \ S, D i *
@@ -263,7 +235,7 @@ theorem app_jet_sq_split
         ((iteratedCovGrad (I := I) g b c i Φ).toSection x)) μ := fun i =>
     integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g b (c + i)
       (iteratedCovGrad (I := I) g b c i Φ)
-  set F : M → ℝ := fun x => appCcGdiag (E := E) j *
+  set F : M → ℝ := fun x => diagonalGridGrowthFactor (E := E) j *
     (∑ i ∈ S, B i * ∑ l ∈ Finset.range (j + 1 - i),
         riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
           ((iteratedCovGrad (I := I) g 0 b l W).toSection x) +
@@ -280,10 +252,10 @@ theorem app_jet_sq_split
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (c + j) x
           ((iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
     intro x
     refine le_trans
-      (appCc_iteratedCovGrad_diagonalProductGrid_le
+      (riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le
         (I := I) (M := M) g b c Φ W j x) ?_
     rw [hF_def]
     refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
@@ -318,7 +290,7 @@ theorem app_jet_sq_split
   have hnorm := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     (I := I) (M := M) g 0 (c + j)
     (iteratedCovGrad (I := I) g 0 c j
-      (appCc (I := I) (M := M) g b c Φ W)) F hF_int hpt
+      (operatorFieldApply (I := I) (M := M) g b c Φ W)) F hF_int hpt
   refine le_trans hnorm (le_of_eq ?_)
   rw [hF_def, MeasureTheory.integral_const_mul,
     MeasureTheory.integral_add
@@ -327,7 +299,7 @@ theorem app_jet_sq_split
           (fun l _ => hWint l)).const_mul (B i)))
       (MeasureTheory.integrable_finset_sum (Finset.range (j + 1) \ S)
         (fun i _ => (hCint i).const_mul (D i)))]
-  apply congrArg (fun z : ℝ => appCcGdiag (E := E) j * z)
+  apply congrArg (fun z : ℝ => diagonalGridGrowthFactor (E := E) j * z)
   refine congrArg₂ (· + ·) ?_ ?_
   · rw [MeasureTheory.integral_finset_sum S (fun i _ =>
       (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i))
@@ -350,8 +322,8 @@ theorem app_jet_sq_split
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g b (c + i)]
 
-/-- A common pointwise coefficient-jet envelope gives one `L²` action-jet
-window for an arbitrary parameter family. -/
+
+
 theorem app_jet_of_bdd
     (g : SmoothRiemannianMetric I M) (b c : ℕ) {α : Type*}
     (Φ : α → SmoothCcTensor g b c) (K : Set α) (B : ℕ → ℝ)
@@ -362,12 +334,12 @@ theorem app_jet_of_bdd
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ t, t ∈ K → ∀ (W : SmoothCcTensor g 0 b) (j : ℕ),
         ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖ ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤
           C j * ∑ l ∈ Finset.range (j + 1),
             ‖iteratedCovGrad (I := I) g 0 b l W‖ := by
   classical
   let C : ℕ → ℝ := fun j =>
-    appCcGdiag (E := E) j * (∑ i ∈ Finset.range (j + 1), B i) + 1
+    diagonalGridGrowthFactor (E := E) j * (∑ i ∈ Finset.range (j + 1), B i) + 1
   refine ⟨C, fun j => ?_, ?_⟩
   · exact add_nonneg
       (mul_nonneg (appCcGdiag_nonneg (E := E) j)
@@ -377,7 +349,7 @@ theorem app_jet_of_bdd
       (fun i _ => hB_nn i) (fun i _ x => hB i t ht x)
     set J : ℝ := ∑ l ∈ Finset.range (j + 1),
       ‖iteratedCovGrad (I := I) g 0 b l W‖ with hJ_def
-    set A : ℝ := appCcGdiag (E := E) j *
+    set A : ℝ := diagonalGridGrowthFactor (E := E) j *
       (∑ i ∈ Finset.range (j + 1), B i) with hA_def
     have hJ_nn : 0 ≤ J := by
       rw [hJ_def]
@@ -421,7 +393,7 @@ theorem app_jet_of_bdd
           rw [Finset.sum_mul]
     have hsqA :
         ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖ ^ 2 ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ^ 2 ≤
           A * J ^ 2 := by
       refine hsq.trans ?_
       rw [hA_def]
@@ -432,7 +404,7 @@ theorem app_jet_of_bdd
       nlinarith [sq_nonneg A]
     have htarget :
         ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖ ^ 2 ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ^ 2 ≤
           ((A + 1) * J) ^ 2 := by
       calc
         _ ≤ A * J ^ 2 := hsqA
@@ -440,12 +412,12 @@ theorem app_jet_of_bdd
           mul_le_mul_of_nonneg_right hA_le (sq_nonneg J)
         _ = ((A + 1) * J) ^ 2 := by ring
     change ‖iteratedCovGrad (I := I) g 0 c j
-        (appCc (I := I) (M := M) g b c (Φ t) W)‖ ≤ (A + 1) * J
+        (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤ (A + 1) * J
     exact le_of_sq_le_sq htarget (mul_nonneg (add_nonneg hA_nn zero_le_one) hJ_nn)
 
-/-- A jointly smooth family of operator fields has one `L²` action-jet
-window on a compact time slab.  The window may depend on the jet order, but
-not on time in the slab or on the input tensor. -/
+
+
+
 theorem param_app_jet
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S K : Set ℝ}
@@ -459,7 +431,7 @@ theorem param_app_jet
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ t, t ∈ K → ∀ (W : SmoothCcTensor g 0 b) (j : ℕ),
         ‖iteratedCovGrad (I := I) g 0 c j
-            (appCc (I := I) (M := M) g b c (Φ t) W)‖ ≤
+            (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤
           C j * ∑ l ∈ Finset.range (j + 1),
             ‖iteratedCovGrad (I := I) g 0 b l W‖ := by
   obtain ⟨B, hB_nn, hB⟩ :=

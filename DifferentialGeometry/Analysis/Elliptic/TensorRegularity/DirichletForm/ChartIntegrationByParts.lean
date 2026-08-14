@@ -2,41 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 
-/-!
-# Integration by parts for the chart-Euclidean partial derivative
-
-This file provides a clean integration-by-parts identity for the chart-Euclidean
-partial derivative `euclidPartial` on the open Euclidean chart target
-`chartTargetEuclid α`. It is the analytic device that moves a derivative off a
-compactly-supported test function and onto a smooth coefficient.
-
-Throughout, the model fibre `E` is a finite-dimensional real inner-product space
-and `n := Module.finrank ℝ E`. Functions live on the standard Euclidean model
-space `EuclideanSpace ℝ (Fin n)`. The reference measure is the pushforward
-`Measure.map toEuclidean modelHaar` of the model Haar measure under the canonical
-linear isometry `toEuclidean : E ≃L[ℝ] EuclideanSpace ℝ (Fin n)`; by
-`map_toEuclidean_modelHaar_eq_volume` this pushforward is the Lebesgue/Haar
-measure `volume` on `EuclideanSpace ℝ (Fin n)`.
-
-## Main result
-
-* `chartTarget_integral_byParts` — for an index `l`, a coefficient `f` that is
-  `C^∞` on the open chart target, and a test function `g` that is `C^∞` on the
-  chart target with compact topological support contained in the chart target,
-  ```
-  ∫ y in chartTargetEuclid α, f y * euclidPartial l g y ∂(map toEuclidean modelHaar)
-    = - ∫ y in chartTargetEuclid α, euclidPartial l f y * g y ∂(map toEuclidean modelHaar).
-  ```
-
-The proof transports the chart-Euclidean integral to the standard Lebesgue
-measure, observes that the integrands vanish off the compact support of `g`
-(hence the chart-target integral equals the whole-space integral), and applies
-the Fréchet-derivative integration-by-parts identity
-`integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable`. The local-to-global
-smoothness needed for integrability is supplied by a gluing lemma: a function
-that is `C^∞` on an open set and vanishes outside a closed subset of that open
-set is globally `C^∞`.
--/
 
 noncomputable section
 
@@ -52,7 +17,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -61,8 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 
-/-- A function that is `C^∞` on an open set `U` and vanishes off a closed set
-`K ⊆ U` is globally `C^∞`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_of_contDiffOn_zero_off_closed
     {P : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {U K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -83,8 +47,7 @@ private lemma contDiff_of_contDiffOn_zero_off_closed
     exact (contDiffAt_const : ContDiffAt ℝ ∞ (fun _ => (0 : ℝ)) y).congr_of_eventuallyEq
       hP_zero_evt
 
-/-- The chart-Euclidean partial derivative of a function vanishes off the
-topological support of the function. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_zero_of_notMem_tsupport
     {g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (l : Fin (Module.finrank ℝ E))
@@ -100,8 +63,7 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hg_zero_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- A test function that is `C^∞` on the chart target with topological support
-contained in the chart target is globally `C^∞`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiff_of_contDiffOn_chartTarget
     (α : M)
     {g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -113,8 +75,7 @@ private lemma contDiff_of_contDiffOn_chartTarget
     (isClosed_tsupport g) hg_tsub hg
     (fun _ hy => image_eq_zero_of_notMem_tsupport hy)
 
-/-- The chart-Euclidean partial derivative of a function that is `C^∞` on the
-open chart target is `C^∞` on the chart target. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma euclidPartial_contDiffOn_chartTarget
     (α : M)
     {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -142,7 +103,7 @@ private lemma euclidPartial_contDiffOn_chartTarget
       (EuclideanSpace.single l 1)).contDiff.contDiffAt.comp x hfd
   exact hat.contDiffWithinAt
 
-/-- The product of the coefficient and the test function is globally `C^∞`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiff_coeff_mul_test
     (α : M)
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -156,8 +117,7 @@ private lemma contDiff_coeff_mul_test
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
-/-- The product of the coefficient and the chart-Euclidean partial of the test
-function is globally `C^∞`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiff_coeff_mul_partial_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -172,8 +132,7 @@ private lemma contDiff_coeff_mul_partial_test
   intro y hy
   rw [euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hy, mul_zero]
 
-/-- The product of the chart-Euclidean partial of the coefficient and the test
-function is globally `C^∞`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma contDiff_partial_coeff_mul_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -188,15 +147,14 @@ lemma contDiff_partial_coeff_mul_test
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
-/-- The product of the coefficient and the test function has compact support. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_coeff_mul_test
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hg_supp : HasCompactSupport g) :
     HasCompactSupport (fun y => f y * g y) :=
   hg_supp.mul_left
 
-/-- The product of the coefficient and the chart-Euclidean partial of the test
-function has compact support. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_coeff_mul_partial_test
     (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -211,8 +169,7 @@ private lemma hasCompactSupport_coeff_mul_partial_test
     exact hy (euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hy')
   exact hpartial_supp.mul_left
 
-/-- The product of the chart-Euclidean partial of the coefficient and the test
-function has compact support. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma hasCompactSupport_partial_coeff_mul_test
     (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -220,18 +177,7 @@ lemma hasCompactSupport_partial_coeff_mul_test
     HasCompactSupport (fun y => euclidPartial (E := E) l f y * g y) :=
   hg_supp.mul_left
 
-/-- **Integration by parts for the chart-Euclidean partial derivative.** For a
-chart `α`, a direction `l`, a coefficient `f` that is `C^∞` on the open chart
-target `chartTargetEuclid α`, and a test function `g` that is `C^∞` on the chart
-target with compact topological support contained in the chart target,
-```
-∫ y in chartTargetEuclid α, f y * euclidPartial l g y ∂(map toEuclidean modelHaar)
-  = - ∫ y in chartTargetEuclid α, euclidPartial l f y * g y ∂(map toEuclidean modelHaar).
-```
-
-The reference measure `Measure.map toEuclidean modelHaar` is the pushforward of
-the model Haar measure under the canonical linear isometry; it equals the
-Lebesgue/Haar measure on `EuclideanSpace ℝ (Fin n)`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem chartTarget_integral_byParts
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}

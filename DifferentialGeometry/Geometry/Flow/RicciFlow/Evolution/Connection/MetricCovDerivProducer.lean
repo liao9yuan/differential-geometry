@@ -4,28 +4,24 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Time side: the metric frame-component mixed-derivative swap from a solution
 
-The foundational time-side bridge: the fixed-base time-derivative swap for the
-metric frame component `g_s(e_a, e_b)`, with the pointwise time derivative
-discharged from the solution's metric variation equation `∂ₛg = −2Ric`
-(`IsSolutionOn.equation`).
 
-The manifold mixed-derivative swap core is `fixedBaseOnReg_of_timeDerivWithin`
-(`Bundle/PartialMfderiv/FixedBase.lean`).  The **only** genuinely new content here
-is wiring the solution's `equation` into its `hTime` slot; the spatial-regularity
-inputs (`hSmooth` joint spacetime `C²` from `MetricFamilySmoothOn.frameCompSmooth`,
-`hFdiff`/`hFtdiff` fixed-time spatial `MDiff`) are taken as hypotheses — each is
-dischargeable from the existing smoothness API (`ricciTensor_apply_smooth`,
-`inner_smooth_scalar`, `TensorMultilinear.contMDiffAt_section_apply_gen`) plus the
-canonical-Ricci bridge `SolutionOn.ricciAt_eq`, which the metric-cov-derivative
-producer supplies. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,22 +31,24 @@ open Bundle Filter
 open scoped Manifold ContDiff BigOperators Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- **Public metric-inner `MDifferentiableAt`** for `∞`-smooth tangent sections — the
-public counterpart of the (private) `inner_mdiffAt_scalar`, re-proved here from the
-public metric bundle smoothness `g.contMDiff` and `cotangentCov_pairing_contMDiff`.
-This is the spatial-`MDiff` input the time-side producer needs (with the `∞`
-coordinate frame supplying the smooth sections). -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInner_mdiffAt
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -75,13 +73,15 @@ theorem metricInner_mdiffAt
   exact ((DifferentialGeometry.Integral.Connection.cotangentCov_pairing_contMDiff hgY hZ)
     x).mdifferentiableAt (by simp)
 
-/-- **The metric frame-component fixed-base mixed-derivative swap, from a solution.**
-With `F s y = g_s(e_a, e_b)(y)` and `Ft t y = −2·Ric_t(e_a, e_b)(y)`, the time
-derivative of the spatial derivative of `F` is the spatial derivative of `Ft`.
 
-`hTime` is discharged from the solution's metric variation equation; the
-spatial-regularity inputs `hSmooth`/`hFdiff`/`hFtdiff` are the genuine prerequisites
-(dischargeable from `MetricFamilySmoothOn` + the canonical-Ricci bridge). -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricFrameComp_fixedBaseSwap_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -104,22 +104,23 @@ theorem metricFrameComp_fixedBaseSwap_of_solution
   refine fixedBaseOnReg_of_timeDerivWithin (I := I)
     (D.regular_subset) (fun {t} ht => D.regular_mem_nhds ht)
     hSmooth hFdiff hFtdiff ?hTime
-  -- `hTime`: the metric variation `∂ₛ g_s(e_a, e_b) = −2 Ric_t(e_a, e_b)`.
   intro t ht x
   have heq := hS.equation ⟨t, ht⟩ x (frame a x) (frame b x)
   simpa [ricciCompInFrame] using heq
 
-/-- **The metric covariant-derivative time derivative from a solution** (`∂ₛ(∇ᵗ g_s)`).
-Discharges the `MetricCovDerivDerivativeComponentsInFrameOnLocal` regularity that the
-banked Christoffel-evolution producer consumes, with
-`metricCovDerivDt = −2·ricciCovDerivCompInFrame` (the `−2∇Ric` Ricci-flow form).
 
-The three terms of `metricCovDerivCompInFrameAtBase` are differentiated in `s`: the
-`extDerivFun(g_s(e_a,e_b))` term by the mixed-derivative swap
-`metricFrameComp_fixedBaseSwap_of_solution`, and the two frozen-vector terms
-`g_s(∇ᵗe_a, e_b)`, `g_s(e_a, ∇ᵗe_b)` directly by the metric variation `∂ₛg = −2Ric`.
-The spatial-regularity inputs are taken `∀ a b` (dischargeable at the `∞` coordinate
-frame). -/
+
+
+
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivDeriv_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -138,19 +139,15 @@ theorem metricCovDerivDeriv_of_solution
     MetricCovDerivDerivativeComponentsInFrameOnLocal (I := I) S frame u
       (fun t x d a b => (-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame t x d a b) := by
   intro t x hx d a b
-  -- Term 1: the mixed-derivative swap on `extDerivFun(g_s(e_a, e_b))` (the swap's
-  -- `Ft = −2·Ric` differentiability is `const · Ric`).
   have h1 := (metricFrameComp_fixedBaseSwap_of_solution (I := I) S hS frame a b
     (hSmooth a b) (hFdiff a b)
     (fun t' ht' x' hx' => (mdifferentiableAt_const (c := (-2 : Real))).mul
       (hFtdiff a b t' ht' x' hx'))) (t : Real) t.2 x hx (frame d x)
-  -- Terms 2, 3: the metric variation on the frozen-vector inner products.
   have h2 := hS.equation t x
     ((S.family.connection (t : Real) (frame a) x) (frame d x)) (frame b x)
   have h3 := hS.equation t x
     (frame a x) ((S.family.connection (t : Real) (frame b) x) (frame d x))
   have hcomb := (h1.sub h2).sub h3
-  -- The differentiated function is `metricCovDerivCompInFrameAtBase` (defeq); match the value.
   have hval :
       extDerivFun (I := I)
             (fun y : M => -2 * ricciCompInFrame (I := I) S frame (t : Real) y a b) x (frame d x) -
@@ -164,17 +161,17 @@ theorem metricCovDerivDeriv_of_solution
     simp only [ricciCovDerivCompInFrame, RicciAtFamily.toTensorField_apply,
       ContinuousLinearMap.smul_apply, smul_eq_mul]
     ring
-  show HasDerivWithinAt
+  change HasDerivWithinAt
       (fun s : Real => metricCovDerivCompInFrameAtBase (I := I) S frame (t : Real) s x d a b)
       ((-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame (t : Real) x d a b)
       D.carrier (t : Real)
   exact hval ▸ hcomb
 
-/-- **The connection-variation black box discharged from a solution.**  The
-`metricCovDerivDerivative` field is `metricCovDerivDeriv_of_solution`; the
-`metricCovDerivRicciFlow` field is definitional (`metricCovDerivDt = −2·ricciCovDeriv`,
-`nablaRic = ricciCovDeriv`).  Spatial regularity taken as inputs (dischargeable at the
-`∞` coordinate frame). -/
+
+
+
+
+
 def connectionVariationBlackBox_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -191,15 +188,19 @@ def connectionVariationBlackBox_of_solution
         (fun y : M => ricciCompInFrame (I := I) S frame t y a b) x) :
     ConnectionVariationBlackBoxInFrameOn (I := I) S frame u
       (fun t x d a b => ricciCovDerivCompInFrame (I := I) S frame t x d a b) where
-  metricCovDerivDt := fun t x d a b => (-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame t x d a b
+  metricCovDerivDt := fun t x d a b => (-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame t x d
+                                         a b
   metricCovDerivDerivative :=
     metricCovDerivDeriv_of_solution (I := I) S hS frame hSmooth hFdiff hFtdiff
   metricCovDerivRicciFlow := fun _ _ _ _ _ => rfl
 
-/-- **Raised Christoffel evolution `∂ₜΓ` from a solution** (Lemma 6.2), with the
-connection-variation black box discharged via `metricCovDerivDeriv_of_solution`.
-The remaining input `hmetricFrame` (`MetricFrameTimeRegularityInFrameOnLocal`) is the
-standing metric-frame time-regularity black box. -/
+
+
+
+
+omit [DecidableEq Idx] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_solution
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

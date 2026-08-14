@@ -217,7 +217,7 @@ theorem H6NormalData.mapsTo_tail
     intro q hq
     exact chiL.ball_subset (hRadL hq)
   have hman := NormalBallChart.MetricEquivOn.hom_dist_le
-    (I := I) Yl (P (Lphi.φ l)) chiL hEquiv hUsrc hseg
+    (J := I) Yl (P (Lphi.φ l)) chiL hEquiv hUsrc hseg
   have hFw : chiL.hom w = F x := by
     have hright := chiL.restrictBall.right_inv hjet.1
     change chiL.hom
@@ -477,7 +477,7 @@ theorem H6NormalData.return_tail
     intro q hq
     exact chiK.ball_subset (hRadK hq)
   have hman := NormalBallChart.MetricEquivOn.hom_dist_le
-    (I := I) Yk (P (Lphi.φ k)) chiK hEquiv hUsrc hseg
+    (J := I) Yk (P (Lphi.φ k)) chiK hEquiv hUsrc hseg
   have hHu : chiK.hom u = Flk (Fkl x) := by
     have hright := chiK.restrictBall.right_inv hreverse.1
     change chiK.hom

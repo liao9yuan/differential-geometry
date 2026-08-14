@@ -1,26 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 
-/-!
-# Diagonal-sum bound for covariant-derivative inner products
-
-Specializes the uniform Rayleigh-quotient lower bound for the chart-frame
-inverse Gram matrix to control the diagonal sum
-`∑ i, ⟨cov S (e'_i b), cov S (e'_i b)⟩_g` by the chart-Gram-weighted full sum
-on the partition-of-unity support, which on the chart base set agrees with
-`tensorCovDerivPointwiseInner g r s S S b`.
-
-The proof diagonalises `chartInvGramMatrix g α b` via its eigenvector unitary,
-expressing the full sum as `∑ k μ_k ⟨w_k, w_k⟩` and the diagonal sum as
-`∑ k ⟨w_k, w_k⟩`, then applies `μ_k ≥ c` from the Rayleigh-quotient bound.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -37,7 +21,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -48,14 +32,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Diagonal-sum bound by the chart-Gram-weighted full sum on an arbitrary
-compact subset of the chart base set.** For a closed Riemannian manifold
-`(M, g)`, any chart base point `α`, and a compact set `K_M` contained in the
-chart-`α` base set, there exists `C ≥ 0` such that for every smooth
-compactly-supported `(r, s)`-tensor section `S` and every base point `b ∈ K_M`,
-`∑ i, ⟨cov S (e'_i b), cov S (e'_i b)⟩_g ≤ C · tensorCovDerivPointwiseInner g r s S S b`
-where `e'_i b = chartBasisVecFiber α i b`. -/
-theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_compact
+omit [NeZero (Module.finrank ℝ E)] in
+theorem exists_sum_tensorInner_cov_chartBasis_diagonal_le_const_mul_covDerivInner_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
     (hK_M_sub_baseSet :
@@ -279,18 +257,8 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
   rw [hdiag_eq, ← hcov_quad_eq, hquad_eq]
   exact hsum_bound
 
-/-- **Diagonal-sum bound by the chart-Gram-weighted full sum on the
-partition-of-unity support.** For a closed Riemannian manifold `(M, g)` and any
-chart base point `α`, there exists `C ≥ 0` such that for every smooth
-compactly-supported `(r, s)`-tensor section `S` and every base point `b` in the
-closed support of the chart-atlas partition-of-unity weight at `α`,
-`∑ i, ⟨cov S (e'_i b), cov S (e'_i b)⟩_g ≤ C · tensorCovDerivPointwiseInner g r s S S b`
-where `e'_i b = chartBasisVecFiber α i b`.
-
-This is the specialisation of
-`exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_compact`
-to the compact closed support of the chart-atlas partition-of-unity weight. -/
-theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
+omit [NeZero (Module.finrank ℝ E)] in
+theorem exists_sum_tensorInner_cov_chartBasis_diagonal_le_const_mul_covDerivInner_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s) {b : M},
@@ -305,7 +273,7 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b))) ≤
           C * tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b :=
-  exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_compact
+  exists_sum_tensorInner_cov_chartBasis_diagonal_le_const_mul_covDerivInner_on_compact
     (I := I) (M := M) g r s α
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)

@@ -6,15 +6,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Regularity
 import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Reverse-flow scalar and gradient-square variations
 
-This file supplies the pointwise geometric time derivatives used by the
-Perelman entropy calculation.  Both results are stated for the actual reversed
-Ricci-flow metric family.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -41,8 +40,8 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- Reverse-time chart Gram entries inherit joint smoothness from the solution
-metric. -/
+
+
 theorem revGram_smooth
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -89,16 +88,16 @@ theorem revGram_smooth
 
 end Normed
 
-section InnerProduct
+section TraceVariation
 
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- The reversed Ricci-flow metric has volume trace `2 R`. -/
+
 theorem revTrace_eq
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -160,7 +159,7 @@ theorem revTrace_eq
   dsimp only [scalar]
   ring
 
-end InnerProduct
+end TraceVariation
 
 section Normed
 
@@ -171,8 +170,8 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- Reading scalar curvature backwards along a Ricci flow changes the sign of
-both terms in `∂ₜR = ΔR + 2 |Ric|²`. -/
+
+
 theorem revScalar_time
     [I.Boundaryless]
     {D : RealTimeInterval}
@@ -211,9 +210,9 @@ theorem revScalar_time
     ring
   simpa only [Function.comp_apply, G] using hcomp.congr_deriv hderiv
 
-/-- Along the reversed Ricci-flow metric, the squared norm of the gradient of
-Perelman's reconstructed potential has the invariant moving-metric
-derivative. -/
+
+
+
 theorem revGradSq_time
     [I.Boundaryless]
     {D Dr : RealTimeInterval}

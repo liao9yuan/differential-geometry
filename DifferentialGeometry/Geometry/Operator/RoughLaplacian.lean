@@ -9,17 +9,15 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Rough Laplacian Preparation
 
-This file provides the metric trace interface used by the scalar and one-form
-Bochner layer.  The direct tensor-valued trace is the canonical rough
-Laplacian object; the realization predicates below are compatibility bridges
-for supplied coordinate, frame, and component data.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -29,20 +27,19 @@ open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Insert two distinguished tangent vectors into the first two slots of a
-covariant tensor input, leaving the remaining `s` slots to `tail`. -/
+
+
 def metricTraceInput {x : M} {s : ℕ}
     (X Y : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
     Fin (s + 2) -> TangentSpace I x :=
   Fin.cases X (Fin.cases Y tail)
 
-/-- The metric as a pointwise covariant two-tensor. -/
+
 def metricTensor0S (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
   (((continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm.toContinuousLinearMap).comp
@@ -65,17 +62,18 @@ theorem metricTensor0S_apply
   rw [htail]
   rfl
 
-/-- Intrinsic metric trace of a covariant two-tensor, expressed as the metric
-inner product with the metric tensor itself.  The metric tensor is placed in
-the first argument so the existing direct `(0,2)` coordinate theorem rewrites
-to the usual `g^{ij} B_{ij}` without needing a separate inverse-symmetry
-lemma. -/
+
+
+
+
+
 def metricTracePair0SAt (g : SmoothRiemannianMetric I M)
     {x : M}
     (B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
     Real :=
   inner0S (I := I) g x 2 (metricTensor0S (I := I) g x) B
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_apply_cons_local
     {x : M} (s : ℕ)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -93,6 +91,7 @@ private theorem tensor0S_curry_apply_cons_local
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {x : M} {s : ℕ}
     (T : ι -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (v : Fin s -> TangentSpace I x) :
@@ -109,6 +108,7 @@ private theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {x : M} {s : �
       change T a v + (∑ i ∈ S, T i) v = T a v + ∑ i ∈ S, T i v
       rw [ih]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0SSpace_smul_apply {x : M} {s : ℕ}
     (c : Real)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
@@ -116,6 +116,7 @@ private theorem tensor0SSpace_smul_apply {x : M} {s : ℕ}
     (c • T) v = c * T v := by
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem metricTraceInput_update_first {x : M} {s : ℕ}
     (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
     (X : TangentSpace I x) :
@@ -128,6 +129,7 @@ private theorem metricTraceInput_update_first {x : M} {s : ℕ}
     simp [metricTraceInput, Function.update]
   · simp [metricTraceInput, Function.update]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem metricTraceInput_update_second {x : M} {s : ℕ}
     (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
     (Y : TangentSpace I x) :
@@ -147,10 +149,11 @@ private theorem metricTraceInput_update_second {x : M} {s : ℕ}
         simp at hv
       simp [metricTraceInput, Function.update, hne]
 
-/-- Construction frontier for freezing all but the first two slots of a
-covariant tensor.  This is mathematically just partial evaluation of a
-continuous multilinear map; the remaining work is bundled-continuity
-bookkeeping. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] in
 theorem exists_freezeFirstTwo0S {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -229,7 +232,7 @@ theorem exists_freezeFirstTwo0S {x : M} {s : ℕ}
     Traw (metricTraceInput (I := I) X Y tail)
   simp [L, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Freeze all but the first two slots of a covariant tensor. -/
+
 def freezeFirstTwo0S {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -237,6 +240,7 @@ def freezeFirstTwo0S {x : M} {s : ℕ}
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
   Classical.choose (exists_freezeFirstTwo0S (I := I) T tail)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem freezeFirstTwo0S_apply {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -246,8 +250,8 @@ theorem freezeFirstTwo0S_apply {x : M} {s : ℕ}
       T (metricTraceInput (I := I) X Y tail) := by
   exact Classical.choose_spec (exists_freezeFirstTwo0S (I := I) T tail) X Y
 
-/-- Freeze the first two slots of a covariant tensor, leaving the remaining
-slots as a tensor-valued output. -/
+
+
 def freezeFirstTwoArgs0S {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -256,6 +260,7 @@ def freezeFirstTwoArgs0S {x : M} {s : ℕ}
   tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
     (tensor0S_curry (I := I) (𝕜 := Real) (M := M) (s + 1) x T X) Y
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem freezeFirstTwoArgs0S_apply {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -267,8 +272,9 @@ theorem freezeFirstTwoArgs0S_apply {x : M} {s : ℕ}
   rw [tensor0S_curry_apply_cons_local, tensor0S_curry_apply_cons_local]
   rfl
 
-/-- Construction frontier for freezing the first slot of a `(0,3)` tensor and
-leaving the last two slots variable. -/
+
+
+omit [FiniteDimensional ℝ E] in
 theorem exists_freezeLastTwo0S3 {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (Y : TangentSpace I x) :
@@ -281,18 +287,21 @@ theorem exists_freezeLastTwo0S3 {x : M}
   congr 1
   funext a
   fin_cases a
-  · norm_num [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec3]
-  · norm_num [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec3]
+  · norm_num [DifferentialGeometry.Integral.Connection.vec2,
+    DifferentialGeometry.Integral.Connection.vec3]
+  · norm_num [DifferentialGeometry.Integral.Connection.vec2,
+    DifferentialGeometry.Integral.Connection.vec3]
   · change (vec2 (I := I) X Z) 1 = Z
     norm_num [DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Freeze the first slot of a `(0,3)` tensor and trace the last two slots. -/
+
 def freezeLastTwo0S3 {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (Y : TangentSpace I x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
   Classical.choose (exists_freezeLastTwo0S3 (I := I) T Y)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem freezeLastTwo0S3_apply {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -301,7 +310,7 @@ theorem freezeLastTwo0S3_apply {x : M}
       T (vec3 (I := I) Y X Z) := by
   exact Classical.choose_spec (exists_freezeLastTwo0S3 (I := I) T Y) X Z
 
-/-- Intrinsic metric trace of the first two covariant slots. -/
+
 def metricTraceFirstTwo0SAt (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -309,17 +318,17 @@ def metricTraceFirstTwo0SAt (g : SmoothRiemannianMetric I M)
     (tail : Fin s -> TangentSpace I x) : Real :=
   metricTracePair0SAt (I := I) g (freezeFirstTwo0S (I := I) T tail)
 
-/-- Intrinsic metric trace of the last two slots of a `(0,3)` tensor after
-freezing the first slot. -/
+
+
 def metricTraceLastTwo0SAt3 (g : SmoothRiemannianMetric I M)
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (Y : TangentSpace I x) : Real :=
   metricTracePair0SAt (I := I) g (freezeLastTwo0S3 (I := I) T Y)
 
-/-- Basis-level metric trace of the first two covariant slots of a `(0,s+2)`
-tensor. This is the coordinate-side preparation interface for the rough
-Laplacian. -/
+
+
+
 def metricTrace0S2InBasis
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -330,7 +339,7 @@ def metricTrace0S2InBasis
   ∑ i : Idx, ∑ j : Idx,
     gInv i j * T (metricTraceInput (I := I) (basis i) (basis j) tail)
 
-/-- Tensor-valued basis metric trace of the first two covariant slots. -/
+
 def metricTrace0S2TensorInBasis
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -341,6 +350,7 @@ def metricTrace0S2TensorInBasis
   ∑ i : Idx, ∑ j : Idx,
     gInv i j • freezeFirstTwoArgs0S (I := I) T (basis i) (basis j)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem metricTrace0S2TensorInBasis_apply
     {Idx : Type*} [Fintype Idx]
@@ -360,6 +370,7 @@ theorem metricTrace0S2TensorInBasis_apply
   intro j _
   rw [tensor0SSpace_smul_apply, freezeFirstTwoArgs0S_apply]
 
+omit [FiniteDimensional ℝ E] in
 private theorem metricInverseInBasis_contract_left
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -378,6 +389,7 @@ private theorem metricInverseInBasis_contract_left
           ring
     _ = (if j = k then 1 else 0) := (hinv j k).2
 
+omit [FiniteDimensional ℝ E] in
 private theorem metricInverseInBasis_contract_metric
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -413,7 +425,7 @@ private theorem metricInverseInBasis_contract_metric
           · intro hk
             simp at hk
 
-/-- Coordinate formula for the intrinsic trace of a `(0,2)` tensor. -/
+
 theorem metricTracePair0SAt_eq_sum_basis
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -489,8 +501,8 @@ theorem metricTracePair0SAt_eq_sum_basis
           intro l _
           congr 1
 
-/-- The metric tensor has squared norm equal to the dimension, expressed via
-any basis and inverse metric components. -/
+
+
 theorem normSq0S_metricTensor0S_eq_card
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -523,8 +535,8 @@ theorem normSq0S_metricTensor0S_eq_card
     _ = (Fintype.card Idx : Real) := by
           simp
 
-/-- Intrinsic trace/norm Cauchy-Schwarz for covariant two-tensors:
-`(tr_g A)^2 <= n |A|^2`. -/
+
+
 theorem metricTracePair0SAt_sq_le_card_mul_normSq0S
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -579,8 +591,8 @@ theorem metricTracePair0SAt_sq_le_card_mul_normSq0S
   rw [habs, hmetric, hA] at hcs
   exact hcs
 
-/-- The change of metric trace is controlled by the covariant metric
-difference and the traced two-tensor, measured in the reference metric. -/
+
+
 theorem trace_sub_le_c0
     (g h : SmoothRiemannianMetric I M) (x : M)
     {C : Real} (hC : 1 ≤ C)
@@ -726,7 +738,7 @@ theorem trace_sub_le_c0
           Real.sqrt (normSq0S (I := I) g x 2 A) := by
       rfl
 
-/-- Divided form of the intrinsic trace/norm Cauchy-Schwarz inequality. -/
+
 theorem metricTracePair0SAt_sq_div_rank_le_normSq0S
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] [Nonempty Idx]
@@ -751,7 +763,7 @@ theorem metricTracePair0SAt_sq_div_rank_le_normSq0S
     simpa [mul_comm, mul_left_comm, mul_assoc] using h
   simpa [div_eq_mul_inv, one_div, mul_comm, mul_left_comm, mul_assoc] using hdiv
 
-/-- Coordinate formula for the intrinsic trace of the first two slots. -/
+
 theorem metricTraceFirstTwo0SAt_eq_sum_basis
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -773,8 +785,8 @@ theorem metricTraceFirstTwo0SAt_eq_sum_basis
   intro j _
   simp
 
-/-- Coordinate formula for the intrinsic trace of the last two slots of a
-`(0,3)` tensor after freezing the first slot. -/
+
+
 theorem metricTraceLastTwo0SAt3_eq_sum_basis
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -794,7 +806,7 @@ theorem metricTraceLastTwo0SAt3_eq_sum_basis
   intro j _
   simp
 
-/-- A coordinate trace sum computes the intrinsic first-two-slot trace. -/
+
 theorem metricTrace0S2InBasis_eq_metricTrace
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -809,7 +821,7 @@ theorem metricTrace0S2InBasis_eq_metricTrace
       metricTraceFirstTwo0SAt (I := I) g T tail :=
   (metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis gInv hinv T tail).symm
 
-/-- Basis independence of the first-two-slot coordinate trace. -/
+
 theorem metricTrace0S2InBasis_eq_metricTrace0S2InBasis
     (g : SmoothRiemannianMetric I M)
     {Idx₁ Idx₂ : Type*} [Fintype Idx₁] [DecidableEq Idx₁]
@@ -830,7 +842,7 @@ theorem metricTrace0S2InBasis_eq_metricTrace0S2InBasis
   rw [metricTrace0S2InBasis_eq_metricTrace (I := I) g basis₁ gInv₁ hinv₁ T tail,
     metricTrace0S2InBasis_eq_metricTrace (I := I) g basis₂ gInv₂ hinv₂ T tail]
 
-/-- Intrinsic tensor-valued metric trace of the first two covariant slots. -/
+
 def metricTraceFirstTwo0STensor
     (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
@@ -840,7 +852,8 @@ def metricTraceFirstTwo0STensor
   metricTrace0S2TensorInBasis (I := I)
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
     T
 
@@ -857,12 +870,14 @@ theorem metricTraceFirstTwo0STensor_apply
   exact metricTrace0S2InBasis_eq_metricTrace (I := I) g
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x)
+    (Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g x)
     T tail
 
-/-- Direct rough Laplacian tensor from a supplied second covariant derivative. -/
+
 def roughLap0STensor
     (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
@@ -882,12 +897,12 @@ theorem roughLap0STensor_apply
       metricTraceFirstTwo0SAt (I := I) g nabla2A tail := by
   exact metricTraceFirstTwo0STensor_apply (I := I) g nabla2A tail
 
-/-- Traced Leibniz rule for the rough Laplacian of a scalar multiple of a
-covariant tensor, stated at the supplied-second-derivative level.
 
-The hypothesis is the pointwise second covariant derivative product rule for
-`f • A`.  The conclusion contracts that rule with the inverse metric in an
-arbitrary basis. -/
+
+
+
+
+
 theorem trace_smul_leibniz
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -937,9 +952,9 @@ theorem trace_smul_leibniz
   simp_rw [Finset.mul_sum]
   ring_nf
 
-/-- Parallel-factor specialization of `trace_smul_leibniz`: if the tensor
-factor has vanishing first and second covariant derivative at the point, then
-the rough Laplacian of `f • A` is `(Δ f) • A`. -/
+
+
+
 theorem trace_smul_parallel
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -978,7 +993,7 @@ theorem trace_smul_parallel
   simp only [metricTrace0S2InBasis, hsecond, mul_zero, Finset.sum_const_zero]
   ring
 
-/-- Rough-Laplacian-facing form of `trace_smul_leibniz`. -/
+
 theorem roughLap_smul_leib
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1016,8 +1031,8 @@ theorem roughLap_smul_leib
   exact trace_smul_leibniz (I := I) g basis gInv hinv
     f df hessF A nablaA nabla2A nabla2fA tail hleib
 
-/-- Rough-Laplacian-facing parallel-factor specialization: if the tensor
-factor is parallel to second order at the point, then `Δ(f • A) = (Δ f) • A`. -/
+
+
 theorem roughLap_smul_par
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1052,8 +1067,8 @@ theorem roughLap_smul_par
   exact trace_smul_parallel (I := I) g basis gInv hinv
     f df hessF A nablaA nabla2A nabla2fA tail hfirst hsecond hleib
 
-/-- Basis-level rough Laplacian value of a covariant tensor, represented as the
-metric trace of a supplied second covariant derivative tensor. -/
+
+
 def roughLap0SAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1063,7 +1078,7 @@ def roughLap0SAt
     (tail : Fin s -> TangentSpace I x) : Real :=
   metricTrace0S2InBasis (I := I) basis gInv nabla2A tail
 
-/-- One-form specialization of the basis-level rough Laplacian interface. -/
+
 def roughLap1FormAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1073,10 +1088,10 @@ def roughLap1FormAt
     (Y : TangentSpace I x) : Real :=
   roughLap0SAt (I := I) basis gInv (s := 1) nabla2α (fun _ : Fin 1 => Y)
 
-/-- Basis-level realization predicate saying that a supplied rough Laplacian
-tensor is the coordinate metric trace of a supplied second covariant derivative
-tensor. This is a compatibility interface; the primary predicate below is
-basis-free. -/
+
+
+
+
 def RoughLap0SRealizesMetricTraceInBasis
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1087,6 +1102,7 @@ def RoughLap0SRealizesMetricTraceInBasis
   ∀ tail : Fin s -> TangentSpace I x,
     roughA tail = roughLap0SAt (I := I) basis gInv nabla2A tail
 
+omit [FiniteDimensional ℝ E] in
 theorem roughLap0SAt_eq_of_realizes
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1099,6 +1115,7 @@ theorem roughLap0SAt_eq_of_realizes
     roughA tail = roughLap0SAt (I := I) basis gInv nabla2A tail :=
   h tail
 
+omit [FiniteDimensional ℝ E] in
 theorem roughLap1FormAt_eq_of_realizes
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1111,16 +1128,16 @@ theorem roughLap1FormAt_eq_of_realizes
       roughLap1FormAt (I := I) basis gInv nabla2α Y :=
   h (fun _ : Fin 1 => Y)
 
-/-!
-## Intrinsic-facing realization predicates
 
-The primary rough-Laplacian interface is now basis-free: a supplied tensor
-realizes a metric trace when it agrees with `metricTraceFirstTwo0SAt`.  Basis
-and inverse-metric components appear only in coordinate wrappers below.
--/
 
-/-- A supplied `(0,s)` tensor realizes the metric trace of a supplied
-`(0,s+2)` tensor. -/
+
+
+
+
+
+
+
+
 def metric_trace_0s
     (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
@@ -1131,7 +1148,7 @@ def metric_trace_0s
   ∀ tail : Fin s -> TangentSpace I x,
     traceT tail = metricTraceFirstTwo0SAt (I := I) g T tail
 
-/-- Primary basis-free rough Laplacian realization for covariant tensors. -/
+
 def RoughLap0SRealizesMetricTrace
     (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
@@ -1141,7 +1158,7 @@ def RoughLap0SRealizesMetricTrace
       (s + 2) x) : Prop :=
   metric_trace_0s (I := I) g nabla2A roughA
 
-/-- Intrinsic-facing rough Laplacian realization for covariant tensors. -/
+
 def rough_lap_0s
     (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
@@ -1188,32 +1205,32 @@ theorem roughLap0STensor_realizes
       (roughLap0STensor (I := I) g nabla2A) := by
   rw [rough_lap_0s_iff_eq_tensor]
 
-/-!
-## TODO: generic tensor norm-square Laplacian
 
-Eventually the tensor/operator layer should expose the basis-free formula
 
-`Delta |A|^2 = 2 <tr_g nabla^2 A, A> + 2 |nabla A|^2`
 
-for a smooth covariant `(0,s)` tensor field `A`, where `tr_g nabla^2 A` is the
-existing intrinsic object `roughLap0STensor g nabla2A`.
 
-This is not currently needed by a checked consumer.  The existing Bochner route
-already proves the corresponding `(0,2)` product rule.  When a generic consumer
-appears, the missing reusable API should be added below `Tensor0SRiemannian` or
-the nearest tensor-product layer:
 
-* arbitrary-valence smoothness for `fun x => inner0S g x s (A x) (B x)`;
-* the metric-compatible first product rule for `inner0S` at valence `s`;
-* the second product rule for `normSq0S`, using two
-  `TotalNabla0SRealizes` inputs for `A`, `nablaA`, and `nabla2A`;
-* the traced version identifying the Hessian trace with
-  `2 * inner0S g x s (roughLap0STensor g (nabla2A x)) (A x) +
-   2 * normSq0S g x (s + 1) (nablaA x)`;
-* a final scalar-laplacian bridge through the existing Hessian trace APIs.
--/
 
-/-- One-form specialization of the intrinsic-facing rough Laplacian interface. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def rough_lap_one_form
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -1279,8 +1296,8 @@ theorem rough_lap_one_form_apply_basis
       rough_lap_0s_apply_basis (I := I) g basis gInv nabla2α roughα hrough hinv
         (fun _ : Fin 1 => Y)
 
-/-- Basis-level realization extracted from the intrinsic one-form rough
-Laplacian interface. -/
+
+
 theorem rough_lap_one_form_realizes_metric_trace
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

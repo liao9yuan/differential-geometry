@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotential
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHsTime
 
-/-!
-# Time regularity of completed scalar potentials
 
-This file realizes scalar multiplication as a rank-zero tensor coefficient and
-transfers the fully applied parametric action theorems to `scalarPotHs`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,8 +32,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- A jointly smooth scalar multiplier preserves each finite time regularity
-order on a completed scalar Sobolev path. -/
+
+
 theorem scalarPot_dyn_fin
     (q : SmoothRiemannianMetric I M)
     (zeta : Real → C^∞⟮I, M; Real⟯) {S : Set Real} (hS : IsOpen S)
@@ -52,8 +52,8 @@ theorem scalarPot_dyn_fin
   intro t ht
   exact scalarPotHs_app (I := I) (M := M) q (zeta t) m (U t)
 
-/-- A jointly smooth scalar multiplier preserves smooth time paths on every
-completed scalar Sobolev order. -/
+
+
 theorem scalarPot_dyn_cd
     (q : SmoothRiemannianMetric I M)
     (zeta : Real → C^∞⟮I, M; Real⟯) {S : Set Real} (hS : IsOpen S)

@@ -4,13 +4,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCInput
 
 set_option autoImplicit false
 
-/-!
-# Strict distance convexity from a selected normal branch
 
-This file turns the pointwise positive Hessian supplied by a full selected
-normal branch into the `StrictDistInput` consumed by the Step-C center of mass.
-The joining curves are the intrinsic Hopf--Rinow minimizing geodesics.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -39,9 +39,9 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace HasNormalBrFull
 
-/-- A controlled full normal branch makes the intrinsic minimizing join a
-`StrictDistInput` whenever the source centre and active points fit in the
-retained physical cage. -/
+
+
+
 theorem strict_dist
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)

@@ -4,14 +4,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCTransitionRefine
 
-/-!
-# Step C pair tails
 
-Producer-backed eventual geometry for pairs of stabilized live good-cover
-centers.  The pointwise comparison remains in `StepCPairGeometry`; this file
-specializes it to the conditional compactness input bundle and the selected
-net-limit tail.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,8 +31,8 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- The finite subtype of live target slots whose five-lambda balls eventually
-intersect those of a fixed live source slot. -/
+
+
 def InterSlot
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -42,8 +42,8 @@ def InterSlot
     BInter hd D P L.lamInf
       (alpha.1 : Nat) (beta.1 : Nat) (L.φ k) }
 
-/-- A currently intersecting target at an aliveness-stabilized stage defines an
-eventually intersecting live target. -/
+
+
 theorem inter_slot_of_binter
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -63,8 +63,8 @@ theorem inter_slot_of_binter
     simpa only [hy, Option.isSome_some] using hgammaStable.symm
   exact ⟨⟨⟨gamma, hgammaLive⟩, htail⟩, rfl⟩
 
-/-- A nonzero target atom forces the corresponding normal transition into the
-target six-lambda ball. -/
+
+
 theorem MetricCompactnessInputs.atom_trans_small
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -78,7 +78,7 @@ theorem MetricCompactnessInputs.atom_trans_small
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       8 * L.lamInf (gamma : Nat) ≤
-      Geometry.Riemannian.expRadiusGp
+      Geometry.Riemannian.expMapC2Radius
         (I := I) (X.obj (L.φ k)).metric
         (seqCenterD inp.decay P L k (gamma : Nat)))
     (z : E)
@@ -89,7 +89,7 @@ theorem MetricCompactnessInputs.atom_trans_small
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       seqAtom inp.decay inp.hD P L inp.pack r k gamma
-      (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
+      (Geometry.Riemannian.NormalCoordinates.expMapDiffeo
         (I := I) (X.obj (L.φ k)).metric x z) ≠ 0) :
     letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
     letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -113,7 +113,7 @@ theorem MetricCompactnessInputs.atom_trans_small
       have hyD : seqCenterD inp.decay P L k (gamma : Nat) = y := by
         simp [seqCenterD, hc]
       rw [hyD] at hGp ⊢
-      let q := Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
+      let q := Geometry.Riemannian.NormalCoordinates.expMapDiffeo
         (I := I) (X.obj (L.φ k)).metric x z
       have hqHat : q ∈ L.hatBall inp.decay inp.D P inp.pack r k gamma :=
         seqAtom_mem_hat inp.decay inp.hD P L inp.pack r k hgp gamma hne
@@ -121,23 +121,57 @@ theorem MetricCompactnessInputs.atom_trans_small
         simpa only [NetLimitData.hatBall, hc] using hqHat
       have hlam : 0 < L.lamInf (gamma : Nat) :=
         inp.decay.lambda_pos inp.hD (L.rInf (gamma : Nat))
-      have hcoord : 4 * L.lamInf (gamma : Nat) <
-          6 * L.lamInf (gamma : Nat) := by nlinarith
+      have hhalf : (1 / 2 : Real) ≤
+          Geometry.Riemannian.gpCoerciveConst
+            (I := I) (X.obj (L.φ k)).metric y :=
+        inp.normalBounds.half_le_gpConst (L.φ k) y
+      have hsqrtPos : 0 < Real.sqrt
+          (Geometry.Riemannian.gpCoerciveConst
+            (I := I) (X.obj (L.φ k)).metric y) :=
+        Real.sqrt_pos.mpr (Geometry.Riemannian.gpCoerciveConst_pos
+          (I := I) (X.obj (L.φ k)).metric y)
+      have hsqrtTwoThirds : (2 / 3 : Real) < Real.sqrt (1 / 2 : Real) := by
+        have hs := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
+        have hn := Real.sqrt_nonneg (1 / 2 : Real)
+        nlinarith
+      have hsqrt : (2 / 3 : Real) < Real.sqrt
+          (Geometry.Riemannian.gpCoerciveConst
+            (I := I) (X.obj (L.φ k)).metric y) :=
+        hsqrtTwoThirds.trans_le (Real.sqrt_le_sqrt hhalf)
+      have hcoord : 4 * L.lamInf (gamma : Nat) /
+            Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+              (I := I) (X.obj (L.φ k)).metric y) <
+          6 * L.lamInf (gamma : Nat) := by
+        rw [div_lt_iff₀ hsqrtPos]
+        have hfour : (4 : Real) < 6 * Real.sqrt
+            (Geometry.Riemannian.gpCoerciveConst
+              (I := I) (X.obj (L.φ k)).metric y) := by
+          nlinarith
+        calc
+          4 * L.lamInf (gamma : Nat) <
+              (6 * Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+                (I := I) (X.obj (L.φ k)).metric y)) *
+                L.lamInf (gamma : Nat) :=
+            mul_lt_mul_of_pos_right hfour hlam
+          _ = 6 * L.lamInf (gamma : Nat) *
+              Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+                (I := I) (X.obj (L.φ k)).metric y) := by ring
       have htarget := properBall_to_exp (I := I) (X.obj (L.φ k))
         (P (L.φ k)).ms (P (L.φ k)).realizes
         (c := y) (R := 4 * L.lamInf (gamma : Nat))
         (σ := 6 * L.lamInf (gamma : Nat)) (hgp gamma y hc) hcoord
       have hVy : Metric.ball (0 : E) (6 * L.lamInf (gamma : Nat)) ⊆
-          Metric.ball 0 (Geometry.Riemannian.expRadiusGp
+          Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
             (I := I) (X.obj (L.φ k)).metric y) :=
         Metric.ball_subset_ball ((by nlinarith :
           6 * L.lamInf (gamma : Nat) ≤ 8 * L.lamInf (gamma : Nat)).trans hGp)
       have hmaps : Set.MapsTo
-          (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
-            (I := I) (X.obj (L.φ k)).metric x)
+          (fun w => Geometry.Riemannian.NormalCoordinates.expMapDiffeo
+            (I := I) (X.obj (L.φ k)).metric x w)
           ({z} : Set E)
-          (Geometry.Riemannian.NormalCoordinates.framedExpMap
-            (I := I) (X.obj (L.φ k)).metric y ''
+          ((fun v : E => Geometry.Riemannian.Exponential.expMap
+            (I := I) (X.obj (L.φ k)).metric y
+              (show TangentSpace I y from v)) ''
             Metric.ball 0 (6 * L.lamInf (gamma : Nat))) := by
         intro w hw
         rw [Set.mem_singleton_iff] at hw
@@ -146,8 +180,8 @@ theorem MetricCompactnessInputs.atom_trans_small
       exact normalTrans_mapsTo (I := I) (X.obj (L.φ k)) x y hVy hmaps
         (Set.mem_singleton z)
 
-/-- A nonzero normalized chart weight forces its normal transition into the
-same target six-lambda ball. -/
+
+
 theorem MetricCompactnessInputs.weight_trans_small
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -162,7 +196,7 @@ theorem MetricCompactnessInputs.weight_trans_small
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       8 * L.lamInf (gamma : Nat) ≤
-        Geometry.Riemannian.expRadiusGp
+        Geometry.Riemannian.expMapC2Radius
           (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (gamma : Nat)))
     (z : E)
@@ -184,9 +218,9 @@ theorem MetricCompactnessInputs.weight_trans_small
   simpa only [seqAtomChart] using
     (num_ne_of_cut_ne (num_ne_of_raw_ne hweight))
 
-/-- On an eventually intersecting pair of stabilized live slots, the bundled
-H6 normal-radius profile supplies all pointwise hypotheses of `pair_exp_maps`
-on one common tail. -/
+
+
+
 theorem MetricCompactnessInputs.pair_exp_maps_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
@@ -208,11 +242,12 @@ theorem MetricCompactnessInputs.pair_exp_maps_tail
         (X.obj (L.φ k)).t2TangentBundle
       letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
       Set.MapsTo
-        (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
-          (I := I) (X.obj (L.φ k)).metric x)
+        (fun z : E => Geometry.Riemannian.NormalCoordinates.expMapDiffeo
+          (I := I) (X.obj (L.φ k)).metric x z)
         (Metric.ball 0 (8 * L.lamInf (α.1 : Nat)))
-        (Geometry.Riemannian.NormalCoordinates.framedExpMap
-          (I := I) (X.obj (L.φ k)).metric y ''
+        ((fun v : E => Geometry.Riemannian.Exponential.expMap
+          (I := I) (X.obj (L.φ k)).metric y
+            (show TangentSpace I y from v)) ''
             Metric.ball 0
               (item3RadiusFactor inp.decay inp.D * L.lamInf (β.1 : Nat))) := by
   have hrad : Item3RadiusTail (I := I) inp.decay inp.D P L inp.pack r
@@ -236,13 +271,32 @@ theorem MetricCompactnessInputs.pair_exp_maps_tail
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  have hzeroX : (0 : E) ∈ Metric.ball 0
+      (inp.normalBounds.radius (L.φ k)
+        (seqCenterD inp.decay P L k (α.1 : Nat))) := by
+    rw [Metric.mem_ball, dist_self]
+    exact inp.normalBounds.radius_pos (L.φ k)
+      (seqCenterD inp.decay P L k (α.1 : Nat))
+  have hmetric : ∀ z : E,
+      (X.obj (L.φ k)).metric.inner
+          (seqCenterD inp.decay P L k (α.1 : Nat)) z z ≤ 2 * ‖z‖ ^ 2 := by
+    intro z
+    simpa only [normalMetric_zero (I := I)] using
+      (inp.normalBounds.metric_equiv (L.φ k)
+        (seqCenterD inp.decay P L k (α.1 : Nat)) 0 hzeroX z).2
+  have hhalf : (1 / 2 : Real) ≤
+      Geometry.Riemannian.gpCoerciveConst (I := I)
+        (X.obj (L.φ k)).metric
+        (seqCenterD inp.decay P L k (β.1 : Nat)) :=
+    inp.normalBounds.half_le_gpConst (L.φ k)
+      (seqCenterD inp.decay P L k (β.1 : Nat))
   exact L.pair_exp_maps inp.decay inp.hD P inp.pack r α.1 β.1
-    hfreq k hk hx hy hradk
+    hfreq k hk hx hy hradk hmetric hhalf
     (hgpk β.1 (seqCenterD inp.decay P L k (β.1 : Nat)) hy)
 
-/-- The pair exponential-image tail gives the complete one-way H6 transition
-data on the same tail: source and target-anchor radius containments,
-smoothness, normal-chart overlap, and transition-map target containment. -/
+
+
+
 theorem MetricCompactnessInputs.pair_overlap_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
@@ -269,10 +323,10 @@ theorem MetricCompactnessInputs.pair_overlap_tail
       U ⊆ Metric.ball 0 (inp.normalBounds.radius (L.φ k) x) ∧
         Va ⊆ Metric.ball 0 (inp.normalBounds.radius (L.φ k) y) ∧
         U ⊆ Metric.ball 0
-          (Geometry.Riemannian.expRadiusGp
+          (Geometry.Riemannian.expMapC2Radius
             (I := I) (X.obj (L.φ k)).metric x) ∧
         Va ⊆ Metric.ball 0
-          (Geometry.Riemannian.expRadiusGp
+          (Geometry.Riemannian.expMapC2Radius
             (I := I) (X.obj (L.φ k)).metric y) ∧
         ContDiffOn Real (⊤ : ℕ∞)
           (normalTransition (I := I) (X.obj (L.φ k)) x y) U ∧
@@ -320,7 +374,7 @@ theorem MetricCompactnessInputs.pair_overlap_tail
     Metric.ball_subset_ball <|
       hmetrick β.1 (seqCenterD inp.decay P L k (β.1 : Nat)) hy
   have hUx : Metric.ball (0 : E) (8 * L.lamInf (α.1 : Nat)) ⊆
-      Metric.ball 0 (Geometry.Riemannian.expRadiusGp
+      Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
         (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (α.1 : Nat))) := by
     intro z hz
@@ -330,7 +384,7 @@ theorem MetricCompactnessInputs.pair_overlap_tail
         (hradk α.1 (seqCenterD inp.decay P L k (α.1 : Nat)) hx).2
   have hVy : Metric.ball (0 : E)
         (item3RadiusFactor inp.decay inp.D * L.lamInf (β.1 : Nat)) ⊆
-      Metric.ball 0 (Geometry.Riemannian.expRadiusGp
+      Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
         (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (β.1 : Nat))) := by
     intro z hz
@@ -349,9 +403,9 @@ theorem MetricCompactnessInputs.pair_overlap_tail
       (seqCenterD inp.decay P L k (α.1 : Nat))
       (seqCenterD inp.decay P L k (β.1 : Nat)) hVy hmapsk⟩
 
-/-- A finite family of stably intersecting live pairs has one common H6
-transition subsequence.  The small balls are the convergence domains, while
-the item-3 balls are the independent bounded target anchors. -/
+
+
+
 theorem MetricCompactnessInputs.exists_pair_trans
     (inp : MetricCompactnessInputs (I := I) X)
     (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)

@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-/-!
-# Continuity of integrals for continuous metric families
 
-This file proves continuity of a scalar integral against a continuously varying
-Riemannian volume measure on a compact manifold.  The proof uses the canonical
-finite partition of unity and dominated convergence in each fixed chart.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,8 +26,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Entrywise continuity of a metric family gives continuity of its chart
-density on the same time-space set. -/
+
+
 private lemma density_cont
     {g : Real → SmoothRiemannianMetric I M} {K : Set Real}
     (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -61,7 +61,6 @@ private lemma density_cont
     exact hg x₀ (σ i) i
   exact Real.continuous_sqrt.comp_continuousOn hdet
 
-set_option maxHeartbeats 4000000 in
 private theorem chart_int_cont
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : Real → SmoothRiemannianMetric I M}
@@ -121,8 +120,9 @@ private theorem chart_int_cont
   have hF_cont : ContinuousOn (fun p : Real × E ↦ F p.1 p.2)
       (K ×ˢ target) := by
     have hfc : ContinuousOn (fun p : Real × E ↦ f p.1 (symm p.2))
-        (K ×ˢ target) :=
-      hf.comp hpair (fun p hp ↦ ⟨hp.1, Set.mem_univ _⟩)
+        (K ×ˢ target) := by
+      have h := hf.comp hpair (fun p hp ↦ ⟨hp.1, Set.mem_univ _⟩)
+      exact h
     have hρc : ContinuousOn (fun p : Real × E ↦ ρ (symm p.2))
         (K ×ˢ target) := by
       exact hρ_cont.continuousOn.comp
@@ -132,8 +132,9 @@ private theorem chart_int_cont
         (fun p : Real × E ↦
           chartDensity (I := I) (g p.1) α (symm p.2))
         (K ×ˢ target) := by
-      exact (density_cont (I := I) hg α).comp hpair
+      have h := (density_cont (I := I) hg α).comp hpair
         (fun p hp ↦ ⟨hp.1, hsymm_base p.2 hp.2⟩)
+      exact h
     exact (hfc.mul hρc).mul hdc
   have hF_zero : ∀ t ∈ K, ∀ y ∈ target, y ∉ T' → F t y = 0 := by
     intro t _ y hy hyT'
@@ -195,11 +196,10 @@ private theorem chart_int_cont
     hb_int hlim
   simpa only [F, ρ, symm, target, μ] using hdct
 
-set_option maxHeartbeats 1600000 in
 
-/-- On a compact time set, entrywise joint continuity of a metric family and
-joint continuity of a scalar family imply continuity of the corresponding
-moving Riemannian integral. -/
+
+
+
 theorem integral_family_cont
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : Real → SmoothRiemannianMetric I M}

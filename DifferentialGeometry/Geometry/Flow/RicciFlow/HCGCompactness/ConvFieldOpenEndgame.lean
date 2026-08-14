@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Open-window Ricci-flow endgame
@@ -27,8 +25,8 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -254,6 +252,8 @@ noncomputable def flowUpgrade_of_open
     refine ⟨k₀, fun k hk t ht => ?_⟩
     exact hk₀ k hk t (hn ht)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- The open-window upgrade retains the supplied pointed flow data. -/
 theorem flowUpgrade_open_L
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
@@ -292,6 +292,8 @@ theorem flowUpgrade_open_L
   cases hPL
   rfl
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- The open-window upgrade data immediately yields the smooth flow-limit
 conclusion. -/
 theorem flowLimit_of_open

@@ -31,7 +31,7 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -59,6 +59,8 @@ variable
   [ConnectedSpace M']
   [IsContinuousRiemannianBundle E (fun x : M' ↦ TangentSpace I' x)]
 
+omit [T2Space (TangentBundle I M)]
+    [T2Space (TangentBundle I' M')] [ConnectedSpace M] [ConnectedSpace M'] in
 /-- A linear isometry between the launch tangent metrics transfers the squared
 norm of the intrinsic exponential differential between curvature-one
 manifolds. -/
@@ -240,7 +242,7 @@ theorem expDiff_sq_xfer
     intro t ht a
     have hconst :=
       parallel_transport_preserves_inner_product (I := I) g γ
-        (N := 2) (by norm_num) hγ2 (by norm_num : (0 : ℝ) ≤ 1)
+        (N := 2) (by norm_num) hγ2
         (frame a) V (hframeDiff a) hVdiff (hframePar a) hVpar t ht
     rw [hframe0 a, hγ0] at hconst
     simpa only [hV0] using hconst
@@ -250,7 +252,7 @@ theorem expDiff_sq_xfer
     intro t ht a
     have hconst :=
       parallel_transport_preserves_inner_product (I := I') g' γ'
-        (N := 2) (by norm_num) hγ2' (by norm_num : (0 : ℝ) ≤ 1)
+        (N := 2) (by norm_num) hγ2'
         (frame' a) V' (hframeDiff' a) hVdiff' (hframePar' a) hVpar' t ht
     rw [hframe0' a, hγ0'] at hconst
     rw [show V' 0 = i u from hV0'] at hconst

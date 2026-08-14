@@ -30,6 +30,7 @@ namespace Euclidean
 
 variable {V G F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [MeasurableSpace V] [BorelSpace V]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
@@ -54,6 +55,11 @@ structure HmfSplit (T Ap As : ℝ) (Cp Cs : ℝ≥0∞)
   sourceWt : SrcWt T As s
   sourceCarl : SrcCarl T Cs s
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V] in
 /-- Weighted estimate for the prescribed inverse-metric-difference flux. -/
 theorem hmfPrinWt {eps K T C : ℝ}
     {A : ℝ × V → G →L[ℝ] F}
@@ -75,6 +81,11 @@ theorem hmfPrinCarl {eps K T : ℝ} {C : ℝ≥0∞}
     GradCarl T (ENNReal.ofReal (eps ^ 2) * C) (fun z ↦ A z (d z)) :=
   linCarl_of_bound A h.principal h.eps0 hae hd
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V] in
 /-- The critical first-heat-derivative time convolution leaves `eps` as the
 small factor and supplies no power of the horizon. -/
 theorem hmfCrit {eps K C t : ℝ}
@@ -84,6 +95,11 @@ theorem hmfCrit {eps K C t : ℝ}
     (∫ s : ℝ in 0..t, (eps * C) * critTime t s) ≤ 4 * (eps * C) :=
   critCoeff_int_le ht (mul_nonneg h.eps0 hC)
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V] in
 /-- Weighted two-arm difference estimate for the quadratic local-addition
 source. -/
 theorem quadDiffWt {K T A₁ A₂ AΔ : ℝ}

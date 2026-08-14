@@ -5,12 +5,12 @@ import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 
 set_option autoImplicit false
 
-/-!
-# Jensen estimate for logarithmic moments
 
-This is the pure measure-theoretic Jensen step used in logarithmic Sobolev
-estimates.  It is independent of the geometric realization of the measure.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.Analysis.Integration
 
@@ -20,8 +20,8 @@ open MeasureTheory Real Set
 
 variable {α : Type*} [MeasurableSpace α]
 
-/-- A nonnegative real density of total integral one defines a probability
-measure through `withDensity`. -/
+
+
 theorem withDensity_prob
     (μ : Measure α) {ρ : α -> Real}
     (hρi : Integrable ρ μ) (hρ0 : 0 ≤ᵐ[μ] ρ)
@@ -33,8 +33,8 @@ theorem withDensity_prob
   rw [← ofReal_integral_eq_lintegral_ofReal hρi hρ0, hmass]
   norm_num
 
-/-- On a probability space, the logarithmic mean of a positive random
-variable is bounded by any positive logarithmic moment. -/
+
+
 theorem int_log_le_moment
     {ν : Measure α} [IsProbabilityMeasure ν]
     {X : α -> Real} {p : Real} (hp : 0 < p)
@@ -72,11 +72,11 @@ theorem int_log_le_moment
   rw [le_div_iff₀ hp]
   simpa only [mul_comm] using hlog_bound
 
-/-- A positive unit-mass amplitude satisfies the entropy-moment estimate.
 
-The probability measure used in the proof has density `v ^ 2` with respect to
-the base measure.  The statement stays on the base measure so geometric
-consumers do not have to manipulate `withDensity` directly. -/
+
+
+
+
 theorem entropy_le_moment
     (μ : Measure α) {v : α → Real} {q : Real} (hq : 2 < q)
     (hvpos : ∀ᵐ x ∂μ, 0 < v x)

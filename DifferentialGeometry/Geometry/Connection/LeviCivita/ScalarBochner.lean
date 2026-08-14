@@ -4,17 +4,13 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Levi-Civita scalar Bochner endpoints
 
-This file packages the Levi-Civita geometric inputs for the generic scalar
-Bochner assembly in `DifferentialGeometry.Geometry.Curvature.Bochner.ScalarBochner`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -25,18 +21,18 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Levi-Civita specialization of the bridge from two total covariant
-derivative realization steps to the existing pointwise second-one-form
-realization predicate. -/
+
+
+
+omit [IsManifold I ∞ M] in
 theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
+    [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (alpha : OneFormSection (I := I) (M := M))
@@ -58,14 +54,16 @@ theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
     (leviCivitaConnectionOfMetric (I := I) g) alpha nablaAlpha
     nabla2AlphaSec h1 h2 x
 
-/-- The trace of the Levi-Civita third covariant derivative of `du` realizes
-`d (Delta u)`.
 
-This is produced by metric compatibility and the generic theorem that the
-covariant derivative commutes with metric trace.  The remaining hypothesis is
-the direct object-level scalar-Laplacian trace identity for the supplied
-Hessian section. -/
+
+
+
+
+
+
+omit [IsManifold I ∞ M] in
 theorem traceNablaHessianRealizesDLapAt_of_leviCivita
+    [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
@@ -86,9 +84,11 @@ theorem traceNablaHessianRealizesDLapAt_of_leviCivita
     (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
     u nablaDuSec nabla2DuSec hnabla htrace x
 
-/-- Levi-Civita scalar Laplacian equals the direct metric trace of the
-globally realized Hessian section. -/
+
+
+omit [IsManifold I ∞ M] in
 theorem lc_lapTrace
+    [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
     (duSec : OneFormSection (I := I) (M := M))
@@ -110,9 +110,11 @@ theorem lc_lapTrace
     (leviCivitaConnectionOfMetric (I := I) g) duSec
     (fun z : M => nablaDuSec z) y (hnabla y)
 
-/-- Levi-Civita-facing scalar Bochner formula with the geometric LC inputs
-produced internally. -/
+
+
+omit [IsManifold I ∞ M] in
 theorem fundamental_bochner_of_leviCivita_terms
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -187,9 +189,11 @@ theorem fundamental_bochner_of_leviCivita_terms
   · exact rm13MetricSkewAt_of_leviCivita_realizes (I := I)
       g Rm13 Rm04 hRm13 hRm04
 
-/-- Levi-Civita scalar Bochner formula where the scalar Laplacian trace of
-`|du|^2` is produced from the operator-level Hessian trace theorem. -/
+
+
+omit [IsManifold I ∞ M] in
 theorem fundamental_bochner_of_leviCivita_terms_of_normSecond_realizes
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -274,14 +278,16 @@ theorem fundamental_bochner_of_leviCivita_terms_of_normSecond_realizes
   · exact rm13MetricSkewAt_of_leviCivita_realizes (I := I)
       g Rm13 Rm04 hRm13 hRm04
 
-/-- Levi-Civita scalar Bochner formula with `d(Delta u)` produced from the
-global Hessian-trace identity.
 
-This is the direct-object route for the trace-Hessian derivative: callers pass
-the full Hessian section and its total covariant derivative; the scalar
-Laplacian trace identity and the pointwise `TraceNablaHessianRealizesDLapAt`
-bridge are produced internally. -/
+
+
+
+
+
+
+omit [IsManifold I ∞ M] in
 theorem lc_bochner_dlap
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -370,9 +376,11 @@ theorem lc_bochner_dlap
     roughDu basis gInvAt hinv X duSec nablaDuSec (nabla2DuSec x) normSecond
     hfields hHessLocal hdu hnablaLocal hnabla2 hdlap hlapTrace hsecond hrough
 
-/-- Levi-Civita scalar Bochner formula where both trace-Hessian derivative and
-the scalar Laplacian trace of `|du|^2` are produced internally. -/
+
+
+omit [IsManifold I ∞ M] in
 theorem lc_bochner_norm
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -470,9 +478,11 @@ theorem lc_bochner_norm
     nablaDuSec (nabla2DuSec x) normSecond normSecondSec hfields hHessLocal hdu
     hnablaLocal hnabla2 hdlap hnormSecond hnormDu hnormHess hnormGrad hsecond hrough
 
-/-- Levi-Civita scalar Bochner formula using the lowered-curvature output-skew
-bridge, with `d(Delta u)` produced from the global Hessian-trace identity. -/
+
+
+omit [IsManifold I ∞ M] in
 theorem lc_bochner_rm04
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -564,7 +574,8 @@ theorem lc_bochner_rm04
     oneFormThirdCovDerivCommAt_of_leviCivita (I := I)
       g Rm13 duSec nablaDuSec (differential1FormFun (I := I) u x)
       (nabla2DuSec x) hRm13 (by simpa [duField] using hdu x) hnabla2
-  exact DifferentialGeometry.Integral.Connection.fundamental_bochner_of_lc_terms_of_rm04_skew (I := I)
+  exact DifferentialGeometry.Integral.Connection.fundamental_bochner_of_lc_terms_of_rm04_skew
+    (I := I)
     g Ric Rm13 Rm04 gInvFrame frame hRm13 hRm04 hRic13 hRic04 u
     (fun y : M => nablaDuSec y) (fun y : M => nablaDuSec y)
     roughDu basis gInvAt hinv X duSec nablaDuSec (nabla2DuSec x)

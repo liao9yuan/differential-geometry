@@ -3,17 +3,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCNorma
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCWeights
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 weight-representation compatibility
 
-This file identifies the arbitrary-base pointwise weight API with the older
-model-chart formulas used by the Step-B convergence engine.  It is deliberately
-a compatibility layer: the canonical pointwise producer lives in
-`StepCWeights`, while `bumpNum` and `normWeights` remain the analytic chart
-formulas consumed by existing convergence theorems.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,15 +29,17 @@ section AlgebraCompat
 
 variable {E' : Type*} [NormedAddCommGroup E'] [NormedSpace Real E']
 
-/-- The arbitrary-base normalization specializes definitionally to the older
-model-space normalization. -/
+
+
+omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem raw_eq_normWeights {ι : Type uι} [Fintype ι]
     (num : ι → E' → Real) (z : E') (i : ι) :
     rawWeights num z i = normWeights num i z := by
   rfl
 
-/-- `cutRaw` is the book's `bumpNum` formula after writing its kill factor as
-`1 - cut`. -/
+
+
+omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem cutRaw_eq_bumpNum {ι : Type uι} [DecidableEq ι]
     (χ : E' → Real) (ψ : ι → E' → Real) (J : ι → E' → E')
     (i0 i : ι) (z : E') :
@@ -49,8 +50,9 @@ theorem cutRaw_eq_bumpNum {ι : Type uι} [DecidableEq ι]
     simp [cutRaw, bumpNum]
   · simp [cutRaw, bumpNum, hi]
 
-/-- The normalized `cutRaw` representation is exactly the older normalized
-`bumpNum` chart weight. -/
+
+
+omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem rawBump_eq_weight {ι : Type uι} [Fintype ι] [DecidableEq ι]
     (χ : E' → Real) (ψ : ι → E' → Real) (J : ι → E' → E')
     (i0 i : ι) (z : E') :
@@ -69,15 +71,17 @@ end AlgebraCompat
 
 section NormalRawBridge
 
-variable {E0 : Type uE} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
+variable {E0 : Type uE} [NormedAddCommGroup E0] [NormedSpace Real E0]
 variable [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
 variable {H0 : Type uH} [TopologicalSpace H0]
 variable {I0 : ModelWithCorners Real E0 H0} [I0.Boundaryless]
 variable {M0 : Type u} [TopologicalSpace M0] [ChartedSpace H0 M0]
 variable [IsManifold I0 ∞ M0] [T2Space M0] [T2Space (TangentBundle I0 M0)]
 
-/-- Reading the global normal-coordinate raw numerator in any normal chart
-gives exactly the existing `bumpNum` transition formula. -/
+
+
+omit [T2Space M0] in
+omit [NeZero (Module.finrank ℝ E0)] in
 theorem normalRaw_eq_bump {ι : Type*} [DecidableEq ι]
     (g : SmoothRiemannianMetric I0 M0) (p : ι → M0)
     (cut : ContDiffBump (0 : E0)) (f : ι → ContDiffBump (0 : E0))
@@ -91,8 +95,10 @@ theorem normalRaw_eq_bump {ι : Type*} [DecidableEq ι]
   simpa only [bumpNum] using
     (normalRaw_readout (I := I0) (z := z) g p cut f i0 β i hsrc)
 
-/-- After pulling the global raw family back to a beta normal chart, its
-pointwise normalization is exactly the existing normalized `bumpNum` weight. -/
+
+
+omit [T2Space M0] in
+omit [NeZero (Module.finrank ℝ E0)] in
 theorem normalWeight_eq {ι : Type} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I0 M0) (p : ι → M0)
     (cut : ContDiffBump (0 : E0)) (f : ι → ContDiffBump (0 : E0))

@@ -4,19 +4,19 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Corr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.UniformBijective
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
-/-!
-# The `t = 0`-anchored corrected chart flow on a uniform horizon
 
-Assembling the per-chart corrected Picard solutions into a single `t = 0`-anchored manifold
-flow `Φ0` on a uniform horizon `σ` (extracted from a finite subcover of the compact
-manifold), with `Φ0 0 = id`, the bare manifold velocity on `(0, σ)`, the **trivialised**
-chart integral identity
-`extChartAt α (Φ0 s x) = extChartAt α x + ∫₀ˢ chartTrivRepr α (X r) (extChartAt α (Φ0 r x))`
-on each orbit's right-half neighbourhood of `0` (carrying a per-orbit norm bound `C` on the
-trivialised chart velocity), and right-continuity of each orbit `s ↦ Φ0 s x` at `0`.  Every
-conclusion is stated through the corrected `chartTrivRepr` field or the intrinsic bare
-velocity — never the raw chart value.
--/
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -31,10 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- The corrected chart velocity `u ↦ chartTrivRepr α (X u) (g u)` along a chart orbit `g` is
-interval-integrable on `[0, s]`.  It is the (a.e.) derivative of the continuous chart curve `g`,
-hence strongly measurable (`derivWithin g (Ici ·)`), and it is bounded by `C` on the horizon, so a
-bounded measurable function on the finite-measure interval is integrable. -/
 private lemma intervalIntegrable_chartTrivRepr_along_orbit
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (g : ℝ → E) (Tα C s : ℝ)
     (hs0 : 0 ≤ s) (hsT : s ≤ Tα)
@@ -68,15 +64,19 @@ private lemma intervalIntegrable_chartTrivRepr_along_orbit
   rw [Set.uIoc_of_le hs0, hrestrict]
   exact ae_restrict_of_forall_mem measurableSet_Ioo (fun u hu => hφ_eq u hu)
 
-/-- Assemble the per-chart corrected Picard solutions into a single `t = 0`-anchored manifold
-flow `Φ0` on a uniform horizon `σ`, with `Φ0 0 = id`, bare velocity on `(0, σ)`, the
-trivialised chart integral identity on each orbit's right-half neighbourhood of `0` (with a
-per-orbit norm bound `C` on the trivialised chart velocity), and right-continuity of each
-orbit at `0`. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chart_anchor_flow_build
     (X : ℝ → ∀ x : M, TangentSpace I x)
-    (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hgrad : ∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
+    (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.univ : Set (ℝ × M)))
+    (hgrad : ∀ α : M, ContinuousOn
+      (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2))
+      (Set.univ : Set (ℝ × M)))
     (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
@@ -84,17 +84,16 @@ theorem corrected_chart_anchor_flow_build
     ∃ (σ : ℝ) (_ : 0 < σ) (Φ0 : ℝ → M → M),
       (∀ x : M, Φ0 0 x = x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M,
-        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ0 t x)))) ∧
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ0 t x)))) ∧
       (∀ x : M, ∃ α : M, ∃ δ : ℝ, ∃ C : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
         ∀ s ∈ Set.Ico (0 : ℝ) (min δ σ), Φ0 s x ∈ (chartAt H α).source ∧
-          (extChartAt I α (Φ0 s x) = extChartAt I α x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X r) (extChartAt I α (Φ0 r x)))
+          (extChartAt I α (Φ0 s x) = extChartAt I α x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α
+            (X r) (extChartAt I α (Φ0 r x)))
           ∧ ‖chartTrivRepr (I := I) α (X s) (extChartAt I α (Φ0 s x))‖ ≤ C) ∧
       (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ0 s x) (Set.Ici (0 : ℝ)) 0) := by
   classical
   set center : M → E := fun α => I ((chartAt H α) α) with hcenter
-  -- Per-chart corrected Picard data: horizon `Tα`, field radius `rα`, initial radius `r'α`,
-  -- velocity bound `Cα` along the orbit, the field ball contained in the chart target, and the
-  -- ODE / initial condition / whole-horizon confinement of the chart flow `flowα`.
   have hper : ∀ α : M, ∃ (Tα rα r'α Cα : ℝ),
       0 < Tα ∧ 0 < rα ∧ 0 < r'α ∧ 0 ≤ Cα ∧
       Metric.closedBall (center α) rα ⊆ (extChartAt I α).target ∧
@@ -102,18 +101,18 @@ theorem corrected_chart_anchor_flow_build
         ∀ y ∈ Metric.closedBall (center α) r'α,
           flowα y 0 = y ∧
           ∀ t ∈ Set.Icc (0 : ℝ) Tα,
-            HasDerivWithinAt (flowα y) (chartTrivRepr (I := I) α (X t) (flowα y t)) (Set.Icc (0 : ℝ) Tα) t ∧
+            HasDerivWithinAt (flowα y) (chartTrivRepr (I := I) α (X t) (flowα y t))
+              (Set.Icc (0 : ℝ) Tα) t ∧
             flowα y t ∈ Metric.closedBall (center α) rα ∧
             ‖chartTrivRepr (I := I) α (X t) (flowα y t)‖ ≤ Cα := by
     intro α
     obtain ⟨L, K, rα, hL, hrα, hK, hContBall, hLipBall, hsub⟩ :=
       corrected_chart_field_lipschitz_of_data (I := I) X α T hT hCont (hgrad α) hint
     obtain ⟨Tα, hTα, r'α, hr'α, Cα, hCα, flowα, hflowα⟩ :=
-      corrected_chart_local_picard_from_zero (I := I) X α rα hrα hCont ⟨L, K, hL, hK, hContBall, hLipBall⟩
+      corrected_chart_local_picard_from_zero (I := I) X α rα hrα hCont
+        ⟨L, K, hL, hK, hContBall, hLipBall⟩
     exact ⟨Tα, rα, r'α, Cα, hTα, hrα, hr'α, hCα, hsub, flowα, hflowα⟩
   choose! Tα rα r'α Cα hTα hrα hr'α hCα hsub flowα hflowα using hper
-  -- Per-chart open neighbourhood of `α`: chart-source points whose chart image is within `r'α`
-  -- of the chart centre, exactly the valid initial points for `flowα`.
   set U : M → Set M := fun α =>
     (chartAt H α).source ∩ ((chartAt H α) ⁻¹' (I ⁻¹' Metric.ball (center α) (r'α α))) with hU
   have hU_open : ∀ α : M, IsOpen (U α) := by
@@ -127,7 +126,6 @@ theorem corrected_chart_anchor_flow_build
     intro α x hx
     rw [extChartAt_coe]
     exact Metric.ball_subset_closedBall hx.2
-  -- A representative covering chart for each point, chosen from the finite subcover.
   have hCover : (Set.univ : Set M) ⊆ ⋃ α : M, U α := fun x _ =>
     Set.mem_iUnion.mpr ⟨x, hU_mem x⟩
   obtain ⟨S, hS⟩ := isCompact_univ.elim_finite_subcover U hU_open hCover
@@ -138,7 +136,6 @@ theorem corrected_chart_anchor_flow_build
   set αRep : M → M := fun x => (hMem x).choose with hαRep
   have hαRep_U : ∀ x : M, x ∈ U (αRep x) := fun x => (hMem x).choose_spec.2
   have hαRep_S : ∀ x : M, αRep x ∈ S := fun x => (hMem x).choose_spec.1
-  -- A single uniform horizon: the minimum of the per-chart horizons over the finite subcover.
   obtain ⟨σ, hσ_pos, hσ_le⟩ :
       ∃ σ : ℝ, 0 < σ ∧ ∀ x : M, σ ≤ Tα (αRep x) := by
     rcases S.eq_empty_or_nonempty with hSe | hSne
@@ -148,11 +145,8 @@ theorem corrected_chart_anchor_flow_build
       · obtain ⟨α₀, _, hα₀⟩ := Finset.mem_image.mp (Finset.min'_mem (S.image Tα) _)
         rw [← hα₀]; exact hTα α₀
       · exact Finset.min'_le _ _ (Finset.mem_image.mpr ⟨αRep x, hαRep_S x, rfl⟩)
-  -- The assembled `t = 0`-anchored flow: pull the chart flow back through the inverse chart.
   set Φ0 : ℝ → M → M := fun s x =>
     (extChartAt I (αRep x)).symm (flowα (αRep x) (extChartAt I (αRep x) x) s) with hΦ0
-  -- For each point, the chosen chart `αRep x` contains `x` and the chart flow data applies at the
-  -- valid initial point `extChartAt I (αRep x) x`.
   have hxsrc : ∀ x : M, x ∈ (chartAt H (αRep x)).source := fun x => (hαRep_U x).1
   have hxinit : ∀ x : M,
       extChartAt I (αRep x) x ∈ Metric.closedBall (center (αRep x)) (r'α (αRep x)) :=
@@ -163,10 +157,11 @@ theorem corrected_chart_anchor_flow_build
         HasDerivWithinAt (flowα (αRep x) (extChartAt I (αRep x) x))
           (chartTrivRepr (I := I) (αRep x) (X t) (flowα (αRep x) (extChartAt I (αRep x) x) t))
           (Set.Icc (0 : ℝ) (Tα (αRep x))) t ∧
-        flowα (αRep x) (extChartAt I (αRep x) x) t ∈ Metric.closedBall (center (αRep x)) (rα (αRep x)) ∧
-        ‖chartTrivRepr (I := I) (αRep x) (X t) (flowα (αRep x) (extChartAt I (αRep x) x) t)‖ ≤ Cα (αRep x) :=
+        flowα (αRep x) (extChartAt I (αRep x) x) t ∈ Metric.closedBall (center (αRep x))
+          (rα (αRep x)) ∧
+        ‖chartTrivRepr (I := I) (αRep x) (X t) (flowα (αRep x) (extChartAt I (αRep x) x) t)‖ ≤ Cα
+          (αRep x) :=
     fun x => hflowα (αRep x) (extChartAt I (αRep x) x) (hxinit x)
-  -- Initial condition of the chart flow, pulled back.
   have hxsrc_ext : ∀ x : M, x ∈ (extChartAt I (αRep x)).source := by
     intro x; rw [extChartAt_source]; exact hxsrc x
   have hΦ0_init : ∀ x : M, Φ0 0 x = x := by
@@ -174,13 +169,10 @@ theorem corrected_chart_anchor_flow_build
     change (extChartAt I (αRep x)).symm (flowα (αRep x) (extChartAt I (αRep x) x) 0) = x
     rw [(hspec x).1]
     exact (extChartAt I (αRep x)).left_inv (hxsrc_ext x)
-  -- Whole-horizon confinement of the chart orbit into the chart target.
   have hconf : ∀ x : M, ∀ t ∈ Set.Icc (0 : ℝ) (Tα (αRep x)),
       flowα (αRep x) (extChartAt I (αRep x) x) t ∈ (extChartAt I (αRep x)).target := by
     intro x t ht
     exact hsub (αRep x) ((hspec x).2 t ht).2.1
-  -- Right-continuity of each chart orbit at `0`: the chart flow is continuous (it is
-  -- differentiable on `[0, Tα]`) and the inverse chart is continuous at the orbit's start.
   have horbit_cont : ∀ x : M,
       ContinuousWithinAt (fun s : ℝ => Φ0 s x) (Set.Ici (0 : ℝ)) 0 := by
     intro x
@@ -188,7 +180,8 @@ theorem corrected_chart_anchor_flow_build
     have hg_cont : ContinuousWithinAt (flowα (αRep x) (extChartAt I (αRep x) x))
         (Set.Icc (0 : ℝ) (Tα (αRep x))) 0 :=
       (((hspec x).2 0 h0mem).1).continuousWithinAt
-    have hg0_target : flowα (αRep x) (extChartAt I (αRep x) x) 0 ∈ (extChartAt I (αRep x)).target := by
+    have hg0_target : flowα (αRep x) (extChartAt I (αRep x) x) 0 ∈
+      (extChartAt I (αRep x)).target := by
       rw [(hspec x).1]; exact (extChartAt I (αRep x)).map_source (hxsrc_ext x)
     have hsymm_cont : ContinuousAt (extChartAt I (αRep x)).symm
         (flowα (αRep x) (extChartAt I (αRep x) x) 0) :=
@@ -200,10 +193,7 @@ theorem corrected_chart_anchor_flow_build
     refine hcomp.mono_of_mem_nhdsWithin ?_
     exact Filter.mem_of_superset (Ico_mem_nhdsGE (hTα (αRep x))) Set.Ico_subset_Icc_self
   refine ⟨σ, hσ_pos, Φ0, hΦ0_init, ?_, ?_, horbit_cont⟩
-  · -- Bare manifold velocity on `(0, σ)`: the chart orbit solves the corrected chart ODE and is
-    -- confined to the chart target, so the `chartTrivRepr` correction cancels to the intrinsic
-    -- field value `X t (Φ0 t x)`.
-    intro t ht x
+  · intro t ht x
     have hIoo_sub : Set.Ioo (0 : ℝ) σ ⊆ Set.Icc (0 : ℝ) (Tα (αRep x)) := fun s hs =>
       ⟨hs.1.le, (lt_of_lt_of_le hs.2 (hσ_le x)).le⟩
     have hconf' : ∀ u ∈ Set.Ioo (0 : ℝ) σ,
@@ -216,11 +206,7 @@ theorem corrected_chart_anchor_flow_build
       (((hspec x).2 u (hIoo_sub hu)).1).mono hIoo_sub
     exact corrected_chartflow_eq_bareflow (I := I) X (αRep x)
       (flowα (αRep x)) (extChartAt I (αRep x) x) hconf' hode' t ht
-  · -- Trivialised chart integral identity + per-orbit velocity bound on `[0, min δ σ)`.  In chart
-    -- coordinates the orbit `g := flowα (αRep x) (extChartAt I (αRep x) x)` satisfies the corrected
-    -- chart ODE, and `extChartAt (αRep x) (Φ0 r x) = g r` (since `g r` lies in the target); FTC
-    -- turns the ODE into the integral identity, and the carried velocity bound gives `C`.
-    intro x
+  · intro x
     set α := αRep x with hαdef
     set ext := extChartAt I α with hextdef
     set g : ℝ → E := flowα α (ext x) with hgdef
@@ -229,18 +215,15 @@ theorem corrected_chart_anchor_flow_build
     rw [lt_min_iff] at hsmin
     obtain ⟨hsTα, hsσ⟩ := hsmin
     have hsIcc : s ∈ Set.Icc (0 : ℝ) (Tα α) := ⟨hs0, hsTα.le⟩
-    -- The orbit point lies in the chart target, so the inverse chart round-trips.
     have hgs_target : g s ∈ ext.target := hconf x s hsIcc
     have hext_round : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α), ext ((ext).symm (g u)) = g u := fun u hu =>
       (ext).right_inv (hconf x u hu)
     have hΦ0_eq : ∀ u : ℝ, Φ0 u x = (ext).symm (g u) := fun u => rfl
-    -- Source membership.
     have hΦ0s_src : Φ0 s x ∈ (chartAt H α).source := by
       rw [hΦ0_eq s, ← extChartAt_source (I := I) α]
       exact (ext).map_target hgs_target
     refine ⟨hΦ0s_src, ?_, ?_⟩
-    · -- Integral identity via the fundamental theorem of calculus.
-      have hg'_full : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α),
+    · have hg'_full : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α),
           HasDerivWithinAt g (chartTrivRepr (I := I) α (X u) (g u)) (Set.Icc (0 : ℝ) (Tα α)) u :=
         fun u hu => ((hspec x).2 u hu).1
       have hbd_full : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α),
@@ -277,8 +260,7 @@ theorem corrected_chart_anchor_flow_build
         _ = ext x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X r) (g r) := by rw [hFTC]
         _ = ext x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X r) (ext (Φ0 r x)) := by
             rw [intervalIntegral.integral_congr hcongr_integrand]
-    · -- Per-orbit velocity bound.
-      rw [hΦ0_eq s, hext_round s hsIcc]
+    · rw [hΦ0_eq s, hext_round s hsIcc]
       exact ((hspec x).2 s hsIcc).2.2
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

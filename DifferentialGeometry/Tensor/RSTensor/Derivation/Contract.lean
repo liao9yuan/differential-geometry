@@ -1,6 +1,6 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import DifferentialGeometry.Tensor.Multilinear.Tensor
@@ -9,30 +9,7 @@ import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.Trace
-/-!
-# Interior Product and Contraction of Tensors
 
-This file defines the interior product (contraction with a tangent vector) and contraction
-with a cotangent vector (1-form) for mixed tensors at a point of a smooth manifold.
-
-## Main Definitions
-
-* `interior_product s x v` : contraction of a (0,s+1)-tensor with a tangent vector `v`,
-  giving a (0,s)-tensor by feeding `v` into the first slot.
-* `contract_covariant r s x v` : contraction of an (r,s+1)-tensor with a tangent vector,
-  giving an (r,s)-tensor by post-composing with `interior_product`.
-* `contract_contravariant r s x α` : contraction of an (r+1,s)-tensor with a cotangent
-  vector `α`, giving an (r,s)-tensor by pre-composing with tensoring with `α`.
-* `contract_Tensor0SField_fun s α X` : pointwise contraction of a (0,s+1)-tensor field
-  with a vector field, giving a (0,s)-tensor field.
-* `contract_Tensor0SField s α X` : contraction of a smooth (0,s+1)-tensor field
-  with a smooth vector field (a `ContMDiffSection` of the tangent bundle),
-  yielding a smooth (0,s)-tensor field.
-
-## Tags
-
-interior product, contraction, cotangent, tensor, smooth manifold
--/
 
 namespace Tensor0SBundle
 noncomputable section
@@ -45,20 +22,10 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+  [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
-/-!
-## Model-level interior product
-
-The pointwise interior product works at the model fiber level first. This is a pure
-`NormedSpace`-level construction (currying + applying a vector), which we transport
-to the bundle fiber via `tensor0SSpace_continuousLinearEquiv`.
--/
-
-/-- The model-level interior product: given a vector `v : E`, contract a (0,s+1)-tensor
-model fiber with `v` in its first slot. This is currying-then-applying. -/
 noncomputable def model_interior_product (s : ℕ) (v : E) :
     Tensor0SModel (s + 1) 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E :=
   (ContinuousLinearMap.apply 𝕜
@@ -66,27 +33,17 @@ noncomputable def model_interior_product (s : ℕ) (v : E) :
     (continuousMultilinearCurryLeftEquiv 𝕜
       (fun _ : Fin (s + 1) => E) 𝕜).toContinuousLinearEquiv.toContinuousLinearMap
 
-/-- The model-level interior product, packaged as a continuous bilinear map in the
-vector argument and the (0,s+1)-tensor argument. Used to prove smoothness of the
-interior-product field operation. -/
 noncomputable def model_interior_bilinear (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     [CompleteSpace 𝕜] (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E] (s : ℕ) :
+    [FiniteDimensional 𝕜 E] (s : ℕ) :
     E →L[𝕜] (Tensor0SModel (s + 1) 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E) :=
   ContinuousLinearMap.flip
     (continuousMultilinearCurryLeftEquiv 𝕜
       (fun _ : Fin (s + 1) => E) 𝕜).toContinuousLinearEquiv.toContinuousLinearMap
 
-set_option linter.unusedSectionVars false in
 theorem model_interior_bilinear_apply (s : ℕ) (v : E) (T : Tensor0SModel (s + 1) 𝕜 E) :
     model_interior_bilinear 𝕜 E s v T = model_interior_product s v T := rfl
 
-/-!
-## Interior product
--/
-
-/-- Contraction of a (0,s+1)-tensor with a tangent vector `v`, giving a (0,s)-tensor
-by feeding `v` into the first slot via the curry-left isomorphism. -/
 noncomputable def interior_product (s : ℕ) (x : M)
     (v : TangentSpace I x) :
     Tensor0SSpace (s + 1) I x →L[𝕜] Tensor0SSpace s I x :=
@@ -94,15 +51,6 @@ noncomputable def interior_product (s : ℕ) (x : M)
     ((model_interior_product s (v : E)).comp
       (tensor0SSpace_continuousLinearEquiv (I := I) (s + 1) x).toContinuousLinearMap)
 
-/-!
-## Model-level tensor-with-covector embedding
-
-Given a model-level (0,1)-tensor `α`, the map `β ↦ β ⊗ α` is a continuous linear map
-`(0,r) →L (0,r+1)`. We build it as a linear map using `modelProduct` and promote to a
-continuous linear map via finite-dimensionality.
--/
-
-/-- The model-level embedding `β ↦ β ⊗ α : (0,r) →L (0,r+1)`, given a (0,1)-tensor `α`. -/
 noncomputable def model_tensorWithCovector (r : ℕ) (α : Tensor0SModel 1 𝕜 E) :
     Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (r + 1) 𝕜 E :=
   LinearMap.toContinuousLinearMap
@@ -131,7 +79,6 @@ noncomputable def model_tensorWithCovector_first (r : ℕ) (α : Tensor0SModel 1
           ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
         ring }
 
-/-- The curry `α ↦ (β ↦ α ⊗ β)` as a continuous bilinear map, with `α` in slot 0. -/
 noncomputable def model_tensorWithCovector_first_bilinear (r : ℕ) :
     Tensor0SModel 1 𝕜 E →L[𝕜]
       (Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E) :=
@@ -161,31 +108,11 @@ noncomputable def model_tensorWithCovector_first_bilinear (r : ℕ) :
           smul_eq_mul, RingHom.id_apply]
         ring }
 
-set_option linter.unusedSectionVars false in
 theorem model_tensorWithCovector_first_bilinear_apply (r : ℕ)
     (α : Tensor0SModel 1 𝕜 E) (β : Tensor0SModel r 𝕜 E) :
     model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r α β =
       model_tensorWithCovector_first r α β := rfl
 
-/-!
-## Contraction of smooth tensor fields
-
-We lift the pointwise `interior_product` to tensor fields: contracting a smooth
-(0,s+1)-tensor field with a smooth vector field produces a smooth (0,s)-tensor field.
-This corresponds to the standard result that contraction of a (0,s)-tensor field with
-a smooth vector field yields a (0,s−1)-tensor field, using the Lean indexing
-convention `s + 1 → s`.
--/
-
-/-!
-## Model-level bilinear contractions on `TensorRSModel`
-
-For smoothness of field-level contractions of `TensorRSField`, we package the fiber-level
-`contract_covariant` and `contract_contravariant_first` as continuous bilinear maps in their
-contraction-vector / contraction-covector argument. -/
-
-/-- Model-level bilinear contraction covariant: pairs a vector with a `(r, s+1)`-tensor to
-produce an `(r, s)`-tensor. Linear in the vector. -/
 noncomputable def model_contract_covariant_bilinear (r s : ℕ) :
     E →L[𝕜] (TensorRSModel r (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
   (ContinuousLinearMap.compL 𝕜
@@ -194,14 +121,11 @@ noncomputable def model_contract_covariant_bilinear (r s : ℕ) :
       (Tensor0SModel s 𝕜 E)).comp
     (model_interior_bilinear 𝕜 E s)
 
-set_option linter.unusedSectionVars false in
 theorem model_contract_covariant_bilinear_apply (r s : ℕ) (v : E)
     (T : TensorRSModel r (s + 1) 𝕜 E) :
     model_contract_covariant_bilinear (𝕜 := 𝕜) (E := E) r s v T =
       (model_interior_product s v).comp T := rfl
 
-/-- Model-level bilinear contraction contravariant-first: pairs a `(0,1)`-tensor (covector)
-with a `(1+r, s)`-tensor to produce an `(r, s)`-tensor. Linear in the covector. -/
 noncomputable def model_contract_contravariant_first_bilinear (r s : ℕ) :
     Tensor0SModel 1 𝕜 E →L[𝕜]
       (TensorRSModel (1 + r) s 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
@@ -209,7 +133,6 @@ noncomputable def model_contract_contravariant_first_bilinear (r s : ℕ) :
         (Tensor0SModel r 𝕜 E) (Tensor0SModel (1 + r) 𝕜 E) (Tensor0SModel s 𝕜 E)).flip.comp
     (model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r)
 
-set_option linter.unusedSectionVars false in
 theorem model_contract_contravariant_first_bilinear_apply (r s : ℕ)
     (α : Tensor0SModel 1 𝕜 E) (T : TensorRSModel (1 + r) s 𝕜 E) :
     model_contract_contravariant_first_bilinear (𝕜 := 𝕜) (E := E) r s α T =
@@ -217,27 +140,14 @@ theorem model_contract_contravariant_first_bilinear_apply (r s : ℕ)
 
 section FieldContraction
 
-variable (n : WithTop ℕ∞ := ⊤) [IsManifold I (n + 1) M]
-/-- Pointwise contraction of a (0,s+1)-tensor field with a vector field,
-giving a (0,s)-tensor field. At each point `x`, this feeds `X(x)` into the first
-slot of the (0,s+1)-tensor `α(x)` via the currying isomorphism. -/
+variable (n : WithTop ℕ∞ := ⊤) [IsManifold I ω M]
+
 noncomputable def contract_Tensor0SField_fun (s : ℕ)
     (α : (x : M) → Tensor0SSpace (s + 1) I x)
     (X : (x : M) → TangentSpace I x) :
     (x : M) → Tensor0SSpace s I x :=
   fun x => interior_product s x (X x) (α x)
 
-/-- Contraction of a smooth (0,s+1)-tensor field with a smooth vector field
-yields a smooth (0,s)-tensor field.
-
-If `α` is a smooth section of `T⁰_{s+1}M` and `X` is a smooth section of `TM`,
-then the interior product `ι_X α`, defined pointwise by `(ι_X α)_x = ι_{X(x)} α_x`,
-is a smooth section of `T⁰_s M`.
-
-The proof reduces to smoothness of the bilinear model-level operation
-`model_interior_bilinear` applied to the trivialized vector field and the
-trivialized (0,s+1)-tensor field. The trivialization compatibility is a `rfl`-style
-unfolding once the trivialization map's evaluation is expanded. -/
 noncomputable def contract_Tensor0SField (s : ℕ)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) (s + 1))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _)) :
@@ -251,7 +161,6 @@ noncomputable def contract_Tensor0SField (s : ℕ)
   rw [contMDiffAt_section] at hα
   have hX := X.contMDiff x₀
   rw [contMDiffAt_section] at hX
-
   have h_combine :
       ContMDiffAt I 𝓘(𝕜, Tensor0SModel s 𝕜 E) n
         (fun x => model_interior_bilinear 𝕜 E s
@@ -263,9 +172,7 @@ noncomputable def contract_Tensor0SField (s : ℕ)
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
-
   ext v
-
   set symmL := (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x with hsymmL
   set gtilde : E := (trivializationAt E (TangentSpace I) x₀ ⟨x, X x⟩).2 with hgtilde
   change (α x) (@Fin.cons s (fun _ => E) (X x : E) (fun i => symmL (v i))) =
@@ -273,24 +180,18 @@ noncomputable def contract_Tensor0SField (s : ℕ)
   congr 1
   funext i
   refine Fin.cases ?_ ?_ i
-  · -- i = 0
-    change (X x : E) = symmL gtilde
+  · change (X x : E) = symmL gtilde
     have h := (trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
       (R := 𝕜) hx (X x)
-    have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (X x) = gtilde := by
+    have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (X x) =
+      gtilde := by
       change (trivializationAt E (TangentSpace I) x₀).linearMapAt 𝕜 x (X x) = _
       rw [(trivializationAt E (TangentSpace I) x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
     rw [hcl] at h
     exact h.symm
-  · -- i = j.succ
-    intro j
+  · intro j
     rfl
 
-/-- Contraction of (r,s+1) tensor with a tangent vector to get (r,s).
-
-Given `T : (0,r) →L (0,s+1)` and `v ∈ TangentSpace`, we post-compose `T` with
-`interior_product v`. The composition is done on the model fiber side (where `compL`
-is available on normed spaces) and transported back via `tensorRSSpace_continuousLinearEquiv`. -/
 noncomputable def contract_covariant (r s : ℕ) (x : M)
     (v : TangentSpace I x) :
     TensorRSSpace r (s + 1) I x →L[𝕜] TensorRSSpace r s I x :=
@@ -302,12 +203,6 @@ noncomputable def contract_covariant (r s : ℕ) (x : M)
         (model_interior_product s (v : E))).comp
       (tensorRSSpace_continuousLinearEquiv (I := I) r (s + 1) x).toContinuousLinearMap)
 
-/-- Contraction of (r+1,s) tensor with a cotangent vector (1-form) to get (r,s).
-
-Given `T : (0,r+1) →L (0,s)` and `α ∈ (0,1)`, we pre-compose `T` with the embedding
-`β ↦ β ⊗ α : (0,r) →L (0,r+1)`. The composition is done on the model fiber side
-(using `compL.flip` for pre-composition) and transported back via
-`tensorRSSpace_continuousLinearEquiv`. -/
 noncomputable def contract_contravariant (r s : ℕ) (x : M)
     (α : Tensor0SSpace 1 I x) :
     TensorRSSpace (r + 1) s I x →L[𝕜] TensorRSSpace r s I x :=
@@ -321,40 +216,16 @@ noncomputable def contract_contravariant (r s : ℕ) (x : M)
         (Tensor0SModel s 𝕜 E)).flip embed_model).comp
       (tensorRSSpace_continuousLinearEquiv (I := I) (r + 1) s x).toContinuousLinearMap)
 
-/-!
-## Trace contraction of (r+1, s+1) tensors
-
-The standard tensor trace: contract one upper index with one lower index of a
-(r+1, s+1)-tensor to produce an (r, s)-tensor. We pick the first slot on each side
-(the trace over the leading upper/lower pair); slot-permuted variants are obtained
-by pre/post-composing with `domDomCongr`.
-
-Coordinate-free description: choose a basis `{e_k}` of the tangent space with dual
-basis `{e^k}`. For `T : (0,r+1) →L (0,s+1)`, the trace acts on `β : (0,r)` and
-`(w_1, …, w_s)` by
-  `(tr T)(β)(w_1, …, w_s) = Σ_k T(β ⊗ e^k)(e_k, w_1, …, w_s)`.
-This is independent of the basis (it is the categorical trace of the slot-isomorphism
-`E ⊗ E^* ≅ End(E)` applied to the chosen pair of slots).
--/
-
-/-- Convert a continuous linear covector into the corresponding one-slot covariant
-model tensor. -/
 noncomputable def model_covectorOfCLM :
     (E →L[𝕜] 𝕜) →L[𝕜] Tensor0SModel 1 𝕜 E :=
   (continuousMultilinearCurryFin1 𝕜 E 𝕜).symm.toContinuousLinearMap
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem model_covectorOfCLM_apply (α : E →L[𝕜] 𝕜) (v : Fin 1 → E) :
     model_covectorOfCLM (𝕜 := 𝕜) (E := E) α v = α (v 0) := by
   change ((continuousMultilinearCurryFin1 𝕜 E 𝕜).symm α) v = α (v 0)
   rfl
 
-/-- Model-level trace contraction of a `(1+r, s+1)` tensor to an `(r, s)` tensor.
-
-Internally this uses the canonical finite basis of the model space. The public
-pointwise operation below transports this model map through the bundle-fiber
-equivalences, so the external API remains coordinate-free. -/
 noncomputable def model_contract_trace (r s : ℕ) :
     TensorRSModel (1 + r) (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E :=
   let d := Module.finrank 𝕜 E
@@ -366,7 +237,6 @@ noncomputable def model_contract_trace (r s : ℕ) :
         (𝕜 := 𝕜) (E := E) r (s + 1)
         (model_covectorOfCLM (𝕜 := 𝕜) (E := E) (b i)))
 
-set_option linter.unusedSectionVars false in
 theorem model_contract_trace_apply (r s : ℕ)
     (T : TensorRSModel (1 + r) (s + 1) 𝕜 E) :
     model_contract_trace (𝕜 := 𝕜) (E := E) r s T =
@@ -380,18 +250,13 @@ theorem model_contract_trace_apply (r s : ℕ)
               ((Module.finBasis 𝕜 E).cDualBasis i))) T) := by
   simp [model_contract_trace]
 
-/-- Pointwise trace contraction of a `(1+r, s+1)` tensor at `x` to an `(r, s)` tensor,
-contracting the first upper slot with the first lower slot.
-
-This is implemented by the finite-basis model trace and transported through the
-fiber/model continuous linear equivalences. -/
 noncomputable def contract_trace (r s : ℕ) (x : M) :
     TensorRSSpace (1 + r) (s + 1) I x →L[𝕜] TensorRSSpace r s I x :=
   (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm.toContinuousLinearMap.comp
     ((model_contract_trace (𝕜 := 𝕜) (E := E) r s).comp
       (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I ω M] in
 theorem contract_trace_apply (r s : ℕ) (x : M)
     (T : TensorRSSpace (1 + r) (s + 1) I x) :
     contract_trace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x T =
@@ -400,7 +265,6 @@ theorem contract_trace_apply (r s : ℕ) (x : M)
           (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x T)) := by
   rfl
 
-set_option linter.unusedSectionVars false in
 private theorem trace_bilinear_change_frame_coord
     (L K : E →L[𝕜] E) (hKL : ∀ z, K (L z) = z)
     (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
@@ -473,7 +337,6 @@ private theorem trace_bilinear_change_frame_coord
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [h_cov j]
 
-set_option linter.unusedSectionVars false in
 private theorem trace_bilinear_change_frame_cdual
     (L K : E →L[𝕜] E) (hKL : ∀ z, K (L z) = z)
     (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
@@ -506,7 +369,6 @@ private noncomputable def model_trace_pairing_first (r s : ℕ)
     ((ContinuousLinearMap.compL 𝕜 E (Tensor0SModel s 𝕜 E) 𝕜) evalTail).comp curry
   outputToPair.comp covToOutput
 
-set_option linter.unusedSectionVars false in
 private theorem model_trace_pairing_first_apply (r s : ℕ)
     (T : TensorRSModel (1 + r) (s + 1) 𝕜 E)
     (β : Tensor0SModel r 𝕜 E) (tail : Fin s → E)
@@ -518,7 +380,6 @@ private theorem model_trace_pairing_first_apply (r s : ℕ)
   simp [model_trace_pairing_first, model_tensorWithCovector_first_bilinear_apply,
     model_interior_product]
 
-set_option linter.unusedSectionVars false in
 private theorem trace_bilinear_basis_coord
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -584,8 +445,7 @@ private theorem trace_bilinear_basis_coord
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [h_cov j]
 
-set_option linter.unusedSectionVars false in
-/-- Model trace contraction evaluated in an arbitrary finite basis. -/
+
 theorem model_contract_trace_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E) (r s : ℕ)
@@ -632,12 +492,11 @@ theorem model_contract_trace_apply_basis
             model_contract_contravariant_first_bilinear_apply]
           simp [Module.Basis.cDualBasis, Module.Basis.coe_dualBasis]
 
-/-- Precompose every covariant slot of a model `(0,k)` tensor by `L`. -/
 noncomputable def model_covariantChange (k : ℕ) (L : E →L[𝕜] E) :
     Tensor0SModel k 𝕜 E →L[𝕜] Tensor0SModel k 𝕜 E :=
   ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : Fin k => L)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace 𝕜] in
 @[simp]
 theorem model_covariantChange_apply (k : ℕ) (L : E →L[𝕜] E)
     (T : Tensor0SModel k 𝕜 E) (v : Fin k → E) :
@@ -645,7 +504,7 @@ theorem model_covariantChange_apply (k : ℕ) (L : E →L[𝕜] E)
       T (fun i => L (v i)) := by
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace 𝕜] in
 private theorem model_interior_product_covariantChange_apply (s : ℕ)
     (L : E →L[𝕜] E) (X : E) (U : Tensor0SModel (s + 1) 𝕜 E)
     (v : Fin s → E) :
@@ -663,7 +522,6 @@ private theorem model_interior_product_covariantChange_apply (s : ℕ)
   · intro j
     rfl
 
-set_option linter.unusedSectionVars false in
 private theorem model_covariantChange_tensorWithCovector_first (r : ℕ)
     (L : E →L[𝕜] E) (α : E →L[𝕜] 𝕜) (β : Tensor0SModel r 𝕜 E) :
     model_covariantChange (𝕜 := 𝕜) (E := E) (1 + r) L
@@ -682,12 +540,7 @@ private theorem model_covariantChange_tensorWithCovector_first (r : ℕ)
     Bundle.continuousMultilinearMap.modelProduct_apply]
   congr 1
 
-set_option linter.unusedSectionVars false in
-/-- Model trace commutes with an invertible change of frame.
 
-This is the reusable algebraic content behind smoothness of trace contraction on
-the tensor bundle: the trace finite sum is independent of the local frame used
-to trivialize the tangent bundle. -/
 theorem model_contract_trace_naturality
     (r s : ℕ) (L Linv : E →L[𝕜] E)
     (hL : L.comp Linv = ContinuousLinearMap.id 𝕜 E)
@@ -758,12 +611,8 @@ theorem model_contract_trace_naturality
             model_contract_contravariant_first_bilinear_apply]
           rfl
 
-set_option linter.unusedSectionVars false in
-/-- Naturality of trace contraction under the local trivialization at `x₀`.
 
-This is the compatibility used by `contract_TensorRSField`: trivializing after
-pointwise trace is the same as applying the model trace after trivializing the
-original tensor. -/
+omit [IsManifold I ω M] in
 theorem contract_trace_trivialization_eq
     {r s : ℕ} {x₀ x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -885,39 +734,104 @@ theorem contract_trace_trivialization_eq
   exact (model_contract_trace_naturality (𝕜 := 𝕜) (E := E)
     r s L Linv hL hR Tx).symm
 
-/-!
-## Field-level contractions
-
-Lifts of the pointwise contraction operations to smooth tensor fields:
-
-* `contract_covariantField r s α X`: post-compose with the interior product of `X`
-  pointwise. Smoothness reduces to smoothness of `model_interior_bilinear` applied
-  to the trivialized vector field and trivialized (r, s+1)-tensor field, using the
-  same `congr_of_eventuallyEq` pattern as `contract_Tensor0SField`.
-* `contract_contravariantField r s α ω`: pre-compose with `β ↦ β ⊗ ω(x)` pointwise.
-  Smoothness uses bilinearity of `modelProduct` together with smoothness of `α` and `ω`.
-* `contract_TensorRSField r s T`: pointwise trace, smoothness via the basis-coord
-  criterion (since the trace is a finite sum of basis-coord values).
--/
-
-/-- Pointwise contraction of an (r, s+1)-tensor field with a vector field. -/
 noncomputable def contract_covariantField_fun (r s : ℕ)
     (α : (x : M) → TensorRSSpace r (s + 1) I x)
     (X : (x : M) → TangentSpace I x) :
     (x : M) → TensorRSSpace r s I x :=
   fun x => contract_covariant r s x (X x) (α x)
 
-set_option maxHeartbeats 800000 in
--- The `change` reductions through the hom-bundle trivialization and id-equiv currying
--- are heavy; we raise the heartbeat limit accordingly.
-/-- Contraction of a smooth (r, s+1)-tensor field with a smooth vector field, yielding
-a smooth (r, s)-tensor field.
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 1 M]
+  [IsManifold I ω M] in
+private theorem contMDiffAt_clm_apply₂
+    {A B C : Type*}
+    [NormedAddCommGroup A] [NormedSpace 𝕜 A]
+    [NormedAddCommGroup B] [NormedSpace 𝕜 B]
+    [NormedAddCommGroup C] [NormedSpace 𝕜 C]
+    (L : A →L[𝕜] B →L[𝕜] C) {f : M → A} {g : M → B} {x : M}
+    (hf : ContMDiffAt I 𝓘(𝕜, A) n f x)
+    (hg : ContMDiffAt I 𝓘(𝕜, B) n g x) :
+    ContMDiffAt I 𝓘(𝕜, C) n (fun y => L (f y) (g y)) x :=
+  ((contMDiffAt_const (c := L)).clm_apply hf).clm_apply hg
 
-The proof structure mirrors `contract_Tensor0SField`: trivializing the contracted field
-gives `biop X̃(x) α̃(x)` where `biop = compL ∘ model_interior_bilinear`, which is smooth
-as a clm-application of two smooth trivialized sections. The trivialization compatibility
-is reduced via `Trivialization.continuousLinearMapAt_apply` and `coe_linearMapAt_of_mem`
-on the (0,s) and (0,s+1) bundles, both wrapped inside the (r, s)/(r, s+1) hom bundles. -/
+private noncomputable def model_tensorWithCovector_bilinear (r : ℕ) :
+    Tensor0SModel 1 𝕜 E →L[𝕜] (Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (r + 1) 𝕜 E) :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun a => model_tensorWithCovector r a
+      map_add' := fun a₁ a₂ => by
+        refine ContinuousLinearMap.ext fun β => ?_
+        refine ContinuousMultilinearMap.ext fun w => ?_
+        simp only [model_tensorWithCovector, LinearMap.coe_toContinuousLinearMap',
+          LinearMap.coe_mk, AddHom.coe_mk, ContinuousLinearMap.add_apply,
+          Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousMultilinearMap.add_apply, mul_add]
+      map_smul' := fun c a => by
+        refine ContinuousLinearMap.ext fun β => ?_
+        refine ContinuousMultilinearMap.ext fun w => ?_
+        simp only [model_tensorWithCovector, LinearMap.coe_toContinuousLinearMap',
+          LinearMap.coe_mk, AddHom.coe_mk, ContinuousLinearMap.smul_apply,
+          Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
+        ring }
+
+omit [CompleteSpace 𝕜] [IsManifold I ω M] in
+private theorem tensor0STrivialization_continuousLinearMapAt_apply (k : ℕ) (x₀ x : M)
+    (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
+    (T : Tensor0SSpace k I x) (u : Fin k → E) :
+    letI := tensor0SBundle_topology
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) k
+    (trivializationAt (Tensor0SModel k 𝕜 E)
+      (fun y => Tensor0SSpace k I y) x₀).continuousLinearMapAt 𝕜 x T u =
+      T (fun i => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x (u i)) := by
+  letI := tensor0SBundle_topology
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) k
+  rw [Trivialization.continuousLinearMapAt_apply,
+    show ⇑((trivializationAt (Tensor0SModel k 𝕜 E)
+      (fun y => Tensor0SSpace k I y) x₀).linearMapAt 𝕜 x) =
+      fun y => (trivializationAt (Tensor0SModel k 𝕜 E)
+        (fun y => Tensor0SSpace k I y) x₀ ⟨x, y⟩).2 from
+    (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
+  rfl
+
+omit [CompleteSpace 𝕜] [IsManifold I ω M] in
+private theorem tensor0STrivialization_symmL_apply (k : ℕ) (x₀ x : M)
+    (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
+    (T : Tensor0SModel k 𝕜 E) (u : Fin k → E) :
+    letI := tensor0SBundle_topology
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) k
+    ((trivializationAt (Tensor0SModel k 𝕜 E)
+      (fun y => Tensor0SSpace k I y) x₀).symmL 𝕜 x T) u =
+      T (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt
+        𝕜 x (u i)) := by
+  letI := tensor0SBundle_topology
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) k
+  let sL := (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x
+  have hu : u = fun i => sL
+      ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (u i)) := by
+    funext i
+    exact ((trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
+      (R := 𝕜) hx (u i)).symm
+  calc
+    ((trivializationAt (Tensor0SModel k 𝕜 E)
+      (fun y => Tensor0SSpace k I y) x₀).symmL 𝕜 x T) u =
+        ((trivializationAt (Tensor0SModel k 𝕜 E)
+          (fun y => Tensor0SSpace k I y) x₀).symmL 𝕜 x T)
+          (fun i => sL
+            ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt
+              𝕜 x (u i))) := by rw [← hu]
+    _ = (trivializationAt (Tensor0SModel k 𝕜 E)
+          (fun y => Tensor0SSpace k I y) x₀).continuousLinearMapAt 𝕜 x
+          ((trivializationAt (Tensor0SModel k 𝕜 E)
+            (fun y => Tensor0SSpace k I y) x₀).symmL 𝕜 x T)
+          (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt
+            𝕜 x (u i)) := by
+      exact (tensor0STrivialization_continuousLinearMapAt_apply
+        (I := I) k x₀ x hx _ _).symm
+    _ = T (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt
+          𝕜 x (u i)) := by
+      rw [(trivializationAt (Tensor0SModel k 𝕜 E)
+        (fun y => Tensor0SSpace k I y) x₀).continuousLinearMapAt_symmL (R := 𝕜) hx]
+
+
 noncomputable def contract_covariantField (r s : ℕ)
     (α : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r (s + 1))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _)) :
@@ -934,7 +848,6 @@ noncomputable def contract_covariantField (r s : ℕ)
   rw [contMDiffAt_section] at hα
   have hX := X.contMDiff x₀
   rw [contMDiffAt_section] at hX
-
   set biop :
       E →L[𝕜] (TensorRSModel r (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
     (ContinuousLinearMap.compL 𝕜
@@ -946,7 +859,7 @@ noncomputable def contract_covariantField (r s : ℕ)
           ((trivializationAt E (TangentSpace I) x₀ ⟨x, X x⟩).2)
           ((trivializationAt (TensorRSModel r (s + 1) 𝕜 E)
             (fun x => TensorRSSpace r (s + 1) I x) x₀ ⟨x, α x⟩).2)) x₀ :=
-    ((contMDiffAt_const (c := biop)).clm_apply hX).clm_apply hα
+    contMDiffAt_clm_apply₂ (I := I) (n := n) biop hX hα
   refine h_combine.congr_of_eventuallyEq ?_
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
@@ -958,7 +871,6 @@ noncomputable def contract_covariantField (r s : ℕ)
   set gtilde : Tensor0SSpace r I x :=
     (trivializationAt (Tensor0SModel r 𝕜 E) (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x γ
     with hgtilde
-
   have h_cLMAt_s : ∀ (T : Tensor0SSpace s I x) (v : Fin s → E),
       (trivializationAt (Tensor0SModel s 𝕜 E)
         (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x T v =
@@ -983,7 +895,6 @@ noncomputable def contract_covariantField (r s : ℕ)
           (fun x => Tensor0SSpace (s + 1) I x) x₀ ⟨x, y⟩).2 from
       (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
     rfl
-
   change (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
       (model_interior_product s (X x : E)
@@ -993,7 +904,6 @@ noncomputable def contract_covariantField (r s : ℕ)
       ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde)
       (Fin.cons Xtilde w)
   rw [h_cLMAt_s, h_cLMAt_s1]
-
   change ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde :
         Tensor0SModel (s + 1) 𝕜 E)
       (@Fin.cons s (fun _ => E) (X x : E) (fun i => sL (w i))) =
@@ -1002,8 +912,7 @@ noncomputable def contract_covariantField (r s : ℕ)
   congr 1
   funext i
   refine Fin.cases ?_ ?_ i
-  · -- i = 0: `X x = sL Xtilde` since `Xtilde = cLMAt (X x)` and `sL ∘ cLMAt = id`.
-    change (X x : E) = sL Xtilde
+  · change (X x : E) = sL Xtilde
     have h := (trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
       (R := 𝕜) hx (X x)
     have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (X x)
@@ -1012,31 +921,16 @@ noncomputable def contract_covariantField (r s : ℕ)
       rw [(trivializationAt E (TangentSpace I) x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
     rw [hcl] at h
     exact h.symm
-  · -- i = j.succ: both sides reduce to `sL (w j)`.
-    intro j
+  · intro j
     rfl
 
-/-- Pointwise contraction of an (r+1, s)-tensor field with a 1-form field. -/
 noncomputable def contract_contravariantField_fun (r s : ℕ)
     (α : (x : M) → TensorRSSpace (r + 1) s I x)
     (φ : (x : M) → Tensor0SSpace 1 I x) :
     (x : M) → TensorRSSpace r s I x :=
   fun x => contract_contravariant r s x (φ x) (α x)
 
-set_option maxHeartbeats 800000 in
--- The `change` reductions through the hom-bundle trivialization and the covector
--- tensor-product embedding are heavy; we raise the heartbeat limit accordingly.
-/-- Contraction of a smooth (r+1, s)-tensor field with a smooth 1-form field, yielding
-a smooth (r, s)-tensor field.
 
-The proof structure mirrors `contract_covariantField`: trivializing the contracted field
-gives `biop_ctr φ̃(x) α̃(x)` where `biop_ctr α̃ T̃ = T̃.comp (model_tensorWithCovector r α̃)`,
-built as a CLM-bilinear via `compL.flip` and a `mtwc_bilinear` packaging of
-`model_tensorWithCovector` in its covector argument. Smoothness follows as a
-clm-application of two smooth trivialized sections. The pointwise equality reduces via
-the hom-bundle `continuousLinearMap_apply` together with `continuousLinearMapAt_apply`
-and `coe_linearMapAt_of_mem` on the (0,r), (0,r+1), (0,s), and (0,1) bundles, plus the
-cancellation `symmL_continuousLinearMapAt` for the tangent trivialization. -/
 noncomputable def contract_contravariantField (r s : ℕ)
     (α : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) (r + 1) s)
     (φ : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) 1) :
@@ -1054,32 +948,11 @@ noncomputable def contract_contravariantField (r s : ℕ)
   rw [contMDiffAt_section] at hα
   have hφ := φ.contMDiff x₀
   rw [contMDiffAt_section] at hφ
-
-  let mtwc_bilinear :
-      Tensor0SModel 1 𝕜 E →L[𝕜] (Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (r + 1) 𝕜 E) :=
-    LinearMap.toContinuousLinearMap
-      { toFun := fun a => model_tensorWithCovector r a
-        map_add' := fun a₁ a₂ => by
-          refine ContinuousLinearMap.ext fun β => ?_
-          refine ContinuousMultilinearMap.ext fun w => ?_
-          simp only [model_tensorWithCovector, LinearMap.coe_toContinuousLinearMap',
-            LinearMap.coe_mk, AddHom.coe_mk, ContinuousLinearMap.add_apply,
-            Bundle.continuousMultilinearMap.modelProduct_apply,
-            ContinuousMultilinearMap.add_apply, mul_add]
-        map_smul' := fun c a => by
-          refine ContinuousLinearMap.ext fun β => ?_
-          refine ContinuousMultilinearMap.ext fun w => ?_
-          simp only [model_tensorWithCovector, LinearMap.coe_toContinuousLinearMap',
-            LinearMap.coe_mk, AddHom.coe_mk, ContinuousLinearMap.smul_apply,
-            Bundle.continuousMultilinearMap.modelProduct_apply,
-            ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
-          ring }
-
   set biop_ctr :
       Tensor0SModel 1 𝕜 E →L[𝕜] (TensorRSModel (r + 1) s 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
     (ContinuousLinearMap.compL 𝕜
       (Tensor0SModel r 𝕜 E) (Tensor0SModel (r + 1) 𝕜 E) (Tensor0SModel s 𝕜 E)).flip.comp
-      mtwc_bilinear with hbiop
+      (model_tensorWithCovector_bilinear r) with hbiop
   have h_combine :
       ContMDiffAt I 𝓘(𝕜, TensorRSModel r s 𝕜 E) n
         (fun x => biop_ctr
@@ -1087,71 +960,19 @@ noncomputable def contract_contravariantField (r s : ℕ)
             (fun x => Tensor0SSpace 1 I x) x₀ ⟨x, φ x⟩).2)
           ((trivializationAt (TensorRSModel (r + 1) s 𝕜 E)
             (fun x => TensorRSSpace (r + 1) s I x) x₀ ⟨x, α x⟩).2)) x₀ :=
-    ((contMDiffAt_const (c := biop_ctr)).clm_apply hφ).clm_apply hα
+    contMDiffAt_clm_apply₂ (I := I) (n := n) biop_ctr hφ hα
   refine h_combine.congr_of_eventuallyEq ?_
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
   refine ContinuousLinearMap.ext fun β => ?_
   refine ContinuousMultilinearMap.ext fun v => ?_
-  set sL := (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x with hsL
-
-  have h_cLMAt_s : ∀ (T : Tensor0SSpace s I x) (u : Fin s → E),
-      (trivializationAt (Tensor0SModel s 𝕜 E)
-        (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x T u =
-      T (fun i => sL (u i)) := by
-    intro T u
-    rw [Trivialization.continuousLinearMapAt_apply,
-      show ⇑((trivializationAt (Tensor0SModel s 𝕜 E)
-        (fun x => Tensor0SSpace s I x) x₀).linearMapAt 𝕜 x) =
-        fun y => (trivializationAt (Tensor0SModel s 𝕜 E)
-          (fun x => Tensor0SSpace s I x) x₀ ⟨x, y⟩).2 from
-      (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
-    rfl
-  have h_cLMAt_r : ∀ (T : Tensor0SSpace r I x) (u : Fin r → E),
-      (trivializationAt (Tensor0SModel r 𝕜 E)
-        (fun x => Tensor0SSpace r I x) x₀).continuousLinearMapAt 𝕜 x T u =
-      T (fun i => sL (u i)) := by
-    intro T u
-    rw [Trivialization.continuousLinearMapAt_apply,
-      show ⇑((trivializationAt (Tensor0SModel r 𝕜 E)
-        (fun x => Tensor0SSpace r I x) x₀).linearMapAt 𝕜 x) =
-        fun y => (trivializationAt (Tensor0SModel r 𝕜 E)
-          (fun x => Tensor0SSpace r I x) x₀ ⟨x, y⟩).2 from
-      (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
-    rfl
-  have h_cLMAt_r1 : ∀ (T : Tensor0SSpace (r + 1) I x) (u : Fin (r + 1) → E),
-      (trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-        (fun x => Tensor0SSpace (r + 1) I x) x₀).continuousLinearMapAt 𝕜 x T u =
-      T (fun i => sL (u i)) := by
-    intro T u
-    rw [Trivialization.continuousLinearMapAt_apply,
-      show ⇑((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-        (fun x => Tensor0SSpace (r + 1) I x) x₀).linearMapAt 𝕜 x) =
-        fun y => (trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-          (fun x => Tensor0SSpace (r + 1) I x) x₀ ⟨x, y⟩).2 from
-      (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
-    rfl
-  have h_cLMAt_1 : ∀ (T : Tensor0SSpace 1 I x) (u : Fin 1 → E),
-      (trivializationAt (Tensor0SModel 1 𝕜 E)
-        (fun x => Tensor0SSpace 1 I x) x₀).continuousLinearMapAt 𝕜 x T u =
-      T (fun i => sL (u i)) := by
-    intro T u
-    rw [Trivialization.continuousLinearMapAt_apply,
-      show ⇑((trivializationAt (Tensor0SModel 1 𝕜 E)
-        (fun x => Tensor0SSpace 1 I x) x₀).linearMapAt 𝕜 x) =
-        fun y => (trivializationAt (Tensor0SModel 1 𝕜 E)
-          (fun x => Tensor0SSpace 1 I x) x₀ ⟨x, y⟩).2 from
-      (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
-    rfl
-
   set β_symm : Tensor0SSpace r I x :=
     (trivializationAt (Tensor0SModel r 𝕜 E) (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x β
     with hβ_symm
   set atilde_x : Tensor0SModel 1 𝕜 E :=
     (trivializationAt (Tensor0SModel 1 𝕜 E) (fun x => Tensor0SSpace 1 I x) x₀ ⟨x, φ x⟩).2
     with hatilde_x
-
   change (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
       ((show Tensor0SSpace (r + 1) I x →L[𝕜] Tensor0SSpace s I x from α x)
@@ -1162,98 +983,54 @@ noncomputable def contract_contravariantField (r s : ℕ)
         ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
           (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
           (model_tensorWithCovector r atilde_x β))) v
-  rw [h_cLMAt_s, h_cLMAt_s]
-
+  rw [tensor0STrivialization_continuousLinearMapAt_apply (I := I) s x₀ x hx,
+    tensor0STrivialization_continuousLinearMapAt_apply (I := I) s x₀ x hx]
   congr 1
   congr 1
-
   refine ContinuousMultilinearMap.ext fun w => ?_
-  have hw : w = fun i => sL ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt
-      𝕜 x (w i)) := by
-    funext i
-    exact ((trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
-      (R := 𝕜) hx (w i)).symm
-
   have hrhs :
       ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
           (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
           ((model_tensorWithCovector r atilde_x) β)) w =
         ((model_tensorWithCovector r atilde_x) β)
           (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (w i)) := by
-    calc ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-            (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
-            ((model_tensorWithCovector r atilde_x) β)) w
-        = ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-              (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
-              ((model_tensorWithCovector r atilde_x) β))
-            (fun i => sL ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt
-              𝕜 x (w i))) := by rw [← hw]
-      _ = (trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-            (fun x => Tensor0SSpace (r + 1) I x) x₀).continuousLinearMapAt 𝕜 x
-            ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-              (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
-              ((model_tensorWithCovector r atilde_x) β))
-            (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (w i)) :=
-          (h_cLMAt_r1 _ _).symm
-      _ = ((model_tensorWithCovector r atilde_x) β)
-            (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (w i)) := by
-          rw [(trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-            (fun x => Tensor0SSpace (r + 1) I x) x₀).continuousLinearMapAt_symmL (R := 𝕜) hx]
+    exact tensor0STrivialization_symmL_apply (I := I) (r + 1) x₀ x hx
+      ((model_tensorWithCovector r atilde_x) β) w
   refine Eq.trans ?_ hrhs.symm
-
   change (Bundle.continuousMultilinearMap.modelProduct r 1 β_symm
       (Tensor0SSpace.toModel (φ x))) w =
     Bundle.continuousMultilinearMap.modelProduct r 1 β atilde_x
       (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (w i))
   rw [Bundle.continuousMultilinearMap.modelProduct_apply,
     Bundle.continuousMultilinearMap.modelProduct_apply]
-
   congr 1
-  · -- first factor: `β_symm (w ∘ castAdd 1) = β (fun i => cL (w ∘ castAdd 1 i))`
-    -- Both unfold via the same cancellation (β_symm = symmL β, cLMAt ∘ symmL = id).
-    have hwc : (w ∘ Fin.castAdd 1) = fun i => sL
-        ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x
-          ((w ∘ Fin.castAdd 1) i)) := by
-      funext i
-      exact ((trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
-        (R := 𝕜) hx ((w ∘ Fin.castAdd 1) i)).symm
-    conv_lhs => rw [hwc]
-    rw [← h_cLMAt_r]
-    rw [(trivializationAt (Tensor0SModel r 𝕜 E)
-      (fun x => Tensor0SSpace r I x) x₀).continuousLinearMapAt_symmL (R := 𝕜) hx]
-    rfl
-  · -- second factor: `toModel (φ x) (w ∘ natAdd r) = atilde_x (fun i => cL (w ∘ natAdd r i))`
-    -- `atilde_x u' = toModel (φ x) (fun i => sL (u' i))` since `atilde_x = cLMAt_{0,1} (toModel (φ x))`
-    -- on baseSet; apply `h_cLMAt_1` to the RHS via this identification.
-    have h_atilde_eq :
-        (trivializationAt (Tensor0SModel 1 𝕜 E) (fun x => Tensor0SSpace 1 I x) x₀).continuousLinearMapAt
+  · rw [hβ_symm]
+    exact tensor0STrivialization_symmL_apply (I := I) r x₀ x hx β
+      (w ∘ Fin.castAdd 1)
+  · have h_atilde_eq :
+        (trivializationAt (Tensor0SModel 1 𝕜 E) (fun x => Tensor0SSpace 1 I x)
+          x₀).continuousLinearMapAt
           𝕜 x (Tensor0SSpace.toModel (φ x)) = atilde_x := by
       ext u'
-      rw [h_cLMAt_1]
+      rw [tensor0STrivialization_continuousLinearMapAt_apply (I := I) 1 x₀ x hx]
       rfl
-    have hwn : (w ∘ Fin.natAdd r) = fun i => sL
-        ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x
-          ((w ∘ Fin.natAdd r) i)) := by
-      funext i
-      exact ((trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
-        (R := 𝕜) hx ((w ∘ Fin.natAdd r) i)).symm
-    conv_lhs => rw [hwn]
-    rw [← h_cLMAt_1]
-    rw [h_atilde_eq]
-    rfl
+    have h_symm :
+        (trivializationAt (Tensor0SModel 1 𝕜 E)
+          (fun x => Tensor0SSpace 1 I x) x₀).symmL 𝕜 x atilde_x =
+          Tensor0SSpace.toModel (φ x) := by
+      rw [← h_atilde_eq]
+      exact (trivializationAt (Tensor0SModel 1 𝕜 E)
+        (fun x => Tensor0SSpace 1 I x) x₀).symmL_continuousLinearMapAt
+          (R := 𝕜) hx (Tensor0SSpace.toModel (φ x))
+    rw [← h_symm]
+    exact tensor0STrivialization_symmL_apply (I := I) 1 x₀ x hx atilde_x
+      (w ∘ Fin.natAdd r)
 
-/-- Pointwise trace contraction of a `(1+r, s+1)` tensor field. -/
 noncomputable def contract_TensorRSField_fun (r s : ℕ)
     (T : (x : M) → TensorRSSpace (1 + r) (s + 1) I x) :
     (x : M) → TensorRSSpace r s I x :=
   fun x => contract_trace r s x (T x)
 
-/-- Trace contraction of a smooth `(1+r, s+1)` tensor field, yielding a smooth
-`(r, s)` tensor field.
-
-The field-level proof is deliberately only the smooth-section skeleton: after
-trivializing the input field, compose with the constant model trace and use
-`contract_trace_trivialization_eq` for the pointwise frame-compatibility. -/
 noncomputable def contract_TensorRSField (r s : ℕ)
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n)
       (1 + r) (s + 1)) :

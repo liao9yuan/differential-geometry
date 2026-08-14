@@ -1,22 +1,20 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.Headlines
-import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import Mathlib.Topology.Connected.Clopen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Global comparison maps from compact pointed limits
 
-For a compact pointed Cheeger--Gromov limit, the exhausting sources of the
-comparison maps are eventually the whole limit manifold.  If the corresponding
-sequence manifold is connected, the open target of such a comparison map is
-also the whole manifold: it is the continuous image of a compact source, hence
-closed, and it is nonempty.  The resulting everywhere-defined partial
-diffeomorphism is promoted to a global `Diffeomorph`.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,7 +27,7 @@ open Set
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -37,11 +35,9 @@ namespace PointedRiemannianManifold
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Bonnet--Myers compactness for the metric and completeness stored by a
-pointed Riemannian manifold.  This helper reconciles the project's default
-tangent norm with the `RiemannianBundle` norm in one low-level place. -/
+omit [CompleteSpace E] in
 theorem compact_of_ricci
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+    [NeZero (Module.finrank Real E)]
     [I.Boundaryless]
     {P : PointedRiemannianManifold.{u} (I := I)}
     (hconn :
@@ -92,8 +88,8 @@ end PointedRiemannianManifold
 
 namespace PointedCGHMaps
 
-/-- On a compact limit manifold, the exhausting comparison-map sources are
-eventually the whole manifold. -/
+
+
 theorem exists_source_univ
     {X : PointedFlowSeq.{u} (I := I)}
     {P : PointedRiemannianManifold.{u} (I := I)}
@@ -108,9 +104,9 @@ theorem exists_source_univ
   refine ⟨k0, fun k hk => ?_⟩
   exact Set.eq_univ_of_univ_subset (hk0 k hk)
 
-/-- If a comparison map has the whole compact limit manifold as source and its
-sequence manifold is connected, then its target is the whole sequence
-manifold. -/
+
+
+
 theorem target_univ
     {X : PointedFlowSeq.{u} (I := I)}
     {P : PointedRiemannianManifold.{u} (I := I)}
@@ -150,8 +146,8 @@ theorem target_univ
     IsClopen.eq_univ ⟨htarget_compact.isClosed, phi.open_target⟩ htarget_nonempty
   simpa [phi, PointedCGHMaps.target] using htarget_univ
 
-/-- Promote a comparison partial diffeomorphism with full source and target to
-a global diffeomorphism. -/
+
+
 noncomputable def globalDiffeomorph
     {X : PointedFlowSeq.{u} (I := I)}
     {P : PointedRiemannianManifold.{u} (I := I)}

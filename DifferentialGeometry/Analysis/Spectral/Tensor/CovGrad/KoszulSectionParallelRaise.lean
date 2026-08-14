@@ -3,9 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -19,7 +16,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -28,19 +25,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem appCcRS_zero_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) :
-    appCcRS (I := I) (M := M) g a b c Φ (0 : SmoothCcTensor g a b) = 0 := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (0 : SmoothCcTensor g a b) = 0 := by
   have h := appCcRS_add_right (I := I) (M := M) g a b c Φ 0 0
   rw [add_zero] at h
-  have h0 : appCcRS (I := I) (M := M) g a b c Φ 0 + (0 : SmoothCcTensor g a c) =
-      appCcRS (I := I) (M := M) g a b c Φ 0 +
-        appCcRS (I := I) (M := M) g a b c Φ 0 := by
+  have h0 : ccOperatorFieldComp (I := I) (M := M) g a b c Φ 0 + (0 : SmoothCcTensor g a c) =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ 0 +
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ 0 := by
     rw [add_zero]; exact h
   exact (add_left_cancel h0).symm
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_eq_zero_of_covGrad_eq_zero (g : SmoothRiemannianMetric I M) (a b : ℕ)
     (W : SmoothCcTensor g a b)
     (hW : covGrad (I := I) (M := M) g a b W = 0) :
@@ -53,7 +51,8 @@ theorem iteratedCovGrad_eq_zero_of_covGrad_eq_zero (g : SmoothRiemannianMetric I
   | succ k ih =>
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma appCcLeibnizPsi_order_zero (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0 =
@@ -66,14 +65,14 @@ private lemma appCcLeibnizPsi_order_zero (g : SmoothRiemannianMetric I M) (b c :
           iteratedCovGrad (I := I) g b c (i + 1) Φ
       rw [ih, iteratedCovGrad_succ]
 
-set_option linter.unusedSectionVars false in
-theorem iteratedCovGrad_appCcRS_of_covGrad_right_eq_zero
+omit [NeZero (Module.finrank ℝ E)] in
+theorem iteratedCovGrad_operatorFieldCompose_of_covGrad_right_eq_zero
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b)
     (hW : covGrad (I := I) (M := M) g a b W = 0) (i : ℕ) :
     iteratedCovGrad (I := I) g a c i
-        (appCcRS (I := I) (M := M) g a b c Φ W) =
-      appCcRS (I := I) (M := M) g a b (c + i)
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) =
+      ccOperatorFieldComp (I := I) (M := M) g a b (c + i)
         (iteratedCovGrad (I := I) g b c i Φ) W := by
   classical
   rw [iteratedCovGrad_appCcRS_eq (I := I) (M := M) g a b c Φ W i]

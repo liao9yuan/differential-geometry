@@ -1,54 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 
-/-!
-# A.e. linearity of `smoothFChartResidual` in the smooth scalar argument
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and three
-smooth scalars `v₁ v₂ v_diff : SmoothScalar g` with
-`v_diff.toFun = v₁.toFun - v₂.toFun`, the chart-pulled smooth Leibniz
-residual `smoothFChartResidual g α v` is a.e.-additive under the smooth
-subtraction in the third argument:
-
-```
-smoothFChartResidual g α v_diff
-  =ᵐ[volume.restrict (chartTargetEuclid α)]
-fun y => smoothFChartResidual g α v₁ y - smoothFChartResidual g α v₂ y.
-```
-
-## Strategy
-
-By definition,
-`smoothFChartResidual g α v = fChartResidual g α (smoothToH1Compl g v)`,
-and
-`fChartResidual g α u_h
-  = (chartPushedRawLpFromLp g α (fHLeibnizResidualLp g α u_h)).coeFn`.
-The Lp class `fHLeibnizResidualLp g α u_h` is built as
-`-(2 • gradInnerCLM g ρα u_h) - smoothMulLp g Δρα (H1ComplToLp g u_h)`,
-which is linear in `u_h` since each of `gradInnerCLM g ρα`,
-`smoothMulLp g Δρα`, and `H1ComplToLp g` is a continuous linear map.
-`smoothToH1Compl g` is itself a continuous linear map, so
-`smoothToH1Compl g v_diff = smoothToH1Compl g v₁ - smoothToH1Compl g v₂`
-as soon as `v_diff = v₁ - v₂` (which follows from the structure-extensional
-equality of `SmoothScalar g` under the `Sub` instance built on `toFun`).
-
-Combining these:
-* `fHLeibnizResidualLp g α (smoothToH1Compl v_diff)
-    = fHLeibnizResidualLp g α (smoothToH1Compl v₁)
-      - fHLeibnizResidualLp g α (smoothToH1Compl v₂)`
-  as `Lp ℝ 2`-classes.
-* By `chartPushedRawLpFromLp_coeFn_sub`, the chart-pull of an Lp-class
-  subtraction is the pointwise subtraction (a.e. on the chart-pulled
-  weighted measure restricted to the chart target).
-* The plain volume measure is absolutely continuous w.r.t. the chart-pulled
-  weighted measure on `chartTargetEuclid α` (the density is strictly
-  positive there), so the a.e. equality transfers to the plain volume
-  measure.
-
-## Main result
-
-* `smoothFChartResidual_ae_sub` — the headline a.e. linearity lemma.
--/
 
 noncomputable section
 
@@ -61,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualLinearity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -85,8 +37,8 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For `v_diff v₁ v₂ : SmoothScalar g` with `v_diff.toFun = v₁.toFun -
-v₂.toFun`, we have `v_diff = v₁ - v₂` in `SmoothScalar g`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalar_eq_sub_of_toFun_eq
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -96,9 +48,7 @@ private lemma smoothScalar_eq_sub_of_toFun_eq
   rw [h_diff]
   rfl
 
-/-- For `v_diff v₁ v₂ : SmoothScalar g` with `v_diff.toFun = v₁.toFun -
-v₂.toFun`, the `H1Compl` embeddings satisfy
-`smoothToH1Compl g v_diff = smoothToH1Compl g v₁ - smoothToH1Compl g v₂`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothToH1Compl_eq_sub
     (g : SmoothRiemannianMetric I M)
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -109,7 +59,7 @@ private lemma smoothToH1Compl_eq_sub
   rw [smoothScalar_eq_sub_of_toFun_eq v₁ v₂ v_diff h_diff]
   exact map_sub (smoothToH1Compl (I := I) (M := M) g) v₁ v₂
 
-/-- `fHLeibnizResidualLp g α` is additive under `H1Compl` subtraction. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fHLeibnizResidualLp_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (u₁ u₂ : H1Compl (I := I) (M := M) g) :
@@ -147,6 +97,7 @@ private lemma fHLeibnizResidualLp_sub
   rw [smul_sub, neg_sub]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict
@@ -181,15 +132,6 @@ private lemma volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-- **A.e. linearity of `smoothFChartResidual`**: for smooth scalars
-`v₁ v₂ v_diff : SmoothScalar g` with
-`v_diff.toFun = v₁.toFun - v₂.toFun`, the chart-pulled smooth Leibniz
-residuals satisfy
-```
-smoothFChartResidual g α v_diff
-  =ᵐ[volume.restrict (chartTargetEuclid α)]
-fun y => smoothFChartResidual g α v₁ y - smoothFChartResidual g α v₂ y.
-``` -/
 theorem smoothFChartResidual_ae_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -201,7 +143,7 @@ theorem smoothFChartResidual_ae_sub
     fun y =>
       DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v₁ y -
-        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        smoothFChartResidual
           (I := I) (M := M) g α v₂ y := by
   classical
   have h_smoothToH1Compl_sub :=
@@ -232,7 +174,7 @@ theorem smoothFChartResidual_ae_sub
               (smoothToH1Compl (I := I) (M := M) g v₂)) := by
     rw [h_residual_sub_at]
   have h_coeFn_sub :=
-    chartPushedRawLpFromLp_coeFn_sub (I := I) (M := M) g α
+    chartPushedRawLpFromLp_coeFn_sub (I := I) (M := M) g inferInstance α
       (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
         (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g v₁))

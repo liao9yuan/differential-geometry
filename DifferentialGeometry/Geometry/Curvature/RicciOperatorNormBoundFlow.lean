@@ -5,16 +5,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Flow-level Ricci operator-norm bound (① flow-wiring)
 
-The general-dimension operator-norm bound `ricci_unitQuad_le_of_trace` is wired
-to a Ricci-flow `SolutionOn`: the flow supplies the Ricci-trace realization
-(`ricciTraceOfSol`) and the `Rm04` lowering (`solution_rm04LowersRm13At`), so on
-a `g`-unit vector the Ricci quadratic form is bounded by `n²·‖Rm‖`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,16 +22,17 @@ namespace DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Connection Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-/-- **Unit-sphere Ricci bound for a Ricci-flow solution (any dimension).** On a
-`(S.base.metric t)`-unit vector `u`, the Ricci quadratic form is bounded by
-`n²·√(normSq0S Rm04)`. -/
+
+
+
+omit [I.Boundaryless] in
 theorem ricciAt_unitQuad_le_of_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -66,14 +66,15 @@ theorem ricciAt_unitQuad_le_of_sol
   exact ricci_unitQuad_le_of_trace (I := I) (S.base.metric t) basis hON hinv
     (S.ricciAt t x) (S.base.rm04 t x) htrace u hu
 
-/-- **① window assembly.** A sequence of Ricci-flow solutions with a uniform
-Riemann curvature bound `normSq0S(Rm04) ≤ C` on a time window yields the
-`TwoTensorQuadBoundOnWindow` consumed by MSM135 equation (3.3), with constant
-`A = n²·√C`. This discharges the eq-(3.3) curvature hypothesis from the flow. -/
+
+
+
+
+omit [I.Boundaryless] in
 theorem twoTensorQuadBound_of_solutions
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
-    (K : Set M) (β ψ C : Real) (hC : 0 <= C)
+    (K : Set M) (β ψ C : Real)
     (hwin : Set.Icc β ψ ⊆ D.carrier)
     (hcurv : forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
       normSq0S (I := I) ((S i).base.metric t) x 4 ((S i).base.rm04 t x) <= C) :

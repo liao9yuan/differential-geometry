@@ -2,17 +2,16 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSP
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Field
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieOneReanchor
 
-/-!
-# Exact three-arm form of the DeTurck Lie slope
 
-This module combines the zeroth-, first-, and second-order reanchoring
-identities. Their connection tails cancel, leaving the complete chart
-DeTurck Lie slope as three intrinsic background-covariant coefficient arms.
--/
+
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open Set Bundle Manifold Tensor0SBundle ContinuousLinearMap
@@ -30,7 +29,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -59,37 +58,35 @@ private theorem unitModel_add_local
     rfl]
   rw [Tensor0SSpace.toModel_add]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- At a chart center, the complete DeTurck Lie slope is exactly the sum of
-its order-zero, order-one, and order-two background-covariant arms. -/
+
+
 theorem lieSlope_eq_arms
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (i j : Fin (Module.finrank ℝ E)) :
     lieDeTurckChartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' g_bg x i j s
         (extChartAt I x x) =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (deTurckLieCoeffField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg +
                 lieCorr0Field (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 0
-                (symmS (I := I) (M := M) g₀ (T - T'))) +
-            appCc (I := I) (M := M) g₀ 3 2
+                (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))) +
+            operatorFieldApply (I := I) (M := M) g₀ 3 2
               (deTurckLieArm1Coeff (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 1
-                (symmS (I := I) (M := M) g₀ (T - T'))) +
-            appCc (I := I) (M := M) g₀ 4 2
+                (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))) +
+            operatorFieldApply (I := I) (M := M) g₀ 4 2
               (deTurckLieArm2PrincipalCoeff (I := I) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 2
-                (symmS (I := I) (M := M) g₀ (T - T')))) x
+                (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x
           ![(chartModelBasis E) i, (chartModelBasis E) j] := by
   classical
   have hy : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=

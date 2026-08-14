@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open Tensor0SBundle
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -83,7 +83,6 @@ private theorem cc_raw_coeff
         ih, pow_succ]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem rawConnLapIter_l2NormSq_eq_tsum
     (g₀ : SmoothRiemannianMetric I M) (s t : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 s t S)‖ ^ 2 =
@@ -104,7 +103,6 @@ private theorem rawConnLapIter_l2NormSq_eq_tsum
   set L := TensorEigenIdx.lambda (I := I) (M := M) m with hL_def
   rw [mul_pow, ← pow_mul, mul_comm t 2, (even_two_mul t).neg_pow L]
 
-set_option maxHeartbeats 1600000 in
 private theorem covGrad_rawConnLapIter_l2NormSq_eq_tsum
     (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖covGrad (I := I) (M := M) g₀ 0 s
@@ -440,6 +438,8 @@ private theorem covGrad_rawConnLapIter_l2_le_ccSpectralEmbed_odd_local
     · exact (ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i + 1 : ℕ) : ℝ) S).weighted_summable
   exact le_of_sq_le_sq hsq hnn
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_iteratedCovGrad_comp_local
     (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ =
@@ -460,13 +460,15 @@ private theorem norm_iteratedCovGrad_comp_local
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
         (s + (j + i)) (iteratedCovGrad (I := I) g₀ 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp
+      (I := I) (M := M) g₀ 0 s j i S x
   have h1 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i
       (iteratedCovGrad (I := I) g₀ 0 s j S)‖ := norm_nonneg _
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_iteratedCovGrad_order_eq_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :
@@ -488,6 +490,8 @@ private lemma contract_eq_covGradBundleEquiv_symm_local
   rw [Tensor0SBundle.covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 s x A v D m]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_sum_contract_orthoFrame_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : TensorRSSpace 0 (s + 1) I x)
@@ -508,6 +512,8 @@ private lemma riemannianFiberNormSq_eq_sum_contract_orthoFrame_local
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [← hAeq, contract_eq_covGradBundleEquiv_symm_local (I := I) (M := M) s x (e a) A, hΦ_def]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_contract_le_succ_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : TensorRSSpace 0 (s + 1) I x)
@@ -524,6 +530,7 @@ private lemma riemannianFiberNormSq_contract_le_succ_local
       (Tensor0SBundle.contract_covariant 0 s x (e a) A))
     (fun a _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 s x _) (Finset.mem_univ i)
 
+omit [CompactSpace M] in
 private lemma covDivergenceRaw_eq_sum_contract_covDeriv_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) (b : M) :
     covDivergenceRaw (I := I) (M := M) g₀ s V b =
@@ -1081,7 +1088,29 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general_local
     subst hn
     exact hC S
 
-set_option maxHeartbeats 1600000 in
+private lemma add_cross_sq_le
+    {a d cross c0 crc dim c1 sum : ℝ}
+    (hcross : 2 * cross ≤ 2 * ((crc * sum) * (dim * (c1 * sum))))
+    (hd : d ≤ c0 ^ 2 * sum ^ 2) :
+    a + 2 * cross + d ≤ a + (c0 ^ 2 + 2 * (crc * (dim * c1))) * sum ^ 2 := by
+  calc
+    a + 2 * cross + d = a + (2 * cross + d) := by ring
+    _ ≤ a + (2 * ((crc * sum) * (dim * (c1 * sum))) + c0 ^ 2 * sum ^ 2) :=
+      add_le_add (le_refl a) (add_le_add hcross hd)
+    _ = a + (c0 ^ 2 + 2 * (crc * (dim * c1))) * sum ^ 2 := by ring
+
+private lemma sub_error_le_combined
+    {base target err c k sum : ℝ}
+    (hbase : base ≤ target + c * sum ^ 2)
+    (herr : |err| ≤ k * sum ^ 2) :
+    base - err ≤ target + (c + k) * sum ^ 2 := by
+  calc
+    base - err = base + -err := by ring
+    _ ≤ (target + c * sum ^ 2) + |err| := add_le_add hbase (neg_le_abs err)
+    _ ≤ (target + c * sum ^ 2) + k * sum ^ 2 :=
+      add_le_add (le_refl (target + c * sum ^ 2)) herr
+    _ = target + (c + k) * sum ^ 2 := by ring
+
 private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower
     (g₀ : SmoothRiemannianMetric I M) (s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 s),
@@ -1213,10 +1242,9 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
     have hcross_le : 2 * (⟪A, D⟫_ℝ : ℝ) ≤
         2 * ((Crc * SUM) * (dimR * (Cfun 1 * SUM))) := by
       have := (abs_le.mp hcross_abs).2
-      linarith [this]
-    nlinarith [hcross_le, hDnorm_sq, hSUM_nn, hCrc_nn, hdimR_nn, hCfun_nn 0, hCfun_nn 1]
+      exact mul_le_mul_of_nonneg_left this (by norm_num)
+    exact add_cross_sq_le hcross_le hDnorm_sq
 
-set_option maxHeartbeats 1600000 in
 private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
     (g₀ : SmoothRiemannianMetric I M) (s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 s),
@@ -1326,7 +1354,7 @@ private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
         rw [Finset.sum_insert (by simp), Finset.sum_singleton]
       rw [hpairsum] at hsub
       exact hsub
-    nlinarith [hsum_le, hK_nn 0, hSUM_nn]
+    exact mul_le_mul_of_nonneg_left hsum_le (hK_nn 0)
   have hpair_bound :
       |tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
           (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
@@ -1349,11 +1377,7 @@ private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
           (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2 := by
     rw [SmoothCcTensor.norm_toL2]
   rw [hLHS_norm_sq, hweitz, hbase_eq, hbase_toL2]
-  have hneg_le := neg_abs_le
-    (tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
-      (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
-      (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun)
-  nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hCgap_nn, hK_nn 0]
+  exact sub_error_le_combined hbase_le hpair_bound
 
 private theorem spectralModeMass_base0
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (u : SmoothCcTensor g₀ 0 s) :
@@ -1535,7 +1559,7 @@ private theorem exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_low
           _ ≤ TOPg + (Cstep * Csob ^ 2 + Cih) * HNu ^ 2 := by nlinarith [hIH_H, hStep_sq]
       exact hgoal
 
-/-- The coefficient-one Dirichlet–Bochner gap for smooth covariant tensors. -/
+
 theorem cc_dirichlet_gap
     (g₀ : SmoothRiemannianMetric I M) (s n : ℕ) :
     ∃ Cgap : ℝ, 0 ≤ Cgap ∧
@@ -1564,7 +1588,7 @@ theorem cc_dirichlet_gap
           mul_nonneg hC_nn (sq_nonneg _)
         linarith [hmass]
 
-/-- The rank-two compatibility specialization of `cc_dirichlet_gap`. -/
+
 theorem exists_iteratedCovGrad_l2NormSq_le_smoothCcToTensorHs_succ_add_lower
     (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ Cgap : ℝ, 0 ≤ Cgap ∧

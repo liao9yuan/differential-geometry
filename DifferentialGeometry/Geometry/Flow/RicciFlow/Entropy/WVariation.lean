@@ -7,16 +7,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WeightedHessian
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Perelman's W variation along reversed Ricci flow
 
-This file assembles the actual reverse-flow metric, scalar-curvature,
-gradient-square, and reconstructed-potential paths into a local first
-variation of `W`.  The pointwise geometric derivatives live in
-`FlowVariation`; this module is only their moving-volume assembly.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -35,7 +34,7 @@ universe u uE uH
 
 variable {M : Type u}
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -46,9 +45,9 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The actual reversed Ricci-flow metric, scalar curvature, squared gradient,
-and positive conjugate-heat potential have a local first variation of
-Perelman's `W` functional. -/
+
+
+
 theorem w_rev_hasDerivAt
     [I.Boundaryless] [CompactSpace M]
     {D Dr : RealTimeInterval}
@@ -288,8 +287,8 @@ theorem w_rev_hasDerivAt
     hbaseEq hbase
   simpa only [G, f, R, q, ft, Rt, qt] using hout
 
-/-- Along reversed Ricci flow, the first variation of Perelman's `W` functional
-is the negative weighted square of `Ric + Hess f - g / (2s)`. -/
+
+
 theorem w_rev_square
     [I.Boundaryless] [CompactSpace M]
     {D Dr : RealTimeInterval}
@@ -491,7 +490,7 @@ theorem w_rev_square
       rw [hperel Sq]
       ring
 
-/-- Along reversed Ricci flow, Perelman's `W` first variation is nonpositive. -/
+
 theorem w_rev_deriv_nonpos
     [I.Boundaryless] [CompactSpace M]
     {D Dr : RealTimeInterval}

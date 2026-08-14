@@ -1725,7 +1725,7 @@ theorem cov_commute_smooth
       (chartRepAt (I := I) (fun v : Real => f 0 v) innerR t) t := by
     refine hrepOuterR.differentiableAt_iff.mpr ?_
     exact
-      (Aux4.hasDerivAt_innerW' (I := I) g β f Y 0 t hF2 hY2 hΓ).differentiableAt
+      (Aux4.hasDerivAt_innerW_snd (I := I) g β f Y 0 t hF2 hY2 hΓ).differentiableAt
   exact
     cov_commute_curv (I := I) g f hf V t hV2 hinnerL hinnerR
       houterL houterR

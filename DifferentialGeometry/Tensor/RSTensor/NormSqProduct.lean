@@ -2,21 +2,19 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# The Frobenius norm is multiplicative on tensor products
 
-`normSq0S g x (s+q) (A ⊗ B) = normSq0S g x s A * normSq0S g x q B`: in a
-`g`-orthonormal basis the squared norm is the sum of squares of the components,
-the components of a tensor product factor as `(A⊗B)_{IJ} = A_I B_J`, and
-`∑_{I,J} (A_I B_J)² = (∑_I A_I²)(∑_J B_J²)`.
 
-This is the base case (`m = 0`) of the iterated-Leibniz product-norm bound
-`|∇ᵐ(A∗B)| ≤ ∑_c \binom m c |∇ᶜA| |∇^{m−c}B|` used in MSM135 equation (3.4).
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,10 +27,11 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [T2Space M]
 
-/-- **The Frobenius norm squares are multiplicative on tensor products.** -/
+
+omit [IsManifold I 2 M] [T2Space M] in
 theorem normSq0S_product {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) {s q : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -84,6 +83,7 @@ theorem normSq0S_product {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [hprod, mul_pow]
   rfl
 
+omit [IsManifold I 2 M] [T2Space M] in
 /-- The Frobenius norm square is multiplicative on the pointwise tensor
 product of two covariant tensor fibers. -/
 theorem normSq0S_prod {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -135,13 +135,14 @@ theorem normSq0S_prod {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [hprod, mul_pow]
   rfl
 
-/-- `normSq0S` is invariant under reindexing the tensor slots by any equivalence
-`Fin s ≃ Fin s'` (a permutation together with a rank identification): the squared
-Frobenius norm is a sum over all index tuples, which the reindexing merely
-permutes.  (Needed because the second Leibniz term `A∗∇B` carries the new
-derivative slot in the middle rather than at the front, and the two product
-orders give the propositionally-but-not-definitionally-equal ranks
-`(s+1)+q = (s+q)+1`.) -/
+
+
+
+
+
+
+
+omit [IsManifold I 2 M] [T2Space M] in
 theorem normSq0S_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) {s s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))

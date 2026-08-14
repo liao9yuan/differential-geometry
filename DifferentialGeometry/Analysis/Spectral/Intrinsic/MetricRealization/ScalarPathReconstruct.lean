@@ -5,14 +5,14 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Rank
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Joint scalar spectral reconstruction
 
-This file reconstructs a scalar spacetime function directly from a time-dependent
-rank-zero spectral coefficient family.  The series is treated chart-locally as
-a sum of real-valued modes; no time-dependent choice of tensor representative
-and no equality of whole mixed-tensor fibres is used.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,7 +33,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,19 +42,19 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- One scalar spacetime eigenmode in a fixed Euclidean chart. -/
+
 noncomputable def scalarMode
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
     (α : M) (i : TensorEigenIdx (I := I) (M := M) g 0 0) :
     ℝ × EuclN → ℝ :=
   fun q => c i q.1 *
-    rawPullR (I := I) (M := M) g 0 0
+    tensorComponentEuclideanChart (I := I) (M := M) g 0 0
       (eigenvectorSmooth (I := I) (M := M) g 0 0 i)
       α Fin.elim0 Fin.elim0 q.2
 
-/-- The intrinsic scalar spectral sum associated to a time-dependent
-coefficient family. -/
+
+
 noncomputable def scalarSpecSum
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ) :
@@ -64,8 +64,8 @@ noncomputable def scalarSpecSum
       c i t * TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
         (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x
 
-/-- The scalar spectral series of a smooth rank-zero tensor reconstructs its
-pointwise scalar readout. -/
+
+
 theorem scalarSpec_cc
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) :
     scalarSpecSum (I := I) (M := M) g
@@ -162,8 +162,6 @@ theorem scalarSpec_cc
   simpa only [V, ccTensorToHs_coeff] using hsum.tsum_eq
 
 omit [BoundarylessManifold I M] in
-/-- A chart scalar mode evaluated at a Euclidean chart point is the intrinsic
-rank-zero eigensection readout at the corresponding manifold point. -/
 lemma scalarMode_eq
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
@@ -175,7 +173,7 @@ lemma scalarMode_eq
         (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
   unfold scalarMode
-  rw [rawPullR, Function.comp_apply, Function.comp_apply]
+  rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply]
   exact congrArg (c i t * ·)
     (scalar0_raw_eq (I := I) (M := M) g
       (eigenvectorSmooth (I := I) (M := M) g 0 0 i) α
@@ -183,8 +181,6 @@ lemma scalarMode_eq
         (I := I) (M := M) α hy))
 
 omit [BoundarylessManifold I M] in
-/-- The chartwise scalar eigen-series is the intrinsic scalar spectral sum at
-the corresponding manifold point. -/
 lemma scalarSpec_chart
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
@@ -199,8 +195,9 @@ lemma scalarSpec_chart
   intro i
   exact scalarMode_eq (I := I) (M := M) g c α i hy
 
-/-- A scalar eigenmode is jointly smooth wherever its coefficient and its
-chart-pulled eigensection are smooth. -/
+
+
+omit [BoundarylessManifold I M] in
 lemma scalarMode_smooth
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
@@ -215,7 +212,7 @@ lemma scalarMode_smooth
     hc.comp contDiffOn_fst Set.mapsTo_fst_prod
   have hx : ContDiffOn ℝ N
       (fun q : ℝ × EuclN =>
-        rawPullR (I := I) (M := M) g 0 0
+        tensorComponentEuclideanChart (I := I) (M := M) g 0 0
           (eigenvectorSmooth (I := I) (M := M) g 0 0 i)
           α Fin.elim0 Fin.elim0 q.2)
       (U ×ˢ chartTargetEuclid (I := I) (M := M) α) :=
@@ -227,6 +224,8 @@ lemma scalarMode_smooth
   exact ht.mul hx
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_two_sq
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 0) (p : ℝ) :
@@ -239,6 +238,8 @@ private lemma weight_two_sq
     Real.rpow_two]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma abs_le_sqrt_wt
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 0) (p : ℝ) {v C : ℝ}
@@ -263,6 +264,8 @@ private lemma abs_le_sqrt_wt
   rwa [← hW_def]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sqrt_mul_tail
     (g : SmoothRiemannianMetric I M) (p : ℝ)
     (C : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ)
@@ -397,9 +400,8 @@ private lemma jet_snd_le
   simpa only [L, Function.comp_apply] using hbound
 
 omit [BoundarylessManifold I M] in
-/-- A coefficient family with summable weighted time-jet masses, multiplied by
-spatial modes with a uniform polynomial eigenvalue bound, has a summable
-uniform mixed-jet majorant on a compact product slab. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem prodMode_majorant
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     (g : SmoothRiemannianMetric I M)
@@ -620,8 +622,8 @@ theorem prodMode_majorant
                   tensorSobolevWeight (I := I) (M := M) i (-qTail)) := by
             rw [hcollapse]
 
-/-- On a compact chart subset, all scalar eigensection jets through a fixed
-order share one polynomial eigenvalue bound. -/
+
+
 lemma scalar_jet_uniform
     (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ)
     {K : Set EuclN} (hK : IsCompact K)
@@ -631,7 +633,7 @@ lemma scalar_jet_uniform
         ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 0) y,
           y ∈ K →
             ‖iteratedFDerivWithin ℝ m
-                (rawPullR (I := I) (M := M) g 0 0
+                (tensorComponentEuclideanChart (I := I) (M := M) g 0 0
                   (eigenvectorSmooth (I := I) (M := M) g 0 0 i)
                   α Fin.elim0 Fin.elim0)
                 (chartTargetEuclid (I := I) (M := M) α) y‖ ≤
@@ -643,7 +645,7 @@ lemma scalar_jet_uniform
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 0) y,
         y ∈ K →
           ‖iteratedFDerivWithin ℝ m
-              (rawPullR (I := I) (M := M) g 0 0
+              (tensorComponentEuclideanChart (I := I) (M := M) g 0 0
                 (eigenvectorSmooth (I := I) (M := M) g 0 0 i)
                 α Fin.elim0 Fin.elim0)
               (chartTargetEuclid (I := I) (M := M) α) y‖ ≤
@@ -676,8 +678,8 @@ lemma scalar_jet_uniform
   exact ((hCmf m hm).2 i y hy).trans
     (mul_le_mul_of_nonneg_right hCm_le (pow_nonneg hbase_nn _))
 
-/-- The scalar chart modes have summable mixed-jet majorants on every compact
-convex product patch. -/
+
+
 theorem scalarMode_majorant
     (g : SmoothRiemannianMetric I M)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 0)
@@ -703,7 +705,7 @@ theorem scalarMode_majorant
   obtain ⟨Csp, pSp, hCsp, hsp⟩ :=
     scalar_jet_uniform (I := I) (M := M) g α n hK hKO
   let ψ : TensorEigenIdx (I := I) (M := M) g 0 0 → EuclN → ℝ :=
-    fun i => rawPullR (I := I) (M := M) g 0 0
+    fun i => tensorComponentEuclideanChart (I := I) (M := M) g 0 0
       (eigenvectorSmooth (I := I) (M := M) g 0 0 i)
       α Fin.elim0 Fin.elim0
   have hψ : ∀ i, ContDiffOn ℝ ∞ (ψ i)
@@ -717,9 +719,9 @@ theorem scalarMode_majorant
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       hψ hKuniq hKO Csp pSp hCsp hsp)
 
-/-- The scalar eigen-series is jointly `C^N` on every compact convex chart
-patch contained in the chart target and every compact time slab contained in
-the coefficient-smoothness region. -/
+
+
+
 theorem scalarTsum_chart
     (g : SmoothRiemannianMetric I M)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 0)
@@ -776,8 +778,8 @@ theorem scalarTsum_chart
     (fun k i q hq hk => (hv k (by exact_mod_cast hk)).2 i q hq)
     (x₀ := (a, y₀)) ⟨Set.left_mem_Icc.mpr hab.le, hy₀⟩
 
-/-- The scalar eigen-series is jointly `C^N` on the full Euclidean chart
-target over a compact time slab. -/
+
+
 theorem scalarTsum_smooth
     (g : SmoothRiemannianMetric I M)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 0)
@@ -838,8 +840,8 @@ theorem scalarTsum_smooth
     hU hIccU hc hmass α hBc_compact hBc_uniq hBc_conv hBc_ne hBcΩ).mono
       (Set.prod_mono (le_refl _) hBBc)
 
-/-- The intrinsic scalar spectral sum is jointly `C^N` on a compact time slab
-over one manifold chart source. -/
+
+
 theorem scalarSpec_local
     (g : SmoothRiemannianMetric I M)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 0)
@@ -901,9 +903,9 @@ theorem scalarSpec_local
     hGEuclid.contDiffWithinAt (hmaps hq)
   exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
 
-/-- The pointwise scalar spectral series differentiates term by term on a
-compact time slab when both the coefficients and their first derivatives have
-summable weighted masses. -/
+
+
+
 theorem scalarSpec_d1
     (g : SmoothRiemannianMetric I M)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 0)
@@ -996,7 +998,7 @@ theorem scalarSpec_d1
         (hU.mem_nhds (hIccU hz))).hasDerivAt
     simpa only [scalarMode, dc] using
       (hd.mul_const
-        (rawPullR (I := I) (M := M) g 0 0
+        (tensorComponentEuclideanChart (I := I) (M := M) g 0 0
           (eigenvectorSmooth (I := I) (M := M) g 0 0 i)
           x Fin.elim0 Fin.elim0 y₀)).hasDerivWithinAt
   have hdbd : ∀ i z, z ∈ Set.Icc a b →
@@ -1052,9 +1054,9 @@ theorem scalarSpec_d1
   simpa only [dc] using
     (hD.congr (fun z _hz => (hchart z).symm) (hchart t).symm).congr_deriv hdchart
 
-/-- Time-dependent scalar spectral coefficients with all mixed jets controlled
-by summable weighted masses reconstruct a jointly `C^N` scalar function on the
-whole compact time slab. -/
+
+
+
 theorem scalar_path_recon
     (g : SmoothRiemannianMetric I M)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 0)

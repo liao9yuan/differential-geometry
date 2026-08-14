@@ -51,9 +51,9 @@ noncomputable def LowBaseActionData.a1Sub
 private theorem app_sub_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W V : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s Φ (W - V) =
-      appCc (I := I) (M := M) g r s Φ W -
-        appCc (I := I) (M := M) g r s Φ V := by
+    operatorFieldApply (I := I) (M := M) g r s Φ (W - V) =
+      operatorFieldApply (I := I) (M := M) g r s Φ W -
+        operatorFieldApply (I := I) (M := M) g r s Φ V := by
   rw [sub_eq_add_neg, appCc_add_right]
   have hneg := appCc_smul_right (I := I) (M := M) g r s
     (-1 : ℝ) Φ V
@@ -820,7 +820,7 @@ theorem riem_pair_h2
       htrace T U gT gU hTtie hUtie hTHs hUHs
   have hApp :
       lowJetSq (I := I) (M := M) g 2
-          (appCcRS (I := I) (M := M) g 2 4 2 L
+          (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 L
             (lc0RiemPass (I := I) g)) ≤
         (Ca * (Ct * N) * Pn) ^ 2 := by
     simpa only [lowJetSq, JP] using
@@ -832,21 +832,21 @@ theorem riem_pair_h2
   have heq :
       lc0Riem (I := I) (M := M) g gT -
           lc0Riem (I := I) (M := M) g gU =
-        -appCcRS (I := I) (M := M) g 2 4 2 L
+        -ccOperatorFieldComp (I := I) (M := M) g 2 4 2 L
           (lc0RiemPass (I := I) g) := by
     rw [lc0Riem_eq_app, lc0Riem_eq_app]
     dsimp only [L]
     rw [appCcRS_sub_left]
     module
-  rw [heq, show -appCcRS (I := I) (M := M) g 2 4 2 L
+  rw [heq, show -ccOperatorFieldComp (I := I) (M := M) g 2 4 2 L
       (lc0RiemPass (I := I) g) =
-        (-1 : ℝ) • appCcRS (I := I) (M := M) g 2 4 2 L
+        (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 4 2 L
           (lc0RiemPass (I := I) g) by simp,
     jet_smul_lip]
   norm_num
   calc
     lowJetSq (I := I) (M := M) g 2
-        (appCcRS (I := I) (M := M) g 2 4 2 L
+        (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 L
           (lc0RiemPass (I := I) g)) ≤
       (Ca * (Ct * N) * Pn) ^ 2 := hApp
     _ = (C * N) ^ 2 := by
@@ -1772,7 +1772,7 @@ private theorem app_h2_mul_lip
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
         lowJetSq (I := I) (M := M) g 2
-            (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+            (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
           C * lowJetSq (I := I) (M := M) g 2 Φ *
             lowJetSq (I := I) (M := M) g 2 W := by
   obtain ⟨C₀, hC₀, happ⟩ :=
@@ -1803,7 +1803,7 @@ private theorem app_h2_mul_lip
       exact le_of_eq hsW.symm)
   calc
     lowJetSq (I := I) (M := M) g 2
-        (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
       (C₀ *
         Real.sqrt (lowJetSq (I := I) (M := M) g 2 Φ) *
         Real.sqrt (lowJetSq (I := I) (M := M) g 2 W)) ^ 2 := by
@@ -1859,7 +1859,7 @@ private theorem dom_sub_lip
 
 private noncomputable def lipOmega
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 3 :=
-  appCcRS (I := I) (M := M) g 0 3 3
+  ccOperatorFieldComp (I := I) (M := M) g 0 3 3
     (slotInsertEndoCc (I := I) (M := M) g 2
       (fullRaisedEndoField (I := I) (M := M) gm g))
     (domDomCongrSection (I := I) g (finRotate 3)
@@ -1869,13 +1869,13 @@ private theorem lipOmega_tel
     (g gT gU : SmoothRiemannianMetric I M) :
     lipOmega (I := I) (M := M) g gT -
         lipOmega (I := I) (M := M) g gU =
-      appCcRS (I := I) (M := M) g 0 3 3
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 3
           (slotInsertEndoCc (I := I) (M := M) g 2
             (fullRaisedEndoField (I := I) (M := M) gU g))
           (domDomCongrSection (I := I) g (finRotate 3)
             (connDiffLoweredCc (I := I) g gT -
               connDiffLoweredCc (I := I) g gU)) +
-        appCcRS (I := I) (M := M) g 0 3 3
+        ccOperatorFieldComp (I := I) (M := M) g 0 3 3
           (slotInsertEndoCc (I := I) (M := M) g 2
               (fullRaisedEndoField (I := I) (M := M) gT g) -
             slotInsertEndoCc (I := I) (M := M) g 2
@@ -1929,9 +1929,9 @@ private theorem omega_pair
     domDomCongrSection (I := I) g (finRotate 3)
       (connDiffLoweredCc (I := I) g gT)
   let X : SmoothCcTensor g 0 3 :=
-    appCcRS (I := I) (M := M) g 0 3 3 AU BD
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 3 AU BD
   let Y : SmoothCcTensor g 0 3 :=
-    appCcRS (I := I) (M := M) g 0 3 3 AD BT
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 3 AD BT
   have hX :
       lowJetSq (I := I) (M := M) g 2 X ≤
         C₀ * lowJetSq (I := I) (M := M) g 2 AU *
@@ -1980,7 +1980,7 @@ private theorem app_h21_mul_lip
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
         lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+            (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
           C * lowJetSq (I := I) (M := M) g 2 Φ *
             lowJetSq (I := I) (M := M) g 1 W := by
   obtain ⟨C₀, hC₀, happ⟩ :=
@@ -2008,21 +2008,21 @@ private theorem app_h21_mul_lip
         (le_of_eq hBsq.symm))
   have hsq := pow_le_pow_left₀
     (norm_nonneg
-      (⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+      (⟨ccOperatorFieldComp (I := I) (M := M) g p r c Φ W⟩ :
         SmoothCcTensorH1 g p c))
     hnorm 2
   have hjet :
       lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+          (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
         (C₀ * A * B) ^ 2 := by
     rw [h1_jet_sq (I := I) (M := M) g p c
-      (appCcRS (I := I) (M := M) g p r c Φ W)] at hsq
+      (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)] at hsq
     simpa only [lowJetSq, Finset.sum_range_succ,
       Finset.sum_range_zero, zero_add, Nat.reduceAdd,
       iteratedCovGrad_zero, iteratedCovGrad_succ] using hsq
   calc
     lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
       (C₀ * A * B) ^ 2 := hjet
     _ = C₀ ^ 2 * lowJetSq (I := I) (M := M) g 2 Φ *
         lowJetSq (I := I) (M := M) g 1 W := by
@@ -2034,7 +2034,7 @@ private theorem app_h12_mul_lip
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
         lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+            (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
           C * lowJetSq (I := I) (M := M) g 1 Φ *
             lowJetSq (I := I) (M := M) g 2 W := by
   obtain ⟨C₀, hC₀, happ⟩ :=
@@ -2062,21 +2062,21 @@ private theorem app_h12_mul_lip
         (le_of_eq hBsq.symm))
   have hsq := pow_le_pow_left₀
     (norm_nonneg
-      (⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+      (⟨ccOperatorFieldComp (I := I) (M := M) g p r c Φ W⟩ :
         SmoothCcTensorH1 g p c))
     hnorm 2
   have hjet :
       lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+          (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
         (C₀ * A * B) ^ 2 := by
     rw [h1_jet_sq (I := I) (M := M) g p c
-      (appCcRS (I := I) (M := M) g p r c Φ W)] at hsq
+      (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)] at hsq
     simpa only [lowJetSq, Finset.sum_range_succ,
       Finset.sum_range_zero, zero_add, Nat.reduceAdd,
       iteratedCovGrad_zero, iteratedCovGrad_succ] using hsq
   calc
     lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
       (C₀ * A * B) ^ 2 := hjet
     _ = C₀ ^ 2 * lowJetSq (I := I) (M := M) g 1 Φ *
         lowJetSq (I := I) (M := M) g 2 W := by
@@ -2180,9 +2180,9 @@ private theorem omega_pair_h1
     domDomCongrSection (I := I) g (finRotate 3)
       (connDiffLoweredCc (I := I) g gT)
   let X : SmoothCcTensor g 0 3 :=
-    appCcRS (I := I) (M := M) g 0 3 3 AU BD
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 3 AU BD
   let Y : SmoothCcTensor g 0 3 :=
-    appCcRS (I := I) (M := M) g 0 3 3 AD BT
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 3 AD BT
   have hX :
       lowJetSq (I := I) (M := M) g 1 X ≤
         C₀ * lowJetSq (I := I) (M := M) g 2 AU *
@@ -2430,11 +2430,12 @@ private theorem curvF_pair_h1
   have hsub :
       lrCurvF (I := I) (M := M) g T -
           lrCurvF (I := I) (M := M) g U =
-        appCcRS (I := I) (M := M) g 0 2 4
+        ccOperatorFieldComp (I := I) (M := M) g 0 2 4
             (lrRiemW1 (I := I) (M := M) g) (T - U) +
-          appCcRS (I := I) (M := M) g 0 2 4
+          ccOperatorFieldComp (I := I) (M := M) g 0 2 4
             (lrRiemW2 (I := I) (M := M) g) (T - U) := by
-    rw [lrCurvF, lrCurvF, appCcRS_sub_right, appCcRS_sub_right]
+    simp only [lrCurvF, riemannCurvatureCoeffField]
+    rw [appCcRS_sub_right, appCcRS_sub_right]
     module
   have hX := happ (lrRiemW1 (I := I) (M := M) g) (T - U)
   have hY := happ (lrRiemW2 (I := I) (M := M) g) (T - U)
@@ -2447,15 +2448,15 @@ private theorem curvF_pair_h1
   rw [hsub]
   calc
     lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 0 2 4
+        (ccOperatorFieldComp (I := I) (M := M) g 0 2 4
             (lrRiemW1 (I := I) (M := M) g) (T - U) +
-          appCcRS (I := I) (M := M) g 0 2 4
+          ccOperatorFieldComp (I := I) (M := M) g 0 2 4
             (lrRiemW2 (I := I) (M := M) g) (T - U)) ≤
       2 * (lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 0 2 4
+          (ccOperatorFieldComp (I := I) (M := M) g 0 2 4
             (lrRiemW1 (I := I) (M := M) g) (T - U)) +
         lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 0 2 4
+          (ccOperatorFieldComp (I := I) (M := M) g 0 2 4
             (lrRiemW2 (I := I) (M := M) g) (T - U))) :=
       jet_add_lip (I := I) (M := M) g 1 _ _
     _ ≤ 2 * (C₀ * J1w *
@@ -2481,38 +2482,40 @@ private theorem quadB_tel
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQB (I := I) (M := M) g gT -
         lrQB (I := I) (M := M) g gU =
-      appCcRS (I := I) (M := M) g 0 3 4
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (armSlotEndoCc (I := I) (M := M) g 2
             (bdConnPair (I := I) (M := M) g gU))
           (lrOmegaHat (I := I) (M := M) g gT -
             lrOmegaHat (I := I) (M := M) g gU) +
-        appCcRS (I := I) (M := M) g 0 3 4
+        ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (armSlotEndoCc (I := I) (M := M) g 2
               (bdConnPair (I := I) (M := M) g gT) -
             armSlotEndoCc (I := I) (M := M) g 2
               (bdConnPair (I := I) (M := M) g gU))
           (lrOmegaHat (I := I) (M := M) g gT) := by
-  rw [lrQB, lrQB, appCcRS_sub_right, appCcRS_sub_left]
+  simp only [lrQB, connDiffQuadraticPairedTensor, bdConnPair]
+  rw [appCcRS_sub_right, appCcRS_sub_left]
   module
 
 private theorem quadA_tel
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQA (I := I) (M := M) g gT -
         lrQA (I := I) (M := M) g gU =
-      appCcRS (I := I) (M := M) g 0 3 4
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (armSlotEndoCc (I := I) (M := M) g 2
             (bdConnPair (I := I) (M := M) g gU))
           (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 3) 1)
             (lrOmegaHat (I := I) (M := M) g gT -
               lrOmegaHat (I := I) (M := M) g gU)) +
-        appCcRS (I := I) (M := M) g 0 3 4
+        ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (armSlotEndoCc (I := I) (M := M) g 2
               (bdConnPair (I := I) (M := M) g gT) -
             armSlotEndoCc (I := I) (M := M) g 2
               (bdConnPair (I := I) (M := M) g gU))
           (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 3) 1)
             (lrOmegaHat (I := I) (M := M) g gT)) := by
-  rw [lrQA, lrQA, dom_sub_lip, appCcRS_sub_right, appCcRS_sub_left]
+  simp only [lrQA, connDiffQuadraticComposedTensor, bdConnPair]
+  rw [dom_sub_lip, appCcRS_sub_right, appCcRS_sub_left]
   module
 
 set_option maxHeartbeats 1600000 in
@@ -2574,15 +2577,15 @@ private theorem quad_pair_h1
   set QAd : SmoothCcTensor g 0 4 :=
     lrQA (I := I) (M := M) g gT - lrQA (I := I) (M := M) g gU with hQAd
   have htelB : QBd =
-      appCcRS (I := I) (M := M) g 0 3 4 cU hatD +
-        appCcRS (I := I) (M := M) g 0 3 4 cD hatT := by
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cU hatD +
+        ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cD hatT := by
     rw [hQBd, hcU, hcD, hhatT, hhatD]
     exact quadB_tel (I := I) (M := M) g gT gU
   have htelA : QAd =
-      appCcRS (I := I) (M := M) g 0 3 4 cU
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cU
           (domDomCongrSection (I := I) g
             (Equiv.swap (0 : Fin 3) 1) hatD) +
-        appCcRS (I := I) (M := M) g 0 3 4 cD
+        ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cD
           (domDomCongrSection (I := I) g
             (Equiv.swap (0 : Fin 3) 1) hatT) := by
     rw [hQAd, hcU, hcD, hhatT, hhatD]
@@ -2596,13 +2599,13 @@ private theorem quad_pair_h1
     calc
       lowJetSq (I := I) (M := M) g 1 QBd =
           lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g 0 3 4 cU hatD +
-              appCcRS (I := I) (M := M) g 0 3 4 cD hatT) := by
+            (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cU hatD +
+              ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cD hatT) := by
         rw [htelB]
       _ ≤ 2 * (lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g 0 3 4 cU hatD) +
+            (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cU hatD) +
           lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g 0 3 4 cD hatT)) :=
+            (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cD hatT)) :=
         jet_add_lip (I := I) (M := M) g 1 _ _
       _ ≤ 2 * (C₀ * lowJetSq (I := I) (M := M) g 2 cU *
             lowJetSq (I := I) (M := M) g 1 hatD +
@@ -2628,19 +2631,19 @@ private theorem quad_pair_h1
     calc
       lowJetSq (I := I) (M := M) g 1 QAd =
           lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g 0 3 4 cU
+            (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cU
                 (domDomCongrSection (I := I) g
                   (Equiv.swap (0 : Fin 3) 1) hatD) +
-              appCcRS (I := I) (M := M) g 0 3 4 cD
+              ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cD
                 (domDomCongrSection (I := I) g
                   (Equiv.swap (0 : Fin 3) 1) hatT)) := by
         rw [htelA]
       _ ≤ 2 * (lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g 0 3 4 cU
+            (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cU
               (domDomCongrSection (I := I) g
                 (Equiv.swap (0 : Fin 3) 1) hatD)) +
           lowJetSq (I := I) (M := M) g 1
-            (appCcRS (I := I) (M := M) g 0 3 4 cD
+            (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 cD
               (domDomCongrSection (I := I) g
                 (Equiv.swap (0 : Fin 3) 1) hatT))) :=
         jet_add_lip (I := I) (M := M) g 1 _ _
@@ -2667,7 +2670,9 @@ private theorem quad_pair_h1
                 (domDomCongrSection (I := I) g lrPermB QAd +
                   domDomCongrSection (I := I) g lrPermC QAd)))) := by
     rw [hQBd, hQAd]
-    simp only [lrQuadF, dom_sub_lip]
+    simp only [lrQuadF, connDiffQuadraticCurvatureTerm, lrQB,
+      connDiffQuadraticPairedTensor, lrQA, connDiffQuadraticComposedTensor,
+      dom_sub_lip]
     abel
   have hd1 : lowJetSq (I := I) (M := M) g 1
       (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 4) 1) QBd) =
@@ -2910,7 +2915,7 @@ private theorem r4_pair_h1
 private theorem lcvPair_eq_lip
     (g gm : SmoothRiemannianMetric I M) :
     lieCovPair (I := I) (M := M) g gm =
-      appCcRS (I := I) (M := M) g 6 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 6 4 2
         (pureTrace (I := I) (M := M) g gm 2)
         (pureTrace (I := I) (M := M) g gm 4) := rfl
 
@@ -2970,11 +2975,11 @@ private theorem lcvPair_pair_h2
   have htel :
       lieCovPair (I := I) (M := M) g gT -
           lieCovPair (I := I) (M := M) g gU =
-        appCcRS (I := I) (M := M) g 6 4 2
+        ccOperatorFieldComp (I := I) (M := M) g 6 4 2
             (pureTrace (I := I) (M := M) g gU 2)
             (pureTrace (I := I) (M := M) g gT 4 -
               pureTrace (I := I) (M := M) g gU 4) +
-          appCcRS (I := I) (M := M) g 6 4 2
+          ccOperatorFieldComp (I := I) (M := M) g 6 4 2
             (pureTrace (I := I) (M := M) g gT 2 -
               pureTrace (I := I) (M := M) g gU 2)
             (pureTrace (I := I) (M := M) g gT 4) := by
@@ -3017,22 +3022,22 @@ private theorem lcvPair_pair_h2
         (lieCovPair (I := I) (M := M) g gT -
           lieCovPair (I := I) (M := M) g gU) =
       lowJetSq (I := I) (M := M) g 2
-        (appCcRS (I := I) (M := M) g 6 4 2
+        (ccOperatorFieldComp (I := I) (M := M) g 6 4 2
             (pureTrace (I := I) (M := M) g gU 2)
             (pureTrace (I := I) (M := M) g gT 4 -
               pureTrace (I := I) (M := M) g gU 4) +
-          appCcRS (I := I) (M := M) g 6 4 2
+          ccOperatorFieldComp (I := I) (M := M) g 6 4 2
             (pureTrace (I := I) (M := M) g gT 2 -
               pureTrace (I := I) (M := M) g gU 2)
             (pureTrace (I := I) (M := M) g gT 4)) := by
       rw [htel]
     _ ≤ 2 * (lowJetSq (I := I) (M := M) g 2
-          (appCcRS (I := I) (M := M) g 6 4 2
+          (ccOperatorFieldComp (I := I) (M := M) g 6 4 2
             (pureTrace (I := I) (M := M) g gU 2)
             (pureTrace (I := I) (M := M) g gT 4 -
               pureTrace (I := I) (M := M) g gU 4)) +
         lowJetSq (I := I) (M := M) g 2
-          (appCcRS (I := I) (M := M) g 6 4 2
+          (ccOperatorFieldComp (I := I) (M := M) g 6 4 2
             (pureTrace (I := I) (M := M) g gT 2 -
               pureTrace (I := I) (M := M) g gU 2)
             (pureTrace (I := I) (M := M) g gT 4))) :=
@@ -3671,7 +3676,7 @@ private theorem lcvPair_h2_bdd
     lowJetSq (I := I) (M := M) g 2
         (lieCovPair (I := I) (M := M) g gT) =
       lowJetSq (I := I) (M := M) g 2
-        (appCcRS (I := I) (M := M) g 6 4 2
+        (ccOperatorFieldComp (I := I) (M := M) g 6 4 2
           (pureTrace (I := I) (M := M) g gT 2)
           (pureTrace (I := I) (M := M) g gT 4)) := by
       rw [lcvPair_eq_lip]
@@ -4006,7 +4011,8 @@ private theorem hat_bdd_h2
 private theorem curvF_zero_lip
     (g : SmoothRiemannianMetric I M) :
     lrCurvF (I := I) (M := M) g (0 : SmoothCcTensor g 0 2) = 0 := by
-  rw [lrCurvF, appCcRS_zero_right, appCcRS_zero_right, add_zero]
+  simp only [lrCurvF, riemannCurvatureCoeffField,
+    appCcRS_zero_right, add_zero]
 
 private theorem curvF_bdd_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -4078,9 +4084,9 @@ private theorem quadF_bdd_h1
   have hhat1 : lowJetSq (I := I) (M := M) g 1 w ≤ (Bh R * A) ^ 2 :=
     le_trans (jet_mono_lip (I := I) (M := M) g (by norm_num) w) hhatB
   have hQBapp : lrQB (I := I) (M := M) g gT =
-      appCcRS (I := I) (M := M) g 0 3 4 c w := rfl
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4 c w := rfl
   have hQAapp : lrQA (I := I) (M := M) g gT =
-      appCcRS (I := I) (M := M) g 0 3 4 c
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4 c
         (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 3) 1) w) := rfl
   set K : ℝ := C₀ * ((fr * Ba R * A) ^ 2) * ((Bh R * A) ^ 2) with hK
   have hK0 : 0 ≤ K :=
@@ -4093,7 +4099,7 @@ private theorem quadF_bdd_h1
     rw [hxdef, hQBapp, hK]
     calc
       lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 0 3 4 c w) ≤
+          (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 c w) ≤
         C₀ * lowJetSq (I := I) (M := M) g 2 c *
           lowJetSq (I := I) (M := M) g 1 w := happ c w
       _ ≤ C₀ * ((fr * Ba R * A) ^ 2) * ((Bh R * A) ^ 2) :=
@@ -4108,7 +4114,7 @@ private theorem quadF_bdd_h1
       (Equiv.swap (0 : Fin 3) 1) w
     calc
       lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 0 3 4 c
+          (ccOperatorFieldComp (I := I) (M := M) g 0 3 4 c
             (domDomCongrSection (I := I) g
               (Equiv.swap (0 : Fin 3) 1) w)) ≤
         C₀ * lowJetSq (I := I) (M := M) g 2 c *
@@ -4137,7 +4143,7 @@ private theorem quadF_bdd_h1
                     (lrQA (I := I) (M := M) g gT) +
                   domDomCongrSection (I := I) g lrPermC
                     (lrQA (I := I) (M := M) g gT))))) := by
-    simp only [lrQuadF]
+    simp only [lrQuadF, connDiffQuadraticCurvatureTerm, lrQB, lrQA]
     abel
   set QB : SmoothCcTensor g 0 4 := lrQB (I := I) (M := M) g gT with hQB
   set QA : SmoothCcTensor g 0 4 := lrQA (I := I) (M := M) g gT with hQA
@@ -4511,7 +4517,7 @@ private theorem covX_bdd_h1
     _ = (Module.finrank ℝ E : ℝ) ^ 2 * (D R * (A + A ^ 2)) ^ 2 := by
       ring
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 set_option linter.unusedVariables false in
 private theorem covX_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -4877,7 +4883,7 @@ private theorem covX_pair_h1
       _ = (2 * (fr * B0c R) ^ 2 + 2 * (fr * B1c R) ^ 2) * (Bh R) ^ 2 *
           (pl * D2 ^ 2) := by ring
   have hD2pl : D2 ^ 2 ≤ pl * D2 ^ 2 := by
-    nlinarith [hpl1, hD22]
+    simpa only [one_mul] using mul_le_mul_of_nonneg_right hpl1 hD22
   calc
     lowJetSq (I := I) (M := M) g 1
         (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
@@ -5046,7 +5052,7 @@ private theorem lieCov_pair_h1
                 Equiv.swap (0 : Fin 4) 1,
               Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
             ![(-1 : ℝ), -1, 1] s =
-      (-1 : ℝ) • appCcRS (I := I) (M := M) g 2 6 2
+      (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 6 2
         (lieCovPair (I := I) (M := M) g gmT)
         (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g 0 4 2
@@ -5062,7 +5068,7 @@ private theorem lieCov_pair_h1
                 Equiv.swap (0 : Fin 4) 1,
               Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
             ![(-1 : ℝ), -1, 1] s =
-      (-1 : ℝ) • appCcRS (I := I) (M := M) g 2 6 2
+      (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 6 2
         (lieCovPair (I := I) (M := M) g gmU)
         (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g 0 4 2
@@ -5072,23 +5078,23 @@ private theorem lieCov_pair_h1
   rw [edgePair_eq_lip (I := I) (M := M) g T hδT hδZ s,
     edgePair_eq_lip (I := I) (M := M) g U hδU hδZ s, hUT, hUU]
   have htel :
-      (-1 : ℝ) • appCcRS (I := I) (M := M) g 2 6 2
+      (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 6 2
           (lieCovPair (I := I) (M := M) g gmT)
           (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g 0 4 2
               (lieCovR4 (I := I) (M := M) g T hδT hδZ s))) -
-        (-1 : ℝ) • appCcRS (I := I) (M := M) g 2 6 2
+        (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 6 2
           (lieCovPair (I := I) (M := M) g gmU)
           (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g 0 4 2
               (lieCovR4 (I := I) (M := M) g U hδU hδZ s))) =
-      (-1 : ℝ) • (appCcRS (I := I) (M := M) g 2 6 2
+      (-1 : ℝ) • (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
           (lieCovPair (I := I) (M := M) g gmT -
             lieCovPair (I := I) (M := M) g gmU)
           (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g 0 4 2
               (lieCovR4 (I := I) (M := M) g T hδT hδZ s))) +
-        appCcRS (I := I) (M := M) g 2 6 2
+        ccOperatorFieldComp (I := I) (M := M) g 2 6 2
           (lieCovPair (I := I) (M := M) g gmU)
           (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g 0 4 2
@@ -5154,7 +5160,7 @@ private theorem lieCov_pair_h1
       _ = (1 + A + A ^ 2) ^ 4 := by ring
   have hpl0 : (0 : ℝ) ≤ (1 + A + A ^ 2) ^ 4 := by positivity
   have hT1 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
         (lieCovPair (I := I) (M := M) g gmT -
           lieCovPair (I := I) (M := M) g gmU)
         (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
@@ -5201,7 +5207,7 @@ private theorem lieCov_pair_h1
       _ = C₂ * Cp ^ 2 * (fr ^ 2 * (Dr R) ^ 2) *
           ((1 + A + A ^ 2) ^ 4 * N ^ 2) := by ring
   have hT2b : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
         (lieCovPair (I := I) (M := M) g gmU)
         (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g 0 4 2
@@ -5228,7 +5234,7 @@ private theorem lieCov_pair_h1
     refine hstep.trans (le_of_eq ?_)
     ring
   have hj1 : (0 : ℝ) ≤ lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
         (lieCovPair (I := I) (M := M) g gmT -
           lieCovPair (I := I) (M := M) g gmU)
         (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
@@ -5237,13 +5243,13 @@ private theorem lieCov_pair_h1
     jet_nonneg_lip (I := I) (M := M) (m := 1) g _
   calc
     lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 6 2
+        (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
             (lieCovPair (I := I) (M := M) g gmT -
               lieCovPair (I := I) (M := M) g gmU)
             (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g 0 4 2
                 (lieCovR4 (I := I) (M := M) g T hδT hδZ s))) +
-          appCcRS (I := I) (M := M) g 2 6 2
+          ccOperatorFieldComp (I := I) (M := M) g 2 6 2
             (lieCovPair (I := I) (M := M) g gmU)
             (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
                 (slotExtendIter (I := I) (M := M) g 0 4 2
@@ -5252,14 +5258,14 @@ private theorem lieCov_pair_h1
                 (slotExtendIter (I := I) (M := M) g 0 4 2
                   (lieCovR4 (I := I) (M := M) g U hδU hδZ s)))) ≤
       2 * (lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 2 6 2
+          (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
             (lieCovPair (I := I) (M := M) g gmT -
               lieCovPair (I := I) (M := M) g gmU)
             (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g 0 4 2
                 (lieCovR4 (I := I) (M := M) g T hδT hδZ s)))) +
         lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 2 6 2
+          (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
             (lieCovPair (I := I) (M := M) g gmU)
             (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
                 (slotExtendIter (I := I) (M := M) g 0 4 2
@@ -5365,7 +5371,7 @@ private noncomputable def ipHead (g : SmoothRiemannianMetric I M) :
 private theorem ip_form_lip
     (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g 0 1) :
     ipLowCc (I := I) (M := M) g om =
-      appCcRS (I := I) (M := M) g 2 3 1 (ipHead (I := I) (M := M) g)
+      ccOperatorFieldComp (I := I) (M := M) g 2 3 1 (ipHead (I := I) (M := M) g)
         (slotExtend (I := I) (M := M) g 1 2
           (slotExtend (I := I) (M := M) g 0 1 om)) := rfl
 
@@ -5845,9 +5851,9 @@ private theorem vb_pair_h1
   set LvT : SmoothCcTensor g 4 2 := lc0RiemLive (I := I) (M := M) g gmT with hLvT
   set LvU : SmoothCcTensor g 4 2 := lc0RiemLive (I := I) (M := M) g gmU with hLvU
   set InT : SmoothCcTensor g 2 4 :=
-    appCcRS (I := I) (M := M) g 2 1 4 VmT IpT with hInT
+    ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmT IpT with hInT
   set InU : SmoothCcTensor g 2 4 :=
-    appCcRS (I := I) (M := M) g 2 1 4 VmU IpU with hInU
+    ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU IpU with hInU
   ------------------------------------------------------------------
   -- ## trace moduli (ρ-cascade), verbatim shape from `amixHalf_pair_h1`
   ------------------------------------------------------------------
@@ -5962,9 +5968,9 @@ private theorem vb_pair_h1
   have hTr1d2 : lowJetSq (I := I) (M := M) g 2 (Tr1T - Tr1U) ≤ Ct1 ^ 2 * u := by
     rw [hTr1T, hTr1U, trPair_sub_lip, reindex_jet_lip]
     exact htp1'
-  have hWTform : WT = appCcRS (I := I) (M := M) g 0 3 1 Tr1T cdT := by
+  have hWTform : WT = ccOperatorFieldComp (I := I) (M := M) g 0 3 1 Tr1T cdT := by
     rw [hWTdef, hTr1T, hcdT, wOmega_refold]
-  have hWUform : WU = appCcRS (I := I) (M := M) g 0 3 1 Tr1U cdU := by
+  have hWUform : WU = ccOperatorFieldComp (I := I) (M := M) g 0 3 1 Tr1U cdU := by
     rw [hWUdef, hTr1U, hcdU, wOmega_refold]
   have hWT2 : lowJetSq (I := I) (M := M) g 2 WT ≤ Wb R * pl2 := by
     rw [hWTform]
@@ -5979,13 +5985,13 @@ private theorem vb_pair_h1
       _ = Wb R * pl2 := by simp only [Wb]; ring
   have hWd1 : lowJetSq (I := I) (M := M) g 1 (WT - WU) ≤ Wm R * (pl2 * u) := by
     have hdel : WT - WU =
-        appCcRS (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT +
-          appCcRS (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU) := by
+        ccOperatorFieldComp (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT +
+          ccOperatorFieldComp (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU) := by
       rw [hWTform, hWUform, appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hdel]
     have h1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT) ≤
         Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 * (pl2 * u) := by
       refine (happW1 _ cdT).trans ?_
       calc
@@ -5997,7 +6003,7 @@ private theorem vb_pair_h1
             (mul_nonneg hCw1 (by positivity))
         _ = Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 * (pl2 * u) := by ring
     have h2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU)) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU)) ≤
         Cw1 * Bt1 ^ 2 * (2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u) := by
       refine (happW1 Tr1U _).trans ?_
       calc
@@ -6106,7 +6112,7 @@ private theorem vb_pair_h1
         exact mul_le_mul_of_nonneg_left this hfr
       _ = Vd R * (pl2 * u) := by simp only [Vd]; ring
   ------------------------------------------------------------------
-  -- ## level In (inner `appCcRS`)
+  -- ## level In (inner `ccOperatorFieldComp`)
   ------------------------------------------------------------------
   have hInT1 : lowJetSq (I := I) (M := M) g 1 InT ≤ Sin R * (pl2 * pl2) := by
     rw [hInT]
@@ -6122,13 +6128,13 @@ private theorem vb_pair_h1
   have hInd1 : lowJetSq (I := I) (M := M) g 1 (InT - InU) ≤
       2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
     have hdel : InT - InU =
-        appCcRS (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT +
-          appCcRS (I := I) (M := M) g 2 1 4 VmU (IpT - IpU) := by
+        ccOperatorFieldComp (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT +
+          ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU (IpT - IpU) := by
       rw [hInT, hInU, appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hdel]
     have h1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT) ≤
         Kv R * ((pl2 * pl2) * u) := by
       refine (happIn12 (VmT - VmU) IpT).trans ?_
       calc
@@ -6140,7 +6146,7 @@ private theorem vb_pair_h1
             (mul_nonneg hCin12 (mul_nonneg (hVd R hR) hpl2u))
         _ = Kv R * ((pl2 * pl2) * u) := by simp only [Kv]; ring
     have h2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 1 4 VmU (IpT - IpU)) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU (IpT - IpU)) ≤
         Ki R * ((pl2 * pl2) * u) := by
       refine (happIn1 VmU (IpT - IpU)).trans ?_
       calc
@@ -6168,19 +6174,19 @@ private theorem vb_pair_h1
     rw [hLvU, riemLive_eq]
     exact htb2'.2
   have hFormT : lc0VB (I := I) (M := M) g gmT =
-      (2 : ℝ) • appCcRS (I := I) (M := M) g 2 4 2 LvT InT := by
+      (2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvT InT := by
     rw [hLvT, hInT, hVmT, hIpT, hWTdef, vb_refold_rf, lc0VBFormRF]
   have hFormU : lc0VB (I := I) (M := M) g gmU =
-      (2 : ℝ) • appCcRS (I := I) (M := M) g 2 4 2 LvU InU := by
+      (2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU InU := by
     rw [hLvU, hInU, hVmU, hIpU, hWUdef, vb_refold_rf, lc0VBFormRF]
   have hdel1 : lc0VB (I := I) (M := M) g gmT - lc0VB (I := I) (M := M) g gmU =
-      (2 : ℝ) • (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
-        appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) := by
+      (2 : ℝ) • (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
+        ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) := by
     rw [hFormT, hFormU, appCcRS_sub_left, appCcRS_sub_right]
     module
   rw [hdel1, jet_smul_lip]
   have h1 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT) ≤
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT) ≤
       K1 R * ((pl2 * pl2) * u) := by
     refine (happOut (LvT - LvU) InT).trans ?_
     calc
@@ -6192,7 +6198,7 @@ private theorem vb_pair_h1
           (mul_nonneg hCout (by positivity))
       _ = K1 R * ((pl2 * pl2) * u) := by simp only [K1]; ring
   have h2 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
       K2 R * ((pl2 * pl2) * u) := by
     refine (happOut LvU (InT - InU)).trans ?_
     calc
@@ -6205,8 +6211,8 @@ private theorem vb_pair_h1
           (mul_nonneg hCout (sq_nonneg _))
       _ = K2 R * ((pl2 * pl2) * u) := by simp only [K2]; ring
   have hsum : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
-        appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
+        ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
       2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u)) := by
     calc
       lowJetSq (I := I) (M := M) g 1 (_ + _) ≤
@@ -6219,8 +6225,8 @@ private theorem vb_pair_h1
   rw [h4]
   calc
     (4 : ℝ) * lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
-          appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
+          ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
         4 * (2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u))) :=
       mul_le_mul_of_nonneg_left hsum (by norm_num)
     _ = B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
@@ -6648,11 +6654,11 @@ private theorem amixHalf_pair_h1
   set S5U : SmoothCcTensor g 2 5 :=
     slotExtendIter (I := I) (M := M) g 0 3 2 mcdU with hS5Udef
   set S4T : SmoothCcTensor g 2 3 :=
-    appCcRS (I := I) (M := M) g 2 5 3
+    ccOperatorFieldComp (I := I) (M := M) g 2 5 3
       (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ) S5T
     with hS4Tdef
   set S4U : SmoothCcTensor g 2 3 :=
-    appCcRS (I := I) (M := M) g 2 5 3
+    ccOperatorFieldComp (I := I) (M := M) g 2 5 3
       (lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ) S5U
     with hS4Udef
   set E3T : SmoothCcTensor g 3 6 :=
@@ -6660,22 +6666,22 @@ private theorem amixHalf_pair_h1
   set E3U : SmoothCcTensor g 3 6 :=
     slotExtendIter (I := I) (M := M) g 0 3 3 mcdU with hE3Udef
   set S3T : SmoothCcTensor g 2 6 :=
-    appCcRS (I := I) (M := M) g 2 3 6 E3T S4T with hS3Tdef
+    ccOperatorFieldComp (I := I) (M := M) g 2 3 6 E3T S4T with hS3Tdef
   set S3U : SmoothCcTensor g 2 6 :=
-    appCcRS (I := I) (M := M) g 2 3 6 E3U S4U with hS3Udef
+    ccOperatorFieldComp (I := I) (M := M) g 2 3 6 E3U S4U with hS3Udef
   set S2T : SmoothCcTensor g 2 4 :=
-    appCcRS (I := I) (M := M) g 2 6 4
+    ccOperatorFieldComp (I := I) (M := M) g 2 6 4
       (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1) S3T
     with hS2Tdef
   set S2U : SmoothCcTensor g 2 4 :=
-    appCcRS (I := I) (M := M) g 2 6 4
+    ccOperatorFieldComp (I := I) (M := M) g 2 6 4
       (lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1) S3U
     with hS2Udef
   have hHalfT : lc0AMixHalfRF (I := I) (M := M) g gmT g σlast =
-      appCcRS (I := I) (M := M) g 2 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmT 2 σlast) S2T := rfl
   have hHalfU : lc0AMixHalfRF (I := I) (M := M) g gmU g σlast =
-      appCcRS (I := I) (M := M) g 2 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2U := rfl
   -- singles, T-state
   have hmcdT1 : lowJetSq (I := I) (M := M) g 1 mcdT ≤
@@ -6877,11 +6883,11 @@ private theorem amixHalf_pair_h1
       _ = M5 R * (pl2 * u) := by simp only [M5]; ring
   -- level-4 difference
   have hdel4 : S4T - S4U =
-      appCcRS (I := I) (M := M) g 2 5 3
+      ccOperatorFieldComp (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
             lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ)
           S5T +
-        appCcRS (I := I) (M := M) g 2 5 3
+        ccOperatorFieldComp (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ)
           (S5T - S5U) := by
     rw [hS4Tdef, hS4Udef, appCcRS_sub_left, appCcRS_sub_right]
@@ -6896,7 +6902,7 @@ private theorem amixHalf_pair_h1
       2 * (K4 R * (pl2 * u) + K5 R * (pl2 * u)) := by
     rw [hdel4]
     have h1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 5 3
+        (ccOperatorFieldComp (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
             lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ)
           S5T) ≤ K4 R * (pl2 * u) := by
@@ -6913,7 +6919,7 @@ private theorem amixHalf_pair_h1
             (mul_nonneg hCa4 (by positivity))
         _ = K4 R * (pl2 * u) := by simp only [K4]; ring
     have h2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 5 3
+        (ccOperatorFieldComp (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmU 3 LieCorr0Core.lieCorr0AMixPermQ)
           (S5T - S5U)) ≤ K5 R * (pl2 * u) := by
       refine (happ4 _ _).trans ?_
@@ -6938,8 +6944,8 @@ private theorem amixHalf_pair_h1
         linarith [h1, h2]
   -- level-3 difference
   have hdel3 : S3T - S3U =
-      appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
-        appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
+      ccOperatorFieldComp (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
+        ccOperatorFieldComp (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
     rw [hS3Tdef, hS3Udef, appCcRS_sub_left, appCcRS_sub_right]
     module
   have hdelE3 : E3T - E3U =
@@ -6988,7 +6994,7 @@ private theorem amixHalf_pair_h1
       2 * (K3 R * ((pl2 * pl2) * u) + K34 R * ((pl2 * pl2) * u)) := by
     rw [hdel3]
     have h1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T) ≤
         K3 R * ((pl2 * pl2) * u) := by
       refine (happ3f (E3T - E3U) S4T).trans ?_
       calc
@@ -7002,7 +7008,7 @@ private theorem amixHalf_pair_h1
             (mul_nonneg hCa3f (by positivity))
         _ = K3 R * ((pl2 * pl2) * u) := by simp only [K3]; ring
     have h2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U)) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 6 E3U (S4T - S4U)) ≤
         K34 R * ((pl2 * pl2) * u) := by
       refine (happ3 E3U _).trans ?_
       calc
@@ -7027,11 +7033,11 @@ private theorem amixHalf_pair_h1
         linarith [h1, h2]
   -- level-2 difference
   have hdel2 : S2T - S2U =
-      appCcRS (I := I) (M := M) g 2 6 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
             lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1)
           S3T +
-        appCcRS (I := I) (M := M) g 2 6 4
+        ccOperatorFieldComp (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1)
           (S3T - S3U) := by
     rw [hS2Tdef, hS2Udef, appCcRS_sub_left, appCcRS_sub_right]
@@ -7046,7 +7052,7 @@ private theorem amixHalf_pair_h1
       2 * (K2 R * ((pl2 * pl2) * u) + K23 R * ((pl2 * pl2) * u)) := by
     rw [hdel2]
     have h1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 6 4
+        (ccOperatorFieldComp (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
             lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1)
           S3T) ≤ K2 R * ((pl2 * pl2) * u) := by
@@ -7063,7 +7069,7 @@ private theorem amixHalf_pair_h1
             (mul_nonneg hCa2 (by positivity))
         _ = K2 R * ((pl2 * pl2) * u) := by simp only [K2]; ring
     have h2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 6 4
+        (ccOperatorFieldComp (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmU 4 LieCorr0Core.lieCorr0AMixPerm1)
           (S3T - S3U)) ≤ K23 R * ((pl2 * pl2) * u) := by
       refine (happ2 _ _).trans ?_
@@ -7097,17 +7103,17 @@ private theorem amixHalf_pair_h1
     exact htp2'
   have hdel1 : lc0AMixHalfRF (I := I) (M := M) g gmT g σlast -
       lc0AMixHalfRF (I := I) (M := M) g gmU g σlast =
-      appCcRS (I := I) (M := M) g 2 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 2
           (lc0TraceRF (I := I) (M := M) g gmT 2 σlast -
             lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2T +
-        appCcRS (I := I) (M := M) g 2 4 2
+        ccOperatorFieldComp (I := I) (M := M) g 2 4 2
           (lc0TraceRF (I := I) (M := M) g gmU 2 σlast)
           (S2T - S2U) := by
     rw [hHalfT, hHalfU, appCcRS_sub_left, appCcRS_sub_right]
     module
   rw [hdel1]
   have h1 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmT 2 σlast -
           lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2T) ≤
       K1 R * ((pl2 * pl2) * u) := by
@@ -7124,7 +7130,7 @@ private theorem amixHalf_pair_h1
           (mul_nonneg hCa1 (by positivity))
       _ = K1 R * ((pl2 * pl2) * u) := by simp only [K1]; ring
   have h2 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmU 2 σlast)
         (S2T - S2U)) ≤
       K12 R * ((pl2 * pl2) * u) := by
@@ -7346,13 +7352,13 @@ private theorem ccSymm_sub_lip
         ccInputSymm (I := I) (M := M) g D =
       ccInputSymm (I := I) (M := M) g (C - D) := by
   have hC : ccInputSymm (I := I) (M := M) g C =
-      (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C
+      (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
         (ccSlotSwapField (I := I) (M := M) g)) := rfl
   have hD : ccInputSymm (I := I) (M := M) g D =
-      (1 / 2 : ℝ) • (D + appCcRS (I := I) (M := M) g 2 2 2 D
+      (1 / 2 : ℝ) • (D + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D
         (ccSlotSwapField (I := I) (M := M) g)) := rfl
   have hCD : ccInputSymm (I := I) (M := M) g (C - D) =
-      (1 / 2 : ℝ) • ((C - D) + appCcRS (I := I) (M := M) g 2 2 2 (C - D)
+      (1 / 2 : ℝ) • ((C - D) + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 (C - D)
         (ccSlotSwapField (I := I) (M := M) g)) := rfl
   rw [hC, hD, hCD, appCcRS_sub_left]
   module
@@ -7380,7 +7386,7 @@ private theorem inputSymm_h1
     jet_nonneg_lip (I := I) (M := M) (m := 1) g C
   have happ' :
       lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 2 2 2 C
+          (ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
             (ccSlotSwapField (I := I) (M := M) g)) ≤
         Ca * lowJetSq (I := I) (M := M) g 2
             (ccSlotSwapField (I := I) (M := M) g) *
@@ -7388,7 +7394,7 @@ private theorem inputSymm_h1
     have h := happ C (ccSlotSwapField (I := I) (M := M) g)
     calc
       lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 2 2 2 C
+          (ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
             (ccSlotSwapField (I := I) (M := M) g)) ≤
           Ca * lowJetSq (I := I) (M := M) g 1 C *
             lowJetSq (I := I) (M := M) g 2
@@ -7398,7 +7404,7 @@ private theorem inputSymm_h1
           lowJetSq (I := I) (M := M) g 1 C := by ring
   have hsum :
       lowJetSq (I := I) (M := M) g 1
-          (C + appCcRS (I := I) (M := M) g 2 2 2 C
+          (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
             (ccSlotSwapField (I := I) (M := M) g)) ≤
         2 * (1 + Ca * lowJetSq (I := I) (M := M) g 2
             (ccSlotSwapField (I := I) (M := M) g)) *
@@ -7406,11 +7412,11 @@ private theorem inputSymm_h1
     refine (jet_add_lip (I := I) (M := M) g 1 C _).trans ?_
     linarith [happ']
   have hnn : 0 ≤ lowJetSq (I := I) (M := M) g 1
-      (C + appCcRS (I := I) (M := M) g 2 2 2 C
+      (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
         (ccSlotSwapField (I := I) (M := M) g)) :=
     jet_nonneg_lip (I := I) (M := M) (m := 1) g _
   have hform : ccInputSymm (I := I) (M := M) g C =
-      (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C
+      (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
         (ccSlotSwapField (I := I) (M := M) g)) := rfl
   rw [hform, jet_smul_lip]
   linarith [hsum, hnn]
@@ -7564,6 +7570,7 @@ private theorem connIns_pair_h1
       connDiffContrInsertionField_eq_reindex_slotExtend_two
         (I := I) (M := M) g gU,
       slotExtend_sub, slotExtend_sub, reindex_sub_lip]
+    rw [show connDiffContrInsertionReindexPerm = coreInPerm201 from rfl]
   rw [hsub, reindex_jet_lip]
   calc
     lowJetSq (I := I) (M := M) g 1
@@ -8072,19 +8079,19 @@ private theorem dagLow_pair_h1
     hρc, by positivity, ?_⟩
   intro T U gT gU hTtie hUtie hTn hUn
   have hformT : LowBaseInternal.dagLowOp (I := I) (M := M) g gT =
-      appCcRS (I := I) (M := M) g 3 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 3 4 4
         (permCoeff (I := I) (M := M) g LowBaseInternal.daPermA)
         (covGrad (I := I) (M := M) g 3 3
           (LowBaseInternal.connLowOp (I := I) (M := M) g gT)) := rfl
   have hformU : LowBaseInternal.dagLowOp (I := I) (M := M) g gU =
-      appCcRS (I := I) (M := M) g 3 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 3 4 4
         (permCoeff (I := I) (M := M) g LowBaseInternal.daPermA)
         (covGrad (I := I) (M := M) g 3 3
           (LowBaseInternal.connLowOp (I := I) (M := M) g gU)) := rfl
   have hsub :
       LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
           LowBaseInternal.dagLowOp (I := I) (M := M) g gU =
-        appCcRS (I := I) (M := M) g 3 4 4
+        ccOperatorFieldComp (I := I) (M := M) g 3 4 4
           (permCoeff (I := I) (M := M) g LowBaseInternal.daPermA)
           (covGrad (I := I) (M := M) g 3 3
             (LowBaseInternal.connLowOp (I := I) (M := M) g gT -
@@ -8144,7 +8151,7 @@ private def aaP120 : Equiv.Perm (Fin 3) :=
 private noncomputable def aaInn
     (g gm : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 3)) :
     SmoothCcTensor g 2 3 :=
-  appCcRS (I := I) (M := M) g 2 3 3
+  ccOperatorFieldComp (I := I) (M := M) g 2 3 3
     (permCoeff (I := I) (M := M) g ρ)
     (connDiffContrInsertionInnerField (I := I) g gm)
 
@@ -8153,9 +8160,9 @@ product of the outer connection-insertion field with an inner factor. -/
 private noncomputable def aaBlk
     (g gm : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (Z : SmoothCcTensor g 2 3) : SmoothCcTensor g 2 4 :=
-  appCcRS (I := I) (M := M) g 2 4 4
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 4
     (permCoeff (I := I) (M := M) g pm)
-    (appCcRS (I := I) (M := M) g 2 3 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
       (connDiffContrInsertionField (I := I) g gm) Z)
 
 set_option maxHeartbeats 1600000 in
@@ -8307,9 +8314,9 @@ private theorem aaBlk_h2
       (permCoeff (I := I) (M := M) g pm) :=
     jet_nonneg_lip (I := I) (M := M) (m := 2) g _
   have hform : aaBlk (I := I) (M := M) g gm pm Z =
-      appCcRS (I := I) (M := M) g 2 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 4
         (permCoeff (I := I) (M := M) g pm)
-        (appCcRS (I := I) (M := M) g 2 3 4
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gm) Z) := rfl
   rw [hform]
   refine (h244 (permCoeff (I := I) (M := M) g pm) _).trans ?_
@@ -8317,7 +8324,7 @@ private theorem aaBlk_h2
     C244 * lowJetSq (I := I) (M := M) g 2
           (permCoeff (I := I) (M := M) g pm) *
         lowJetSq (I := I) (M := M) g 2
-          (appCcRS (I := I) (M := M) g 2 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
             (connDiffContrInsertionField (I := I) g gm) Z) ≤
         C244 * lowJetSq (I := I) (M := M) g 2
             (permCoeff (I := I) (M := M) g pm) *
@@ -8374,40 +8381,40 @@ private theorem aaBlk_pair_h1
     mul_nonneg (jet_nonneg_lip (I := I) (M := M) (m := 2) g _)
       (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
   have hformT : aaBlk (I := I) (M := M) g gT pm ZT =
-      appCcRS (I := I) (M := M) g 2 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 4
         (permCoeff (I := I) (M := M) g pm)
-        (appCcRS (I := I) (M := M) g 2 3 4
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gT) ZT) := rfl
   have hformU : aaBlk (I := I) (M := M) g gU pm ZU =
-      appCcRS (I := I) (M := M) g 2 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 4
         (permCoeff (I := I) (M := M) g pm)
-        (appCcRS (I := I) (M := M) g 2 3 4
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gU) ZU) := rfl
-  have hinner : appCcRS (I := I) (M := M) g 2 3 4
+  have hinner : ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gT -
           connDiffContrInsertionField (I := I) g gU) ZT +
-      appCcRS (I := I) (M := M) g 2 3 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gU) (ZT - ZU) =
-      appCcRS (I := I) (M := M) g 2 3 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gT) ZT -
-        appCcRS (I := I) (M := M) g 2 3 4
+        ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gU) ZU := by
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have hsub : aaBlk (I := I) (M := M) g gT pm ZT -
         aaBlk (I := I) (M := M) g gU pm ZU =
-      appCcRS (I := I) (M := M) g 2 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 4
         (permCoeff (I := I) (M := M) g pm)
-        (appCcRS (I := I) (M := M) g 2 3 4
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
             (connDiffContrInsertionField (I := I) g gT -
               connDiffContrInsertionField (I := I) g gU) ZT +
-          appCcRS (I := I) (M := M) g 2 3 4
+          ccOperatorFieldComp (I := I) (M := M) g 2 3 4
             (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)) := by
     rw [hformT, hformU, hinner, appCcRS_sub_right]
   rw [hsub]
   refine (hout _ _).trans ?_
   have h1 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gT -
           connDiffContrInsertionField (I := I) g gU) ZT) ≤
       Cf * (lowJetSq (I := I) (M := M) g 1
@@ -8418,7 +8425,7 @@ private theorem aaBlk_pair_h1
       connDiffContrInsertionField (I := I) g gU) ZT
     linarith [h]
   have h2 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)) ≤
       Cb * (lowJetSq (I := I) (M := M) g 2
           (connDiffContrInsertionField (I := I) g gU) *
@@ -8426,10 +8433,10 @@ private theorem aaBlk_pair_h1
     have h := hright (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)
     linarith [h]
   have hY : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gT -
             connDiffContrInsertionField (I := I) g gU) ZT +
-        appCcRS (I := I) (M := M) g 2 3 4
+        ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)) ≤
       2 * (Cf * (lowJetSq (I := I) (M := M) g 1
             (connDiffContrInsertionField (I := I) g gT -
@@ -8547,7 +8554,7 @@ private theorem aaKer_bdd_h2
         (permCoeff (I := I) (M := M) g ρ) :=
       jet_nonneg_lip (I := I) (M := M) (m := 2) g _
     have hform : aaInn (I := I) (M := M) g gT ρ =
-        appCcRS (I := I) (M := M) g 2 3 3
+        ccOperatorFieldComp (I := I) (M := M) g 2 3 3
           (permCoeff (I := I) (M := M) g ρ)
           (connDiffContrInsertionInnerField (I := I) g gT) := rfl
     rw [hform]
@@ -8827,7 +8834,7 @@ private theorem aaKer_pair_h1
     intro ρ hρ
     have hpm := aaPK_ge3 (I := I) (M := M) g ρ hρ
     have hform : aaInn (I := I) (M := M) g gT ρ =
-        appCcRS (I := I) (M := M) g 2 3 3
+        ccOperatorFieldComp (I := I) (M := M) g 2 3 3
           (permCoeff (I := I) (M := M) g ρ)
           (connDiffContrInsertionInnerField (I := I) g gT) := rfl
     rw [hform]
@@ -8850,16 +8857,16 @@ private theorem aaKer_pair_h1
     have hpm := aaPK_ge3 (I := I) (M := M) g ρ hρ
     have hsub : aaInn (I := I) (M := M) g gT ρ -
           aaInn (I := I) (M := M) g gU ρ =
-        appCcRS (I := I) (M := M) g 2 3 3
+        ccOperatorFieldComp (I := I) (M := M) g 2 3 3
           (permCoeff (I := I) (M := M) g ρ)
           (connDiffContrInsertionInnerField (I := I) g gT -
             connDiffContrInsertionInnerField (I := I) g gU) := by
       have hfT : aaInn (I := I) (M := M) g gT ρ =
-          appCcRS (I := I) (M := M) g 2 3 3
+          ccOperatorFieldComp (I := I) (M := M) g 2 3 3
             (permCoeff (I := I) (M := M) g ρ)
             (connDiffContrInsertionInnerField (I := I) g gT) := rfl
       have hfU : aaInn (I := I) (M := M) g gU ρ =
-          appCcRS (I := I) (M := M) g 2 3 3
+          ccOperatorFieldComp (I := I) (M := M) g 2 3 3
             (permCoeff (I := I) (M := M) g ρ)
             (connDiffContrInsertionInnerField (I := I) g gU) := rfl
       rw [hfT, hfU, appCcRS_sub_right]
@@ -9129,20 +9136,20 @@ private theorem ricciAA_pair_h1
       mul_le_mul_of_nonneg_left hDu (by positivity)
     exact mul_le_mul_of_nonneg_left hstep hBdR
   have hformT : ricciAAArm (I := I) (M := M) g gT =
-      appCcRS (I := I) (M := M) g 2 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (ricciCometricFourTraceCastG0 (I := I) g gT)
         (ricciAAKer (I := I) (M := M) g gT) := rfl
   have hformU : ricciAAArm (I := I) (M := M) g gU =
-      appCcRS (I := I) (M := M) g 2 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (ricciCometricFourTraceCastG0 (I := I) g gU)
         (ricciAAKer (I := I) (M := M) g gU) := rfl
   have hdel : ricciAAArm (I := I) (M := M) g gT -
         ricciAAArm (I := I) (M := M) g gU =
-      appCcRS (I := I) (M := M) g 2 4 2
+      ccOperatorFieldComp (I := I) (M := M) g 2 4 2
           (ricciCometricFourTraceCastG0 (I := I) g gT -
             ricciCometricFourTraceCastG0 (I := I) g gU)
           (ricciAAKer (I := I) (M := M) g gT) +
-        appCcRS (I := I) (M := M) g 2 4 2
+        ccOperatorFieldComp (I := I) (M := M) g 2 4 2
           (ricciCometricFourTraceCastG0 (I := I) g gU)
           (ricciAAKer (I := I) (M := M) g gT -
             ricciAAKer (I := I) (M := M) g gU) := by
@@ -9150,7 +9157,7 @@ private theorem ricciAA_pair_h1
     module
   rw [hdel]
   have h1 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (ricciCometricFourTraceCastG0 (I := I) g gT -
           ricciCometricFourTraceCastG0 (I := I) g gU)
         (ricciAAKer (I := I) (M := M) g gT)) ≤ K1 R * (W * u) := by
@@ -9167,7 +9174,7 @@ private theorem ricciAA_pair_h1
           (mul_nonneg hCa (by positivity))
       _ = K1 R * (W * u) := by simp only [K1]; ring
   have h2 : lowJetSq (I := I) (M := M) g 1
-      (appCcRS (I := I) (M := M) g 2 4 2
+      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (ricciCometricFourTraceCastG0 (I := I) g gU)
         (ricciAAKer (I := I) (M := M) g gT -
           ricciAAKer (I := I) (M := M) g gU)) ≤ K2 R * (W * u) := by
@@ -9190,12 +9197,12 @@ private theorem ricciAA_pair_h1
     ring
   calc
     2 * (lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 2 4 2
+          (ccOperatorFieldComp (I := I) (M := M) g 2 4 2
             (ricciCometricFourTraceCastG0 (I := I) g gT -
               ricciCometricFourTraceCastG0 (I := I) g gU)
             (ricciAAKer (I := I) (M := M) g gT)) +
         lowJetSq (I := I) (M := M) g 1
-          (appCcRS (I := I) (M := M) g 2 4 2
+          (ccOperatorFieldComp (I := I) (M := M) g 2 4 2
             (ricciCometricFourTraceCastG0 (I := I) g gU)
             (ricciAAKer (I := I) (M := M) g gT -
               ricciAAKer (I := I) (M := M) g gU))) ≤
@@ -9326,11 +9333,11 @@ private theorem ricciDA_pair_h1
     linarith only [h]
   -- ## the moving factors
   set GT : SmoothCcTensor g 0 4 :=
-    appCcRS (I := I) (M := M) g 0 3 4
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 4
       (LowBaseInternal.dagLowOp (I := I) (M := M) g gT)
       (covGrad (I := I) (M := M) g 0 2 P) with hGT
   set GU : SmoothCcTensor g 0 4 :=
-    appCcRS (I := I) (M := M) g 0 3 4
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 4
       (LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
       (covGrad (I := I) (M := M) g 0 2 Q) with hGU
   set ET : SmoothCcTensor g 2 2 :=
@@ -9360,11 +9367,11 @@ private theorem ricciDA_pair_h1
       (covGrad (I := I) (M := M) g 0 2 (P - Q)) ≤ D2 ^ 2 :=
     (grad_h1_le_h2_lip (I := I) (M := M) g (P - Q)).trans hPQ2
   -- ## the `G` telescope
-  have hGcomb : appCcRS (I := I) (M := M) g 0 3 4
+  have hGcomb : ccOperatorFieldComp (I := I) (M := M) g 0 3 4
         (LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
           LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
         (covGrad (I := I) (M := M) g 0 2 P) +
-      appCcRS (I := I) (M := M) g 0 3 4
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4
         (LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
         (covGrad (I := I) (M := M) g 0 2 (P - Q)) = GT - GU := by
     rw [hGT, hGU, appCcRS_sub_left, covGrad_sub, appCcRS_sub_right]
@@ -9372,7 +9379,7 @@ private theorem ricciDA_pair_h1
   have hGd : lowJetSq (I := I) (M := M) g 1 (GT - GU) ≤ c1 * (p * u) := by
     rw [← hGcomb]
     have e1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 0 3 4
+        (ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
             LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
           (covGrad (I := I) (M := M) g 0 2 P)) ≤
@@ -9398,7 +9405,7 @@ private theorem ricciDA_pair_h1
         _ ≤ Cf034 * Cd * (u * p) := hmulc
         _ = Cf034 * Cd * (p * u) := by ring
     have e2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 0 3 4
+        (ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
           (covGrad (I := I) (M := M) g 0 2 (P - Q))) ≤
         2 * (Ca034 * Kdag) * (p * u) := by
@@ -9488,26 +9495,26 @@ private theorem ricciDA_pair_h1
         2 * (D1 R * (p * u) + D2c R * (p ^ 3 * u)) := by
     intro σ
     have hfT : LowBaseInternal.daMono (I := I) (M := M) g gT GT σ =
-        appCcRS (I := I) (M := M) g 2 2 2
+        ccOperatorFieldComp (I := I) (M := M) g 2 2 2
           (refoldKernelContractionMonomialField (I := I) (M := M) g g GT σ)
           ET := by rw [hET]; rfl
     have hfU : LowBaseInternal.daMono (I := I) (M := M) g gU GU σ =
-        appCcRS (I := I) (M := M) g 2 2 2
+        ccOperatorFieldComp (I := I) (M := M) g 2 2 2
           (refoldKernelContractionMonomialField (I := I) (M := M) g g GU σ)
           EU := by rw [hEU]; rfl
     have hsub : LowBaseInternal.daMono (I := I) (M := M) g gT GT σ -
           LowBaseInternal.daMono (I := I) (M := M) g gU GU σ =
-        appCcRS (I := I) (M := M) g 2 2 2
+        ccOperatorFieldComp (I := I) (M := M) g 2 2 2
             (refoldKernelContractionMonomialField (I := I) (M := M) g g
               (GT - GU) σ) ET +
-          appCcRS (I := I) (M := M) g 2 2 2
+          ccOperatorFieldComp (I := I) (M := M) g 2 2 2
             (refoldKernelContractionMonomialField (I := I) (M := M) g g GU σ)
             (ET - EU) := by
       rw [hfT, hfU, refold_sub_lip, appCcRS_sub_left, appCcRS_sub_right]
       module
     rw [hsub]
     have e1 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g 2 2 2
           (refoldKernelContractionMonomialField (I := I) (M := M) g g
             (GT - GU) σ) ET) ≤ D1 R * (p * u) := by
       refine (h222f _ _).trans ?_
@@ -9528,7 +9535,7 @@ private theorem ricciDA_pair_h1
       apply le_of_eq
       ring
     have e2 : lowJetSq (I := I) (M := M) g 1
-        (appCcRS (I := I) (M := M) g 2 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g 2 2 2
           (refoldKernelContractionMonomialField (I := I) (M := M) g g GU σ)
           (ET - EU)) ≤ D2c R * (p ^ 3 * u) := by
       refine (h222a _ _).trans ?_
@@ -10378,12 +10385,12 @@ theorem a1Sub_lo_tame
       rw [hC1eq]
       exact hM1
     have ha1 : D.a1 (I := I) (M := M) V =
-        appCc (I := I) (M := M) g 2 2 D.C0 V +
-          appCc (I := I) (M := M) g 3 2 D.C1
+        operatorFieldApply (I := I) (M := M) g 2 2 D.C0 V +
+          operatorFieldApply (I := I) (M := M) g 3 2 D.C1
             (iteratedCovGrad (I := I) g 0 2 1 V) := rfl
     rw [ha1]
     have hL : lowJetSq (I := I) (M := M) g 1
-        (appCc (I := I) (M := M) g 2 2 D.C0 V) ≤
+        (operatorFieldApply (I := I) (M := M) g 2 2 D.C0 V) ≤
         Ca * (Bq0 R * X) * lowJetSq (I := I) (M := M) g 2 V := by
       have h := happ12 D.C0 V
       rw [appCcRS_zero_eq_appCc] at h
@@ -10392,7 +10399,7 @@ theorem a1Sub_lo_tame
         (mul_le_mul_of_nonneg_left hj0 hCa)
         (jet_nonneg_lip (I := I) (M := M) (m := 2) g V)
     have hRt : lowJetSq (I := I) (M := M) g 1
-        (appCc (I := I) (M := M) g 3 2 D.C1
+        (operatorFieldApply (I := I) (M := M) g 3 2 D.C1
           (iteratedCovGrad (I := I) g 0 2 1 V)) ≤
         Cb * M1 * lowJetSq (I := I) (M := M) g 2 V := by
       have h := happ21 D.C1 (iteratedCovGrad (I := I) g 0 2 1 V)
@@ -10405,13 +10412,13 @@ theorem a1Sub_lo_tame
           (mul_nonneg hCb hM1n))
     calc
       lowJetSq (I := I) (M := M) g 1
-          (appCc (I := I) (M := M) g 2 2 D.C0 V +
-            appCc (I := I) (M := M) g 3 2 D.C1
+          (operatorFieldApply (I := I) (M := M) g 2 2 D.C0 V +
+            operatorFieldApply (I := I) (M := M) g 3 2 D.C1
               (iteratedCovGrad (I := I) g 0 2 1 V)) ≤
         2 * (lowJetSq (I := I) (M := M) g 1
-            (appCc (I := I) (M := M) g 2 2 D.C0 V) +
+            (operatorFieldApply (I := I) (M := M) g 2 2 D.C0 V) +
           lowJetSq (I := I) (M := M) g 1
-            (appCc (I := I) (M := M) g 3 2 D.C1
+            (operatorFieldApply (I := I) (M := M) g 3 2 D.C1
               (iteratedCovGrad (I := I) g 0 2 1 V))) :=
         jet_add_lip (I := I) (M := M) g 1 _ _
       _ ≤ 2 * (Ca * (Bq0 R * X) * lowJetSq (I := I) (M := M) g 2 V +

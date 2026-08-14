@@ -71,7 +71,7 @@ def metricCompactnessH6
 /-- MSM135 Theorem 3.9: compactness for complete connected pointed Riemannian
 manifolds with uniformly bounded geometry and a basepoint injectivity-radius
 lower bound. -/
-def metricCompactness
+def metricCompactness_of_connected
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
     (hgeom : SeqBoundedGeometry (I := I) X)

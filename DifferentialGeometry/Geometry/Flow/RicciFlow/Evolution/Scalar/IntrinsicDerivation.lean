@@ -5,20 +5,18 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Scalar-curvature diffusion bridge
 
-This file proves the realization-level identity
 
-`scalarLaplacianTraceInFrame (coordInv S x₀) (coordRoughRic S x₀ (coordNab2Ric S x₀)) t x₀
-  = laplacianAt (flowG S) t (S.scalar t) x₀`
 
-i.e. the scalar-curvature heat term `g^{ab} (∇_a ∇_b Ric)_{ij} g^{ij}` realizes
-`ΔR`.  The metric trace commutes with the Laplacian because `∇g = 0`.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,7 +35,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- Swap the two traced index pairs in a four-fold finite sum. -/
+
 private theorem sum_swap_four_local
     {Idx : Type*} [Fintype Idx] {R : Type*} [AddCommMonoid R]
     (F : Idx -> Idx -> Idx -> Idx -> R) :
@@ -60,7 +58,9 @@ private theorem sum_swap_four_local
             _ = ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, F i j a b := by
                   rw [Finset.sum_comm]
 
-/-- The connection of a solution at time `t` is `∞`-smooth (Levi-Civita). -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connSmoothInf
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -69,7 +69,9 @@ private theorem connSmoothInf
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
 
-/-- Metric compatibility for a solution at time `t`. -/
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem isMetricCompatibleSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -79,7 +81,7 @@ private theorem isMetricCompatibleSol
     DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
-/-- The canonical first covariant-derivative tensor field of Ricci. -/
+
 private def nablaRicField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -90,7 +92,7 @@ private def nablaRicField
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
 
-/-- The canonical second covariant-derivative tensor field of Ricci. -/
+
 private def nabla2RicField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -99,9 +101,10 @@ private def nabla2RicField
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (nablaRicField (I := I) S t) x
 
-/-- The CRUX: the explicit christoffel-formula second covariant derivative of
-Ricci in the coordinate frame realizes the abstract second covariant derivative
-tensor at the coordinate center. -/
+
+
+
+omit [I.Boundaryless] in
 theorem coordNab2Ric_eq_nabla2RicField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -118,11 +121,9 @@ theorem coordNab2Ric_eq_nabla2RicField
   set cov := S.family.connection t with hcov_def
   set frame := coordinateFrameAt (I := I) x₀ with hframe_def
   set nablaA := nablaRicField (I := I) S t with hnablaA_def
-  -- realize the leading derivative direction by a smooth section
   obtain ⟨Dsec, hDsec⟩ :=
     ContMDiffSection.exists_eq_at_gen
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x₀ (frame d x₀)
-  -- the three moving frame slots
   let slot : Fin 3 -> CoordinateIdx (𝕜 := Real) E :=
     fun q => if q = 0 then a else if q = 1 then i else j
   let V : Fin 3 -> (p : M) -> TangentSpace I p :=
@@ -134,7 +135,6 @@ theorem coordNab2Ric_eq_nabla2RicField
           (frame a x₀) (frame i x₀) (frame j x₀) := by
     funext q
     fin_cases q <;> simp [V, slot, DifferentialGeometry.Integral.Connection.vec3]
-  -- smoothness of each frame slot
   have hV_at : ∀ q : Fin 3,
       ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
         (fun p : M => (⟨p, V q p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
@@ -164,7 +164,6 @@ theorem coordNab2Ric_eq_nabla2RicField
     fun q k =>
       Tensor0SBundle.tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
         (I := I) (V q) x₀ (hV_at q) k
-  -- the pairing function equals the nablaRicComp component
   have hnablaA_eval : ∀ p : M,
       nablaA p
           (DifferentialGeometry.Integral.Connection.vec3 (I := I)
@@ -186,11 +185,9 @@ theorem coordNab2Ric_eq_nabla2RicField
       rw [this, hnablaA_eval p]
     rw [heq]
     exact coordNablaReg (I := I) S x₀ t a i j
-  -- the raw moving-frame formula
   have hraw := Tensor0SBundle.nabla0SFun_eval_coordFrame_moving_raw
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (s := 3) cov Dsec V nablaA x₀ hpair hV hVmodel hcoord
-  -- Step 1: rewrite the LHS via totalNabla0SFun_apply_section
   have hLHS :
       nabla2RicField (I := I) S t x₀
           (DifferentialGeometry.Integral.Connection.vec4 (I := I)
@@ -212,10 +209,8 @@ theorem coordNab2Ric_eq_nabla2RicField
       3 cov Dsec nablaA x₀
       (DifferentialGeometry.Integral.Connection.vec3 (I := I)
         (frame a x₀) (frame i x₀) (frame j x₀))
-  -- Step 2: rewrite coordNab2Ric as ricciSecondCovDerivCompInFrame
   rw [coordNab2At (I := I) S x₀ t d a i j]
   rw [hLHS, hraw]
-  -- the extDeriv terms agree
   have hpair_fun :
       (fun p : M => nablaA p (fun q : Fin 3 => V q p)) =
         fun p : M => nablaRicComp (I := I) S frame t p a i j := by
@@ -226,7 +221,6 @@ theorem coordNab2Ric_eq_nabla2RicField
       funext q
       fin_cases q <;> simp [V, slot, DifferentialGeometry.Integral.Connection.vec3]
     rw [hVp, hnablaA_eval p]
-  -- the correction sum equals the three christoffel terms
   have hcorr :
       (∑ q : Fin 3,
           nablaA x₀
@@ -245,7 +239,6 @@ theorem coordNab2Ric_eq_nabla2RicField
               (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x₀ d j p *
             nablaRicComp (I := I) S frame t x₀ a i p) := by
     let hcf := coordinateFrameAt_isLocalFrame_one (I := I) x₀
-    -- single-slot update lemma: plugging frame p into slot q gives a nablaRicComp
     have hupd : ∀ (q : Fin 3) (p : CoordinateIdx (𝕜 := Real) E),
         nablaA x₀
             (Function.update (fun r : Fin 3 => V r x₀) q (frame p x₀)) =
@@ -265,7 +258,6 @@ theorem coordNab2Ric_eq_nabla2RicField
           simp [V, slot, Function.update, DifferentialGeometry.Integral.Connection.vec3]
       rw [hupd_vec]
       rfl
-    -- expand each covariant derivative via Christoffel symbols
     have hchris : ∀ q : Fin 3,
         (cov (V q) x₀) (Dsec x₀) =
           ∑ p : CoordinateIdx (𝕜 := Real) E,
@@ -316,13 +308,12 @@ theorem coordNab2Ric_eq_nabla2RicField
       show ((2 : Fin 3) = 0) = False by simp,
       show ((2 : Fin 3) = 1) = False by simp]
   rw [hpair_fun, hcorr, hDsec]
-  -- now match the explicit ricciSecondCovDerivCompInFrame formula
   unfold DifferentialGeometry.PDE.RicciFlow.ricciSecondCovDerivCompInFrame
   ring
 
-/-- The scalar-curvature diffusion bridge: the canonical coordinate rough
-Laplacian of Ricci, contracted with the inverse metric, realizes `Δ R` at the
-coordinate center. -/
+
+
+
 theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -349,19 +340,15 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
   have hinv :
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) g x₀ basis gInv := by
     simpa [hg_def, hbasis_def, hgInv_def] using coordInvReal (I := I) S x₀ (t : Real)
-  -- the scalar curvature is the metric trace of the bundled Ricci tensor
   have hscalar_eq :
       S.scalar (t : Real) = fun y => metricTracePair0SAt (I := I) g (S.ricci (t : Real) y) := by
     funext y
     rw [SolutionOn.scalar_eq_metricTrace, hg_def]
     congr 1
-  -- smoothness of the scalar
   have hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (S.scalar (t : Real)) := by
     rw [hscalar_eq]
     exact trace02_smooth (I := I) g (S.ricci (t : Real))
-  -- canonical first/second covariant derivatives of Ricci
   set nablaA := nablaRicField (I := I) S (t : Real) with hnablaA_def
-  -- the laplacian is the metric trace of the canonical Hessian of the scalar
   have hLapTrace :
       DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S)
           (t : Real) (S.scalar (t : Real)) x₀ =
@@ -373,22 +360,17 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
       (hessianSec (I := I) cov hcov (S.scalar (t : Real)) hf x₀) hreal
     simpa [DifferentialGeometry.Integral.Connection.laplacianAt, flowG, hcov_def, hg_def]
       using this
-  -- the canonical Hessian of the scalar equals the canonical Hessian of the
-  -- trace of Ricci (same function, proof-irrelevant)
   have hHess :
       hessianSec (I := I) cov hcov (S.scalar (t : Real)) hf =
         hessianSec (I := I) cov hcov
           (fun y => metricTracePair0SAt (I := I) g (S.ricci (t : Real) y))
           (trace02_smooth (I := I) g (S.ricci (t : Real))) := by
     congr 1
-  -- abbreviation for the abstract second covariant derivative tensor
   have hnab2 := nabla2Trace02 (I := I) (M := M) cov hcov hcov1 g hmc
     (S.ricci (t : Real)) (Idx := CoordinateIdx (𝕜 := Real) E) (x := x₀)
     basis gInv hinv
-  -- Step A: rewrite RHS = ∑ᵢⱼ gⁱʲ (Hess scalar)(vec2 eᵢ eⱼ)
   rw [hLapTrace, hHess, scalarLapTraceAt]
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv hinv]
-  -- Step B: rewrite each Hessian component via nabla2Trace02
   have hRHS_comp : ∀ p q : CoordinateIdx (𝕜 := Real) E,
       hessianSec (I := I) cov hcov
           (fun y => metricTracePair0SAt (I := I) g (S.ricci (t : Real) y))
@@ -402,7 +384,6 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
                 (basis p) (basis q) (basis a) (basis b)) := by
     intro p q
     exact hnab2 (basis p) (basis q)
-  -- Step C: rewrite LHS as a double sum over coordNab2Ric via coordNab2Can / crux
   have hLHS_expand :
       scalarLaplacianTraceInFrame (M := M) (coordInv (I := I) S x₀)
           (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀)) (t : Real) x₀ =
@@ -417,14 +398,11 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     refine Finset.sum_congr rfl fun i _ => ?_
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [coordRoughRic]
-    -- goal: coordInv i j * (∑ₐ∑ᵦ coordInv a b * coordNab2Ric a b i j)
-    --     = gInv i j * (∑ₐ∑ᵦ gInv a b * nabla2RicField(...))
     congr 1
     refine Finset.sum_congr rfl fun a _ => ?_
     refine Finset.sum_congr rfl fun b _ => ?_
     rw [coordNab2Ric_eq_nabla2RicField (I := I) S x₀ (t : Real) a b i j]
   rw [hLHS_expand]
-  -- Step D: rewrite RHS double sum and match via the double-trace sum swap
   have hRHS_expand :
       (∑ i : CoordinateIdx (𝕜 := Real) E, ∑ j : CoordinateIdx (𝕜 := Real) E,
         gInv i j *
@@ -444,16 +422,13 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [hRHS_comp i j]
   rw [hRHS_expand]
-  -- both sides equal a common 4-fold sum after relabeling (i,j) <-> (a,b)
   simp only [hbasis_def, coordinateFrameAt_toBasis_apply]
-  -- Abbreviate the abstract second-derivative component.
   set N : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
     fun p q r s =>
       nabla2RicField (I := I) S (t : Real) x₀
         (DifferentialGeometry.Integral.Connection.vec4 (I := I)
           (frame p x₀) (frame q x₀) (frame r x₀) (frame s x₀)) with hN_def
-  -- Fully distribute both sides into 4-fold sums.
   have hLHS4 :
       (∑ i, ∑ j, gInv i j * ∑ a, ∑ b, gInv a b * N a b i j) =
         ∑ i, ∑ j, ∑ a, ∑ b, gInv i j * (gInv a b * N a b i j) := by
@@ -471,19 +446,18 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [Finset.mul_sum]
   rw [hLHS4, hRHS4]
-  -- swap the (i,j) and (a,b) index pairs on the LHS
   rw [sum_swap_four_local (Idx := CoordinateIdx (𝕜 := Real) E)
     (fun i j a b => gInv i j * (gInv a b * N a b i j))]
-  -- positional relabeling: outer (a,b) ↔ (i,j), commute the metric factors
   refine Finset.sum_congr rfl fun a _ => ?_
   refine Finset.sum_congr rfl fun b _ => ?_
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
-/-- The curvature-trace cancellation `g^{ij} R_ikjl Ric^{kl} = -|Ric|²` at the
-center of the coordinate frame, produced pointwise from the canonical `Rm04`
-first-trace, output-skew, and first-Bianchi symmetries. -/
+
+
+
+omit [I.Boundaryless] in
 private theorem coordScalarRmTrace_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -505,7 +479,6 @@ private theorem coordScalarRmTrace_center
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M)
         (S.family.metric (t : Real)) x₀ basis gInv := by
     simpa [hbasis_def, hgInv_def] using coordInvReal (I := I) S x₀ (t : Real)
-  -- the pointwise curvature symmetry producers, specialized at the center
   have hRm13 :
       ∀ τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
         DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -571,8 +544,9 @@ private theorem coordScalarRmTrace_center
     ricciCompInFrame, ricciTwoTensorField,
     SolutionOn.ricciAt, SolutionFamily.ricciAt] using hmain
 
-/-- The product-rule derivative RHS of the coordinate scalar trace identifies
-with `Δ R + 2 |Ric|²` at the center of the coordinate frame. -/
+
+
+omit [I.Boundaryless] in
 private theorem coordScalarTraceDerivRHS_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -653,9 +627,9 @@ private theorem coordScalarTraceDerivRHS_center
   rw [hsplit, hdt, hrm, hquad]
   ring
 
-/-- The product-rule time derivative of the coordinate scalar trace at the
-center of the coordinate frame, with the RHS already identified as
-`Δ R + 2 |Ric|²`. -/
+
+
+
 private theorem coordScalarTrace_hasDerivWithinAt_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -681,7 +655,6 @@ private theorem coordScalarTrace_hasDerivWithinAt_center
     fun (τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
         (i j : CoordinateIdx (𝕜 := Real) E) =>
       coordRicciEvol (I := I) S hS x₀ τ i j
-  -- product rule on the double sum, at the fixed center x₀
   have hbase :
       HasDerivWithinAt
         (fun s : Real =>
@@ -733,11 +706,11 @@ private theorem coordScalarTrace_hasDerivWithinAt_center
   refine hbase.congr_deriv ?_
   exact coordScalarTraceDerivRHS_center (I := I) S hS x₀ t
 
-/-- The scalar-curvature evolution `∂_t R = Δ R + 2 |Ric|²`, in the exact field
-form of `IsSolutionOn.scalarEvolution`, derived from `hS` (rather than read off
-the structure field) by combining the canonical coordinate Ricci/inverse-metric
-evolutions, the curvature-trace cancellation, and the scalar-curvature diffusion
-bridge `scalarLaplacianTraceInFrame_coord_eq_laplacianAt`. -/
+
+
+
+
+
 theorem scalarEvolution_of_isSolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -758,12 +731,9 @@ theorem scalarEvolution_of_isSolution
           (t : Real) := by
   classical
   intro G hGm hGc t x
-  -- work in the coordinate frame centered at x
   set frame := coordinateFrameAt (I := I) x with hframe_def
   set gInv := coordInv (I := I) S x with hgInv_def
-  -- the at-center scalar-trace time derivative, RHS = diffusion + reaction
   have hderiv := coordScalarTrace_hasDerivWithinAt_center (I := I) S hS x t
-  -- FUNCTION bridge: scalarTraceInFrame ... s x = S.scalar s x for all s
   have hscalar_eq : ∀ s : Real,
       scalarTraceInFrame (I := I) S gInv frame s x = S.scalar s x := by
     intro s
@@ -772,15 +742,12 @@ theorem scalarEvolution_of_isSolution
       (coordinateFrameAt_mem (I := I) x)]
     rw [SolutionOn.scalar_eq_metricTrace]
     rfl
-  -- DIFFUSION bridge: the coordinate rough Laplacian trace realizes Δ R
   have hdiff :=
     scalarLaplacianTraceInFrame_coord_eq_laplacianAt (I := I) S hS x t
-  -- REACTION bridge: the coordinate Ricci norm is |Ric|²
   have hreact :=
     ricciNormSqInFrame_eq_normSq0S (I := I) S gInv frame
       (coordinateFrameAt_isLocalFrame_one (I := I) x) (coordInvLocal (I := I) S x)
       (t : Real) (coordinateFrameAt_mem (I := I) x)
-  -- G-congruence: laplacianAt G = laplacianAt (flowG S) at regular time t
   have hGcong :
       DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real)
           (S.scalar (t : Real)) x =
@@ -788,7 +755,6 @@ theorem scalarEvolution_of_isSolution
           (t : Real) (S.scalar (t : Real)) x := by
     simp only [DifferentialGeometry.Integral.Connection.laplacianAt, hGm t, hGc t,
       flowG, SolutionOn.family_metric, SolutionOn.family_connection]
-  -- rewrite the derivand function and the RHS into the target form
   have hfun :
       (fun s : Real => scalarTraceInFrame (I := I) S gInv frame s x) =
         fun s : Real => S.scalar s x := by

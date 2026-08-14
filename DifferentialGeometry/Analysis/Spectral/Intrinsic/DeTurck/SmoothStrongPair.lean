@@ -2,21 +2,12 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothPathHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.StrongSolutionUniqueness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDiffJoint
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRealizeUnitModel
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothEmbedInj
-
-/-!
-# Smooth geometric Ricci--DeTurck paths as strong Sobolev pairs
-
-This file packages a classically smooth tensor path satisfying a geometric
-Ricci--DeTurck equation as the zero-trace `timeH1`/`timeL2` strong pair used by
-the maximal-regularity uniqueness theorem.  The construction is direct: the
-continuous strong time derivative is put in `timeL2`, the path is recovered by
-the Banach-space fundamental theorem of calculus, and all cross-scale and PDE
-identities are then proved as equalities of `Lp` classes.
--/
-
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsMetricPerturbation
 noncomputable section
-
+set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter MeasureTheory Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators NNReal
 
@@ -32,7 +23,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -43,9 +34,7 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-- The spectral embedding sends the zero smooth tensor to zero at every
-Sobolev order. -/
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 theorem smoothHs_zero (g : SmoothRiemannianMetric I M) (sigma : ℝ) :
     smoothCcToTensorHs (I := I) (M := M) g sigma
         (0 : SmoothCcTensor g 0 2) = 0 := by
@@ -105,6 +94,9 @@ theorem exists_pathBall
     rw [hF0, dist_zero_right] at h
     exact h.le
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [BoundarylessManifold I M] in
 /-- A continuous high-Sobolev path with a continuous strong derivative and a
 pointwise semilinear parabolic equation determines the exact zero-trace strong
 pair consumed by reverse Duhamel uniqueness. -/
@@ -137,16 +129,16 @@ theorem smoothPath_strong
           (field : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2))
             =ᵐ[timeMeasure T] Fhi ∧
           (force : ℝ → tensorHs (I := I) (M := M) g 0 2 a)
-            =ᵐ[timeMeasure T] fun t => Nfun (Fhi t) ∧
+            =ᵐ[timeMeasure T] (fun t => Nfun (Fhi t)) ∧
           ∀ t ∈ Icc (0 : ℝ) T, u.toFun t = Flow t := by
   have hNcont : ContinuousOn (fun t => Nfun (Fhi t)) (Icc (0 : ℝ) T) :=
     hLip.continuous.comp_continuousOn hhi
   let field : timeL2 (tensorHs (I := I) (M := M) g 0 2 (a + 2)) T :=
-    TimeSobolev.ofContinuousOn hhi
+    DifferentialGeometry.Analysis.Parabolic.TimeSobolev.ofContinuousOn hhi
   let force : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T :=
-    TimeSobolev.ofContinuousOn hNcont
+    DifferentialGeometry.Analysis.Parabolic.TimeSobolev.ofContinuousOn hNcont
   let derivL2 : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T :=
-    TimeSobolev.ofContinuousOn hD
+    DifferentialGeometry.Analysis.Parabolic.TimeSobolev.ofContinuousOn hD
   let u : timeH1 (tensorHs (I := I) (M := M) g 0 2 a) T :=
     timeH1.mk (Flow 0) derivL2
   have htoFun : ∀ t ∈ Icc (0 : ℝ) T, u.toFun t = Flow t := by
@@ -155,7 +147,8 @@ theorem smoothPath_strong
       ⟨le_rfl, le_trans ht.1 ht.2⟩
     have hrep : (derivL2 : ℝ → tensorHs (I := I) (M := M) g 0 2 a)
         =ᵐ[timeMeasure T] D := by
-      simpa only [derivL2] using TimeSobolev.coeFn_ofContinuousOn hD
+      simpa only [derivL2] using
+        DifferentialGeometry.Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn hD
     have hrepVol : ∀ᵐ s ∂volume, s ∈ Icc (0 : ℝ) T → derivL2 s = D s :=
       (ae_restrict_iff' measurableSet_Icc).1 hrep
     have hintEq : (∫ s in (0 : ℝ)..t, derivL2 s) = ∫ s in (0 : ℝ)..t, D s := by
@@ -164,7 +157,8 @@ theorem smoothPath_strong
       exact hs ((Set.uIoc_subset_uIcc).trans
         (uIcc_subset_Icc hzeroMem ht) hsI)
     have hDint : IntegrableOn D (Icc (0 : ℝ) T) volume :=
-      (TimeSobolev.memLp_of_continuousOn hD).integrable (by norm_num)
+      (DifferentialGeometry.Analysis.Parabolic.TimeSobolev.memLp_of_continuousOn
+        hD).integrable (by norm_num)
     have hint : IntervalIntegrable D volume 0 t :=
       MeasureTheory.IntegrableOn.intervalIntegrable
         (hDint.mono_set (uIcc_subset_Icc hzeroMem ht))
@@ -176,10 +170,12 @@ theorem smoothPath_strong
     abel
   have hfieldRep : (field : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2))
       =ᵐ[timeMeasure T] Fhi := by
-    simpa only [field] using TimeSobolev.coeFn_ofContinuousOn hhi
+    simpa only [field] using
+      DifferentialGeometry.Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn hhi
   have hforceRep : (force : ℝ → tensorHs (I := I) (M := M) g 0 2 a)
       =ᵐ[timeMeasure T] fun t => Nfun (Fhi t) := by
-    simpa only [force] using TimeSobolev.coeFn_ofContinuousOn hNcont
+    simpa only [force] using
+      DifferentialGeometry.Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn hNcont
   refine ⟨force, u, field, ?_, ?_, ?_, ?_, hfieldRep, hforceRep, htoFun⟩
   · simpa only [u, timeH1.trace0_mk] using hzero
   · refine Lp.ext ?_
@@ -195,7 +191,8 @@ theorem smoothPath_strong
         ⇑(timeH1.toTimeL2 (tensorHs (I := I) (M := M) g 0 2 a) T u)
             =ᵐ[timeMeasure T] u.toFun := by
       simpa only [timeH1.toTimeL2_apply] using
-        TimeSobolev.coeFn_ofContinuousOn u.continuousOn_toFun
+        DifferentialGeometry.Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn
+          u.continuousOn_toFun
     have hmem : ∀ᵐ t ∂(timeMeasure T), t ∈ Icc (0 : ℝ) T :=
       ae_restrict_mem measurableSet_Icc
     filter_upwards [hinclAE, hfieldRep, huAE, hmem] with t hit hft hut ht
@@ -205,7 +202,7 @@ theorem smoothPath_strong
         ⇑(timeH1.timeDeriv (tensorHs (I := I) (M := M) g 0 2 a) T u)
             =ᵐ[timeMeasure T] D := by
       simpa only [u, derivL2, timeH1.timeDeriv_mk] using
-        TimeSobolev.coeFn_ofContinuousOn hD
+        DifferentialGeometry.Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn hD
     have hLap := timeScaleLaplacian_coeFn (I := I) (M := M) (τ := a) field
     have hadd := Lp.coeFn_add
       (timeScaleLaplacian (I := I) (M := M) a field) force
@@ -213,7 +210,7 @@ theorem smoothPath_strong
       ae_restrict_mem measurableSet_Icc
     filter_upwards [hderivAE, hfieldRep, hforceRep, hLap, hadd, hmem]
       with t hdt hft hnft hLapt haddt ht
-    rw [hdt, haddt, hLapt, hft, hnft, hpde t ht]
+    rw [hdt, haddt, Pi.add_apply, hLapt, hft, hnft, hpde t ht]
   · refine Lp.ext ?_
     have hNemy := nemytskii_coeFn (I := I) (M := M) hLip field
     filter_upwards [hforceRep, hfieldRep, hNemy] with t hft hhit hNt
@@ -224,7 +221,7 @@ theorem smoothPath_strong
 mixed tensor section is unchanged. -/
 def deTurckRHSBase (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ) : SmoothCcTensor g₀ 0 2 where
   toSection :=
     (deTurckRHSSection (I := I) g_bg
@@ -240,21 +237,21 @@ theorem metricDiff_pde
     (q g_bg : SmoothRiemannianMetric I M)
     (G : ℝ → SmoothRiemannianMetric I M) {T δ : ℝ} (hδ_lt : δ < 1)
     (hsmall : ∀ t ∈ Icc (0 : ℝ) T,
-      gFibreOpBound (I := I) (M := M) q
+      metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q
           (metricDifferenceCcTensor (I := I) (M := M) q (G t))) δ)
     (hPDE : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
         HasDerivAt (fun tau => (G tau).inner x v w)
           (deTurckRicciRHS (I := I) g_bg (G t) x v w) t) :
-    ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M, ∀ slots : Fin 2 → E,
+    ∀ (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T), ∀ x : M, ∀ slots : Fin 2 → E,
       HasDerivAt
         (fun tau => unitModel (I := I) (M := M) q 2
           (metricDifferenceCcTensor (I := I) (M := M) q (G tau)) x slots)
         (unitModel (I := I) (M := M) q 2
           (deTurckRHSBase (I := I) (M := M) q g_bg
             (metricDifferenceCcTensor (I := I) (M := M) q (G t)) hδ_lt
-            (hsmall t ‹t ∈ Icc (0 : ℝ) T›)) x slots) t := by
+            (hsmall t ht)) x slots) t := by
   intro t ht x slots
   have hder := (hPDE t ht x (slots 0) (slots 1)).sub_const
     (q.inner x (slots 0) (slots 1))
@@ -281,7 +278,7 @@ theorem metricDiff_pde
 the rough connection Laplacian and the smooth DeTurck remainder. -/
 theorem rhsBase_eq_lap_rem (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ) :
     deTurckRHSBase (I := I) (M := M) g₀ g_bg T hδ_lt hδ =
       rawTensorConnLapSmooth (I := I) g₀ 0 2 T +
@@ -292,10 +289,12 @@ theorem rhsBase_eq_lap_rem (g₀ g_bg : SmoothRiemannianMetric I M)
 /-- Spectral coefficients of the smooth rough connection Laplacian. -/
 theorem smoothLap_coeff (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (T : SmoothCcTensor g₀ 0 2)
-    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :
     (smoothCcToTensorHs (I := I) (M := M) g₀ σ
         (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)).coeff i =
-      -(TensorEigenIdx.lambda (I := I) (M := M) i) *
+      -(DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+        (I := I) (M := M) i) *
         (smoothCcToTensorHs (I := I) (M := M) g₀ σ T).coeff i := by
   classical
   have hdiag := tensorL2Coeff_ofCompact_oneMinusConnLapSmoothIter
@@ -334,11 +333,11 @@ theorem smoothLap_eq_scale (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
 smooth remainder. -/
 theorem smoothRem_eq_N (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ) :
     smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ)
         (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ) =
-      deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ := by
+      deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a T hδ_lt hδ := by
   refine tensorHs.ext ?_
   funext i
   rfl
@@ -349,7 +348,7 @@ theorem smoothGeom_strong
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {L : ℝ≥0}
     (hLip : LipschitzWith L
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a))
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a))
     {T : ℝ} (Phi : ℝ → SmoothCcTensor g₀ 0 2) {S : Set ℝ}
     (hS : IsOpen S) (hIcc : Icc (0 : ℝ) T ⊆ S)
     (hPhi : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -360,22 +359,23 @@ theorem smoothGeom_strong
       ((Set.univ : Set M) ×ˢ S))
     (hPhi0 : Phi 0 = 0) {δ : ℝ} (hδ_lt : δ < 1)
     (hsmall : ∀ t ∈ Icc (0 : ℝ) T,
-      gFibreOpBound (I := I) (M := M) g₀
+      metricCauchySchwarzBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ (Phi t)) δ)
     (hsymm : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        ccTensorBilin (I := I) g₀ (Phi t) x v w =
-          ccTensorBilin (I := I) g₀ (Phi t) x w v)
+        smoothCcTensorBilinForm (I := I) g₀ (Phi t) x v w =
+          smoothCcTensorBilinForm (I := I) g₀ (Phi t) x w v)
     (hball : ∀ t ∈ Icc (0 : ℝ) T,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Phi t)‖ ≤
         (Classical.choose
           (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super)).1)
-    (hPDE : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M, ∀ slots : Fin 2 → E,
+    (hPDE : ∀ (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T), ∀ x : M,
+      ∀ slots : Fin 2 → E,
         HasDerivAt
           (fun tau => unitModel (I := I) (M := M) g₀ 2 (Phi tau) x slots)
           (unitModel (I := I) (M := M) g₀ 2
             (deTurckRHSBase (I := I) (M := M) g₀ g_bg (Phi t) hδ_lt
-              (hsmall t ‹t ∈ Icc (0 : ℝ) T›)) x slots) t) :
+              (hsmall t ht)) x slots) t) :
     ∃ force : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
       ∃ u : timeH1 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
         ∃ field : timeL2
@@ -389,21 +389,21 @@ theorem smoothGeom_strong
             timeScaleLaplacian (I := I) (M := M) (a : ℝ) field + force ∧
           force = nemytskii (I := I) (M := M) hLip field ∧
           (field : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-            =ᵐ[timeMeasure T] fun t => smoothCcToTensorHs (I := I) (M := M)
-              g₀ ((a : ℝ) + 2) (Phi t) ∧
+            =ᵐ[timeMeasure T] (fun t => smoothCcToTensorHs (I := I) (M := M)
+              g₀ ((a : ℝ) + 2) (Phi t)) ∧
           (force : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-            =ᵐ[timeMeasure T] fun t =>
-              deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            =ᵐ[timeMeasure T] (fun t =>
+              deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                 (smoothCcToTensorHs (I := I) (M := M) g₀
-                  ((a : ℝ) + 2) (Phi t)) ∧
+                  ((a : ℝ) + 2) (Phi t))) ∧
           ∀ t ∈ Icc (0 : ℝ) T,
             u.toFun t = smoothCcToTensorHs (I := I) (M := M)
               g₀ (a : ℝ) (Phi t) := by
   obtain ⟨dPhi, hdPhi, hcomp, hHs⟩ :=
     smoothHs_deriv (I := I) (M := M) g₀ Phi hS hPhi
-  have hdPhi_eq : ∀ t ∈ Icc (0 : ℝ) T,
+  have hdPhi_eq : ∀ (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T),
       dPhi t = deTurckRHSBase (I := I) (M := M) g₀ g_bg (Phi t)
-        hδ_lt (hsmall t ‹t ∈ Icc (0 : ℝ) T›) := by
+        hδ_lt (hsmall t ht) := by
     intro t ht
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
     apply ContinuousMultilinearMap.ext
@@ -451,7 +451,7 @@ theorem smoothGeom_strong
         tensorScaleLaplacian (I := I) (M := M) (a : ℝ)
             (smoothCcToTensorHs (I := I) (M := M) g₀
               ((a : ℝ) + 2) (Phi t)) +
-          deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (smoothCcToTensorHs (I := I) (M := M) g₀
               ((a : ℝ) + 2) (Phi t)) := by
     intro t ht
@@ -476,13 +476,13 @@ theorem smoothGeom_strong
       _ = tensorScaleLaplacian (I := I) (M := M) (a : ℝ)
             (smoothCcToTensorHs (I := I) (M := M) g₀
               ((a : ℝ) + 2) (Phi t)) +
-          deTurckSmoothN (I := I) (M := M) g₀ g_bg a (Phi t)
+          deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a (Phi t)
             hδ_lt (hsmall t ht) := by
         rw [← smoothLap_eq_scale, smoothRem_eq_N]
       _ = tensorScaleLaplacian (I := I) (M := M) (a : ℝ)
             (smoothCcToTensorHs (I := I) (M := M) g₀
               ((a : ℝ) + 2) (Phi t)) +
-          deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (smoothCcToTensorHs (I := I) (M := M) g₀
               ((a : ℝ) + 2) (Phi t)) := by rw [hN]
   exact smoothPath_strong (I := I) (M := M) g₀ (a : ℝ) hLip
@@ -491,6 +491,9 @@ theorem smoothGeom_strong
     (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (dPhi t))
     hhi hD hincl hderiv hzero hpde
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [BoundarylessManifold I M] in
 /-- A continuous high-Sobolev path has a finite uniform bound for its
 Lipschitz nonlinearity on a nonempty closed time window. -/
 theorem exists_pathNBound
@@ -615,11 +618,11 @@ theorem smoothGeom_unique
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {L C₁ C₂ : ℝ≥0}
     (hLip : LipschitzWith L
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a))
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a))
     (hsingle : ∀ (v v' :
       tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a v -
-          deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a v'‖ ≤
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a v -
+          deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a v'‖ ≤
         (C₁ : ℝ) * max
             ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) v‖
@@ -650,19 +653,19 @@ theorem smoothGeom_unique
     (hPhi₁0 : Phi₁ 0 = 0) (hPhi₂0 : Phi₂ 0 = 0)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hsmall₁ : ∀ t ∈ Icc (0 : ℝ) T,
-      gFibreOpBound (I := I) (M := M) g₀
+      metricCauchySchwarzBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ (Phi₁ t)) δ)
     (hsmall₂ : ∀ t ∈ Icc (0 : ℝ) T,
-      gFibreOpBound (I := I) (M := M) g₀
+      metricCauchySchwarzBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ (Phi₂ t)) δ)
     (hsymm₁ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        ccTensorBilin (I := I) g₀ (Phi₁ t) x v w =
-          ccTensorBilin (I := I) g₀ (Phi₁ t) x w v)
+        smoothCcTensorBilinForm (I := I) g₀ (Phi₁ t) x v w =
+          smoothCcTensorBilinForm (I := I) g₀ (Phi₁ t) x w v)
     (hsymm₂ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        ccTensorBilin (I := I) g₀ (Phi₂ t) x v w =
-          ccTensorBilin (I := I) g₀ (Phi₂ t) x w v)
+        smoothCcTensorBilinForm (I := I) g₀ (Phi₂ t) x v w =
+          smoothCcTensorBilinForm (I := I) g₀ (Phi₂ t) x w v)
     (hball₁ : ∀ t ∈ Icc (0 : ℝ) T,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Phi₁ t)‖ ≤
         (Classical.choose
@@ -671,24 +674,26 @@ theorem smoothGeom_unique
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Phi₂ t)‖ ≤
         (Classical.choose
           (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super)).1)
-    (hPDE₁ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M, ∀ slots : Fin 2 → E,
+    (hPDE₁ : ∀ (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T), ∀ x : M,
+      ∀ slots : Fin 2 → E,
         HasDerivAt
           (fun tau => unitModel (I := I) (M := M) g₀ 2 (Phi₁ tau) x slots)
           (unitModel (I := I) (M := M) g₀ 2
             (deTurckRHSBase (I := I) (M := M) g₀ g_bg (Phi₁ t) hδ_lt
-              (hsmall₁ t ‹t ∈ Icc (0 : ℝ) T›)) x slots) t)
-    (hPDE₂ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M, ∀ slots : Fin 2 → E,
+              (hsmall₁ t ht)) x slots) t)
+    (hPDE₂ : ∀ (t : ℝ) (ht : t ∈ Icc (0 : ℝ) T), ∀ x : M,
+      ∀ slots : Fin 2 → E,
         HasDerivAt
           (fun tau => unitModel (I := I) (M := M) g₀ 2 (Phi₂ tau) x slots)
           (unitModel (I := I) (M := M) g₀ 2
             (deTurckRHSBase (I := I) (M := M) g₀ g_bg (Phi₂ t) hδ_lt
-              (hsmall₂ t ‹t ∈ Icc (0 : ℝ) T›)) x slots) t)
+              (hsmall₂ t ht)) x slots) t)
     (hNbound₁ : ∀ t ∈ Icc (0 : ℝ) T,
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (smoothCcToTensorHs (I := I) (M := M) g₀
           ((a : ℝ) + 2) (Phi₁ t))‖ ≤ B)
     (hNbound₂ : ∀ t ∈ Icc (0 : ℝ) T,
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (smoothCcToTensorHs (I := I) (M := M) g₀
           ((a : ℝ) + 2) (Phi₂ t))‖ ≤ B) :
     ∀ t ∈ Icc (0 : ℝ) T, Phi₁ t = Phi₂ t := by
@@ -720,6 +725,7 @@ theorem smoothGeom_unique
   have hu := congrArg
     (fun v : timeH1 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T =>
       v.toFun t) huniq.2.2
+  change u₁.toFun t = u₂.toFun t at hu
   rw [hpath₁ t ht, hpath₂ t ht] at hu
   apply ccToHs_injective (I := I) (M := M) g₀ 2 (a : ℝ)
   simpa only [ccHs_eq_smoothHs] using hu
@@ -738,11 +744,11 @@ theorem metricRD_unique
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {L C₁ C₂ : ℝ≥0}
     (hLip : LipschitzWith L
-      (deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a))
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a))
     (hsingle : ∀ (v v' :
       tensorHs (I := I) (M := M) q 0 2 ((a : ℝ) + 2)),
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a v -
-          deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a v'‖ ≤
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a v -
+          deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a v'‖ ≤
         (C₁ : ℝ) * max
             ‖tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 2)
               (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) v‖
@@ -762,12 +768,12 @@ theorem metricRD_unique
     (hG₁0 : G₁.metric c = q) (hG₂0 : G₂.metric c = q)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hsmall₁ : ∀ t ∈ Icc (0 : ℝ) T,
-      gFibreOpBound (I := I) (M := M) q
+      metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q
           (metricDifferenceCcTensor (I := I) (M := M) q
             (G₁.metric (c + t)))) δ)
     (hsmall₂ : ∀ t ∈ Icc (0 : ℝ) T,
-      gFibreOpBound (I := I) (M := M) q
+      metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q
           (metricDifferenceCcTensor (I := I) (M := M) q
             (G₂.metric (c + t)))) δ)
@@ -792,12 +798,12 @@ theorem metricRD_unique
         HasDerivAt (fun tau => (G₂.metric (c + tau)).inner x v w)
           (deTurckRicciRHS (I := I) g_bg (G₂.metric (c + t)) x v w) t)
     (hNbound₁ : ∀ t ∈ Icc (0 : ℝ) T,
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a
         (smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2)
           (metricDifferenceCcTensor (I := I) (M := M) q
             (G₁.metric (c + t))))‖ ≤ B)
     (hNbound₂ : ∀ t ∈ Icc (0 : ℝ) T,
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a
         (smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2)
           (metricDifferenceCcTensor (I := I) (M := M) q
             (G₂.metric (c + t))))‖ ≤ B) :
@@ -814,14 +820,14 @@ theorem metricRD_unique
     simp only [Phi₂, add_zero, hG₂0, metricDifferenceCcTensor_self]
   have hsymm₁ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        ccTensorBilin (I := I) q (Phi₁ t) x v w =
-          ccTensorBilin (I := I) q (Phi₁ t) x w v := by
+        smoothCcTensorBilinForm (I := I) q (Phi₁ t) x v w =
+          smoothCcTensorBilinForm (I := I) q (Phi₁ t) x w v := by
     intro t _ x v w
     exact metricDiff_symm (I := I) (M := M) q (G₁.metric (c + t)) x v w
   have hsymm₂ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        ccTensorBilin (I := I) q (Phi₂ t) x v w =
-          ccTensorBilin (I := I) q (Phi₂ t) x w v := by
+        smoothCcTensorBilinForm (I := I) q (Phi₂ t) x v w =
+          smoothCcTensorBilinForm (I := I) q (Phi₂ t) x w v := by
     intro t _ x v w
     exact metricDiff_symm (I := I) (M := M) q (G₂.metric (c + t)) x v w
   have hunit₁ := metricDiff_pde (I := I) (M := M) q g_bg
@@ -833,21 +839,15 @@ theorem metricRD_unique
     hPhi₁ hPhi₂ hPhi₁0 hPhi₂0 hδ_lt hsmall₁ hsmall₂ hsymm₁ hsymm₂
     hball₁ hball₂ hunit₁ hunit₂ hNbound₁ hNbound₂
   intro t ht
-  calc
-    G₁.metric (c + t) = tensorSectionRealizeMetric (I := I) q (Phi₁ t)
-        hδ_lt (hsmall₁ t ht) :=
-      (realize_metricDiff (I := I) (M := M) q (G₁.metric (c + t))
-        hδ_lt (hsmall₁ t ht)).symm
-    _ = tensorSectionRealizeMetric (I := I) q (Phi₂ t)
-        hδ_lt (hsmall₂ t ht) := by rw [hPhiEq t ht]
-    _ = G₂.metric (c + t) :=
-      realize_metricDiff (I := I) (M := M) q (G₂.metric (c + t))
-        hδ_lt (hsmall₂ t ht)
-
-/-- Automatic positive-window continuation for two smooth Ricci--DeTurck
-metric families which already agree at one regular interior time.  All
-spectral truncation, fibre-smallness, forcing-ball, and mixed-contraction
-budgets are chosen from continuity at the zero metric difference. -/
+  apply metric_ext_inner
+  intro x v w
+  have h := congrArg
+    (fun T : SmoothCcTensor q 0 2 =>
+      smoothCcTensorBilinForm (I := I) q T x v w)
+    (hPhiEq t ht)
+  dsimp only [Phi₁, Phi₂] at h
+  rw [metricDiff_raw, metricDiff_raw] at h
+  linarith
 theorem metricRD_local
     {D : RealTimeInterval}
     (G₁ G₂ : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -907,28 +907,30 @@ theorem metricRD_local
           (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) q a ha)).1 := by
     intro t ht
     have h := hball₁ t (hsub₁ ht)
-    simpa only [hcast, R₀, hex] using h
+    rw [hcast] at h
+    simpa only [R₀, hex] using h
   have hball₂pre : ∀ t ∈ Icc (0 : ℝ) Tpre,
       ‖smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2) (Phi₂ t)‖ ≤
         (Classical.choose
           (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) q a ha)).1 := by
     intro t ht
     have h := hball₂ t (hsub₂ ht)
-    simpa only [hcast, R₀, hex] using h
+    rw [hcast] at h
+    simpa only [R₀, hex] using h
   have hsmall₁pre : ∀ t ∈ Icc (0 : ℝ) Tpre,
-      gFibreOpBound (I := I) (M := M) q
+      metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q (Phi₁ t)) δ₀ := by
     intro t ht
     exact (Classical.choose_spec hex).2.2 _ (hball₁pre t ht)
   have hsmall₂pre : ∀ t ∈ Icc (0 : ℝ) Tpre,
-      gFibreOpBound (I := I) (M := M) q
+      metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q (Phi₂ t)) δ₀ := by
     intro t ht
     exact (Classical.choose_spec hex).2.2 _ (hball₂pre t ht)
   let L := deTurckLipConstSymm
     (I := I) (M := M) (g₀ := q) (g_bg := g_bg) a ha
   have hLip : LipschitzWith L
-      (deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a) :=
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a) :=
     deTurckSobolevNHa2Symm_lipschitzWith_lipConst
       (I := I) (M := M) (g₀ := q) (g_bg := g_bg) a ha
   have hcont₁ : ContinuousOn
@@ -950,13 +952,13 @@ theorem metricRD_local
   set B : ℝ := max B₁ B₂ with hBdef
   have hB : 0 ≤ B := le_trans hB₁ (by rw [hBdef]; exact le_max_left _ _)
   have hN₁B : ∀ t ∈ Icc (0 : ℝ) Tpre,
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a
         (smoothCcToTensorHs (I := I) (M := M) q
           ((a : ℝ) + 2) (Phi₁ t))‖ ≤ B := by
     intro t ht
     exact le_trans (hN₁ t ht) (by rw [hBdef]; exact le_max_left _ _)
   have hN₂B : ∀ t ∈ Icc (0 : ℝ) Tpre,
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) q g_bg a
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a
         (smoothCcToTensorHs (I := I) (M := M) q
           ((a : ℝ) + 2) (Phi₂ t))‖ ≤ B := by
     intro t ht

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 
-/-! # Uniform `C^k` bound on chart Christoffel symbols from a `C^{k+1}` metric, on a precompact chart subset -/
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
@@ -20,71 +19,50 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 800000 in
-/-- Existence of a non-negative chart-`C^{k-1}` operator-norm bound on
-the Christoffel symbols of a smooth Riemannian metric, uniform on a
-compact subset of the chart-image.
+noncomputable local instance : NormedAddCommGroup (E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
 
-# Blueprint intent
+noncomputable local instance : NormedSpace ℝ (E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
 
-In any chart `α` of `M`, the chart Christoffel object is the
-continuous bilinear operator
-```
-y ↦ chartChristoffelBilin g α ((extChartAt I α).symm (toEuclidean.symm y))
-    : EuclideanSpace ℝ (Fin n) → (E →L[ℝ] E →L[ℝ] E),
-```
-where `n = Module.finrank ℝ E` and `chartChristoffelBilin g α b : E →L[ℝ] E →L[ℝ] E`
-is the iterated continuous-linear-map packaging of the chart Christoffel
-symbols
-`Γ^i_{j k}(α; b) := ½ · g^{i l}(α; b) ·
-    (∂_j g_{l k}(α; b) + ∂_k g_{l j}(α; b) − ∂_l g_{j k}(α; b))`
-(see `chartChristoffelBilin` and `chartChristoffel`). The Christoffel
-symbols are the unique tensorial-failure correction that makes the
-connection Levi-Civita (torsion-free and metric-compatible); they are
-NOT a tensor themselves, but they enter the chart-coordinate formula
-for `∇` on tensors as a linear combination of first partial derivatives
-(see `nabla_equals_partial_plus_christoffel_on_tensors`).
+noncomputable local instance : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
 
-The **chart-`C^{k-1}` operator-norm bound** on the chart Christoffel
-object on a compact subset `K ⊆ chartTargetEuclid α` asserts: for every
-iterated Fréchet-derivative order `j ≤ k - 1` (i.e. `j ∈ Finset.range k`)
-and every `y ∈ K`, the iterated Fréchet derivative operator norm is
-bounded by `C`:
-```
-‖iteratedFDeriv ℝ j
-    (fun y => chartChristoffelBilin g α
-        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) y‖ ≤ C.
-```
-The constant `C(g, k, α, K) ≥ 0` depends on:
+noncomputable local instance : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
 
-* the chart-`C^k` bound on `g_{i j}(α; ·)`, finite by smoothness of `g`
-  and compactness of `K`;
-* a strictly positive lower bound on the smallest eigenvalue of the
-  Gram matrix `(g_{i j}(α; y))_{i,j}` on `K` (matching the `c > 0` side
-  of `fibrewise_gram_twist_estimate`).
+private theorem exists_iteratedFDeriv_norm_bound_on_compact
+    {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G]
+    (f : F → G) (U K : Set F) (hU_open : IsOpen U)
+    (hK_compact : IsCompact K) (hK_sub : K ⊆ U)
+    (hf : ContDiffOn ℝ ∞ f U) (j : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖iteratedFDeriv ℝ j f y‖ ≤ C := by
+  have hU_uniqueDiff : UniqueDiffOn ℝ U := hU_open.uniqueDiffOn
+  have hwithin_eq : ∀ y ∈ U,
+      iteratedFDerivWithin ℝ j f U y = iteratedFDeriv ℝ j f y :=
+    fun y hy => iteratedFDerivWithin_of_isOpen j hU_open hy
+  have hcont : ContinuousOn (fun y => iteratedFDerivWithin ℝ j f U y) U :=
+    hf.continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top) hU_uniqueDiff
+  by_cases hKne : K.Nonempty
+  · have hiter : ContinuousOn (iteratedFDerivWithin ℝ j f U) K :=
+      hcont.mono hK_sub
+    have hnorm : ContinuousOn (fun y =>
+        ‖iteratedFDerivWithin ℝ j f U y‖) K :=
+      continuous_norm.comp_continuousOn hiter
+    obtain ⟨y₀, hy₀_K, hy₀_max⟩ := hK_compact.exists_isMaxOn hKne hnorm
+    refine ⟨‖iteratedFDerivWithin ℝ j f U y₀‖, norm_nonneg _, ?_⟩
+    intro y hy
+    have hle : ‖iteratedFDerivWithin ℝ j f U y‖ ≤
+        ‖iteratedFDerivWithin ℝ j f U y₀‖ := hy₀_max hy
+    rw [hwithin_eq y (hK_sub hy)] at hle
+    exact hle
+  · refine ⟨0, le_refl _, ?_⟩
+    intro y hy
+    exact (hKne ⟨y, hy⟩).elim
 
-# Why a compact subset, not the full chart target
-
-The full chart-image `chartTargetEuclid α` is the open set
-`toEuclidean '' (extChartAt I α).target`. It is **not** precompact in
-general — for instance, the stereographic chart of `S²` from the north
-pole has `chartTargetEuclid = ℝ²`, on which the Christoffel symbols of
-the round metric grow unboundedly as `|y| → ∞`. A uniform iterated-Fréchet
-bound on the full open set is therefore false in general; the correct
-formulation restricts to a precompact set `K ⊆ chartTargetEuclid α`.
-
-The downstream consumers (the iterated `∇` vs iterated `∂` comparison
-and the `H¹` reduction in `iterated_nabla_vs_iterated_partial_equivalence_H1`)
-only need bounds on the chart image of the partition-of-unity support,
-which is compact and sits inside `chartTargetEuclid α` (see
-`chartChristoffel_bdd_on_pou_tsupport` in
-`Analysis/Spectral/Tensor/Estimates/ChristoffelCorrection/ChristoffelBound.lean`).
-This is the Christoffel-side counterpart of `fibrewise_gram_twist_estimate`,
-and the per-chart constant `C` absorbs into a single absolute constant
-across the chart atlas via `uniform_chart_bounds_from_compactness`.
-
-The non-negativity of `C` follows since the LHS — an operator norm — is
-non-negative. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (k : ℕ) (α : M)
     {K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -189,16 +167,9 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       simp [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
         smul_smul, mul_comm]
     rw [h_inner]
-    have h_outer : ((chartModelBasis E).coord i).toContinuousLinearMap.smulRight
-        (s • ((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
-                ((chartModelBasis E) κ)) =
-        s • ((chartModelBasis E).coord i).toContinuousLinearMap.smulRight
-              (((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
-                ((chartModelBasis E) κ)) := by
-      ext v w
-      simp [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
-        smul_smul, mul_comm]
-    exact h_outer
+    ext v w
+    simp [N, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+      smul_smul, mul_comm]
   have hΨ_contDiffOn : ContDiffOn ℝ ∞ Ψ U := by
     refine ContDiffOn.sum (fun i _ => ?_)
     refine ContDiffOn.sum (fun j _ => ?_)
@@ -215,46 +186,12 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       exact h_summand_eq i j κ z
     rw [h_eq]
     exact h_scalar.smul_const (N i j κ)
-  have h_iterated_eq : ∀ j_idx : ℕ, ∀ y ∈ U,
-      iteratedFDeriv ℝ j_idx Φ y = iteratedFDeriv ℝ j_idx Ψ y := by
-    intro j_idx y hy
-    have hΦΨ_nhds : Φ =ᶠ[nhds y] Ψ :=
-      Filter.eventuallyEq_iff_exists_mem.mpr
-        ⟨U, hU_open.mem_nhds hy, fun z hz => hΦΨ_on_U hz⟩
-    exact (Filter.EventuallyEq.iteratedFDeriv ℝ hΦΨ_nhds j_idx).eq_of_nhds
-  have hU_uniqueDiff : UniqueDiffOn ℝ U := hU_open.uniqueDiffOn
-  have h_iteratedFDerivWithin_eq_iteratedFDeriv : ∀ j_idx : ℕ, ∀ y ∈ U,
-      iteratedFDerivWithin ℝ j_idx Ψ U y = iteratedFDeriv ℝ j_idx Ψ y :=
-    fun j_idx y hy => iteratedFDerivWithin_of_isOpen j_idx hU_open hy
-  have h_iterated_contOn : ∀ j_idx : ℕ,
-      ContinuousOn (fun y => iteratedFDerivWithin ℝ j_idx Ψ U y) U := fun j_idx =>
-    hΨ_contDiffOn.continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top) hU_uniqueDiff
+  have hΦ_contDiffOn : ContDiffOn ℝ ∞ Φ U :=
+    hΨ_contDiffOn.congr (fun y hy => hΦΨ_on_U hy)
   have h_per_order : ∀ j_idx : ℕ, ∃ Cj : ℝ, 0 ≤ Cj ∧ ∀ y ∈ K,
-      ‖iteratedFDeriv ℝ j_idx Φ y‖ ≤ Cj := by
-    intro j_idx
-    by_cases hKne : K.Nonempty
-    · have h_iter_K : ContinuousOn (iteratedFDerivWithin ℝ j_idx Ψ U) K :=
-        (h_iterated_contOn j_idx).mono hK_sub
-      have h_cont_within : ContinuousOn (fun y =>
-          ‖iteratedFDerivWithin ℝ j_idx Ψ U y‖) K :=
-        continuous_norm.comp_continuousOn h_iter_K
-      obtain ⟨y₀, hy₀_K, hy₀_max⟩ := hK_compact.exists_isMaxOn hKne h_cont_within
-      refine ⟨‖iteratedFDerivWithin ℝ j_idx Ψ U y₀‖, norm_nonneg _, ?_⟩
-      intro y hy
-      have hy_U : y ∈ U := hK_sub hy
-      have h₁ : ‖iteratedFDerivWithin ℝ j_idx Ψ U y‖ ≤
-          ‖iteratedFDerivWithin ℝ j_idx Ψ U y₀‖ := hy₀_max hy
-      have h₂ : iteratedFDerivWithin ℝ j_idx Ψ U y =
-          iteratedFDeriv ℝ j_idx Ψ y :=
-        h_iteratedFDerivWithin_eq_iteratedFDeriv j_idx y hy_U
-      have h₃ : iteratedFDeriv ℝ j_idx Ψ y = iteratedFDeriv ℝ j_idx Φ y :=
-        (h_iterated_eq j_idx y hy_U).symm
-      rw [h₂, h₃] at h₁
-      exact h₁
-    · refine ⟨0, le_refl _, ?_⟩
-      intro y hy
-      exfalso
-      exact hKne ⟨y, hy⟩
+      ‖iteratedFDeriv ℝ j_idx Φ y‖ ≤ Cj :=
+    fun j_idx => exists_iteratedFDeriv_norm_bound_on_compact
+      Φ U K hU_open hK_compact hK_sub hΦ_contDiffOn j_idx
   choose Cj hCj_nn hCj_bd using h_per_order
   by_cases hk : k = 0
   · refine ⟨0, le_refl _, ?_⟩

@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # `ric_bound` — the `(A_N)` endpoint of MSM135 Lemma 3.11 (eq. 3.4 input); PROVED
@@ -63,20 +61,24 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 open DifferentialGeometry.PDE.RicciFlow in
+omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- Pointwise nonnegativity of the squared tensor norm (via a pointwise
 orthonormal basis). -/
 private theorem normSq0S_nonneg'
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     0 ≤ Tensor0SBundle.normSq0S (I := I) g x s A := by
@@ -91,10 +93,15 @@ private theorem normSq0S_nonneg'
   rw [Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv A]
   exact Finset.sum_nonneg fun _ _ => sq_nonneg _
 
+omit [Module.Finite ℝ E] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [IsManifold I 1 M] [I.Boundaryless] [IsManifold I 2 M]
+    [SigmaCompactSpace M] in
 /-- `metricCovDerivNorm` equals the intrinsic norm of the `iterCov` tower at
 every point (the R4f arity bridge, with the pointwise orthonormal basis chosen
 internally). -/
 private theorem mcdNorm_eq_at
+    [Module.Finite ℝ E]
     (h gRef : SmoothRiemannianMetric I M) (N : Nat) (x : M) :
     metricCovDerivNorm (I := I) N h gRef x =
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
@@ -244,10 +251,12 @@ theorem ricCoeffs_nonneg
     mul_nonneg (pow_nonneg hFrame _) hComp2⟩
 
 set_option backward.isDefEq.respectTransparency false in
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **The fixed-witness per-domain `(A_N)` engine.** On a good-frame domain,
 the explicit component coefficients work for every metric satisfying the
 numeric equivalence, lower-order, and moving-Shi bounds. -/
 private theorem perDomain_bound
+    [Module.Finite ℝ E]
     (gRef : SmoothRiemannianMetric I M)
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -608,9 +617,11 @@ private theorem perDomain_bound
       (fun a y' => e₀.localFrame basisE a y'))
     hDtop hShiComp x hx
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Pointwise order-`N` Ricci-tower estimate on an open set. Each point may use
 its own good frame because the affine coefficients are fixed numeric data. -/
 theorem ric_tower_on
+    [Module.Finite ℝ E]
     {U : Set M} (hU : IsOpen U)
     (gRef g : SmoothRiemannianMetric I M)
     (N : Nat) (hN : 1 ≤ N)
@@ -780,11 +791,13 @@ theorem ric_tower_on
               (ricCompC (Module.finrank Real E) N Bmax Cg KShi).2
       ring
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Constants-first form of the raw Ricci-tower estimate on a compact set.
 
 The constants depend on the spatial data, order, equivalence majorant, lower-order
 constants, and Shi constant, but are chosen before the time window and metric sequence. -/
 private theorem ric_tower_const
+    [Module.Finite ℝ E]
     {K U : Set M}
     {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
@@ -1005,11 +1018,13 @@ private theorem ric_tower_const
     _ ≤ CppF * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + CpppF :=
         add_le_add (mul_le_mul_of_nonneg_right hppF hmcd0) hpppF
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **`ric_bound` — MSM135 Lemma 3.11, Step 4 `(A_N)` (the eq. 3.4 engine).**
 
 On a fixed time window, lower-order metric bounds and moving Shi bounds imply the
 uniform order-`N` Ricci-tower estimate. -/
 theorem ric_bound
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1048,8 +1063,13 @@ noncomputable def nablaRicReal
   fun i s x =>
     (ricCovTower (I := I) (gSeq i s) gRef p x).domDomCongr (acEquiv p)
 
+omit [Module.Finite ℝ E] [I.Boundaryless]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [IsManifold I 2 M] [SigmaCompactSpace M] in
 /-- Norm invariance of the `nablaRicReal` reindex. -/
 theorem nablaRicReal_normSq
+    [Module.Finite ℝ E]
     (gSeq : Nat → Real → SmoothRiemannianMetric I M)
     (gRef : SmoothRiemannianMetric I M) (p i : Nat) (s : Real) (x : M) :
     Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
@@ -1067,9 +1087,11 @@ theorem nablaRicReal_normSq
   exact Tensor0SBundle.normSq0S_domDomCongr (I := I) gRef x basis hinv (acEquiv p)
     (ricCovTower (I := I) (gSeq i s) gRef p x)
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Constants-first Ricci-tower field bound on an open set, with coefficients
 chosen before the sequence index, time, point, and manifold instantiation. -/
 theorem ric_bound_field_on
+    [Module.Finite ℝ E]
     {U : Set M} {β ψ : Real}
     {gSeq : Nat → Real → SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1097,11 +1119,13 @@ theorem ric_bound_field_on
     (fun r h1 hr z hz => hBprev r h1 hr i t ht z hz)
     (fun s hs z hz => hShi s hs i t ht z hz) x hx
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Constants-first `ric_bound` field for the order-`N` evolution input.
 
 The same `Cpp, Cppp` work on every admissible time window and metric sequence with
 the fixed spatial, equivalence, lower-order, and Shi bounds. -/
 theorem ric_bound_const
+    [Module.Finite ℝ E]
     {K U : Set M}
     {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
@@ -1131,10 +1155,12 @@ theorem ric_bound_const
   rw [nablaRicReal_normSq]
   exact hfield B hequiv hBmax hBprev hShi i s hs x hx
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **The `ric_bound` field of `MetricCovOrderEvolutionInput`, realized.**  The
 proved `ric_bound`, restated with `nablaRic := nablaRicReal` in the exact
 Grönwall field shape (`p + 2` arity). -/
 theorem ric_bound_field
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1161,6 +1187,10 @@ theorem ric_bound_field
   exact ⟨Cpp, Cppp, h0, h1,
     hb (β := β) (ψ := ψ) (gSeq := gSeq) B hequiv hBmax hBprev hShi⟩
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [SigmaCompactSpace M] in
 /-- **The `normsq_evol` field from pointwise-evaluated evolution data**: if the
 order-`p` metric derivative tower evolves by `-2·nablaRic` under every fixed
 slot evaluation (an ℝ-valued `HasDerivAt` family — the natural output of the
@@ -1168,6 +1198,7 @@ componentwise flow-evolution producer), then the squared-norm evolution bound
 holds.  Proof: componentwise differentiation in a fixed pointwise
 `gRef`-orthonormal basis; no fibre calculus is needed. -/
 theorem normsq_evol_of_comp
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M} {p : Nat}
@@ -1334,6 +1365,9 @@ theorem normsq_evol_of_comp
     exact habs
 
 set_option backward.isDefEq.respectTransparency false in
+omit [Module.Finite ℝ E] [I.Boundaryless]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [SigmaCompactSpace M] in
 /-- **The `hevComp` family from Ricci-flow solutions.**  If each `gSeq i` is
 the moving metric of a flow solution `S i` whose regular times contain the
 window, and the per-level mixed-derivative swaps hold (the regularity input,
@@ -1342,6 +1376,7 @@ window, and the per-level mixed-derivative swaps hold (the regularity input,
 `solnTower_hasDerivAt`, with the value identified through
 `covDerivOfField_smul` + `covDerivOfField_eq_iterCov`. -/
 theorem hevComp_of_solutions
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M} {N : Nat}
@@ -1388,7 +1423,7 @@ theorem hevComp_of_solutions
   have hsec : (covDerivOfField (I := I) gRef (solnRicField (I := I) (S i) s) N) x
       = nablaRicReal (I := I) gSeq gRef N i s x := by
     rw [hsolng, covDerivOfField_eq_iterCov, ← hric]
-    show ContinuousMultilinearMap.domDomCongr (acEquiv N)
+    change ContinuousMultilinearMap.domDomCongr (acEquiv N)
         (ricCovTower (I := I) (gSeq i s) gRef N x)
       = nablaRicReal (I := I) gSeq gRef N i s x
     simp only [nablaRicReal]
@@ -1399,9 +1434,11 @@ theorem hevComp_of_solutions
   rw [hfun, hval] at h
   exact h
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Noncompact stage-`N` metric-derivative bound with an explicit output
 constant. The proof is the existing affine Grönwall assembly on the open set. -/
 theorem covOrderBound_stage_on
+    [Module.Finite ℝ E]
     {U : Set M} {β ψ t0 : Real}
     {gSeq : Nat → Real → SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1449,6 +1486,7 @@ theorem covOrderBound_stage_on
       timeRadius := timeRadius
       time_abs_le := htime }
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **The stage-`N` `(B_N)` assembly** (MSM135 Lemma 3.11, Step 4, one stage).
 From the `ric_bound` inputs (eq. 3.3 on `U ⊇ K`, the `(B_r)` bounds for
 `r < N`, the moving Shi bounds), the pointwise-evaluated evolution data for the
@@ -1457,6 +1495,7 @@ the `covDerivOfField_eval_hasDerivWithinAt` induction from the flow equation
 and the per-level swaps), and the initial-time bound, the order-`N` window
 bound `(B_N)` follows by the Grönwall assembly. -/
 theorem covOrderBound_stage
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1502,6 +1541,7 @@ theorem covOrderBound_stage
       timeRadius := timeRadius
       time_abs_le := htime }
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **The `(B_r)` tower** (MSM135 Lemma 3.11, Step 4, all stages).  From the
 window inputs on a single open `U ⊇ K` — eq. (3.3) equivalence with majorant,
 the moving Shi bounds up to order `N`, the evolution families at every order,
@@ -1511,6 +1551,7 @@ bound on `K`.  Each stage is `covOrderBound_stage` on an interpolated pair
 `M`), with the lower-order `(B_q)` constants supplied by strong induction on
 the compact `L`. -/
 theorem covOrderBound_tower
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1575,6 +1616,7 @@ theorem covOrderBound_tower
       timeRadius htime
 
 set_option backward.isDefEq.respectTransparency false in
+omit [Module.Finite ℝ E] [SigmaCompactSpace M] in
 /-- **The P2 capstone: all `(B_r)` window bounds from a sequence of Ricci-flow
 solutions** (MSM135 Lemma 3.11, eq. (3.4) → Step 4 output).  The evolution
 families are produced internally: `hevComp_of_solutions` from the flow
@@ -1586,6 +1628,7 @@ Shi bounds (the BBS realization track), the initial-time bounds, and `hDreg`
 (regular times are interior to the regular set — true for every concrete flow
 interval). -/
 theorem covOrderBound_of_soln
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}

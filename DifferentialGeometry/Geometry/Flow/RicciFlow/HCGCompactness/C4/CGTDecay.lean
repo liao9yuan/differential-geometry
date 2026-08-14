@@ -232,7 +232,8 @@ def injDecay_of_bg
     exact ENNReal.toReal_pos
       (Measure.measure_univ_pos.mpr
         (Measure.toSphere_ne_zero
-          (volume : Measure (EuclideanSpace Real (Fin n))))).ne'
+          (volume : Measure
+            (EuclideanSpace Real (Fin n))))).ne'
       (measure_lt_top _ _).ne
   have hsphereP : 0 ≤ sphereP := by
     exact ENNReal.toReal_nonneg

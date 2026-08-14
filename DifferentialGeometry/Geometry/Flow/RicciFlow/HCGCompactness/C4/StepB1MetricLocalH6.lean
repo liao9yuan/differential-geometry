@@ -149,7 +149,7 @@ theorem H6NormalData.source_stay
       intro v hv
       exact chiK.ball_subset (hRad hv)
     have hman := NormalBallChart.MetricEquivOn.hom_dist_le
-      (I := I) Yk (P (Lphi.φ (kn n))) chiK hEquiv hUsrc
+      (J := I) Yk (P (Lphi.φ (kn n))) chiK hEquiv hUsrc
         (hsegInt.trans hIntU)
     have hsqrt : Real.sqrt 2 ≤ 2 := by
       linarith [Real.sqrt_two_lt_three_halves]

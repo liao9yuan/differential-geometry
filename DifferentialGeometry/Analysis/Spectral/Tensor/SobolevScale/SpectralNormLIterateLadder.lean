@@ -3,11 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 
+
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -23,13 +21,16 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ladder_weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) (n : ℕ) :
@@ -38,6 +39,7 @@ private lemma ladder_weight_natCast (g₀ : SmoothRiemannianMetric I M)
   unfold tensorSobolevWeight
   rw [Real.rpow_natCast]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tensorL2Inner_self_eq_norm_toL2_sq (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (X : SmoothCcTensor g₀ r s) :
     tensorL2Inner (I := I) (M := M) g₀ r s X.toFun X.toFun =
@@ -100,9 +102,11 @@ theorem smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2) w i p,
       ladder_weight_natCast (I := I) (M := M) g₀ i (2 * p + 1)]
     ring
-  have hcross := tensorL2Inner_eq_tsum_l2Coeff_cross_arm (I := I) (M := M) g₀
-    (oneMinusConnLapSmooth (I := I) g₀ 0 2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w))
-    (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)
+  have hcross := tensorL2Inner_eq_tsum_l2Coeff_cross_arm
+    (I := I) (M := M) (g₀ := g₀)
+    (A := oneMinusConnLapSmooth (I := I) g₀ 0 2
+      (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w))
+    (B := oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)
   have hadd := oneMinusConnLapSmooth_l2Inner_eq_add_covGrad (I := I) (M := M) g₀ 0 2
     (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)
     (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)

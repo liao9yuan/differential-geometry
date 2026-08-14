@@ -3,13 +3,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarFluxJetBou
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IterCovGradHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHsTime
 
-/-!
-# Time regularity of the scalar nonautonomous Laplacian
 
-This file factors the completed scalar Laplacian difference through the generic
-completed coefficient action and the fixed-background covariant derivatives,
-then differentiates the resulting backward-time path.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -33,9 +33,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- On the common backward-time slab, the completed scalar Laplacian
-difference is the Hessian coefficient action minus the connection coefficient
-action on the gradient. -/
+
+
+
 theorem lapDiffHs_decomp
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -124,9 +124,9 @@ theorem lapDiffHs_decomp
             (iteratedCovGrad (I := I) q 0 0 1 W) := by
       exact iterCovGradHs_core (I := I) (M := M) q 0 1 m W
     rw [hD₁, appHs_core, appHs_core]
-    let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+    let X := operatorFieldApply (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 W)
-    let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+    let Y := operatorFieldApply (I := I) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 W)
     have hsub :
         ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =
@@ -138,8 +138,8 @@ theorem lapDiffHs_decomp
   simpa only [L, R, D₂, D₁, J, q, h,
     ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply] using congrFun hLR U
 
-/-- On one common backward slab, the completed scalar Laplacian difference
-applied to any fixed `H^(m+2)` input is a smooth `H^m`-valued path. -/
+
+
 theorem lapDiffHs_path_cd
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -189,8 +189,8 @@ theorem lapDiffHs_path_cd
   intro s hs
   simpa only [q, J, V₂, V₁] using hdec m s hs U
 
-/-- On one common backward-time interior, the scalar Laplacian difference
-preserves every finite time regularity order of a moving `H^(m+2)` input. -/
+
+
 theorem lapDiffHs_dyn_fin
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -243,8 +243,8 @@ theorem lapDiffHs_dyn_fin
     ContinuousLinearMap.comp_apply] using
       hdec m s ⟨hs.1.le, hs.2.le.trans hat⟩ (U s)
 
-/-- On the same backward-time interior, the scalar Laplacian difference sends
-smooth completed Sobolev paths to smooth paths two spatial orders lower. -/
+
+
 theorem lapDiffHs_dyn_cd
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

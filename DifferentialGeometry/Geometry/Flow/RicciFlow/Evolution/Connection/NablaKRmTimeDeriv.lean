@@ -4,30 +4,26 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# `∂ₜ∇ᵏRm` time-side producer for a solution
 
-This is the **assembly of the BBS time side**: the iterated covariant-derivative
-component array `∇ᵏRm` has a time derivative for a Ricci-flow solution, obtained by
-feeding three inputs into the banked rank-uniform identity
-`iteratedRmComp_hasDerivWithinAt`:
 
-* `hchr` (`∂ₜΓ`) — **discharged** here from `christoffelEvolution_of_solution`
-  (`realizedChr` is definitionally `christoffelSymbolInFrame` in the coordinate frame);
-* `hrm` (`∂ₜRm04`, the Uhlenbeck base `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`) —
-  the genuine standing analytic input (the Hamilton curvature evolution, Lemma 6.1);
-* `hswap` — the standing time/space derivative-commutation regularity input.
 
-So the time side is structurally complete: `∂ₜ∇ᵏRm` is produced for every level `k`
-with `∂ₜΓ` genuinely computed from the Ricci-flow PDE, modulo the standing
-`∂ₜRm04`/swap regularity inputs (the project's black-box style, joining
-`hmetricFrame`/`hmix`).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,17 +34,18 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- **`∂ₜΓ` as the tower's `hchr` input.**  The realized Christoffel data
-`realizedChr S x₀` is definitionally `christoffelSymbolInFrame` in the coordinate
-frame at `x₀`, so its time derivative is exactly `christoffelEvolution_of_solution`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem realizedChr_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -78,7 +75,8 @@ theorem realizedChr_hasDerivWithinAt
     HasDerivWithinAt
       (fun s : Real => realizedChr (I := I) S x₀ s x i a p)
       (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b)
+        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d
+          a b)
         (t : Real) x i a p)
       D.carrier
       (t : Real) :=
@@ -86,9 +84,10 @@ theorem realizedChr_hasDerivWithinAt
     (coordinateFrameAt (I := I) x₀) (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
     (coordinateFrameSet_open (I := I) x₀) hmetricFrame hSmooth hFdiff hFtdiff t x hx i a p
 
-/-- **The BBS time side: `∂ₜ∇ᵏRm` for a solution at the frame centre `x₀`.**
-`∂ₜΓ` (`hchr`) is discharged from `realizedChr_hasDerivWithinAt`; the Uhlenbeck base
-`∂ₜRm04` (`hrm`) and the swap (`hswap`) are the standing analytic inputs. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nablaKRm_timeDeriv_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -130,7 +129,8 @@ theorem nablaKRm_timeDeriv_of_solution
           (fun y : M => iteratedRmCompDt (I := I) (coordinateFrameAt (I := I) x₀)
             (realizedChr (I := I) S x₀)
             (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-              (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+              (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
+                t x d a b))
             (realizedRmBase (I := I) S x₀) rm04Dt k (t : Real) y m) x₀
           (coordinateFrameAt (I := I) x₀ d x₀))
         D.carrier (t : Real))
@@ -141,14 +141,16 @@ theorem nablaKRm_timeDeriv_of_solution
       (iteratedRmCompDt (I := I) (coordinateFrameAt (I := I) x₀)
         (realizedChr (I := I) S x₀)
         (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-          (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+          (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x
+            d a b))
         (realizedRmBase (I := I) S x₀) rm04Dt k (t : Real) x₀ n)
       D.carrier
       (t : Real) :=
   iteratedRmComp_hasDerivWithinAt (I := I) (coordinateFrameAt (I := I) x₀)
     (realizedChr (I := I) S x₀)
     (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-      (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+      (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a
+        b))
     (realizedRmBase (I := I) S x₀) rm04Dt x₀ hrm
     (fun i a p => realizedChr_hasDerivWithinAt (I := I) S hS x₀ gInvDt hmetricFrame
       hSmooth hFdiff hFtdiff t x₀ (coordinateFrameAt_mem (I := I) x₀) i a p)

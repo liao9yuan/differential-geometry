@@ -3,14 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
-/-!
-# Cross-metric scalar energy bounds
 
-This file compares the Hessian and differential energies of a smooth scalar
-representative measured in one metric with its fixed spectral `H²` norm in
-another metric.  The integration measure remains the spectral reference
-measure; no comparison of Riemannian volume measures is needed.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -85,6 +85,8 @@ private theorem add_sq_le (a b : Real) :
   nlinarith [sq_nonneg (a - b)]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem cross_point_le
     (q k : SmoothRiemannianMetric I M) (Ce R : Real)
     (hEq : DifferentialGeometry.HCGCompactness.MetricUniformEquivalentOn
@@ -258,10 +260,10 @@ private theorem cross_point_le
             (Real.sqrt (Ce ^ 3) * R)) ^ 2) + Ce) *
           normSq0S (I := I) q x 1 (duSec (I := I) f hf x) := by ring
 
-/-- Hessian and differential energy measured in a second metric are bounded
-by the fixed spectral `H²` norm, with a constant independent of finite
-spectral support.  The integral is taken with respect to the spectral
-reference metric. -/
+
+
+
+
 theorem cross_energy_le
     (q k : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧

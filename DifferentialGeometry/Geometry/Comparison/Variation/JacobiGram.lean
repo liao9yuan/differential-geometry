@@ -24,7 +24,7 @@ namespace Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -70,11 +70,9 @@ def curveDensity (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ) : ℝ :=
   Real.sqrt (curveGram (I := I) g γ V t).det
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [DecidableEq ι] in
-/-- A rectangular linear recombination transforms a curve Gram matrix by
-congruence. -/
 theorem curveGram_rect
     {κ : Type*}
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -112,7 +110,7 @@ theorem curveGram_rect
   rw [Finset.sum_mul]
   exact Finset.sum_congr rfl fun l _ => by ring
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [Fintype ι] [DecidableEq ι] in
 /-- The Gram matrix of a finite tangent family is Hermitian. -/
@@ -125,7 +123,7 @@ theorem curveGram_herm
   simp only [star_trivial, curveGram, Matrix.of_apply]
   exact g.symm (γ t) (V j t) (V i t)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [DecidableEq ι] in
 /-- The Gram quadratic form is the metric norm-square of the corresponding
@@ -157,7 +155,7 @@ theorem curveGram_dotVec
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [Fintype ι] [DecidableEq ι] in
 /-- A Gram matrix is positive definite when the tangent family is linearly
@@ -180,7 +178,7 @@ theorem curveGram_posDef
     exact hc (funext (hLI c hv))
   exact g.pos (γ t) _ hv_ne
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 /-- Linear independence makes the Gram determinant strictly positive. -/
@@ -191,7 +189,7 @@ theorem curveGram_det_pos
     0 < (curveGram (I := I) g γ V t).det :=
   (curveGram_posDef (I := I) g γ V t hLI).det_pos
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 /-- Linear independence makes the square-root Gram density strictly positive. -/
@@ -202,7 +200,11 @@ theorem curveDensity_pos
     0 < curveDensity (I := I) g γ V t := by
   exact Real.sqrt_pos.mpr (curveGram_det_pos (I := I) g γ V t hLI)
 
+
 omit [Fintype ι] [DecidableEq ι] in
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Metric compatibility differentiates each entry of the Gram matrix. -/
 theorem hasDerivAt_gram
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
@@ -237,6 +239,9 @@ theorem curveDensity_cont
   exact (hasDerivAt_gram (I := I) hn g γ V t hγ hVdiff i j).continuousAt
 
 omit [Fintype ι] [DecidableEq ι] in
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Metric compatibility differentiates each entry of the mixed Gram matrix. -/
 theorem hasDerivAt_mixed
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
@@ -257,6 +262,9 @@ theorem hasDerivAt_mixed
       (fun s => covDerivAlong (I := I) g γ (V i) s) (V j) t hγ
       (hDVdiff i) (hVdiff j)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Jacobi's formula for the square-root Gram determinant. -/
 theorem hasDerivAt_curveDen
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
@@ -276,7 +284,7 @@ theorem hasDerivAt_curveDen
     exact hasDerivAt_gram (I := I) hn g γ V t hγ hVdiff i j
   · exact hpos
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [Fintype ι] [DecidableEq ι] in
 /-- Vanishing pairwise Wronskians identify the Gram derivative with twice the
 mixed Gram matrix. -/
@@ -293,7 +301,7 @@ theorem gramDeriv_eq_two
     Matrix.smul_apply, smul_eq_mul]
   linarith
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [Fintype ι] [DecidableEq ι] in
 /-- Vanishing pairwise Wronskians make the mixed Gram matrix symmetric. -/
 theorem mixedGram_symm
@@ -311,6 +319,9 @@ theorem mixedGram_symm
       g.symm (γ t) _ _
     _ = g.inner (γ t) (covDerivAlong (I := I) g γ (V i) t) (V j t) := hw.symm
 
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Wronskian symmetry simplifies the density derivative to the mixed Gram
 trace. -/
 theorem hasDerivAt_symmDen

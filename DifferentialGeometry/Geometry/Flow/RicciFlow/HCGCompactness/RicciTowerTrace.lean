@@ -6,15 +6,14 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
-/-!
-# Ricci towers as traces of Riemann towers
 
-Covariant differentiation commutes with the Levi-Civita metric trace.  This
-file packages that fact at every order of the `iterCov` tower, allowing a
-Riemann-tower norm estimate to control the corresponding Ricci tower.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,11 +31,11 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [SigmaCompactSpace M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- At every order, the covariant Ricci tower is one metric trace of a
-slot-reindexing of the covariant Riemann tower. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ric_trace
     (g : SmoothRiemannianMetric I M)
     (Rm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -71,8 +70,9 @@ theorem exists_ric_trace
       rw [← MultilinearSection.domDomCongr_trans]
       exact hout
 
-/-- The squared norm of the order-`k` Ricci tower is controlled by the
-same-order Riemann tower, with an explicit dimension-only factor. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem iterRic_normSq_le
     (g : SmoothRiemannianMetric I M)
     (Rm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -106,8 +106,10 @@ theorem iterRic_normSq_le
   exact htrace.trans_eq
     (congrArg (fun z => (Module.finrank Real E : Real) ^ ((2 + k) + 2) * z) hperm)
 
-/-- The canonical solution curvature tower agrees with `iterCov` for the
-Levi-Civita connection of the time-slice metric. -/
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm_eq_iterCov
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : Nat) :
@@ -126,8 +128,8 @@ theorem nablaKRm_eq_iterCov
       exact Tensor0SBundle.totalNabla0SRealizes_unique (I := I) hleft'
         (iterCov_realizes (I := I) (S.base.metric t) (S.base.rm04 t) k)
 
-/-- The moving-metric Ricci tower of a solution is controlled pointwise by the
-same-order canonical Riemann tower. -/
+
+
 theorem ricTower_normSq_le
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : Nat) (x : M) :

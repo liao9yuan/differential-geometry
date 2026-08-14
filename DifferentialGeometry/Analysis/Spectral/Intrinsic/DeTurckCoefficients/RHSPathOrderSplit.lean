@@ -4,15 +4,15 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieTopReanchor
 
-/-!
-# Ricci--DeTurck slope along a realized metric path
 
-This module gives the realized-family-native derivative of the complete chart
-Ricci--DeTurck right-hand side.  It deliberately avoids
-`ChartMetricPerturbation`: a realized chart Gram field is smooth on the chart
-target, but its totalized function on the whole model space need not be
-globally smooth.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,7 +33,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -77,23 +77,28 @@ private theorem unitModel_sub_app
       ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub]
   rw [hfun, ContinuousMultilinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem ccBilin_sub
     [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ (T - T') x v w =
-      ccTensorBilin (I := I) g₀ T x v w - ccTensorBilin (I := I) g₀ T' x v w := by
+    smoothCcTensorBilinForm (I := I) g₀ (T - T') x v w =
+      smoothCcTensorBilinForm (I := I) g₀ T x v w - smoothCcTensorBilinForm (I := I) g₀ T' x v
+        w := by
   rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ (T - T') x v w,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T x v w,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T' x v w]
   exact unitModel_sub_app (I := I) (M := M) g₀ T T' x ![v, w]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem symmS_eq_self
     [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hS : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ S x v w = ccTensorBilin (I := I) g₀ S x w v) :
-    symmS (I := I) (M := M) g₀ S = S := by
+      smoothCcTensorBilinForm (I := I) g₀ S x v w = smoothCcTensorBilinForm (I := I) g₀ S x w v) :
+    ccTensor02Symm (I := I) (M := M) g₀ S = S := by
   have hswap : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
     rw [domDomCongrSection_unitModel]
@@ -115,21 +120,21 @@ private theorem symmS_eq_self
     rw [hveta]
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
-  rw [symmS, hswap, ← two_smul ℝ S, smul_smul,
+  rw [ccTensor02Symm, hswap, ← two_smul ℝ S, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
-/-- The exact scalar slope of the complete chart Ricci--DeTurck RHS along the
-realized segment from `T'` to `T`.
 
-The first term is the Ricci contraction slope and the second is the DeTurck
-Lie slope.  Keeping them in one definition is essential: their second-order
-cross terms must be combined before any norm estimate is taken. -/
+
+
+
+
+
 def rhsPathSlope
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (s : ℝ) (y : E) : ℝ :=
   (-2 : ℝ) *
@@ -140,14 +145,15 @@ def rhsPathSlope
     lieDeTurckChartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
       g_bg α i k s y
 
-/-- The complete chart Ricci--DeTurck RHS has derivative `rhsPathSlope` at
-every parameter for which the realized metric remains fibre positive. -/
+
+
+omit [CompactSpace M] in
 theorem hasDerivAt_rhsPath
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) {s : ℝ}
@@ -172,14 +178,15 @@ theorem hasDerivAt_rhsPath
     g₀ T T' hδ_lt hδ hδ'_lt hδ' g_bg α i k hy hs
   simpa only [rhsPathSlope] using (hRic.const_mul (-2 : ℝ)).add hLie
 
-/-- On the open unit path, the derivative of the complete chart RHS is the
-realized-family slope. -/
+
+
+omit [CompactSpace M] in
 theorem deriv_rhsPath
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) {s : ℝ}
@@ -191,13 +198,14 @@ theorem deriv_rhsPath
   exact (hasDerivAt_rhsPath (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
     g_bg α i k hy (Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩)).deriv
 
-/-- The total realized family starts at the metric realized by `T'`. -/
+
+omit [CompactSpace M] in
 theorem realizedFam_zero
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     realizedFam (I := I) g₀ T T' hδ hδ' 0 =
       tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ' := by
   refine riemannianMetric_eq_of_inner _ _ (fun x v w => ?_)
@@ -205,13 +213,14 @@ theorem realizedFam_zero
       (Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨le_rfl, zero_le_one⟩),
     tensorSectionRealizeMetric_inner, convexPerturbation_zero]
 
-/-- The total realized family ends at the metric realized by `T`. -/
+
+omit [CompactSpace M] in
 theorem realizedFam_one
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     realizedFam (I := I) g₀ T T' hδ hδ' 1 =
       tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ := by
   refine riemannianMetric_eq_of_inner _ _ (fun x v w => ?_)
@@ -219,57 +228,57 @@ theorem realizedFam_one
       (Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨zero_le_one, le_rfl⟩),
     tensorSectionRealizeMetric_inner, convexPerturbation_one]
 
-/-- The complete Ricci--DeTurck chart sum evaluated on two tangent vectors at
-the chart centre. -/
+
+
 def rhsChartSum
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
       chartDeTurckRicciRHS (I := I)
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i k (extChartAt I x x)
 
-/-- The corresponding sum of complete Ricci--DeTurck path slopes. -/
+
 def rhsSumSlope
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
       rhsPathSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
         g_bg x i k s (extChartAt I x x)
 
-/-- The chart-centre sum of the DeTurck Lie slopes. -/
+
 def lieSumSlope
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
       lieDeTurckChartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
         g_bg x i k s (extChartAt I x x)
 
-/-- The raw chart-Hessian arm of the summed DeTurck Lie slope. -/
+
 def lieTopSum
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
@@ -278,51 +287,51 @@ def lieTopSum
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x)
         i k (extChartAt I x x)
 
-/-- The summed intrinsic DeTurck Lie top arm before combining it with the
-Ricci principal coefficient. -/
+
+
 def lieTopCovSum
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (deTurckLieArm2PrincipalCoeff (I := I) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T')))) x
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x
         ![(chartModelBasis E) i, (chartModelBasis E) k]
 
-/-- The summed connection tail produced by reanchoring the raw Lie chart
-Hessian to the fixed background connection. -/
+
+
 def lieTopTailSum
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
       lieTopTail (I := I) g₀ T T'
         (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k
 
-/-- The same connection tail with its two output indices transposed.  This is
-the orientation that combines with the chart-component sum evaluated at
-`![v, w]`. -/
+
+
+
 def lieTopTailSwap
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
@@ -330,6 +339,7 @@ def lieTopTailSwap
         (realizedFam (I := I) g₀ T T' hδ hδ' s) x k i
 
 omit [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieTopRaw_symm
     (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -364,15 +374,15 @@ private theorem lieTopRaw_symm
   rw [h₁, h₂]
   ring
 
-/-- The raw summed Lie top arm plus its connection tail is exactly the
-intrinsic background-covariant Hessian arm. -/
+
+
 theorem lieTop_add_tail
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) :
     lieTopSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s +
         lieTopTailSum (I := I) g₀ T T' hδ hδ' x v w s =
@@ -387,24 +397,24 @@ theorem lieTop_add_tail
   rw [← lieTop_cov_eq_raw (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
     (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i k]
 
-/-- With the transposed connection tail, the raw chart-Hessian sum is exactly
-the intrinsic Lie top section evaluated in the untransposed output order. -/
+
+
 theorem lieTop_add_swap
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) :
     lieTopSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s +
         lieTopTailSwap (I := I) g₀ T T' hδ hδ' x v w s =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (deTurckLieArm2PrincipalCoeff (I := I) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T')))) x ![v, w] := by
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x ![v, w] := by
   classical
   unfold lieTopSum lieTopTailSwap
   rw [← Finset.sum_add_distrib]
@@ -412,11 +422,11 @@ theorem lieTop_add_swap
     _ = ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
           unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 4 2
+            (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (deTurckLieArm2PrincipalCoeff (I := I) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 2
-                (symmS (I := I) (M := M) g₀ (T - T')))) x
+                (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x
             ![(chartModelBasis E) k, (chartModelBasis E) i] := by
       refine Finset.sum_congr rfl (fun i _ => ?_)
       rw [← Finset.sum_add_distrib]
@@ -430,20 +440,20 @@ theorem lieTop_add_swap
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k i]
     _ = _ := by
       simpa using unitModel_basis_expand_two (I := I) (M := M) g₀
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (deTurckLieArm2PrincipalCoeff (I := I) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T')))) x ![v, w]
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x ![v, w]
 
-/-- The raw first-order arm of the summed DeTurck Lie slope. -/
+
 def lieOneSum
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
@@ -452,14 +462,14 @@ def lieOneSum
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x)
         i k (extChartAt I x x)
 
-/-- The raw zeroth-order arm of the summed DeTurck Lie slope. -/
+
 def lieZeroSum
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
@@ -468,15 +478,16 @@ def lieZeroSum
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x)
         i k (extChartAt I x x)
 
-/-- The summed Lie slope is exactly its raw second-, first-, and zeroth-order
-chart arms. -/
+
+
+omit [CompactSpace M] in
 theorem lieSum_eq_split [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) :
     lieSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
       lieTopSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s +
@@ -489,14 +500,15 @@ theorem lieSum_eq_split [BoundarylessManifold I M]
     hδ_lt hδ hδ'_lt hδ' g_bg x _ _ s hy]
   simp only [mul_add, Finset.sum_add_distrib]
 
-/-- The Ricci part of the chart slope sum is the invariant linearized Ricci
-tensor evaluated on the chosen tangent vectors. -/
+
+
+omit [CompactSpace M] in
 theorem ricciSum_eq_lin [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
@@ -513,15 +525,16 @@ theorem ricciSum_eq_lin [BoundarylessManifold I M]
       (linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I)
         g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w hs).symm
 
-/-- The complete RHS slope is the invariant linearized Ricci contribution plus
-the summed DeTurck Lie slope. -/
+
+
+omit [CompactSpace M] in
 theorem rhsSlope_eq_lin [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     rhsSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
       (-2 : ℝ) * linearizedRicciAt (I := I) g₀ T T'
@@ -551,33 +564,33 @@ theorem rhsSlope_eq_lin [BoundarylessManifold I M]
     ring
   rw [hscale, ricciSum_eq_lin (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w hs]
 
-/-- Before the chart-Hessian reanchoring, the complete RHS slope is an
-invariant Ricci three-arm expression plus the raw Lie top/C1/C0 split. -/
+
+
 theorem rhsSlope_eq_raw [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
     (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     rhsSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
       (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s +
               (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s -
                 linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s))
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-          appCc (I := I) (M := M) g₀ 3 2
+          operatorFieldApply (I := I) (M := M) g₀ 3 2
             (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s +
               (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s -
                 linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s))
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
-          appCc (I := I) (M := M) g₀ 4 2
+          operatorFieldApply (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x ![v, w] +
       lieTopSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s +
@@ -588,17 +601,17 @@ theorem rhsSlope_eq_raw [BoundarylessManifold I M]
     hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s hs x ![v, w]
   have hRic' : linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
       x v w s = unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s +
               (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s -
                 linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s))
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-          appCc (I := I) (M := M) g₀ 3 2
+          operatorFieldApply (I := I) (M := M) g₀ 3 2
             (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s +
               (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s -
                 linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s))
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
-          appCc (I := I) (M := M) g₀ 4 2
+          operatorFieldApply (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x ![v, w] := by
     simpa using hRic
@@ -606,39 +619,39 @@ theorem rhsSlope_eq_raw [BoundarylessManifold I M]
   rw [lieSum_eq_split (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s]
   ring
 
-/-- The complete Ricci--DeTurck second-order slope arm after the Ricci and
-DeTurck principal coefficients have been combined. -/
+
+
 def rhsTopTerm
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   unitModel (I := I) (M := M) g₀ 2
-    (appCc (I := I) (M := M) g₀ 4 2
+    (operatorFieldApply (I := I) (M := M) g₀ 4 2
       (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
         (realizedFam (I := I) g₀ T T' hδ hδ' s))
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x ![v, w]
 
-/-- The lower slope arm: Ricci orders zero and one, the raw DeTurck orders
-zero and one, and the connection tail created by top-order reanchoring. -/
+
+
 def rhsLowTerm
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
   (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 2 2
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s +
             (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s -
               linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s))
           (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-        appCc (I := I) (M := M) g₀ 3 2
+        operatorFieldApply (I := I) (M := M) g₀ 3 2
           (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s +
             (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s -
               linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s))
@@ -647,36 +660,36 @@ def rhsLowTerm
     lieZeroSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s -
     lieTopTailSwap (I := I) g₀ T T' hδ hδ' x v w s
 
-/-- The combined top term is exactly the raw Ricci top arm plus the reanchored
-DeTurck top arm.  No estimate and no high-order Sobolev hypothesis enters this
-identity. -/
+
+
+
 theorem rhsTop_eq_raw [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
     (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s : ℝ) :
     rhsTopTerm (I := I) g₀ g_bg T T' hδ hδ' x v w s =
       (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
           (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x ![v, w] +
       lieTopSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s +
       lieTopTailSwap (I := I) g₀ T T' hδ hδ' x v w s := by
   have hSsymm : ∀ (y : M) (u z : TangentSpace I y),
-      ccTensorBilin (I := I) g₀ (T - T') y u z =
-        ccTensorBilin (I := I) g₀ (T - T') y z u := by
+      smoothCcTensorBilinForm (I := I) g₀ (T - T') y u z =
+        smoothCcTensorBilinForm (I := I) g₀ (T - T') y z u := by
     intro y u z
     rw [ccBilin_sub (I := I) (M := M) g₀ T T' y u z,
       ccBilin_sub (I := I) (M := M) g₀ T T' y z u,
       hTsymm y u z, hT'symm y u z]
-  have hsymmS : symmS (I := I) (M := M) g₀ (T - T') = T - T' :=
+  have hsymmS : ccTensor02Symm (I := I) (M := M) g₀ (T - T') = T - T' :=
     symmS_eq_self (I := I) (M := M) g₀ (T - T') hSsymm
   have hLie := lieTop_add_swap (I := I) g₀ g_bg T T'
     hδ_lt hδ hδ'_lt hδ' x v w s
@@ -687,20 +700,20 @@ theorem rhsTop_eq_raw [BoundarylessManifold I M]
     ← hLie]
   ring
 
-/-- Exact complete path-slope decomposition into the combined top coefficient
-and lower C0/C1 arms.  In particular, the top cancellation occurs before any
-norm or integral estimate is applied. -/
+
+
+
 theorem rhsSlope_eq_split [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
     (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     rhsSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
       rhsTopTerm (I := I) g₀ g_bg T T' hδ hδ' x v w s +
@@ -713,15 +726,16 @@ theorem rhsSlope_eq_split [BoundarylessManifold I M]
   rw [unitModel_add_app, unitModel_add_app]
   ring
 
-/-- The complete chart sum is smooth in the path parameter on the realized
-small set. -/
+
+
+omit [CompactSpace M] in
 theorem rhsSum_contDiffAt [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ}
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
     ContDiffAt ℝ ∞ (rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s := by
@@ -742,15 +756,16 @@ theorem rhsSum_contDiffAt [BoundarylessManifold I M]
   exact realizedDeTurckRicciChartSum_contDiffAt (I := I)
     g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w hs
 
-/-- The derivative of the complete chart sum is the sum of the complete
-Ricci--DeTurck slopes. -/
+
+
+omit [CompactSpace M] in
 theorem hasDerivAt_rhsSum [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ}
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
     HasDerivAt (rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w)
@@ -763,43 +778,46 @@ theorem hasDerivAt_rhsSum [BoundarylessManifold I M]
   exact (hasDerivAt_rhsPath (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
     g_bg x i k hy hs).const_mul _
 
-/-- On the open unit path, the derivative of the chart sum is `rhsSumSlope`. -/
+
+omit [CompactSpace M] in
 theorem deriv_rhsSum [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     deriv (rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s =
       rhsSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s := by
   exact (hasDerivAt_rhsSum (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
     x v w (Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩)).deriv
 
-/-- The complete chart sum is continuous on the closed unit path. -/
+
+omit [CompactSpace M] in
 theorem rhsSum_continuous [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) :
     ContinuousOn (rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) (Icc (0 : ℝ) 1) := by
   intro s hs
   exact (rhsSum_contDiffAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
     x v w (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs)).continuousAt.continuousWithinAt
 
-/-- The complete Ricci--DeTurck slope sum is interval integrable on the unit
-path. -/
+
+
+omit [CompactSpace M] in
 theorem rhsSlope_integrable [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) :
     IntervalIntegrable
       (rhsSumSlope (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w)
@@ -834,15 +852,16 @@ theorem rhsSlope_integrable [BoundarylessManifold I M]
   refine measure_mono_null (fun s hs => ?_) hnull
   exact fun hs' => hs (hsub hs')
 
-/-- The endpoint difference of the complete chart sum is the integral of the
-complete realized-family slope. -/
+
+
+omit [CompactSpace M] in
 theorem rhsSum_sub_eq_int [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) :
     rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w 1 -
         rhsChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w 0 =

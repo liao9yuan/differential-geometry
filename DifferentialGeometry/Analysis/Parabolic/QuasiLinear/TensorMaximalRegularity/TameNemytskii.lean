@@ -10,18 +10,17 @@ set_option maxSynthPendingDepth 3
 This is small-lemma-frontier **item 4** of the R1τ ruling
 (`Geometry/Flow/RicciFlow/ShortTime/UNIF_N_PRO_RULING.md`): the time-integrated
 contraction estimate for a genuinely **second-order** Nemytskii operator, built
-*abstractly* over inner-product carriers so the fixed-horizon representative
+*abstractly* over Banach carriers so the fixed-horizon representative
 (item 5) can instantiate it as a drop-in.
 
 The mechanism is the two-orientation product-Hölder split named in the ruling
 (`‖A·B‖_{L²_t} ≤ ‖A‖_{L^∞_t}·‖B‖_{L²_t}`, roles reversed in the other
 orientation).  We follow the `LowScaleCutoff.lean` carrier pattern:
 
-* `X` — the top spatial scale (think `H^{a+2}`), a Hilbert space so `timeL2 X T`
-  exists;
+* `X` — the top spatial scale (think `H^{a+2}`), a Banach space;
 * `H` — the admissibility scale (think `H^{a+1}`), a normed space reached by a
   continuous linear inclusion `ι : X →L[ℝ] H`;
-* `Y` — the codomain scale (think `H^a`), a Hilbert space so `timeL2 Y T` exists.
+* `Y` — the codomain scale (think `H^a`), a Banach space.
 
 The pointwise hypothesis is the **second-order two-orientation tame bound**
 (no pointwise `H^{a+2}`-ball, no radius `R` in the leading constant):
@@ -71,10 +70,10 @@ This is the reusable sibling of the committed two-term
 one extra summand. -/
 theorem timeL2_norm_le_of_ae_three_bound
     {T : ℝ} {X Y Z W : Type*}
-    [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-    [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
-    [NormedAddCommGroup Z] [InnerProductSpace ℝ Z] [CompleteSpace Z]
-    [NormedAddCommGroup W] [InnerProductSpace ℝ W] [CompleteSpace W]
+    [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+    [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
+    [NormedAddCommGroup Z] [NormedSpace ℝ Z] [CompleteSpace Z]
+    [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
     (h : timeL2 X T) (p : timeL2 Y T) (q : timeL2 Z T) (r : timeL2 W T)
     {A B C : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) (hC : 0 ≤ C)
     (hbound : ∀ᵐ t ∂(timeMeasure T), ‖h t‖ ≤ A * ‖p t‖ + B * ‖q t‖ + C * ‖r t‖) :
@@ -156,9 +155,9 @@ theorem timeL2_norm_le_of_ae_three_bound
     ENNReal.toReal_ofReal hA, ENNReal.toReal_ofReal hB, ENNReal.toReal_ofReal hC]
 
 variable {T : ℝ}
-  {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+  {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
   {H : Type*} [NormedAddCommGroup H] [NormedSpace ℝ H]
-  {Y : Type*} [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
+  {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
 
 /-- **Time-level tame Nemytskii splitting (two-orientation form).**
 

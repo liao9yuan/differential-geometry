@@ -7,7 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.LocalPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MaximalFlow
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPinchingPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.EarlyBall
@@ -17,14 +17,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConver
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.Headlines
-import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
 import DifferentialGeometry.Geometry.Metric.Sphere.PositiveSpaceForm
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Hamilton Positive Ricci Endpoint
@@ -55,74 +53,73 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Closed, connected, smooth, boundaryless, three-dimensional manifold
-package used by the statement of Hamilton's theorem. -/
+
+
 def Closed3Manifold : Prop :=
   CompactSpace M /\ ConnectedSpace M /\ I.Boundaryless /\
     Module.finrank Real E = 3
 
-/-- The initial metric has positive Ricci curvature, expressed through the
-canonical pointwise Ricci tensor of the metric. -/
+
+
 def PosRicciMetric (g : SmoothRiemannianMetric I M) : Prop :=
   forall x : M, forall v : TangentSpace I x, v ≠ 0 ->
     0 < DifferentialGeometry.PDE.RicciFlow.metricRicciAt (I := I) (M := M) g x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
 
-/-- `M` admits a smooth Riemannian metric of positive Ricci curvature. -/
+
 def AdmitsPosRicci : Prop :=
   exists g : SmoothRiemannianMetric I M, PosRicciMetric (I := I) (M := M) g
 
-/-- Constant positive sectional curvature, expressed in the standard lowered
-curvature slot order `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`.
 
-The sectional numerator is `Rm04(X,Y,Y,X)`. -/
+
+
+
 def ConstPosSecMetric (g : SmoothRiemannianMetric I M) : Prop :=
   exists c : Real, 0 < c /\
     forall x : M, forall X Y : TangentSpace I x,
       DifferentialGeometry.Integral.Connection.metricRm04StdAt (I := I) (M := M) g x X Y Y X =
         c * (g.inner x X X * g.inner x Y Y - g.inner x X Y * g.inner x X Y)
 
-/-- `M` admits a smooth metric of constant positive sectional curvature. -/
+
 def AdmitsConstPosSec : Prop :=
   exists g : SmoothRiemannianMetric I M, ConstPosSecMetric (I := I) (M := M) g
 
-/-- The ambient-dimension fact for the round three-sphere model: `dim ℝ⁴ = 3 + 1`. -/
+
 instance : Fact (Module.finrank Real (EuclideanSpace Real (Fin 4)) = 3 + 1) :=
   ⟨by norm_num [finrank_euclideanSpace_fin]⟩
 
-/-- Witness data that a smooth manifold is presented as a spherical space-form
-quotient.
 
-This is topology/global-geometry data, not analytic Ricci-flow data: a finite group acting
-freely by ambient orthogonal isometries on the round three-sphere, packaged as a
-`Geometry.RoundQuotientData` over `EuclideanSpace ℝ (Fin 4)` (whose orbit quotient `data.Q`
-carries a smooth structure modeled on `𝓡 3` with descended round metric), together with a
-smooth equivalence of the supplied manifold `N` with that quotient. -/
+
+
+
+
+
+
+
 structure SphericalSpaceFormQuotientModel
     (I : ModelWithCorners Real E H) (N : Type u)
     [TopologicalSpace N] [ChartedSpace H N] : Type _ where
   data : Geometry.RoundQuotientData.{0, u, u} (EuclideanSpace Real (Fin 4)) 3
   equiv : N ≃ₘ⟮I, 𝓡 3⟯ data.Q
 
-/-- Predicate that a smooth manifold is a spherical space-form quotient. -/
+
 def IsSphericalSpaceFormQuotient
     (I : ModelWithCorners Real E H) (N : Type u)
     [TopologicalSpace N] [ChartedSpace H N] : Prop :=
   Nonempty (SphericalSpaceFormQuotientModel I N)
 
-/-- `M` is diffeomorphic to a spherical space form. -/
+
 def SphericalSpaceForm : Prop :=
   IsSphericalSpaceFormQuotient I M
 
-/-- All-real metric family associated to an interval solution and a fallback
-initial metric.
 
-On the solution interval it is the solution family; outside it falls back to
-`g0` and its Levi-Civita connection.  This is the family used by scalar maximum
-principle statements, whose time variable is all of `Real`. -/
+
+
+
+
+
 def ham3RealFamilyCore
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -142,16 +139,17 @@ def ham3RealFamilyCore
     by_cases ht : t ∈ D.carrier
     · simpa [ht] using S.family.metricCompatible ⟨t, ht⟩
     · simpa [ht] using
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g0)
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+          (I := I) g0)
 
-/-- Current project-structured global output of Hamilton's flow argument.
 
-This is the black-box boundary rewritten in current structures: it contains a
-folder-level Ricci-flow solution `SolutionOn`, its solution predicate
-`IsSolutionOn`, the initial metric relation, and the curvature blow-up property
-of the maximal finite-endpoint solution.  Point selection, noncollapsing,
-compactness, and the limiting constant-curvature metric are theorem endpoints
-below, not fields in this data package. -/
+
+
+
+
+
+
+
 structure Ham3FlowPackage (g0 : SmoothRiemannianMetric I M) where
   D : DifferentialGeometry.Integral.Connection.RealTimeInterval
   S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D
@@ -162,29 +160,30 @@ structure Ham3FlowPackage (g0 : SmoothRiemannianMetric I M) where
       K < Tensor0SBundle.normSq0S (I := I) (S.family.metric t) x 4
         (S.base.rm04 t x)
 
-/-- Accessor for the Ricci-flow solution carried by the Section 12 package.
 
-Keeping this as a named accessor avoids brittle parsing around the capital field
-projection `P.S` inside long component theorem statements. -/
+
+
+
 abbrev ham3Solution
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
     DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) P.D :=
   P.S
 
-/-- Intrinsic scalar curvature carried by the flow package: the metric trace
-of the canonical pointwise Ricci tensor. -/
+
+
 def ham3Scalar
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
     Real -> M -> Real :=
   DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P)
 
-/-- Global maximal-flow setup supplies joint spacetime continuity for the
-canonical scalar curvature.
 
-This is a theorem endpoint, not stored data in `Ham3FlowPackage`: proving it
-belongs to the smooth Ricci-flow existence/regularity package. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalarSTCont
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -192,8 +191,8 @@ theorem ham3_scalarSTCont
       (I := I) (M := M) (ham3Solution (I := I) (M := M) P) := by
   exact P.isSmooth.scalarSTCont
 
-/-- Canonical metric-induced squared curvature norm for a Hamilton Section 12
-package. -/
+
+
 def ham3RmNormSq
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -203,34 +202,34 @@ def ham3RmNormSq
       ((ham3Solution (I := I) (M := M) P).family.metric t) x 4
       (((ham3Solution (I := I) (M := M) P).base.rm04 t) x)
 
-/-! ## Section 12 blow-up and compactness data -/
 
-/-- Data carried by Hamilton's blow-up sequence in Section 12.
 
-The scale is not stored: in Hamilton's proof it is the scalar curvature of the
-original flow at the chosen point-time, `R_i = R(x_i,t_i)`.  Curvature and volume
-quantities on the rescaled flows are likewise theorem-level consequences, not
-fields of this sequence data. -/
+
+
+
+
+
+
 structure Ham3BlowupData (M : Type*) where
   point : Nat -> M
   time : Nat -> Real
 
-/-- Blow-up scale for the `i`th selected parabolic rescaling. -/
+
 def ham3BlowupScale
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M) (i : Nat) : Real :=
   ham3Scalar (I := I) P (Q.time i) (Q.point i)
 
-/-- Original flow time corresponding to rescaled time `s` in the `i`th blow-up:
-`t = t_i + s / R_i`. -/
+
+
 def ham3RescaledTime
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M) (i : Nat) (s : Real) : Real :=
   Q.time i + s / ham3BlowupScale (I := I) P Q i
 
-/-- Scalar curvature of the `i`th parabolically rescaled flow. -/
+
 def ham3RescaledScalar
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -238,7 +237,7 @@ def ham3RescaledScalar
   (ham3BlowupScale (I := I) P Q i)⁻¹ *
     ham3Scalar (I := I) P (ham3RescaledTime (I := I) P Q i s) x
 
-/-- The fixed radius used in Hamilton's Section 12 proof. -/
+
 def ham3_r0 : Real := (1 : Real) / 10
 
 theorem ham3_r0_pos : 0 < ham3_r0 := by
@@ -247,15 +246,15 @@ theorem ham3_r0_pos : 0 < ham3_r0 := by
 theorem r0_le_one : ham3_r0 ≤ (1 : Real) := by
   norm_num [ham3_r0]
 
-/-- The coarse constant `100` is the inverse-square scale of `r0 = 1/10`. -/
+
 theorem ham3_hundred_eq : (100 : Real) = (ham3_r0⁻¹) ^ 2 := by
   norm_num [ham3_r0]
 
-/-- The pointed smooth limit produced by Hamilton compactness, retaining its
-actual source sequence, comparison maps, original Hamilton indices, and
-source-to-original-manifold identifications.  The original limit fields remain
-primitive so downstream tensor proofs use one definitionally fixed instance
-package. -/
+
+
+
+
+
 structure Ham3CGHLimitData (I : ModelWithCorners Real E H) (M : Type u)
     [TopologicalSpace M] [ChartedSpace H M] where
   N : Type u
@@ -308,45 +307,46 @@ abbrev limit (L : Ham3CGHLimitData (I := I) M) :
     t2TangentBundle := L.t2TangentBundle, basepoint := L.basepoint,
     S := L.S, isSolution := L.isSolution }
 
-/-- Original Hamilton index selected by the smooth-CGH subsequence. -/
+
 def subseq (L : Ham3CGHLimitData (I := I) M) : Nat -> Nat :=
   fun k => L.origIndex (L.cghSubseq k)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem subseq_strict (L : Ham3CGHLimitData (I := I) M) :
     StrictMono L.subseq :=
   L.origStrict.comp L.cghStrict
 
 end Ham3CGHLimitData
 
-/-- The selected subsequence along which the rescaled pointed flows converge. -/
+
 def Ham3LimitSubseq (L : Ham3CGHLimitData (I := I) M) : Prop :=
   StrictMono L.subseq
 
-/-- The limit flow contains the fixed backward parabolic window used in
-Section 12. -/
+
+
 def Ham3LimitWindow (L : Ham3CGHLimitData (I := I) M) : Prop :=
   Set.Icc (-(ham3_r0 ^ 2)) 0 ⊆ L.D.carrier
 
-/-- The limit flow is regular on the open fixed backward parabolic window. -/
+
 def Ham3LimitRegWin (L : Ham3CGHLimitData (I := I) M) : Prop :=
   Set.Ioo (-(ham3_r0 ^ 2)) 0 ⊆ L.D.regular
 
-/-- The CGH limit remains connected.  This is needed in the final Schur step:
-`Ric = (R / 3) g` makes scalar locally constant, while a single global
-constant-sectional-curvature parameter requires connectedness. -/
+
+
+
 def Ham3LimitConnected (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   ConnectedSpace L.N
 
-/-- The CGH limit remains boundaryless.  This is part of the smooth limit
-manifold data needed by static Bianchi/Schur arguments. -/
+
+
 def Ham3LimitBoundaryless (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
   I.Boundaryless
 
-/-- The limit object is itself a smooth Ricci-flow solution. -/
+
 def Ham3LimitFlow (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -356,9 +356,9 @@ def Ham3LimitFlow (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : T2Space L.N := L.t2
   DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) L.S
 
-/-- Scalar convergence at the pointed basepoints of the selected rescaled
-flows.  This is the narrow CGH scalar-transfer datum needed to turn
-Hamilton's point-selection normalization into `R(g∞)(x∞,0)=1`. -/
+
+
+
 def Ham3LimitBaseScalarConv
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -374,9 +374,9 @@ def Ham3LimitBaseScalarConv
       ham3RescaledScalar (I := I) P Q (L.subseq k) 0 (Q.point (L.subseq k)))
     Filter.atTop (nhds (L.S.scalar 0 L.basepoint))
 
-/-! ## Section 12 limit-flow proof interfaces -/
 
-/-- Ricci nonnegativity inherited by the CGH limit flow. -/
+
+
 def LimitRicNonneg (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -388,7 +388,7 @@ def LimitRicNonneg (L : Ham3CGHLimitData (I := I) M) : Prop :=
     forall v : TangentSpace I x,
       0 <= L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
 
-/-- Scalar normalization inherited at the CGH base point. -/
+
 def LimitBaseScalarOne (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -398,7 +398,7 @@ def LimitBaseScalarOne (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : T2Space L.N := L.t2
   L.S.scalar 0 L.basepoint = 1
 
-/-- Positive scalar curvature at one regular limit-flow time. -/
+
 def LimitScalarPosAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -408,11 +408,11 @@ def LimitScalarPosAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : T2Space L.N := L.t2
   forall x : L.N, 0 < L.S.scalar t x
 
-/-- Positive scalar curvature on the noninitial part of the limit flow. -/
+
 def LimitScalarPos (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.regular -> LimitScalarPosAt (I := I) L t
 
-/-- Nonnegative scalar curvature on the limit-flow carrier. -/
+
 def LimitScalarNonneg (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -423,8 +423,8 @@ def LimitScalarNonneg (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.carrier -> forall x : L.N,
     0 <= L.S.scalar t x
 
-/-- The improved pinching estimate forces the trace-free Ricci norm of the CGH
-limit to vanish at one regular time. -/
+
+
 def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -433,20 +433,21 @@ def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : SigmaCompactSpace L.N := L.sigmaCompact
   letI : T2Space L.N := L.t2
   forall x : L.N,
-    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x = 0
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x = 0
 
-/-- The improved pinching estimate forces the trace-free Ricci norm of the CGH
-limit to vanish. -/
+
+
 def LimitTfZero (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.regular -> LimitTfZeroAt (I := I) L t
 
-/-- The concrete decay conclusion obtained from passing the improved pinching
-estimate through the smooth CGH convergence: at every regular limit-flow point,
-the trace-free Ricci norm is bounded above by every positive number.
 
-This is deliberately weaker than `LimitTfZero`; the remaining convergence
-frontier is to produce this decay statement from pullback convergence of the
-rescaled flows and the scale factor `R_i^{-ε} -> 0`. -/
+
+
+
+
+
+
 def LimitTfDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -455,15 +456,16 @@ def LimitTfDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : SigmaCompactSpace L.N := L.sigmaCompact
   letI : T2Space L.N := L.t2
   forall x : L.N, forall η : Real, 0 < η ->
-    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x <= η
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x <= η
 
-/-- The improved pinching estimate gives arbitrary small upper bounds for the
-trace-free Ricci norm on the regular part of the CGH limit. -/
+
+
 def LimitTfDecay (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.regular -> LimitTfDecayAt (I := I) L t
 
-/-- At a fixed limit-flow time, the Ricci tensor is Einstein with factor
-`R / 3`. -/
+
+
 def LimitEinsteinAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -475,7 +477,7 @@ def LimitEinsteinAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
     L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) =
       (L.S.scalar t x / 3) * (L.S.base.metric t).inner x v w
 
-/-- The limit flow carries a constant positive sectional-curvature metric. -/
+
 def LimitConstPosSec (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -486,9 +488,9 @@ def LimitConstPosSec (L : Ham3CGHLimitData (I := I) M) : Prop :=
   exists gInf : SmoothRiemannianMetric I L.N,
     ConstPosSecMetric (I := I) (M := L.N) gInf
 
-/-- A specified limit-flow slice has the positive Ricci lower bound needed by
-Bonnet--Myers and is a constant-positive-sectional-curvature metric.  Keeping
-the exact slice prevents completeness information from being lost. -/
+
+
+
 def LimitRoundAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -504,14 +506,14 @@ def LimitRoundAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)) /\
     ConstPosSecMetric (I := I) (M := L.N) g
 
-/-- The checked short-time existence stage available from the Hamilton-DeTurck
-construction.
 
-This is exactly the raw metric-family/PDE output of
-`ricci_flow_short_time_existence`, repackaged under the Hamilton closed-manifold
-hypothesis.  It is intentionally weaker than `Ham3FlowPackage`: it does not
-construct the canonical `SolutionOn`/`IsSmoothSolutionOn` package, a normalized
-maximal interval, or endpoint curvature blow-up. -/
+
+
+
+
+
+
+
 theorem ham3_short_exists
     {E0 : Type*} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
     [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
@@ -540,18 +542,26 @@ theorem ham3_short_exists
   classical
   letI : CompactSpace M0 := hM.1
   letI : I0.Boundaryless := hM.2.2.1
-  exact DifferentialGeometry.PDE.RicciFlow.ricci_flow_short_time_existence
-    (I := I0) (M := M0) g0
+  obtain ⟨T, hT, g_fam, hg0, hsmooth, hpde⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.ricci_flow_short_time_existence
+      (I := I0) (M := M0) g0
+  refine ⟨T, hT, g_fam, hg0, ?_, ?_, hpde⟩
+  · intro x0 i j
+    exact (hsmooth x0 i j).mono (by
+      rintro ⟨t, x⟩ ⟨ht, hx⟩
+      exact ⟨⟨le_of_lt ht.1, ht.2⟩, hx⟩)
+  · intro x0 i j
+    exact (hsmooth x0 i j).continuousOn
 
-/-- Checked local bridge: the short-time Hamilton-DeTurck headline packaged as a
-folder-level `SolutionOn` candidate on the half-open interval `[0, T)`.
 
-This genuinely cites `ham3_short_exists` (hence `ricci_flow_short_time_existence`)
-at the file's own `E, I, M`.  The raw chart-Gram smoothness/continuity and the
-pointwise Ricci-flow PDE are restated verbatim in terms of the candidate's
-metric family `S.family.metric` (which is definitionally the short-time
-`g_fam`).  It does *not* yet supply `IsSolutionOn`; see
-`ham3_short_isSolution`. -/
+
+
+
+
+
+
+
+
 theorem ham3_short_solution_candidate
     [BoundarylessManifold I M]
     (hM : Closed3Manifold (I := I) (M := M))
@@ -580,7 +590,7 @@ theorem ham3_short_solution_candidate
   obtain ⟨T, hT, g_fam, hg0, hsmooth, hcont, hpde⟩ :=
     ham3_short_exists hM g0
   refine ⟨T, hT, ⟨⟨g_fam⟩⟩, ?_, ?_, ?_, ?_⟩
-  · show g_fam 0 = g0
+  · change g_fam 0 = g0
     exact hg0
   · intro x0 i j
     exact hsmooth x0 i j
@@ -589,8 +599,8 @@ theorem ham3_short_solution_candidate
   · intro t ht x v w
     exact hpde t ht x v w
 
-/-- Short-time Ricci-flow solution package, assembled from the closed-left joint
-chart-Gram regularity of `short_time_joint` and `solutionOn_of_joint`. -/
+
+
 theorem ham3_short_isSolution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
@@ -607,14 +617,14 @@ theorem ham3_short_isSolution
   obtain ⟨T, hT, g, hstart, hjoint, hpde⟩ :=
     DifferentialGeometry.PDE.RicciFlow.short_time_joint (I := I) (M := M) g0
   refine ⟨T, hT, ⟨⟨g⟩⟩, ?_, ?_⟩
-  · show g 0 = g0
+  · change g 0 = g0
     exact hstart
   · exact DifferentialGeometry.PDE.RicciFlow.solutionOn_of_joint
       (I := I) (M := M) hT g hjoint hpde
 
-/-- Short-time *smooth* normalized existence, assembled from the short-time
-solution producer `ham3_short_isSolution` and the checked regularity promotion
-`smoothOfSol` (`IsSolutionOn → IsSmoothSolutionOn`). -/
+
+
+
 theorem ham3_short_smooth_solution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
@@ -631,12 +641,13 @@ theorem ham3_short_smooth_solution
   exact ⟨T, hT, S, hstart,
     DifferentialGeometry.PDE.RicciFlow.smoothOfSol (I := I) S hSol⟩
 
-/-- Global analytic input for Hamilton's normalized maximal-flow setup.
 
-The source-level theorem records the endpoint needed by Section 12: a normalized
-maximal interval starting at `0`, the initial metric, smooth Ricci-flow data, and
-the blow-up package.  It assembles the supremal compatible-flow constructor
-`exists_max_flow` with `rmUnbounded_of_maximal`. -/
+
+
+
+
+
+
 theorem ham3_flow_exists_normalized
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -667,7 +678,7 @@ theorem ham3_flow_exists_normalized
         exact ⟨t, x, ⟨ht0, htω⟩, by simpa [curvatureNormSq] using hK⟩ }
   exact ⟨omega, h0ω, P, rfl⟩
 
-/-- Compatibility nonempty form of the normalized maximal-flow setup. -/
+
 theorem ham3_flow_exists
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -677,7 +688,7 @@ theorem ham3_flow_exists
     ⟨_omega, _h0ω, P, _hD⟩
   exact ⟨P⟩
 
-/-- Chosen global Ricci-flow package supplied by `ham3_flow_exists`. -/
+
 noncomputable def ham3_flow_box
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -685,20 +696,20 @@ noncomputable def ham3_flow_box
   Ham3FlowPackage (I := I) (M := M) g0 :=
   Classical.choice (ham3_flow_exists (I := I) (M := M) hM g0 hpos)
 
-/-! ## Corollary 7.4 scalar package extracted from a maximal flow -/
 
-/-- The all-real metric family used by the scalar maximum-principle package.
 
-On the flow interval it is the metric/connection carried by `P`; outside the
-interval it falls back to the initial metric and its Levi-Civita connection, so
-the realized family has metric compatibility for every real time. -/
+
+
+
+
+
 def ham3RealFamily
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
     DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
   ham3RealFamilyCore (I := I) P.S g0
 
-/-- Intrinsic squared Ricci norm carried by the flow package. -/
+
 def ham3RicNormSq
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -706,8 +717,8 @@ def ham3RicNormSq
   fun t x =>
     Tensor0SBundle.normSq0S (I := I) (P.S.family.metric t) x 2 (P.S.ricciAt t x)
 
-/-- The scalar Laplacian used by the WMP package, defined through the realized
-heat-operator metric family. -/
+
+
 def ham3ScalarLap
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -716,12 +727,13 @@ def ham3ScalarLap
     DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (ham3RealFamily (I := I) P) t
       (ham3Scalar (I := I) P t) x
 
-/-- Global maximal-flow setup supplies the scalar regularity package required
-by the scalar weak maximum principle on every compact subinterval of the
-normalized time domain.
 
-This is kept as a theorem endpoint rather than a field of `Ham3FlowPackage`;
-the proof belongs to the smooth Ricci-flow regularity layer. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalarRegular
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -742,21 +754,21 @@ theorem ham3_scalarRegular
         simp [ham3RealFamily, ham3RealFamilyCore, htD])
       hden)
 
-/-- Scalar curvature is unbounded above on the maximal flow interval.
 
-This is the honest input for Lemma 11.6 point selection.  It is produced from
-maximal-endpoint curvature blow-up plus Section 9 Ricci nonnegativity and
-Corollary 11.4; finite endpoint alone is not enough. -/
+
+
+
+
 def Ham3ScalarBlowup
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) : Prop :=
   forall A : Real, exists t : Real, exists x : M,
     t ∈ P.D.carrier /\ A < ham3Scalar (I := I) P t x
 
-/-- Point-selection and parabolic-rescaling normalization:
-`R_i > 0`, `R_i t_i -> infinity`,
-`R(g^{R_i})(x_i,0) = 1`, and scalar curvature is bounded above by `1`
-on the rescaled backward time slab. -/
+
+
+
+
 def Ham3PointSel
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -772,7 +784,7 @@ def Ham3PointSel
       -(ham3BlowupScale (I := I) P Q i * Q.time i) <= s -> s <= 0 ->
         ham3RescaledScalar (I := I) P Q i s x <= 1)
 
-/-- The `i`th selected parabolic rescaling as an actual Ricci-flow candidate. -/
+
 noncomputable def ham3RescaledSol
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -783,6 +795,7 @@ noncomputable def ham3RescaledSol
   paraSolution (I := I) P.S (Q.time i) (ham3BlowupScale (I := I) P Q i)
     (hsel.1 i) (hsel.2.2.1 i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The canonical trace-free Ricci norm square has weight two under each
 selected parabolic rescaling. -/
 theorem ham3_tf_display
@@ -836,11 +849,11 @@ structure Ham3SourceRealizes
           ((ham3RescaledSol (I := I) P Q hsel (L.origIndex i)).base.metric t)
           (L.sourceToOrig i)
 
-/-- Lemma 9.1-style nonnegative Ricci on the selected rescaled flow slabs.
 
-Since constant parabolic metric scaling preserves the `(0,2)` Ricci tensor, this
-is stated on the original flow at the original time corresponding to the
-rescaled slab point. -/
+
+
+
+
 def Ham3RescaledRicNonneg
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -850,8 +863,8 @@ def Ham3RescaledRicNonneg
       0 <= P.S.ricciAt (ham3RescaledTime (I := I) P Q i s) x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
 
-/-- Section 9 shifted pinching preservation available on every compact
-subinterval of the normalized maximal flow. -/
+
+
 def Ham3Section9Pinch
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
@@ -860,11 +873,12 @@ def Ham3Section9Pinch
       0 < delta /\ delta < (1 : Real) / 3 /\
         DifferentialGeometry.PDE.RicciFlow.PinchPres (I := I) (M := M)
           (fun t : Real => P.S.base.metric t)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+            P.S.ricci)
           P.S.scalar T delta
 
-/-- Section 9 shifted pinching preservation with one fixed pinching constant
-valid on every compact subinterval of the maximal flow. -/
+
+
 def Ham3Section9PinchFixed
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
@@ -873,9 +887,11 @@ def Ham3Section9PinchFixed
       forall T : Real, 0 <= T -> T < omega ->
         DifferentialGeometry.PDE.RicciFlow.PinchPres (I := I) (M := M)
           (fun t : Real => P.S.base.metric t)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+            P.S.ricci)
           P.S.scalar T delta
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem Ham3Section9PinchFixed.toVarying
     {g0 : SmoothRiemannianMetric I M}
     {P : Ham3FlowPackage (I := I) (M := M) g0} {omega : Real}
@@ -885,8 +901,8 @@ theorem Ham3Section9PinchFixed.toVarying
   intro T hT hTω
   exact ⟨delta, hdelta0, hdelta13, hpres T hT hTω⟩
 
-/-- Section 9 Ricci nonnegativity preservation on every compact subinterval of
-the normalized maximal flow. -/
+
+
 def Ham3Section9RicNonneg
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
@@ -895,8 +911,8 @@ def Ham3Section9RicNonneg
       (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
       (Set.Icc 0 T)
 
-/-- The CGH transfer datum saying that nonnegative Ricci on the selected
-rescaled slabs passes to the smooth limit. -/
+
+
 def Ham3RicNonnegTransfer
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -906,16 +922,17 @@ def Ham3RicNonnegTransfer
     Ham3RescaledRicNonneg (I := I) P Q ->
     LimitRicNonneg (I := I) L
 
-/-- Native Section 10 pinching estimate for the canonical fields of the chosen
-Hamilton flow.  This is the domain-aware estimate on the maximal-flow carrier,
-before the all-real display extension forgets which fields are canonical. -/
+
+
+
 def Ham3PinchEstimate
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) : Prop :=
   exists epsilon C : Real,
     0 < epsilon /\ epsilon < 1 /\ 0 <= C /\
       DifferentialGeometry.PDE.RicciFlow.PinchEstimateOn (M := M)
-        (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
+        (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar
+          (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
         P.S.scalar
         (DifferentialGeometry.PDE.RicciFlow.pinchWeight (M := M) P.S.scalar epsilon)
         C P.D.carrier
@@ -949,6 +966,7 @@ private theorem scaled_pinch_le
     mul_nonneg hC (Real.rpow_nonneg hR.le _)
   exact hmain.trans (by simpa using mul_le_mul_of_nonneg_left hrpow hcoef)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The time-zero trace-free Ricci norm on every selected rescaling has the
 decaying upper bound supplied by Hamilton's improved pinching estimate. -/
 theorem ham3_tf_bound0
@@ -1051,14 +1069,14 @@ def Ham3PinchTransfer
     LimitScalarPos (I := I) L ->
       LimitTfDecay (I := I) L
 
-/-- The conclusion of Black box 11.12 in the Hamilton Section 12 pipeline:
-after passing to a subsequence, the rescaled pointed flows have a smooth
-pointed Cheeger-Gromov-Hamilton limit.
 
-The conclusion exposes an actual smooth-CGH relation and also records that its
-source metrics, basepoints, and common time interval realize the selected
-Hamilton rescalings.  The remaining frontier is the producer of this data, not
-an absent convergence relation. -/
+
+
+
+
+
+
+
 def Ham3CGHLimitExists
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1076,8 +1094,8 @@ def Ham3CGHLimitExists
       LimitScalarPos (I := I) L /\
       Ham3PinchTransfer (I := I) P Q hsel L
 
-/-- Eventually the fixed backward time window `[-r0^2,0]` lies inside the
-rescaled time slab `[-R_i t_i,0]`. -/
+
+
 def Ham3Window
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1086,7 +1104,7 @@ def Ham3Window
     forall s : Real, -(r ^ 2) <= s -> s <= 0 ->
       -(ham3BlowupScale (I := I) P Q i * Q.time i) <= s /\ s <= 0
 
-/-- The exact raw curvature estimate on every selected rescaled backward slab. -/
+
 def Ham3RmBound
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1097,8 +1115,8 @@ def Ham3RmBound
           (ham3RescaledTime (I := I) P Q i s) x <=
         (100 : Real) ^ 2 * (ham3BlowupScale (I := I) P Q i) ^ 2
 
-/-- Rescaled time zero, encoded with membership in the selected rescaling's
-time interval. -/
+
+
 def ham3RescaledZero
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1108,8 +1126,8 @@ def ham3RescaledZero
   ⟨0, (paraInterval P.D (Q.time i) (ham3BlowupScale (I := I) P Q i)
     (hsel.1 i) (hsel.2.2.1 i)).initial_mem⟩
 
-/-- The genuine intrinsic metric ball of radius `r` centered at the selected
-point at rescaled time zero. -/
+
+
 def ham3RescaledBall
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1121,8 +1139,8 @@ def ham3RescaledBall
   radius := r
   radius_pos := hr
 
-/-- Eventual fixed-scale curvature control on the actual selected parabolic
-rescalings, stated on genuine backward flow balls. -/
+
+
 def Ham3RmControl
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1132,9 +1150,9 @@ def Ham3RmControl
     let B := ham3RescaledBall (I := I) P Q hsel i r hr
     B.IsRmControlled
 
-/-- Perelman's fixed-scale noncollapsing conclusion on the actual selected
-parabolic rescalings.  Both curvature control and the volume lower bound are
-predicates of genuine time-slice metric balls. -/
+
+
+
 def Ham3Noncollapse
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1145,9 +1163,9 @@ def Ham3Noncollapse
       let B := ham3RescaledBall (I := I) P Q hsel i r hr
       B.IsRmControlled /\ B.IsKappaNoncollapsed kappa
 
-/-- Complete geometric input for the fixed-window Hamilton compactness step.
-The raw slab bound and common window are retained instead of being discarded
-after deriving one fixed-ball noncollapse statement. -/
+
+
+
 structure Ham3CompactInput
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1157,9 +1175,10 @@ structure Ham3CompactInput
   kappa : Real
   noncollapse : Ham3Noncollapse (I := I) P Q hsel kappa ham3_r0
 
-/-- Projection of the normalized maximal-flow time interval used by
-Corollary 7.4.  The normalization is a setup output, not a theorem about an
-arbitrary flow package. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_time74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1169,8 +1188,9 @@ theorem ham3_time74
       P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega' h0ω' := by
   exact ⟨omega, h0ω, hD⟩
 
-/-- Continuity of the initial scalar trace.  This is the scalar-continuity
-producer used only to choose the compact initial minimum. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar0_cont74
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -1198,7 +1218,8 @@ theorem ham3_scalar0_cont74
     funext y
     have hmetric :
         Tensor0SBundle.metricTensorField (I := I) (P.S.family.metric 0) y =
-          DifferentialGeometry.Integral.Connection.metricTensor0S (I := I) (P.S.family.metric 0) y := by
+          DifferentialGeometry.Integral.Connection.metricTensor0S (I := I) (P.S.family.metric 0)
+            y := by
       ext v
       rw [Tensor0SBundle.metricTensorField_apply,
         DifferentialGeometry.Integral.Connection.metricTensor0S_apply]
@@ -1209,12 +1230,14 @@ theorem ham3_scalar0_cont74
         DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P) 0 y
     rw [DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_eq_metricTrace,
       DifferentialGeometry.Integral.Connection.metricTracePair0SAt, hmetric]
-    simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
+    simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
       DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci_apply]
   exact (hfun ▸ hmdiff.continuousAt)
 
-/-- Positive initial metric Ricci curvature gives positive time-zero Ricci for
-the canonical Ricci tensor carried by the Hamilton flow package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_ricci_pos0
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1222,7 +1245,8 @@ theorem ham3_ricci_pos0
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
     DifferentialGeometry.PDE.RicciFlow.RicciPosInit (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) := by
+      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+        P.S.ricci) := by
   intro x v hv
   have hmetric0 : P.S.family.metric 0 = g0 := by
     have hinit : P.D.initial = 0 := by
@@ -1234,12 +1258,15 @@ theorem ham3_ricci_pos0
         (P.S.family.metric 0) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) := by
     rw [hmetric0]
     exact hpos x v hv
-  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
-    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
+  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hpos0
 
-/-- Positive initial Ricci curvature gives positive initial scalar curvature
-after the normalized time setup identifies `t = 0` with the initial metric. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar0_pos74
     (hdim : Module.finrank Real E = 3)
     {omega : Real} (h0ω : 0 < omega)
@@ -1270,8 +1297,9 @@ theorem ham3_scalar0_pos74
       (I := I) (M := M) (P.S.family.metric 0) (P.S.ricciAt 0 x)
       hdimx hpos0
 
-/-- Initial positive Ricci curvature supplies the positive scalar minimum used
-by Corollary 7.4. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_init74
     [CompactSpace M] [Nonempty M]
     (hdim : Module.finrank Real E = 3)
@@ -1290,8 +1318,9 @@ theorem ham3_init74
     ⟨c0, hmin⟩
   exact ⟨c0, hmin, ham3_scalar0_pos74 (I := I) (M := M) hdim h0ω hpos P hD⟩
 
-/-- Scalar curvature is continuous on every compact slab strictly inside the
-closed-open flow interval. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_cont74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1315,8 +1344,9 @@ theorem ham3_cont74
         rw [hD]
         exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩)
 
-/-- Scalar evolution in the intrinsic package:
-`partial_t R = Delta R + 2 |Ric|^2`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_evol74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1333,7 +1363,8 @@ theorem ham3_evol74
         (D := P.D)
         (ham3Solution (I := I) P).scalar
         (fun t x =>
-          DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (ham3RealFamily (I := I) P) t
+          DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (ham3RealFamily (I := I) P)
+            t
             ((ham3Solution (I := I) P).scalar t) x)
         (fun t x =>
           Tensor0SBundle.normSq0S (I := I)
@@ -1351,8 +1382,9 @@ theorem ham3_evol74
       simp [ham3RealFamily, ham3RealFamilyCore, ht]
   simpa [ham3Scalar, ham3ScalarLap, ham3RicNormSq, ham3Solution] using h
 
-/-- The scalar Laplacian definition realizes the heat-operator Laplacian on
-every compact time slab. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_lap74
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (T : Real) :
@@ -1369,7 +1401,8 @@ theorem ham3_lap74
         intro t _ht x
         rfl)
 
-/-- WMP regularity producer for the scalar lower-bound package. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_reg74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1399,8 +1432,9 @@ theorem ham3_reg74
   simpa [ham3RealFamily, ham3Scalar, ham3Solution] using
     ham3_scalarRegular (I := I) (M := M) P c0 K T hsubset hden
 
-/-- Three-dimensional trace Cauchy-Schwarz for the intrinsic scalar and Ricci
-norm package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_ricBound74
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
@@ -1411,7 +1445,8 @@ theorem ham3_ricBound74
   classical
   letI : Nonempty (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :=
     ⟨⟨0, by simp [hdim]⟩⟩
-  let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) Real
+  let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
+    Real
       (TangentSpace I x) :=
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv :
@@ -1424,22 +1459,25 @@ theorem ham3_ricBound74
       Tensor0SBundle.MetricInverseInBasis (I := I) (P.S.family.metric t) x
         basis gInv := by
     simpa [basis, gInv] using
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) (P.S.family.metric t) x
   have h :=
     DifferentialGeometry.Integral.Connection.metricTracePair0SAt_sq_div_rank_le_normSq0S
       (I := I) (g := P.S.family.metric t) (basis := basis)
       (gInv := gInv) hinv (P.S.ricciAt t x)
   have hcard :
-      (1 / (Fintype.card (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) : Real)) =
+      (1 / (Fintype.card (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+        Real)) =
         (1 / 3 : Real) := by
     simp [DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hdim]
   have hcoef : ((Module.finrank Real E : Real)⁻¹) = (3⁻¹ : Real) := by
     simp [hdim]
-  simpa [ham3Scalar, ham3RicNormSq, DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hcard, hcoef]
+  simpa [ham3Scalar, ham3RicNormSq, DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hcard,
+    hcoef]
     using h
 
-/-- Compact value-set Lipschitz producer for the scalar lower-bound reaction. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_lip74
     [CompactSpace M]
     {omega : Real}
@@ -1482,7 +1520,8 @@ theorem ham3_lip74
       DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier_denominator_pos_on_Icc_of_lt_blowup
         (n := 3) (c0 := c0) (by norm_num) hc0 hPole
     have hbar_cont :
-        ContinuousOn (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0) (Set.Icc 0 T) := by
+        ContinuousOn (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)
+          (Set.Icc 0 T) := by
       unfold DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier
       have hden_cont :
           ContinuousOn (fun t : Real => 1 - (2 / 3 : Real) * c0 * t)
@@ -1512,8 +1551,9 @@ theorem ham3_lip74
   rw [dif_pos ⟨hT, hTω, hPole⟩]
   exact Classical.choose_spec (hExists T hT hTω hPole) t ht
 
-/-- Section 11/7 producer: extract the scalar package needed by Corollary 7.4
-from Hamilton's normalized maximal Ricci-flow package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar74
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1580,8 +1620,9 @@ theorem ham3_scalar74
   · intro T hT hTω hPole
     exact hK T hT hTω hPole
 
-/-- Lemma 11.1-style input: the maximal Ricci flow reaches a finite singular
-time. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_finite_time
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1606,6 +1647,7 @@ theorem ham3_finite_time
       hricci hF_lip
   exact ⟨c0, hfinite.1, hfinite.2⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ham3_rm_scalar_ctl
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1619,7 +1661,8 @@ private theorem ham3_rm_scalar_ctl
         (100 : Real) ^ 2 * (ham3Scalar (I := I) P t x) ^ 2 := by
   classical
   rcases hM with ⟨_hcompact, _hconnected, _hboundaryless, hdim⟩
-  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+    h0ω).carrier := by
     simpa [hD] using htD
   have ht0 : 0 <= t := htD'.1
   have htω : t < omega := htD'.2
@@ -1629,7 +1672,8 @@ private theorem ham3_rm_scalar_ctl
   have hricNonneg :
       DifferentialGeometry.Integral.Connection.RicciNonnegAt (I := I) (P.S.ricciAt t x) := by
     intro v
-    simpa [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
+    simpa [DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
       hricOn t ⟨ht0, le_rfl⟩ x v
   have hricSym :
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (P.S.ricciAt t x) :=
@@ -1652,7 +1696,8 @@ private theorem ham3_rm_scalar_ctl
       ⟨basis, l1, l2, l3, horth, hdiag, h1, h2, h3⟩
     have hScalarTrace :
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-          (P.S.scalar t x) (P.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+          (P.S.scalar t x) (P.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3
+            basis := by
       have htr :=
         DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (P.S.base.metric t)
           (P.S.ricciAt t x) horth
@@ -1690,6 +1735,7 @@ private theorem scalar_gt_of_rm {A R rm : Real}
     mul_nonneg hdiff hsum
   nlinarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ham3_scalar_cont_slab
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1703,6 +1749,7 @@ private theorem ham3_scalar_cont_slab
   intro hTω
   exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem slab_max_of_continuousOn
     [CompactSpace M]
     {f : Real × M -> Real}
@@ -1748,11 +1795,12 @@ private theorem ham3PointLevel_ge_index (B : Real) (i : Nat) :
   have hmax0 : 0 <= max B 0 := le_max_right B 0
   linarith
 
-/-- Lemma 11.3 plus Corollary 11.4-style scalar blow-up producer.
 
-The flow package supplies curvature blow-up at the finite maximal endpoint.
-Section 9 Ricci nonnegativity and the dimension-three curvature-control
-estimate convert that into scalar curvature blow-up. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar_blowup
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1786,8 +1834,9 @@ theorem ham3_scalar_blowup
       scalar_pos_of_rm hctl.1 hctl.2 hRm'
     exact lt_of_le_of_lt (le_of_not_gt hA) hRpos
 
-/-- Lemma 11.6-style point selection from scalar blow-up: choose blow-up
-points, times, and parabolic rescalings normalized by scalar curvature. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_point_select
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -1838,13 +1887,15 @@ theorem ham3_point_select
   have hraw_nonneg : ∀ i : Nat, 0 <= rawTime i := by
     intro i
     have hmem : rawTime i ∈
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).carrier := by
       simpa [hD] using (hraw_spec i).1
     exact hmem.1
   have hraw_lt_omega : ∀ i : Nat, rawTime i < omega := by
     intro i
     have hmem : rawTime i ∈
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).carrier := by
       simpa [hD] using (hraw_spec i).1
     exact hmem.2
   have hmax_exists : ∀ i : Nat, ∃ tmax : Real, ∃ xmax : M,
@@ -1982,8 +2033,9 @@ theorem ham3_point_select
       field_simp [hscale_ne]
     simpa [hone] using hmul
 
-/-- Section 9 shifted pinching preservation along the normalized Hamilton flow,
-produced by the closed Ricci-flow WMP data package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch9_fixed
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2002,7 +2054,8 @@ theorem ham3_pinch9_fixed
   letI : Nonempty M := inferInstance
   have hpos0 :
       DifferentialGeometry.PDE.RicciFlow.RicciPosInit (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) :=
+        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+          P.S.ricci) :=
     ham3_ricci_pos0 (I := I) (M := M) h0ω hpos P hD
   have hinit : DifferentialGeometry.PDE.RicciFlow.PinchInitLt (I := I) (M := M)
       (fun t : Real => P.S.base.metric t)
@@ -2010,7 +2063,8 @@ theorem ham3_pinch9_fixed
       P.S.scalar :=
     DifferentialGeometry.PDE.RicciFlow.pinchInitLt_pos (I := I) (M := M)
       (G := fun t : Real => P.S.base.metric t)
-      (Ric := DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+      (Ric := DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+        P.S.ricci)
       (scalar := P.S.scalar)
       (DifferentialGeometry.PDE.RicciFlow.metricData_sol0 (I := I) (M := M) P.S)
       (DifferentialGeometry.PDE.RicciFlow.metricData_sol0_pos (I := I) (M := M) P.S hpos0)
@@ -2036,8 +2090,9 @@ theorem ham3_pinch9_fixed
   exact DifferentialGeometry.PDE.RicciFlow.pinch_sol_closed (I := I) (M := M) (S := P.S)
     P.isSmooth hT hdelta0 hdelta13 hdimT hTsub hTreg hpinch0
 
-/-- Section 9 shifted pinching preservation along the normalized Hamilton flow,
-produced by the closed Ricci-flow WMP data package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch9
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2051,8 +2106,9 @@ theorem ham3_pinch9
     Ham3Section9Pinch (I := I) P omega := by
   exact (ham3_pinch9_fixed (I := I) (M := M) h0ω hM hpos P hD).toVarying
 
-/-- Section 9 Ricci nonnegativity along the normalized Hamilton flow, produced
-as the `delta = 0` endpoint of the shifted WMP package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_ric_nonneg9
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2072,14 +2128,16 @@ theorem ham3_ric_nonneg9
   have hpos0 := ham3_ricci_pos0 (I := I) (M := M) h0ω hpos P hD
   have hinit : DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeAtTime
       (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) 0 := by
+      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+        0 := by
     intro x v
     by_cases hv : v = 0
     · subst v
       have hbilin := DifferentialGeometry.Integral.Connection.twoTensorSecToFamily_bilin
         (I := I) (M := M) P.S.ricci 0 x
       have hzero :
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+            P.S.ricci)
               0 x 0 0 = 0 := by
         have h := hbilin.smul_left 0
           (0 : TangentSpace I x) (0 : TangentSpace I x)
@@ -2101,8 +2159,9 @@ theorem ham3_ric_nonneg9
   exact DifferentialGeometry.PDE.RicciFlow.ricci_nonneg_sol_closed (I := I) (M := M) (S := P.S)
     P.isSmooth hT hdimT hTsub hTreg hinit
 
-/-- Lemma 9.1-style input: nonnegative Ricci curvature persists on the selected
-rescaled flow slabs. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rescaled_ric_nonneg
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2150,12 +2209,15 @@ theorem ham3_rescaled_ric_nonneg
   have htau : ham3RescaledTime (I := I) P Q i s ∈ Set.Icc 0 (Q.time i) :=
     ⟨htau0, htauT⟩
   have hraw := hnonneg (ham3RescaledTime (I := I) P Q i s) htau x v
-  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
-    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
+  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hraw
 
-/-- Positive scalar curvature on the maximal Hamilton flow interval, produced
-from the scalar lower-barrier package used in Corollary 7.4. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar_pos
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
@@ -2243,7 +2305,8 @@ theorem ham3_scalar_pos
       (DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum.lowerBound (M := M) hinit_min) hF
   intro t htD x
   have ht_closed :
-      t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+      t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+        h0ω).carrier := by
     simpa [hD] using htD
   rcases ht_closed with ⟨ht0, htω⟩
   by_cases ht_zero : t = 0
@@ -2266,8 +2329,9 @@ theorem ham3_scalar_pos
         (n := 3) (c0 := c0) (t := t) hbound hc0 hden
     simpa [ham3Scalar, ham3Solution] using hpos_t
 
-/-- Hamilton's pinching improvement along the chosen flow, in the native
-domain-aware canonical-field form needed by the Section 12 limit argument. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch_imp_can
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2306,8 +2370,9 @@ theorem ham3_pinch_imp_can
     ⟨epsilon, C, heps0, heps1, hC0, hest⟩
   exact ⟨epsilon, C, heps0, heps1, hC0, hest⟩
 
-/-- Hamilton's pinching improvement along the chosen flow, in the all-real
-display form used by older endpoint wrappers. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch_imp
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2330,22 +2395,25 @@ theorem ham3_pinch_imp
     ⟨epsilon, C, _heps0, _heps1, _hC0, hest⟩
   let tracefreeRmNormSq : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierZeroExt (M := M) P.D
-      (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
+      (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar
+        (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
   let scalar : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierScalarExt (M := M) P.D P.S.scalar
   let weight : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierWeightExt (M := M) P.D P.S.scalar epsilon
   refine ⟨tracefreeRmNormSq, scalar, weight, C, ?_⟩
   have hdisplay :
-      DifferentialGeometry.PDE.RicciFlow.PinchEstimateOn (M := M) tracefreeRmNormSq scalar weight C Set.univ := by
+      DifferentialGeometry.PDE.RicciFlow.PinchEstimateOn (M := M) tracefreeRmNormSq scalar weight C
+        Set.univ := by
     simpa [tracefreeRmNormSq, scalar, weight] using
       DifferentialGeometry.PDE.RicciFlow.pinchEstimate_ext (M := M) (D := P.D) hest
   intro t x
   exact hdisplay t trivial x
 
-/-- Corollary 11.4-style producer: nonnegative Ricci controls the full
-curvature tensor on the selected rescaled slabs, with whatever universal
-constant the pointwise Corollary 11.4 package supplies. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rm_bound
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2365,7 +2433,8 @@ theorem ham3_rm_bound
   have hricNonneg :
       DifferentialGeometry.Integral.Connection.RicciNonnegAt (I := I) (P.S.ricciAt τ x) := by
     intro v
-    simpa [τ, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
+    simpa [τ, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
       hric i s x v hsleft hsright
   have hricSym :
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (P.S.ricciAt τ x) :=
@@ -2388,7 +2457,8 @@ theorem ham3_rm_bound
       ⟨basis, l1, l2, l3, horth, hdiag, h1, h2, h3⟩
     have hScalarTrace :
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-          (P.S.scalar τ x) (P.S.ricciAt τ x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+          (P.S.scalar τ x) (P.S.ricciAt τ x) DifferentialGeometry.Integral.Connection.delta3
+            basis := by
       have htr :=
         DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (P.S.base.metric τ)
           (P.S.ricciAt τ x) horth
@@ -2441,8 +2511,9 @@ theorem ham3_rm_bound
     mul_le_mul_of_nonneg_left hscalarSq (by norm_num)
   exact le_trans hRmScalar hscaled
 
-/-- The fixed window `[-r0^2,0]` eventually lies inside each selected rescaled
-time interval.  This is just the arithmetic part of the Section 12 argument. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_r0_window
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2459,6 +2530,7 @@ theorem ham3_r0_window
   · linarith
   · exact hsright
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a finite maximal-flow interval, point selection forces the scalar
 blow-up scales themselves to tend to infinity. -/
 theorem ham3_scale_atTop
@@ -2488,6 +2560,7 @@ theorem ham3_scale_atTop
   exact le_of_lt
     (lt_of_mul_lt_mul_right (lt_of_le_of_lt hprod_i hlt) h0omega.le)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Every negative power of the selected blow-up scale tends to zero along the
 smooth-CGH subsequence. -/
 theorem ham3_scale_decay
@@ -2518,6 +2591,7 @@ theorem ham3_scale_decay
     (tendsto_rpow_neg_atTop hepsilon).comp hscale
   simpa only [mul_zero] using tendsto_const_nhds.mul hpow
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The selected metric scaling eventually makes any fixed original
 noncollapsing scale `rho` contain a fixed rescaled radius `r`. -/
 theorem ham3_radius_event
@@ -2558,8 +2632,9 @@ theorem ham3_radius_event
     r = (r / rho) * rho := (div_mul_cancel₀ r (ne_of_gt hrho)).symm
     _ <= Real.sqrt (ham3BlowupScale (I := I) P Q i) * rho := hmul
 
-/-- The exact `100 = r0⁻²` curvature estimate becomes scale-one curvature
-control on the actual parabolically rescaled `r0` balls. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rm_control
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2639,8 +2714,9 @@ theorem ham3_rm_control
         field_simp [ne_of_gt hscale]
         norm_num [ham3_r0]
 
-/-- A genuine no-local-collapsing statement on the original flow supplies the
-fixed-radius noncollapse input for the selected Hamilton rescalings. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_noncollapse_of
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2710,24 +2786,12 @@ theorem ham3_noncollapse
   exact ham3_noncollapse_of
     (I := I) h0omega P hD Q hsel _hrm hnlc
 
-/-- Black box 11.12-style input: Hamilton compactness produces a pointed smooth
-Cheeger-Gromov-Hamilton limit from curvature control and noncollapsing. -/
-theorem ham3_cgh_limit
-    {omega : Real} (h0omega : 0 < omega)
-    (hM : Closed3Manifold (I := I) (M := M))
-    (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
-      0 omega h0omega)
-    (Q : Ham3BlowupData M)
-    (hsel : Ham3PointSel (I := I) P Q)
-    (_hin : Ham3CompactInput (I := I) P Q hsel) :
-    Ham3CGHLimitExists (I := I) P Q hsel := by
-  sorry
 
-/-- The midpoint of the fixed backward window is a regular time of the limit
-flow once the CGH output includes regularity on the open window. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_mid_regular
     {L : Ham3CGHLimitData (I := I) M}
     (hreg : Ham3LimitRegWin (I := I) L) :
@@ -2736,8 +2800,9 @@ theorem limit_mid_regular
   have hsq : 0 < ham3_r0 ^ 2 := sq_pos_of_ne_zero ham3_r0_pos.ne'
   constructor <;> nlinarith
 
-/-- Consume the CGH Ricci-nonnegativity transfer package for the selected
-rescaled flows and the smooth limit. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_ric_nonneg
     (_hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2759,8 +2824,9 @@ theorem limit_ric_nonneg
     LimitRicNonneg (I := I) L := by
   exact htransfer hreal hric
 
-/-- The point-selection normalization `R(g_i)(x_i,0)=1` passes to the CGH
-base point in the smooth limit. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_base_scalar_one
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2794,7 +2860,8 @@ theorem limit_base_scalar_one
     tendsto_nhds_unique hconv' hconst
   simpa [LimitBaseScalarOne] using heq
 
-/-- Ricci nonnegativity gives nonnegative scalar curvature on the limit flow. -/
+
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_scalar_nonneg
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2819,7 +2886,8 @@ theorem limit_scalar_nonneg
     have hcomp := hdiag.2 0 0
     rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] at hcomp
     have hval :
-        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0)) = l1 := by
+        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0))
+          = l1 := by
       simpa [DifferentialGeometry.Integral.Connection.ricciDiag3] using hcomp
     rwa [hval] at h
   have hl2 : 0 <= l2 := by
@@ -2827,7 +2895,8 @@ theorem limit_scalar_nonneg
     have hcomp := hdiag.2 1 1
     rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] at hcomp
     have hval :
-        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1)) = l2 := by
+        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1))
+          = l2 := by
       simpa [DifferentialGeometry.Integral.Connection.ricciDiag3] using hcomp
     rwa [hval] at h
   have hl3 : 0 <= l3 := by
@@ -2835,12 +2904,14 @@ theorem limit_scalar_nonneg
     have hcomp := hdiag.2 2 2
     rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] at hcomp
     have hval :
-        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2)) = l3 := by
+        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2))
+          = l3 := by
       simpa [DifferentialGeometry.Integral.Connection.ricciDiag3] using hcomp
     rwa [hval] at h
   have hScalarTrace :
       DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-        (L.S.scalar t x) (L.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+        (L.S.scalar t x) (L.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3
+          basis := by
     have htr :=
       DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (L.S.base.metric t)
         (L.S.ricciAt t x) horth
@@ -2852,10 +2923,11 @@ theorem limit_scalar_nonneg
   unfold DifferentialGeometry.Integral.Connection.ricciEigenScalar3
   nlinarith
 
-/-- CGH convergence plus the already-checked rescaled scalar/Ricci inputs
-produce the concrete limit data used in the final Section 12 argument:
-Ricci nonnegativity, base-point scalar normalization, scalar positivity on the
-regular limit window, and the pinching transfer datum. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_inherit
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2897,8 +2969,9 @@ theorem limit_inherit
   exact ⟨L, hreal, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
     hricTransfer, hpinchTransfer, hnonneg, hbase, hscalarPos⟩
 
-/-- Consume the CGH/pinching transfer package to obtain trace-free Ricci decay
-on the smooth limit. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_tf_decay
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2919,6 +2992,10 @@ theorem limit_tf_decay
     LimitTfDecay (I := I) L := by
   exact htransfer hreal hpinch hscalarPos
 
+omit [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [SigmaCompactSpace M]
+  [T2Space M] in
 /-- At one fixed time, arbitrary-small upper bounds on the canonical
 trace-free Ricci norm force that norm to vanish. -/
 theorem tf_zero_of_decay
@@ -2936,7 +3013,8 @@ theorem tf_zero_of_decay
   letI : T2Space L.N := L.t2
   intro x
   let q : Real :=
-    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x
   have hnonneg : 0 <= q := by
     have hdimT :
         forall (_t : Real) (y : L.N),
@@ -2952,6 +3030,10 @@ theorem tf_zero_of_decay
     exact le_of_forall_pos_le_add hforall
   simpa [q] using le_antisymm hle0 hnonneg
 
+omit [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [SigmaCompactSpace M]
+  [T2Space M] in
 /-- Once the pinching estimate has been transferred to arbitrary-small upper
 bounds on the CGH limit, nonnegativity of the canonical trace-free Ricci norm
 upgrades the decay statement to actual vanishing. -/
@@ -2963,6 +3045,7 @@ theorem limit_tf_zero_of_decay
   intro t ht
   exact tf_zero_of_decay (I := I) (M := M) hdim (hdecay t ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The Section 10 improved pinching estimate passes to the smooth CGH limit
 and kills the trace-free Ricci part. -/
 theorem limit_tf_zero
@@ -2988,8 +3071,9 @@ theorem limit_tf_zero
     (limit_tf_decay (I := I) (M := M) P Q hsel hreal htransfer hpinch
       _hlimit _hscalarPos)
 
-/-- Vanishing trace-free Ricci norm gives the pointwise Einstein equation
-`Ric = (R / 3) g` at that time. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limitEinstein_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -3009,7 +3093,8 @@ theorem limitEinstein_of_tf0
     simpa using hdim
   have hsym : DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (M := L.N) Ric :=
     DifferentialGeometry.PDE.RicciFlow.ricciSym_can (I := I) (M := L.N) L.S t0 x
-  rcases DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (M := L.N) g Ric hdimT hsym with
+  rcases DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (M := L.N) g Ric hdimT
+    hsym with
     ⟨basis, l1, l2, l3, horth, hdiag⟩
   have hscalarTrace :=
     DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (M := L.N) g Ric horth
@@ -3021,7 +3106,8 @@ theorem limitEinstein_of_tf0
             (L.S.family.metric t0) (L.S.ricciAt t0 x) :=
             DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_eq_metricTrace (I := I) (M := L.N)
               L.S t0 x
-      _ = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (M := L.N) g Ric := by
+      _ = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (M := L.N) g
+        Ric := by
             rfl
       _ = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
             exact DifferentialGeometry.PDE.RicciFlow.scalar_eq_diag (I := I) hscalarTrace hdiag
@@ -3042,10 +3128,12 @@ theorem limitEinstein_of_tf0
   have htf_eigen :
       DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3 l1 l2 l3 = 0 := by
     have htf_x := htf x
-    rw [DifferentialGeometry.PDE.RicciFlow.tfRicNormSq, DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
+    rw [DifferentialGeometry.PDE.RicciFlow.tfRicNormSq,
+      DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
       hscalar, hnorm,
       DifferentialGeometry.PDE.RicciFlow.ricciNormAt_diag (I := I) (M := L.N) hdiag] at htf_x
-    simpa [DifferentialGeometry.PDE.RicciFlow.tfRicNormSqAt, DifferentialGeometry.PDE.RicciFlow.tfRic_eigen] using htf_x
+    simpa [DifferentialGeometry.PDE.RicciFlow.tfRicNormSqAt,
+      DifferentialGeometry.PDE.RicciFlow.tfRic_eigen] using htf_x
   have heq :=
     (DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3_eq_zero_iff l1 l2 l3).1
       htf_eigen
@@ -3088,12 +3176,15 @@ theorem limitEinstein_of_tf0
   calc
     L.S.ricciAt t0 x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) =
         g.inner x (T v) w := by
-          exact (DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) (M := L.N) g Ric v w).symm
+          exact (DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) (M := L.N) g Ric v
+            w).symm
     _ = g.inner x (l1 • v) w := by rw [hT_all]
     _ = l1 * g.inner x v w := by simp
     _ = (L.S.scalar t0 x / 3) * (L.S.base.metric t0).inner x v w := by
           rw [hscalar_l1]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M] in
 /-- Static Schur/space-form step for the Section 12 limit: a connected
 three-dimensional Einstein limit metric whose scalar curvature is positive at
 the base point has constant positive sectional curvature. -/
@@ -3114,6 +3205,7 @@ theorem limit_round_base
     (heinstein : LimitEinsteinAt (I := I) L t0) :
     LimitRoundAt (I := I) L t0 := by
   classical
+  letI : NeZero (Module.finrank Real E) := ⟨by omega⟩
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
@@ -3134,8 +3226,10 @@ theorem limit_round_base
     intro y v w
     have h := heinstein y v w
     simpa [g, LimitEinsteinAt, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
-      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt, DifferentialGeometry.PDE.RicciFlow.metricRicciAt,
-      DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt,
+        DifferentialGeometry.PDE.RicciFlow.metricRicciAt,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar,
+        DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
       DifferentialGeometry.PDE.RicciFlow.metricScalarAt] using h
   have hdScalar :
       ∀ x : L.N, ∀ X : TangentSpace I x,
@@ -3155,16 +3249,19 @@ theorem limit_round_base
     have hinv :
         Tensor0SBundle.MetricInverseInBasis (I := I) (M := L.N) g x basis
           DifferentialGeometry.Integral.Connection.delta3 :=
-      DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (M := L.N) g basis horth
+      DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (M := L.N) g basis
+        horth
     exact DifferentialGeometry.Integral.Connection.dScalar_zero_ein3_at (I := I) (M := L.N) g basis
       DifferentialGeometry.Integral.Connection.delta3 hinv hEinStatic X
-  rcases DifferentialGeometry.Integral.Connection.metricScalar_const_of_dScalar_zero (I := I) (M := L.N) g
+  rcases DifferentialGeometry.Integral.Connection.metricScalar_const_of_dScalar_zero (I := I)
+    (M := L.N) g
       hdScalar with
     ⟨R0, hR0_metric⟩
   have hR0_scalar : ∀ x : L.N, L.S.scalar t0 x = R0 := by
     intro x
     have hx := hR0_metric x
-    simpa [g, DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
+    simpa [g, DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
       DifferentialGeometry.PDE.RicciFlow.metricScalarAt] using hx
   have hR0_pos : 0 < R0 := by
     rw [hR0_scalar L.basepoint] at hbase
@@ -3192,7 +3289,8 @@ theorem limit_round_base
     DifferentialGeometry.PDE.RicciFlow.traceData_can (I := I) (M := L.N) L.S
       (t := t0) (x := x) (basis := basis) horth
   have hEinCompNeg : ∀ i j : Fin 3,
-      DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (-(L.S.ricciAt t0 x)) i j =
+      DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (-(L.S.ricciAt t0 x)) i j
+        =
         ((-L.S.scalar t0 x) / 3) * DifferentialGeometry.Integral.Connection.delta3 i j := by
     intro i j
     have hij := heinstein x (basis i) (basis j)
@@ -3220,6 +3318,8 @@ theorem limit_round_base
           rw [hscalar_x]
           ring
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M] in
 /-- Compatibility form of `limit_round_base` for callers that already know
 pointwise positive scalar curvature on the selected slice. -/
 theorem limit_round_of_ein
@@ -3234,6 +3334,8 @@ theorem limit_round_of_ein
   exact limit_round_base (I := I) (M := M) hdim hconn hbdry
     (hscalar L.basepoint) heinstein
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M] in
 /-- Compatibility projection of the slice-indexed round package to the older
 existential constant-curvature statement. -/
 theorem limit_const_sec_of_einstein
@@ -3256,8 +3358,9 @@ theorem limit_const_sec_of_einstein
     ⟨_K, _hK, _hRic, hsec⟩
   exact ⟨L.S.base.metric t0, hsec⟩
 
-/-- At one regular time, positive scalar plus vanishing trace-free Ricci gives a
-constant positive sectional-curvature metric. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem const_pos_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -3267,14 +3370,16 @@ theorem const_pos_of_tf0
     (hscalar : LimitScalarPosAt (I := I) L t0)
     (htf : LimitTfZeroAt (I := I) L t0) :
     LimitConstPosSec (I := I) L := by
+  letI : NeZero (Module.finrank Real E) := ⟨by omega⟩
   have heinstein : LimitEinsteinAt (I := I) L t0 :=
     limitEinstein_of_tf0 (I := I) (M := M) hdim htf
   exact limit_const_sec_of_einstein (I := I) (M := M) hdim hconn hbdry
     hscalar heinstein
 
-/-- In dimension three, a smooth limit flow with positive scalar curvature and
-vanishing trace-free Ricci on the regular backward window has constant positive
-sectional curvature. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_const_pos
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -3290,8 +3395,8 @@ theorem limit_const_pos
   exact const_pos_of_tf0 (I := I) (M := M) hdim hconn hbdry
     (hscalarPos t0 ht0) (htf t0 ht0)
 
-/-- Myers/compactness and the eventual diffeomorphism in the CGH convergence
-transfer a constant-positive-sectional metric on the limit back to `M`. -/
+
+
 theorem limit_to_orig
     (hM : Closed3Manifold (I := I) (M := M))
     {L : Ham3CGHLimitData (I := I) M}
@@ -3365,109 +3470,15 @@ theorem limit_to_orig
     ← Diffeomorph.pullbackMetricCross_inner g limitToOrig.symm x Y Y,
     ← Diffeomorph.pullbackMetricCross_inner g limitToOrig.symm x X Y]
 
-/-- Pinching plus the smooth CGH limit and the compact-limit transfer step
-produce a constant-positive-sectional metric on the original manifold. -/
-theorem ham3_limit_const_metric
-    (hM : Closed3Manifold (I := I) (M := M))
-    (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (Q : Ham3BlowupData M)
-    (hsel : Ham3PointSel (I := I) P Q)
-    (hric : Ham3RescaledRicNonneg (I := I) P Q)
-    (hpinch : Ham3PinchEstimate (I := I) P)
-    (hcgh : Ham3CGHLimitExists (I := I) P Q hsel) :
-    exists gInf : SmoothRiemannianMetric I M,
-      ConstPosSecMetric (I := I) (M := M) gInf := by
-  have hdim : Module.finrank Real E = 3 := hM.2.2.2
-  rcases limit_inherit (I := I) (M := M) hM g0 hpos P Q hsel hric hcgh with
-    ⟨L, hreal, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
-      _hricTransfer, hpinchTransfer, hnonneg, hbase, hscalarPos⟩
-  have hlimit :
-      Ham3LimitSubseq (I := I) L /\
-        Ham3LimitWindow (I := I) L /\
-        Ham3LimitRegWin (I := I) L /\
-        Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
-        Ham3LimitFlow (I := I) L :=
-    ⟨hsubseq, hwindow, hregwin, hconn, hbdry, hflow⟩
-  have htf : LimitTfZero (I := I) L :=
-    limit_tf_zero (I := I) (M := M) hdim P Q hsel hreal hpinchTransfer hpinch
-      hlimit hscalarPos
-  let t0 : Real := -(ham3_r0 ^ 2) / 2
-  have ht0 : t0 ∈ L.D.regular := by
-    simpa [t0] using limit_mid_regular (I := I) (M := M) hregwin
-  have heinstein : LimitEinsteinAt (I := I) L t0 :=
-    limitEinstein_of_tf0 (I := I) (M := M) hdim (htf t0 ht0)
-  have hround : LimitRoundAt (I := I) L t0 :=
-    limit_round_of_ein (I := I) (M := M) hdim hconn hbdry
-      (hscalarPos t0 ht0) heinstein
-  exact limit_to_orig (I := I) (M := M) hM (L.D.regular_subset ht0)
-    hconn hround
 
-/-- If a limiting constant-positive-sectional metric has been produced, then
-`M` admits such a metric. -/
-theorem ham3_const_of_limit
-    (hlim : exists gInf : SmoothRiemannianMetric I M,
-      ConstPosSecMetric (I := I) (M := M) gInf) :
-    AdmitsConstPosSec (I := I) (M := M) := by
-  exact hlim
 
-/-- Consumer endpoint: the global Ricci-flow package gives a constant positive
-sectional-curvature metric. -/
-theorem ham3_const_metric
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-  AdmitsConstPosSec (I := I) (M := M) := by
-  rcases hpos with ⟨g0, hg0⟩
-  rcases ham3_flow_exists_normalized (I := I) (M := M) hM g0 hg0 with
-    ⟨omega, h0ω, P, hD⟩
-  have hfinite_core : exists c0 : Real, 0 < c0 /\ omega <= 3 / (2 * c0) :=
-    ham3_finite_time (I := I) (M := M) h0ω hM g0 hg0 P hD
-  have hfinite :
-      exists omega c0 : Real, exists h0ω : 0 < omega,
-        P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω /\
-          0 < c0 /\ omega <= 3 / (2 * c0) := by
-    rcases hfinite_core with ⟨c0, hc0, hbound⟩
-    exact ⟨omega, c0, h0ω, hD, hc0, hbound⟩
-  have hnonneg9 : Ham3Section9RicNonneg (I := I) P omega :=
-    ham3_ric_nonneg9 (I := I) (M := M) h0ω hM hg0 P hD
-  have hscalarBlow : Ham3ScalarBlowup (I := I) P :=
-    ham3_scalar_blowup (I := I) (M := M) h0ω hM P hD hnonneg9
-  rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite
-      hscalarBlow with
-    ⟨Q, hsel⟩
-  have hric : Ham3RescaledRicNonneg (I := I) P Q :=
-    ham3_rescaled_ric_nonneg (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel
-  have hsec9 : Ham3Section9Pinch (I := I) P omega :=
-    ham3_pinch9 (I := I) (M := M) h0ω hM hg0 P hD
-  have hpinch : Ham3PinchEstimate (I := I) P :=
-    ham3_pinch_imp_can (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hric hsec9
-  have hrm : Ham3RmBound (I := I) P Q :=
-    ham3_rm_bound (I := I) (M := M) hM g0 hg0 P Q hsel hric
-  have hwindow : Ham3Window (I := I) P Q ham3_r0 :=
-    ham3_r0_window (I := I) P Q hsel
-  have hrmControl : Ham3RmControl (I := I) P Q hsel ham3_r0 :=
-    ham3_rm_control (I := I) (M := M) h0ω P hD Q hsel hrm hwindow
-  rcases ham3_noncollapse (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel
-      hrmControl with
-    ⟨kappa, hnoncollapse⟩
-  let hcompact : Ham3CompactInput (I := I) P Q hsel :=
-    { rmBound := hrm
-      window := hwindow
-      kappa := kappa
-      noncollapse := hnoncollapse }
-  have hcgh : Ham3CGHLimitExists (I := I) P Q hsel :=
-    ham3_cgh_limit (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hcompact
-  have hlim :
-      exists gInf : SmoothRiemannianMetric I M,
-        ConstPosSecMetric (I := I) (M := M) gInf :=
-    ham3_limit_const_metric (I := I) (M := M) hM g0 hg0 P Q hsel hric hpinch hcgh
-  exact ham3_const_of_limit (I := I) (M := M) hlim
 
-/-- Topological/global geometry black box: a closed connected smooth
-three-manifold with a constant positive sectional-curvature metric is a
-spherical space form. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_space_box
     (hM : Closed3Manifold (I := I) (M := M))
     (hconst : AdmitsConstPosSec (I := I) (M := M)) :
@@ -3479,13 +3490,14 @@ theorem ham3_space_box
       (I := I) (M := M) hcompact hconn hbdry hdim g c hc hsec
   exact ⟨⟨model.1, model.2⟩⟩
 
-/-- A spherical-space-form model carries a constant positive sectional-curvature
-metric.
 
-Mathematically this is the direct construction: take the round metric on
-`S^3`, descend it through the finite free isometric quotient, and pull it back
-to `M` along the smooth equivalence stored in
-`IsSphericalSpaceFormQuotient`. -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem spaceForm_const_metric
     (hM : Closed3Manifold (I := I) (M := M))
     (model : IsSphericalSpaceFormQuotient I M) :
@@ -3503,16 +3515,18 @@ theorem spaceForm_const_metric
     ← Diffeomorph.pullbackMetricCross_inner S.data.gQuot S.equiv x Y Y,
     ← Diffeomorph.pullbackMetricCross_inner S.data.gQuot S.equiv x X Y]
 
-/-- Reverse presentation direction of the standard equivalence, obtained by
-the quotient round metric construction. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_const_box
     (hM : Closed3Manifold (I := I) (M := M))
     (hsph : SphericalSpaceForm (I := I) (M := M)) :
     AdmitsConstPosSec (I := I) (M := M) :=
   spaceForm_const_metric (I := I) (M := M) hM hsph
 
-/-- The theorem-facing equivalence between constant positive sectional
-curvature and spherical space-form topology. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_equiv
     (hM : Closed3Manifold (I := I) (M := M)) :
     AdmitsConstPosSec (I := I) (M := M) <-> SphericalSpaceForm (I := I) (M := M) := by
@@ -3520,24 +3534,12 @@ theorem ham3_equiv
   · exact ham3_space_box (I := I) (M := M) hM
   · exact ham3_const_box (I := I) (M := M) hM
 
-/-- Hamilton's theorem in dimension three, Theorem 2.1 in the Hamilton
-blueprint: positive initial Ricci curvature implies existence of a constant
-positive sectional-curvature metric, equivalently spherical space-form
-topology. -/
-theorem ham3_main
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-    AdmitsConstPosSec (I := I) (M := M) /\ SphericalSpaceForm (I := I) (M := M) := by
-  have hconst : AdmitsConstPosSec (I := I) (M := M) :=
-    ham3_const_metric (I := I) (M := M) hM hpos
-  exact ⟨hconst, (ham3_equiv (I := I) (M := M) hM).1 hconst⟩
 
-/-- Label alias for the LaTeX theorem `thm:main-hamilton-3d`. -/
-theorem thm_2_1
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-    AdmitsConstPosSec (I := I) (M := M) /\ SphericalSpaceForm (I := I) (M := M) :=
-  ham3_main (I := I) (M := M) hM hpos
+
+
+
+
+
 
 end HamiltonPositiveRicci
 end DifferentialGeometry.PDE.RicciFlow

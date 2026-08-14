@@ -2,17 +2,15 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Bundle.LocalFrameRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Smooth pairings for realized metric families
 
-This file derives joint spacetime smoothness of a moving metric evaluated on
-two globally smooth tangent sections.  The proof stays scalar-valued: it
-expands both sections in one actual local frame and uses
-`MetricFamilySmoothOn.frameCompSmooth` on that frame.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +22,7 @@ open Bundle
 open scoped Manifold ContDiff Topology BigOperators
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,8 +30,9 @@ variable [IsManifold I ∞ M]
 
 namespace MetricFamilySmoothOn
 
-/-- A smooth realized metric family paired with two smooth tangent sections is
-jointly smooth in spacetime at every interior time. -/
+
+
+omit [CompleteSpace E] in
 theorem pairSmoothAt
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}

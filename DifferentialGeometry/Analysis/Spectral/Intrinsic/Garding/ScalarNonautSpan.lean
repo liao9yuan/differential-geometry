@@ -28,7 +28,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -37,6 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- A compact regular-time interval has one backward radius on which every
 frozen-background metric difference is quarter-small and has a common spatial
 jet envelope at that frozen time. -/
@@ -51,7 +52,7 @@ theorem metricDiff_span
           ∃ B : ℕ → ℝ, (∀ i, 0 ≤ B i) ∧
             ∀ s ∈ Set.Icc (0 : ℝ) h,
               ((T : ℝ) - s ∈ D.regular) ∧
-              gFibreOpBound (I := I) (G.metric (T : ℝ))
+              metricCauchySchwarzBound (I := I) (G.metric (T : ℝ))
                 (ccTensorBilinSymm (I := I) (G.metric (T : ℝ))
                   (metricDifferenceCcTensor (I := I) (M := M)
                     (G.metric (T : ℝ)) (G.metric ((T : ℝ) - s))))
@@ -104,7 +105,7 @@ theorem metricDiff_span
       abs_of_nonneg hs.1]
     exact hs.2.trans (hhρ.trans hρ₀')
   have hsup := hmetric (T : ℝ) hT ((T : ℝ) - s) hvar hdist
-  have hbound : gFibreOpBound (I := I) q
+  have hbound : metricCauchySchwarzBound (I := I) q
       (ccTensorBilinSymm (I := I) q (P ((T : ℝ) - s))) (1 / 4 : ℝ) := by
     intro y v w
     rw [metricDiff_bilin (I := I) (M := M)]
@@ -170,7 +171,7 @@ theorem scalarFlux_span
     intro y v w
     rw [metricDiff_bilin (I := I) (M := M)]
     ring
-  have hbound : gFibreOpBound (I := I) q
+  have hbound : metricCauchySchwarzBound (I := I) q
       (ccTensorBilinSymm (I := I) q (P ((T : ℝ) - s))) (1 / 4 : ℝ) := by
     simpa only [q, P] using hsdata.2.1
   have hlocal := hflux (G.metric ((T : ℝ) - s)) (P ((T : ℝ) - s)) htie
@@ -205,14 +206,15 @@ theorem cc_comm_span
               ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
                 |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
                     (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-                    (appCc (I := I) (M := M) (G.metric (T : ℝ)) 2 0
+                    (operatorFieldApply (I := I) (M := M) (G.metric (T : ℝ)) 2 0
                       (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
                         (G.metric ((T : ℝ) - s)))
                       (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 2 U)).toFun +
                   tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n)
                     (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 1 n
                       (covGrad (I := I) (M := M) (G.metric (T : ℝ)) 0 0 U)).toFun
-                    (appCcRS (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n) (1 + n)
+                    (ccOperatorFieldComp (I := I) (M := M)
+                      (G.metric (T : ℝ)) 0 (1 + n) (1 + n)
                       (slotExtendIter (I := I) (M := M) (G.metric (T : ℝ)) 1 1 n
                         (scalarFluxCoeff (I := I) (G.metric (T : ℝ))
                           (G.metric ((T : ℝ) - s))))
@@ -232,7 +234,7 @@ theorem cc_comm_span
   let C₀ : ℝ → SmoothCcTensor q 1 1 := fun s ↦
     scalarFluxCoeff (I := I) q (G.metric ((T : ℝ) - s))
   let Φ : ℝ → SmoothCcTensor q 1 0 := fun s ↦
-    appCcRS (I := I) (M := M) q 1 2 0
+    ccOperatorFieldComp (I := I) (M := M) q 1 2 0
       (cometricDoubleTraceField (I := I) q 0)
       (covGrad (I := I) (M := M) q 1 1 (C₀ s))
   have hC₀ : ∀ i s, s ∈ A → ∀ x : M,
@@ -257,24 +259,24 @@ theorem cc_comm_span
   intro s hs U
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 2 0
+    (operatorFieldApply (I := I) (M := M) q 2 0
       (scalarTraceCoeff (I := I) q (G.metric ((T : ℝ) - s)))
       (iteratedCovGrad (I := I) q 0 0 2 U)).toFun
   let G₀ : ℝ := tensorL2Inner (I := I) (M := M) q 0 1
     (covGrad (I := I) (M := M) q 0 0
       (oneMinusConnLapSmoothIter (I := I) q 0 0 n U)).toFun
-    (appCc (I := I) (M := M) q 1 1 (C₀ s)
+    (operatorFieldApply (I := I) (M := M) q 1 1 (C₀ s)
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
   let Htop : ℝ := tensorL2Inner (I := I) (M := M) q 0 (1 + n)
     (iteratedCovGrad (I := I) q 0 1 n
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
-    (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n (C₀ s))
       (iteratedCovGrad (I := I) q 0 1 n
         (covGrad (I := I) (M := M) q 0 0 U))).toFun
   let R : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
-    (appCc (I := I) (M := M) q 1 0 (Φ s)
+    (operatorFieldApply (I := I) (M := M) q 1 0 (Φ s)
       (covGrad (I := I) (M := M) q 0 0 U)).toFun
   let J : ℝ := (∑ j ∈ Finset.range (n + 1),
       ‖iteratedCovGrad (I := I) q 0 0 j U‖) *
@@ -318,7 +320,7 @@ theorem cc_conn_span
               ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
                 |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
                     (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-                    (appCc (I := I) (M := M) (G.metric (T : ℝ)) 1 0
+                    (operatorFieldApply (I := I) (M := M) (G.metric (T : ℝ)) 1 0
                       (connTraceCoeff (I := I) (G.metric (T : ℝ))
                         (G.metric ((T : ℝ) - s)))
                       (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 1 U)).toFun| ≤
@@ -394,7 +396,7 @@ theorem cc_lap_span
                       (G.metric ((T : ℝ) - s)) U).toFun ≤
                   ((1 : ℝ) / 3) *
                       ‖SmoothCcTensor.toL2
-                        (castRankCc_db (I := I) (M := M) (G.metric (T : ℝ)) 0
+                        (castCcTensorRank (I := I) (M := M) (G.metric (T : ℝ)) 0
                           (by omega : 0 + (n + 1) = 1 + n)
                           (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 (n + 1) U))‖ ^ 2 +
                     C * ((∑ j ∈ Finset.range (n + 1),
@@ -434,24 +436,24 @@ theorem cc_lap_span
     simp only [k, K]
     rw [metricDiff_bilin (I := I) (M := M)]
     ring
-  have hsmall : gFibreOpBound (I := I) q k (1 / 4 : ℝ) := by
+  have hsmall : metricCauchySchwarzBound (I := I) q k (1 / 4 : ℝ) := by
     simpa only [q, g, K, k] using (hm' s hs).2.1
   let X : SmoothCcTensor q 0 0 :=
     oneMinusConnLapSmoothIter (I := I) q 0 0 n U
   let A : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q g)
+    operatorFieldApply (I := I) (M := M) q 2 0 (scalarTraceCoeff (I := I) q g)
       (iteratedCovGrad (I := I) q 0 0 2 U)
   let B : SmoothCcTensor q 0 0 :=
-    appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q g)
+    operatorFieldApply (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q g)
       (iteratedCovGrad (I := I) q 0 0 1 U)
   let Atop : SmoothCcTensor q 0 (1 + n) :=
-    castRankCc_db (I := I) (M := M) q 0
+    castCcTensorRank (I := I) (M := M) q 0
       (by omega : 0 + (n + 1) = 1 + n)
       (iteratedCovGrad (I := I) q 0 0 (n + 1) U)
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0 X.toFun A.toFun
   let Q : ℝ := tensorL2Inner (I := I) (M := M) q 0 0 X.toFun B.toFun
   let Htop : ℝ := tensorL2Inner (I := I) (M := M) q 0 (1 + n) Atop.toFun
-    (appCcRS (I := I) (M := M) q 0 (1 + n) (1 + n)
+    (ccOperatorFieldComp (I := I) (M := M) q 0 (1 + n) (1 + n)
       (slotExtendIter (I := I) (M := M) q 1 1 n
         (scalarFluxCoeff (I := I) q g)) Atop).toFun
   let Dtop : ℝ := ((1 : ℝ) / 3) * ‖SmoothCcTensor.toL2 Atop‖ ^ 2
@@ -562,7 +564,7 @@ theorem cc_a2_span
           (scalarLapDiffCc (I := I) q (gm s) U).toFun ≤
         ((1 : ℝ) / 3) *
             ‖SmoothCcTensor.toL2
-              (castRankCc_db (I := I) (M := M) q 0
+              (castCcTensorRank (I := I) (M := M) q 0
                 (by omega : 0 + (n + 1) = 1 + n)
                 (iteratedCovGrad (I := I) q 0 0 (n + 1) U))‖ ^ 2 +
           Clap * ((∑ j ∈ Finset.range (n + 1),

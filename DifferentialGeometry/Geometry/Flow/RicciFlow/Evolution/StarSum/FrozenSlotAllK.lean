@@ -1,8 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.FrozenSlot
 
 /-!
-# Compatibility import for generic frozen-slot tensors
+# Compatibility re-export for frozen-slot covariant derivatives
 
-The rank-generic frozen-slot construction now lives in the tensor layer.  This
-module preserves the existing Ricci-flow import path.
+The reusable tensor calculus now lives in `Tensor/RSTensor/Tensor0SRiemannian/FrozenSlot`.
+This module preserves the former Ricci-flow import path.
 -/

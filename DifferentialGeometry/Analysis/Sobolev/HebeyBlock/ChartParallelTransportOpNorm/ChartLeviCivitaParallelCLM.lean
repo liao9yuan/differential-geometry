@@ -4,35 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.Inn
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 
-/-!
-# Unconditional uniform operator-norm bounds for the chart Levi-Civita parallel CLM
-
-For a closed Riemannian manifold `(M, g)` we establish three uniform
-operator-norm bounds without any locality hypothesis on the chart selection:
-
-1. `chartJinv_opNorm_isBounded_on_compact_unconditional` — `‖chartJinv α b‖`
-   is uniformly bounded for `b` in a compact subset of the trivialisation
-   base set, with the Riemannian fibre norm on `TangentSpace I b`.
-2. `christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional` —
-   `‖christoffelCorrection g α b Y‖ ≤ C * ‖Y‖` uniformly for `b` in the
-   closed support of the canonical chart-atlas partition-of-unity weight at
-   `α`, again with Riemannian fibre norm on `TangentSpace I b`.
-3. `chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional`
-   — the headline operator-norm bound for the chart Levi-Civita parallel
-   CLM applied to a general vector-field argument, in Riemannian fibre
-   norm on `TangentSpace I b`.
-
-The norm on `TangentSpace I b` used throughout is the Riemannian norm
-induced by the smooth metric `g`. This is enforced by removing the default
-model-norm instances `Tensor0SBundle.tangentSpace_normedAddCommGroup` and
-`Tensor0SBundle.tangentSpace_normedSpace` over each statement and installing
-the Riemannian-bundle instance via the metric `g.toContinuousRiemannianMetric`.
-Under this norm assignment, Mathlib's
-`eventually_norm_trivializationAt_lt` and
-`eventually_norm_symmL_trivializationAt_lt` apply and give the per-point
-local boundedness used in the finite-cover argument.
--/
-
 noncomputable section
 
 open Bundle ContinuousLinearMap Set Filter Finset
@@ -51,8 +22,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [FiniteDimensional ℝ E] in
@@ -160,12 +129,10 @@ private lemma exists_W_and_constant_tangent_symmL
       _ = C₁ * C₂ * ‖w‖ := by ring
   exact ContinuousLinearMap.opNorm_le_bound _ (by positivity) h_norm_w
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [FiniteDimensional ℝ E] in
-theorem chartJinv_opNorm_isBounded_on_compact_unconditional
+theorem chartTrivInv_opNorm_isBounded_on_compact_unconditional
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) {K : Set M} (hK : IsCompact K)
@@ -251,8 +218,6 @@ theorem chartJinv_opNorm_isBounded_on_compact_unconditional
 
 variable [NeZero (Module.finrank ℝ E)]
 
-/-- Local copy of the model-space coordinate functional supremum over a finite
-basis indexed by `Fin (Module.finrank ℝ E)`. -/
 private noncomputable def modelBasisCoordSup : ℝ :=
   (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
     (by
@@ -283,7 +248,6 @@ private lemma norm_coord_le_modelBasisCoordSup
     (f := fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
     (Finset.mem_univ _)
 
-/-- Local copy of the model-space basis-vector norm supremum. -/
 private noncomputable def modelBasisVecSup : ℝ :=
   (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
     (by
@@ -312,8 +276,6 @@ private lemma norm_basis_le_modelBasisVecSup
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private lemma christoffelCorrection_summand_opNorm_le_unconditional
@@ -460,23 +422,8 @@ private lemma christoffelCorrection_summand_opNorm_le_unconditional
         modelBasisVecSup (E := E) := by ring
   linarith
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Unconditional uniform op-norm bound for `christoffelCorrection g α b`.**
-
-For a closed Riemannian manifold `(M, g)`, there exists a non-negative constant
-`C` depending only on `g`, the chart at `α`, and the model space `E`, such that
-for every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α`, the Christoffel-correction CLM
-`christoffelCorrection g α b Y : TangentSpace I b →L[ℝ] E` satisfies
-
-  `‖christoffelCorrection g α b Y‖ ≤ C * ‖Y‖`
-
-for every `Y : E`. The operator norm uses the Riemannian fibre norm on
-`TangentSpace I b`. The constant `C` is independent of `b` and `Y`. No
-locality hypothesis on the chart selection is required. -/
 theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
     [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -499,7 +446,7 @@ theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
   have hK_base : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α
   obtain ⟨C_J, hCJ_nn, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact_unconditional
+    chartTriv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   obtain ⟨C_Γ, hCΓ_nn, hCΓ_bound⟩ :=
     chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
@@ -604,22 +551,8 @@ theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
   rw [h_C_eq] at h_outer_norm
   exact h_outer_norm
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Unconditional uniform operator-norm bound for `chartLeviCivitaParallelCLM`.**
-
-For a closed Riemannian manifold `(M, g)`, there exists a non-negative constant
-`C` such that for every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α` and every vector-field section
-`X : Π b', TangentSpace I b'`,
-
-  `‖chartLeviCivitaParallelCLM g α b X‖ ≤ C * ‖X b‖`,
-
-where all operator and vector norms use the Riemannian fibre norm on the
-relevant tangent spaces (induced by `g`). The constant `C` is independent of
-`b` and `X`. No locality hypothesis on the chart selection is required. -/
 theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
     [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -643,10 +576,10 @@ theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unc
   have hK_base : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α
   obtain ⟨C_J, hCJ_nn, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact_unconditional
+    chartTriv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   obtain ⟨C_Jinv, hCJinv_nn, hCJinv_bound⟩ :=
-    chartJinv_opNorm_isBounded_on_compact_unconditional
+    chartTrivInv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   obtain ⟨C_χ, hCχ_nn, hCχ_bound⟩ :=
     christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional

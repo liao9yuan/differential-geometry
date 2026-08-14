@@ -1,28 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-/-!
-# Completeness of the iterated Euclidean Sobolev space `W^{k,p}`
-
-For `1 < p < ∞` and an open set `Ω ⊆ EuclideanSpace ℝ (Fin d)`, the iterated
-Sobolev predicate `MemWkp k p · Ω` is closed under `wkpNorm`-Cauchy convergence:
-every Cauchy sequence has a `MemWkp k p · Ω` limit, and the convergence is in
-`wkpNorm`.
-
-The proof:
-
-1. Each iterated weak partial of order `j ≤ k`, of a Cauchy sequence in
-   `wkpNorm`, is `eLpNorm`-Cauchy on `Ω`.
-2. By Mathlib's `MeasureTheory.Lp.cauchy_complete_eLpNorm`, each such sequence
-   has a limit in `L^p(Ω)`.
-3. The limits at successive orders are weak partials of one another, by the
-   integration-by-parts duality `HasWeakPartialDeriv.of_eLpNormApprox_p`.
-4. Hence the order-`0` limit is in `MemWkp k p · Ω`, with iterated weak partials
-   given by the limits at higher orders.
-5. The convergence in `wkpNorm` is the sum of `eLpNorm` convergence over all
-   `(j, β)` pairs.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -37,16 +15,13 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The `wkpNorm` is dominated termwise by the sum over `(j, β)` of `eLpNorm`s of
-iterated weak partials. In particular, for any fixed `(j₀, β₀)` with `j₀ ≤ k`,
-the `eLpNorm` of the order-`j₀` weak partial is bounded by the `wkpNorm`. -/
 theorem eLpNorm_iterWeakPartial_le_wkpNorm
     {k : ℕ} (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E)
     (j₀ : ℕ) (hj₀ : j₀ ≤ k) (β₀ : Fin j₀ → Fin d) :
     eLpNorm (iterWeakPartial (d := d) p j₀ β₀ u Ω) p (volume.restrict Ω) ≤
-      wkpNorm (d := d) k p u Ω := by
+      iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   have h_inner :
       eLpNorm (iterWeakPartial (d := d) p j₀ β₀ u Ω) p (volume.restrict Ω) ≤
         ∑ β : Fin j₀ → Fin d,
@@ -72,9 +47,6 @@ theorem eLpNorm_iterWeakPartial_le_wkpNorm
     omega
   exact le_trans h_inner h_outer
 
-/-- For a sequence `(u n)` whose `wkpNorm` differences are bounded by a summable
-`B N`, every iterated weak partial of order `j ≤ k` is `eLpNorm`-Cauchy with the
-same bound. -/
 theorem iterWeakPartial_cauchy_of_wkpNorm_cauchy
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -82,7 +54,7 @@ theorem iterWeakPartial_cauchy_of_wkpNorm_cauchy
     (hu : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {B : ℕ → ℝ≥0∞}
     (h_cau : ∀ N n m, N ≤ n → N ≤ m →
-      wkpNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
     {j : ℕ} (hj : j ≤ k) (β : Fin j → Fin d) :
     ∀ N n m, N ≤ n → N ≤ m →
       eLpNorm
@@ -120,8 +92,6 @@ theorem iterWeakPartial_cauchy_of_wkpNorm_cauchy
   rw [eLpNorm_congr_ae h_iter_sub] at h_iter_le
   exact lt_of_le_of_lt h_iter_le h_bound
 
-/-- For `1 ≤ p`, every Cauchy sequence in `wkpNorm` has an `eLpNorm`-limit
-of every iterated weak partial of order `j ≤ k`, and the limit is in `MemLp`. -/
 theorem exists_eLpNorm_limit_iterWeakPartial
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -129,7 +99,7 @@ theorem exists_eLpNorm_limit_iterWeakPartial
     (hu : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {B : ℕ → ℝ≥0∞} (hB : ∑' i, B i ≠ ∞)
     (h_cau : ∀ N n m, N ≤ n → N ≤ m →
-      wkpNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
     {j : ℕ} (hj : j ≤ k) (β : Fin j → Fin d) :
     ∃ (v : E → ℝ), MemLp v p (volume.restrict Ω) ∧
       atTop.Tendsto

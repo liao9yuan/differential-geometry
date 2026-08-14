@@ -2,33 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Se
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
-/-!
-# Abstract Duhamel mild-solution map
-
-For a real Banach space `X`, a `BoundedC0Semigroup S` on `X`, an initial
-datum `u₀ : X`, and a forcing term `F : ℝ → X`, the **Duhamel mild
-solution** of the linear evolution equation `u' = A u + F(t)`, `u(0) = u₀`
-(where `A` is the generator of `S`) is
-
-  `duhamel S u₀ F t = S t u₀ + ∫₀ᵗ S (t - τ) (F τ) dτ`,
-
-the second summand being a Bochner-valued interval integral on `[0, t]`.
-
-This file defines `duhamel` and establishes that it is well posed: the
-Duhamel integrand is interval-integrable for continuous `F`, the map is
-continuous on `[0, ∞)`, and it recovers `u₀` at `t = 0`.
-
-## Main definitions
-
-* `duhamel S u₀ F t` — the abstract Duhamel formula.
-
-## Main results
-
-* `duhamel_zero` — `duhamel S u₀ F 0 = u₀`.
-* `duhamel_integrable` — the integrand `τ ↦ S (t - τ) (F τ)` is
-  interval-integrable on `[0, t]` for continuous `F` and `t ≥ 0`.
-* `duhamel_continuousOn` — `duhamel S u₀ F` is continuous on `[0, ∞)`.
--/
 
 noncomputable section
 
@@ -42,23 +15,15 @@ namespace QuasiLinear
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   [CompleteSpace X]
 
-/-- The abstract Duhamel mild solution of `u' = A u + F(t)`, `u(0) = u₀`,
-for a bounded `C₀`-semigroup `S` (with generator `A`):
-`duhamel S u₀ F t = S t u₀ + ∫₀ᵗ S (t - τ) (F τ) dτ`. -/
 noncomputable def duhamel (S : BoundedC0Semigroup X) (u₀ : X)
     (F : ℝ → X) (t : ℝ) : X :=
   S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (F τ)
 
-/-- The clipped Duhamel kernel `S (max 0 (t - τ)) (F τ)`. Jointly
-continuous in `(t, τ)`, and equal to the Duhamel integrand on
-`τ ∈ [0, t]` for `t ≥ 0`. -/
 private noncomputable def duhamelKernelClipped (S : BoundedC0Semigroup X)
     (F : ℝ → X) (t τ : ℝ) : X :=
   S (max 0 (t - τ)) (F τ)
 
-/-- Joint continuity of the clipped Duhamel kernel: the map
-`(t, τ) ↦ (max 0 (t - τ), F τ)` is continuous into `[0, ∞) × X`, and the
-semigroup action is jointly continuous there. -/
+omit [CompleteSpace X] in
 private lemma continuous_duhamelKernelClipped (S : BoundedC0Semigroup X)
     {F : ℝ → X} (hF : Continuous F) :
     Continuous (Function.uncurry (duhamelKernelClipped S F)) := by
@@ -74,8 +39,7 @@ private lemma continuous_duhamelKernelClipped (S : BoundedC0Semigroup X)
     (S.continuousOn_uncurry).comp_continuous h_inner h_maps
   exact h_comp
 
-/-- At `t = 0` the Duhamel mild solution recovers the initial datum:
-`duhamel S u₀ F 0 = u₀`. -/
+omit [CompleteSpace X] in
 theorem duhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (F : ℝ → X) :
     duhamel S u₀ F 0 = u₀ := by
   unfold duhamel
@@ -83,12 +47,7 @@ theorem duhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (F : ℝ → X) :
   rw [S.apply_zero]
   rfl
 
-/-- The Duhamel integrand `τ ↦ S (t - τ) (F τ)` is interval-integrable on
-`[0, t]` whenever `F` is continuous and `t ≥ 0`.
-
-On `Set.uIoc 0 t = (0, t]` the raw integrand agrees with the clipped
-kernel `duhamelKernelClipped S F t`, which is continuous, hence
-interval-integrable; the conclusion transfers across that agreement. -/
+omit [CompleteSpace X] in
 theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
     (hF : Continuous F) {t : ℝ} (ht : 0 ≤ t) :
     IntervalIntegrable (fun τ => S (t - τ) (F τ))
@@ -109,14 +68,7 @@ theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
   unfold duhamelKernelClipped
   rw [max_eq_right h_nn]
 
-/-- The Duhamel mild solution `duhamel S u₀ F` is continuous on
-`[0, ∞)`.
-
-The homogeneous term `t ↦ S t u₀` is continuous on `[0, ∞)` by strong
-continuity of the semigroup. The Duhamel integral term equals, for
-`t ≥ 0`, the parametric integral of the jointly continuous clipped
-kernel, which is continuous; the two facts combine after replacing the
-raw map by the clipped one on a neighbourhood within `[0, ∞)`. -/
+omit [CompleteSpace X] in
 theorem duhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
     {F : ℝ → X} (hF : Continuous F) :
     ContinuousOn (duhamel S u₀ F) (Set.Ici 0) := by

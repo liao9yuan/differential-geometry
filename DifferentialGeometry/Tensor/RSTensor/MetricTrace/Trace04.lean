@@ -1,15 +1,13 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Four-tensor metric traces
 
-Smooth field producer for the Ricci-style metric trace of standard-slot
-`(0,4)` tensors, tracing slots `0` and `3`.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -20,7 +18,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,20 +36,22 @@ theorem metricTrace_metricField_eq0S
   intro slots
   simp [Tensor0SBundle.component0S_apply]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTrace_finCons_vec2_eq_vec3 {x : M}
     (X Y Z : TangentSpace I x) :
     Fin.cons X (vec2 (I := I) Y Z) = vec3 (I := I) X Y Z := by
   funext a
   fin_cases a <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTrace_finCons_vec3_eq_vec4 {x : M}
     (X Y Z U : TangentSpace I x) :
     Fin.cons X (vec3 (I := I) Y Z U) = vec4 (I := I) X Y Z U := by
   funext a
   fin_cases a <;> rfl
 
-/-- Slot permutation turning the first-two trace input `(i,j,tail₀,tail₁)`
-into the standard Ricci trace input `(i,tail₀,tail₁,j)`. -/
+
+
 def trace04Perm : Equiv.Perm (Fin 4) where
   toFun q := if q = 0 then 0 else if q = 1 then 2 else if q = 2 then 3 else 1
   invFun q := if q = 0 then 0 else if q = 1 then 3 else if q = 2 then 1 else 2
@@ -60,6 +60,7 @@ def trace04Perm : Equiv.Perm (Fin 4) where
   right_inv q := by
     fin_cases q <;> simp
 
+omit [FiniteDimensional ℝ E] in
 theorem metricTrace_tensor0S_curry_apply_cons
     {x : M} (s : ℕ)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -77,6 +78,7 @@ theorem metricTrace_tensor0S_curry_apply_cons
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
+omit [FiniteDimensional ℝ E] in
 theorem metricTrace_tensor0S_update_zero {s : ℕ} {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (slots : Fin s -> TangentSpace I x) (a : Fin s) :
@@ -237,8 +239,8 @@ private theorem trace04Coeff
     (trace04Event (I := I) g A x₀ tail)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smooth `(0,2)` field obtained by the standard Ricci trace of a smooth
-`(0,4)` tensor field, tracing slots `0` and `3`. -/
+
+
 def trace04Field
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

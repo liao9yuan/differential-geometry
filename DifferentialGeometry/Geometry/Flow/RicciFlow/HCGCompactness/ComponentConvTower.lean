@@ -2,28 +2,26 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Covariant-tower component convergence (P3 Gap B, `componentConv_covDeriv_of_chartCInf`)
 
-The `a ≥ 1` covariant tower of the metric component convergence.  The induction
-runs on the bump-extended chart representative of the level-`p` tower scalar
-`s_p^V(w) = (∇^p_gRef A0) w (V·w)` (`A0 = metricTensorField g`), using the existing
-A2 machinery:
 
-* `MetricPreconv.fderiv_chartRep_eq_towerStep` — the chart `fderiv` of `s_p^V`
-  along a chart-constant direction `v` is the chart rep of `towerStep` (the
-  level-`(p+1)` scalar plus the `gRef`-Christoffel corrections), as a germ.
-* `MapCInfConvOnCompacts.fderivApply` (B2) — directional-derivative closure.
-* `MapCInfConvOnCompacts.mulLeft`/`.sum`/`.add` (producer 3) — convergence algebra.
-* `MapCInfConvOnCompacts.congr` — locality, to transfer convergence across the
-  germ identity / where the global sections equal the chart-constant frame.
 
-This file currently provides the foundational `ContDiff` and the directional-step
-plumbing; the full induction is assembled on top.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,16 +33,17 @@ open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle TensorLieDeriv
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- The chart representative of a level-`p` tower scalar `s_p^V` is `ContDiffOn`
-the extended-chart target. -/
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem chartRep_towerScalar_contDiffOn
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -69,10 +68,12 @@ theorem chartRep_towerScalar_contDiffOn
   rw [hzeq] at hcd
   exact hcd.contDiffWithinAt
 
-/-- **Bump-extended level-`p` tower scalar is globally `ContDiff`.**  Multiplying
-the chart representative of `s_p^V` by a smooth bump supported in the chart target
-gives a globally smooth function on the model space — the form `MapCInfConvOnCompacts`
-and its derivative/algebra closures (`fderivApply`, `mulLeft`, `sum`) consume. -/
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerScalar_contDiff
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -88,12 +89,14 @@ theorem bumpTowerScalar_contDiff
   bumpMul_contDiff (isOpen_extChartAt_target (I := I) x₀) hχ htsupp
     (chartRep_towerScalar_contDiffOn (I := I) gRef A0 p V x₀)
 
-/-- **Per-point bridge: bump-carrier chart `fderiv` is the bump-extended tower
-step.**  On an open `U` where the bump `χ ≡ 1` and whose chart preimage lies in
-`Kc` (the germ region of `fderiv_chartRep_eq_towerStep`), the directional chart
-`fderiv` of the bump-extended level-`p` scalar equals the bump-extended
-`towerStep` chart rep.  (`χ ≡ 1` ⇒ bump-`fderiv` = unbump-`fderiv`; then the A2
-germ identity.) -/
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpFderiv_eq_chartTowerStep
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -134,10 +137,12 @@ theorem bumpFderiv_eq_chartTowerStep
   rw [hval, hχU hz]
   simp
 
-/-- **Directional convergence step (tower-step form).**  If the bump-extended
-level-`p` tower scalars converge `C^∞`-on-compacts on the open chart patch `U`,
-then so do the bump-extended `towerStep` chart reps.  Combines `fderivApply` (B2)
-with the per-point bridge `bumpFderiv_eq_chartTowerStep` via `congr`. -/
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerStep_chartConv
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -176,10 +181,12 @@ theorem bumpTowerStep_chartConv
   · exact (bumpFderiv_eq_chartTowerStep (I := I) gRef A0inf p V x₀ v σ hσ hKchart
       hU hχU hUKc hUtarget hz).symm
 
-/-- The chart representative of a function smooth on the chart source is
-`ContDiffOn` the extended-chart target.  (General version of
-`chartRep_towerScalar_contDiffOn`, for the frame-coefficient functions that are
-only smooth on the chart domain.) -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
     (hf : ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f (chartAt H x₀).source) :
     ContDiffOn Real (∞ : WithTop ℕ∞)
@@ -200,15 +207,16 @@ theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
       = f ∘ (extChartAt I x₀).symm := by funext z; simp [writtenInExtChartAt]
   rw [hwrite]; exact hcd
 
-set_option linter.unusedVariables false in
-/-- **Multilinear frame-expansion convergence.**  If one slot `j` of the section
-tuple `V` is, on the chart source, the finite combination `∑ᵢ cᵢ • frameᵢ` of a
-section family with smooth coefficients `cᵢ`, then the bump-extended level-`p`
-tower carrier of `V` converges `C^∞`-on-compacts whenever each carrier of the
-slot-replaced tuple `update V j frameᵢ` does.  (Multilinearity of
-`covDerivOfField … w` in the slots + `mulLeft`/`sum`; the `χ²`/coefficient locality
-is absorbed by `congr` on `U`.)  Used for the leading-slot expansion of the
-`p → p+1` step and the order-`0` base. -/
+
+
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTower_slotExpand_conv
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -219,7 +227,7 @@ theorem bumpTower_slotExpand_conv
     {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
     (htsupp : tsupport χ ⊆ (extChartAt I x₀).target)
     {U : Set E} (hU : IsOpen U) (hχU : Set.EqOn χ 1 U)
-    (hUtarget : U ⊆ (extChartAt I x₀).target)
+    (_hUtarget : U ⊆ (extChartAt I x₀).target)
     {ι : Type*} (s : Finset ι)
     (frame : ι → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -244,12 +252,10 @@ theorem bumpTower_slotExpand_conv
       (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
         (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w (fun a => V a w)) z) := by
   classical
-  -- bump-extended coefficient `χ · chartRep(cᵢ)` is globally smooth
   have hg : ∀ i, ContDiff Real (∞ : WithTop ℕ∞)
       (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀ (c i) z) :=
     fun i => bumpMul_contDiff (isOpen_extChartAt_target (I := I) x₀) hχ htsupp
       (chartRep_contDiffOn (I := I) (c i) x₀ (hc i))
-  -- slot-replaced carriers are globally smooth
   have hcarrSeq : ∀ (i : ι) (k : ℕ), ContDiff Real (∞ : WithTop ℕ∞)
       (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
         (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w
@@ -262,11 +268,9 @@ theorem bumpTower_slotExpand_conv
           (fun a => (Function.update V j (frame i)) a w)) z) :=
     fun i => bumpTowerScalar_contDiff (I := I) gRef A0inf p
       (Function.update V j (frame i)) x₀ hχ htsupp
-  -- each `gᵢ · carrierᵢ` converges, then sum over `s`
   have hsum := MapCInfConvOnCompacts.sum s
     (fun i => (hconv i).mulLeft (hg i) (fun k => hcarrSeq i k) (hcarrInf i))
     (fun i k => (hg i).mul (hcarrSeq i k)) (fun i => (hg i).mul (hcarrInf i))
-  -- pointwise multilinear expansion, valid for every base field `A0` on the chart source
   have hmulti : ∀ (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2),
       ∀ q ∈ S,
@@ -300,7 +304,6 @@ theorem bumpTower_slotExpand_conv
               (fun a => (Function.update V j (frame i)) a q) := by
             refine Finset.sum_congr rfl fun i _ => ?_
             simp only [smul_eq_mul, hupd i]
-  -- the carrier of `V` agrees on `U` with the `Σ` of `gᵢ · carrierᵢ`
   refine hsum.congr hU (fun k z hz => ?_) (fun z hz => ?_)
   · have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
     simp only [writtenInExtChartAt_real_apply, hχz, one_mul]
@@ -311,12 +314,14 @@ theorem bumpTower_slotExpand_conv
     rw [hmulti A0inf ((extChartAt I x₀).symm z) (hUS z hz)]
     simp only [smul_eq_mul]
 
-/-- **`towerStep` split.**  Pointwise, the bump-extended level-`(p+1)` carrier with
-leading slot `σ` is the bump-extended `towerStep` minus the bump-extended
-`gRef`-Christoffel corrections, each of which is itself a level-`p` carrier for the
-section tuple `update V' a (∇_σ V'ₐ)` (the covariant-derivative slot realised as a
-`covSection`).  This is the algebraic identity behind extracting `s_{p+1}` from the
-directional step via `MapCInfConvOnCompacts.sub`. -/
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerStep_split
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -357,10 +362,12 @@ theorem bumpTowerStep_split
   rw [mul_add, Finset.mul_sum]
   ring
 
-/-- The bump-extended `towerStep` chart rep is globally `ContDiff` — obtained from
-the `bumpTowerStep_split` (`bump-towerStep = bump-s_{p+1} + Σ bump-corrections`),
-each summand a `bumpTowerScalar_contDiff`.  Needed as the minuend smoothness for
-`MapCInfConvOnCompacts.sub` in the induction step. -/
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerStepScalar_contDiff
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -410,13 +417,15 @@ theorem bumpTowerStepScalar_contDiff
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) gRef)
           σ (V' a))) x₀ hχ htsupp
 
-/-- **Per-frame-index convergence (induction step core).**  Given the level-`p`
-inductive hypothesis (convergence of the bump carriers for ALL section tuples) and
-a chart-constant leading slot `σ` (`= tangentConstInChart x₀ v` near `Kc`), the
-bump carrier of the level-`(p+1)` tuple `Fin.cons σ V'` converges.  Combines the
-directional step (`bumpTowerStep_chartConv`, from IH at `V'`), the correction
-convergences (IH at the `covSection`-updated tuples), `MapCInfConvOnCompacts.sub`,
-and the `towerStep` split. -/
+
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerCons_conv
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -492,11 +501,13 @@ theorem bumpTowerCons_conv
   rw [hfeq_seq, hfeq_inf]
   exact hsub
 
-/-- **The covariant-tower convergence induction step.**  If the level-`p` bump
-carriers converge for ALL section tuples (IH), so do the level-`(p+1)` bump
-carriers.  Expand the leading slot of `W` in the frame (`bumpTower_slotExpand_conv`,
-chart-constant `frameᵢ`), reducing to the frame-leading case handled by
-`bumpTowerCons_conv` (bridging `update W 0 frameᵢ` to `Fin.cons frameᵢ (tail W)`). -/
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerCarrier_step
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -574,10 +585,12 @@ theorem bumpTowerCarrier_step
   exact bumpTowerCons_conv (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
     hKchart hUKc (vbasis i) (frame i) (hframeσ i) (Fin.tail W) IH
 
-/-- **All-levels covariant-tower convergence (the `Nat.rec` induction).**  From the
-order-`0` base (`hbase`) and the step `bumpTowerCarrier_step`, the bump carriers of
-EVERY section tuple at EVERY covariant order `a` converge `C^∞`-on-compacts on `U`,
-along the single subsequence baked into `A0Seq`. -/
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerCarrier_all
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -624,14 +637,15 @@ theorem bumpTowerCarrier_all
     exact bumpTowerCarrier_step (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
       hKchart hUKc s frame vbasis hframeσ hspan IH
 
-/-- **Frame-data package** for `bumpTowerCarrier_all`/`bumpTowerCarrier_step`.  For a
-compact `Kc` inside a chart, produces global smooth sections `frame` agreeing with
-the chart-constant coordinate frame `tangentConstInChart x₀ (finBasis i)` near `Kc`,
-together with `hspan`: every smooth section's coordinate-frame coefficients are
-smooth on the chart source and reconstruct it on `Kc`.  Built from
-`exists_section_eqOn_compact` (globalization) and the Mathlib local-frame API
-(`localFrame_coeff` smoothness `contMDiffOn_baseSet_localFrame_coeff` +
-`eq_sum_localFrame_coeff_smul`), bridged to `tangentConstInChart` via `symmL`. -/
+
+
+
+
+
+
+
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
     ∃ (frame : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -673,12 +687,14 @@ theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
         = e.localFrame_coeff I b i w (W0 w) • frame i w
     rw [hlf_eq, hframe_eq]
 
-/-- **Order-`0` base for an arbitrary section pair, from the frame-pair
-convergence.**  Frame-expand BOTH slots of a `Fin 2` section tuple via
-`bumpTower_slotExpand_conv` (using `hspan`), reducing the order-`0` carrier of any
-`V : Fin 2 → ContMDiffSection` to the frame-pair carriers `![frameᵢ, frameⱼ]`.  This
-is the `hbase` input to `bumpTowerCarrier_all`, given the (diagonalised) B0
-frame-pair convergence `hpairs`. -/
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem hbase_of_framePairs
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -756,12 +772,14 @@ theorem hbase_of_framePairs
   rw [hbr_seq, hbr_inf]
   exact hpairs i j
 
-/-- **Shared-`χ` engine input for a finite family of slot tuples.**  The bump `χ`
-of `exists_chart_engineInput` depends only on `x₀`/`K₀` (not on the slot tuple), so
-a single `χ` serves an entire finite family `Vfam`: each member's bump-extended
-order-0 carrier is globally `ContDiff` with uniform iterated-derivative bounds.
-This is what lets the `n²` frame pairs share one bump (and hence one `U/Kc`) for the
-diagonal producing `hpairs`. -/
+
+
+
+
+
+
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem engine_input_family
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -888,12 +906,12 @@ private theorem engine_input_family
     exact le_trans hbnd
       (Finset.single_le_sum (fun jj _ => hMr0 jj)
         (Finset.mem_range.2 (Nat.lt_succ_of_le hjr)))
-  show ‖iteratedFDeriv Real r (fun x : E => χ x * cr k x) x‖ ≤ _
+  change ‖iteratedFDeriv Real r (fun x : E => χ x * cr k x) x‖ ≤ _
   simp only [hΦeq]
   exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
     hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
 
-/-- **Shared-`χ` engine input for a finite family of slot tuples.** -/
+
 theorem exists_chart_engineInput_family
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -922,7 +940,7 @@ theorem exists_chart_engineInput_family
   intro p r Kc hKc hKchart
   exact metricComp_iteratedFDeriv_le (I := I) gRef gSeq hbdd x₀ hKc hKchart (Vfam p) r
 
-/-- Shared chart-engine input when each requested order has its own reference metric. -/
+
 theorem engine_input_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -955,7 +973,7 @@ theorem engine_input_refs
   refine ⟨Mr, hMr0, fun k y hy => ?_⟩
   exact hMr k y hy
 
-/-- Per-chart `C^∞` extraction when each requested order has its own reference metric. -/
+
 theorem exists_chart_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)

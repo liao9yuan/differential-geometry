@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairingPolarized
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRicciPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSRefoldPathIntegral
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannianBundle

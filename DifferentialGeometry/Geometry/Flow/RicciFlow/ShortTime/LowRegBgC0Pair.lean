@@ -398,7 +398,8 @@ private theorem symmSelf
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
   have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
-  rw [symmS, hswap, htwo, smul_smul,
+  unfold symmS ccTensor02Symm
+  rw [hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 private theorem perturbSlotH2
@@ -457,8 +458,12 @@ private theorem rev3Pair
       (Module.finrank ℝ E : ℝ) ^ 3 *
         lowJetSq (I := I) (M := M) g 2 (T - U) := by
   have hsymm : symmS (I := I) (M := M) g (T - U) = T - U := by
-    rw [symmS_sub, symmSelf (I := I) (M := M) g T hT,
-      symmSelf (I := I) (M := M) g U hU]
+    have hTs := symmSelf (I := I) (M := M) g T hT
+    have hUs := symmSelf (I := I) (M := M) g U hU
+    change ccTensor02Symm (I := I) (M := M) g T = T at hTs
+    change ccTensor02Symm (I := I) (M := M) g U = U at hUs
+    change ccTensor02Symm (I := I) (M := M) g (T - U) = T - U
+    rw [symmS_sub, hTs, hUs]
   rw [← slotInsertEndoCc_sub,
     LowBaseInternal.fullRev_sub (I := I) (M := M)
       g gT gU T U hTtie hUtie]
@@ -954,7 +959,8 @@ private theorem corePairRaw
       appCcRS (I := I) (M := M) g 0 4 4 SU (LT - LU) +
         appCcRS (I := I) (M := M) g 0 4 4 (ST - SU) LT := by
     dsimp only [HT, HU]
-    rw [appCcRS_sub_right, appCcRS_sub_left]
+    simp only [appCcRS]
+    rw [ccOperatorFieldComp_sub_right, appCcRS_sub_left]
     module
   have hterm0 : lowJetSq (I := I) (M := M) g 1
       (appCcRS (I := I) (M := M) g 0 4 4 SU (LT - LU)) ≤
@@ -1457,7 +1463,8 @@ theorem dlaBg_pair_h1
       appCcRS (I := I) (M := M) g 2 6 2 PU (XT - XU) +
         appCcRS (I := I) (M := M) g 2 6 2 (PT - PU) XT := by
     dsimp only [YT, YU]
-    rw [appCcRS_sub_right, appCcRS_sub_left]
+    simp only [appCcRS]
+    rw [ccOperatorFieldComp_sub_right, appCcRS_sub_left]
     module
   have hXsub : XT - XU =
       bgPass (I := I) (M := M) g
@@ -1917,8 +1924,8 @@ private theorem insEndoOne
     slotInsertEndoCc (I := I) (M := M) g 0
       (endoDiffSection (I := I) (M := M) g gm g_bg) = _
   rw [endoDiffSection, slotInsertEndoCc_sub,
-    deTurckLieWEndoInsert_eq_cometricRaise,
-    deTurckLieWEndoInsert_eq_cometricRaise,
+    deTurckLieWEndoInsert_eq_cometricRaise_wAlpha,
+    deTurckLieWEndoInsert_eq_cometricRaise_wAlpha,
     connDiffDVFInsert_eq_cometricRaise,
     connDiffDVFInsert_eq_cometricRaise]
   rw [wAlpha, wAlpha, raiseAdd0, raiseAdd0, raiseSub0]
@@ -1936,8 +1943,9 @@ private theorem omegaBgSub
         (connDiffLoweredCc (I := I) g g -
           connDiffLoweredCc (I := I) g g_bg) := by
   rw [wOmega_sub_refold (I := I) (M := M) g gT g_bg g,
-    wOmega_sub_refold (I := I) (M := M) g gU g_bg g,
-    appCcRS_sub_left]
+    wOmega_sub_refold (I := I) (M := M) g gU g_bg g]
+  simp only [appCcRS]
+  rw [appCcRS_sub_left]
 
 private theorem omegaBgPairH2
     (hDim : Module.finrank ℝ E = 3)
@@ -2254,7 +2262,8 @@ private theorem appPairH1S
           appCcRS (I := I) (M := M) g p r c ΦU WU =
         appCcRS (I := I) (M := M) g p r c ΦU (WT - WU) +
           appCcRS (I := I) (M := M) g p r c (ΦT - ΦU) WT := by
-    rw [appCcRS_sub_right, appCcRS_sub_left]
+    simp only [appCcRS]
+    rw [ccOperatorFieldComp_sub_right, appCcRS_sub_left]
     module
   have hWD0 : 0 ≤ lowJetSq (I := I) (M := M) g 1 (WT - WU) :=
     jetNn (I := I) (M := M) (m := 1) g (WT - WU)
@@ -2504,11 +2513,12 @@ private noncomputable def amixBgHalf
       (lc0TraceRF (I := I) (M := M) g gm 4 lieCorr0AMixPerm1)
       (appCcRS (I := I) (M := M) g 2 3 6
         (slotExtendIter (I := I) (M := M) g 0 3 3
-          (kappaBg (I := I) (M := M) g gm g_bg))
+          (metricConnDiffLoweredCc (I := I) (M := M) g gm g_bg -
+            metricConnDiffLoweredCc (I := I) (M := M) g gm g))
         (appCcRS (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gm 3 lieCorr0AMixPermQ)
           (slotExtendIter (I := I) (M := M) g 0 3 2
-            (lc0Kappa (I := I) (M := M) g gm g)))))
+            (metricConnDiffLoweredCc (I := I) (M := M) g gm g)))))
 
 private theorem slotIterSub
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
@@ -2530,8 +2540,9 @@ private theorem amixHalf_bg
     lc0AMixHalfRF (I := I) (M := M) g gm g_bg σ -
         lc0AMixHalfRF (I := I) (M := M) g gm g σ =
       amixBgHalf (I := I) (M := M) g gm g_bg σ := by
-  unfold lc0AMixHalfRF amixBgHalf kappaBg lc0Kappa
-  rw [← appCcRS_sub_right, ← appCcRS_sub_right,
+  unfold lc0AMixHalfRF amixBgHalf
+  simp only [appCcRS]
+  rw [← ccOperatorFieldComp_sub_right, ← ccOperatorFieldComp_sub_right,
     ← appCcRS_sub_left, ← slotIterSub]
 
 private theorem kappaBgH2

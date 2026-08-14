@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMo
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
+import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
 import Mathlib.Analysis.MeanInequalities
 
 /-! # DeTurck vector-field endo-insert tower (split 1/3 of `DeTurckVectorFieldL2JetBound`)
@@ -38,21 +41,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-def deTurckLieWEndoSection (g₁ g_bg : SmoothRiemannianMetric I M) :
-    ContMDiffSection I (E →L[ℝ] E) ∞
-      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
-  toFun := fun x : M => deTurckLieWEndo (I := I) g₁ g_bg x
-  contMDiff_toFun := deTurckLieWEndo_homSection_contMDiff (I := I) g₁ g_bg
-
-@[simp] lemma deTurckLieWEndoSection_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
-    deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg x =
-      deTurckLieWEndo (I := I) g₁ g_bg x := rfl
-
-def deTurckLieWEndoInsert (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g₀ 1 1 :=
-  slotInsertEndoCc (I := I) (M := M) g₀ 0
-    (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)
 
 def wVF (g₁ g_bg : SmoothRiemannianMetric I M) :
     Π b : M, TangentSpace I b :=
@@ -125,13 +113,6 @@ private lemma connDiffLoweredCc_unitModel' (g₀ g₁ : SmoothRiemannianMetric I
       from rfl]
   rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
-  rfl
-
-lemma connDiffLoweredCc_unitModel_apply' (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
-    (m : Fin 3 → TangentSpace I x) :
-    unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
-      g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (m 0) (m 1)) (m 2) := by
-  rw [connDiffLoweredCc_unitModel']
   rfl
 
 private lemma unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
@@ -416,18 +397,6 @@ lemma wAlphaA_unit_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
   rw [hYx]
   ring
 
-lemma interior_product_toModel_eval' (s : ℕ) (x : M) (v : TangentSpace I x)
-    (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
-    Tensor0SSpace.toModel
-        (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D) w =
-      Tensor0SSpace.toModel D (Fin.cons (show E from v) (fun k => (show E from w k))) := by
-  have h1 : Tensor0SSpace.toModel
-      (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D) =
-      Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s (show E from v)
-        (Tensor0SSpace.toModel D) := rfl
-  rw [h1]
-  rfl
-
 lemma wAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (wAlphaB (I := I) (M := M) g₀ g₁ g_bg) x ![u, w] =
@@ -482,23 +451,6 @@ private lemma wEndo_eq_covDeriv_add_connDiff (g₀ g₁ g_bg : SmoothRiemannianM
   rw [hEndo, hcd]
   abel
 
-lemma cotangentToDual_slotInsertEndoFib' (x : M)
-    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (om : Tensor0SSpace 1 I x)
-    (w : TangentSpace I x) :
-    cotangentToDual (I := I)
-        (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om) w =
-      cotangentToDual (I := I) om (Λ w) := by
-  rw [cotangentToDual_apply, cotangentToDual_apply]
-  rw [show (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om) (fun _ : Fin 1 => w)
-      = Tensor0SSpace.toModel (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om)
-          (fun _ : Fin 1 => (show E from w)) from rfl]
-  rw [slotInsertEndoFib_apply_eval]
-  rw [show Function.update (fun _ : Fin 1 => (show E from w)) 0
-        (Λ ((fun _ : Fin 1 => (show E from w)) 0)) =
-      (fun _ : Fin 1 => (show E from Λ w)) from by
-    funext k; fin_cases k; simp]
-  rfl
-
 /-- Generic `cotangentToDual` action of a slot-`0` cometric raise of any `(0, 2)` field:
 the raise of `A` pairs against `om` as the `unitModel` of `A` fed the sharp of `om`. -/
 lemma cotangentToDual_cometricRaiseSlot0_gen
@@ -549,7 +501,7 @@ private lemma cotangentToDual_cometricRaise_wAlpha
   cotangentToDual_cometricRaiseSlot0_gen (I := I) (M := M) g₀
     (wAlpha (I := I) (M := M) g₀ g₁ g_bg) x om w
 
-theorem deTurckLieWEndoInsert_eq_cometricRaise
+theorem deTurckLieWEndoInsert_eq_cometricRaise_wAlpha
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 0

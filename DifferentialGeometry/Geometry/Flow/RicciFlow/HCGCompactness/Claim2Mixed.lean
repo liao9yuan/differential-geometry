@@ -2,33 +2,31 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AkMFold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Claim 2 (mixed derivatives): the conversion engine
 
-MSM135 Lemma 3.11, eq-(3.4) bookkeeping **Claim 2**: if `|∇^r g_k| ≤ C_r` for
-`1 ≤ r ≤ L`, then `|∇^a ∇_k^b T| ≤ C_{a,b}` for `a + b ≤ L` and `T` with
-Shi-bounded `∇_k`-towers (`Rm_k`, `Rc_k`).
 
-Engine design (all at the component-array level, reusing the `AkMFold` machinery):
-1. `akAct A B` — the per-slot `A_k`-action, the ONE-STEP conversion term:
-   `covDerivStepComp ext chrRef B = covDerivStepComp ext chrK B + akAct ak B`
-   (`covStep_chr_convert`; the `ext` parts cancel, pure algebra).
-2. `akAct` decomposes as a finite sum of REINDEXED `contrTail`s
-   (`akActTerm_eq`, slot combinators `(finRotate).symm.trans (swap s last)` +
-   `frontExtendEquiv`), so the m-fold norm bound for `∇^a(akAct ak B)` is a
-   corollary of the proven `P(m)` (`compL2_iterCovComp_contrTail_le`) — NO new
-   Leibniz machinery.
-3. Claim 2 = strong induction on `a`: bottom-pull + conversion + `P(m)`-corollary;
-   the `∇_k`-step composes definitionally (`iterCovComp chr (iterCovComp chr F b) 1
-   = iterCovComp chr F (b+1)` by `rfl`).
 
-SIGN CONVENTION (`Claim1Wiring.md` §1b): `ak = chr(g_k) − chr(g_ref)`, so
-`∇_ref-step = ∇_k-step + akAct ak` (the `−Γ` corrections differ by `−(chrR − chrK)
-= +ak`).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -46,23 +44,23 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-! ## The one-step conversion `∇_ref = ∇_k + akAct` -/
 
-/-- The per-slot action of a `(1,2)`-component array `A` (upper slot LAST) on a `(0,q)`
-component array `B`: the conversion term between the covariant-derivative steps of two
-connections.  Slot `0` of the result is the derivative direction. -/
+
+
+
+
 def akAct {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real) (B : (Fin q → Idx) → Real) :
     (Fin (q + 1) → Idx) → Real :=
   fun n => ∑ s : Fin q, ∑ p : Idx,
     A ![n 0, Fin.tail n s, p] * B (Function.update (Fin.tail n) s p)
 
-/-- **The one-step conversion**: the covariant-derivative step w.r.t. `chrR` equals the
-step w.r.t. `chrK` plus the action of the Christoffel-difference array `chrK − chrR`
-(the `ext` parts are identical and the `−Γ` sums differ by the difference action). -/
+
+
+
+omit [DecidableEq Idx] in
 theorem covStep_chr_convert {q : ℕ}
     (ext : (Fin q → Idx) → Idx → Real)
     (chrR chrK : Idx → Idx → Idx → Real)
@@ -89,11 +87,11 @@ theorem covStep_chr_convert {q : ℕ}
   rw [hdiff]
   ring
 
-/-! ## The slot decomposition: each `akAct` summand is a reindexed `contrTail` -/
 
-/-- The inner slot permutation of the `s`-th `akAct` summand: `0 ↦ s`, `succ i ↦`
-(`castSucc i`, with `s` deflected to `last`).  Built from combinators
-(`finRotate` rotation + transposition), per the project lesson. -/
+
+
+
+
 def akInnerPerm {q : ℕ} (s : Fin (q + 1)) : Equiv.Perm (Fin (q + 1)) :=
   ((finRotate (q + 1)).symm).trans (Equiv.swap s (Fin.last q))
 
@@ -118,8 +116,8 @@ theorem akInnerPerm_succ {q : ℕ} (s : Fin (q + 1)) (i : Fin q) :
   · have hlast : Fin.castSucc i ≠ Fin.last q := (Fin.castSucc_lt_last i).ne
     simp [akInnerPerm, hrot, Equiv.swap_apply_of_ne_of_ne h hlast, h]
 
-/-- The outer index reindex of the `s`-th `akAct` summand (`contrTail`'s `Fin (2+q)`
-slots into the `Fin (q+1+1)` slots of the stepped array). -/
+
+
 def akSlotEquiv {q : ℕ} (s : Fin (q + 1)) : Fin (2 + q) ≃ Fin (q + 1 + 1) :=
   (finCongr (show 2 + q = q + 1 + 1 by omega)).trans (frontExtendEquiv (akInnerPerm s))
 
@@ -144,9 +142,10 @@ theorem akSlotEquiv_natAdd {q : ℕ} (s : Fin (q + 1)) (i : Fin q) :
     Fin.ext (by simp)
   rw [akSlotEquiv, Equiv.trans_apply, h, frontExtendEquiv_succ, akInnerPerm_succ]
 
-/-- **The `s`-th `akAct` summand is a reindexed `contrTail`**: contracting `A`'s upper
-slot against `B`'s `s`-th slot equals the natural last-slot contraction against the
-`swap s last`-reindexed `B`, with the free slots reindexed by `akSlotEquiv`. -/
+
+
+
+omit [DecidableEq Idx] in
 theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
     (B : (Fin (q + 1) → Idx) → Real) (s : Fin (q + 1)) (n : Fin (q + 1 + 1) → Idx) :
     (∑ p : Idx, A ![n 0, Fin.tail n s, p] * B (Function.update (Fin.tail n) s p)) =
@@ -156,26 +155,24 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
   rw [contrTail_apply]
   refine Finset.sum_congr rfl fun c _ => ?_
   congr 1
-  · -- the A-factor arguments agree
-    congr 1
+  · congr 1
     funext m
     refine Fin.lastCases ?_ (fun m' => ?_) m
     · rw [Fin.snoc_last]
       rfl
     · rw [Fin.snoc_castSucc]
       refine Fin.cases ?_ (fun m'' => ?_) m'
-      · show (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 0 =
+      · change (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 0 =
           n (akSlotEquiv s (Fin.castAdd q (0 : Fin 2)))
         rw [akSlotEquiv_castAdd0]
         rfl
       · have hm : m'' = 0 := Subsingleton.elim _ _
         subst hm
-        show (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 1 =
+        change (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 1 =
           n (akSlotEquiv s (Fin.castAdd q (1 : Fin 2)))
         rw [akSlotEquiv_castAdd1]
         rfl
-  · -- the B-factor arguments agree
-    congr 1
+  · congr 1
     funext j
     rcases eq_or_ne j s with rfl | hjs
     · rw [Function.update_self, Equiv.swap_apply_left, Fin.snoc_last]
@@ -196,8 +193,10 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
           rfl
         · exact absurd rfl hs
 
-/-! ## Finite-sum tower and norm lemmas -/
 
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (F : ι → M → Real)
     (hF : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (F i) u) :
@@ -214,8 +213,10 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     exact (hF a (Finset.mem_insert_self a s)).add
       (ih fun i hi => hF i (Finset.mem_insert_of_mem hi))
 
-/-- The component tower of a finite sum of (smooth) fields is the sum of the towers
-(`iterCovComp_add` iterated over the finset). -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -254,7 +255,8 @@ theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
       ih (fun i hi => hF i (Finset.mem_insert_of_mem hi)) y hy n,
       Finset.sum_insert hbs]
 
-/-- Triangle inequality for finite sums of component arrays. -/
+
+omit [DecidableEq Idx] in
 theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
     (F : ι → (Fin r → Idx) → Real) :
     compL2 (fun n => ∑ i ∈ t, F i n) ≤ ∑ i ∈ t, compL2 (F i) := by
@@ -270,12 +272,14 @@ theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
     exact le_trans (compL2_add_le (F b) (fun n => ∑ i ∈ s, F i n))
       (add_le_add le_rfl ih)
 
-/-! ## The m-fold norm bound for the conversion term (`P(m)` reused) -/
 
-/-- **The m-fold bound for the conversion action**: `|∇^a(akAct A B)|` obeys the same
-binomial bound as the natural contraction, slot-multiplied — each of the `q+1` slot
-summands is a reindexed `contrTail` (`akActTerm_eq`), so `P(m)`
-(`compL2_iterCovComp_contrTail_le`) applies verbatim after the reindex norm-invariances. -/
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -291,7 +295,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
         compL2 (iterCovCompU (I := I) frame chr A c y) *
         compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
   classical
-  -- the base field as a finite sum of reindexed contrTails
   have hbase : (fun z => akAct (A z) (B z)) =
       fun z (n : Fin (q + 1 + 1) → Idx) => ∑ s : Fin (q + 1),
         contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
@@ -299,7 +302,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     funext z n
     unfold akAct
     exact Finset.sum_congr rfl fun s _ => akActTerm_eq (A z) (B z) s n
-  -- smoothness of each slot summand
   have hFsm : ∀ s : Fin (q + 1), ∀ k : Fin (q + 1 + 1) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun z => contrTail (A z)
@@ -308,7 +310,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     fun s k => contMDiffOn_contrTail _ _ hA
       (fun k' => hB (fun j => k' (Equiv.swap s (Fin.last q) j))) _
   rw [hbase]
-  -- tower of the finite sum, then triangle
   have htower := iterCovComp_sum hu frame chr Finset.univ
     (fun (s : Fin (q + 1)) (z : M) (n : Fin (q + 1 + 1) → Idx) =>
       contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
@@ -333,7 +334,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
           compL2 (iterCovCompU (I := I) frame chr A c y) *
           compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
         refine Finset.sum_le_sum fun s _ => ?_
-        -- kill the outer reindex, apply `P(a)`, kill the inner reindex
         rw [compL2_iterCovComp_compReindex (akSlotEquiv s) frame chr
           (fun z => contrTail (A z)
             (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))) a y]
@@ -350,11 +350,14 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
         push_cast
         ring
 
-/-! ## The field-level conversion -/
 
-/-- **The field-level one-step conversion** (pointwise, no smoothness needed): the first
-`chrR`-tower step of a field equals the first `chrK`-step plus the action of the
-pointwise Christoffel-difference array. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem iterCov_chr_convert {q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrR chrK : M → Idx → Idx → Idx → Real)
@@ -365,17 +368,19 @@ theorem iterCov_chr_convert {q : ℕ}
   simp only [iterCovComp_succ, iterCovComp_zero]
   exact covStep_chr_convert _ _ _ _ n
 
-/-! ## Claim 2: the mixed-derivative bound -/
 
-/-- **Claim 2 (core, mixed derivatives)**: on the smooth frame domain, if the `∇_U`-towers
-of the Christoffel-difference array are bounded up to order `L − 1` (the Claim-1 output),
-then any field `B` whose `chrK`-towers are bounded up to order `a ≤ L` has bounded
-`chrR`-towers up to order `a` — `|∇_ref^a B| ≤ C(a, …)`.  Strong induction on `a`,
-universally quantified over `(Q, B, S)` (the recursion changes the field): bottom shift +
-the one-step conversion (`iterCov_chr_convert`) + tower linearity split the top derivative
-into the `chrK`-stepped instance (`S` shifted, via the `chrK`-norm shift) plus the
-conversion term, whose `a`-fold tower obeys the `P(m)`-corollary `compL2_akAct_le` with
-lower-order instances of the induction. -/
+
+
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem claim2core {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrR chrK : M → Idx → Idx → Idx → Real)
@@ -406,7 +411,6 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
       rw [iterCovComp_zero] at h ⊢
       exact le_trans h (le_max_left _ _)
     | succ a' =>
-      -- smoothness of the pieces
       have hakSm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
           (fun y => chrK y (k 0) (k 1) (k 2) - chrR y (k 0) (k 1) (k 2)) u :=
         fun k => (hchrK (k 0) (k 1) (k 2)).sub (hchrR (k 0) (k 1) (k 2))
@@ -431,7 +435,6 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
         exact contMDiffOn_finsetSum' _ _ fun s _ =>
           contMDiffOn_finsetSum' _ _ fun p _ =>
             (hakSm ![k 0, Fin.tail k s, p]).mul (hB _)
-      -- (i) the `chrK`-stepped instance of the induction
       have hKt' : ∀ j, j ≤ a' → ∀ y ∈ u,
           compL2 (iterCovComp (I := I) frame chrK
             (fun z => iterCovComp (I := I) frame chrK B 1 z) j y) ≤ S (j + 1) := by
@@ -440,12 +443,10 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
         exact hKt (j + 1) (by omega) y hy
       obtain ⟨C1, hC10, hC1⟩ := ih a' (Nat.lt_succ_self a') (by omega)
         (fun z => iterCovComp (I := I) frame chrK B 1 z) hB'sm (fun j => S (j + 1)) hKt'
-      -- (ii) the lower-order instances on `B`
       have hmixc : ∀ c, c ≤ a' → ∃ C, 0 ≤ C ∧ ∀ y ∈ u,
           compL2 (iterCovComp (I := I) frame chrR B (a' - c) y) ≤ C :=
         fun c hc => ih (a' - c) (by omega) (by omega) B hB S (fun j hj => hKt j (by omega))
       choose! Cm hCm0 hCmB using hmixc
-      -- assemble the constant
       have hsumnn : (0 : ℝ) ≤ ∑ c ∈ Finset.range (a' + 1),
           (a'.choose c : ℝ) * CA c * Cm c :=
         Finset.sum_nonneg fun c hc =>
@@ -507,15 +508,17 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
                   mul_le_mul_of_nonneg_left h2
                     (mul_nonneg (Nat.cast_nonneg _) (hCA0 c))
 
-/-! ## Claim 2, geometric form -/
+
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Claim 2, geometric form**: on a tangent-trivialization domain, if the gRef-tower of
-`g_K` is bounded up to order `L` and the inverse-array norm is bounded, then any component
-field `B` whose `g_K`-Christoffel towers are bounded up to order `a ≤ L` has a bounded
-gRef-Christoffel tower of order `a`.  Instantiates `claim2core` with the two Levi-Civita
-Christoffels in the frame; the `A_k`-tower bounds come from `claim1_geom`
-(`|∇_U^c A_k| ≤ C_c(1+|∇^{c+1}g_K|) ≤ C_c(1+K)`). -/
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem claim2_geom
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -559,7 +562,6 @@ theorem claim2_geom
     fun d i j => lcChrist_e_mdiffOn e₀ gRef basisE d i j
   have hchrKsm : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrKf y d i j) e₀.baseSet :=
     fun d i j => lcChrist_e_mdiffOn e₀ gK basisE d i j
-  -- the `A_k`-tower constant bounds from `claim1_geom`
   have hCAex : ∀ c, c < L → ∃ Cc, 0 ≤ Cc ∧ ∀ y ∈ e₀.baseSet,
       compL2 (iterCovCompU (I := I) frame chrRf
         (fun z (m : Fin (2 + 1) → Idx) =>

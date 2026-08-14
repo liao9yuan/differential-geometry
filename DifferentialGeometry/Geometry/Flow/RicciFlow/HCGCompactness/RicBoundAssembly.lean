@@ -2,21 +2,19 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# ric_bound assembly: from the component `(A_N)` bound to the intrinsic norm bound
 
-This file lifts the per-frame component `(A_N)` bound (`aN_component`,
-`RicBoundClaims.lean`) to the intrinsic `gRef`-norm form needed by the
-`ric_bound` endpoint, using the `B5` component↔intrinsic bridge
-`compL2_tower_eq` (`Claim1Wiring.lean`) at a `gRef`-orthonormal frame point.
 
-* **`tower_bound_to_intrinsic`** (R4b): the pure `B5`-lift — a component-tower
-  inequality between two bundled `(0,2)` fields converts, at a `gRef`-ON point,
-  into the corresponding `√normSq0S` inequality of their `iterCov` towers.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,17 +32,20 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- **R4b — the `B5` lift.**  If the order-`N` `gRef`-frame component towers of
-two bundled `(0,2)` fields `T`, `T'` satisfy a linear inequality at a point `y`
-where the frame is `gRef`-orthonormal (`hinv`), then their intrinsic
-`√normSq0S` towers satisfy the same inequality.  Both sides are rewritten by
-`compL2_tower_eq` (`B5`). -/
+
+
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem tower_bound_to_intrinsic
     (gRef : SmoothRiemannianMetric I M)
     (T T' : Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -72,18 +73,22 @@ theorem tower_bound_to_intrinsic
     ← compL2_tower_eq (I := I) gRef T' frame hframe hu hy hinv N]
   exact hbound
 
-/-- **R4c — the per-frame-point intrinsic `(A_N)` bound.**  On a smooth local
-frame domain `u` that is `gRef`-orthonormal at a point `y` (`hinvON`), with the
-`claim1_LC` geometric inputs (frame smoothness, the two LC frame Christoffels'
-smoothness, the metric-component smoothness, the `g`-inverse data `Ginv`/`hinv`/
-`hGinv`), the lower-order metric-derivative bounds `|∇_H^j g| ≤ Kg` for
-`1 ≤ j ≤ N − 1` (`hgB`, the `(B_r)` inputs), and the moving Shi bounds on the
-Ricci component tower up to order `N` (`hShi`), the intrinsic `gRef`-norm of the
-order-`N` `gRef`-derivative of `Ric(g)` is bounded linearly by that of the
-metric:
-`√normSq0S gRef (∇_gRef^N Ric(g)) ≤ Cpp·√normSq0S gRef (∇_gRef^N g) + Cppp` at `y`.
-Chain: `claim1_LC` (totalized lower bounds + the top bound) → `aN_component`
-(the component `(A_N)`) → `tower_bound_to_intrinsic` (the `B5` lift at `y`). -/
+
+
+
+
+
+
+
+
+
+
+
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem aN_intrinsic_point
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
@@ -140,7 +145,6 @@ theorem aN_intrinsic_point
         Cpp * Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (2 + N)
           (iterCov (I := I) gRef 2 (metricTensorField (I := I) g) N y)) + Cppp := by
   classical
-  -- totalize the lower-order difference-tower constants from `claim1_LC`
   have hBd : ∀ c : ℕ, ∃ Bc, 0 ≤ Bc ∧ (c < N - 1 → ∀ z ∈ u,
       compL2 (iterCovCompU (I := I) frame
         (fun y' => christoffelSymbolInFrame
@@ -152,11 +156,13 @@ theorem aN_intrinsic_point
             (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')) c z) ≤ Bc) := by
     intro c
     by_cases hc : c < N - 1
-    · obtain ⟨C, hC0, hCb⟩ := claim1_LC hu g gRef frame hframe hframeS hchrG hchrH hgsm Ginv hinv
-        C0 Kg hGinv c (fun x hx j h1 h2 => hgB x hx j h1 (by omega))
+    · obtain ⟨C, hC0, hCb⟩ := claim1_LC hu gRef frame hframe hframeS hchrH
+        C0 Kg c
+      have hCb' := hCb g hchrG hgsm Ginv hinv hGinv
+        (fun x hx j h1 h2 => hgB x hx j h1 (by omega))
       refine ⟨C * (1 + Kg), mul_nonneg hC0 (by linarith), fun _ z hz => ?_⟩
       have hg := hgB z hz (c + 1) (by omega) (by omega)
-      have hcb := hCb z hz
+      have hcb := hCb' z hz
       have hgnn := compL2_nonneg (iterCovComp (I := I) frame
         (fun y' => christoffelSymbolInFrame
           (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')
@@ -164,9 +170,10 @@ theorem aN_intrinsic_point
       nlinarith [hC0, hg, hcb, hgnn]
     · exact ⟨0, le_rfl, fun h => absurd h hc⟩
   choose B hB0 hBb using hBd
-  -- the top difference-tower bound from `claim1_LC` at `m = N - 1`
-  obtain ⟨Ctop, hCtop0, htop⟩ := claim1_LC hu g gRef frame hframe hframeS hchrG hchrH hgsm Ginv hinv
-    C0 Kg hGinv (N - 1) (fun x hx j h1 h2 => hgB x hx j h1 h2)
+  obtain ⟨Ctop, hCtop0, htopGen⟩ := claim1_LC hu gRef frame hframe hframeS hchrH
+    C0 Kg (N - 1)
+  have htop := htopGen g hchrG hgsm Ginv hinv hGinv
+    (fun x hx j h1 h2 => hgB x hx j h1 h2)
   have hDtop : ∀ x ∈ u,
       compL2 (iterCovCompU (I := I) frame
         (fun y' => christoffelSymbolInFrame
@@ -183,21 +190,22 @@ theorem aN_intrinsic_point
     intro x hx
     have h := htop x hx
     rwa [show N - 1 + 1 = N from by omega] at h
-  -- the per-frame component `(A_N)` bound
-  obtain ⟨Cpp, Cppp, hpp0, hppp0, hcomp⟩ := aN_component hu frame
-    (fun y' => christoffelSymbolInFrame
-      (leviCivitaConnectionOfMetric (I := I) g) frame hframe y')
+  obtain ⟨Cpp, Cppp, hpp0, hppp0, hcompGen⟩ := aN_component (r₀ := 2) (rg := 2)
+    hu frame
     (fun y' => christoffelSymbolInFrame
       (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')
-    hframeS hchrG hchrH
+    hframeS hchrH N hN B hB0 Ctop hCtop0 KShi hKShi0
+  have hcomp := hcompGen
+    (fun y' => christoffelSymbolInFrame
+      (leviCivitaConnectionOfMetric (I := I) g) frame hframe y')
+    hchrG
     (frameComp0S (I := I)
       (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
         (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
         (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) (M := M) g))
       frame)
-    hRicSm N hN B hB0 (fun c hc z hz => hBb c hc z hz)
-    (frameComp0S (I := I) (metricTensorField (I := I) g) frame) Ctop hCtop0 hDtop
-    KShi hKShi0 hShi
+    hRicSm (fun c hc z hz => hBb c hc z hz)
+    (frameComp0S (I := I) (metricTensorField (I := I) g) frame) hDtop hShi
   exact ⟨Cpp, Cppp, hpp0, hppp0,
     tower_bound_to_intrinsic gRef
       (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection

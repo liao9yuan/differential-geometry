@@ -47,18 +47,14 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Pointwise tensor coordinates from a tangent basis
 
-This file is the metric-free coordinate core for realized tensor fibers.  The
-primitive algebraic object is a pointwise `Module.Basis` of one tangent fiber;
-local-frame coordinates should pass through `IsLocalFrameOn.toBasisAt`.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -90,6 +86,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {s : Nat} {x : M}
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem tensor0S_sum_apply {ι : Type*} [Fintype ι]
     (T : ι -> Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
     ((∑ i : ι, T i) v) = ∑ i : ι, (T i) v := by
@@ -118,8 +115,9 @@ theorem basisTensor0S_apply
   rw [continuousMultilinearMapBasis_apply]
   simp [continuousMultilinearMapBasisElem]
 
-/-- Expanding a covariant tensor in a tangent basis gives the usual component
-contraction formula. -/
+
+
+omit [DecidableEq Idx] in
 theorem tensor0S_apply_eq_sum
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (A : Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
@@ -127,6 +125,7 @@ theorem tensor0S_apply_eq_sum
       ∑ slots : Fin s -> Idx,
         component0S (I := I) basis A slots *
           ∏ a : Fin s, basis.coord (slots a) (v a) := by
+  classical
   conv_lhs => rw [← (tensor0SBasis (I := I) basis s).sum_repr A]
   rw [tensor0S_sum_apply]
   refine Finset.sum_congr rfl ?_

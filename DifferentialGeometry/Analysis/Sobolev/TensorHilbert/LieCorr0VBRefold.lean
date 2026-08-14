@@ -1,5 +1,6 @@
-import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTower
 
 /-!
 # Low-regularity normal form for the `lc0VB` correction
@@ -82,8 +83,15 @@ theorem wOmega_refold (g₀ g₁ : SmoothRiemannianMetric I M) :
         (lc0TraceRF (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _))
         (connDiffLoweredCc (I := I) g₀ g₁) := by
   unfold wOmega
-  rw [wXi_self_eq, ← appCcRS_zero_eq_appCc]
-  exact trace_app_refold (I := I) (M := M) g₀ g₁ _
+  rw [wXi_self_eq]
+  calc
+    appCc (I := I) (M := M) g₀ 3 1
+        (cometricCastG0 (I := I) g₀ g₁) (connDiffLoweredCc (I := I) g₀ g₁) =
+      appCcRS (I := I) (M := M) g₀ 0 3 1
+        (cometricCastG0 (I := I) g₀ g₁) (connDiffLoweredCc (I := I) g₀ g₁) :=
+      (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1
+        (cometricCastG0 (I := I) g₀ g₁) (connDiffLoweredCc (I := I) g₀ g₁)).symm
+    _ = _ := trace_app_refold (I := I) (M := M) g₀ g₁ _
 
 /-- Changing the fixed DeTurck background cancels the common moving
 connection difference before the moving trace is estimated. -/
@@ -95,16 +103,42 @@ theorem wOmega_sub_refold (g₀ g₁ gA gB : SmoothRiemannianMetric I M) :
         (connDiffLoweredCc (I := I) g₀ gB -
           connDiffLoweredCc (I := I) g₀ gA) := by
   unfold wOmega
-  rw [← appCcRS_zero_eq_appCc, ← appCcRS_zero_eq_appCc,
-    ← appCcRS_sub_right]
-  rw [show
+  have hXi :
     wXi (I := I) (M := M) g₀ g₁ gA -
         wXi (I := I) (M := M) g₀ g₁ gB =
       connDiffLoweredCc (I := I) g₀ gB -
-        connDiffLoweredCc (I := I) g₀ gA by
+        connDiffLoweredCc (I := I) g₀ gA := by
     unfold wXi
-    abel]
-  exact trace_app_refold (I := I) (M := M) g₀ g₁ _
+    abel
+  calc
+    appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
+          (wXi (I := I) (M := M) g₀ g₁ gA) -
+        appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
+          (wXi (I := I) (M := M) g₀ g₁ gB) =
+      appCcRS (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
+          (wXi (I := I) (M := M) g₀ g₁ gA) -
+        appCcRS (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
+          (wXi (I := I) (M := M) g₀ g₁ gB) :=
+      congrArg₂ (· - ·)
+        (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1
+          (cometricCastG0 (I := I) g₀ g₁)
+          (wXi (I := I) (M := M) g₀ g₁ gA)).symm
+        (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1
+          (cometricCastG0 (I := I) g₀ g₁)
+          (wXi (I := I) (M := M) g₀ g₁ gB)).symm
+    _ = appCcRS (I := I) (M := M) g₀ 0 3 1
+        (cometricCastG0 (I := I) g₀ g₁)
+        (wXi (I := I) (M := M) g₀ g₁ gA -
+          wXi (I := I) (M := M) g₀ g₁ gB) :=
+      (appCcRS_sub_right (I := I) (M := M) g₀ 0 3 1
+        (cometricCastG0 (I := I) g₀ g₁)
+        (wXi (I := I) (M := M) g₀ g₁ gA)
+        (wXi (I := I) (M := M) g₀ g₁ gB)).symm
+    _ = appCcRS (I := I) (M := M) g₀ 0 3 1
+        (cometricCastG0 (I := I) g₀ g₁)
+        (connDiffLoweredCc (I := I) g₀ gB -
+          connDiffLoweredCc (I := I) g₀ gA) := congrArg _ hXi
+    _ = _ := trace_app_refold (I := I) (M := M) g₀ g₁ _
 
 /-- The nested RicciFlower operator form of the vector--bilinear correction. -/
 noncomputable def lc0VBFormRF (g₀ g₁ : SmoothRiemannianMetric I M) :

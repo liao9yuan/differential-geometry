@@ -47,11 +47,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Chart-reading of the bare manifold velocity.**  The forward analogue of
-`IsMIntegralCurveOn.hasDerivWithinAt` for the time-dependent bare velocity: a curve `γ` whose value
-at `t` lies in the chart source and whose bare manifold derivative within `s` is
-`(1).smulRight (X t (γ t))` reads, in the chart at `α`, as a chart-coordinate `HasDerivWithinAt`
-with the change-of-coordinates velocity `tangentCoordChange I (γ t) α (γ t) (X t (γ t))`. -/
 private theorem bareVel_to_chartDeriv
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (γ : ℝ → M) (s : Set ℝ) (t : ℝ)
     (hsrc : γ t ∈ (chartAt H α).source)
@@ -71,15 +66,9 @@ private theorem bareVel_to_chartDeriv
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
-/-- **A-priori confinement of a bare-velocity orbit to the basepoint chart and validity ball.**
-A curve `γ` continuous within `Ici 0` at `0` with `γ 0 = α` stays, on a short initial interval
-`Icc 0 δ'`, inside the chart source and with its chart coordinate in the open ball `ball x₀ a`
-around `x₀ = extChartAt I α α`.  Pure continuity through the centre: the open set
-`source ∩ extChartAt ⁻¹' (ball x₀ a)` contains `α` and so its `γ`-preimage is a one-sided
-neighbourhood of `0`. -/
 private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : ℝ → M)
     (hγ0 : γ 0 = α)
-    (hcw : ContinuousWithinAt γ (Set.Ici (0:ℝ)) 0) :
+    (hcw : ContinuousWithinAt γ (Set.Ici (0 : ℝ)) 0) :
     ∃ δ' : ℝ, 0 < δ' ∧ ∀ t ∈ Set.Icc (0:ℝ) δ',
       γ t ∈ (extChartAt I α).source ∧
         extChartAt I α (γ t) ∈ Metric.ball (extChartAt I α α) a := by
@@ -104,6 +93,8 @@ private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : 
   have hmem : γ t ∈ U := hW_sub ⟨hε_sub htball, ht.1⟩
   exact ⟨hmem.1, hmem.2⟩
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] in
 /-- **From-`0` bare-flow uniqueness from an explicit chart-field Lipschitz datum.**  The core
 uniqueness step.  Given, at the basepoint `α`, a chart ball `closedBall x₀ a` on which the
 trivialised chart field `fromZeroChartField X α t` is `K`-Lipschitz for `t ∈ [0, δ₀]`, two curves

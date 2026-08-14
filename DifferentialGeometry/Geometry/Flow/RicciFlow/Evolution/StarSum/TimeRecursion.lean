@@ -2,30 +2,26 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualLe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# `TimeRecursion` — Brick 4 Phase P3 (downstream home)
 
-The all-`k` residual time recursion lives here (downstream of `SpatialMember`/`StarRouting`), not
-in `StarSum2.lean` (which is upstream of both).  See `TimeRecursion.md`.
 
-## First producer: the arbitrary-frame Ricci-trace bridge
 
-`ricciCovDeriv_trace_nablaRm` connects the realized `∇Ric` component
-(`ricciCovDerivCompInFrame`, the gamma-correction's `nablaRic`) to a trace of `∇¹Rm`
-(`nablaKRm04Field S t 1`), via `canBianchiCore` (`NablaRicTraceAt` for an arbitrary basis) and the
-`coordNablaReal` realization pattern generalized to an arbitrary **smooth local frame**.
 
-KEY hypothesis note (for the P3 endpoint refreeze): the realization
-`nablaRicComp = ricciCovDerivCompInFrame` is proved by `TotalNabla0SRealizes.eval_C1_slots`, which
-needs the frame to be a **smooth `IsLocalFrameOn` frame** (a `Module.Basis` at a single point — as in
-`residualStarSum_zero` — does NOT suffice).  So the refrozen endpoint must carry a smooth orthonormal
-local frame, with the pointwise basis recovered as `hframe.toBasisAt hx`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,7 +32,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,19 +41,23 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
-/-- **Arbitrary smooth-frame realization of `∇Ric`** (the `coordNablaReal` pattern, generalized
-from `coordinateFrameAt` to any `IsLocalFrameOn` frame).  The canonical `totalNabla0SFun`-component
-`nablaRicComp` equals the explicit covariant-derivative component `ricciCovDerivCompInFrame`.
-Needs only frame **smoothness** (`IsLocalFrameOn`), not a frozen/cov-zero frame: the Christoffel
-corrections are already inside `ricciCovDerivCompInFrame`. -/
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRicReal_frame
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (frame : Idx → (y : M) → TangentSpace I y)
     (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u) (hu : IsOpen u) (hx : x ∈ u)
     (d a b : Idx) :
-    nablaRicComp (I := I) S frame t x d a b = ricciCovDerivCompInFrame (I := I) S frame t x d a b := by
+    nablaRicComp (I := I) S frame t x d a b = ricciCovDerivCompInFrame (I := I) S frame t x d a
+      b := by
   classical
+  letI := Fintype.ofFinite Idx
   have hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection t) (∞ : WithTop ℕ∞) := by
@@ -101,7 +101,8 @@ theorem nablaRicReal_frame
       (h := (derivs.first)) X V x hV_at
   have hcons :
       Fin.cons (X x) (fun q : Fin 2 => V q x) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+          (frame b x) := by
     rw [hX, hslots x]
     funext q
     fin_cases q <;> rfl
@@ -109,7 +110,8 @@ theorem nablaRicReal_frame
   rw [hX] at heval
   have hleft :
       derivs.nablaA x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+            (frame b x)) =
         nablaRicComp (I := I) S frame t x d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection]
   have hfun :
@@ -159,20 +161,22 @@ theorem nablaRicReal_frame
   simpa [ricciCovDerivCompInFrame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-/-- **Ricci-trace bridge** (arbitrary smooth orthonormal local frame).  The realized
-covariant-derivative component of Ricci equals the orthonormal `g`-trace of `∇¹Rm` along the
-diagonal of the frame.
 
-This uses `canBianchiCore` (the arbitrary-basis lowered-Riemann Bianchi/trace producer) together
-with `nablaRicReal_frame` (the `coordNablaReal` realization for a smooth local frame).  The
-`canBianchiCore` `NablaRicTraceAt` convention puts the trace on Riemann slots `1` and `4`, so the
-native diagonal `vec5` order is `(d, e, a, b, e)` — `∇_d Ric_{ab} = ∑_e ∇_d Rm04(e, a, b, e)`.
-(The schematic target in `TimeRecursion.md` wrote `(d, e, a, e, b)`; the two differ by the
-`NablaRmSymm` slot-`3↔4` antisymmetry that `gammaStarU` normalizes downstream.)
 
-Hypotheses: the frame must be a smooth `IsLocalFrameOn` frame (for the realization) whose pointwise
-values at `x` form a `g`-orthonormal `basis` (`hbasis`/`horth`, for the trace collapse). -/
+
+
+
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem ricciCovDeriv_trace_nablaRm
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (frame : Idx → (y : M) → TangentSpace I y)
@@ -186,7 +190,6 @@ theorem ricciCovDeriv_trace_nablaRm
       = ∑ e : Idx, nablaKRm04Field (I := I) S t 1 x
           (vec5 (I := I) (frame d x) (frame e x) (frame a x) (frame b x) (frame e x)) := by
   classical
-  -- δ-collapse of the orthonormal inverse metric to the diagonal sum.
   have hcollapse : ∀ f : Idx → Idx → Real,
       (∑ i : Idx, ∑ j : Idx, identityInvMetric i j * f i j) = ∑ e : Idx, f e e := by
     intro f
@@ -196,7 +199,6 @@ theorem ricciCovDeriv_trace_nablaRm
     · intro j _ hj
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hj h.symm), zero_mul]
     · intro h; exact absurd (Finset.mem_univ i) h
-  -- Gap A: `∇¹Rm` field is the canonical first total covariant derivative of `Rm04`.
   have hk : ∀ e : Idx,
       nablaKRm04Field (I := I) S t 1 x
           (vec5 (I := I) (frame d x) (frame e x) (frame a x) (frame b x) (frame e x))
@@ -205,12 +207,9 @@ theorem ricciCovDeriv_trace_nablaRm
             (vec5 (I := I) (frame d x) (frame e x) (frame a x) (frame b x) (frame e x)) := by
     intro e
     rw [nablaKRm04Field_succ, totalNabla0S_apply, nablaKRm04Field_zero]
-  -- Gap B: realization, then rewrite to the canonical `totalNabla0SFun` Ricci component.
   rw [← nablaRicReal_frame S t frame hframe hu hx d a b, nablaRicComp_apply]
   simp_rw [hk]
-  -- Move both sides into the pointwise `basis` so they match `canBianchiCore`'s output.
   simp only [hbasis]
-  -- `canBianchiCore` trace at the `g`-orthonormal `basis` with the identity inverse metric.
   have hinv :=
     metricInverseInBasis_identity_of_orthonormal (I := I) (S.family.metric t) basis horth
   have heq :=
@@ -222,30 +221,30 @@ theorem ricciCovDeriv_trace_nablaRm
       4 (S.family.connection t) (S.base.rm04 t) x
       (vec5 (I := I) (basis d) (basis i) (basis a) (basis b) (basis j)))
 
-/-! ## P3 endpoint refreeze: the local-frame residual time recursion
 
-`resStarLFU` is the refrozen all-`k` Brick 4 endpoint, living downstream of `SpatialMember`
-(per the planner decision).  Unlike the old `StarSum2.residualStarSum` stub (which quantified a bare
-pointwise `Module.Basis` inside the conclusion), this endpoint uses a **smooth orthonormal local
-frame** `frame` and concludes uniformly for every `y ∈ u`, so the realization
-`ricciCovDeriv_trace_nablaRm` and the time-step producer `iteratedRmComp_hasDerivWithinAt` (both of
-which need a smooth frame field) apply, and the `succ` covariant step has a neighborhood to
-differentiate on.
 
-The component data of the tower is the solution's own frame data: the level-0 Riemann components
-`lfBase = frameComp0S (S.base.rm04 ·) frame` and the Christoffel symbols
-`lfChr = christoffelSymbolInFrame (S.family.connection ·) frame hframe`.  The honest time-side inputs
-are carried explicitly: the `k = 0` evolution `hbase` (exactly `residualStarSum_zero`'s standing
-orthonormal `∂ₜRm04`), and for the all-`k` recursion the three derivative facts `hrm` (`∂ₜRm`),
-`hchr` (`∂ₜΓ`), `hswap` (the per-level spatial-frame/time-derivative swap) consumed by
-`iteratedRmComp_hasDerivWithinAt`, together with their derivative arrays `baseDt`/`chrDt`.
 
-The `k = 0` instance is proved from `residualStarSum_zero`; the all-`k` induction body (the gamma
-producer + realization assembly) is now fully proved (sorry-free). -/
 
-/-- Level-0 Riemann component array of a solution in the local frame `frame` (the tower's `base`).
-Public so downstream consumers (e.g. `TowerHeat.resStarBoundLF`) can state the `resStarLFU`
-time-side hypotheses. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def lfBase
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D)
@@ -253,9 +252,9 @@ def lfBase
     Real → M → (Fin 4 → Idx) → Real :=
   fun s => frameComp0S (I := I) (S.base.rm04 s) frame
 
-/-- Christoffel symbols of a solution in the local frame `frame` (the tower's `chr`).
-Public so downstream consumers (e.g. `TowerHeat.resStarBoundLF`) can state the `resStarLFU`
-time-side hypotheses. -/
+
+
+
 def lfChr
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D)
@@ -265,12 +264,16 @@ def lfChr
   fun s y =>
     christoffelSymbolInFrame (S.family.connection s) frame hframe y
 
-/-- **Orthonormal-basis trace = intrinsic metric trace.**  At a `g`-orthonormal basis (so
-`identityInvMetric` is the inverse-metric component matrix), the basis first-two-slot trace
-`metricTrace0S2TensorInBasis` coincides with the intrinsic `metricTraceFirstTwo0STensor g`.  This is
-the bridge the `succ` assembly needs to reconcile the endpoint's orthonormal-frame `Δ` (built from
-`hframe.toBasisAt hy`) with the intrinsic `Δ` used by `spatialCommStarSum` and the realizer field. -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem traceOrthoEq
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
@@ -284,9 +287,8 @@ private theorem traceOrthoEq
     (metricInverseInBasis_identity_of_orthonormal (I := I) g basis horth) T tail
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- Constructor-tree cost of the Christoffel-time correction: three sums of
-`4+k` double-trace base terms in dimension three. -/
+
+
 def gammaStarCost (k : ℕ) : Real :=
   9 * (12 + 3 * k)
 
@@ -306,10 +308,11 @@ def gammaStarField
     ∑ q : Fin (4 + k),
       starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic3 k q)
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Exact constructor cost of the canonical Christoffel-time correction. -/
 theorem gammaStarField_cost
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
+    {Idx : Type*} [Fintype Idx] :
     StarSum2Cost (I := I) Idx S t (k + 1)
       (gammaStarField (I := I) S t k)
       (rmGammaCost (Fintype.card Idx) k) := by
@@ -350,6 +353,7 @@ theorem gammaStarField_cost
   push_cast
   ring
 
+omit [FiniteDimensional Real E] in
 /-- **The gamma correction is a `StarSum2` element, UNIFORMLY on `u`.**  ONE global witness `Tgamma`,
 with the component equality holding for every `y ∈ u` — the shape the `resStarLFU` succ assembly
 needs (`spatialCommStarSum` is already `∀x`; a fixed-`x` `∃` would give a per-`y` witness that could
@@ -360,6 +364,7 @@ with the center fixed only inside the per-`y` component proof (basis `hframe.toB
 orthonormality from `horthU y hy`).  Its exact arbitrary-index cost is
 `rmGammaCost (Fintype.card Idx) k`. -/
 private theorem gammaStarU
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
@@ -513,8 +518,10 @@ private theorem gammaStarU
     simp only [show Fin.tail I0 s = I0 s.succ from rfl]
     ring
 
-/-- `frameExtData` only reads its field argument near the base point, so eventual equality at `y`
-suffices to rewrite it (mirrors `HCGCompactness.AkMFold`'s `frameExtData_congr_nhds`). -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtGerm {Idx : Type*} {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     {A1 A2 : M → (Fin r → Idx) → Real} {y : M}
@@ -542,7 +549,7 @@ def resStarNext
 theorem resStarNext_cost
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     (Tk : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k))
     (hTk : StarSum2Cost (I := I) Idx S (t : Real) k Tk
@@ -550,6 +557,7 @@ theorem resStarNext_cost
     StarSum2Cost (I := I) Idx S (t : Real) (k + 1)
       (resStarNext (I := I) S t k Tk)
       (rmResidualCost (Fintype.card Idx) (k + 1)) := by
+  classical
   have hcomm := commStarField_cost (I := I) S hS t k (Idx := Idx)
   have hgamma := gammaStarField_cost (I := I) S (t : Real) k (Idx := Idx)
   unfold resStarNext
@@ -557,7 +565,6 @@ theorem resStarNext_cost
   simp only [abs_neg, abs_one, one_mul, rmResidualCost]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 /-- The fixed canonical successor has the exact constructor cost and realizes
 the level-`k+1` component heat equation on every supplied orthonormal frame
 patch. -/
@@ -904,10 +911,9 @@ theorem resStarSucc
     baseDt chrDt hrm hchr hchrId hswap Tk hTk hIH
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-/-- Uniform constructor-tree cost of the canonical residual witness.  The
-successor step combines the two Leibniz daughters, the spatial commutator, and
-the Christoffel-time correction. -/
+
+
+
 def resStarCost : ℕ → Real
   | 0 => 108
   | k + 1 => 2 * resStarCost k + commStarCost 3 k + gammaStarCost k
@@ -927,16 +933,9 @@ private theorem resCost_eq (k : ℕ) :
       rw [ih, gammaCost_eq]
 
 open DifferentialGeometry.Dim3Reaction in
-/-- **Brick 4 Phase P3 endpoint (uniform local-frame).**  For a smooth local frame `frame`
-orthonormal throughout `u`, the heat residual `(∂ₜ − Δ)∇ᵏRm` is a `StarSum2` element, witnessed by
-the per-component time-derivative identity in the frame, **uniformly for every `y ∈ u`**.  The
-uniform conclusion is what the `succ` induction needs: the level-`k` residual must hold on a
-neighborhood so that `iteratedRmCompDt_succ`'s `covDerivStepComp` (a spatial derivative of the
-level-`k` field) can be identified with `∇(Δ∇ᵏRm + …)`.  `k = 0` is proved from
-`residualStarSum_zero`; the all-`k` induction body is fully proved (sorry-free) via the Shi
-single-step assembly (`iteratedRmCompDt_succ` + `covDerivStepComp_frameComp_eq` + `spatialCommStarSum`
-+ `gammaStarU` + `traceOrthoEq`). -/
+omit [Module.Finite ℝ E] in
 theorem resStarLFU
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
     {u : Set M}
@@ -946,8 +945,6 @@ theorem resStarLFU
     (hdim : ∀ y : M, Module.finrank Real (TangentSpace I y) = 3)
     (horthU : ∀ y : M, y ∈ u → ∀ i j : Fin 3,
       (S.base.metric (t : Real)).inner y (frame i y) (frame j y) = if i = j then (1 : Real) else 0)
-    -- k = 0 time-side input: the standing orthonormal `∂ₜRm04` evolution (exactly
-    -- `residualStarSum_zero`'s `hbase`).
     (hbase : ∀ (y : M) (bas : Module.Basis (Fin 3) Real (TangentSpace I y))
         (_horth : ∀ i j : Fin 3,
           (S.base.metric (t : Real)).inner y (bas i) (bas j) = if i = j then (1 : Real) else 0)
@@ -968,8 +965,6 @@ theorem resStarLFU
                 - drift (fun i j => S.ricciAt (t : Real) y (vec2 (I := I) (bas i) (bas j)))
                       (I0 0) (I0 1) (I0 2) (I0 3)))
           D.carrier (t : Real))
-    -- all-k time-side inputs: the derivative arrays and the three facts consumed by
-    -- `iteratedRmComp_hasDerivWithinAt` (at the centre `x`, on `D.carrier`, at `t`).
     (baseDt : Real → M → (Fin 4 → Fin 3) → Real)
     (chrDt : Real → M → Fin 3 → Fin 3 → Fin 3 → Real)
     (hrm : ∀ (y : M), y ∈ u → ∀ m : Fin 4 → Fin 3,
@@ -978,10 +973,6 @@ theorem resStarLFU
     (hchr : ∀ (y : M), y ∈ u → ∀ i a p : Fin 3,
       HasDerivWithinAt (fun s : Real => lfChr (I := I) S frame hframe s y i a p)
         (chrDt (t : Real) y i a p) D.carrier (t : Real))
-    -- The Christoffel time-derivative VALUE (the `∂ₜΓ = -∇Ric - ∇Ric + ∇Ric` evolution), uniform on
-    -- `u`.  `hchr` only says `chrDt` is *a* derivative array; the gamma normalization needs its value,
-    -- which `christoffelEvolution_of_solution` produces only from inverse-metric / metric-frame
-    -- regularity inputs the endpoint does not carry.  Carried here as an honest value equation.
     (hchrId : ∀ (y : M), y ∈ u → ∀ i j p : Fin 3,
       chrDt (t : Real) y i j p =
         - ricciCovDerivCompInFrame (I := I) S frame (t : Real) y i j p
@@ -992,7 +983,8 @@ theorem resStarLFU
         (fun s : Real =>
           extDerivFun (I := I)
             (fun z : M =>
-              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe) (lfBase (I := I) S frame)
+              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
+                (lfBase (I := I) S frame)
                 k' s z m) y (frame d y))
         (extDerivFun (I := I)
           (fun z : M =>
@@ -1015,11 +1007,9 @@ theorem resStarLFU
   classical
   induction k with
   | zero =>
-      -- `residualStarSum_zero`'s body hard-codes the witness `e0Field`, so supply it explicitly.
       refine ⟨e0Field (I := I) S (t : Real), ?_, fun y hy I0 => ?_⟩
       · simpa [resStarCost] using e0Field_cost (I := I) S (t : Real)
       obtain ⟨_, _, hcomp⟩ := residualStarSum_zero (I := I) S t hdim hbase
-      -- Specialize at `y` with the pointwise basis `hframe.toBasisAt hy`, whose values are `frame · y`.
       have horthy : ∀ i j : Fin 3,
           (S.base.metric (t : Real)).inner y ((hframe.toBasisAt hy) i) ((hframe.toBasisAt hy) j)
             = if i = j then (1 : Real) else 0 := by

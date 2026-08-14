@@ -1,38 +1,36 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNormRestrict
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
+import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Spatial continuity of the metric covariant-derivative seminorm
 
-For fixed smooth Riemannian metrics `h`, `gRef` and a fixed order `q`, the
-pointwise seminorm
 
-`z ↦ metricCovDerivNorm q h gRef z = √ ‖∇^q h‖²_{gRef}(z)`
 
-is a continuous function of the base point `z`.
 
-The proof is local.  Near a base point `z₀`, we pick the smooth
-`gRef`-orthonormal frame `smoothOrthoFrame gRef z₀`
-(`Geometry/Curvature/CurvatureOperator/RicciIdentitySmoothFrame.lean`).  On the
-open neighbourhood `smoothOrthoFrameNbhd z₀` the frame is `gRef`-orthonormal, so
-the frame-independent squared norm `normSq0S gRef z (q + 2) (∇^q h z)` equals the
-finite sum of the squares of the frame components
-(`normSq0S_identity_eq_sum_sq`).  Each frame component
-`z ↦ (∇^q h z) (fun a => frame (slots a) z)` is smooth as a scalar function,
-because `metricCovDeriv h gRef q` is a smooth `(0, q + 2)` tensor field and the
-frame vectors are smooth tangent sections
-(`tensor0SField_eval_smooth_slots_contMDiffAt`).  A finite sum of squares of
-continuous functions is continuous, and `Real.sqrt` is continuous, giving
-`ContinuousAt` at every `z₀`, hence `Continuous`.
 
-The corollary `metricCovDerivNorm_bddAbove_of_isCompact` records the
-compact-set boundedness used by the Arzelà–Ascoli endpoint `windowGInfAll`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -43,15 +41,15 @@ open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M]
 
-/-- The smooth `gRef`-orthonormal frame at `z₀`, evaluated at a point `y` of its
-orthonormality neighbourhood, packaged as a `Module.Basis` of `T_yM`. -/
+
+
 private noncomputable def orthoFrameBasis
     (gRef : SmoothRiemannianMetric I M) (z₀ : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) z₀) :
@@ -81,6 +79,7 @@ private noncomputable def orthoFrameBasis
         exact absurd (Finset.mem_univ b) hb)
     (by rw [Fintype.card_fin]; rfl)
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp]
 private lemma orthoFrameBasis_apply
     (gRef : SmoothRiemannianMetric I M) (z₀ : M) {y : M}
@@ -91,8 +90,8 @@ private lemma orthoFrameBasis_apply
   unfold orthoFrameBasis
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-/-- The `i`-th component of the smooth `gRef`-orthonormal frame at `z₀`, bundled
-as a smooth tangent-bundle section. -/
+
+
 private noncomputable def orthoFrameSection
     (gRef : SmoothRiemannianMetric I M) (z₀ : M)
     (i : Fin (Module.finrank Real E)) :
@@ -100,6 +99,7 @@ private noncomputable def orthoFrameSection
   ContMDiffSection.mk (smoothOrthoFrame (I := I) gRef z₀ i)
     (smoothOrthoFrame_smooth (I := I) gRef z₀ i)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp]
 private lemma orthoFrameSection_apply
     (gRef : SmoothRiemannianMetric I M) (z₀ : M)
@@ -107,8 +107,10 @@ private lemma orthoFrameSection_apply
     orthoFrameSection (I := I) gRef z₀ i y = smoothOrthoFrame (I := I) gRef z₀ i y :=
   rfl
 
-/-- On the orthonormality neighbourhood of `z₀`, the seminorm `metricCovDerivNorm`
-is the square root of the finite sum of squared frame components. -/
+
+
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma metricCovDerivNorm_eq_sum_sq_on_nbhd
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) (z₀ : M) {z : M}
     (hz : z ∈ smoothOrthoFrameNbhd (I := I) (M := M) z₀) :
@@ -146,25 +148,23 @@ private lemma metricCovDerivNorm_eq_sum_sq_on_nbhd
   funext a
   rw [orthoFrameBasis_apply]
 
-/-- **Continuity of the metric covariant-derivative seminorm** at a base point.
-The map `z ↦ metricCovDerivNorm q h gRef z` is continuous at every `z₀`. -/
+
+
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_continuousAt
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) (z₀ : M) :
     ContinuousAt (fun z : M => metricCovDerivNorm (I := I) q h gRef z) z₀ := by
   classical
-  -- On the open orthonormality neighbourhood of `z₀`, `metricCovDerivNorm`
-  -- equals `√ (∑ slots (frame component)²)`, a continuous function.
   have hnbhd : smoothOrthoFrameNbhd (I := I) (M := M) z₀ ∈ nhds z₀ :=
     smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) z₀
   have hz₀ : z₀ ∈ smoothOrthoFrameNbhd (I := I) (M := M) z₀ :=
     mem_smoothOrthoFrameNbhd_self (I := I) (M := M) z₀
-  -- the "sum of squares" function
   set g : M -> Real := fun z =>
     Real.sqrt (∑ slots : Fin (q + 2) -> Fin (Module.finrank Real E),
       (metricCovDeriv (I := I) h gRef q z
           (fun a : Fin (q + 2) =>
             smoothOrthoFrame (I := I) gRef z₀ (slots a) z)) ^ 2) with hg_def
-  -- each frame component is smooth (hence continuous)
   have hcomp_cont : ∀ slots : Fin (q + 2) -> Fin (Module.finrank Real E),
       Continuous (fun z : M =>
         metricCovDeriv (I := I) h gRef q z
@@ -184,7 +184,6 @@ theorem metricCovDerivNorm_continuousAt
           (fun a : Fin (q + 2) => smoothOrthoFrame (I := I) gRef z₀ (slots a) z)) :=
       fun z => hsmooth z
     exact this.continuous
-  -- the sum of squares is continuous
   have hsum_cont : Continuous (fun z : M =>
       ∑ slots : Fin (q + 2) -> Fin (Module.finrank Real E),
         (metricCovDeriv (I := I) h gRef q z
@@ -193,32 +192,37 @@ theorem metricCovDerivNorm_continuousAt
     continuous_finset_sum _ (fun slots _ => (hcomp_cont slots).pow 2)
   have hg_cont : Continuous g := by
     rw [hg_def]; exact Real.continuous_sqrt.comp hsum_cont
-  -- `metricCovDerivNorm = g` on the neighbourhood
   have heq : (fun z : M => metricCovDerivNorm (I := I) q h gRef z) =ᶠ[nhds z₀] g := by
     filter_upwards [hnbhd] with z hz
     exact metricCovDerivNorm_eq_sum_sq_on_nbhd (I := I) q h gRef z₀ hz
   exact (hg_cont.continuousAt).congr heq.symm
 
-/-- **Continuity of the metric covariant-derivative seminorm.**
-For fixed metrics `h`, `gRef` and a fixed order `q`, the pointwise seminorm
-`z ↦ metricCovDerivNorm q h gRef z` is continuous on `M`. -/
+
+
+
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_continuous
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) :
     Continuous (fun z : M => metricCovDerivNorm (I := I) q h gRef z) :=
   continuous_iff_continuousAt.mpr
     (fun z₀ => metricCovDerivNorm_continuousAt (I := I) q h gRef z₀)
 
-/-- **Compact boundedness of the metric covariant-derivative seminorm.**
-On a compact set `K`, the seminorm `z ↦ metricCovDerivNorm q h gRef z` is bounded
-above.  This is the input consumed by the Arzelà–Ascoli endpoint `windowGInfAll`
-for the finitely many head/mid indices of a bump-extended sequence. -/
+
+
+
+
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_bddAbove_of_isCompact
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) {K : Set M} (hK : IsCompact K) :
     BddAbove ((fun z : M => metricCovDerivNorm (I := I) q h gRef z) '' K) :=
   (hK.image (metricCovDerivNorm_continuous (I := I) q h gRef)).bddAbove
 
-/-- The seminorm attains a uniform bound on a compact set: there is a constant
-`C` with `metricCovDerivNorm q h gRef z ≤ C` for all `z ∈ K`. -/
+
+
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_le_of_isCompact
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) {K : Set M} (hK : IsCompact K) :
     ∃ C : Real, ∀ z : M, z ∈ K -> metricCovDerivNorm (I := I) q h gRef z <= C := by
@@ -226,18 +230,20 @@ theorem metricCovDerivNorm_le_of_isCompact
   refine ⟨C, fun z hz => ?_⟩
   exact hC ⟨z, hz, rfl⟩
 
-/-! ### Locality of `metricCovDerivNorm` under agreement on an open set
 
-The seminorm `metricCovDerivNorm q · gRef` at a point `z` only depends on the
-germ of the metric near `z`.  Two metrics that agree on an open set `U` (as
-`inner` forms) have equal `metricCovDerivNorm` at every `z ∈ U`.  This is what
-lets a bump-extended metric inherit the covariant-derivative bounds of the
-source metric on the region where the bump equals `1`.
--/
 
-/-- Two smooth Riemannian metrics with the same `inner` form are equal.  The
-non-`inner` fields of `ContMDiffRiemannianMetric` are propositions, so equality
-of `inner` forces equality of the whole structure. -/
+
+
+
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem smoothRiemannianMetric_eq_of_inner
     {h₁ h₂ : SmoothRiemannianMetric I M}
     (hinner : (fun x => h₁.inner x) = fun x => h₂.inner x) :
@@ -248,8 +254,10 @@ theorem smoothRiemannianMetric_eq_of_inner
   subst this
   rfl
 
-/-- Restrictions to an open subtype agree whenever the ambient metrics agree, as
-`inner` forms, on that subtype. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem restrictOpen_eq_of_eqOn
     (h₁ h₂ : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -262,9 +270,11 @@ theorem restrictOpen_eq_of_eqOn
   rw [SmoothRiemannianMetric.restrictOpen_inner, SmoothRiemannianMetric.restrictOpen_inner]
   exact hUeq (x : M) x.2 v w
 
-/-- **Locality of the metric covariant-derivative tower.**  If two metrics agree
-(as `inner` forms) on an open set `U`, then their fixed-background covariant
-derivatives agree at every point of `U`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_eq_of_eqOn
     (h₁ h₂ gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -362,9 +372,11 @@ theorem metricCovDeriv_eq_of_eqOn
       rw [hslots]
       exact hsmooth
 
-/-- **Locality of the metric covariant-derivative seminorm.**  If two metrics
-agree (as `inner` forms) on an open set `U`, then their fixed-background
-covariant-derivative seminorms agree at every point of `U`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_eq_of_eqOn
     (h₁ h₂ gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U]

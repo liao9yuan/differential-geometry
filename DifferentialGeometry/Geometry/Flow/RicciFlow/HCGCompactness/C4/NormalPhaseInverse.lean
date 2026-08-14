@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.ODE.PhaseEndpointInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseSmallness
 
-/-!
-# Quantitative inverse radius for the normal phase endpoint
 
-This file selects one sequence-uniform small normal phase radius and applies
-the quantitative inverse theorem to the fenced endpoint map.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,8 +24,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- One positive phase radius simultaneously fits the normal-coordinate box,
-the trajectory fence, and the strict quantitative inverse threshold. -/
+
+
 theorem exists_normal_q
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) {r : Real} (hr : 0 < r) :
@@ -91,8 +91,8 @@ theorem exists_normal_q
     nlinarith
   · simpa only [threshold] using herrQ
 
-/-- The fenced normal-coordinate endpoint admits a quantitative inverse branch
-on one positive phase ball, with a positive closed ball in its target. -/
+
+
 theorem exists_normal_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -105,7 +105,7 @@ theorem exists_normal_inv
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x / 4)) :
+        (Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x / 4)) :
     ∃ (q : NNReal) (Φ : (E × E) → Real → E × E)
         (e : OpenPartialHomeomorph (E × E) (E × E)) (δ : Real),
       0 < q ∧

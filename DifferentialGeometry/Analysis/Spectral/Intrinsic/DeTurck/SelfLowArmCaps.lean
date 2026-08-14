@@ -35,7 +35,7 @@ that the residual carries **no second derivative of the state at all**:
 `lrCurvF g₀ T` is the fixed background curvature contracted with `T` itself
 (`lrCurvF_unitModel_apply`), so it is linear and order zero, and `lieCovPair` is
 a pure double moving trace.  The only quadratic part is `lrQuadF`, so the arm
-splits — along the sub-linearity of `appCcRS`, `rsDomDomCongrSection` and
+splits — along the sub-linearity of `ccOperatorFieldComp`, `rsDomDomCongrSection` and
 `slotExtendIter` — into an unmarked half handled by `markJet0` and a twice-marked
 half handled by `markJet`.
 -/
@@ -209,8 +209,8 @@ the moving metric are used. -/
 private lemma clSplit (g₀ : SmoothRiemannianMetric I M) :
     ∃ Z : SmoothCcTensor g₀ 3 3, ∀ g₁ : SmoothRiemannianMetric I M,
       connLowOp (I := I) (M := M) g₀ g₁ =
-        appCcRS (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
-          (appCcRS (I := I) (M := M) g₀ 3 3 3
+        ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3
             (slotInsertEndoCc (I := I) (M := M) g₀ 2
               (fullRaisedEndoField (I := I) (M := M) g₀ g₁)) Z) :=
   ⟨_, fun _ => rfl⟩
@@ -284,7 +284,7 @@ private theorem clAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
   have hinner' : ∀ (l : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (3 + l) y
           ((iteratedCovGrad (I := I) g₀ 3 3 l
-            (appCcRS (I := I) (M := M) g₀ 3 3 3
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3
               (slotInsertEndoCc (I := I) (M := M) g₀ 2
                 (fullRaisedEndoField (I := I) (M := M) g₀ g₁)) Z)).toSection y) ≤
         Kin l * Combinatorics.antidiagonalTupleGridWindow
@@ -296,7 +296,7 @@ private theorem clAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
     exact h
   have houter := atgwFold (I := I) (M := M) g₀ (p := 3) (a := 3) (b := 3) 0 0
     (permCoeff (I := I) (M := M) g₀ lowPerm)
-    (appCcRS (I := I) (M := M) g₀ 3 3 3
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3
       (slotInsertEndoCc (I := I) (M := M) g₀ 2
         (fullRaisedEndoField (I := I) (M := M) g₀ g₁)) Z) P hSL_nn hKin_nn
     (hconst 3 SL hSL_nn (permCoeff (I := I) (M := M) g₀ lowPerm) (fun j y => hSL j y))
@@ -316,7 +316,7 @@ difference of two contraction monomials, and
 `refoldKernelContractionMonomialField_eq_mvPairTraceRefold` factors each
 monomial's head as `mvPairTraceOp ⋆ ddc (Ext² (ddc G))` for an ARBITRARY `(0,4)`
 argument `G`.  Both factors of `G` carry one derivative of the state, so `G`
-itself is quadratic in `∇P`; the capped currency is closed under `appCcRS`, so
+itself is quadratic in `∇P`; the capped currency is closed under `ccOperatorFieldComp`, so
 the whole tree stays at level `i + 1`. -/
 theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
@@ -391,7 +391,7 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
       (covGrad (I := I) (M := M) g₀ 0 2 P) (fun _ => Λ) :=
     capOfDP (I := I) (M := M) g₀ P hΛ1 hP1
   have hG : HasCapWin (I := I) (M := M) g₀ P
-      (appCcRS (I := I) (M := M) g₀ 0 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
         (dagLowOp (I := I) (M := M) g₀ g₁)
         (covGrad (I := I) (M := M) g₀ 0 2 P)) KG :=
     capApp (I := I) (M := M) g₀ P _ _ hKDag_nn (fun _ => hΛ0) hDag hDP
@@ -408,18 +408,18 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
   have hMono : ∀ σ : Equiv.Perm (Fin 4),
       HasCapWin (I := I) (M := M) g₀ P
         (daMono (I := I) (M := M) g₀ g₁
-          (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
             (dagLowOp (I := I) (M := M) g₀ g₁)
             (covGrad (I := I) (M := M) g₀ 0 2 P)) σ) KMo := by
     intro σ
     have hRK : HasCapWin (I := I) (M := M) g₀ P
         (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₀
-          (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
             (dagLowOp (I := I) (M := M) g₀ g₁)
             (covGrad (I := I) (M := M) g₀ 0 2 P)) σ) KRK := by
       refine capCongr (I := I) (M := M) g₀ P
         (refoldKernelContractionMonomialField_eq_mvPairTraceRefold (I := I) (M := M) g₀ g₀
-          (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
             (dagLowOp (I := I) (M := M) g₀ g₁)
             (covGrad (I := I) (M := M) g₀ 0 2 P)) σ) ?_
       exact capApp (I := I) (M := M) g₀ P _ _ hSM_nn hKX_nn hM
@@ -533,14 +533,14 @@ private theorem ptAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
       (gInvDiffRaisedEndoField (I := I) g₀ g₁)) P hSΦ_nn hKW_nn hΦw hWw i x
   rw [pureTrace_split (I := I) (M := M) g₀ g₁ s, iteratedCovGrad_add]
   rw [show ((iteratedCovGrad (I := I) g₀ (s + 2) s i
-        (appCcRS (I := I) (M := M) g₀ (s + 2) (s + 2) s
+        (ccOperatorFieldComp (I := I) (M := M) g₀ (s + 2) (s + 2) s
           (cometricDoubleTraceField (I := I) g₀ s)
           (slotInsertEndoCc (I := I) (M := M) g₀ (s + 1)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))) +
       iteratedCovGrad (I := I) g₀ (s + 2) s i
         (cometricDoubleTraceField (I := I) g₀ s)).toSection x) =
       (iteratedCovGrad (I := I) g₀ (s + 2) s i
-          (appCcRS (I := I) (M := M) g₀ (s + 2) (s + 2) s
+          (ccOperatorFieldComp (I := I) (M := M) g₀ (s + 2) (s + 2) s
             (cometricDoubleTraceField (I := I) g₀ s)
             (slotInsertEndoCc (I := I) (M := M) g₀ (s + 1)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)))).toSection x +
@@ -602,7 +602,7 @@ private theorem pairCap (g₀ : SmoothRiemannianMetric I M)
   have hP2 := hpt 2 C2 hC2_nn (fun i x => h2 g₁ P htie hδ_le hδ0 hδ i x)
   have hP4 := hpt 4 C4 hC4_nn (fun i x => h4 g₁ P htie hδ_le hδ0 hδ i x)
   have hpair : lieCovPair (I := I) (M := M) g₀ g₁ =
-      appCcRS (I := I) (M := M) g₀ 6 4 2
+      ccOperatorFieldComp (I := I) (M := M) g₀ 6 4 2
         (pureTrace (I := I) (M := M) g₀ g₁ 2) (pureTrace (I := I) (M := M) g₀ g₁ 4) := rfl
   exact capCongr (I := I) (M := M) g₀ P hpair
     (capApp (I := I) (M := M) g₀ P _ _ hK2_nn hK4_nn hP2 hP4)
@@ -614,7 +614,17 @@ set_option linter.unusedSectionVars false in
 private lemma curvSmul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (t : ℝ) :
     lrCurvF (I := I) (M := M) g₀ (t • T) = t • lrCurvF (I := I) (M := M) g₀ T := by
-  rw [lrCurvF, lrCurvF, appCcRS_smul_right, appCcRS_smul_right, smul_add]
+  change
+    ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
+          (riemannLoweredContractionA (I := I) (M := M) g₀) (t • T) +
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
+          (riemannLoweredContractionB (I := I) (M := M) g₀) (t • T) =
+      t •
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
+            (riemannLoweredContractionA (I := I) (M := M) g₀) T +
+          ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
+            (riemannLoweredContractionB (I := I) (M := M) g₀) T)
+  rw [appCcRS_smul_right, appCcRS_smul_right, smul_add]
 
 set_option linter.unusedVariables false in
 /-- **Capped window of the curvature head, read at the perturbation.**
@@ -763,7 +773,8 @@ private theorem revEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (h
           linarith [hz, hWnn]
       | (m + 1) =>
           refine le_trans
-            (rfns_iteratedCovGrad_symmS_pointwise (I := I) (M := M) g₀ P (m + 1) x) ?_
+            (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.rfns_iteratedCovGrad_symmS_pointwise
+                (I := I) (M := M) g₀ P (m + 1) x) ?_
           have hgb : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (m + 1)) x
               ((iteratedCovGrad (I := I) g₀ 0 2 (m + 1) P).toSection x) =
               gridBase (I := I) (M := M) g₀ P x (m + 1) := rfl
@@ -1224,7 +1235,7 @@ single product `(−1) • lieCovPair ⋆ σ(Ext²(lieCovR4))`, and there
 (`lrCurvF` is the *fixed background* Riemann tensor contracted with `P` itself)
 and a quadratic connection-difference tail.  The two halves therefore have
 different mark counts and are split along the sub-linearity of `slotExtendIter`,
-`rsDomDomCongrSection` and `appCcRS`: the curvature half is unmarked and consumes
+`rsDomDomCongrSection` and `ccOperatorFieldComp`: the curvature half is unmarked and consumes
 `markJet0` (no `Λ₁`, axiom-clean), the quadratic half is twice marked and
 consumes `markJet`.
 
@@ -1331,7 +1342,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
       (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s)) 0 KP :=
     wP (realizedFam (I := I) g₀ T 0 hδg hδZ s) P htie hδ_le hδ0 hδP
   have hArmA : HasMarkWin (I := I) (M := M) g₀ P
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1340,7 +1351,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
       (mkDdc (I := I) (M := M) g₀ P lieCovSigma
         (mkIter (I := I) (M := M) g₀ P 2 hAw))
   have hArmB : HasMarkWin (I := I) (M := M) g₀ P
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1355,13 +1366,13 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
           (realizedFam (I := I) g₀ T 0 hδg hδZ s) g₀ -
         edgeLiePairFam (I := I) (M := M) g₀ T hδg hδZ
           lieRefoldQ lieRefoldEps s =
-      appCcRS (I := I) (M := M) g₀ 2 6 2
+      ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (lrQuadF (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδg hδZ s)))) -
-        appCcRS (I := I) (M := M) g₀ 2 6 2
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1371,7 +1382,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
             (realizedFam (I := I) g₀ T 0 hδg hδZ s) g₀ -
           edgeLiePairFam (I := I) (M := M) g₀ T hδg hδZ
             lieRefoldQ lieRefoldEps s =
-          (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+          (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
             (lieCovPair (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδg hδZ s))
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
@@ -1380,7 +1391,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
       lieCov_residual (I := I) (M := M) g₀ T hδ_lt hδg hδZ hTsymm hs
     rw [hres0, lieCovR4_eq (I := I) (M := M) g₀ T hδg hδZ s, hcurv,
       extSub (I := I) (M := M) g₀, rsDomDomCongrSection_sub_cc,
-      appCcRS_sub_right_cc, neg_smul, one_smul, neg_sub]
+      ccOperatorFieldComp_sub_right, neg_smul, one_smul, neg_sub]
   -- the tame bounds of the two halves
   set H3 : ℝ := ∑ j ∈ Finset.range 3,
     ‖iteratedCovGrad (I := I) g₀ 0 2 (1 + j) P‖ ^ 2 with hH3_def
@@ -1408,13 +1419,13 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
   -- assemble
   rw [hres, iteratedCovGrad_sub]
   have hnA : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
             (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))‖ := norm_nonneg _
   have hnB : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1422,73 +1433,73 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
               (realizedFam (I := I) g₀ T 0 hδg hδZ s)))))‖ := norm_nonneg _
   have htri := norm_sub_le
     (iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
             (lrQuadF (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδg hδZ s))))))
     (iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
             (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P)))))
   have hsq : ‖iteratedCovGrad (I := I) g₀ 2 2 i
-        (appCcRS (I := I) (M := M) g₀ 2 6 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (lrQuadF (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδg hδZ s))))) -
       iteratedCovGrad (I := I) g₀ 2 2 i
-        (appCcRS (I := I) (M := M) g₀ 2 6 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))‖ ^ 2 ≤
       2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
             (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (lrQuadF (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδg hδZ s)))))‖ ^ 2 +
         2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (appCcRS (I := I) (M := M) g₀ 2 6 2
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
               (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                   (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))‖ ^ 2 := by
     nlinarith [htri, hnA, hnB, norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
             (lrQuadF (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδg hδZ s))))) -
       iteratedCovGrad (I := I) g₀ 2 2 i
-        (appCcRS (I := I) (M := M) g₀ 2 6 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))),
       sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
             (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (lrQuadF (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδg hδZ s)))))‖ -
         ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (appCcRS (I := I) (M := M) g₀ 2 6 2
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
               (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                   (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))‖)]
   refine hsq.trans ?_
   have hAfin : 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1499,7 +1510,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
         ≤ 2 * (KAr i * K0A i * JS) := h
       _ = 2 * (KAr i * K0A i) * JS := by ring
   have hBfin : 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
-      (appCcRS (I := I) (M := M) g₀ 2 6 2
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
         (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1576,7 +1587,7 @@ permutes the INPUT slots, which is exactly `reindexCoeffGen`.  Both sides are
 fibre-norm isometries of `Φ` at every covariant jet order. -/
 private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (Φ : SmoothCcTensor g₀ d d) (ρ : Equiv.Perm (Fin d)) :
-    appCcRS (I := I) (M := M) g₀ d d d Φ
+    ccOperatorFieldComp (I := I) (M := M) g₀ d d d Φ
         (permCoeff (I := I) (M := M) g₀ ρ) =
       reindexCoeffGen (I := I) (M := M) g₀ d d Φ ρ := by
   apply SmoothCcTensor.ext
@@ -1601,8 +1612,8 @@ read-only low-base action module is still never named: the equation holds by
 three permutations be recognised as source reindexes. -/
 private lemma clZ (g₀ g₁ : SmoothRiemannianMetric I M) :
     connLowOp (I := I) (M := M) g₀ g₁ =
-      appCcRS (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
-        (appCcRS (I := I) (M := M) g₀ 3 3 3
+      ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3
           (slotInsertEndoCc (I := I) (M := M) g₀ 2
             (fullRaisedEndoField (I := I) (M := M) g₀ g₁))
           ((1 / 2 : ℝ) •
@@ -1664,7 +1675,7 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     (1 / 2 : ℝ) • (permCoeff (I := I) (M := M) g₀ (Equiv.swap (0 : Fin 3) 2) +
       permCoeff (I := I) (M := M) g₀ (finRotate 3) -
       permCoeff (I := I) (M := M) g₀ (Equiv.swap (1 : Fin 3) 2)) with hZc_def
-  set Y : SmoothCcTensor g₀ 3 3 := appCcRS (I := I) (M := M) g₀ 3 3 3 E₁ Zc with hY_def
+  set Y : SmoothCcTensor g₀ 3 3 := ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 E₁ Zc with hY_def
   -- (1) the outer permutation is a fibre isometry at every jet order
   have hiso : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (3 + (i + 1)) x
       ((iteratedCovGrad (I := I) g₀ 3 3 (i + 1)
@@ -1852,7 +1863,7 @@ theorem ricciDAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
       (covGrad (I := I) (M := M) g₀ 0 2 P) 1 (fun _ => 1) :=
     mkOfDP (I := I) (M := M) g₀ P
   have hG : HasMarkWin (I := I) (M := M) g₀ P
-      (appCcRS (I := I) (M := M) g₀ 0 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
         (dagLowOp (I := I) (M := M) g₀ g₁)
         (covGrad (I := I) (M := M) g₀ 0 2 P)) 2 KG :=
     mkApp (I := I) (M := M) g₀ P _ _ hKDag_nn (fun _ => zero_le_one) hDag hDP
@@ -1863,18 +1874,18 @@ theorem ricciDAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
   have hMono : ∀ σ : Equiv.Perm (Fin 4),
       HasMarkWin (I := I) (M := M) g₀ P
         (daMono (I := I) (M := M) g₀ g₁
-          (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
             (dagLowOp (I := I) (M := M) g₀ g₁)
             (covGrad (I := I) (M := M) g₀ 0 2 P)) σ) 2 KMo := by
     intro σ
     have hRK : HasMarkWin (I := I) (M := M) g₀ P
         (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₀
-          (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
             (dagLowOp (I := I) (M := M) g₀ g₁)
             (covGrad (I := I) (M := M) g₀ 0 2 P)) σ) 2 KRK := by
       refine mkCongr (I := I) (M := M) g₀ P
         (refoldKernelContractionMonomialField_eq_mvPairTraceRefold (I := I) (M := M) g₀ g₀
-          (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
             (dagLowOp (I := I) (M := M) g₀ g₁)
             (covGrad (I := I) (M := M) g₀ 0 2 P)) σ) ?_
       exact mkApp (I := I) (M := M) g₀ P _ _ hSM_nn hKX_nn hM

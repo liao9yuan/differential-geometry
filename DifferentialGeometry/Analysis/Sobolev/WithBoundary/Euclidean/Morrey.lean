@@ -1,48 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Morrey
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 
-/-!
-# Morrey-type embedding on Euclidean half-space balls
-
-This is the with-boundary parallel of
-`Analysis/Sobolev/Euclidean/Embedding/Morrey.lean`. We
-deliver Morrey-type embeddings whose conclusions hold on the closed-half-space
-portion of a Euclidean ball, `Metric.ball x₀ R ∩ closedHalfSpace`.
-
-## Strategy
-
-For smooth `u : EuclideanSpace ℝ (Fin d) → ℝ` defined on the full ambient space,
-the boundaryless smooth Morrey inequalities (`smooth_morrey_pair_bound`,
-`smooth_morrey_sup_bound`, `smooth_morrey_holder_modulus`,
-`smooth_morrey_pair_bound_uniform`, `smooth_morrey_sup_bound_uniform`) deliver
-Hölder/sup bounds on the entire half-radius ball `Metric.ball x₀ (R / 2)`. We
-specialise these to the closed-half-space portion
-`Metric.ball x₀ (R / 2) ∩ closedHalfSpace` by simple intersection: the
-hypotheses of the boundaryless versions are unchanged, and the closed-half-space
-points are a subset of the half-radius ball.
-
-For the Dirichlet-variant `MemWkpHalfSpace 1 p u Ω` predicate, we expose a
-corollary covering the **interior ball** case where the ball
-`Metric.ball x₀ R` is fully contained in the open half-space (equivalently, the
-ball does not touch the boundary). In that case, the half-space-Sobolev
-membership reduces to the boundaryless `MemW1pWitness` membership and the full
-boundaryless Hölder representative on `Metric.ball x₀ (R / 4)` applies, whose
-restriction to the closed-half-space portion is automatic.
-
-## Main results
-
-### Smooth-input half-space Morrey bounds
-* `smooth_morrey_pair_bound_halfSpace`
-* `smooth_morrey_sup_bound_halfSpace`
-* `smooth_morrey_holder_modulus_halfSpace`
-* `smooth_morrey_pair_bound_uniform_halfSpace`
-* `smooth_morrey_sup_bound_uniform_halfSpace`
-
-### `MemWkpHalfSpace` interior-ball Morrey
-* `morrey_holder_representative_halfSpace_interior`
-* `morrey_sup_bound_halfSpace_interior`
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function
@@ -57,7 +15,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The closed-half-space portion of an open ball is contained in the ball. -/
 theorem ball_inter_closedHalfSpace_subset_ball
     {x₀ : E} {r : ℝ} :
     Metric.ball x₀ r ∩
@@ -65,8 +22,6 @@ theorem ball_inter_closedHalfSpace_subset_ball
       Metric.ball x₀ r :=
   inter_subset_left
 
-/-- The closed-half-space portion of an open ball is contained in the
-closed half-space. -/
 theorem ball_inter_closedHalfSpace_subset_closedHalfSpace
     {x₀ : E} {r : ℝ} :
     Metric.ball x₀ r ∩
@@ -74,15 +29,6 @@ theorem ball_inter_closedHalfSpace_subset_closedHalfSpace
       DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace :=
   inter_subset_right
 
-/-- **Smooth pair Hölder bound on the closed-half-space portion of a ball.**
-
-For a smooth function `u : E → ℝ` and any pair `x, y ∈ B(x₀, R/2) ∩ closedHalfSpace`,
-the difference `‖u x - u y‖` is bounded by `(dist x y)^{1 - d/p}` times the
-gradient `L^p` norm on the larger ball `B(x₀, R)`, with a constant depending
-only on `d` and `p`.
-
-This is the boundaryless `smooth_morrey_pair_bound` restricted to the
-closed-half-space portion of the half-radius ball. -/
 theorem smooth_morrey_pair_bound_halfSpace
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)
@@ -102,14 +48,6 @@ theorem smooth_morrey_pair_bound_halfSpace
   exact hbound (ball_inter_closedHalfSpace_subset_ball hx)
     (ball_inter_closedHalfSpace_subset_ball hy)
 
-/-- **Smooth sup bound on the closed-half-space portion of a ball.**
-
-For a smooth function `u : E → ℝ`, every value `u(x)` with
-`x ∈ B(x₀, R/2) ∩ closedHalfSpace` is bounded by a constant times the sum of
-the `L^p` norms of `u` and its gradient on the larger ball `B(x₀, R)`.
-
-This is the boundaryless `smooth_morrey_sup_bound` restricted to the
-closed-half-space portion of the half-radius ball. -/
 theorem smooth_morrey_sup_bound_halfSpace
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)
@@ -126,15 +64,6 @@ theorem smooth_morrey_sup_bound_halfSpace
   intro x hx
   exact hbound x (ball_inter_closedHalfSpace_subset_ball hx)
 
-/-- **Smooth Hölder modulus on the closed-half-space portion of a ball.**
-
-For a smooth function `u : E → ℝ`, the value `‖u x - u y‖` is controlled by
-`(dist x y)^{1 - d/p}` times an absolute constant, for `x, y` in the
-closed-half-space portion of `B(x₀, R/2)`. The constant depends on `d, p, R`
-and the gradient `L^p` norm on `B(x₀, R)`.
-
-This is the boundaryless `smooth_morrey_holder_modulus` restricted to the
-closed-half-space portion of the half-radius ball. -/
 theorem smooth_morrey_holder_modulus_halfSpace
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)
@@ -152,9 +81,6 @@ theorem smooth_morrey_holder_modulus_halfSpace
   exact hbound (ball_inter_closedHalfSpace_subset_ball hx)
     (ball_inter_closedHalfSpace_subset_ball hy)
 
-/-- **Uniform-in-`u` smooth pair Hölder bound on the closed-half-space portion
-of a ball.** Strengthens `smooth_morrey_pair_bound_halfSpace` by quantifying the
-constant `C` ahead of `u`. -/
 theorem smooth_morrey_pair_bound_uniform_halfSpace
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R) :
@@ -174,9 +100,6 @@ theorem smooth_morrey_pair_bound_uniform_halfSpace
   exact hbound hu (ball_inter_closedHalfSpace_subset_ball hx)
     (ball_inter_closedHalfSpace_subset_ball hy)
 
-/-- **Uniform-in-`u` smooth sup bound on the closed-half-space portion of a
-ball.** Strengthens `smooth_morrey_sup_bound_halfSpace` by quantifying the
-constant `C` ahead of `u`. -/
 theorem smooth_morrey_sup_bound_uniform_halfSpace
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R) :
@@ -194,8 +117,6 @@ theorem smooth_morrey_sup_bound_uniform_halfSpace
   intro u hu x hx
   exact hbound hu x (ball_inter_closedHalfSpace_subset_ball hx)
 
-/-- A ball strictly inside the open half-space is half-space-friendly:
-`Metric.ball x₀ R ⊆ openHalfSpace ⊆ closedHalfSpace`. -/
 theorem ball_subset_openHalfSpace_of_dist_pos
     {x₀ : E} {R : ℝ}
     (hx₀ : R ≤ x₀ 0) :
@@ -218,8 +139,6 @@ theorem ball_subset_openHalfSpace_of_dist_pos
     linarith [this.1]
   linarith
 
-/-- The closed-half-space portion of an open ball strictly inside the open
-half-space is the entire ball. -/
 theorem ball_inter_closedHalfSpace_eq_ball_of_dist_pos
     {x₀ : E} {R : ℝ}
     (hx₀ : R ≤ x₀ 0) :
@@ -232,9 +151,6 @@ theorem ball_inter_closedHalfSpace_eq_ball_of_dist_pos
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace_subset_closedHalfSpace
     (ball_subset_openHalfSpace_of_dist_pos hx₀ hy)
 
-/-- For a half-space-friendly `Ω` and an open ball strictly inside the open
-half-space, if `Metric.ball x₀ R ⊆ Ω`, then the ball is contained in the
-interior part `interiorHalfSpace Ω = Ω ∩ openHalfSpace`. -/
 theorem ball_subset_interiorHalfSpace_of_dist_pos
     {x₀ : E} {R : ℝ}
     (hx₀ : R ≤ x₀ 0)
@@ -246,18 +162,6 @@ theorem ball_subset_interiorHalfSpace_of_dist_pos
   refine ⟨h_ball_sub hy, ?_⟩
   exact ball_subset_openHalfSpace_of_dist_pos hx₀ hy
 
-/-- **Interior-ball Morrey Hölder representative for `MemWkpHalfSpace`.**
-
-For `p > d` and `MemWkpHalfSpace 1 p u Ω` on a half-space-friendly `Ω`, with
-the ball `Metric.ball x₀ R` lying strictly inside the open half-space
-(equivalently, `R ≤ x₀ 0`) and contained in `Ω`, there exists a continuous
-representative `ũ` of `u` on `E`, equal to `u` almost everywhere on
-`Metric.ball x₀ (R / 4)`, satisfying a Hölder bound with exponent `1 - d/p`
-controlled by the witness gradient `L^p` norm on `Metric.ball x₀ R`.
-
-In this interior-ball case the conclusion on
-`Metric.ball x₀ (R / 4) ∩ closedHalfSpace` is automatic since the entire ball
-already sits in the open half-space. -/
 theorem morrey_holder_representative_halfSpace_interior
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)
@@ -305,15 +209,6 @@ theorem morrey_holder_representative_halfSpace_interior
   intro x hx y hy
   exact h_holder x hx.1 y hy.1
 
-/-- **Interior-ball Morrey sup bound for `MemWkpHalfSpace`.**
-
-For `p > d` and `MemWkpHalfSpace 1 p u Ω` on a half-space-friendly `Ω`, with
-the ball `Metric.ball x₀ R` lying strictly inside the open half-space
-(equivalently, `R ≤ x₀ 0`) and contained in `Ω`, there exists a continuous
-representative `ũ` of `u` on `E` whose values on
-`Metric.ball x₀ (R / 4) ∩ closedHalfSpace` are bounded by a constant times the
-sum of the `L^p` norm of `u` and the witness gradient `L^p` norm on
-`Metric.ball x₀ R`. -/
 theorem morrey_sup_bound_halfSpace_interior
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)

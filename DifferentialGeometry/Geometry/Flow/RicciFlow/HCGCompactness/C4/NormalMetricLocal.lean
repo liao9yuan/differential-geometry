@@ -4,13 +4,13 @@ import DifferentialGeometry.Geometry.Geodesic.PullbackCross
 
 set_option autoImplicit false
 
-/-!
-# Quarter-ball normal pullback metric
 
-This file restricts the canonical smooth normal exponential to the quarter
-normal ball, the region where `normalTotal` agrees with the pulled-back metric.
-It packages the exact metric equality needed by geodesic naturality.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,14 +26,14 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- The quarter normal ball on which the total extension is exactly the
-normal-coordinate pullback metric. -/
+
+
 def normalQuarter
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -46,10 +46,10 @@ def normalQuarter
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact ⟨Metric.ball (0 : E)
-    (expRadiusGp (I := I) Y.metric x / 4), Metric.isOpen_ball⟩
+    (expMapC2Radius (I := I) Y.metric x / 4), Metric.isOpen_ball⟩
 
-/-- The quarter normal ball lies in the source of the smooth normal
-exponential partial diffeomorphism. -/
+
+
 theorem normalQuarter_sub
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -65,7 +65,7 @@ theorem normalQuarter_sub
   rw [normalExpPD_source]
   exact normalInner_sub (I := I) Y x
 
-/-- The open image of the quarter normal ball. -/
+
 def normalQuarterImage
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -82,8 +82,8 @@ def normalQuarterImage
     image_opens_isOpen (normalExpPD (I := I) Y x)
       (normalQuarter_sub (I := I) Y x)⟩
 
-/-- The smooth normal exponential as a global diffeomorphism from the quarter
-normal ball onto its open image. -/
+
+
 noncomputable def normalQuarterDiffeo
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -100,8 +100,8 @@ noncomputable def normalQuarterDiffeo
     PartialDiffeomorph.toOpensDiffeoCross (normalExpPD (I := I) Y x)
       (normalQuarter_sub (I := I) Y x)
 
-/-- The quarter normal ball is sigma compact, for connection pullback and
-restriction APIs on its open-subtype manifold. -/
+
+
 @[implicit_reducible] noncomputable def normalQuarterSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -117,7 +117,7 @@ restriction APIs on its open-subtype manifold. -/
     (normalQuarter (I := I) Y x).2.locallyCompactSpace
   infer_instance
 
-/-- The normal-exponential image of the quarter ball is sigma compact. -/
+
 @[implicit_reducible] noncomputable def normalQuarterImageSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -139,8 +139,8 @@ restriction APIs on its open-subtype manifold. -/
   rw [← hrange]
   exact isSigmaCompact_range (normalQuarterDiffeo (I := I) Y x).continuous
 
-/-- The quarter-ball normal diffeomorphism is the normal exponential on
-underlying points. -/
+
+
 theorem quarterDiffeo_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : normalQuarter (I := I) Y x) :
@@ -150,11 +150,11 @@ theorem quarterDiffeo_apply
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ((normalQuarterDiffeo (I := I) Y x z :
       normalQuarterImage (I := I) Y x) : Y.M) =
-      framedExpDiffeo (I := I) Y.metric x (z : E) := by
+      expMapDiffeo (I := I) Y.metric x (z : E) := by
   rfl
 
-/-- The derivative of the quarter-ball normal diffeomorphism is the derivative
-of the ambient normal exponential. -/
+
+
 theorem quarterDiffeo_mfd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : normalQuarter (I := I) Y x) (v : E) :
@@ -166,7 +166,7 @@ theorem quarterDiffeo_mfd
         (normalQuarterDiffeo (I := I) Y x :
           normalQuarter (I := I) Y x → normalQuarterImage (I := I) Y x) z v =
       mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) v := by
+        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -191,8 +191,8 @@ private theorem metric_ext
   subst hi
   rfl
 
-/-- On the quarter normal ball, the total metric is exactly the pullback of
-the ambient metric under the quarter-ball normal exponential diffeomorphism. -/
+
+
 theorem normalTotal_quarter
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -229,9 +229,9 @@ theorem normalTotal_quarter
   rw [normalTotal_inner (I := I) Y x (z : E) z.2 v w]
   exact normalCoordMetric_apply (I := I) Y x (z : E) v w
 
-/-- Levi--Civita derivatives of smooth ambient fields commute with the normal
-exponential on the quarter ball, provided their restricted germs correspond
-under the quarter-ball diffeomorphism. -/
+
+
+
 theorem normal_cov_map
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -260,15 +260,15 @@ theorem normal_cov_map
           (Integral.Connection.restrictOpenTangentSection
             (I := 𝓘(Real, E)) (normalQuarter (I := I) Y x) V) y) →
     mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E)
+        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E)
         (((Integral.Connection.metricCov (I := 𝓘(Real, E))
           (M := E) (normalTotal (I := I) Y x)).toFun
           (fun u : E => V u) (z : E)) v) =
       ((Integral.Connection.metricCov (I := I) (M := Y.M) Y.metric).toFun
         (fun y : Y.M => Z y)
-        (framedExpDiffeo (I := I) Y.metric x (z : E)))
+        (expMapDiffeo (I := I) Y.metric x (z : E)))
         (mfderiv 𝓘(Real, E) I
-          (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) v) := by
+          (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v) := by
   classical
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -331,9 +331,9 @@ theorem normal_cov_map
   rw [← hleft, ← hres, ← hdir, ← hbase]
   exact hpbAmbient
 
-/-- A locally smooth geodesic of the total normal-coordinate metric that stays
-in the quarter ball maps under the normal exponential to an ambient geodesic.
-Only membership and smoothness on the displayed open time set are required. -/
+
+
+
 theorem normalGeo_map
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (gamma : Real → E) (s : Set Real) (hs : IsOpen s)
@@ -348,7 +348,7 @@ theorem normalGeo_map
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     Geometry.Riemannian.Geodesic.IsGeodesicOn (I := I) Y.metric
-      (fun t ↦ framedExpDiffeo (I := I) Y.metric x (gamma t)) s := by
+      (fun t ↦ expMapDiffeo (I := I) Y.metric x (gamma t)) s := by
   classical
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -362,9 +362,9 @@ theorem normalGeo_map
     normalQuarterImageSigma (I := I) Y x
   let z0 : normalQuarter (I := I) Y x := ⟨0, by
     change (0 : E) ∈ Metric.ball (0 : E)
-      (expRadiusGp (I := I) Y.metric x / 4)
+      (expMapC2Radius (I := I) Y.metric x / 4)
     rw [Metric.mem_ball, dist_self]
-    exact div_pos (expRadiusGp_pos (I := I) Y.metric x) (by norm_num)⟩
+    exact div_pos (expMapC2Radius_pos (I := I) Y.metric x) (by norm_num)⟩
   let gammaQ : Real → normalQuarter (I := I) Y x := fun t ↦
     if ht : t ∈ s then ⟨gamma t, hmem t ht⟩ else z0
   have hval : ∀ t ∈ s, (gammaQ t : E) = gamma t := by
@@ -407,7 +407,7 @@ theorem normalGeo_map
       (normalQuarterImage (I := I) Y x)
       (fun t ↦ normalQuarterDiffeo (I := I) Y x (gammaQ t)) s).1 hmapRestr
   intro t ht
-  have hev : (fun r ↦ framedExpDiffeo (I := I) Y.metric x (gamma r)) =ᶠ[nhds t]
+  have hev : (fun r ↦ expMapDiffeo (I := I) Y.metric x (gamma r)) =ᶠ[nhds t]
       (fun r ↦ ((normalQuarterDiffeo (I := I) Y x (gammaQ r) :
         normalQuarterImage (I := I) Y x) : Y.M)) := by
     filter_upwards [hs.mem_nhds ht] with r hr
@@ -418,3 +418,4 @@ theorem normalGeo_map
 
 end HCGCompactness
 end DifferentialGeometry
+

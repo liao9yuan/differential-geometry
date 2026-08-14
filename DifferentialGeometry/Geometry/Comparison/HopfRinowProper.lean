@@ -1,18 +1,16 @@
 import Mathlib.Topology.Order.IntermediateValue
-import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Metric.Completeness
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Proper Riemannian Metric From Intrinsic Hopf--Rinow
 
-This file packages the compactness and intermediate-distance consequences of the
-intrinsic Hopf--Rinow endpoint in `Exponential/MinimizingGeodesic.lean`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -27,8 +25,7 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
-  [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -117,7 +114,7 @@ namespace HopfRinow
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -128,7 +125,6 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The finite metric-space structure associated to the Riemannian emetric. -/
 @[reducible] noncomputable def riemMetricSpace
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] :
     MetricSpace M :=
@@ -139,7 +135,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The metric `riemMetricSpace` realizes the ambient Riemannian emetric. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem riemMetric_realizes
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] :
     ∀ x y : M,
@@ -154,7 +151,8 @@ theorem riemMetric_realizes
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Distance in `riemMetricSpace` is the real value of `riemannianEDist`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem riemMetric_dist_eq
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (x y : M) :
@@ -176,7 +174,7 @@ theorem riemMetric_dist_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Compactness of a tangent closed ball's image under the intrinsic exponential. -/
+omit [ConnectedSpace M] in
 theorem expImgClosedBall_compact
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :
@@ -200,8 +198,6 @@ theorem expImgClosedBall_compact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Points in a Riemannian closed ball are reached by bounded intrinsic
-exponential vectors. -/
 theorem closedBall_subset_expImg
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :
@@ -236,7 +232,6 @@ theorem closedBall_subset_expImg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Hopf--Rinow properness for the finite Riemannian metric. -/
 theorem properSpace_riemMetric
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :
@@ -261,8 +256,6 @@ theorem properSpace_riemMetric
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every intermediate distance to a basepoint is realized in the finite
-Riemannian metric. -/
 theorem intermediateDist_riemMetric
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :

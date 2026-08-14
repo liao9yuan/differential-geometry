@@ -6,48 +6,44 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 
-/-!
-# The Voss–Weyl divergence is the basis-invariant metric trace of the covariant derivative
 
-For a closed smooth Riemannian manifold `(M, g)` and a smooth tangent field `Z`, the
-Voss–Weyl coordinate divergence `divergence_g g Z` (computed in the `chartModelBasis`
-frame of the divergence-theorem machinery) is shown to equal the intrinsic metric trace
-of the covariant differential `(u, v) ↦ g(∇_u Z, v)`.  Since the metric trace of a
-covariant two-tensor is basis-independent, the divergence is then re-expressed in the
-point-centered `coordinateFrameAt` (`Module.finBasis`) frame:
 
-`divergence_g g Z x = ∑_{i,j} g^{ij} g(∇_{f_i} Z, f_j)`,
 
-where `g^{ij} = inverseMetricFlatModelInChart_component g x i j (φ x)` is the inverse
-metric in the `coordinateFrameAt`-frame at the chart centre and `f_i = coordinateFrameAt x i`.
 
-This bridges md0's two coordinate conventions:
 
-* the divergence-theorem layer (`chartCoeff`, `chartGramMatrix`, `chartDensity`,
-  `chartChristoffel`) lives in the `chartModelBasis` frame;
-* the metric-trace / connection-trace layer (`coordinateFrameAt`,
-  `inverseMetricFlatModelInChart_component`, `componentRS`) lives in the `Module.finBasis`
-  frame.
 
-The two frames are genuinely different (`chartModelBasis E ≠ Module.finBasis ℝ E`), so the
-bridge cannot be a definitional rewrite; it is a true basis-invariance statement, proven
-here through the intrinsic metric trace `metricTracePair0SAt`.
 
-## Main results
 
-* `nablaCovTensor g Z x` : the covariant-differential `(0,2)`-tensor `(u,v) ↦ g(∇_u Z, v)`.
-* `metricTracePair0SAt_nablaCov_eq_divergence` : its intrinsic metric trace equals the
-  Voss–Weyl divergence at any point (point-centered chart).
-* `divergence_g_eq_finBasis_metricTrace` : the `coordinateFrameAt`-frame form of the
-  divergence — the inverse-metric contraction of `g(∇_{f_i} Z, f_j)`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 3
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
@@ -61,7 +57,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,25 +65,28 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The covariant differential of a smooth tangent field `Z`, packaged as the covariant
-two-tensor `(u, v) ↦ g(∇_u Z, v)` at the point `b`. -/
+
+
 def nablaCovTensor (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 b :=
   (((continuousMultilinearCurryFin1 ℝ (TangentSpace I b) ℝ).symm.toContinuousLinearMap).comp
     ((g.inner b).comp ((LeviCivita (I := I) g).toFun Z.toFun b))).uncurryLeft
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma nablaCovTensor_apply (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M)
     (v : Fin 2 → TangentSpace I b) :
     nablaCovTensor (I := I) g Z b v =
       g.inner b ((LeviCivita (I := I) g).toFun Z.toFun b (v 0)) (v 1) := by
-  simp only [nablaCovTensor, ContinuousLinearMap.uncurryLeft_apply,
-    ContinuousLinearMap.comp_apply]
+  simp only [nablaCovTensor]
   rfl
 
-/-- `chartInvGramMatrix` is the inverse metric for the `chartModelBasis`-frame
-`chartBasisFamily` at any base-set point. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartInvGram_metricInverse (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     MetricInverseInBasis_gen (I := I) g b (chartBasisFamily (I := I) α hb)
@@ -109,8 +108,10 @@ private lemma chartInvGram_metricInverse (g : SmoothRiemannianMetric I M) (α : 
     exact Finset.sum_congr rfl fun k _ => by
       rw [chartGramMatrix_apply, chartBasisFamily_apply, chartBasisFamily_apply]
 
-/-- The intrinsic metric trace of `nablaCovTensor` expanded in the `chartModelBasis` frame:
-`tr_g(∇Z) = ∑_{m,n} G^{mn} g(∇_{∂_m} Z, ∂_n)`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma metricTracePair0SAt_nablaCov_eq_chartSum
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}
@@ -130,6 +131,8 @@ private lemma metricTracePair0SAt_nablaCov_eq_chartSum
   simp only [vec2]
   norm_num
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma self_mem_goodSet (x : M) :
     x ∈ chartLeviCivitaGoodSet (I := I) x := by
   rw [mem_chartLeviCivitaGoodSet_iff]
@@ -138,9 +141,12 @@ private lemma self_mem_goodSet (x : M) :
   rw [(isOpen_extChartAt_target (I := I) x).interior_eq]
   exact (extChartAt I x).map_source (mem_extChartAt_source (I := I) x)
 
-/-- **The Voss–Weyl divergence is the intrinsic metric trace of the covariant
-differential.**  At any point `x`, computing the divergence in the point-centered chart and
-the intrinsic metric trace `tr_g(∇Z)` of `(u,v) ↦ g(∇_u Z, v)` give the same value. -/
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricTracePair0SAt_nablaCov_eq_divergence
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -173,12 +179,15 @@ theorem metricTracePair0SAt_nablaCov_eq_divergence
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [chartChristoffel_symm (I := I) g x k i k]
 
-/-- **The divergence in the point-centered `coordinateFrameAt` frame.**  The Voss–Weyl
-divergence equals the `Module.finBasis`-frame inverse-metric contraction of
-`g(∇_{f_i} Z, f_j)`, where `f_i = coordinateFrameAt x i` and `g^{ij}` is the
-`coordinateFrameAt`-frame inverse metric at the chart centre.  This is the basis-invariance
-of the divergence, used to bridge the divergence-theorem (`chartModelBasis`) layer into the
-connection-trace (`coordinateFrameAt`) layer. -/
+
+
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem divergence_g_eq_finBasis_metricTrace
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -197,7 +206,7 @@ theorem divergence_g_eq_finBasis_metricTrace
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun i j => DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
       (I := I) g x i j (extChartAt I x x))
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    (Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x)]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [nablaCovTensor_apply]
@@ -206,31 +215,40 @@ theorem divergence_g_eq_finBasis_metricTrace
   simp only [vec2]
   norm_num
 
-/-- Generic `coordinateFrameAt`-frame coefficient of the covariant derivative of a smooth
-tangent field, via the Leibniz rule:
-`coeff_k(∇_{f_i} Z) = ∂_{f_i}(Z^k) + ∑_l Γ^k_{i l} Z^l`,
-where `Z^l = coeff_l Z` and `Γ^k_{i l} = christoffelSymbolInFrame cov (coordinateFrameAt x) ... x i l k`. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma coeff_cov_eq_deriv_add_christoffel
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x₀ : M) (i k : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
-    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k x₀
-        ((cov Z.toFun x₀) (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ i x₀)) =
+    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k
+      x₀
+        ((cov Z.toFun x₀) (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ i
+          x₀)) =
       extDerivFun (I := I)
           (fun y : M =>
-            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k y (Z.toFun y))
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+              x₀).coeff k y (Z.toFun y))
           x₀ (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ i x₀) +
         ∑ l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
           DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀) x₀ i l k *
-            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff l x₀ (Z.toFun x₀) := by
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x₀) x₀ i l k *
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+              x₀).coeff l x₀ (Z.toFun x₀) := by
   classical
-  set hframe := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀ with hframe_def
+  set hframe := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+    x₀ with hframe_def
   set frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ with hfr_def
   set u := DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x₀ with hu_def
   have hx₀ : x₀ ∈ u := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x₀
-  have hu_open : IsOpen u := DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) x₀
+  have hu_open : IsOpen u := DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open
+    (I := I) x₀
   have hu_nhds : u ∈ 𝓝 x₀ := hu_open.mem_nhds hx₀
   have hZ1 : ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
       (fun y : M => (⟨y, Z.toFun y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀ :=
@@ -239,7 +257,8 @@ private lemma coeff_cov_eq_deriv_add_christoffel
     fun l y => hframe.coeff l y (Z.toFun y) with hZc_def
   have hZc_diff : ∀ l, MDifferentiableAt I 𝓘(Real, Real) (Zc l) x₀ := by
     intro l
-    set e := DifferentialGeometry.Tensor.Coordinates.coordinateTrivializationAt (I := I) x₀ with he_def
+    set e := DifferentialGeometry.Tensor.Coordinates.coordinateTrivializationAt (I := I) x₀ with
+      he_def
     have hxe : x₀ ∈ e.baseSet := by
       simp [e, DifferentialGeometry.Tensor.Coordinates.coordinateTrivializationAt]
     have hraw :=
@@ -255,24 +274,23 @@ private lemma coeff_cov_eq_deriv_add_christoffel
   have hframevec_diff : ∀ l,
       MDifferentiableAt I (I.prod 𝓘(Real, E))
         (fun y : M => (⟨y, frame l y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀ :=
-    fun l => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mdifferentiableAt (I := I) x₀ l
+    fun l => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mdifferentiableAt (I := I) x₀
+               l
   have hZdiff :
       MDifferentiableAt I (I.prod 𝓘(Real, E))
         (fun y : M => (⟨y, Z.toFun y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀ :=
     Z.mdifferentiableAt
-  -- Z agrees with its frame expansion near x₀.
   have hZexp : ∀ᶠ y in 𝓝 x₀, Z.toFun y = ∑ l, Zc l y • frame l y := by
     filter_upwards [hu_nhds] with y hy
     exact hframe.coeff_sum_eq (fun z => Z.toFun z) hy
-  -- Differentiability of each summand `Zc l • frame l`.
   have hsummand_diff : ∀ l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
       MDifferentiableAt I (I.prod 𝓘(Real, E))
         (fun y : M => (⟨y, Zc l y • frame l y⟩ :
           TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
     intro l
     exact (hZc_diff l).smul_section (hframevec_diff l)
-  -- Differentiability of partial sums of the frame expansion.
-  have hpartial_diff : ∀ (s : Finset (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)),
+  have hpartial_diff : ∀ (s : Finset
+    (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)),
       MDifferentiableAt I (I.prod 𝓘(Real, E))
         (fun y : M => (⟨y, ∑ l ∈ s, Zc l y • frame l y⟩ :
           TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
@@ -293,13 +311,13 @@ private lemma coeff_cov_eq_deriv_add_christoffel
           funext y; rw [Finset.sum_insert ha]
         rw [heq]
         exact mdifferentiableAt_add_section (hsummand_diff a) ih
-  -- Covariant derivative of the frame expansion via additivity + Leibniz.
   have hcov_sum :
       cov (fun y : M => ∑ l, Zc l y • frame l y) x₀ =
         ∑ l, (Zc l x₀ • cov (frame l) x₀ +
           (extDerivFun (I := I) (Zc l) x₀).smulRight (frame l x₀)) := by
     classical
-    have hadd : ∀ (s : Finset (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)),
+    have hadd : ∀ (s : Finset
+      (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)),
         cov (fun y : M => ∑ l ∈ s, Zc l y • frame l y) x₀ =
           ∑ l ∈ s, (Zc l x₀ • cov (frame l) x₀ +
             (extDerivFun (I := I) (Zc l) x₀).smulRight (frame l x₀)) := by
@@ -321,7 +339,6 @@ private lemma coeff_cov_eq_deriv_add_christoffel
           have hsmul_eq : (fun y : M => Zc a y • frame a y) = Zc a • (fun y => frame a y) := rfl
           rw [hsmul_eq, hleib]
     simpa using hadd Finset.univ
-  -- Replace Z by its frame expansion inside the covariant derivative.
   have hcovZ :
       cov Z.toFun x₀ =
         ∑ l, (Zc l x₀ • cov (frame l) x₀ +
@@ -332,17 +349,16 @@ private lemma coeff_cov_eq_deriv_add_christoffel
         have hsumdiff := hpartial_diff (Finset.univ)
         simpa using hsumdiff)
       univ_mem hZexp
-  -- Apply at the direction `frame i x₀` and read off the `k`-th coefficient.
   rw [hcovZ]
   rw [ContinuousLinearMap.sum_apply]
   rw [map_sum]
-  -- Split each summand and simplify the two coefficient contributions.
   have hk_each : ∀ l,
       hframe.coeff k x₀
           ((Zc l x₀ • cov (frame l) x₀ +
             (extDerivFun (I := I) (Zc l) x₀).smulRight (frame l x₀)) (frame i x₀)) =
         Zc l x₀ *
-            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe x₀ i l k +
+            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe x₀ i l
+              k +
           (if k = l then extDerivFun (I := I) (Zc k) x₀ (frame i x₀) else 0) := by
     intro l
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
@@ -373,33 +389,39 @@ private lemma coeff_cov_eq_deriv_add_christoffel
     rw [hZc_def]
     ring
 
-/-- Inner product of `∇_{f_i} Z` against `f_j`, expanded in the `coordinateFrameAt` frame:
-`g(∇_{f_i} Z, f_j) = ∑_k (∂_{f_i} Z^k + ∑_l Γ^k_{il} Z^l) g(f_k, f_j)`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma inner_cov_frame_eq
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x₀ : M) (i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
-    g.inner x₀ ((cov Z.toFun x₀) (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ i x₀))
+    g.inner x₀ ((cov Z.toFun x₀)
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ i x₀))
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ j x₀) =
       ∑ k : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
         (extDerivFun (I := I)
             (fun y : M =>
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k y (Z.toFun y))
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x₀).coeff k y (Z.toFun y))
             x₀ (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ i x₀) +
           ∑ l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov
                 (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀)
-                (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀) x₀ i l k *
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff l x₀ (Z.toFun x₀)) *
+                (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                  x₀) x₀ i l k *
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x₀).coeff l x₀ (Z.toFun x₀)) *
         g.inner x₀ (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ k x₀)
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ j x₀) := by
   classical
-  set hframe := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀ with hframe_def
+  set hframe := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+    x₀ with hframe_def
   set frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ with hfr_def
   have hx₀ : x₀ ∈ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x₀ :=
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x₀
-  -- Expand the covariant derivative in the frame.
   have hexpand : (cov Z.toFun x₀) (frame i x₀) =
       ∑ k, hframe.coeff k x₀ ((cov Z.toFun x₀) (frame i x₀)) • frame k x₀ :=
     hframe.coeff_sum_eq (fun _ => (cov Z.toFun x₀) (frame i x₀)) hx₀
@@ -409,11 +431,14 @@ private lemma inner_cov_frame_eq
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [coeff_cov_eq_deriv_add_christoffel cov Z x₀ i k]
 
-/-- **The Voss–Weyl divergence as the `coordinateFrameAt`-frame coordinate covariant
-divergence.**
-`divergence_g g Z x = ∑_p (∂_{f_p} Z^p + ∑_l Γ^p_{p l} Z^l)`,
-where `Z^p = coeff_p Z`, `f_p = coordinateFrameAt x p`, and `Γ` is the
-`coordinateFrameAt`-frame Christoffel symbol of the Levi–Civita connection. -/
+
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem divergence_g_eq_coordinateFrame_covariant_divergence
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -421,34 +446,39 @@ theorem divergence_g_eq_coordinateFrame_covariant_divergence
       ∑ p : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
         (extDerivFun (I := I)
             (fun y : M =>
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x).coeff p y (Z.toFun y))
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x).coeff p y (Z.toFun y))
             x (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x p x) +
           ∑ l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame (LeviCivita (I := I) g)
                 (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x) x p l p *
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x).coeff l x (Z.toFun x)) := by
+                (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                  x) x p l p *
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x).coeff l x (Z.toFun x)) := by
   classical
   set frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x with hfr_def
-  set hfo := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x with hfo_def
+  set hfo := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x
+    with hfo_def
   set gInv : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
       DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
     fun i j => DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
       (I := I) g x i j (extChartAt I x x) with hgInv_def
-  have hinv := DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+  have hinv :=
+    Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
     (I := I) g x
-  set hfb := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x with hfb_def
+  set hfb := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x with
+    hfb_def
   have hbasis_app : ∀ q, hfb q = frame q x := fun q =>
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply (I := I) x q
-  -- Abbreviation for the coordinate-covariant-derivative coefficient `C i k`.
   set C : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
       DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
     fun i k =>
       extDerivFun (I := I) (fun y : M => hfo.coeff k y (Z.toFun y)) x (frame i x) +
-        ∑ l, DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame (LeviCivita (I := I) g)
+        ∑ l, DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
+          (LeviCivita (I := I) g)
             frame hfo x i l k * hfo.coeff l x (Z.toFun x) with hC_def
   rw [divergence_g_eq_finBasis_metricTrace (I := I) g Z x]
-  -- Inverse-metric contraction collapses `∑_j gInv i j · g(f_k, f_j) = δ_{i k}`.
   have hcontract : ∀ i k,
       (∑ j, gInv i j * g.inner x (frame k x) (frame j x)) = (if i = k then (1 : Real) else 0) := by
     intro i k
@@ -458,7 +488,8 @@ theorem divergence_g_eq_coordinateFrame_covariant_divergence
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [hbasis_app j, hbasis_app k, g.symm x (frame k x) (frame j x)]
       _ = if i = k then (1 : Real) else 0 := h
-  calc (∑ i, ∑ j, gInv i j * g.inner x ((LeviCivita (I := I) g).toFun Z.toFun x (frame i x)) (frame j x))
+  calc (∑ i, ∑ j, gInv i j * g.inner x ((LeviCivita (I := I) g).toFun Z.toFun x (frame i x))
+    (frame j x))
       = ∑ i, ∑ j, gInv i j * ∑ k, C i k * g.inner x (frame k x) (frame j x) := by
         refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
         rw [inner_cov_frame_eq (LeviCivita (I := I) g) g Z x i j]

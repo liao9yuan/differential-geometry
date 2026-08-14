@@ -7,38 +7,13 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.ToLpChartBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalIdentityIntegral
 import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 
-/-!
-# Constructor for `ChartBilinearH1ComplData` from a `laplacianDomain g` element
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and any
-`u_h : H1Compl g` with `hu_h : u_h ∈ laplacianDomain g`, this file
-constructs a `ChartBilinearH1ComplData g α` instance.
-
-The data fields are populated as follows:
-
-* `u_chart` — the partition-of-unity-weighted chart-push of the Lp
-  representative `H1ComplToLp u_h` on `chartTargetEuclid α`.
-* `weak_partial i` — the chart-pushed weak `i`-partial coming from the
-  H¹-Lipschitz extension `chartPushedWeakPartialLp` (against the canonical
-  chart-pushed-partial Lipschitz witness).
-* `f_chart` — the no-partition-of-unity chart-pullback (`chartPushedRaw`)
-  of the Lp representative `fHLeibniz g α u_h hu_h`. This is the chart
-  function `EuclN → ℝ` whose value at `y ∈ chartTargetEuclid α` is
-  `(fHLeibniz : M → ℝ) ((extChartAt I α).symm ((toEuclidean).symm y))`,
-  and zero outside `chartTargetEuclid α`.
-
-The variational identity is then a direct consequence of the form-B
-headline `laplacianDomain_variational_identity_general`, with the
-RHS rewritten in setIntegral form via the `chartPulledIntegralCLM` ↔
-setIntegral bridge developed below.
--/
 
 noncomputable section
 
@@ -51,7 +26,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainChartData
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -83,15 +58,14 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- A globally Borel-measurable extension of `(extChartAt I α).symm` taking a
-fixed default value (here `α : M`) outside the chart target. -/
 private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
   classical
   exact (extChartAt I α).target.piecewise
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [I.Boundaryless] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlobal (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -101,7 +75,8 @@ private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [I.Boundaryless] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmGlobal_measurable (α : M) :
     Measurable (extChartAtSymmGlobal (I := I) (M := M) α) := by
   classical
@@ -112,7 +87,8 @@ private lemma extChartAtSymmGlobal_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-omit [I.Boundaryless] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
     (hF_meas : Measurable F) :
     Measurable (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F) := by
@@ -156,7 +132,7 @@ private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
   rw [h_piecewise]
   exact Measurable.piecewise hCT_meas h_comp measurable_const
 
-omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -172,7 +148,8 @@ private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
         ∫⁻ x, Ftilde x ∂(chartLocalMeasure (I := I) g α) := by
     change ∫⁻ x, Ftilde x ∂(riemannianMeasure (I := I) g (chartAtlasPOU I M)) =
       ∫⁻ x, Ftilde x ∂(chartLocalMeasure (I := I) g α)
-    exact DifferentialGeometry.Analysis.Sobolev.Chart.riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
+    exact
+      riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
       (I := I) (M := M) g α hFtilde_meas hFtilde_zero_off
   have h_off_zero :
       (chartLocalMeasure (I := I) g α) ((chartAt H α).source)ᶜ = 0 :=
@@ -201,6 +178,7 @@ private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
   · rw [hFtilde_def, Set.indicator_of_mem hx]
   · rw [hFtilde_def, Set.indicator_of_notMem hx]; exact zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma lintegral_density_chartPushedRaw_pow_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F) {p : ℝ} (_hp_pos : 0 < p) :
@@ -271,9 +249,7 @@ private lemma lintegral_density_chartPushedRaw_pow_le
   exact lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
     (I := I) (M := M) g α h_G_meas
 
-/-- For any measurable `F : M → ℝ` in `MemLp 2 μ_g`, the chart-pullback function
-`chartPushedRaw I α F` is in `MemLp 2` of the chart-pulled weighted measure
-restricted to `chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRaw_memLp_chartPulledWeighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F)
@@ -299,7 +275,8 @@ private lemma chartPushedRaw_memLp_chartPulledWeighted
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal h_two_ne_zero h_two_ne_top]
   rw [h_two_toReal]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) ?_
-  show ∫⁻ y, ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F y‖ₑ ^ (2 : ℝ) ∂μ_w ≠ ⊤
+  show ∫⁻ y, ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F y‖ₑ ^ (2 : ℝ) ∂μ_w ≠
+    ⊤
   have h_lint_eq :
       ∫⁻ y, ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F y‖ₑ ^ (2 : ℝ) ∂μ_w =
         ∫⁻ y in DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -338,9 +315,11 @@ private lemma chartPushedRaw_memLp_chartPulledWeighted
   have h_c_E_pos : (0 : ℝ≥0∞) <
       (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) := by
     exact_mod_cast DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor_pos
-  have h_c_E_ne_zero : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠ 0 :=
+  have h_c_E_ne_zero : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠
+    0 :=
     ne_of_gt h_c_E_pos
-  have h_c_E_ne_top : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠ ⊤ :=
+  have h_c_E_ne_top : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠
+    ⊤ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor_ennreal_ne_top
   have h_bound :=
     lintegral_density_chartPushedRaw_pow_le (I := I) (M := M) g α (p := 2) hF_meas
@@ -367,9 +346,7 @@ private lemma chartPushedRaw_memLp_chartPulledWeighted
   rw [h_contra, ENNReal.mul_top h_c_E_ne_zero] at h_bound
   exact absurd h_bound (not_le.mpr h_RHS_lt_top)
 
-/-- For any measurable `F : M → ℝ` (in particular Lp.coeFn), the eLpNorm of
-`chartPushedRaw I α F` against the chart-pulled weighted measure restricted to
-`chartTargetEuclid α` is bounded by `(1/√c_E) · eLpNorm F μ_g`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPushedRaw_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F) :
@@ -476,9 +453,6 @@ private lemma eLpNorm_chartPushedRaw_le
   refine h_pow_le.trans ?_
   rw [ENNReal.mul_rpow_of_nonneg _ _ (by positivity : (0 : ℝ) ≤ 1 / 2)]
 
-/-- For any Lp class `F : Lp ℝ 2 μ_g`, the chart-pullback function
-`chartPushedRaw I α (F : M → ℝ)` is in `MemLp 2` of the chart-pulled
-weighted measure restricted to `chartTargetEuclid α`. -/
 noncomputable def chartPushedRawLpFromLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -488,6 +462,7 @@ noncomputable def chartPushedRawLpFromLp
   (chartPushedRaw_memLp_chartPulledWeighted (I := I) (M := M) g α
     (Lp.stronglyMeasurable F).measurable (Lp.memLp F)).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRawLpFromLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -503,9 +478,7 @@ lemma chartPushedRawLpFromLp_coeFn
   unfold chartPushedRawLpFromLp
   exact MemLp.coeFn_toLp _
 
-/-- `chartPushedRawLpFromLp` preserves Lp-tendsto. The proof follows
-`chartPushedLpFromLp_tendsto` (form-B), using the eLpNorm bound for
-`chartPushedRaw`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRawLpFromLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : ℕ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -574,7 +547,8 @@ lemma chartPushedRawLpFromLp_tendsto
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
               (I := I) (M := M) α))) atTop (𝓝 0) := by
-    set c := ((DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞))⁻¹ ^ ((1 : ℝ)/2)
+    set c := ((DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞))⁻¹ ^
+      ((1 : ℝ)/2)
       with hc_def
     have h_const_tendsto :
         Tendsto (fun n => c *
@@ -646,9 +620,7 @@ lemma chartPushedRawLpFromLp_tendsto
     simpa using h_comp
   exact h_toReal_tendsto
 
-/-- The smooth-case identity: for a smooth scalar `v`, the chart-pulled integral
-CLM at `smoothToLp v` against weight `density · ψ` equals the chart-target setIntegral
-of `density · chartPushedRaw v · ψ`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPulledIntegralCLM_density_ψ_smoothToLp_eq_setIntegral
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -690,10 +662,8 @@ private lemma chartPulledIntegralCLM_density_ψ_smoothToLp_eq_setIntegral
     (I := I) (M := M) α v.toFun hy]
   ring
 
-/-- `ψ` as an Lp class in `Lp ℝ 2 (chartPulledWeightedMeasure.restrict chartTarget)`.
-ψ is continuous, compactly supported, and `tsupport ψ ⊆ chartTarget`, hence
-`MemLp 2` of the weighted-restricted measure (continuous functions with compact
-support are bounded, and the measure is finite on the support). -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma psi_memLp_chartPulledWeighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -708,8 +678,7 @@ private lemma psi_memLp_chartPulledWeighted
   continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (I := I) (M := M) g α hψ.continuous hψ_cs hψ_supp
 
-/-- The integral `∫_{chartTarget} density · f · ψ ∂vol` equals
-`∫_{chartTarget} f · ψ ∂(chartPulledWeighted)`, for measurable `f`. -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma setIntegral_density_eq_integral_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (f ψ : EuclN → ℝ) :
@@ -739,13 +708,7 @@ private lemma setIntegral_density_eq_integral_weighted
   rw [← setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (I := I) (M := M) g α (fun y => f y * ψ y)]
 
-/-- The inner product representation: for any
-`G : Lp ℝ 2 (chartPulledWeightedMeasure.restrict chartTarget)`,
-```
-∫_{chartTarget} density(y) · G.coeFn(y) · ψ(y) ∂vol
-  = ⟪ψ_lp, G⟫_{L²((chartPulledWeighted).restrict chartTarget)},
-```
-where `ψ_lp = MemLp.toLp ψ` (the Lp class of ψ against the weighted measure). -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma setIntegral_density_G_psi_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -782,6 +745,7 @@ private lemma setIntegral_density_G_psi_eq_inner
   rw [show @inner ℝ _ _ (ψ y) ((G : EuclN → ℝ) y) =
       ((G : EuclN → ℝ) y) * ψ y from RCLike.inner_apply _ _]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_aeEq_of_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     {f₁ f₂ : M → ℝ} (hf₁ : Measurable f₁) (hf₂ : Measurable f₂)
@@ -870,7 +834,8 @@ lemma chartPushedRaw_aeEq_of_aeEq
     filter_upwards [h_integrand_ae_zero, h_density_pos_ae] with y hy h_pos
     rcases mul_eq_zero.mp hy with h | h
     · exact absurd h h_pos.ne'
-    · have h_enorm_zero : ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ = 0 := by
+    · have h_enorm_zero : ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ =
+        0 := by
         have : (‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ) ^ (2 : ℝ) =
             ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ ^ (2 : ℝ) := rfl
         rw [this] at h
@@ -879,7 +844,8 @@ lemma chartPushedRaw_aeEq_of_aeEq
         rcases h_rpow with ⟨h1, _⟩ | ⟨_, h2⟩
         · exact h1
         · exact absurd h2 (by norm_num)
-      exact (enorm_eq_zero (a := DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y)).mp h_enorm_zero
+      exact (enorm_eq_zero (a := DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d
+        y)).mp h_enorm_zero
   have h_abs_cts :
       (chartPulledWeightedMeasure (I := I) g α).restrict
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -916,10 +882,7 @@ lemma chartPushedRaw_aeEq_of_aeEq
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
       (I := I) (M := M) α f₂ h_in_chart]
 
-/-- For any `F : Lp ℝ 2 μ_g`, the chart-pulled integral CLM at `F` against
-the weight `density · ψ` equals the chart-target setIntegral of
-`density · (chartPushedRawLpFromLp F).coeFn · ψ ∂vol`. This is the general
-form of the smooth-case identity, extended by density from smooth scalars. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPulledIntegralCLM_density_ψ_eq_setIntegral
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1071,9 +1034,7 @@ theorem chartPulledIntegralCLM_density_ψ_eq_setIntegral
   rw [h_LHS_eq_inner_seq] at h_LHS_tendsto
   exact tendsto_nhds_unique h_LHS_tendsto h_inner_tendsto
 
-/-- The chart-pushed weak partial is a weak partial of
-`chartPushed POU α (H1ComplToLp u_h).coeFn` on the full open
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -1171,8 +1132,10 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
       have hx_notin_tsupport : x ∉ tsupport φ := fun hx => hx_notin_Ω' (h_tsupport_in_Ω' hx)
       rw [h_fderiv_zero x hx_notin_tsupport]
       simp
-    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := Ω')]
-    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
+    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := Ω')]
+    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
       intro x hx
       by_cases hx_in_chart : x ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α
@@ -1215,8 +1178,10 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
       have hx_notin_tsupport : x ∉ tsupport φ := fun hx => hx_notin_Ω' (h_tsupport_in_Ω' hx)
       have hφ_x_zero : φ x = 0 := image_eq_zero_of_notMem_tsupport hx_notin_tsupport
       rw [hφ_x_zero, mul_zero]
-    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := Ω')]
-    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
+    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := Ω')]
+    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
       intro x hx
       by_cases hx_in_chart : x ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α
@@ -1230,7 +1195,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
   rw [h_LHS_eq, h_RHS_eq]
   exact h_identity
 
-/-- The chart-bilinear data associated with an element `u_h ∈ laplacianDomain g`. -/
 noncomputable def chartBilinearH1ComplData_of_laplacianDomain
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1243,7 +1207,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
           (I := I) (M := M) α))) : EuclN → ℝ)
   f_chart :=
     ((chartPushedRawLpFromLp (I := I) (M := M) g α
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h) :
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) :
       Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α))) : EuclN → ℝ)
@@ -1258,7 +1222,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
       (H1ComplToLp (I := I) (M := M) g u_h))
   f_chart_memLp_weighted :=
     Lp.memLp (chartPushedRawLpFromLp (I := I) (M := M) g α
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h))
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))
   weak_partial_locally_memLp := fun i K hK hK_in =>
     chartPushedWeakPartialLp_locally_memLp (I := I) (M := M) g α i u_h hK hK_in
   weak_partial_isWeakPartial := fun i => by
@@ -1373,7 +1337,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
       (I := I) (M := M) g α hu_h hψ hψ_cs hψ_supp
     have h_partA := chartPulledIntegralCLM_density_ψ_eq_setIntegral
       (I := I) (M := M) g α hψ hψ_cs hψ_supp
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h)
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h)
     rw [h_partA] at h_integralForm
     have h_u_chart_ae := chartPushedLpFromLp_coeFn (I := I) (M := M) g α
       (H1ComplToLp (I := I) (M := M) g u_h)
@@ -1408,9 +1372,6 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
             (I := I) (M := M) α))) : EuclN → ℝ) ψ] at h_integralForm
     exact h_integralForm
 
-/-- The `u_chart` field of the structure returned by
-`chartBilinearH1ComplData_of_laplacianDomain` equals the chart-pushed Lp class
-coercion (with-ρα). -/
 lemma chartBilinearH1ComplData_of_laplacianDomain_u_chart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1421,9 +1382,6 @@ lemma chartBilinearH1ComplData_of_laplacianDomain_u_chart_def
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α))) : EuclN → ℝ) := rfl
 
-/-- The `weak_partial` field of the structure returned by
-`chartBilinearH1ComplData_of_laplacianDomain` equals the chart-pushed weak
-partial Lp class coercion. -/
 lemma chartBilinearH1ComplData_of_laplacianDomain_weak_partial_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -1435,15 +1393,12 @@ lemma chartBilinearH1ComplData_of_laplacianDomain_weak_partial_def
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α))) : EuclN → ℝ) := rfl
 
-/-- The `f_chart` field of the structure returned by
-`chartBilinearH1ComplData_of_laplacianDomain` equals the chart-pullback Lp class
-coercion (no-ρα) of `fHLeibniz`. -/
 lemma chartBilinearH1ComplData_of_laplacianDomain_f_chart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α hu_h).f_chart =
       ((chartPushedRawLpFromLp (I := I) (M := M) g α
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h) :
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) :
         Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α))) : EuclN → ℝ) := rfl

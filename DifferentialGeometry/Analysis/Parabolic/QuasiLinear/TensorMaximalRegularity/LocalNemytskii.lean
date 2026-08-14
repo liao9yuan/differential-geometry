@@ -23,8 +23,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
 variable {X Y : Type*}
-  [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-  [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
+  [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+  [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
 variable {T : ℝ}
 
 /-- Lift a time field to a state-set subtype, using the zero state off the
@@ -51,7 +51,7 @@ theorem aeSetLift_aesm {S : Set X} (hzero : (0 : X) ∈ S)
   exact (Lp.aestronglyMeasurable f).congr
     (aeSetLift_coe_ae hzero f hf).symm
 
-omit [InnerProductSpace ℝ Y] [CompleteSpace Y] in
+omit [NormedSpace ℝ Y] [CompleteSpace Y] in
 /-- A Lipschitz map on a state-set subtype sends every top-norm time field
 which remains in that state set almost everywhere to an `L²` field. -/
 theorem memLp_on {S : Set X} (hzero : (0 : X) ∈ S)
@@ -124,9 +124,9 @@ three-arm tame estimate, whose right-hand side has four terms once the tame arm
 is split across its two endpoints. -/
 theorem timeL2_norm_le_four
     {Z W V : Type*}
-    [NormedAddCommGroup Z] [InnerProductSpace ℝ Z] [CompleteSpace Z]
-    [NormedAddCommGroup W] [InnerProductSpace ℝ W] [CompleteSpace W]
-    [NormedAddCommGroup V] [InnerProductSpace ℝ V] [CompleteSpace V]
+    [NormedAddCommGroup Z] [NormedSpace ℝ Z] [CompleteSpace Z]
+    [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
+    [NormedAddCommGroup V] [NormedSpace ℝ V] [CompleteSpace V]
     (h : timeL2 X T) (p : timeL2 Y T) (q : timeL2 Z T)
     (r : timeL2 W T) (s : timeL2 V T) {A B C D : ℝ}
     (hA : 0 ≤ A) (hB : 0 ≤ B) (hC : 0 ≤ C) (hD : 0 ≤ D)
@@ -244,7 +244,7 @@ lower-order norm.  The three-arm estimate is nevertheless enough to build the
 `L²` Nemytskii field, because on the state set the lower-order operator `J` is
 bounded by `R`, so the tame arm contributes a term linear in `‖f t‖`. -/
 
-omit [InnerProductSpace ℝ Y] [CompleteSpace Y] in
+omit [NormedSpace ℝ Y] [CompleteSpace Y] in
 /-- A continuous state-set map satisfying the three-arm tame estimate sends
 every top-order `L²` field which remains in the state set to an `L²` field.
 This is the tame counterpart of `memLp_on`; no global Lipschitz constant is

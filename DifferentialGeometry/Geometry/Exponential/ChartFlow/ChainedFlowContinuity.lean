@@ -10,25 +10,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Chain-of-charts continuity of the exponential map
-
-This file collects the six chained-flow continuity steps used to deduce
-`Continuous (expMap g p)` on a geodesically complete Riemannian manifold:
-compactness of the geodesic segment `γ([0, 1])`, a finite chart-cover
-partition via the Lebesgue-number lemma, per-chart joint-`C¹` local flows
-from Picard–Lindelöf, continuity at chart junctions via the local-flow
-group-property gluing, and the final continuity statement obtained by
-specialising the joint flow to `t = 1`.
-
-The detailed Lean types of the intermediate joint-flow predicates are
-deferred to the proof phase; here we expose only the propositional
-shells required to record the chain. The headline statement is
-`expMap_continuous`, whose signature is
-`Continuous (expMap g p)`.
--/
 
 noncomputable section
 
@@ -40,8 +22,8 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,10 +32,31 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
-/-- The base curve `γ` of a geodesic witness `IsGeodesicOnWithInitial g γ J p v`
-is continuous on `J`: it is the bundle projection of a tangent-bundle integral
-curve of the chart-fixed geodesic vector field, and integral curves are
-continuous on their domain. -/
+omit [NeZero (Module.finrank ℝ E)] in
+theorem maximalGeodesic_continuousAt_zero
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    ContinuousAt (maximalGeodesic (I := I) g p v) 0 := by
+  classical
+  obtain ⟨g_v, hg0, hg_int⟩ :=
+    exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) (g := g)
+      (p := p) (v := v)
+  have hlift_cont : ContinuousAt g_v 0 := hg_int.continuousAt
+  have hπ_cont : Continuous
+      (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+    FiberBundle.continuous_proj E (TangentSpace I)
+  have hproj_cont : ContinuousAt (fun t => (g_v t).proj) 0 :=
+    hπ_cont.continuousAt.comp hlift_cont
+  obtain ⟨ε, hε, h_eq⟩ :=
+    picardLift_proj_eq_maximalGeodesic_on_ball (I := I) (g := g) (p := p)
+      (v := v) hg0 hg_int
+  have h_eventually :
+      maximalGeodesic (I := I) g p v =ᶠ[𝓝 (0 : ℝ)] fun t => (g_v t).proj := by
+    have h_ball : Metric.ball (0 : ℝ) ε ∈ 𝓝 (0 : ℝ) :=
+      Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hε)
+    filter_upwards [h_ball] with t ht using h_eq t ht
+  exact hproj_cont.congr h_eventually.symm
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless]
+    [T2Space (TangentBundle I M)] in
 lemma IsGeodesicOnWithInitial.continuousOn_base
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {J : Set ℝ}
     {p : M} {v : TangentSpace I p}
@@ -67,17 +70,8 @@ lemma IsGeodesicOnWithInitial.continuousOn_base
     hπ.comp_continuousOn hf_cont
   exact hcomp.congr (fun t _ht => (hproj t).symm)
 
-/-- **Identification of the maximal geodesic with a witness lift, under
-foot-in-source.** If `f` is a tangent-bundle integral curve of the chart-`p`
-geodesic vector field on an open preconnected `J ∋ 0`, starting at `⟨p, v⟩`,
-whose base curve stays in `(chartAt H p).source` throughout `J`, then
-`maximalGeodesic g p v` agrees with `t ↦ (f t).proj` on `J`.
-
-This generalises `picardLift_proj_eq_maximalGeodesic_on_ball` from a ball
-around `0` to any such witness interval.  The foot-in-source hypothesis is
-unavoidable: it is exactly what `isMIntegralCurveOn_eq_of_isPreconnected`
-requires to propagate the agreement across `J`, since the chart-`p` geodesic
-vector field degenerates once the foot leaves `(chartAt H p).source`. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma maximalGeodesic_eqOn_lift_of_footInSource
     {g : SmoothRiemannianMetric I M} {p : M} {v : E}
     {f : ℝ → TangentBundle I M} {J : Set ℝ}
@@ -120,10 +114,8 @@ lemma maximalGeodesic_eqOn_lift_of_footInSource
     exact (hproj' t).symm
   exact hval
 
-/-- **Continuity of the maximal geodesic on a foot-in-source witness
-interval.** Under the same hypotheses as
-`maximalGeodesic_eqOn_lift_of_footInSource`, `maximalGeodesic g p v` is
-continuous on `J`. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma maximalGeodesic_continuousOn_of_footInSource
     {g : SmoothRiemannianMetric I M} {p : M} {v : E}
     {f : ℝ → TangentBundle I M} {J : Set ℝ}
@@ -141,33 +133,6 @@ lemma maximalGeodesic_continuousOn_of_footInSource
     hπ.comp_continuousOn hf_cont
   exact hcomp.congr heq
 
-/-- The maximal geodesic `maximalGeodesic g p v` is continuous at `t = 0`.
-Its value near `0` coincides with the projection of a single
-Picard–Lindelöf integral curve `g_v` (via
-`picardLift_proj_eq_maximalGeodesic_on_ball`), and that projection is
-continuous as a base curve of an integral curve. -/
-theorem maximalGeodesic_continuousAt_zero
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
-    ContinuousAt (maximalGeodesic (I := I) g p v) 0 := by
-  classical
-  obtain ⟨g_v, hg0, hg_int⟩ :=
-    exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) (g := g)
-      (p := p) (v := v)
-  have hlift_cont : ContinuousAt g_v 0 := hg_int.continuousAt
-  have hπ_cont : Continuous
-      (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
-    FiberBundle.continuous_proj E (TangentSpace I)
-  have hproj_cont : ContinuousAt (fun t => (g_v t).proj) 0 :=
-    hπ_cont.continuousAt.comp hlift_cont
-  obtain ⟨ε, hε, h_eq⟩ :=
-    picardLift_proj_eq_maximalGeodesic_on_ball (I := I) (g := g) (p := p)
-      (v := v) hg0 hg_int
-  have h_eventually :
-      maximalGeodesic (I := I) g p v =ᶠ[𝓝 (0 : ℝ)] fun t => (g_v t).proj := by
-    have h_ball : Metric.ball (0 : ℝ) ε ∈ 𝓝 (0 : ℝ) :=
-      Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hε)
-    filter_upwards [h_ball] with t ht using h_eq t ht
-  exact hproj_cont.congr h_eventually.symm
 
 end Exponential
 end Riemannian

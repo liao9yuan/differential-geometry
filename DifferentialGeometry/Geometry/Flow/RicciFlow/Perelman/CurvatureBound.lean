@@ -25,7 +25,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [T2Space M] [SigmaCompactSpace M]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 

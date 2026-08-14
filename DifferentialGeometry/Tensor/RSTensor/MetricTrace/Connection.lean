@@ -12,14 +12,12 @@ import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Connection metric traces
 
-Connection-trace one-form and tangent-field adapters for `(1,2)` tensors.
--/
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -30,13 +28,13 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Linear trace functional on the one upper slot of a `(1,2)` tensor after
-lowering that slot by a supplied covector. -/
+
+
 private def connTraceEvalLin
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -47,7 +45,8 @@ private def connTraceEvalLin
     metricTrace0S2InBasis (I := I)
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
       (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-        DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+        DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x
+          k l
           (extChartAt I x x))
       (A β) Fin.elim0
   map_add' β γ := by
@@ -69,8 +68,8 @@ private def connTraceEvalLin
     intro j _
     simp [mul_left_comm]
 
-/-- Pointwise one-form obtained by metric-tracing a `(1,2)` tensor:
-`V ↦ tr_g ((X,Y) ↦ g(A(X,Y), V))`. -/
+
+
 def connTraceOneFormAt
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -95,12 +94,14 @@ def connTraceOneFormAt
   exact metricTrace0S2InBasis_eq_metricTrace (I := I) g
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x)
+    (inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g x)
     (A (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) V))) Fin.elim0
 
-/-- Basis-coordinate formula for the pointwise connection-trace one-form. -/
+
 theorem connTraceOneFormAt_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -120,7 +121,7 @@ theorem connTraceOneFormAt_coord
   rw [metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis gInv hinv]
   rfl
 
-/-- Pointwise tangent vector obtained by raising the metric trace one-form. -/
+
 def connTraceAt
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -136,7 +137,7 @@ def connTraceAt
       cotangentSharp_gen (I := I) g x (connTraceOneFormAt (I := I) g A) := by
   rfl
 
-/-- Basis-coordinate reconstruction of the raised trace vector. -/
+
 theorem connTraceAt_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -334,9 +335,9 @@ private theorem traceAlg
         · intro hp
           exact False.elim (hp (Finset.mem_univ _))
 
-/-- Coefficient form of `connTraceAt`: after raising the traced one-form, the
-`p`-th coordinate is the inverse-metric trace of the `(1,2)` tensor components
-with upper index `p`. -/
+
+
+
 theorem connTraceCoeff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -430,8 +431,8 @@ private theorem gInvComp_contMDiffAt
       (mem_extChartAt_source (I := I) x₀))
   simpa [f, Function.comp_def] using hcompAt
 
-/-- Local coordinate expansion of the intrinsic trace of a smooth covariant
-two-tensor field. -/
+
+
 private theorem trace02_eventually
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -479,7 +480,7 @@ private theorem trace02_eventually
       fin_cases q <;>
         simp [basis, coordinateFrameAt_basis_apply, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- The metric trace of a smooth covariant two-tensor field is smooth. -/
+
 theorem trace02_smooth
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -509,8 +510,8 @@ theorem trace02_smooth
         (fun q : Fin 2 => if q = 0 then i else j))
   exact hRhs.congr_of_eventuallyEq (trace02_eventually (I := I) g A x₀)
 
-/-- Local coordinate expansion of the intrinsic squared norm of a smooth covariant
-two-tensor field. -/
+
+
 private theorem normSq02_eventually
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -553,8 +554,8 @@ private theorem normSq02_eventually
     funext q; fin_cases q <;> simp [basis, coordinateFrameAt_basis_apply]
   rw [e1, e2]
 
-/-- The intrinsic squared norm of a smooth covariant two-tensor field is smooth.
-This is the static specialization route used for `|Ric|²`-type curvature norms. -/
+
+
 theorem normSq02_smooth
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -594,8 +595,8 @@ theorem normSq02_smooth
         (fun q : Fin 2 => if q = 0 then k else l))
   exact hRhs.congr_of_eventuallyEq (normSq02_eventually (I := I) g A x₀)
 
-/-- Local coordinate expansion of the intrinsic squared norm of a smooth
-covariant tensor field of arbitrary valence. -/
+
+
 private theorem normSq0S_eventually
     (g : SmoothRiemannianMetric I M) {s : Nat}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -633,8 +634,8 @@ private theorem normSq0S_eventually
     simp [basis, coordinateFrameAt_basis_apply]
   rw [hI, hJ]
 
-/-- The intrinsic squared norm of a smooth covariant tensor field of any
-finite valence is smooth. -/
+
+
 theorem normSq0S_smooth {s : Nat}
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -781,7 +782,7 @@ private theorem connTraceCoeff_contMDiffAt
   exact hRhs.congr_of_eventuallyEq
     (connTraceCoeff_eventually (I := I) g A x₀ p)
 
-/-- Smooth tangent section obtained by metric-tracing a smooth `(1,2)` tensor. -/
+
 def connTraceField
     (g : SmoothRiemannianMetric I M)
     (A : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -801,7 +802,7 @@ def connTraceField
     (x : M) :
     connTraceField (I := I) g A x = connTraceAt (I := I) g (A x) := rfl
 
-/-- Coordinate-frame coefficient formula for the bundled metric trace field. -/
+
 theorem connTraceField_coord
     (g : SmoothRiemannianMetric I M)
     (A : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

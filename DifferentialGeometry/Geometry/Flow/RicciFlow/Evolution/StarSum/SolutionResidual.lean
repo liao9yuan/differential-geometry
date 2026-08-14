@@ -3,12 +3,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualBa
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerSwapRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
 
-/-!
-# Local-frame residual data from a Ricci-flow solution
 
-The positive-tail regularity producer and the dimension-three level-zero
-curvature equation discharge every standing input of `resStarBoundLF`.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -16,14 +16,13 @@ open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- The canonical whole residual field, fixed recursively before any point or
@@ -37,7 +36,7 @@ noncomputable def rmResidualField
   | 0 => e0Field (I := I) S (t : Real)
   | k + 1 => resStarNext (I := I) S t k (rmResidualField S t k)
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 /-- The canonical residual field has the exact recursive constructor cost in
 every finite component index type. -/
 theorem rmResidualField_cost
@@ -60,7 +59,7 @@ theorem rmResidualField_cost
         resStarNext_cost (I := I) S hS k t
           (rmResidualField (I := I) S t k) ih
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 /-- On one orthonormal local-frame patch, the fixed recursive field realizes
 the component heat equation at every tower level. -/
 private theorem rmResidual_local
@@ -200,6 +199,7 @@ theorem rmResidual_cost
     rmResidual_local (I := I) S hS t frame hframe1 hu horthU
       baseDt chrDt hrm hchr hchrId hswap k x hx I0
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a positive-time tail, a dimension-three Ricci-flow solution produces
 the local-frame StarSum residual and its component bound without additional
 time-regularity or derivative-swap assumptions. -/

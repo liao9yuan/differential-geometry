@@ -2,15 +2,13 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Constant scaling of smooth Riemannian metrics
 
-This file contains the metric-side algebra needed for parabolic rescaling.
-The scaling is by a positive constant and keeps the same tangent bundle.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -48,7 +46,6 @@ private theorem mdifferentiableAt_metric_inner
   rw [mdifferentiableAt_totalSpace] at htotal
   exact htotal.2
 
-set_option synthInstance.maxHeartbeats 80000 in
 private theorem contMDiff_scaleMetric_inner_section
     (c : Real) (g : SmoothRiemannianMetric I M) :
     ContMDiff I
@@ -65,7 +62,7 @@ private theorem contMDiff_scaleMetric_inner_section
         TangentSpace I y →L[Real] TangentSpace I y →L[Real] Real)
       (a := c))
 
-/-- Scale a smooth Riemannian metric by a positive constant. -/
+
 def scaleMetric (c : Real) (hc : 0 < c)
     (g : SmoothRiemannianMetric I M) : SmoothRiemannianMetric I M where
   inner x := c • g.inner x
@@ -113,7 +110,7 @@ def scaleMetric (c : Real) (hc : 0 < c)
       c * g.inner x v w := by
   rfl
 
-/-- Scaling by `1` is extensionally the identity on inner products. -/
+
 theorem scaleMetric_one
     (g : SmoothRiemannianMetric I M) :
     (scaleMetric (I := I) (1 : Real) zero_lt_one g).inner = g.inner := by
@@ -121,7 +118,7 @@ theorem scaleMetric_one
   ext v w
   simp [scaleMetric_inner]
 
-/-- Successive positive scalings multiply, extensionally on inner products. -/
+
 theorem scaleMetric_mul
     (a b : Real) (ha : 0 < a) (hb : 0 < b)
     (g : SmoothRiemannianMetric I M) :
@@ -131,8 +128,8 @@ theorem scaleMetric_mul
   ext v w
   simp [scaleMetric_inner, mul_assoc]
 
-/-- Scaling by `c⁻¹` after scaling by `c` returns the original metric,
-extensionally on inner products. -/
+
+
 theorem scaleMetric_inv_mul
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) :
     (scaleMetric (I := I) c⁻¹ (inv_pos.mpr hc)
@@ -142,8 +139,8 @@ theorem scaleMetric_inv_mul
   simp only [scaleMetric_inner]
   rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hc), one_mul]
 
-/-- Metric compatibility is preserved when the metric is scaled by a positive
-constant and the connection is unchanged. -/
+
+
 theorem mc_scaleMetric
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -179,8 +176,8 @@ theorem mc_scaleMetric
   rw [smul_eq_mul]
   ring
 
-/-- Levi-Civita-ness is preserved when the metric is scaled by a positive
-constant and the connection is unchanged. -/
+
+
 theorem lc_scaleMetric
     [FiniteDimensional Real E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}

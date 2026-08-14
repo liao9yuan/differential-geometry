@@ -1,12 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 
-/-!
-# Tensor heat semigroup: shared analytic setup
-
-This file provides the shared file-local setup (Borel-space instances on `E`
-and `M`) used by the tensor heat semigroup analysis on `TensorL2 r s g`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

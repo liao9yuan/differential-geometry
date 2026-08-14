@@ -4,12 +4,12 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapLine
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Retag
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# The finite spectral core of the moving scalar Laplacian
 
-This file realizes the genuine scalar Laplacian difference on the dense
-finite-support spectral core, with values in the fixed reference `L²` space.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -30,7 +30,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -43,7 +43,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The dense finite-support scalar spectral `H²` core. -/
+
 abbrev ScalarH2Core (g : SmoothRiemannianMetric I M) :=
   tensorHs.finiteSupportSubmodule
     (I := I) (M := M) (g := g) (r := 0) (s := 0) 2
@@ -59,7 +59,7 @@ private theorem toRS0_sub {x : M} (A B : Tensor0SSpace 0 I x) :
     tensor0SSpace_evalScalar x c • A - tensor0SSpace_evalScalar x c • B
   exact smul_sub _ _ _
 
-/-- The true moving-minus-reference rough Laplacian on the smooth finite core. -/
+
 noncomputable def lapDiffSec
     (g h : SmoothRiemannianMetric I M) :
     ScalarH2Core (I := I) (M := M) g →ₗ[Real] SmoothCcTensor g 0 0 :=
@@ -70,8 +70,8 @@ noncomputable def lapDiffSec
     (rawConnLapLin (I := I) g 0 0).comp
       (finiteReprLin (I := I) (M := M) g 0 0 2)
 
-/-- Pointwise, `lapDiffSec` is the canonical rank-zero lift of the actual
-scalar Laplacian difference. -/
+
+
 theorem lapDiffSec_apply
     (g h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) g) (x : M) :
@@ -101,16 +101,16 @@ theorem lapDiffSec_apply
   rw [← toRS0_sub]
   rw [map_sub]
 
-/-- The genuine fixed-reference `L²` realization of the finite-core
-Laplacian difference. -/
+
+
 noncomputable def lapDiffCore
     (g h : SmoothRiemannianMetric I M) :
     ScalarH2Core (I := I) (M := M) g →ₗ[Real] TensorL2 0 0 g :=
   (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 0)).toLinearMap.comp
     (lapDiffSec (I := I) (M := M) g h)
 
-/-- Pairing a finite-core moving-Laplacian difference with a finite spectral
-test vector is the fixed-volume integral of the genuine scalar difference. -/
+
+
 theorem lapDiffCore_pair
     (q h : SmoothRiemannianMetric I M)
     (v w : ScalarH2Core (I := I) (M := M) q) :
@@ -171,8 +171,8 @@ theorem lapDiffCore_pair
       (reprScalar0_smooth (I := I) (M := M) w.1 w.2) x Fin.elim0
   rw [hlap, hrepr]
 
-/-- The squared fixed-reference `L²` norm of `lapDiffCore` is the scalar
-Laplacian-difference energy. -/
+
+
 theorem lapDiffCore_sq
     (g h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) g) :
@@ -194,8 +194,8 @@ theorem lapDiffCore_sq
   rw [inner_toRS0_scalar (I := I) (M := M) g x]
   ring
 
-/-- The finite-core `L²` norm is bounded by the metric `C¹` modulus, with a
-constant independent of the spectral support. -/
+
+
 theorem lapDiffCore_norm
     (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧
@@ -228,16 +228,16 @@ theorem lapDiffCore_norm
   nlinarith [norm_nonneg
     (lapDiffCore (I := I) (M := M) g h v)]
 
-/-- The genuine moving-minus-reference scalar Laplacian, extended uniquely
-from the dense finite spectral core to a bounded map `H²(g) → L²(g)`. -/
+
+
 noncomputable def lapDiffOp
     (g h : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g 0 0 2 →L[Real] TensorL2 0 0 g :=
   (lapDiffCore (I := I) (M := M) g h).extendOfNorm
     (ScalarH2Core (I := I) (M := M) g).subtype
 
-/-- On the finite spectral core, `lapDiffOp` evaluates to the genuine
-Laplacian-difference realization whenever the local metric bound applies. -/
+
+
 theorem lapDiffOp_core
     (g h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) g)
@@ -259,8 +259,8 @@ theorem lapDiffOp_core
   intro w
   simpa only [B, Submodule.coe_subtype] using hbound h w hsmall
 
-/-- The operator norm of `lapDiffOp` is controlled by the same support-free
-metric `C¹` modulus. -/
+
+
 theorem lapDiffOp_norm
     (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧

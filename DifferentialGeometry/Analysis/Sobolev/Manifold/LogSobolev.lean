@@ -3,13 +3,13 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IntrinsicEmbedding
 
 set_option autoImplicit false
 
-/-!
-# Logarithmic Sobolev estimate on a closed three-manifold
 
-This file combines the intrinsic Sobolev embedding with the scalar Jensen
-estimate.  The constant is chosen before the scale and the test function, so
-the result can feed a uniform lower bound for Perelman's `W` functional.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Analysis.Sobolev
 
@@ -21,9 +21,9 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Integration
 open scoped Manifold ContDiff ENNReal
 
-/-- Scale-uniform logarithmic Sobolev estimate on a closed three-manifold. -/
+
 theorem logSobolev_closed
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

@@ -135,7 +135,7 @@ private theorem sphere_proj (x : sphere (0 : E) 1) (w : E) :
   rw [hsing] at hsplit
   exact eq_sub_of_add_eq (by rw [add_comm]; exact hsplit)
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [NeZero n] in
 private theorem dIncl_coordGrad
     (x : sphere (0 : E) 1) (w : E) :
     dIncl (n := n) x (coordGrad (E := E) (n := n) w x) =
@@ -167,7 +167,7 @@ private theorem dIncl_coordGrad
         (innerCoordFun (E := E) (n := n) w) x) = _
   rw [← hgrad, hz]
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [NeZero n] in
 private theorem dIncl_rotField (p v : E)
     (x : sphere (0 : E) 1) :
     dIncl (n := n) x (rotField (E := E) (n := n) p v x) =
@@ -180,7 +180,7 @@ private theorem dIncl_rotField (p v : E)
   rw [real_inner_comm (x : E) v, real_inner_comm (x : E) p]
   module
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [NeZero n] in
 private theorem ambDeriv_rot (p v : E)
     (x : sphere (0 : E) 1) (a : TangentSpace (𝓡 n) x) :
     ambDeriv (n := n) (rotField (E := E) (n := n) p v) x a =
@@ -279,7 +279,7 @@ theorem greatCircle_vel
   rw [← hamb]
   simpa [γ, Function.comp_def] using hcomp.symm
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [NeZero n] in
 private theorem velocity_eq_rot
     (p : sphere (0 : E) 1) (v : E)
     (hv : ‖v‖ = 1) (hpv : ⟪(p : E), v⟫ = 0) (t : ℝ) :
@@ -311,6 +311,7 @@ theorem greatCircle_speed
   rw [neg_sq]
   exact Real.sin_sq_add_cos_sq t
 
+omit [NeZero n] in
 /-- Great circles satisfy the geodesic equation of the round metric. -/
 theorem greatCircle_geodesic
     (p : sphere (0 : E) 1) (v : E)

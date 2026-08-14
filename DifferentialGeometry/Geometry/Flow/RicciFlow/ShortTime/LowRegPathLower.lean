@@ -2,14 +2,14 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCc
 
-/-!
-# Low-regularity lower Ricci--DeTurck path arms
 
-This module contains the dimension-three Sobolev estimate used after the
-Ricci--DeTurck path slope has been split into its order-zero and order-one
-coefficient arms.  Production of those coefficients from the low-regularity
-metric family remains in the coefficient layer.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -20,20 +20,15 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 
+section GeneralModel
+
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
-
-/-- In dimension three, uniformly controlled order-zero and order-one
-coefficient arms act from spectral `H2` to spectral `H1`.
-
-The order-zero coefficient needs a pointwise bound and one `L2` covariant
-derivative.  The order-one coefficient needs a pointwise bound and its
-covariant derivatives through order two. -/
 theorem lower_coeff_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -51,8 +46,8 @@ theorem lower_coeff_h1
         (∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g 3 2 j Φ₁‖ ^ 2) ≤ B₁ ^ 2 →
         ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g 2 2 Φ₀ U +
-              appCc (I := I) (M := M) g 3 2 Φ₁
+            (operatorFieldApply (I := I) (M := M) g 2 2 Φ₀ U +
+              operatorFieldApply (I := I) (M := M) g 3 2 Φ₁
                 (covGrad (I := I) (M := M) g 0 2 U))‖ ≤
           C * (B₀ + B₀' + B₁) *
             ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by
@@ -69,9 +64,9 @@ theorem lower_coeff_h1
   calc
     _ ≤
         ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g 2 2 Φ₀ U)‖ +
+            (operatorFieldApply (I := I) (M := M) g 2 2 Φ₀ U)‖ +
           ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g 3 2 Φ₁
+            (operatorFieldApply (I := I) (M := M) g 3 2 Φ₁
               (covGrad (I := I) (M := M) g 0 2 U))‖ := norm_add_le _ _
     _ ≤ C₀ * (B₀ + B₀') *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ +
@@ -89,6 +84,18 @@ theorem lower_coeff_h1
           (mul_le_mul_of_nonneg_left (by linarith) hC₁) hnorm
     _ = (C₀ + C₁) * (B₀ + B₀' + B₁) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by ring
+
+end GeneralModel
+
+section GeneralJetModel
+
+variable
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+      [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+      [T2Space M] [SigmaCompactSpace M]
 
 /-- In dimension three, integral `H1` control of the order-zero coefficient
 and integral `H2` control of the order-one coefficient are sufficient for the
@@ -109,13 +116,15 @@ theorem lower_jet_h1
         (∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g 3 2 j Φ₁‖ ^ 2) ≤ A₁ ^ 2 →
         ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g 2 2 Φ₀ U +
-              appCc (I := I) (M := M) g 3 2 Φ₁
+            (operatorFieldApply (I := I) (M := M) g 2 2 Φ₀ U +
+              operatorFieldApply (I := I) (M := M) g 3 2 Φ₁
                 (covGrad (I := I) (M := M) g 0 2 U))‖ ≤
           C * (A₀ + A₁) *
             ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by
-  obtain ⟨C₀, hC₀, hzero⟩ := appCc_h1_h2_h1 (I := I) (M := M) hDim g 2 2
-  obtain ⟨C₁, hC₁, hone⟩ := appCc_h2_cov_h1 (I := I) (M := M) hDim g 1 2
+  obtain ⟨C₀, hC₀, hzero⟩ := appCc_h1_h2_h1
+    (I := I) (M := M) (hDim := hDim) (g := g) (r := 2) (c := 2)
+  obtain ⟨C₁, hC₁, hone⟩ := appCc_h2_cov_h1
+    (I := I) (M := M) (hDim := hDim) (g := g) (s := 1) (c := 2)
   obtain ⟨Cp, hCp, hp⟩ :=
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 3 2
@@ -158,9 +167,9 @@ theorem lower_jet_h1
   calc
     _ ≤
         ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g 2 2 Φ₀ U)‖ +
+            (operatorFieldApply (I := I) (M := M) g 2 2 Φ₀ U)‖ +
           ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g 3 2 Φ₁
+            (operatorFieldApply (I := I) (M := M) g 3 2 Φ₁
               (covGrad (I := I) (M := M) g 0 2 U))‖ := norm_add_le _ _
     _ ≤ C₀ * A₀ *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ +
@@ -174,13 +183,14 @@ theorem lower_jet_h1
       apply add_le_add
       · exact mul_le_mul_of_nonneg_right
           (mul_le_mul_of_nonneg_left (by linarith) hC₀) hnorm
-      · apply mul_le_mul_of_nonneg_right ?_ hnorm
+      · apply mul_le_mul_of_nonneg_right _ hnorm
         calc
-          C₁ * (K * A₁) ≤ C₁ * (K * (A₀ + A₁)) :=
-            mul_le_mul_of_nonneg_left
-              (mul_le_mul_of_nonneg_left (by linarith) hK) hC₁
-          _ = (C₁ * K) * (A₀ + A₁) := by ring
+          C₁ * (K * A₁) = (C₁ * K) * A₁ := by ring
+          _ ≤ (C₁ * K) * (A₀ + A₁) :=
+            mul_le_mul_of_nonneg_left (by linarith) (mul_nonneg hC₁ hK)
     _ = (C₀ + C₁ * K) * (A₀ + A₁) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by ring
+
+end GeneralJetModel
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

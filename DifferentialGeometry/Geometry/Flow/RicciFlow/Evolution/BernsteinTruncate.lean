@@ -2,14 +2,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSoluti
 
 set_option autoImplicit false
 
-/-!
-# Finite-level Bernstein tower truncation
 
-The maximum-principle consumer uses one reaction constant at every tower level.
-For a fixed target level, a family of level-dependent heat inequalities can be
-made uniform by keeping the genuine tower through that level and setting all
-higher levels to zero.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,9 +29,9 @@ variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 
 namespace BernsteinTower
 
-/-- A level-dependent family of tower heat inequalities gives the Bernstein
-estimate at any fixed level once its finitely many reaction constants are
-bounded by one nonnegative constant. -/
+
+
+
 theorem estimate_of_heat
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

@@ -1,73 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-/-!
-# The spectral `Hˢ` Sobolev scale of tensor sections
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a real
-parameter `σ ≥ 0`, this file builds the **spectral Sobolev space** `Hˢ`
-of mixed `(r, s)`-tensor fields: the subspace of `TensorL2 r s g`
-consisting of tensors `T` whose eigenbasis coordinates
-`cᵢ = ⟪bᵢ, T⟫` against the rough-Laplacian eigenbasis decay fast
-enough that
-
-  `∑ᵢ (1 + λᵢ)^σ · cᵢ² < ∞`,
-
-where `{bᵢ}` is the eigenbasis `tensorResolventHilbertEigenbasisSigma`
-and `λᵢ ≥ 0` the associated connection-Laplacian eigenvalues. The space
-is equipped with the weighted inner product
-
-  `⟪S, T⟫_{Hˢ} = ∑ᵢ (1 + λᵢ)^σ · ⟪bᵢ, S⟫ · ⟪bᵢ, T⟫`,
-
-making it a real Hilbert space. For `σ = 0` the weight is `(1+λ)^0 = 1`
-and `H⁰` is isometrically `TensorL2 r s g` itself.
-
-## Design
-
-`tensorHs g r s σ` is a one-field structure carrying the
-coordinate family `coeff : TensorEigenIdx g r s → ℝ` together with the
-weighted square-summability witness. A structure (rather than a subtype
-of `TensorL2`) is used so the carrier is topology-free: this lets the
-`Hˢ` Hilbert topology — strictly stronger than the `L²`-subspace
-topology — be installed without a `UniformSpace` diamond.
-
-The weighted inner product is supplied via an `InnerProductSpace.Core`,
-which yields the `NormedAddCommGroup` and `InnerProductSpace ℝ`
-instances. Completeness is obtained by transporting along the explicit
-linear isometric equivalence `tensorHs … σ ≃ₗᵢ ℓ²(ι, ℝ)` given by the
-diagonal rescaling `cᵢ ↦ √(1+λᵢ)^σ · cᵢ`.
-
-## Main definitions
-
-* `tensorHs g r s σ` — the spectral `Hˢ` Sobolev space, a
-  real Hilbert space.
-* `tensorHs.coeff` — the `i`-th eigenbasis coordinate of an element.
-* `tensorHsToL2` — the inclusion `Hˢ →L[ℝ] TensorL2 r s g`.
-* `tensorHsRescaleEquivL2` — the rescaling isometry
-  `Hˢ ≃ₗᵢ[ℝ] ℓ²(ι, ℝ)`.
-* `tensorHsZeroEquivL2` — the `σ = 0` identification
-  `H⁰ ≃ₗᵢ[ℝ] TensorL2 r s g`.
-
-## Main results
-
-* weighted-Parseval: `‖T‖² = ∑ᵢ (1+λᵢ)^σ (coeff i T)²`;
-* the weighted inner-product formula;
-* `tensorHsToL2` is injective with operator norm `≤ 1` for
-  `σ ≥ 0`, and its coordinates agree with those of the image in `TensorL2`;
-* finitely-supported coordinate families give elements of every `Hˢ`.
-
-## Sign convention
-
-The eigenvalues `λᵢ ≥ 0` are the connection-Laplacian eigenvalues
-attached to the resolvent eigenbasis (geometer convention
-`Δ_∇ = -∇*∇`, spectrum `⊆ (-∞, 0]`); the resolvent is `(1 - Δ_∇)⁻¹`.
-The weight `(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`, so `Hˢ ⊆ H⁰ = L²`.
--/
-
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -79,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -94,21 +29,20 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The spectral Sobolev weight at eigen-index `i` and exponent `σ`,
-namely `(1 + λᵢ)^σ` with `λᵢ ≥ 0` the connection-Laplacian eigenvalue.
-For `σ ≥ 0` the weight is `≥ 1`; for `σ = 0` it is `1`. -/
 def tensorSobolevWeight {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) : ℝ :=
   (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ σ
 
-/-- The base `1 + λᵢ` of the Sobolev weight is `≥ 1`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma one_le_one_add_lambda {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
   have h := tensor_lambda_nonneg (I := I) (M := M) i
   linarith
 
-/-- The Sobolev weight `(1 + λᵢ)^σ` is positive. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSobolevWeight_pos {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     0 < tensorSobolevWeight (I := I) (M := M) i σ := by
@@ -117,37 +51,37 @@ lemma tensorSobolevWeight_pos {g : SmoothRiemannianMetric I M} {r s : ℕ}
     one_le_one_add_lambda (I := I) (M := M) i
   exact Real.rpow_pos_of_pos (lt_of_lt_of_le one_pos h) σ
 
-/-- The Sobolev weight `(1 + λᵢ)^σ` is non-negative. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSobolevWeight_nonneg {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
   (tensorSobolevWeight_pos (I := I) (M := M) i σ).le
 
-/-- For `σ ≥ 0` the Sobolev weight `(1 + λᵢ)^σ` is `≥ 1`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma one_le_tensorSobolevWeight {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {σ : ℝ} (hσ : 0 ≤ σ) :
     1 ≤ tensorSobolevWeight (I := I) (M := M) i σ := by
   unfold tensorSobolevWeight
   exact Real.one_le_rpow (one_le_one_add_lambda (I := I) (M := M) i) hσ
 
-/-- At `σ = 0` the Sobolev weight is `1`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorSobolevWeight_zero {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i (0 : ℝ) = 1 := by
   unfold tensorSobolevWeight
   exact Real.rpow_zero _
 
-/-- The square root of the Sobolev weight, squared, is the weight. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sq_sqrt_tensorSobolevWeight {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) ^ 2 =
       tensorSobolevWeight (I := I) (M := M) i σ :=
   Real.sq_sqrt (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)
 
-/-- The `i`-th eigenbasis coordinate of an `L²` tensor field `T`, against
-the chart-locality-free eigenbasis
-`tensorResolventHilbertEigenbasisSigma h_compact`. Concretely
-this is `(b.repr T) i`. No chart-selection hypothesis is required. -/
 def tensorL2Coeff {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -156,8 +90,8 @@ def tensorL2Coeff {g : SmoothRiemannianMetric I M} {r s : ℕ}
   (tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) h_compact).repr T i
 
-/-- The chart-locality-free eigenbasis coordinate equals the inner
-product `⟪bᵢ, T⟫`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorL2Coeff_eq_inner {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -169,8 +103,8 @@ lemma tensorL2Coeff_eq_inner {g : SmoothRiemannianMetric I M}
   unfold tensorL2Coeff
   exact HilbertBasis.repr_apply_apply _ T i
 
-/-- The chart-locality-free eigenbasis-coordinate family of `T` is
-square-summable. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorL2Coeff_summable_sq {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -189,7 +123,8 @@ lemma tensorL2Coeff_summable_sq {g : SmoothRiemannianMetric I M}
     rw [tensorL2Coeff_eq_inner, Real.norm_eq_abs, sq_abs]
   rwa [h_eq] at h
 
-/-- `tensorL2Coeff` is additive in its `L²` argument. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorL2Coeff_add {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -201,7 +136,8 @@ lemma tensorL2Coeff_add {g : SmoothRiemannianMetric I M} {r s : ℕ}
   rw [map_add]
   rfl
 
-/-- `tensorL2Coeff` is `ℝ`-homogeneous in its `L²` argument. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorL2Coeff_smul {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -213,17 +149,6 @@ lemma tensorL2Coeff_smul {g : SmoothRiemannianMetric I M} {r s : ℕ}
   rw [map_smul]
   rfl
 
-/-- The spectral `Hˢ` Sobolev space of mixed `(r, s)`-tensor fields, for
-exponent `σ`.
-
-An element is a coordinate family `coeff : TensorEigenIdx g r s → ℝ`
-against the rough-Laplacian eigenbasis, together with a witness that the
-weighted squares `(1 + λᵢ)^σ · (coeff i)²` are summable. For `σ ≥ 0`
-this is exactly the subspace of `TensorL2 r s g` of tensors whose
-eigenbasis expansion lies in the weighted `ℓ²`; see `tensorHsToL2`.
-
-The structure is intentionally topology-free: the `Hˢ` Hilbert topology
-is installed below via an `InnerProductSpace.Core`. -/
 structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) where
 
   coeff : TensorEigenIdx (I := I) (M := M) g r s → ℝ
@@ -232,13 +157,6 @@ structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) where
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (coeff i) ^ 2)
 
-/-- **The Sobolev-scale assembler from a spectral-mass majorant.**  A
-coordinate family `c : TensorEigenIdx g r s → ℝ` whose weighted squares
-`(1 + λᵢ)^σ · (c i)²` are dominated mode-by-mode by a single summable
-majorant `B` defines an element of `Hˢ` with `.coeff = c`.  The
-weighted-summability witness is obtained by the comparison test
-`Summable.of_nonneg_of_le` (the weighted squares are non-negative, since
-the Sobolev weight is non-negative). -/
 def tensorHs_of_spectralMass_majorant {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {σ : ℝ}
     (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -252,6 +170,8 @@ def tensorHs_of_spectralMass_majorant {g : SmoothRiemannianMetric I M}
         (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _))
       hle hB
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorHs_of_spectralMass_majorant_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
     (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -264,14 +184,23 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
-/-- Two `Hˢ` elements are equal once their coordinate families agree. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[ext] lemma ext {S T : tensorHs (I := I) (M := M) g r s σ}
     (h : S.coeff = T.coeff) : S = T := by
   cases S; cases T; cases h; rfl
 
 instance : Zero (tensorHs (I := I) (M := M) g r s σ) where
-  zero := ⟨fun _ => 0, by simp⟩
+  zero := ⟨fun _ => 0, by
+    have h : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        tensorSobolevWeight (I := I) (M := M) i σ * (0 : ℝ) ^ 2) = fun _ => (0 : ℝ) := by
+      funext i
+      rw [pow_two, mul_zero, mul_zero]
+    rw [h]
+    exact summable_zero⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma zero_coeff :
     (0 : tensorHs (I := I) (M := M) g r s σ).coeff =
       (fun _ => 0) := rfl
@@ -311,6 +240,8 @@ instance : Add (tensorHs (I := I) (M := M) g r s σ) where
                   2 * (tensorSobolevWeight (I := I) (M := M) i σ *
                     (T.coeff i) ^ 2) := by ring }
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma add_coeff
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     (S + T).coeff = (fun i => S.coeff i + T.coeff i) := rfl
@@ -329,6 +260,8 @@ instance : Neg (tensorHs (I := I) (M := M) g r s σ) where
           funext i; ring
         rwa [h_eq] }
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma neg_coeff (S : tensorHs (I := I) (M := M) g r s σ) :
     (-S).coeff = (fun i => -S.coeff i) := rfl
 
@@ -347,6 +280,8 @@ instance : SMul ℝ (tensorHs (I := I) (M := M) g r s σ) where
         rw [h_eq]
         exact hS.mul_left _ }
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smul_coeff (c : ℝ)
     (S : tensorHs (I := I) (M := M) g r s σ) :
     (c • S).coeff = (fun i => c * S.coeff i) := rfl
@@ -368,9 +303,8 @@ instance : Module ℝ (tensorHs (I := I) (M := M) g r s σ) where
   add_smul a b S := by ext i; simp [add_mul]
   zero_smul S := by ext i; simp
 
-/-- The weighted product family `i ↦ (1+λᵢ)^σ · (coeff i S) · (coeff i T)`
-is summable: it is dominated by the AM–GM bound coming from the two
-weighted-square-summable families. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedProd_summable
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -415,14 +349,12 @@ lemma weightedProd_summable
               (T.coeff i) ^ 2) := by ring
   simpa using h_amgm
 
-/-- The weighted `Hˢ` inner-product value, as a bare function:
-`⟪S, T⟫ = ∑ᵢ (1 + λᵢ)^σ · (coeff i S) · (coeff i T)`. -/
 def innerFun (S T : tensorHs (I := I) (M := M) g r s σ) : ℝ :=
   ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
     (S.coeff i * T.coeff i)
 
-/-- `innerFun T T` is the weighted sum of squares
-`∑ᵢ (1 + λᵢ)^σ (coeff i T)²`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma innerFun_self (T : tensorHs (I := I) (M := M) g r s σ) :
     innerFun (I := I) (M := M) T T =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
@@ -431,10 +363,6 @@ lemma innerFun_self (T : tensorHs (I := I) (M := M) g r s σ) :
   refine tsum_congr (fun i => ?_)
   rw [sq]
 
-/-- The pre-inner-product `Core` underlying the weighted `Hˢ` inner
-product: symmetry, positive-definiteness, additivity and homogeneity in
-the first slot are all immediate from the corresponding `tsum`
-identities. -/
 @[reducible] def innerCore :
     InnerProductSpace.Core ℝ
       (tensorHs (I := I) (M := M) g r s σ) where
@@ -501,38 +429,35 @@ identities. -/
     have : T.coeff i = 0 := by nlinarith [h_sq]
     simpa using this
 
-/-- The `NormedAddCommGroup` instance on `Hˢ` induced by the weighted
-inner product. -/
 instance instNormedAddCommGroup :
     NormedAddCommGroup (tensorHs (I := I) (M := M) g r s σ) :=
   InnerProductSpace.Core.toNormedAddCommGroup
     (cd := innerCore (I := I) (M := M) (g := g) (r := r) (s := s)
       (σ := σ))
 
-/-- The `InnerProductSpace ℝ` instance on `Hˢ`. -/
 instance instInnerProductSpace :
     InnerProductSpace ℝ (tensorHs (I := I) (M := M) g r s σ) :=
   InnerProductSpace.ofCore
     (innerCore (I := I) (M := M) (g := g) (r := r) (s := s)
       (σ := σ)).1
 
-/-- The `Hˢ` inner product is the weighted `tsum`
-`∑ᵢ (1 + λᵢ)^σ · (coeff i S) · (coeff i T)`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_def (S T : tensorHs (I := I) (M := M) g r s σ) :
     (inner ℝ S T : ℝ) =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (S.coeff i * T.coeff i) := rfl
 
-/-- The `Hˢ` inner product of `T` with itself is the weighted sum of
-squares `∑ᵢ (1+λᵢ)^σ (coeff i T)²`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_self_eq (T : tensorHs (I := I) (M := M) g r s σ) :
     (inner ℝ T T : ℝ) =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (T.coeff i) ^ 2 :=
   innerFun_self (I := I) (M := M) T
 
-/-- The squared `Hˢ` norm equals the weighted sum of squared
-coordinates: `‖T‖² = ∑ᵢ (1 + λᵢ)^σ · (coeff i T)²`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_sq_eq_tsum
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖T‖ ^ 2 =
@@ -540,8 +465,8 @@ theorem norm_sq_eq_tsum
         (T.coeff i) ^ 2 := by
   rw [← real_inner_self_eq_norm_sq, inner_self_eq]
 
-/-- The `Hˢ` norm is the square root of the weighted sum of squared
-coordinates. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_eq_sqrt_tsum
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖T‖ =
@@ -556,8 +481,8 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
-/-- The rescaled coordinate family `i ↦ √(1+λᵢ)^σ · coeff i` of an `Hˢ`
-element is square-summable, hence a member of `ℓ²(ι, ℝ)`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rescale_memℓp (T : tensorHs (I := I) (M := M) g r s σ) :
     Memℓp (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
@@ -583,13 +508,13 @@ lemma rescale_memℓp (T : tensorHs (I := I) (M := M) g r s σ) :
   rw [h_eq]
   exact T.weighted_summable
 
-/-- The forward rescaling map `Hˢ → ℓ²(ι, ℝ)`,
-`T ↦ (i ↦ √(1+λᵢ)^σ · coeff i)`. -/
 def rescaleToL2 (T : tensorHs (I := I) (M := M) g r s σ) :
     lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 :=
   ⟨fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
       T.coeff i, rescale_memℓp (I := I) (M := M) T⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rescaleToL2_apply
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -597,8 +522,8 @@ def rescaleToL2 (T : tensorHs (I := I) (M := M) g r s σ) :
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
         T.coeff i := rfl
 
-/-- Any `ℓ²(ι, ℝ)` family, divided by `√(1+λᵢ)^σ`, satisfies the
-weighted square-summability defining `Hˢ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rescaleFromL2_weighted_summable
     (f : lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -635,8 +560,6 @@ lemma rescaleFromL2_weighted_summable
   rw [h_eq]
   exact hf
 
-/-- The inverse rescaling map `ℓ²(ι, ℝ) → Hˢ`,
-`f ↦ (i ↦ √(1+λᵢ)^σ ⁻¹ · f i)`. -/
 def rescaleFromL2
     (f : lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2) :
     tensorHs (I := I) (M := M) g r s σ where
@@ -644,6 +567,8 @@ def rescaleFromL2
     (f : _ → ℝ) i
   weighted_summable := rescaleFromL2_weighted_summable (I := I) (M := M) f
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rescaleFromL2_coeff
     (f : lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -652,10 +577,6 @@ def rescaleFromL2
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ *
         (f : _ → ℝ) i := rfl
 
-/-- The rescaling map `Hˢ → ℓ²(ι, ℝ)` packaged as a linear isometric
-equivalence. The forward map is the diagonal rescaling
-`cᵢ ↦ √(1+λᵢ)^σ · cᵢ`; norm preservation is the weighted-norm
-identity. -/
 def rescaleEquivL2 :
     tensorHs (I := I) (M := M) g r s σ ≃ₗᵢ[ℝ]
       lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 where
@@ -724,6 +645,8 @@ def rescaleEquivL2 :
     have := congrArg Real.sqrt h_eq_sq
     rwa [Real.sqrt_sq h1, Real.sqrt_sq h2] at this
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rescaleEquivL2_apply
     (T : tensorHs (I := I) (M := M) g r s σ) :
     (rescaleEquivL2 (I := I) (M := M)
@@ -743,8 +666,8 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
-/-- For `σ ≥ 0`, the (unweighted) coordinate family of an `Hˢ` element
-is square-summable. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma coeff_summable_sq_of_nonneg (hσ : 0 ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -757,8 +680,6 @@ lemma coeff_summable_sq_of_nonneg (hσ : 0 ≤ σ)
   have hsq : 0 ≤ (T.coeff i) ^ 2 := sq_nonneg _
   nlinarith [hw, hsq]
 
-/-- For `σ ≥ 0`, the coordinate family of an `Hˢ` element, viewed in
-`ℓ²(ι, ℝ)`. -/
 def toL2Seq (hσ : 0 ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 :=
@@ -775,12 +696,15 @@ def toL2Seq (hσ : 0 ≤ σ)
     rw [h_eq]
     exact coeff_summable_sq_of_nonneg (I := I) (M := M) hσ T⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma toL2Seq_apply (hσ : 0 ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (toL2Seq (I := I) (M := M) hσ T : _ → ℝ) i = T.coeff i := rfl
 
-/-- `toL2Seq` is additive. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma toL2Seq_add (hσ : 0 ≤ σ)
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     toL2Seq (I := I) (M := M) hσ (S + T) =
@@ -789,7 +713,8 @@ lemma toL2Seq_add (hσ : 0 ≤ σ)
   funext i
   simp only [toL2Seq_apply, lp.coeFn_add, Pi.add_apply, add_coeff]
 
-/-- `toL2Seq` is `ℝ`-homogeneous. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma toL2Seq_smul (hσ : 0 ≤ σ) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     toL2Seq (I := I) (M := M) hσ (c • T) =
@@ -799,10 +724,6 @@ lemma toL2Seq_smul (hσ : 0 ≤ σ) (c : ℝ)
   simp only [toL2Seq_apply, lp.coeFn_smul, Pi.smul_apply, smul_coeff,
     smul_eq_mul]
 
-/-- The underlying function of the chart-locality-free inclusion
-`Hˢ → TensorL2`: it sends an `Hˢ` element to the `L²` tensor with the
-same eigenbasis coordinate family, reconstructed via the inverse of the
-`_ofCompact` Hilbert-basis representation. -/
 def toL2Fun_ofCompact
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -813,8 +734,8 @@ def toL2Fun_ofCompact
     (I := I) (M := M) h_compact).repr.symm
     (toL2Seq (I := I) (M := M) hσ T)
 
-/-- The chart-locality-free `L²` eigenbasis coordinate of `toL2Fun_ofCompact T`
-is the `Hˢ` coordinate of `T`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorL2Coeff_ofCompact_toL2Fun_ofCompact
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -827,7 +748,8 @@ is the `Hˢ` coordinate of `T`. -/
   rw [LinearIsometryEquiv.apply_symm_apply]
   rfl
 
-/-- `toL2Fun_ofCompact` is additive. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma toL2Fun_ofCompact_add
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -839,7 +761,8 @@ lemma toL2Fun_ofCompact_add
   unfold toL2Fun_ofCompact
   rw [toL2Seq_add (I := I) (M := M) hσ S T, map_add]
 
-/-- `toL2Fun_ofCompact` is `ℝ`-homogeneous. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma toL2Fun_ofCompact_smul
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -850,8 +773,8 @@ lemma toL2Fun_ofCompact_smul
   unfold toL2Fun_ofCompact
   rw [toL2Seq_smul (I := I) (M := M) hσ c T, map_smul]
 
-/-- For `σ ≥ 0`, the `L²` norm of `toL2Fun_ofCompact T` is bounded by the
-`Hˢ` norm of `T`: the chart-locality-free inclusion is norm-non-increasing. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_toL2Fun_ofCompact_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -903,9 +826,6 @@ lemma norm_toL2Fun_ofCompact_le
 
 end tensorHs
 
-/-- For `σ ≥ 0`, the chart-locality-free inclusion of the spectral
-Sobolev space `Hˢ` into `TensorL2 r s g`, as a continuous linear map.
-Operator norm `≤ 1`, injective. No chart-selection hypothesis. -/
 def tensorHsToL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) {σ : ℝ}
@@ -924,8 +844,8 @@ def tensorHsToL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
       rw [one_mul]
       exact tensorHs.norm_toL2Fun_ofCompact_le (I := I) (M := M) h_compact hσ T)
 
-/-- `tensorHsToL2` applied to `T` is the underlying
-`toL2Fun_ofCompact T`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorHsToL2_apply {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {h_compact : IsCompactOperator (tensorResolventL2
@@ -935,8 +855,8 @@ def tensorHsToL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
         h_compact hσ T =
       tensorHs.toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T := rfl
 
-/-- The operator norm of the chart-locality-free inclusion
-`Hˢ →L[ℝ] TensorL2` is at most `1` for `σ ≥ 0`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsToL2_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {h_compact : IsCompactOperator (tensorResolventL2
@@ -946,8 +866,8 @@ theorem tensorHsToL2_opNorm_le_one {g : SmoothRiemannianMetric I M}
         h_compact hσ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-- The chart-locality-free `L²` eigenbasis coordinate of the image of
-`T` under the inclusion equals the `Hˢ` coordinate of `T`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsToL2_tensorL2Coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {h_compact : IsCompactOperator (tensorResolventL2
@@ -961,8 +881,8 @@ theorem tensorHsToL2_opNorm_le_one {g : SmoothRiemannianMetric I M}
   exact tensorHs.tensorL2Coeff_ofCompact_toL2Fun_ofCompact
     (I := I) (M := M) h_compact hσ T i
 
-/-- The chart-locality-free inclusion `Hˢ →L[ℝ] TensorL2` is injective for
-`σ ≥ 0`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsToL2_injective {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {h_compact : IsCompactOperator (tensorResolventL2
@@ -979,9 +899,6 @@ theorem tensorHsToL2_injective {g : SmoothRiemannianMetric I M}
     (I := I) (M := M) (h_compact := h_compact) hσ T i
   rw [← hS, ← hT, hST]
 
-/-- The spectral `H⁰` Sobolev space is isometrically isomorphic to the
-`L²` Hilbert space `TensorL2 r s g`, via the chart-locality-free
-eigenbasis. No chart-selection hypothesis is required. -/
 def tensorHsZeroEquivL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
@@ -992,8 +909,8 @@ def tensorHsZeroEquivL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (tensorResolventHilbertEigenbasisSigma
       (I := I) (M := M) h_compact).repr.symm
 
-/-- The chart-locality-free `H⁰`-to-`L²` identification sends `T` to the
-`L²` tensor with the same eigenbasis coordinates. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsZeroEquivL2_tensorL2Coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -1010,9 +927,8 @@ theorem tensorHsZeroEquivL2_tensorL2Coeff
   rw [tensorHs.rescaleEquivL2_apply]
   simp only [tensorSobolevWeight_zero, Real.sqrt_one, one_mul]
 
-/-- The chart-locality-free `H⁰`-to-`L²` identification, read backwards:
-the `L²` tensor `U` becomes the `H⁰` element whose coordinate family is
-`U`'s eigenbasis coordinate family. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsZeroEquivL2_symm_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -1027,8 +943,6 @@ theorem tensorHsZeroEquivL2_symm_coeff
   rw [LinearIsometryEquiv.apply_symm_apply] at h
   exact h.symm
 
-/-- A finitely-supported coordinate family `f` defines an element of
-`Hˢ` for every exponent `σ`. -/
 def tensorHsOfFiniteSupport {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : ℝ)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     (hf : (Function.support f).Finite) :
@@ -1044,6 +958,8 @@ def tensorHsOfFiniteSupport {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : �
     rw [hfi]
     ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorHsOfFiniteSupport_coeff {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (σ : ℝ)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -1052,9 +968,6 @@ def tensorHsOfFiniteSupport {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : �
       f := rfl
 
 open scoped Classical in
-/-- The standard basis coordinate family `i ↦ if i = j then 1 else 0`
-defines an element of every `Hˢ` — the spectral representation of the
-`j`-th eigenvector `b j`. -/
 def tensorHsBasisVec {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : ℝ)
     (j : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorHs (I := I) (M := M) g r s σ :=
@@ -1068,15 +981,16 @@ def tensorHsBasisVec {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : ℝ)
       simpa using hi)
 
 open scoped Classical in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorHsBasisVec_coeff {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (σ : ℝ)
     (j i : TensorEigenIdx (I := I) (M := M) g r s) :
     (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j).coeff i =
       (if i = j then (1 : ℝ) else 0) := rfl
 
-/-- For `σ ≥ 0`, the chart-locality-free inclusion `Hˢ → TensorL2` carries
-the spectral basis vector `tensorHsBasisVec σ j` to the actual
-`_ofCompact` eigenbasis vector `b j`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsToL2_tensorHsBasisVec {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {h_compact : IsCompactOperator (tensorResolventL2
@@ -1128,14 +1042,12 @@ example (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
     CompleteSpace (tensorHs (I := I) (M := M) g r s σ) :=
   inferInstance
 
-/-- Chart-locality-free coordinate functional access (no `h_atlas`). -/
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) : ℝ :=
   tensorL2Coeff (I := I) (M := M) h_compact T i
 
-/-- Chart-locality-free inclusion access (no `h_atlas`). -/
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) {σ : ℝ}
@@ -1145,7 +1057,6 @@ example {g : SmoothRiemannianMetric I M} {r s : ℕ}
   tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
     h_compact hσ
 
-/-- Chart-locality-free `σ = 0` identification access (no `h_atlas`). -/
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :

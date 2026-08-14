@@ -33,7 +33,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -348,6 +348,7 @@ theorem exists_rfns_iteratedCovGrad_pairTraceOp_diff_grid
           (pureDoubleTraceField (I := I) (M := M) g₀ g₁ 2)
           (pureDoubleTraceField (I := I) (M := M) g₀ g₁ 4) from rfl]
     rw [pureDoubleTraceField_cross_split (I := I) (M := M) g₀ g₁ 2]
+    simp only [appCcRS]
     rw [appCcRS_add_left_cc (I := I) (M := M) g₀ 6 4 2]
     conv_lhs =>
       rw [show pureDoubleTraceField (I := I) (M := M) g₀ g₁ 4 =

@@ -1,33 +1,16 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerPointwiseUpperBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2Bound
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# `L²` bound on a tensor section by the sum of chart-frame scalar components
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S`, the squared `L²` norm `(tensorL2Norm S)²` is
-bounded by a non-negative constant `C` (depending only on `(g, r, s)`)
-times the double sum over `α ∈ chartAtlasPOU_finset` and the multi-index
-pair `(Idx, Jdx)` of `((eLpNorm scalar 2 μ).toReal)²`. The proof composes
-the bundle-fibre pointwise upper bound (on `tsupport(POU_α)`), the
-chart-frame basis recovery `‖T‖² ≤ C₁ · Σ (P_IJ T)²`, Cauchy–Schwarz on
-the POU finset using `Σ_α POU_α = 1`, and an integration step.
-
-* `tensorL2Norm_sq_le_const_mul_sum_componentL2Norm_sq` — the headline.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -42,7 +25,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,21 +36,17 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Covariant multi-index type used as an index across the file. -/
-abbrev MIdxC (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+abbrev MIdxC (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] (r : ℕ) :=
   Fin r → Fin (Module.finrank ℝ E)
 
-/-- The cardinality (as a real number) of the universal pair-of-multi-indices
-finset, appearing as a multiplier in the basis-recovery constant. -/
 noncomputable def midxPairCard (r s : ℕ) : ℝ :=
   ((Finset.univ : Finset (MIdxC E r × MIdxC E s)).card : ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma midxPairCard_nonneg (r s : ℕ) :
     0 ≤ midxPairCard (E := E) r s := Nat.cast_nonneg _
 
-/-- The `(Idx, Jdx)`-indexed double sum of squared chart-frame scalar
-components at a point on the manifold, against a fixed chart base point. -/
 private noncomputable def sumScalarSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (b : M) : ℝ :=
@@ -75,15 +54,13 @@ private noncomputable def sumScalarSq
     (tensorChartComponentScalar (I := I) (M := M)
         g r s S α Idx Jdx b) ^ 2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma sumScalarSq_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α b : M) :
     0 ≤ sumScalarSq g r s S α b :=
   Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
 
-/-- **Algebraic fibre-norm recovery.** The model-fibre norm squared of a
-mixed `(r, s)`-tensor `T` is dominated by the multi-index cardinality times
-the squared chart-frame basis-norm constant times the sum over all
-multi-index pairs of the squared chart-frame component projections. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorRSModel_norm_sq_le_sum_projection_sq (r s : ℕ)
     (T : TensorRSModel r s ℝ E) :
     ‖T‖ ^ 2 ≤
@@ -138,6 +115,7 @@ lemma tensorRSModel_norm_sq_le_sum_projection_sq (r s : ℕ)
     rw [hprod, Finset.sum_product (f := fun p => (P p) ^ 2)]] at h_sq
   exact h_sq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pou_sq_tensorInner_le_sum_scalar_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -192,6 +170,7 @@ private lemma pou_sq_tensorInner_le_sum_scalar_sq
     rw [show ρ ^ 2 * Q = 0 from by rw [this]; ring]
     exact mul_nonneg (mul_nonneg hK_nn hC₁_nn) h_sum_nn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorInner_le_const_mul_sum_scalar_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -253,6 +232,7 @@ private lemma tensorInner_le_const_mul_sum_scalar_sq
     h_CS.trans (mul_le_mul_of_nonneg_left h_per_α hN_nn)
   linarith [h_combined, (show N * (Cmax * sumSS) = N * Cmax * sumSS by ring)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- **Pointwise finite-component reconstruction.** The intrinsic squared fibre
 norm of a smooth mixed tensor is controlled by the finite sum of squares of
 its partition-of-unity weighted chart-frame scalar components. -/
@@ -273,6 +253,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (S : SmoothCcTensor g r s) (α : M)
   (Idx : MIdxC E r) (Jdx : MIdxC E s)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_memLp_two :
     MemLp (tensorChartComponentScalar g r s S α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -284,6 +265,7 @@ private lemma tensorChartComponentScalar_memLp_two :
       g r s S α Idx Jdx).continuous.memLp_of_hasCompactSupport (p := 2)
     (tensorChartComponentScalar_hasCompactSupport g r s S α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_sq_integrable :
     Integrable (fun b : M =>
       (tensorChartComponentScalar g r s S α Idx Jdx b) ^ 2)
@@ -297,6 +279,7 @@ private lemma tensorChartComponentScalar_sq_integrable :
     ((tensorChartComponentScalar_hasCompactSupport g r s S α Idx Jdx).comp_left
       (g := fun y : ℝ => y ^ 2) (by simp))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_integral_sq_eq_eLpNorm_toReal_sq :
     ∫ b, (tensorChartComponentScalar g r s S α Idx Jdx b) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
@@ -321,13 +304,7 @@ private lemma tensorChartComponentScalar_integral_sq_eq_eLpNorm_toReal_sq :
 
 end ScalarHelpers
 
-/-- **Headline `L²` bound for a tensor section by chart-frame scalar
-components.** There is `C ≥ 0` (depending only on `(g, r, s)` and the
-chart-atlas data; independent of `S`) such that the squared global `L²`
-norm `(tensorL2Norm S)²` is bounded by `C` times the double sum over
-`α ∈ chartAtlasPOU_finset` and the multi-index pair `(Idx, Jdx)` of
-`((eLpNorm (tensorChartComponentScalar g r s S α Idx Jdx) 2 μ).toReal)²`.
-Inverse companion of `tensorChartComponentScalar_eLpNorm_le_uniform`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorL2Norm_sq_le_const_mul_sum_componentL2Norm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

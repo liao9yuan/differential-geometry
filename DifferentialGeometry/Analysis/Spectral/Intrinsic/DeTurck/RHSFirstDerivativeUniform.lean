@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSFirstDerivativeLipschitz
 
-/-!
-# Family-uniform first derivative bound for the Ricci--DeTurck RHS
 
-This module packages chart Gram bounds through order three into one uniform
-bound for the first spatial chart derivatives of the Ricci--DeTurck right-hand
-side on active partition-of-unity chart supports.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -18,15 +18,15 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option maxHeartbeats 800000 in
-/-- Uniform metric equivalence and chart Gram bounds through order three give
-one metric-`3`-jet Lipschitz constant for every first spatial chart derivative
-of the Ricci--DeTurck RHS on active POU supports. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHSD_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -217,8 +217,14 @@ theorem chartRHSD_pou_lip
   have hW₁ : 0 ≤ W₁ := by dsimp [W₁]; positivity
   have hW₂ : 0 ≤ W₂ := by dsimp [W₂]; positivity
   have hRicL : 0 ≤ RicL := by dsimp [RicL]; positivity
-  have hLieL : 0 ≤ LieL := by dsimp [LieL]; positivity
-  refine ⟨C, by dsimp [C]; positivity, ?_⟩
+  have hLieL : 0 ≤ LieL := by
+    dsimp only [LieL]
+    have hn0 : (0 : ℝ) ≤ n := by dsimp only [n]; positivity
+    have h1 : 0 ≤ W₁ * Q₁ + DV := add_nonneg (mul_nonneg hW₁ hQ₁_nn) hDV
+    have h2 : 0 ≤ W₀ * Q₂ + V := add_nonneg (mul_nonneg hW₀ hQ₂_nn) hV
+    have h3 : 0 ≤ W₂ * Q₀ + D2V := add_nonneg (mul_nonneg hW₂ hQ₀_nn) hD2V
+    exact mul_nonneg hn0 (by linarith)
+  refine ⟨C, by dsimp only [C]; linarith, ?_⟩
   intro α hα k₁ k₂ b hb d i j
   have hbBase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
@@ -604,9 +610,10 @@ theorem chartRHSD_pou_lip
         (metricJet3_nonneg (I := I) (M := M)
           (gSeq k₁) (gSeq k₂) α (extChartAt I α b))
 
-/-- Uniform metric equivalence and chart Gram bounds through order three give
-one bound for every first spatial chart derivative of the Ricci--DeTurck RHS
-on every active partition-of-unity chart support. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHSD_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -762,8 +769,14 @@ theorem chartRHSD_pou_bnd
   have hDV : 0 ≤ DV := by dsimp [DV]; positivity
   have hD2V : 0 ≤ D2V := by dsimp [D2V]; positivity
   have hRicD : 0 ≤ RicD := by dsimp [RicD]; positivity
-  have hLieD : 0 ≤ LieD := by dsimp [LieD]; positivity
-  refine ⟨C, by dsimp [C]; positivity, ?_⟩
+  have hLieD : 0 ≤ LieD := by
+    dsimp only [LieD]
+    have hn0 : (0 : ℝ) ≤ n := by dsimp only [n]; positivity
+    have h1 : 0 ≤ 3 * DV * Q₁ := mul_nonneg (by linarith) hQ₁_nn
+    have h2 : 0 ≤ V * Q₂ := mul_nonneg hV hQ₂_nn
+    have h3 : 0 ≤ 2 * Q₀ * D2V := mul_nonneg (by linarith) hD2V
+    exact mul_nonneg hn0 (by linarith)
+  refine ⟨C, by dsimp only [C]; linarith, ?_⟩
   intro α hα k b hb d i j
   have hbBase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet

@@ -10,19 +10,18 @@ open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
   [BoundarylessManifold I M]
 
-/-- On a dimension-three bounded-curvature Ricci flow, every finite
-covariant-derivative level of the Riemann tensor is uniformly bounded on the
-tail starting at the midpoint of the time interval. -/
+
+
+
 theorem bbsAllMBounds
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     (S : SolutionOn (I := I) (M := M)

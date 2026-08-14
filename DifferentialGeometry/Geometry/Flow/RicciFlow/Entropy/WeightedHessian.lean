@@ -5,16 +5,15 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Weighted Hessian identities
 
-This file packages the invariant weighted-divergence and Bochner identities
-used to complete Perelman's Hessian square.  Every tensor is evaluated to a
-scalar before integration, so no comparison of dependent tensor fibers is
-required.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -28,19 +27,20 @@ open scoped Manifold ContDiff
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [IsManifold I 1 M] in
 private theorem weighted_int [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f q : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f)
@@ -150,6 +150,7 @@ private theorem int7_zero
       hg012345 hg6
   simpa only [g0, g1, g2, g3, g4, g5, g6, Pi.add_apply] using hall
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem norm_sq_shift
     (g : SmoothRiemannianMetric I M) {x : M}
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -213,8 +214,8 @@ private theorem norm_sq_shift
   rw [← normSq0S_eq_inner, ← normSq0S_eq_inner, ← normSq0S_eq_inner, hmetric]
   ring
 
-/-- The weighted Ricci--Hessian contraction differs from the Ricci drift and
-the scalar-curvature trace term by a weighted divergence. -/
+
+
 theorem weighted_hess_split [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) :
@@ -243,8 +244,8 @@ theorem weighted_hess_split [I.Boundaryless] [CompactSpace M]
     (fun x => ricDriftAct (I := I) g hf x)
     (fun x => by ring)
 
-/-- The integrated weighted Bochner identity in the scalar form needed for
-Perelman's Hessian-square completion. -/
+
+
 theorem weighted_bochner [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) :
@@ -504,8 +505,8 @@ theorem weighted_bochner [I.Boundaryless] [CompactSpace M]
         exact congrArg (fun r : Real => r - ∫ x, A2 x ∂μw) hadd
       _ = 0 := by rw [hA0zero, hA1zero, hA2zero]; ring
 
-/-- The geometric part of the reversed `W` variation is the negative square
-of `Ric + Hess f - g / (2 * s)`. -/
+
+
 theorem weighted_w_square [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f)

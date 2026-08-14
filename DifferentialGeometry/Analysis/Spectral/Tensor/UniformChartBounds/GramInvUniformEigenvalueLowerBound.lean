@@ -7,44 +7,41 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Uniform Rayleigh-quotient lower bound for the inverse chart-frame Gram matrix
 
-For a closed Riemannian manifold `(M, g)` and a chart base point `α : M`, the
-quadratic form
-`(b, ξ) ↦ ∑_{i, j} (chartGramMatrix g α b)⁻¹_{ij} ξ_i ξ_j`
-on the compact closed support of the chart-atlas partition-of-unity weight at
-`α` admits a strictly positive uniform lower bound in `ξ`-norm.
 
-Concretely:
 
-* `exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport` — there
-  exists `c > 0` such that for every `b` in the closed support and every
-  coefficient vector `ξ : Fin n → ℝ`,
-  `c * (∑ i, ξ i ^ 2) ≤ ∑ i j, (chartInvGramMatrix g α b)_{ij} * ξ i * ξ j`.
 
-## Proof strategy
 
-The chart-frame Gram matrix `chartGramMatrix g α b` is positive-definite at
-every point of the chart base set (`chartGramMatrix_posDef`); its inverse
-`chartInvGramMatrix g α b := (chartGramMatrix g α b)⁻¹` is therefore
-positive-definite there. Its entries are continuous in `b` on the chart
-base set (`chartInvGramMatrix_entry_contMDiffOn`), and the chart base set
-contains the compact closed support of the chart-atlas
-partition-of-unity weight at `α`. The Rayleigh-quotient bilinear form is
-continuous on `baseSet × (Fin n → ℝ)`, strictly positive at every
-`(b, ξ)` with `ξ ≠ 0`, and the extreme-value theorem on the compact
-product `tsupport(POU_α) × unit sphere` gives a strictly positive
-minimum, which is the required lower bound (with the squared `ξ`-norm
-scaling for general `ξ`).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap Metric Function
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
@@ -61,13 +58,11 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] in
-/-- The unit sphere `{ξ | ∑ ξ_i^2 = 1}` in `Fin n → ℝ` is compact (closed and
-bounded in a finite-dimensional space). -/
+omit [FiniteDimensional ℝ E] in
 private lemma sphere_isCompact :
     IsCompact {ξ : Fin (Module.finrank ℝ E) → ℝ |
       ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 = 1} := by
@@ -97,19 +92,19 @@ private lemma sphere_isCompact :
     exact habs
   exact (isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hbdd⟩)
 
-/-- **Uniform Rayleigh-quotient lower bound for the chart-frame inverse Gram
-matrix on an arbitrary compact subset `Kα` of the chart base set.**
 
-For a closed Riemannian manifold `(M, g)`, any chart base point `α`, and a
-compact set `Kα` contained in the chart-`α` base set, there exists `c > 0`
-such that for every `b ∈ Kα` and every coefficient vector
-`ξ : Fin (Module.finrank ℝ E) → ℝ`,
-`c * (∑ i, ξ i ^ 2) ≤ ∑ i j, (chartInvGramMatrix g α b)_{ij} * ξ i * ξ j`.
 
-The Gram matrix is built from the chart-`α`-trivialised model basis at every
-base-set point; on a compact subset of the chart base set the inverse is
-positive-definite with continuous entries, and the extreme-value theorem
-produces a strictly positive minimum. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -288,8 +283,8 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         exact le_of_eq (hsum_empty _).symm
     · exact absurd ⟨b, hb⟩ hKα_ne
 
-/-- The inverse chart-Gram quadratic form has a uniform upper bound on a
-compact chart piece. -/
+
+
 theorem chartInvGram_quad_ub
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -405,8 +400,8 @@ theorem chartInvGram_quad_ub
         rw [← hr_sq]
         ring
 
-/-- Pointwise metric equivalence gives the corresponding upper comparison of
-the chart inverse-Gram quadratic forms. -/
+
+
 theorem chartInvGram_quad_le
     (g h : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -476,9 +471,6 @@ theorem chartInvGram_quad_le
       rw [hcoord]
       simp
 
-omit [InnerProductSpace ℝ E] in
-/-- A quadratic-form upper bound for an inverse chart-Gram matrix bounds each
-matrix entry by the same constant. -/
 theorem chartInvGram_ent_le
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -571,8 +563,8 @@ theorem chartInvGram_ent_le
     rw [abs_of_neg (lt_of_not_ge hentry)]
     nlinarith [hdiag_nonneg i, hdiag_nonneg j]
 
-/-- A pointwise metric-equivalent family has one inverse-Gram quadratic-form
-upper bound on a fixed compact chart piece. -/
+
+
 theorem chartInvGram_unif_ub
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -610,8 +602,8 @@ theorem chartInvGram_unif_ub
       mul_le_mul_of_nonneg_left (hbase b hb ξ) hΛpos.le
     _ = (Λ * CBase) * (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2) := by ring
 
-/-- A pointwise metric-equivalent family has one chart inverse-Gram
-ellipticity constant on a fixed compact chart piece. -/
+
+
 theorem chartInvGram_unif_lb
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -706,8 +698,8 @@ theorem chartInvGram_unif_lb
     _ ≤ normSq0S (I := I) (gSeq k) b 1 A := hnorm
     _ = _ := hseq_coord
 
-/-- A pointwise metric-equivalent family has one inverse-Gram ellipticity
-constant on every active chart-atlas partition-of-unity support. -/
+
+
 theorem chartInvGram_pou_lb
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -777,8 +769,8 @@ theorem chartInvGram_pou_lb
     intro α _hα
     exact (hM ⟨α⟩).elim
 
-/-- A pointwise metric-equivalent family has one inverse-Gram quadratic-form
-upper bound on every active chart-atlas partition-of-unity support. -/
+
+
 theorem chartInvGram_pou_ub
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -829,8 +821,8 @@ theorem chartInvGram_pou_ub
     (mul_le_mul_of_nonneg_right hCα_le
       (Finset.sum_nonneg fun i _ => sq_nonneg (ξ i)))
 
-/-- Pointwise metric equivalence gives one entrywise inverse-Gram bound on all
-active partition-of-unity chart supports. -/
+
+
 theorem chartInvGram_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -853,8 +845,8 @@ theorem chartInvGram_pou_bnd
     (pouTsupport_subset_baseSet (I := I) (M := M) α hb)
     (hupper α hα k b hb) i j
 
-/-- Pointwise metric equivalence gives one two-sided inverse-Gram ellipticity
-envelope on all active partition-of-unity chart supports. -/
+
+
 theorem chartInvGram_pou_eqv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -884,19 +876,19 @@ theorem chartInvGram_pou_eqv
   intro α hα k b hb ξ
   exact ⟨hlower α hα k b hb ξ, hupper α hα k b hb ξ⟩
 
-/-- **Uniform Rayleigh-quotient lower bound for the chart-frame inverse Gram
-matrix on the compact closed support of the chart-atlas partition-of-unity
-weight at `α`.**
 
-For a closed Riemannian manifold `(M, g)` and any chart base point `α`,
-there exists `c > 0` such that for every `b` in the closed support of the
-chart-atlas partition-of-unity weight at `α` and every coefficient vector
-`ξ : Fin (Module.finrank ℝ E) → ℝ`,
-`c * (∑ i, ξ i ^ 2) ≤ ∑ i j, (chartInvGramMatrix g α b)_{ij} * ξ i * ξ j`.
 
-This is the specialisation of
-`exists_chartInvGramMatrix_quadForm_lower_bound_on_compact` to the compact
-closed support of the chart-atlas partition-of-unity weight. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :

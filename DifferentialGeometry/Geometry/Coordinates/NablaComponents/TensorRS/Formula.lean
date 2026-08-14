@@ -1,15 +1,13 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ApplyInput
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ModelBridge
 
-/-!
-# Mixed tensor coordinate covariant derivative formula
 
-Generic coordinate-frame component formula for `nablaRSFun`.
--/
+
+
+
+
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,17 +18,15 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-- Coordinate-frame component formula for `nablaRSFun` in arbitrary mixed
-valence. -/
+
+
 theorem nablaRS_coordFrame_slots {r s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -184,8 +180,8 @@ theorem nablaRS_coordFrame_slots {r s : ℕ}
       upper (Function.update lower b k)]
   rw [hupperSum, hlowerSum]
 
-/-- Coordinate-frame component formula for `nablaRSFun`, with the model/scalar
-derivative bridge discharged by smoothness of the tensor field. -/
+
+
 theorem nablaRS_coordFrame_slots_of_smooth {r s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

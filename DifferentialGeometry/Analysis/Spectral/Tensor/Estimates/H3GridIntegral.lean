@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingSharpC0JetSum
-import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
 /-!
 # Low-order antidiagonal jet-grid integrals in dimension three
@@ -22,9 +22,9 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-
+open DifferentialGeometry.Analysis.Sobolev.Tensor
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -67,14 +67,14 @@ theorem low_grid_int
       (I := I) (M := M) g 0 2
   let Cgn : ℕ → ℝ := fun k =>
     if hk : 1 ≤ k then
-      (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
           (I := I) (M := M) g 0 2 k hk).choose
     else 0
   have hCgn : ∀ k, 0 ≤ Cgn k := by
     intro k
     simp only [Cgn]
     split_ifs with hk
-    · exact (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    · exact (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
           (I := I) (M := M) g 0 2 k hk).choose_spec.1
     · exact le_rfl
   let vol : ℝ :=
@@ -147,7 +147,7 @@ theorem low_grid_int
         (fun j _ => sq_nonneg _) hmem).trans hPjet
     have htop : ‖iteratedCovGrad (I := I) g 0 2 k P‖ ≤ A := by
       nlinarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 k P)]
-    have hGNspec := (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    have hGNspec := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g 0 2 k hk1).choose_spec.2
     have hGNP : ∀ j : ℕ, 0 < j → j < k →
         (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + j) x
@@ -159,7 +159,7 @@ theorem low_grid_int
             A ^ (2 * (j : ℝ) / (k : ℝ)) := by
       intro j hj0 hjk
       have hb := hGNspec P Lam hLam hLamSup j hj0 hjk
-      have hchoose : (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      have hchoose : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
             (I := I) (M := M) g 0 2 k hk1).choose = Cgn k := by
         simp only [Cgn, dif_pos hk1]
       rw [hchoose] at hb
@@ -170,9 +170,7 @@ theorem low_grid_int
           (iteratedCovGrad (I := I) g 0 2 k P)).symm
       rw [hnorm] at hb
       exact hb.trans (mul_le_mul_of_nonneg_left
-        (Real.rpow_le_rpow
-          (norm_nonneg (iteratedCovGrad (I := I) g 0 2 k P))
-          htop (by positivity))
+        (Real.rpow_le_rpow (norm_nonneg _) htop (by positivity))
         (mul_nonneg (hCgn k) (Real.rpow_nonneg hLam _)))
     let G : ℝ :=
       (k : ℝ) * (max Lam (max (Cgn k) 1)) ^ (7 * k) * A ^ 2
@@ -310,8 +308,8 @@ theorem h3_top_grid_int
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 2
   obtain ⟨Cgn, hCgn, hGNspec⟩ :=
-    _root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-        (I := I) (M := M) g 0 2 3 (by omega)
+    exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      (I := I) (M := M) g 0 2 3 (by omega)
   let count : ℝ := ∑ n ∈ Finset.range 4,
     ((Finset.Nat.antidiagonalTuple n 3).card : ℝ)
   let K : ℝ → ℝ := fun R =>

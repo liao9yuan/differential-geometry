@@ -3,45 +3,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 
-/-!
-# Orthonormal-frame trace calculus on the tangent space
 
-This file develops the pure pointwise linear-algebra machinery used by the
-coordinate-free Bochner-Weitzenböck identity: trace formulas relativized to a
-`g_x`-orthonormal frame of the tangent space `T_x M`.
-
-The development is entirely *pointwise* (fixing `x : M`) and independent of the
-gradient/Laplacian PDE content of the Bochner identity; it depends only on the
-chart Gram-matrix API (`chartModelBasis`, `chartGramMatrix`, `chartInvGramMatrix`),
-the metric `g`, the Levi-Civita connection's metric compatibility, the curvature
-operator `riemannOp`, the Ricci tensor, and the smooth orthonormal frame
-`smoothOrthoFrame`.
-
-The building blocks are:
-
-* **Orthonormal-frame trace of a bilinear form** (`orthonormal_basis_bilin_trace`):
-  for any `g_x`-orthonormal frame `(B_i)` and continuous bilinear form `Hb`,
-  `∑ᵢ Hb(Bᵢ, Bᵢ) = ∑_{kl} G^{kl} Hb(e_k, e_l)` (the metric trace against the
-  model basis). Proved via the change-of-basis matrix `coBchange` and the inverse
-  Gram identity `A G Aᵀ = I`.
-* **`LinearMap.trace` as an orthonormal-frame sum**
-  (`trace_eq_ortho_sum`): for any endomorphism `T`,
-  `tr T = ∑ᵢ g_x(T Bᵢ, Bᵢ)`. Proved by promoting the frame to the
-  orthonormal basis of the inner product induced by `g`.
-* **Ricci as an orthonormal trace** (`ricciTensor_eq_orthonormal_trace`,
-  `heart_curvature_orthonormal_sum_eq_ricci`): `Ric_x(v, w) = ∑ᵢ g_x(R(Bᵢ, v) w, Bᵢ)`,
-  and the curvature term of the heart-of-Bochner identity summed against the
-  smooth orthonormal frame equals `Ric(∇f, w)`.
-* **Frame skew-derivative** (`smoothOrthoFrame_cov_skew`): differentiating
-  `g(Bᵢ, Bⱼ) = δᵢⱼ` gives the antisymmetry `g(∇_v Bᵢ, Bⱼ) = - g(Bᵢ, ∇_v Bⱼ)`.
-* **Parseval identity** (`g_inner_eq_orthonormal_parseval_sum`):
-  `g_x(X, Y) = ∑ᵢ g_x(X, Bᵢ) · g_x(Bᵢ, Y)`.
-
-## Sign convention
-
-The Ricci tensor `ricciTensor` is unsigned (`g(Ric^♯(v), w) = Ric(v, w)`); the
-trace formulas are sign-agnostic.
--/
 
 noncomputable section
 
@@ -53,7 +15,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,35 +28,31 @@ section OrthonormalFrameTrace
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
-/-- The change-of-basis matrix from a frame `B : Fin n → T_x M` to the model
-basis `(chartModelBasis E)`. The `(i, k)`-th entry is the `k`-th coordinate
-of `B_i` in the model basis. -/
 private noncomputable def coBchange
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i k => (chartModelBasis E).repr (B i) k
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 @[simp] private lemma coBchange_apply
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i k : Fin (Module.finrank ℝ E)) :
     coBchange (I := I) (x := x) B i k =
       (chartModelBasis E).repr (B i) k := rfl
 
-/-- The Gram matrix of the model basis at `x`, using `g.inner x`. By
-definition, this equals `chartGramMatrix g x x` (since `chartBasisVecFiber x i x =
-(chartModelBasis E) i`). -/
 private noncomputable def modelGramMatrix :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k l =>
     g.inner x ((chartModelBasis E) k) ((chartModelBasis E) l)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] private lemma modelGramMatrix_apply
     (k l : Fin (Module.finrank ℝ E)) :
     modelGramMatrix (I := I) g x k l =
       g.inner x ((chartModelBasis E) k) ((chartModelBasis E) l) := rfl
 
-/-- The model Gram matrix at `x` agrees with `chartGramMatrix g x x`, since the
-chart-basis fibre vectors at the chart base point equal the model basis. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma modelGramMatrix_eq_chartGramMatrix :
     modelGramMatrix (I := I) g x = chartGramMatrix (I := I) g x x := by
   classical
@@ -103,9 +61,8 @@ private lemma modelGramMatrix_eq_chartGramMatrix :
   rw [chartBasisVecFiber_self (I := I) x k]
   rw [chartBasisVecFiber_self (I := I) x l]
 
-/-- Each tangent vector `B_i` decomposes against the model basis as a finite
-linear combination of `(chartModelBasis E) k` with coefficients
-`a_{ik} = (chartModelBasis E).repr (B_i) k`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma decompose_in_modelBasis
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) :
@@ -116,7 +73,8 @@ private lemma decompose_in_modelBasis
   have h := (chartModelBasis E).sum_repr (B i)
   exact h.symm
 
-/-- **Bilinear expansion of `Hb(B i, B j)` against the model basis.** -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma bilin_expand_modelBasis
     (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -176,8 +134,7 @@ private lemma bilin_expand_modelBasis
   intro l _
   ring
 
-/-- **Bilinear expansion of `g_x(B i, B j)` against the model basis (Gram form).**
-This is the case `H = g.inner x` in `bilin_expand_modelBasis`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma gram_expand_modelBasis
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -195,9 +152,7 @@ private lemma gram_expand_modelBasis
   intro l _
   rw [modelGramMatrix_apply]
 
-/-- **Matrix form of orthonormality.** If `(B_i)` is `g_x`-orthonormal, then
-the change-of-basis matrix `A_{ik} := (chartModelBasis E).repr (B_i) k`
-satisfies `A G A^T = I`, where `G = modelGramMatrix g x`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma orthonormal_matrix_form
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -243,9 +198,7 @@ private lemma orthonormal_matrix_form
   intro k₀ _
   ring
 
-/-- **Inverse-matrix consequence of orthonormality.** If `(B_i)` is `g_x`-orthonormal,
-then `Aᵀ * A = G⁻¹`, where `A_{ik} = (chartModelBasis E).repr (B_i) k` and
-`G = modelGramMatrix g x`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma orthonormal_matrix_inverse
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -268,9 +221,7 @@ private lemma orthonormal_matrix_inverse
   rw [Matrix.mul_assoc] at hA_left_inv
   exact (Matrix.inv_eq_right_inv hA_left_inv).symm
 
-/-- **Sum of products of change-of-basis entries equals inverse Gram entries.**
-For an `g_x`-orthonormal basis `(B_i)`, the sum `∑ i, a_{ik} a_{il}` (over the
-frame index `i`) equals the inverse Gram matrix entry `G^{kl}`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma sum_coBchange_eq_invGram
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -302,14 +253,7 @@ private lemma sum_coBchange_eq_invGram
   rw [heval]
   rfl
 
-/-- **Orthonormal-frame trace identity for a continuous bilinear form.**
-For any continuous bilinear form `Hb : T_x M →L T_x M →L ℝ` and any `g_x`-
-orthonormal basis `(B_i)`, the sum on the frame equals the metric trace
-against the model basis:
-$$
-  \sum_i Hb(B_i, B_i) = \sum_{kl} G^{kl}(x, x) \cdot Hb(e_k, e_l).
-$$
--/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem orthonormal_basis_bilin_trace
     (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -357,14 +301,7 @@ section TraceIdentity
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
-/-- **Decomposition of the model basis representation against the metric.**
-For `e = chartModelBasis E` and `X ∈ T_x M`:
-$$
-  (e.\mathrm{repr}\,X)_k = \sum_l G^{k l}(x, x)\, g_x(X,\, e_l),
-$$
-where `G^{kl} = chartInvGramMatrix g x x k l`. The proof proceeds by
-expanding `X` against the model basis, evaluating `g(X, e_l)` as a linear
-combination of Gram entries, and inverting the Gram matrix. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma finBasis_repr_eq_invGram_inner_sum
     (X : TangentSpace I x) (k : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr X k =
@@ -500,15 +437,7 @@ private lemma finBasis_repr_eq_invGram_inner_sum
     · intro hk
       exact absurd (Finset.mem_univ k) hk]
 
-/-- **Trace formula in chart coordinates.** For any linear endomorphism
-`T : T_x M →ₗ[ℝ] T_x M`, the basis-independent trace `LinearMap.trace ℝ T`
-admits the Gram-weighted bilinear sum form:
-$$
-  \mathrm{tr}\,T = \sum_{k l} G^{k l}(x, x)\, g_x(T(e_k),\, e_l),
-$$
-where `G^{kl} = chartInvGramMatrix g x x k l`. This is the chart-coordinate
-trace identity converting `LinearMap.trace ℝ T` into a metric-weighted bilinear
-sum. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma linearMap_trace_eq_invGram_bilin_sum
     (T : TangentSpace I x →ₗ[ℝ] TangentSpace I x) :
     LinearMap.trace ℝ (TangentSpace I x) T =
@@ -530,16 +459,7 @@ private lemma linearMap_trace_eq_invGram_bilin_sum
   exact finBasis_repr_eq_invGram_inner_sum (I := I) g x
     (T ((chartModelBasis E) k)) k
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- **Trace formula via orthonormal frame.** For any linear endomorphism
-`T : T_x M →ₗ[ℝ] T_x M` and any `g_x`-orthonormal basis `(B_i)` of `T_x M`,
-the trace `LinearMap.trace ℝ T` equals the orthonormal-frame trace sum:
-$$
-  \mathrm{tr}\,T = \sum_i g_x\bigl(T(B_i),\, B_i\bigr).
-$$
-The orthonormal family is promoted to an `OrthonormalBasis` for the inner
-product induced by `g`, after which this is `LinearMap.trace_eq_sum_inner`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem trace_eq_ortho_sum
     (T : TangentSpace I x →ₗ[ℝ] TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -582,7 +502,7 @@ theorem trace_eq_ortho_sum
       OrthonormalBasis.mk hON hspan
     have hb : ∀ i, b i = B i := by
       intro i
-      show (OrthonormalBasis.mk hON hspan) i = B i
+      change (OrthonormalBasis.mk hON hspan) i = B i
       rw [OrthonormalBasis.coe_mk]
     rw [LinearMap.trace_eq_sum_inner T b]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -594,31 +514,26 @@ section RicciOrthonormalTrace
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
-/-- The endomorphism `Z ↦ R(Z, v) w` on `T_x M`, packaged as a `LinearMap`. -/
 private def riemannCurvatureEndo
     (v w : TangentSpace I x) :
     TangentSpace I x →ₗ[ℝ] TangentSpace I x where
   toFun Z := riemannOp (LeviCivita (I := I) g) x Z v w
   map_add' Z Z' := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_add Z Z'
-    set_option linter.unnecessarySimpa false in
-    simpa using h
+    simp
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_smul c Z
-    set_option linter.unnecessarySimpa false in
-    simpa using h
+    simp
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] private lemma riemannCurvatureEndo_apply
     (v w Z : TangentSpace I x) :
     riemannCurvatureEndo (I := I) g x v w Z =
       riemannOp (LeviCivita (I := I) g) x Z v w := rfl
 
-/-- The Ricci tensor at `(v, w)` equals the orthonormal-frame trace of the
-endomorphism `Z ↦ R(Z, v) w`:
-$$
-  \mathrm{Ric}_x(v, w) = \sum_i g_x\bigl(R(B_i, v) w,\, B_i\bigr).
-$$
-This is the "Ricci as orthonormal trace" formula. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_eq_orthonormal_trace
     (v w : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -640,14 +555,7 @@ theorem ricciTensor_eq_orthonormal_trace
   intro i _
   rw [riemannCurvatureEndo_apply]
 
-/-- **Curvature term identity for the heart of Bochner.** For the smooth
-orthonormal frame `B_i = smoothOrthoFrame g x i x` and any tangent vector
-`w ∈ T_x M`, the curvature term sum
-$$
-  \sum_i g_x\bigl(R(B_i, w)\,\nabla f x,\, B_i\bigr) = \mathrm{Ric}_x(\nabla f x,\, w).
-$$
-The proof uses Ricci symmetry to identify `Ric(∇f, w) = Ric(w, ∇f)` and the
-orthonormal-frame trace formula for the latter. -/
+omit [SigmaCompactSpace M] in
 theorem heart_curvature_orthonormal_sum_eq_ricci
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (_hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -670,14 +578,7 @@ section OrthonormalFrameSkewDerivative
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
-/-- Differentiating `g(B_i, B_j) = δ_{ij}` along a tangent direction `v` at `x`
-gives, via metric compatibility, the antisymmetry of the matrix
-`a_{ij} := g(∇_v B_i, B_j x)`:
-$$
-  g_x(\nabla_v B_i, B_j x) = - g_x(B_i x, \nabla_v B_j).
-$$
-The proof differentiates the constant function `b ↦ g(B_i b, B_j b) = δ_{ij}`
-on the orthonormal neighborhood, then uses metric compatibility. -/
+omit [SigmaCompactSpace M] in
 theorem smoothOrthoFrame_cov_skew
     (i j : Fin (Module.finrank ℝ E))
     (v : TangentSpace I x) :
@@ -730,17 +631,7 @@ section OrthonormalRiesz
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
-/-- **Parseval identity for `g_x` against an orthonormal basis.** For any
-`g_x`-orthonormal basis `(B_i)` of `T_x M` and any pair `(X, Y) ∈ T_x M × T_x M`:
-$$
-  g_x(X,\, Y) = \sum_i g_x(X,\, B_i) \cdot g_x(B_i,\, Y).
-$$
-The proof uses `orthonormal_basis_bilin_trace` applied to the bilinear form
-`Hb(Z₁, Z₂) := g(X, Z₁) * g(Z₂, Y)` and the trace formula
-`linearMap_trace_eq_invGram_bilin_sum` for the unique linear endomorphism
-`T : T_x M → T_x M` satisfying `g(T(Z), W) = g(X, Z) * g(W, Y)`. The endomorphism
-`T` is the rank-one operator `Z ↦ g(X, Z) • Y_♯` where `Y_♯` is the metric-flat
-of `Y`; its trace is `g(X, Y)` directly. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem g_inner_eq_orthonormal_parseval_sum
     (X Y : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)

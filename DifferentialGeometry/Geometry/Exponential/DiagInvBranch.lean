@@ -4,14 +4,14 @@ import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
 set_option autoImplicit false
 
-/-!
-# Selected inverse branches for the diagonal exponential
 
-This file defines the branch object shared by the generic diagonal-exponential
-inverse and quantitative consumers.  The object records one explicit local
-inverse branch; quantitative source and target radii belong to the producer
-that selects a branch, not to this generic interface.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -38,11 +38,11 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- A selected smooth local inverse branch of the intrinsic diagonal
-exponential at the zero tangent vector over `p`.
 
-The branch carries no quantitative radius: such bounds belong to the theorem
-that selects a branch for a particular geometric application. -/
+
+
+
+
 structure DiagInvBranch
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -56,7 +56,7 @@ structure DiagInvBranch
 
 namespace DiagInvBranch
 
-/-- The totalized inverse function selected by a diagonal-exponential branch. -/
+
 def inv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -65,7 +65,7 @@ def inv
     M × M → TangentBundle I M :=
   B.hom.symm
 
-/-- The target domain on which the selected inverse laws hold. -/
+
 def dom
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -73,7 +73,7 @@ def dom
     {p : M} (B : DiagInvBranch (I := I) g hEnorm p) : Set (M × M) :=
   B.hom.target
 
-/-- The selected branch is a right inverse of `diagExp` on its target. -/
+
 theorem right_inv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -87,7 +87,7 @@ theorem right_inv
       (B.hom_eq hu).symm
     _ = y := by simpa only [inv] using B.hom.right_inv hy
 
-/-- The selected branch is a left inverse of `diagExp` on its source. -/
+
 theorem left_inv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -100,8 +100,8 @@ theorem left_inv
       congrArg B.inv (B.hom_eq hu).symm
     _ = u := by simpa only [inv] using B.hom.left_inv hu
 
-/-- A tangent vector in the selected source is recovered from its intrinsic
-exponential endpoint by the selected inverse. -/
+
+
 theorem inv_eq_of_exp
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -118,8 +118,8 @@ theorem inv_eq_of_exp
   rw [← hdiag]
   exact B.left_inv hvsrc
 
-/-- On the selected inverse domain, the inverse tangent vector is based at the
-first point of the pair. -/
+
+
 theorem proj_eq
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -129,8 +129,8 @@ theorem proj_eq
     (B.inv y).proj = y.1 := by
   simpa only [diagExp_fst] using congrArg Prod.fst (B.right_inv hy)
 
-/-- Fixing the endpoint of a selected inverse branch gives a smooth tangent
-section wherever the corresponding pairs stay in the branch domain. -/
+
+
 theorem inv_snd_inf
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -376,7 +376,7 @@ theorem inv_eq_normal_lt
   refine TotalSpace.ext (B.proj_eq hy) ?_
   exact heq_of_eq hcoord.symm
 
-/-- The diagonal pair belongs to the target domain of every selected branch. -/
+
 theorem center_mem
     [T2Space (TangentBundle I M)]
     {g : SmoothRiemannianMetric I M}
@@ -396,7 +396,7 @@ theorem center_mem
   rw [heq, hdiag] at hmap
   exact hmap
 
-/-- The selected inverse sends the diagonal pair to the zero tangent vector. -/
+
 theorem center_inv
     [T2Space (TangentBundle I M)]
     {g : SmoothRiemannianMetric I M}

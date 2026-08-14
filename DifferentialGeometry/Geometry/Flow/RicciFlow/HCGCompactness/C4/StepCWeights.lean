@@ -1,17 +1,16 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAveraging
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 Step C finite normalized weights
 
-This file gives the base-space-independent algebra that turns a finite family
-of nonnegative raw numerators into the pointwise `WeightDataOn` consumed by the
-Step-C averaging map.  Analytic convergence of particular numerator families
-belongs in the producer layer; no vector-space structure on the source is
-needed here.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,26 +21,26 @@ namespace HCGCompactness
 
 open scoped BigOperators
 
-/-- Preserve the base numerator and multiply every other numerator by a
-base-centered kill factor. -/
+
+
 noncomputable def cutRaw {X : Type uX} {ι : Type uι} [DecidableEq ι]
     (cut : X → ℝ) (a : ι → X → ℝ) (i0 i : ι) (x : X) : ℝ :=
   if i = i0 then a i0 x else (1 - cut x) * a i x
 
-/-- The base slot of `cutRaw` is unchanged. -/
+
 @[simp] theorem cutRaw_same {X : Type uX} {ι : Type uι} [DecidableEq ι]
     (cut : X → ℝ) (a : ι → X → ℝ) (i0 : ι) (x : X) :
     cutRaw cut a i0 i0 x = a i0 x := by
   rw [cutRaw, if_pos rfl]
 
-/-- A non-base slot of `cutRaw` is multiplied by the kill factor. -/
+
 theorem cutRaw_of_ne {X : Type uX} {ι : Type uι} [DecidableEq ι]
     (cut : X → ℝ) (a : ι → X → ℝ) (i0 i : ι) (x : X) (hi : i ≠ i0) :
     cutRaw cut a i0 i x = (1 - cut x) * a i x := by
   rw [cutRaw, if_neg hi]
 
-/-- The base-killed raw numerators stay nonnegative when the atoms are
-nonnegative and the kill function takes values in `[0, 1]`. -/
+
+
 theorem cutRaw_nonneg {X : Type uX} {ι : Type uι} [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 : ι} {x : X}
     (hcut : cut x ∈ Set.Icc (0 : ℝ) 1) (hnn : ∀ i, 0 ≤ a i x) (i : ι) :
@@ -53,7 +52,7 @@ theorem cutRaw_nonneg {X : Type uX} {ι : Type uι} [DecidableEq ι]
   · rw [cutRaw_of_ne cut a i0 i x hi]
     exact mul_nonneg (sub_nonneg.mpr hcut.2) (hnn i)
 
-/-- A nonzero base-killed numerator comes from a nonzero atom. -/
+
 theorem num_ne_of_cut_ne {X : Type uX} {ι : Type uι} [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 i : ι} {x : X}
     (hraw : cutRaw cut a i0 i x ≠ 0) : a i x ≠ 0 := by
@@ -63,8 +62,8 @@ theorem num_ne_of_cut_ne {X : Type uX} {ι : Type uι} [DecidableEq ι]
     exact hraw (by rw [cutRaw_same, ha])
   · exact hraw (by rw [cutRaw_of_ne cut a i0 i x hi, ha, mul_zero])
 
-/-- If the atoms cover a point and every nonzero kill value lies where the
-base atom is positive, some base-killed numerator is positive. -/
+
+
 theorem cutRaw_pos {X : Type uX} {ι : Type uι} [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 : ι} {x : X}
     (hnn : ∀ i, 0 ≤ a i x)
@@ -86,8 +85,8 @@ theorem cutRaw_pos {X : Type uX} {ι : Type uι} [DecidableEq ι]
   rw [cutRaw_of_ne cut a i0 i x hine, hcut0, sub_zero, one_mul]
   exact hi
 
-/-- Under the same cover and base-support hypotheses, the finite raw
-denominator is strictly positive. -/
+
+
 theorem cutRaw_sum_pos {X : Type uX} {ι : Type uι} [Fintype ι] [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 : ι} {x : X}
     (hcut : cut x ∈ Set.Icc (0 : ℝ) 1) (hnn : ∀ i, 0 ≤ a i x)
@@ -98,7 +97,7 @@ theorem cutRaw_sum_pos {X : Type uX} {ι : Type uι} [Fintype ι] [DecidableEq �
     (fun j (_hj : j ∈ Finset.univ) => cutRaw_nonneg hcut hnn j)).2
       ⟨i, Finset.mem_univ i, hi⟩
 
-/-- When the kill factor is one, `cutRaw` is concentrated at the base slot. -/
+
 theorem cutRaw_delta {X : Type uX} {ι : Type uι} [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 : ι} {x : X}
     (hcut : cut x = 1) :
@@ -107,27 +106,27 @@ theorem cutRaw_delta {X : Type uX} {ι : Type uι} [DecidableEq ι]
   refine ⟨cutRaw_same cut a i0 x, fun i hi => ?_⟩
   rw [cutRaw_of_ne cut a i0 i x hi, hcut, sub_self, zero_mul]
 
-/-- Normalize a finite family of raw numerators on an arbitrary base type. -/
+
 noncomputable def rawWeights {X : Type uX} {ι : Type uι} [Fintype ι]
     (a : ι → X → ℝ) (x : X) (i : ι) : ℝ :=
   a i x / ∑ j, a j x
 
-/-- The normalized raw weights sum to one wherever their denominator is
-nonzero. -/
+
+
 theorem rawWeights_sum {X : Type uX} {ι : Type uι} [Fintype ι]
     {a : ι → X → ℝ} {x : X} (hne : (∑ j, a j x) ≠ 0) :
     ∑ i, rawWeights a x i = 1 := by
   simp only [rawWeights, ← Finset.sum_div]
   exact div_self hne
 
-/-- Nonnegative raw numerators give nonnegative normalized weights. -/
+
 theorem rawWeights_nonneg {X : Type uX} {ι : Type uι} [Fintype ι]
     {a : ι → X → ℝ} {x : X} (hnn : ∀ j, 0 ≤ a j x) (i : ι) :
     0 ≤ rawWeights a x i :=
   div_nonneg (hnn i) (Finset.sum_nonneg fun j _ => hnn j)
 
-/-- A nonnegative normalized family with nonzero denominator has a positive
-slot. -/
+
+
 theorem rawWeights_pos {X : Type uX} {ι : Type uι} [Fintype ι]
     {a : ι → X → ℝ} {x : X} (hnn : ∀ j, 0 ≤ a j x)
     (hne : (∑ j, a j x) ≠ 0) : ∃ i, 0 < rawWeights a x i := by
@@ -137,8 +136,8 @@ theorem rawWeights_pos {X : Type uX} {ι : Type uι} [Fintype ι]
     (Finset.sum_pos_iff_of_nonneg
       (fun i (_hi : i ∈ Finset.univ) => rawWeights_nonneg hnn i)).mp hpos
 
-/-- A nonzero normalized weight can only occur in a nonzero raw-numerator
-slot. -/
+
+
 theorem num_ne_of_raw_ne {X : Type uX} {ι : Type uι} [Fintype ι]
     {a : ι → X → ℝ} {x : X} {i : ι} (hweight : rawWeights a x i ≠ 0) :
     a i x ≠ 0 := by
@@ -146,8 +145,8 @@ theorem num_ne_of_raw_ne {X : Type uX} {ι : Type uι} [Fintype ι]
   apply hweight
   simp [rawWeights, hnum]
 
-/-- If only the base numerator survives, normalized weights are the Kronecker
-delta at that slot. -/
+
+
 theorem rawWeights_delta {X : Type uX} {ι : Type uι} [Fintype ι]
     {a : ι → X → ℝ} {x : X} (i0 : ι)
     (hzero : ∀ j, j ≠ i0 → a j x = 0) (hne : a i0 x ≠ 0) :
@@ -159,8 +158,8 @@ theorem rawWeights_delta {X : Type uX} {ι : Type uι} [Fintype ι]
   · simp [rawWeights, hsum, div_self hne]
   · simp [rawWeights, hzero j hj]
 
-/-- Nonnegative raw numerators with nonvanishing sum and controlled active
-support give exactly the pointwise data consumed by the Step-C average. -/
+
+
 theorem rawWeights_data {X : Type uX} {ι : Type} [Fintype ι]
     {s : Set X} {U : ι → Set X} {a : ι → X → ℝ}
     (hnn : ∀ x ∈ s, ∀ i, 0 ≤ a i x)
@@ -172,8 +171,8 @@ theorem rawWeights_data {X : Type uX} {ι : Type} [Fintype ι]
   sum_one x hx := rawWeights_sum (hne x hx)
   active_mem x hx i hi := hactive x hx i (num_ne_of_raw_ne hi)
 
-/-- Covered nonnegative atoms and a base-supported kill factor directly
-produce the pointwise normalized weight package used by Step C. -/
+
+
 theorem cutWeights_data {X : Type uX} {ι : Type} [Fintype ι] [DecidableEq ι]
     {s : Set X} {U : ι → Set X} {cut : X → ℝ} {a : ι → X → ℝ} {i0 : ι}
     (hcut : ∀ x ∈ s, cut x ∈ Set.Icc (0 : ℝ) 1)

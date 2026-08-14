@@ -5,12 +5,12 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInner
 
-/-!
-# Three-dimensional H2 pointwise control
 
-This file packages the sharp covariant-jet Sobolev embedding in the intrinsic
-spectral norm used by the low-regularity Ricci--DeTurck theory.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -24,7 +24,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open Tensor0SBundle
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -33,6 +33,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem grad_jet_norm
     (g : SmoothRiemannianMetric I M) (s j : ℕ) (T : SmoothCcTensor g 0 s) :
     ‖iteratedCovGrad (I := I) g 0 (s + 1) j
@@ -64,8 +65,8 @@ private theorem grad_jet_norm
       (covGrad (I := I) (M := M) g 0 s T)),
     norm_nonneg (iteratedCovGrad (I := I) g 0 s (j + 1) T)]
 
-/-- At the supercritical natural order, the intrinsic spectral Sobolev norm
-controls the pointwise squared fibre norm of a smooth covariant tensor. -/
+
+
 theorem hsC0_fiber_sq
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g 0 s) (x : M),
@@ -74,7 +75,7 @@ theorem hsC0_fiber_sq
           ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ ^ 2 := by
   classical
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 s
   obtain ⟨Chs, hChs, hhs⟩ := hsJet_le
     (I := I) (M := M) g s (Module.finrank ℝ E / 2 + 1)
@@ -114,8 +115,6 @@ theorem hsC0_fiber_sq
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
-/-- For a smooth rank-zero tensor, the Riemannian fibre norm-squared is the
-square of its scalar readout. -/
 theorem scalar0_fiber_sq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 0) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 0 x (T.toSection x) =
@@ -136,8 +135,8 @@ theorem scalar0_fiber_sq
     rfl
   rw [hscalar, pow_two]
 
-/-- At the supercritical natural order, scalar evaluation of a smooth
-rank-zero tensor is bounded by its intrinsic spectral Sobolev norm. -/
+
+
 theorem scalar0_abs_le_hs
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g 0 0) (x : M),
@@ -161,8 +160,8 @@ theorem scalar0_abs_le_hs
         ring
   exact abs_le_of_sq_le_sq hsq (mul_nonneg hC (norm_nonneg _))
 
-/-- In dimension three, the pointwise squared fibre norm of a smooth
-covariant tensor is controlled by its intrinsic spectral `H2` norm. -/
+
+
 theorem hs2_fiber_sq
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -171,7 +170,7 @@ theorem hs2_fiber_sq
         C ^ 2 * ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) T‖ ^ 2 := by
   classical
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 s
   obtain ⟨Chs, hChs, hhs⟩ := hsJet_le (I := I) (M := M) g s 2
   refine ⟨Cpt * Chs, mul_nonneg hCpt hChs, ?_⟩
@@ -205,8 +204,8 @@ theorem hs2_fiber_sq
           ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) T‖ ^ 2 := by
       ring
 
-/-- The intrinsic spectral `H2` norm controls the square-sum of the first
-three covariant `L²` jets. -/
+
+
 theorem hs2_low2
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ T : SmoothCcTensor g 0 s,
@@ -224,8 +223,8 @@ theorem hs2_low2
     (pow_le_pow_left₀
       (Finset.sum_nonneg (fun j _ => norm_nonneg _)) hsum 2)
 
-/-- In dimension three, spectral `H3` controls both the pointwise gradient and
-the first three `L²` jets starting at that gradient. -/
+
+
 theorem hs3_grad_low2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -240,7 +239,7 @@ theorem hs3_grad_low2
         (C * ‖ccTensorToHs (I := I) (M := M) g s (3 : ℝ) T‖) ^ 2 := by
   classical
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 (s + 1)
   obtain ⟨Chs, hChs, hhs⟩ := hsJet_le (I := I) (M := M) g s 3
   let C : ℝ := Cpt * Chs + Chs + 1
@@ -318,13 +317,11 @@ theorem hs3_grad_low2
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- In dimension three, the intrinsic spectral `H2` norm supplies the
-fibrewise operator bound needed to realize a small metric perturbation. -/
 theorem hs2_op_bound
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 < C ∧ ∀ T : SmoothCcTensor g 0 2,
-      gFibreOpBound (I := I) (M := M) g
+      metricCauchySchwarzBound (I := I) (M := M) g
         (ccTensorBilinSymm (I := I) g T)
         (C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖) := by
   classical
@@ -366,13 +363,13 @@ theorem hs2_op_bound
     (I := I) (M := M) g T x
   have hsv : 0 ≤ Real.sqrt (g.inner x v v) := Real.sqrt_nonneg _
   have hsw : 0 ≤ Real.sqrt (g.inner x w w) := Real.sqrt_nonneg _
-  have hvw : |ccTensorBilin (I := I) g T x v w| ≤
+  have hvw : |smoothCcTensorBilinForm (I := I) g T x v w| ≤
       ((C0 + 1) * N) * Real.sqrt (g.inner x v v) *
         Real.sqrt (g.inner x w w) := by
     exact (hcs v w).trans
       (mul_le_mul_of_nonneg_right
         (mul_le_mul_of_nonneg_right hnorm hsv) hsw)
-  have hwv : |ccTensorBilin (I := I) g T x w v| ≤
+  have hwv : |smoothCcTensorBilinForm (I := I) g T x w v| ≤
       ((C0 + 1) * N) * Real.sqrt (g.inner x w w) *
         Real.sqrt (g.inner x v v) := by
     exact (hcs w v).trans
@@ -381,10 +378,10 @@ theorem hs2_op_bound
   rw [ccTensorBilinSymm_apply]
   calc
     |(1 / 2 : ℝ) *
-        (ccTensorBilin (I := I) g T x v w + ccTensorBilin (I := I) g T x w v)|
+        (smoothCcTensorBilinForm (I := I) g T x v w + smoothCcTensorBilinForm (I := I) g T x w v)|
         ≤ (1 / 2 : ℝ) *
-          (|ccTensorBilin (I := I) g T x v w| +
-            |ccTensorBilin (I := I) g T x w v|) := by
+          (|smoothCcTensorBilinForm (I := I) g T x v w| +
+            |smoothCcTensorBilinForm (I := I) g T x w v|) := by
       rw [abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
       exact mul_le_mul_of_nonneg_left (abs_add_le _ _) (by norm_num)
     _ ≤ (1 / 2 : ℝ) *

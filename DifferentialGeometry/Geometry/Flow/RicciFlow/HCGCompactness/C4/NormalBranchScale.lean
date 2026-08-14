@@ -4,12 +4,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-/-!
-# Relative scale for the selected quantitative normal branch
 
-This file combines the proportional phase-radius selection with the fixed-radius
-normal-diagonal worker and the intrinsic branch transport.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -32,8 +32,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- A divisor inequality converts a fixed multiple of the covering scale into
-a fixed multiple of the sequence-relative radius. -/
+
+
 theorem normalBrHat
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -45,8 +45,8 @@ theorem normalBrHat
     _ < a * hd.mu R :=
       mul_lt_mul_of_pos_right ((div_lt_iff₀ hD).2 hc) (hd.mu_pos R)
 
-/-- A quantitative branch witness retaining the full coordinate transport,
-the common consumer ball, and the inverse formula on the whole target ball. -/
+
+
 def HasNormalBrFull
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -104,8 +104,8 @@ def HasNormalBrFull
 
 namespace HasNormalBrFull
 
-/-- Shrinking the common closed-ball radius preserves all selected-branch,
-fence, and transport data. -/
+
+
 theorem mono
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -120,8 +120,8 @@ theorem mono
   intro w hw
   exact hclosed w (Metric.closedBall_subset_closedBall hρ hw)
 
-/-- Forget the full transport data while retaining the common intrinsic
-branch-domain witness used by existing consumers. -/
+
+
 theorem toDom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -183,8 +183,8 @@ theorem toDom
 
 end HasNormalBrFull
 
-/-- Global relative coefficients produce one common selected-branch domain on
-every fixed exhaustion sublevel. -/
+
+
 theorem normalBrAccept
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -284,10 +284,10 @@ theorem normalBrAccept
     dsimp only [NormalRadiusProfile.phaseRadius]
     nlinarith [h.floor_pos R]
   have hqExp : (q : Real) <
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
     (hqPhase.trans_le hphaseFloor).trans_le (h.floor_le_exp hx)
   have hρExp : aρ * hd.mu R <
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
     hρq.trans hqExp
   have hclosed : ∀ w ∈ Metric.closedBall (0 : E × E) (aρ * hd.mu R),
       normalPair (I := I) (X.obj k) x w ∈
@@ -359,9 +359,9 @@ theorem normalBrAccept
   exact ⟨hq, e, he, hfence, hclosed, hδdom, htransport.1,
     htransport.2.1, htransport.2.2, hδinv, _, hinvErr, hinvApprox⟩
 
-/-- The selected quantitative branch can be shrunk to one uniform coefficient
-that simultaneously satisfies the minimizing-gradient metric and intrinsic
-exponential-radius requirements. -/
+
+
+
 theorem normalMinScale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -455,8 +455,8 @@ theorem normalMinScale
       _ ≤ h.gpRatio * hd.mu R := hMinFloor
   exact ⟨hbranch, hradius, hhalfFloor.trans (h.floor_le_expGp hx)⟩
 
-/-- Compatibility form of `normalBrAccept` retaining the established
-common-domain endpoint used by downstream cage consumers. -/
+
+
 theorem normalBrScale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

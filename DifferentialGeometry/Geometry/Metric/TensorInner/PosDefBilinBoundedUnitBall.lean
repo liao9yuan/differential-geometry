@@ -17,21 +17,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
-/-!
-# Bounded unit ball of a positive-definite bilinear form
-
-A general fact, free of bundle structure: on a finite-dimensional real normed
-space, the sublevel set `{v | B v v < 1}` of a continuous symmetric
-positive-definite bilinear form `B` is von-Neumann bounded
-(`posDef_bilin_unit_ball_isBounded`). The argument compares the quadratic form
-with the squared norm via the minimum of `B v v` over the unit sphere, which is
-positive by positive-definiteness and attained by compactness.
-
-This lemma is the abstract core behind the boundedness of the metric unit ball
-on the tensor bundle fibres, where it is applied to the pointwise tensor inner
-product.
--/
-
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap Bornology
@@ -46,31 +31,10 @@ open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## von-Neumann boundedness of the unit ball
-
-The set `{T : Tensor0SSpace s I b | inner b T T < 1}` is von-Neumann bounded.
-Since `Tensor0SSpace s I b` is a finite-dimensional normed-like space (its
-topology is induced via the trivialization from a finite-dimensional model
-fibre), and the inner product is a positive-definite continuous quadratic
-form, the unit ball of the metric-induced norm is contained in a multiple of
-the standard unit ball, hence is bounded.
-
-We prove this by transferring the unit ball to the model fibre via the CLE
-`bundleCLE` and using the equivalence of norms on a finite-dimensional space:
-on `Tensor0SModel s ℝ E`, the inner product `tensorInnerPointwise_0s` and the
-operator norm both induce equivalent norms (since both are positive-definite
-quadratic forms on a finite-dimensional space). -/
-
--- Helper: a continuous symmetric positive-definite bilinear form on a
--- finite-dim normed space has a sublevel set {v | B(v,v) < 1} that is bounded.
--- We prove this for any abstract such bilinear form, working purely in the
--- model fibre and using the standard `ContinuousMultilinearMap` instances.
-
-/-- A general finite-dim positive-definite bilinear form has a bounded unit ball. -/
 lemma posDef_bilin_unit_ball_isBounded
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [FiniteDimensional ℝ F] [Nontrivial F]

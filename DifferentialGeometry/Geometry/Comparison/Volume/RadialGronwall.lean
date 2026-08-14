@@ -6,15 +6,14 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Radial-Jacobi Gronwall wrappers for volume comparison
 
-This file specializes the covariant Gronwall transfer to the radial Jacobi
-fields used by the normal-coordinate volume comparison lane.  It does not prove
-the remaining regularity, parallel-frame, or curvature-bound inputs.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,6 +21,8 @@ open Set
 open scoped Topology Manifold ContDiff
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace Geometry
 namespace Riemannian
 namespace VolumeComparison
@@ -31,8 +32,8 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -41,22 +42,28 @@ section Radial
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
-/-- The radial exponential curve launched from `p` in model direction `x`. -/
+
 def radialCurve (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) : M :=
   expMap (I := I) g p (show TangentSpace I p from (t • x))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 @[simp] lemma radialCurve_apply
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) :
     radialCurve (I := I) g p x t =
       expMap (I := I) g p (show TangentSpace I p from (t • x)) :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 @[simp] lemma radialCurve_one
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     radialCurve (I := I) g p x 1 =
       expMap (I := I) g p (show TangentSpace I p from x) := by
   simp [radialCurve]
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma radialCurve_zero
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     radialCurve (I := I) g p x 0 = p := by
@@ -64,8 +71,10 @@ def radialCurve (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) : M :
   rw [zero_smul]
   exact expMap_zero (I := I) g p
 
-/-- Radius form of the `chartRepAt` differentiability inputs for the packaged
-radial Jacobi field and its first covariant derivative. -/
+
+
+omit [T2Space M] in
+omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_diff
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {b : ℝ}, b ≤ 1 →
@@ -81,8 +90,10 @@ theorem exists_radialJacobi_diff
   simpa [radialCurve, radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.exists_jacobi_diff (I := I) g p
 
-/-- The open radial segment of a vector with `‖x‖ < ρ` stays in the
-`expMap` image of the open tangent ball of radius `ρ`, as long as `b ≤ 1`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 theorem radial_mem_expBall
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {ρ b : Real} (hxρ : ‖x‖ < ρ) (hb : b ≤ 1) :
@@ -103,8 +114,10 @@ theorem radial_mem_expBall
       _ < ρ := hxρ
   · rfl
 
-/-- A radial curve with `C²` regularity admits a full parallel orthonormal
-frame on every positive time interval. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space (TangentBundle I M)] in
 lemma exists_radialFrame
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {b : ℝ} (hb : 0 < b)
@@ -134,8 +147,9 @@ lemma exists_radialFrame
   simp only [Fintype.card_fin]
   rfl
 
-/-- The radial curve is `C²` on `[0, 1]` while it stays inside the named
-exponential smoothness radius. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialCurve_contMDiffAt_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb : b ≤ 1)
@@ -159,8 +173,9 @@ lemma radialCurve_contMDiffAt_Icc
     (DifferentialGeometry.Geometry.Riemannian.radialCurve_contMDiffAt2
       (I := I) g p x t hnorm)
 
-/-- The radial curve is `C²` on `[0, 1]` while it stays inside the named
-exponential smoothness radius. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialCurve_contMDiffOn_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -182,7 +197,8 @@ lemma radialCurve_contMDiffOn_Icc
     (DifferentialGeometry.Geometry.Riemannian.radialCurve_contMDiffAt2
       (I := I) g p x t hnorm).contMDiffWithinAt
 
-/-- Uniform local `C²` regularity for radial curves launched from a model ball. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialC2OnBallIcc
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) (hb : b ≤ 1) :
@@ -197,9 +213,10 @@ lemma radialC2OnBallIcc
       intro t ht
       exact ⟨ht.1, le_trans ht.2 hb⟩)
 
-/-- A smooth global time clip for a radial curve: it is the identity on
-`Icc 0 b`, and its clipped launch vectors stay inside the exponential
-smoothness radius for all time. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radial_clip
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
@@ -243,9 +260,10 @@ lemma exists_radial_clip
     exact lt_of_le_of_lt
       (mul_le_mul_of_nonneg_right (htau_bound t) (norm_nonneg x)) hprod
 
-/-- A smooth bounded radial time clip that is the identity on a slightly larger
-time window around `Icc 0 b`, while keeping all clipped launch vectors inside
-the exponential smoothness radius. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rclip_nbhd
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb1 : b ≤ 1)
@@ -302,9 +320,10 @@ lemma exists_rclip_nbhd
     exact lt_of_le_of_lt
       (mul_le_mul_of_nonneg_right (htau_bound t) (norm_nonneg x)) hprod
 
-/-- A radial exponential curve composed with a smooth time clip is globally
-`C²` when every clipped launch vector remains inside the exponential
-smoothness radius. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radial_clip_contMDiff
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) (tau : ℝ → ℝ)
     (htau : ContDiff ℝ (∞ : WithTop ℕ∞) tau)
@@ -325,9 +344,10 @@ lemma radial_clip_contMDiff
     expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p (hradius t)
   simpa using hexpC2.comp t (hsmul.contMDiffAt.of_le ENat.LEInfty.out)
 
-/-- A globally `C²` radial extension agreeing with the usual radial curve on
-`Icc 0 b`, obtained by clipping time while staying inside the exponential
-smoothness radius. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radial_ext
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
@@ -345,8 +365,9 @@ lemma exists_radial_ext
     rw [htau_eq ht]
     rfl
 
-/-- A globally `C²` radial extension agreeing with the radial curve on a
-neighborhood of `Icc 0 b`. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rext_nbhd
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb1 : b ≤ 1)
@@ -365,8 +386,9 @@ lemma exists_rext_nbhd
     rw [htau_eq ht]
     rfl
 
-/-- Along a central radial curve inside the exponential `C²` radius, the
-squared speed equals the squared launch speed. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_speed_sq_eq
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) {t : ℝ}
@@ -379,8 +401,9 @@ theorem radial_speed_sq_eq
     (DifferentialGeometry.Geometry.Riemannian.radialSpeedSq_eq_inner
       (I := I) g p x hx t ht)
 
-/-- A bound on the launch speed controls radial speed on every smaller interval
-`(0, b)` with `b ≤ 1`. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_speed_le
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) {Vb b : ℝ}
@@ -394,8 +417,10 @@ theorem radial_speed_le
   rw [radial_speed_sq_eq (I := I) g p x hx ht01]
   exact hVb
 
-/-- Every tangent fibre has a `g`-orthonormal basis indexed by the model
-dimension `Fin (finrank E)`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 private theorem exists_gON_tangentBasis_E
     (g : SmoothRiemannianMetric I M) (y : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I y),
@@ -404,9 +429,10 @@ private theorem exists_gON_tangentBasis_E
     using DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
       (I := I) g y
 
-/-- Radius form of the radial Jacobi equation on any smaller open interval
-`(0, b)` with `b ≤ 1`.  This is the interior part of the Gronwall `Ico`
-ODE input; the endpoint `t = 0` remains a separate explicit input. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_jacobi_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {b : ℝ}, b ≤ 1 →
@@ -419,8 +445,11 @@ theorem exists_jacobi_Ioo
   have ht01 : t ∈ Ioo (0 : ℝ) 1 := ⟨ht.1, lt_of_lt_of_le ht.2 hb⟩
   simpa [radialCurve] using hJac x w hx hw t ht01
 
-/-- Radial-Jacobi ODE norm bound from the pointwise Jacobi equation plus a
-curvature-term norm bound. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialJacobi_ode_of_curv
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : ℝ}
     (hJac : ∀ t ∈ Ico (0 : ℝ) b,
@@ -459,10 +488,13 @@ theorem radialJacobi_ode_of_curv
     (radialJacobiField (I := I) g p x w) (K := K) (t := t) (hJac t ht)
     (hcurv t ht)
 
-/-- The Gronwall ODE input on `Ico 0 b` can be assembled from the open-interval
-Jacobi/curvature data on `(0, b)` plus a separate endpoint bound at `0`.  This
-keeps the current `t = 0` Jacobi frontier explicit instead of hiding it in an
-interior theorem. -/
+
+
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ode_Ico_of_Ioo_zero
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : ℝ}
     (hJac : ∀ t ∈ Ioo (0 : ℝ) b,
@@ -516,8 +548,10 @@ theorem ode_Ico_of_Ioo_zero
       (radialJacobiField (I := I) g p x w) (K := K) (t := t)
       (hJac t ⟨htpos, ht.2⟩) (hcurv t ⟨htpos, ht.2⟩)
 
-/-- Variant of `ode_Ico_of_Ioo_zero` whose endpoint input is the sharper
-second-initial-condition target `D_t² J(0)=0`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ode_Ico_of_Ioo_d2
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : ℝ}
     (hJac : ∀ t ∈ Ioo (0 : ℝ) b,
@@ -572,8 +606,10 @@ theorem ode_Ico_of_Ioo_d2
   rw [hz]
   rw [mul_zero]
 
-/-- If the radial Jacobi equation is available at the endpoint `0`, then the
-second covariant derivative endpoint condition follows from `J(0)=0`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem d2_zero_of_jac0
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     (hJac0 : IsJacobiAt (I := I) g (radialCurve (I := I) g p x)
@@ -602,9 +638,10 @@ theorem d2_zero_of_jac0
   rw [hCzero, add_zero] at hJac0
   exact hJac0
 
-/-- Radius-packaged `Ico` ODE input for radial Jacobi fields.  The radius
-discharges the open-interval Jacobi equation; callers still provide the
-curvature-term bound on `(0, b)` and the separate endpoint bound at `0`. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : ℝ}, b ≤ 1 →
@@ -652,7 +689,9 @@ theorem exists_ode_Ico
   exact ode_Ico_of_Ioo_zero (I := I) g p x w (K := K) (b := b)
     (hJac x w hx hw hb) hcurv h0
 
-/-- Nonnegativity of the pointwise Riemannian square norm. -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_self_nonneg
     (g : SmoothRiemannianMetric I M) {q : M} (u : TangentSpace I q) :
     0 <= g.inner q u u := by
@@ -660,7 +699,9 @@ private lemma inner_self_nonneg
   · simp [hu]
   · exact (g.pos q u hu).le
 
-/-- A square-root Riemannian norm bound implies the squared inner-product bound. -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_sq_le_of_sqrt_le
     (g : SmoothRiemannianMetric I M) {q : M} {u v : TangentSpace I q} {K : Real}
     (hK : 0 ≤ K)
@@ -681,7 +722,7 @@ private lemma inner_sq_le_of_sqrt_le
     _ = K ^ 2 * g.inner q v v := by
       rw [mul_pow, Real.sq_sqrt hv_nn]
 
-/-- The radial curvature term appearing in the Jacobi ODE estimate. -/
+
 private def radialCurvTerm
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     TangentSpace I (radialCurve (I := I) g p x t) :=
@@ -692,7 +733,7 @@ private def radialCurvTerm
     (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
     (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
 
-/-- The metric-lowered one-form associated to the radial curvature term. -/
+
 private def radialCurvTermFlat
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     Tensor0SBundle.Tensor0SSpace 1 I (radialCurve (I := I) g p x t) :=
@@ -701,8 +742,11 @@ private def radialCurvTermFlat
       (radialCurve (I := I) g p x t)
       (radialCurvTerm (I := I) g p x w t))
 
-/-- The cotangent metric of the lowered radial curvature term is its tangent
-Riemannian square norm. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_inner
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     Tensor0SBundle.cotangentInner_gen (I := I) g
@@ -718,8 +762,11 @@ private theorem radialCurvTermFlat_inner
       (radialCurvTerm (I := I) g p x w t)
       (radialCurvTerm (I := I) g p x w t))
 
-/-- Evaluating the lowered radial curvature term is the standard lowered
-metric Riemann tensor with the radial slots. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_apply_eq_metricRm04StdAt
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
     (W : TangentSpace I (radialCurve (I := I) g p x t)) :
@@ -743,10 +790,13 @@ private theorem radialCurvTermFlat_apply_eq_metricRm04StdAt
   exact g.symm (radialCurve (I := I) g p x t)
     (radialCurvTerm (I := I) g p x w t) W
 
-/-- Component form of `radialCurvTermFlat_apply_eq_metricRm04StdAt`, ready for
-orthonormal-frame fibre-norm estimates. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_component_eq_metricRm04StdAt
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
     (basis : Module.Basis Idx Real (TangentSpace I (radialCurve (I := I) g p x t)))
     (i : Idx) :
@@ -761,8 +811,11 @@ private theorem radialCurvTermFlat_component_eq_metricRm04StdAt
   rw [Tensor0SBundle.component0S_apply]
   exact radialCurvTermFlat_apply_eq_metricRm04StdAt (I := I) g p x w t (basis i)
 
-/-- The intrinsic `(0,1)` tensor squared norm of the lowered radial curvature
-term is the cotangent metric square used by the ODE bridge. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_normSq_eq_cotangentInner
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     Tensor0SBundle.normSq0S (I := I) g (radialCurve (I := I) g p x t) 1
@@ -775,10 +828,13 @@ private theorem radialCurvTermFlat_normSq_eq_cotangentInner
     Tensor0SBundle.inner0S_one_eq_cotangent]
   rfl
 
-/-- Pointwise Cauchy-Schwarz bound for evaluating the lowered radial curvature
-term through the canonical lowered Riemann tensor norm. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abs_flat_apply_le_rm04
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
     (basis : Module.Basis Idx Real (TangentSpace I (radialCurve (I := I) g p x t)))
     (hON : ∀ i j : Idx,
@@ -813,9 +869,12 @@ theorem abs_flat_apply_le_rm04
   rw [radialCurvTermFlat_apply_eq_metricRm04StdAt (I := I) g p x w t W]
   simpa [DifferentialGeometry.Integral.Connection.metricRm04StdAt_apply] using hCS
 
-/-- Uniformly bounding the per-basis evaluations of `abs_flat_apply_le_rm04`
-bounds the intrinsic `(0,1)` squared norm of the lowered radial curvature
-term. -/
+
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_normSq_le_card
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -884,10 +943,12 @@ theorem radialCurvTermFlat_normSq_le_card
             (basis (slots 0))) a)) := happly
     _ ≤ B := hB (slots 0)
 
-/-- In an orthonormal basis, the slot-length product for
-`vec4 J V V (basis i)` loses the final basis-vector factor. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotProd_basis_le
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
     (basis : Module.Basis Idx Real (TangentSpace I q))
     (hON : ∀ i j : Idx,
@@ -907,10 +968,12 @@ private theorem radialSlotProd_basis_le
   ring_nf
   exact le_rfl
 
-/-- A uniform bound for the `J` and velocity slot lengths bounds the full
-Riemann Cauchy-Schwarz slot product. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotBound_basis_le
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
     (basis : Module.Basis Idx Real (TangentSpace I q))
     (hON : ∀ i j : Idx,
@@ -958,8 +1021,11 @@ private theorem radialSlotBound_basis_le
         ≤ R * (Jb * Vb ^ 2) := mul_le_mul_of_nonneg_left hprod_bound hRnn
     _ = R * Jb * Vb ^ 2 := by ring
 
-/-- If the Jacobi field and radial velocity have pointwise length bounds, the
-lowered radial curvature one-form has the corresponding intrinsic norm bound. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_normSq_le_card_of_bounds
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -999,7 +1065,7 @@ theorem radialCurvTermFlat_normSq_le_card_of_bounds
       (radialJacobiField (I := I) g p x w t)
       (curveVelocity (I := I) (radialCurve (I := I) g p x) t) hJ hV i
 
-/-- Taking square roots of a bound of the form `A <= C * B^2`. -/
+
 private theorem sqrt_le_sqrt_mul_of_sq_le {A C B : Real}
     (hC : 0 ≤ C) (hB : 0 ≤ B) (h : A ≤ C * B ^ 2) :
     Real.sqrt A ≤ Real.sqrt C * B := by
@@ -1008,9 +1074,12 @@ private theorem sqrt_le_sqrt_mul_of_sq_le {A C B : Real}
     _ = Real.sqrt C * Real.sqrt (B ^ 2) := Real.sqrt_mul hC _
     _ = Real.sqrt C * B := by rw [Real.sqrt_sq hB]
 
-/-- Square-root form of `radialCurvTermFlat_normSq_le_card_of_bounds`, with the
-Jacobi length kept as the final Gronwall factor and the radial velocity bounded
-by `Vb`. -/
+
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_sqrt_le_card_of_velocity_bound
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -1053,8 +1122,11 @@ theorem radialCurvTermFlat_sqrt_le_card_of_velocity_bound
   simpa [R, Jb] using
     sqrt_le_sqrt_mul_of_sq_le hcard hBnn hsq
 
-/-- Pointwise curvature-term square-root bound from a uniform velocity bound
-and a packaged `metricRm04At` coefficient bound. -/
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_sqrt_le_K
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -1099,8 +1171,10 @@ theorem radialCurvTermFlat_sqrt_le_K
       _ ≤ K * Jn := mul_le_mul_of_nonneg_right hcoef hJn
   exact hbase.trans (by simpa [Cn, Rn, Jn] using hstep)
 
-/-- A square-root bound for the metric-lowered curvature one-form implies the
-squared ODE curvature input. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_flat_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : Real}
     (hK : 0 ≤ K)
@@ -1126,8 +1200,10 @@ theorem curv_sq_of_flat_Ioo
       rw [radialCurvTermFlat_inner] at h
       exact h)
 
-/-- A square-root bound in the intrinsic `(0,1)` tensor norm implies the
-squared ODE curvature input. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_fiber_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : Real}
     (hK : 0 ≤ K)
@@ -1150,9 +1226,12 @@ theorem curv_sq_of_fiber_Ioo
   simpa [radialCurvTermFlat_normSq_eq_cotangentInner]
     using hcurv t ht
 
-/-- `Ioo` curvature ODE input from pointwise `metricRm04At` norm bounds and a
-uniform radial-velocity bound.  The orthonormal bases are supplied pointwise;
-this theorem only packages the curvature-term estimate for the ODE consumer. -/
+
+
+
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_rm04_velocity_Ioo
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K Vb b : Real}
@@ -1186,8 +1265,10 @@ theorem curv_sq_of_rm04_velocity_Ioo
     (I := I) g p x w t (basis t ht) (hON t ht) K Vb hVb
     (hV t ht) (hRm t ht)
 
-/-- Convert a square-root curvature-term norm bound on `(0, b)` into the
-squared ODE curvature input consumed by `exists_ode_Ico`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_norm_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : Real}
     (hK : 0 ≤ K)
@@ -1208,8 +1289,9 @@ theorem curv_sq_of_norm_Ioo
   intro t ht
   exact inner_sq_le_of_sqrt_le (I := I) g hK (hcurv t ht)
 
-/-- Radius-packaged `Ico` ODE input from the more natural square-root
-curvature-term bound on `(0, b)`.  The endpoint bound at `0` remains explicit. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_curvNorm
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : Real},
@@ -1247,8 +1329,9 @@ theorem exists_ode_Ico_of_curvNorm
   intro x w hx hw K b hK hb hcurv h0
   exact hODE x w hx hw hb (curv_sq_of_norm_Ioo (I := I) g p x w hK hcurv) h0
 
-/-- Radius-packaged `Ico` ODE input from a square-root bound on the
-metric-lowered curvature one-form.  The endpoint bound at `0` remains explicit. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_flat
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : Real},
@@ -1287,8 +1370,9 @@ theorem exists_ode_Ico_of_flat
   intro x w hx hw K b hK hb hcurv h0
   exact hODE x w hx hw hb (curv_sq_of_flat_Ioo (I := I) g p x w hK hcurv) h0
 
-/-- Radius-packaged `Ico` ODE input from a square-root bound on the intrinsic
-`(0,1)` tensor norm of the metric-lowered curvature one-form. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_fiber
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : Real},
@@ -1329,9 +1413,10 @@ theorem exists_ode_Ico_of_fiber
   simpa [radialCurvTermFlat_normSq_eq_cotangentInner]
     using hcurv t ht
 
-/-- Radius-packaged `Ico` ODE input from pointwise `metricRm04At` coefficient
-bounds and a uniform radial-velocity bound on `(0, b)`.  Endpoint control at
-`t = 0` remains an explicit separate input. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_velocity
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1380,9 +1465,10 @@ theorem exists_ode_Ico_of_rm04_velocity
   exact hODE x w hx hw hb
     (curv_sq_of_rm04_velocity_Ioo (I := I) g p x w hK hVb basis hON hV hRm) h0
 
-/-- Radius-packaged `Ico` ODE input from pointwise `metricRm04At` coefficient
-bounds and a launch-speed bound.  The Gauss-lemma speed identity supplies the
-uniform radial-velocity bound on `(0, b)`. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_launch
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1434,9 +1520,10 @@ theorem exists_ode_Ico_of_rm04_launch
   exact hODE x w hx₀ hw₀ hK hVb hb basis hON
     (radial_speed_le (I := I) g p x hxExp hb hlaunch) hRm h0
 
-/-- Radius-packaged `Ico` ODE input from pointwise `metricRm04At` coefficient
-bounds and a launch-speed bound, with the pointwise orthonormal bases chosen
-internally.  The endpoint `t = 0` ODE input remains explicit. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1488,8 +1575,9 @@ theorem exists_ode_Ico_of_rm04
   exact hODE x w hx hw hK hVb hb hlaunch basis
     (fun t ht i j => hON t ht i j) hRm h0
 
-/-- Radius-packaged `Ico` ODE input from a pointwise bound on the `metricRm04At`
-fibre norm and a global algebraic coefficient bound. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_norm
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1541,8 +1629,9 @@ theorem exists_ode_Ico_of_rm04_norm
     exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hA_le_R hCnn) hVsq
   exact le_trans hmul hKbound
 
-/-- Rm04-norm ODE package whose endpoint input is the concrete second initial
-condition `D_t² J(0)=0`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_rm04_d2
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1589,8 +1678,9 @@ theorem exists_ode_rm04_d2
   rw [hz]
   rw [mul_zero]
 
-/-- Rm04-norm ODE package whose endpoint input is the Jacobi equation at
-`t = 0`; `J(0)=0` converts it to the required second initial condition. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_rm04_jac0
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1625,8 +1715,6 @@ theorem exists_ode_rm04_jac0
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Rm04-norm ODE package with the endpoint Jacobi equation produced from the
-radial exponential variation. -/
 theorem exists_ode_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1674,8 +1762,6 @@ theorem exists_ode_rm04
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius package combining radial-Jacobi differentiability with the
-endpoint-closed Rm04 ODE input. -/
 theorem exists_rm04_data
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1728,7 +1814,6 @@ theorem exists_rm04_data
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Basis-family form of `exists_rm04_data` for scaled model-basis directions. -/
 theorem exists_rm04_basis
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1785,8 +1870,6 @@ theorem exists_rm04_basis
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Basis-family Rm04 analytic package with the radial-Jacobi initial derivative
-radius synchronized to the same smallness scale. -/
 theorem exists_rm04_pack
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1844,8 +1927,10 @@ theorem exists_rm04_pack
     have hw₁ : ‖w‖ < r₁ := lt_of_lt_of_le hw (min_le_right _ _)
     exact hderiv x w hx₁ hw₁
 
-/-- A region-wise `metricRm04At` fibre-norm bound gives the pointwise
-open-interval Rm04 input along a radial curve contained in that region. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem rm04_Ioo_of_region
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {R b : Real} {U : Set M}
@@ -1866,9 +1951,6 @@ theorem rm04_Ioo_of_region
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Rm04-norm ODE package with the curvature bound supplied on an ambient
-region containing the open radial segment.  The endpoint Jacobi input is
-produced internally from the radial exponential variation. -/
 theorem exists_ode_rm04_on
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1905,8 +1987,9 @@ theorem exists_ode_rm04_on
   exact hODE x w hx hw hK hVb hb hlaunch hKbound
     (rm04_Ioo_of_region (I := I) g p x hcurve hRmU)
 
-/-- Rm04-norm ODE package with the curvature bound supplied on the `expMap`
-image of an open tangent ball containing the radial segment. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_expBall
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1940,8 +2023,10 @@ theorem exists_ode_expBall
     (rm04_Ioo_of_region (I := I) g p x
       (radial_mem_expBall (I := I) g p x hxρ hb) hRm) hJac0
 
-/-- A global `metricRm04At` fibre-norm bound restricts to every `expMap` ball
-image used by the radial Gronwall package. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem rm04Exp_of_global
     (g : SmoothRiemannianMetric I M) (p : M) {R ρ : Real}
     (hRm : ∀ q : M,
@@ -1957,9 +2042,10 @@ theorem rm04Exp_of_global
   intro q _hq
   exact hRm q
 
-/-- Rm04-norm ODE package with a global `metricRm04At` fibre-norm bound as the
-curvature input.  This is the direct `‖Rm‖ ≤ R` entry point for the current
-Gronwall producer; the endpoint Jacobi input remains separate. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem exists_ode_global
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1990,2936 +2076,6 @@ theorem exists_ode_global
   exact hODE x w hx hw hK hVb hb hxρ hlaunch hKbound
     (rm04Exp_of_global (I := I) g p hRm) hJac0
 
-/-- The coefficient-space vector associated to the fixed chart model basis. -/
-private noncomputable def coeffModelCLM :
-    EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] E :=
-  (toEuclidean (E := E)).symm.toContinuousLinearMap
-
-private lemma coeffModelCLM_eq_sum
-    (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
-    coeffModelCLM (E := E) v = ∑ i, v i • (chartModelBasis E) i := by
-  have hvsum : v = ∑ i, v i • EuclideanSpace.single i (1 : ℝ) := by
-    let b := (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis
-    simpa [b, EuclideanSpace.basisFun_apply] using (b.sum_repr v).symm
-  calc
-    coeffModelCLM (E := E) v =
-        (toEuclidean (E := E)).symm v := rfl
-    _ = (toEuclidean (E := E)).symm (∑ i, v i • EuclideanSpace.single i (1 : ℝ)) := by
-          exact congrArg (toEuclidean (E := E)).symm hvsum
-    _ = ∑ i, v i • (toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ)) := by
-          rw [map_sum]
-          simp only [map_smul]
-    _ = ∑ i, v i • (chartModelBasis E) i := by
-          simp only [chartModelBasis_apply]
-
-private lemma sqrt_coercive_mul_norm_le
-    (g : SmoothRiemannianMetric I M) (p : M)
-    (x : E) :
-    Real.sqrt (gpCoerciveConst (I := I) g p) * ‖x‖ ≤
-      Real.sqrt (g.inner p x x) := by
-  have hc_pos : 0 < gpCoerciveConst (I := I) g p := gpCoerciveConst_pos (I := I) g p
-  have hcoerc : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
-    gpCoerciveConst_le (I := I) g p x
-  have hlhs_eq : Real.sqrt (gpCoerciveConst (I := I) g p) * ‖x‖ =
-      Real.sqrt (gpCoerciveConst (I := I) g p * ‖x‖ ^ 2) := by
-    rw [Real.sqrt_mul hc_pos.le, Real.sqrt_sq (norm_nonneg x)]
-  rw [hlhs_eq]
-  exact Real.sqrt_le_sqrt hcoerc
-
-private lemma inner_le_opNorm_sq
-    (g : SmoothRiemannianMetric I M) (p : M)
-    (x : E) :
-    g.inner p x x ≤ ‖g.inner p‖ * ‖x‖ ^ 2 := by
-  have hlin : ‖(g.inner p) x‖ ≤ ‖g.inner p‖ * ‖x‖ :=
-    (g.inner p).le_opNorm x
-  have happ : ‖((g.inner p) x) x‖ ≤ ‖(g.inner p) x‖ * ‖x‖ :=
-    ((g.inner p) x).le_opNorm x
-  have hmul :
-      ‖((g.inner p) x) x‖ ≤ (‖g.inner p‖ * ‖x‖) * ‖x‖ :=
-    happ.trans (mul_le_mul_of_nonneg_right hlin (norm_nonneg x))
-  have hself : g.inner p x x ≤ ‖((g.inner p) x) x‖ := by
-    exact Real.le_norm_self _
-  calc
-    g.inner p x x ≤ ‖((g.inner p) x) x‖ := hself
-    _ ≤ (‖g.inner p‖ * ‖x‖) * ‖x‖ := hmul
-    _ = ‖g.inner p‖ * ‖x‖ ^ 2 := by ring
-
-/-- Unit coefficient directions have a uniform positive `g_p`-length lower bound.
-
-This is the coefficient-space lower-bound producer needed before replacing the
-Jacobi initial velocity by its concrete model-basis value. -/
-theorem exists_unitCoeff_ge
-    (g : SmoothRiemannianMetric I M) (p : M) :
-    ∃ B : ℝ, 0 < B ∧
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i)) := by
-  let L : E →L[ℝ] EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
-    (toEuclidean (E := E)).toContinuousLinearMap
-  let K : ℝ := ‖L‖ + 1
-  let B : ℝ := Real.sqrt (gpCoerciveConst (I := I) g p) / K
-  have hc_pos : 0 < Real.sqrt (gpCoerciveConst (I := I) g p) :=
-    Real.sqrt_pos.mpr (gpCoerciveConst_pos (I := I) g p)
-  have hden_pos : 0 < K := by
-    have hL_nonneg : 0 ≤ ‖L‖ := norm_nonneg L
-    linarith
-  refine ⟨B, div_pos hc_pos hden_pos, ?_⟩
-  intro v hv
-  have hanti :=
-    (ContinuousLinearEquiv.antilipschitz ((toEuclidean (E := E)).symm)).le_mul_dist v 0
-  have hunit_le :
-      1 ≤ K * ‖coeffModelCLM (E := E) v‖ := by
-    simp only [map_zero, dist_zero_right] at hanti
-    rw [hv] at hanti
-    have hK0_le : (↑‖L‖₊ : ℝ) ≤ K := by
-      simp [K, L]
-    have hanti' : 1 ≤ (↑‖L‖₊ : ℝ) * ‖coeffModelCLM (E := E) v‖ := by
-      simpa [L, coeffModelCLM] using hanti
-    exact hanti'.trans
-      (mul_le_mul_of_nonneg_right hK0_le (norm_nonneg _))
-  have hnorm_lower : 1 / K ≤ ‖coeffModelCLM (E := E) v‖ := by
-    exact (div_le_iff₀ hden_pos).2 (by rwa [mul_comm])
-  have hmetric := sqrt_coercive_mul_norm_le (I := I) g p (coeffModelCLM (E := E) v)
-  have hB_le :
-      B ≤ Real.sqrt (gpCoerciveConst (I := I) g p) * ‖coeffModelCLM (E := E) v‖ := by
-    dsimp [B]
-    rw [div_eq_mul_inv]
-    have hnorm_inv : K⁻¹ ≤ ‖coeffModelCLM (E := E) v‖ := by
-      simpa [one_div] using hnorm_lower
-    exact mul_le_mul_of_nonneg_left hnorm_inv hc_pos.le
-  calc
-    B ≤ Real.sqrt (gpCoerciveConst (I := I) g p) * ‖coeffModelCLM (E := E) v‖ := hB_le
-    _ ≤ Real.sqrt (g.inner p (coeffModelCLM (E := E) v) (coeffModelCLM (E := E) v)) :=
-        hmetric
-    _ = Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i)) := by
-        rw [coeffModelCLM_eq_sum (E := E) v]
-        rfl
-
-/-- Unit coefficient directions have a uniform finite `g_p`-length upper bound. -/
-theorem exists_unitCoeff_le
-    (g : SmoothRiemannianMetric I M) (p : M) :
-    ∃ D : ℝ, 0 ≤ D ∧
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i)) ≤ D := by
-  let C : ℝ := ‖coeffModelCLM (E := E)‖
-  let D : ℝ := Real.sqrt (‖g.inner p‖ * C ^ 2)
-  refine ⟨D, Real.sqrt_nonneg _, ?_⟩
-  intro v hv
-  have hdir_le : ‖coeffModelCLM (E := E) v‖ ≤ C := by
-    have hop := (coeffModelCLM (E := E)).le_opNorm v
-    simpa [C, hv] using hop
-  have hsq_le : ‖coeffModelCLM (E := E) v‖ ^ 2 ≤ C ^ 2 := by
-    have hC_nonneg : 0 ≤ C := by
-      exact norm_nonneg (coeffModelCLM (E := E))
-    exact (sq_le_sq₀ (norm_nonneg _) hC_nonneg).2 hdir_le
-  have hinner_le :
-      g.inner p (coeffModelCLM (E := E) v) (coeffModelCLM (E := E) v) ≤
-        ‖g.inner p‖ * C ^ 2 := by
-    exact (inner_le_opNorm_sq (I := I) g p (coeffModelCLM (E := E) v)).trans
-      (mul_le_mul_of_nonneg_left hsq_le (norm_nonneg (g.inner p)))
-  calc
-    Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i))
-        = Real.sqrt (g.inner p (coeffModelCLM (E := E) v) (coeffModelCLM (E := E) v)) := by
-          rw [coeffModelCLM_eq_sum (E := E) v]
-          rfl
-    _ ≤ D := Real.sqrt_le_sqrt hinner_le
-
-/-- Unit coefficient directions have simultaneous positive lower and finite
-upper `g_p`-length bounds. -/
-theorem exists_unitCoeff_bounds
-    (g : SmoothRiemannianMetric I M) (p : M) :
-    ∃ B₀ D : ℝ, 0 < B₀ ∧ 0 ≤ D ∧
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B₀ ≤ Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i))) ∧
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i)) ≤ D) := by
-  rcases exists_unitCoeff_ge (I := I) g p with ⟨B₀, hB₀_pos, hB₀⟩
-  rcases exists_unitCoeff_le (I := I) g p with ⟨D, hD_nonneg, hD⟩
-  exact ⟨B₀, D, hB₀_pos, hD_nonneg, hB₀, hD⟩
-
-/-- A positive common scale makes every unit coefficient direction lie in any
-prescribed positive radius. -/
-lemma unitDirScaleSmall {r : ℝ} (hr : 0 < r) :
-    ∃ a : ℝ, 0 < a ∧
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < r := by
-  set C : ℝ := ‖coeffModelCLM (E := E)‖ with hC
-  have hC_nonneg : 0 ≤ C := by
-    simp [hC]
-  have hden_pos : 0 < C + 1 := by linarith
-  refine ⟨r / (C + 1), div_pos hr hden_pos, ?_⟩
-  intro v hv
-  have ha_pos : 0 < r / (C + 1) := div_pos hr hden_pos
-  have hdir_le : ‖∑ i, v i • (chartModelBasis E) i‖ ≤ C := by
-    have hop := (coeffModelCLM (E := E)).le_opNorm v
-    rw [hv, mul_one] at hop
-    rw [← coeffModelCLM_eq_sum (E := E) v] 
-    simpa [hC] using hop
-  have hdir_lt : ‖∑ i, v i • (chartModelBasis E) i‖ < C + 1 := by
-    linarith
-  rw [norm_smul, Real.norm_eq_abs, abs_of_pos ha_pos]
-  calc
-    r / (C + 1) * ‖∑ i, v i • (chartModelBasis E) i‖
-        < r / (C + 1) * (C + 1) :=
-          mul_lt_mul_of_pos_left hdir_lt ha_pos
-    _ = r := by field_simp [ne_of_gt hden_pos]
-
-/-- Unit-coefficient derivative equality from the small-radius radial-Jacobi
-initial derivative producer.
-
-The smallness of the realized unit-coefficient direction remains an explicit
-hypothesis.  This is the same real frontier as in the fixed-basis bridge: the
-radius theorem alone only applies to directions inside its radius. -/
-lemma dir_deriv_radius
-    (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ} (x : E)
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hdirSmall : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ‖∑ i, v i • (chartModelBasis E) i‖ < r) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i)) 0 : E) =
-        ∑ i, v i • (chartModelBasis E) i := by
-  intro v hv
-  simpa [radialCurve] using
-    hderivRadius x (∑ i, v i • (chartModelBasis E) i) hx (hdirSmall v hv)
-
-/-- Initial-speed lower bound for unit coefficient directions once the
-Jacobi initial derivative has been identified with the model-basis
-combination. -/
-lemma dir_init_ge
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E) {B : ℝ}
-    (hB : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ≤ Real.sqrt
-        (g.inner p (∑ i, v i • (chartModelBasis E) i)
-          (∑ i, v i • (chartModelBasis E) i)))
-    (hderiv : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i)) 0 : E) =
-        ∑ i, v i • (chartModelBasis E) i) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ≤ Real.sqrt
-        (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) 0)) := by
-  intro v hv
-  rw [radialCurve_zero (I := I) g p x]
-  rw [hderiv v hv]
-  exact hB v hv
-
-/-- Existence form of the unit-direction initial-speed lower bound.
-
-This combines the coefficient-space coercivity producer with a supplied
-Jacobi initial derivative equality. -/
-theorem exists_dirInit_ge
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    (hderiv : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i)) 0 : E) =
-        ∑ i, v i • (chartModelBasis E) i) :
-    ∃ B : ℝ, 0 < B ∧
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-          (g.inner (radialCurve (I := I) g p x 0)
-            (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (∑ i, v i • (chartModelBasis E) i)) 0)
-            (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (∑ i, v i • (chartModelBasis E) i)) 0)) := by
-  rcases exists_unitCoeff_ge (I := I) g p with ⟨B, hBpos, hB⟩
-  exact ⟨B, hBpos, dir_init_ge (I := I) g p x hB hderiv⟩
-
-/-- Radial-Jacobi specialization of the quantitative covariant Gronwall
-transfer.
-
-The theorem keeps the remaining V1c producer inputs explicit: the radial curve
-regularity, a full parallel orthonormal frame, chart-representation
-differentiability for `J` and `D_tJ`, and the covariant ODE bound.  Its content
-is the honest specialization of `covGronwall_bounds` to the packaged
-`radialJacobiField`, with `J 0 = 0` discharged by `radialJacobi_zero` and the
-initial velocity taken to be the actual covariant derivative at `0`. -/
-theorem radialJacobi_bounds_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t)) :
-    (∀ t ∈ Icc (0 : ℝ) b,
-      Real.sqrt (g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t)) ≤
-        t * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) t) ∧
-    (∀ t ∈ Icc (0 : ℝ) b,
-      t * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) t ≤
-        Real.sqrt (g.inner (radialCurve (I := I) g p x t)
-          (radialJacobiField (I := I) g p x w t)
-          (radialJacobiField (I := I) g p x w t))) := by
-  simpa [radialCurve] using
-    covGronwall_bounds_at (I := I) g (radialCurve (I := I) g p x) hγ hcard F
-      (radialJacobiField (I := I) g p x w) hK hb hpar hON hFdiff hJdiff
-      hDJdiff hODE (radialJacobi_zero (I := I) g p x w) rfl
-
-/-- Compatibility wrapper for `radialJacobi_bounds_at` when the radial curve is
-globally `C¹`. -/
-theorem radialJacobi_bounds
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t)) :
-    (∀ t ∈ Icc (0 : ℝ) b,
-      Real.sqrt (g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t)) ≤
-        t * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) t) ∧
-    (∀ t ∈ Icc (0 : ℝ) b,
-      t * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) t ≤
-        Real.sqrt (g.inner (radialCurve (I := I) g p x t)
-          (radialJacobiField (I := I) g p x w t)
-          (radialJacobiField (I := I) g p x w t))) := by
-  refine radialJacobi_bounds_at (I := I) g p x w hK hb (fun t _ => ?_) hcard F
-    hpar hON hFdiff hJdiff hDJdiff hODE
-  exact hγ.contMDiffAt
-
-/-- Endpoint `t = 1` form of `radialJacobi_bounds`.
-
-This is the shape consumed by the radial-Jacobi Gram matrix, whose entries use
-`radialJacobiField ... 1`.  The remaining analytic hypotheses are still the
-same explicit hypotheses of `radialJacobi_bounds`. -/
-theorem radialJacobi_one_bounds_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t)) :
-    (Real.sqrt (g.inner (radialCurve (I := I) g p x 1)
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤
-        Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1) ∧
-    (Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1 ≤
-        Real.sqrt (g.inner (radialCurve (I := I) g p x 1)
-          (radialJacobiField (I := I) g p x w 1)
-          (radialJacobiField (I := I) g p x w 1))) := by
-  have hbounds := radialJacobi_bounds_at (I := I) g p x w hK hb hγ hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE
-  have h1 : (1 : ℝ) ∈ Icc (0 : ℝ) b := ⟨by norm_num, h1b⟩
-  constructor
-  · simpa using hbounds.1 1 h1
-  · simpa using hbounds.2 1 h1
-
-/-- Compatibility wrapper for `radialJacobi_one_bounds_at` when the radial
-curve is globally `C¹`. -/
-theorem radialJacobi_one_bounds
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t)) :
-    (Real.sqrt (g.inner (radialCurve (I := I) g p x 1)
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤
-        Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1) ∧
-    (Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1 ≤
-        Real.sqrt (g.inner (radialCurve (I := I) g p x 1)
-          (radialJacobiField (I := I) g p x w 1)
-          (radialJacobiField (I := I) g p x w 1))) := by
-  refine radialJacobi_one_bounds_at (I := I) g p x w hK hb h1b
-    (fun t _ => ?_) hcard F hpar hON hFdiff hJdiff hDJdiff hODE
-  exact hγ.contMDiffAt
-
-/-- Local-regularity version of `radialJacobi_one_le`. -/
-theorem radialJacobi_one_le_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t))
-    (hB :
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1 ≤ B) :
-    Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤ B := by
-  have hbounds := radialJacobi_one_bounds_at (I := I) g p x w hK hb h1b hγ hcard F
-    hpar hON hFdiff hJdiff hDJdiff hODE
-  have hupper :
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x w 1)
-        (radialJacobiField (I := I) g p x w 1)) ≤
-          Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-            (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x w) 0)
-            (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x w) 0)) +
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-                (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                  (radialJacobiField (I := I) g p x w) 0)
-                (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                  (radialJacobiField (I := I) g p x w) 0)))) 1 := by
-    rw [← radialCurve_one (I := I) g p x]
-    exact hbounds.1
-  exact hupper.trans hB
-
-/-- Upper endpoint bound extracted from `radialJacobi_one_bounds`.
-
-This is the single-field producer used before passing to Gram-entry or density
-consumers.  The remaining hypothesis `hB` is the explicit scalar comparison for
-the model Gronwall expression. -/
-theorem radialJacobi_one_le
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t))
-    (hB :
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1 ≤ B) :
-    Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤ B := by
-  have hbounds := radialJacobi_one_bounds (I := I) g p x w hK hb h1b hγ hcard F
-    hpar hON hFdiff hJdiff hDJdiff hODE
-  have hupper :
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x w 1)
-        (radialJacobiField (I := I) g p x w 1)) ≤
-          Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-            (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x w) 0)
-            (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x w) 0)) +
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-                (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                  (radialJacobiField (I := I) g p x w) 0)
-                (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                  (radialJacobiField (I := I) g p x w) 0)))) 1 := by
-    rw [← radialCurve_one (I := I) g p x]
-    exact hbounds.1
-  exact hupper.trans hB
-
-/-- Local-regularity version of `radialJacobi_one_ge`. -/
-theorem radialJacobi_one_ge_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t))
-    (hB :
-      B ≤ Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1) :
-    B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) := by
-  have hbounds := radialJacobi_one_bounds_at (I := I) g p x w hK hb h1b hγ hcard F
-    hpar hON hFdiff hJdiff hDJdiff hODE
-  have hlower :
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1 ≤
-        Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-          (radialJacobiField (I := I) g p x w 1)
-          (radialJacobiField (I := I) g p x w 1)) := by
-    rw [← radialCurve_one (I := I) g p x]
-    exact hbounds.2
-  exact hB.trans hlower
-
-/-- Lower endpoint bound extracted from `radialJacobi_one_bounds`.
-
-This is the single-field lower producer used before passing to lower
-Gram/density consumers.  The remaining hypothesis `hB` is the explicit scalar
-comparison for the lower Gronwall expression. -/
-theorem radialJacobi_one_ge
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t))
-    (hB :
-      B ≤ Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1) :
-    B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) := by
-  have hbounds := radialJacobi_one_bounds (I := I) g p x w hK hb h1b hγ hcard F
-    hpar hON hFdiff hJdiff hDJdiff hODE
-  have hlower :
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1 ≤
-        Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-          (radialJacobiField (I := I) g p x w 1)
-          (radialJacobiField (I := I) g p x w 1)) := by
-    rw [← radialCurve_one (I := I) g p x]
-    exact hbounds.2
-  exact hB.trans hlower
-
-/-- Local-regularity version of `radialJacobi_sq_ge`. -/
-theorem radialJacobi_sq_ge_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b B : ℝ} (hB_nonneg : 0 ≤ B)
-    (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t))
-    (hB :
-      B ≤ Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1) :
-    B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1) := by
-  set q := radialCurve (I := I) g p x 1 with hq
-  set J : TangentSpace I q := radialJacobiField (I := I) g p x w 1 with hJdef
-  have hsqrt : B ≤ Real.sqrt (g.inner q J J) := by
-    rw [hq, radialCurve_one]
-    exact
-      radialJacobi_one_ge_at (I := I) g p x w hK hb h1b hγ hcard F hpar hON
-        hFdiff hJdiff hDJdiff hODE hB
-  have hsq : B ^ 2 ≤ (Real.sqrt (g.inner q J J)) ^ 2 :=
-    (sq_le_sq₀ hB_nonneg (Real.sqrt_nonneg _)).2 hsqrt
-  have hJ_nonneg : 0 ≤ g.inner q J J := by
-    rcases eq_or_ne J 0 with hJ | hJ
-    · rw [hJ]
-      have hzero :
-          (g.inner q) (0 : TangentSpace I q) = (0 : TangentSpace I q →L[ℝ] ℝ) :=
-        map_zero (g.inner q)
-      rw [hzero]
-      rfl
-    · exact (g.pos q J hJ).le
-  rw [← radialCurve_one (I := I) g p x]
-  simpa [hq, hJdef] using hsq.trans_eq (Real.sq_sqrt hJ_nonneg)
-
-/-- Squared lower endpoint bound extracted from the lower Gronwall endpoint
-estimate.
-
-This is the shape needed by lower Gram/density consumers, which are stated in
-terms of `g.inner J(1) J(1)` rather than its square root. -/
-theorem radialJacobi_sq_ge
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {K b B : ℝ} (hB_nonneg : 0 ≤ B)
-    (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x w) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x w t)
-        (radialJacobiField (I := I) g p x w t))
-    (hB :
-      B ≤ Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x w) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x w) 0)))) 1) :
-    B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1) := by
-  set q := radialCurve (I := I) g p x 1 with hq
-  set J : TangentSpace I q := radialJacobiField (I := I) g p x w 1 with hJdef
-  have hsqrt : B ≤ Real.sqrt (g.inner q J J) := by
-    rw [hq, radialCurve_one]
-    exact
-      radialJacobi_one_ge (I := I) g p x w hK hb h1b hγ hcard F hpar hON
-        hFdiff hJdiff hDJdiff hODE hB
-  have hsq : B ^ 2 ≤ (Real.sqrt (g.inner q J J)) ^ 2 :=
-    (sq_le_sq₀ hB_nonneg (Real.sqrt_nonneg _)).2 hsqrt
-  have hJ_nonneg : 0 ≤ g.inner q J J := by
-    rcases eq_or_ne J 0 with hJ | hJ
-    · rw [hJ]
-      have hzero :
-          (g.inner q) (0 : TangentSpace I q) = (0 : TangentSpace I q →L[ℝ] ℝ) :=
-        map_zero (g.inner q)
-      rw [hzero]
-      rfl
-    · exact (g.pos q J hJ).le
-  rw [← radialCurve_one (I := I) g p x]
-  simpa [hq, hJdef] using hsq.trans_eq (Real.sq_sqrt hJ_nonneg)
-
-/-- Local-regularity version of `radialJacobi_dir_ge`. -/
-theorem radialJacobi_dir_ge_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b B : ℝ} (hB_nonneg : 0 ≤ B)
-    (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) t) t)
-    (hDJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) s) t) t)
-    (hODE : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Ico (0 : ℝ) b,
-        g.inner (radialCurve (I := I) g p x t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (∑ i, v i • (chartModelBasis E) i)) s) t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (∑ i, v i • (chartModelBasis E) i)) s) t)
-        ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) t)
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) t))
-    (hB : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ≤ Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x
-                  (∑ i, v i • (chartModelBasis E) i)) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x
-                  (∑ i, v i • (chartModelBasis E) i)) 0)))) 1) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1) := by
-  intro v hv
-  exact radialJacobi_sq_ge_at (I := I) g p x (∑ i, v i • (chartModelBasis E) i)
-    hB_nonneg hK hb h1b hγ hcard F hpar hON hFdiff (hJdiff v hv)
-    (hDJdiff v hv) (hODE v hv) (hB v hv)
-
-/-- Unit-direction family form of the squared lower endpoint Gronwall bound.
-
-This is the producer-side shape expected by the lower density route: for every
-unit coefficient vector `v`, it bounds the endpoint field generated by
-`sum_i v_i e_i` from below.  All analytic hypotheses remain explicit for that
-direction family. -/
-theorem radialJacobi_dir_ge
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b B : ℝ} (hB_nonneg : 0 ≤ B)
-    (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) t) t)
-    (hDJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) s) t) t)
-    (hODE : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Ico (0 : ℝ) b,
-        g.inner (radialCurve (I := I) g p x t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (∑ i, v i • (chartModelBasis E) i)) s) t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (∑ i, v i • (chartModelBasis E) i)) s) t)
-        ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) t)
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) t))
-    (hB : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ≤ Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (∑ i, v i • (chartModelBasis E) i)) 0)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x
-                  (∑ i, v i • (chartModelBasis E) i)) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x
-                  (∑ i, v i • (chartModelBasis E) i)) 0)))) 1) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1) := by
-  intro v hv
-  exact radialJacobi_sq_ge (I := I) g p x (∑ i, v i • (chartModelBasis E) i)
-    hB_nonneg hK hb h1b hγ hcard F hpar hON hFdiff (hJdiff v hv)
-    (hDJdiff v hv) (hODE v hv) (hB v hv)
-
-/-- Local-regularity version of `radialJacobi_fin_le`. -/
-theorem radialJacobi_fin_le_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hB : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)))) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  intro k
-  exact radialJacobi_one_le_at (I := I) g p x ((chartModelBasis E) k) hK hb h1b hγ
-    hcard F hpar hON hFdiff (hJdiff k) (hDJdiff k) (hODE k) (hB k)
-
-/-- Basis-family endpoint bound extracted from `radialJacobi_one_le`.
-
-This packages the per-basis analytic hypotheses in exactly the form consumed by
-the existing radial-Jacobi density upper-bound lemmas. -/
-theorem radialJacobi_fin_le
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hB : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)) +
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)))) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  intro k
-  exact radialJacobi_one_le (I := I) g p x ((chartModelBasis E) k) hK hb h1b hγ
-    hcard F hpar hON hFdiff (hJdiff k) (hDJdiff k) (hODE k) (hB k)
-
-/-- Local-regularity version of `radialJacobi_fin_le_of_init_bound`. -/
-theorem radialJacobi_fin_le_of_init_bound_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hinit : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  refine radialJacobi_fin_le_at (I := I) g p x hK hb h1b hγ hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE ?_
-  intro k
-  set vnorm : ℝ :=
-    Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0))
-  have hvA : vnorm ≤ A := by
-    simpa [vnorm] using hinit k
-  have heps :
-      K * (b * vnorm) ≤ K * (b * A) := by
-    exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hvA hb) hK
-  have hmax : 0 ≤ max K 1 := le_max_of_le_right (by norm_num : (0 : ℝ) ≤ 1)
-  have hgb :
-      gronwallBound 0 (max K 1) (K * (b * vnorm)) 1 ≤
-        gronwallBound 0 (max K 1) (K * (b * A)) 1 :=
-    gronwallBound_zero_mono_eps hmax (by norm_num) heps
-  calc
-    vnorm + gronwallBound 0 (max K 1) (K * (b * vnorm)) 1
-        ≤ A + gronwallBound 0 (max K 1) (K * (b * A)) 1 :=
-          add_le_add hvA hgb
-    _ ≤ B := hmodel
-
-/-- Basis-family endpoint bound from a uniform initial-speed bound.
-
-This is the scalar-input compression used by the volume-comparison lane: instead
-of proving the full Grönwall expression separately for every basis vector, it is
-enough to bound every initial speed by `A` and compare the resulting uniform
-model expression with `B`. -/
-theorem radialJacobi_fin_le_of_init_bound
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hinit : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  refine radialJacobi_fin_le (I := I) g p x hK hb h1b hγ hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE ?_
-  intro k
-  set vnorm : ℝ :=
-    Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0))
-  have hvA : vnorm ≤ A := by
-    simpa [vnorm] using hinit k
-  have heps :
-      K * (b * vnorm) ≤ K * (b * A) := by
-    exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hvA hb) hK
-  have hmax : 0 ≤ max K 1 := le_max_of_le_right (by norm_num : (0 : ℝ) ≤ 1)
-  have hgb :
-      gronwallBound 0 (max K 1) (K * (b * vnorm)) 1 ≤
-        gronwallBound 0 (max K 1) (K * (b * A)) 1 :=
-    gronwallBound_zero_mono_eps hmax (by norm_num) heps
-  calc
-    vnorm + gronwallBound 0 (max K 1) (K * (b * vnorm)) 1
-        ≤ A + gronwallBound 0 (max K 1) (K * (b * A)) 1 :=
-          add_le_add hvA hgb
-    _ ≤ B := hmodel
-
-/-- Initial-speed bound for the fixed radial-Jacobi basis fields from the
-actual initial-derivative equality.
-
-This does not prove the derivative equality.  It isolates the remaining
-geometric input: once each fixed basis field satisfies `D_t J_k(0)=e_k`, the
-uniform initial-speed hypothesis needed by `radialJacobi_fin_le_of_init_bound`
-is reduced to a bound on the `g_p`-lengths of the model basis vectors. -/
-lemma radialJacobi_init_le_of_deriv_eq
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E) {A : ℝ}
-    (hderiv : ∀ k : Fin (Module.finrank ℝ E),
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0 : E) =
-        (chartModelBasis E) k)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0)) ≤ A := by
-  intro k
-  rw [radialCurve_zero (I := I) g p x]
-  rw [hderiv k]
-  exact hbasis k
-
-/-- Fixed-basis derivative equality from a small-radius derivative producer.
-
-This is the direct bridge from the radius form of the radial Jacobi initial
-condition to the fixed `chartModelBasis` family.  The side condition
-`‖e_k‖ < r` remains explicit; discharging it is a genuine scale/linearity
-frontier, not a consequence of the radius theorem alone. -/
-lemma fin_deriv_radius
-    (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ} (x : E)
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hbasisSmall : ∀ k : Fin (Module.finrank ℝ E), ‖(chartModelBasis E) k‖ < r) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0 : E) =
-        (chartModelBasis E) k := by
-  intro k
-  simpa [radialCurve] using hderivRadius x ((chartModelBasis E) k) hx (hbasisSmall k)
-
-private lemma sqrt_inner_le_of_smul_le
-    (g : SmoothRiemannianMetric I M) (q : M) (v : TangentSpace I q)
-    {a B : ℝ} (ha : 0 < a)
-    (h : Real.sqrt (g.inner q (a • v) (a • v)) ≤ a * B) :
-    Real.sqrt (g.inner q v v) ≤ B := by
-  have hscale :
-      g.inner q (a • v) (a • v) = a ^ 2 * g.inner q v v := by
-    rw [map_smul (g.inner q), ContinuousLinearMap.smul_apply,
-      ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
-    ring
-  have hsqrt :
-      Real.sqrt (a ^ 2 * g.inner q v v) =
-        a * Real.sqrt (g.inner q v v) := by
-    rw [Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs, abs_of_pos ha]
-  rw [hscale, hsqrt] at h
-  exact (le_of_mul_le_mul_left h ha)
-
-private lemma le_sqrt_inner_of_smul_ge
-    (g : SmoothRiemannianMetric I M) (q : M) (v : TangentSpace I q)
-    {a B : ℝ} (ha : 0 < a)
-    (h : a * B ≤ Real.sqrt (g.inner q (a • v) (a • v))) :
-    B ≤ Real.sqrt (g.inner q v v) := by
-  have hscale :
-      g.inner q (a • v) (a • v) = a ^ 2 * g.inner q v v := by
-    rw [map_smul (g.inner q), ContinuousLinearMap.smul_apply,
-      ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
-    ring
-  have hsqrt :
-      Real.sqrt (a ^ 2 * g.inner q v v) =
-        a * Real.sqrt (g.inner q v v) := by
-    rw [Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs, abs_of_pos ha]
-  rw [hscale, hsqrt] at h
-  exact le_of_mul_le_mul_left h ha
-
-/-- If a positive scalar multiple of an endpoint radial Jacobi field has the
-correspondingly scaled length bound, then the original endpoint field has the
-unscaled bound.
-
-This is the endpoint-scaling bridge used to apply small-radius initial
-condition producers to a shrunk variation direction and then recover a bound
-for the original direction. -/
-lemma radialJacobi_one_le_of_smul
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {a B : ℝ} (ha : 0 < a)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p)
-    (hscaled :
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x (a • w) 1)
-        (radialJacobiField (I := I) g p x (a • w) 1)) ≤ a * B) :
-    Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤ B := by
-  have hsmul := radialJacobi_one_smul (I := I) g p x w a hxrad
-  rw [hsmul] at hscaled
-  exact sqrt_inner_le_of_smul_le (I := I) g
-    (expMap (I := I) g p (show TangentSpace I p from x))
-    (radialJacobiField (I := I) g p x w 1) ha hscaled
-
-/-- If a positive scalar multiple of an endpoint radial Jacobi field has the
-correspondingly scaled lower length bound, then the original endpoint field has
-the unscaled lower bound. -/
-lemma radialJacobi_one_ge_of_smul
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {a B : ℝ} (ha : 0 < a)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p)
-    (hscaled :
-      a * B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x (a • w) 1)
-        (radialJacobiField (I := I) g p x (a • w) 1))) :
-    B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) := by
-  have hsmul := radialJacobi_one_smul (I := I) g p x w a hxrad
-  rw [hsmul] at hscaled
-  exact le_sqrt_inner_of_smul_ge (I := I) g
-    (expMap (I := I) g p (show TangentSpace I p from x))
-    (radialJacobiField (I := I) g p x w 1) ha hscaled
-
-private noncomputable def basisNormSup : ℝ :=
-  (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
-    (by
-      refine Finset.univ_nonempty_iff.mpr ?_
-      exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
-    (fun k => ‖(chartModelBasis E) k‖)
-
-private lemma basisNormSup_nonneg : 0 ≤ basisNormSup (E := E) := by
-  classical
-  unfold basisNormSup
-  have hne : (Finset.univ : Finset (Fin (Module.finrank ℝ E))).Nonempty := by
-    refine Finset.univ_nonempty_iff.mpr ?_
-    exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
-  obtain ⟨k₀, hk₀⟩ := hne
-  have hnn : (0 : ℝ) ≤ ‖(chartModelBasis E) k₀‖ := norm_nonneg _
-  exact hnn.trans (Finset.le_sup'
-    (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
-
-private lemma norm_basis_le_sup
-    (k : Fin (Module.finrank ℝ E)) :
-    ‖(chartModelBasis E) k‖ ≤ basisNormSup (E := E) := by
-  classical
-  unfold basisNormSup
-  exact Finset.le_sup'
-    (f := fun k => ‖(chartModelBasis E) k‖)
-    (Finset.mem_univ _)
-
-/-- A positive common scale makes every fixed model-basis vector lie in any
-prescribed positive radius. -/
-lemma basisScaleSmall {r : ℝ} (hr : 0 < r) :
-    ∃ a : ℝ, 0 < a ∧
-      ∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < r := by
-  classical
-  set C : ℝ := basisNormSup (E := E) with hC
-  have hC_nonneg : 0 ≤ C := by
-    simpa [hC] using basisNormSup_nonneg (E := E)
-  have hden_pos : 0 < C + 1 := by linarith
-  refine ⟨r / (C + 1), div_pos hr hden_pos, ?_⟩
-  intro k
-  have hscale_pos : 0 < r / (C + 1) := div_pos hr hden_pos
-  have hk_le : ‖(chartModelBasis E) k‖ ≤ C := by
-    simpa [hC] using norm_basis_le_sup (E := E) k
-  have hk_lt : ‖(chartModelBasis E) k‖ < C + 1 := lt_of_le_of_lt hk_le (by linarith)
-  rw [norm_smul, Real.norm_eq_abs, abs_of_pos hscale_pos]
-  calc
-    r / (C + 1) * ‖(chartModelBasis E) k‖
-        < r / (C + 1) * (C + 1) :=
-          mul_lt_mul_of_pos_left hk_lt hscale_pos
-    _ = r := by field_simp [ne_of_gt hden_pos]
-
-private lemma scaleSmall_of_le {a b r : ℝ} {v : E}
-    (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a ≤ b) (hsmall : ‖b • v‖ < r) :
-    ‖a • v‖ < r := by
-  rw [norm_smul] at hsmall
-  rw [norm_smul]
-  have habs : ‖a‖ ≤ ‖b‖ := by
-    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg ha, abs_of_nonneg hb]
-    exact hab
-  exact lt_of_le_of_lt (mul_le_mul_of_nonneg_right habs (norm_nonneg v)) hsmall
-
-/-- A positive common scale makes both fixed model-basis vectors and unit
-coefficient directions lie in any prescribed positive radius. -/
-lemma basisUnitScaleSmall {r : ℝ} (hr : 0 < r) :
-    ∃ a : ℝ, 0 < a ∧
-      (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < r) ∧
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < r) := by
-  obtain ⟨ab, hab_pos, hbasis⟩ := basisScaleSmall (E := E) hr
-  obtain ⟨ad, had_pos, hdir⟩ := unitDirScaleSmall (E := E) hr
-  refine ⟨min ab ad, lt_min hab_pos had_pos, ?_, ?_⟩
-  · intro k
-    exact scaleSmall_of_le
-      (v := (chartModelBasis E) k)
-      (le_of_lt (lt_min hab_pos had_pos))
-      (le_of_lt hab_pos)
-      (min_le_left ab ad)
-      (hbasis k)
-  · intro v hv
-    exact scaleSmall_of_le
-      (v := ∑ i, v i • (chartModelBasis E) i)
-      (le_of_lt (lt_min hab_pos had_pos))
-      (le_of_lt had_pos)
-      (min_le_right ab ad)
-      (hdir v hv)
-
-/-- A center length bound for the fixed model basis scales linearly under a
-positive scalar. -/
-lemma basisInit_smul_le
-    (g : SmoothRiemannianMetric I M) (p : M) {a A : ℝ} (ha : 0 < a)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤
-        a * A := by
-  intro k
-  let v : TangentSpace I p := (chartModelBasis E) k
-  have hscale :
-      g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k) =
-        a ^ 2 * g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k) := by
-    have hscale_v : g.inner p (a • v) (a • v) = a ^ 2 * g.inner p v v := by
-      rw [map_smul (g.inner p), ContinuousLinearMap.smul_apply,
-        ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
-      ring
-    change g.inner p (a • v) (a • v) = a ^ 2 * g.inner p v v
-    exact hscale_v
-  have hsqrt :
-      Real.sqrt (a ^ 2 * g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) =
-        a * Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) := by
-    rw [Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs, abs_of_pos ha]
-  rw [hscale, hsqrt]
-  exact mul_le_mul_of_nonneg_left (hbasis k) ha.le
-
-/-- The upper scalar Gronwall model comparison scales linearly under a positive
-scalar. -/
-lemma model_le_smul {a K b A B : ℝ} (ha : 0 < a)
-    (hmodel : A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    a * A + gronwallBound 0 (max K 1) (K * (b * (a * A))) 1 ≤ a * B := by
-  have herr :
-      gronwallBound 0 (max K 1) (K * (b * (a * A))) 1 =
-        a * gronwallBound 0 (max K 1) (K * (b * A)) 1 := by
-    have heps : K * (b * (a * A)) = a * (K * (b * A)) := by ring
-    rw [heps, gronwallBound_zero_mul_eps]
-  rw [herr]
-  have hmul := mul_le_mul_of_nonneg_left hmodel ha.le
-  nlinarith
-
-/-- Scaled fixed-basis initial bound and upper scalar model comparison. -/
-lemma basisModel_le_smul
-    (g : SmoothRiemannianMetric I M) (p : M) {a K b A B : ℝ} (ha : 0 < a)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A)
-    (hmodel : A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    (∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤
-        a * A) ∧
-    a * A + gronwallBound 0 (max K 1) (K * (b * (a * A))) 1 ≤ a * B := by
-  exact ⟨basisInit_smul_le (I := I) g p ha hbasis, model_le_smul ha hmodel⟩
-
- /-- Local-regularity version of `radialJacobi_fin_le_of_deriv_eq`. -/
-theorem radialJacobi_fin_le_of_deriv_eq_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hderiv : ∀ k : Fin (Module.finrank ℝ E),
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0 : E) =
-        (chartModelBasis E) k)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B :=
-  radialJacobi_fin_le_of_init_bound_at (I := I) g p x hK hb h1b hγ hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE
-    (radialJacobi_init_le_of_deriv_eq (I := I) g p x hderiv hbasis) hmodel
-
-/-- Basis-family endpoint bound from actual initial-derivative equalities and
-a uniform `g_p`-length bound on the fixed model basis.
-
-Compared with `radialJacobi_fin_le_of_init_bound`, this removes the abstract
-`hinit` hypothesis.  The remaining nontrivial producer is the fixed-basis
-initial derivative equality, which must be supplied by the radial Jacobi
-initial-condition/radius API. -/
-theorem radialJacobi_fin_le_of_deriv_eq
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hderiv : ∀ k : Fin (Module.finrank ℝ E),
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) 0 : E) =
-        (chartModelBasis E) k)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B :=
-  radialJacobi_fin_le_of_deriv_eq_at (I := I) g p x hK hb h1b
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE
-    hderiv hbasis hmodel
-
- /-- Local-regularity version of `radialJacobi_fin_le_of_radius_deriv`. -/
-theorem radialJacobi_fin_le_of_radius_deriv_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {r K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hbasisSmall : ∀ k : Fin (Module.finrank ℝ E), ‖(chartModelBasis E) k‖ < r)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B :=
-  radialJacobi_fin_le_of_deriv_eq_at (I := I) g p x hK hb h1b hγ hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE
-    (fin_deriv_radius (I := I) g p x hderivRadius hx hbasisSmall)
-    hbasis hmodel
-
-/-- Basis-family endpoint bound from a small-radius radial-Jacobi derivative
-producer.
-
-This consumes the radius form of `D_tJ(0)=w` and exposes exactly the fixed-basis
-side condition needed to apply it to every `chartModelBasis` vector. -/
-theorem radialJacobi_fin_le_of_radius_deriv
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {r K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x ((chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hbasisSmall : ∀ k : Fin (Module.finrank ℝ E), ‖(chartModelBasis E) k‖ < r)
-    (hbasis : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B :=
-  radialJacobi_fin_le_of_radius_deriv_at (I := I) g p x hK hb h1b
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON
-    hFdiff hJdiff hDJdiff hODE
-    hderivRadius hx hbasisSmall hbasis hmodel
-
-/-- Single-direction endpoint bound from a small-radius derivative producer
-applied to a positive scalar multiple of the direction.
-
-This bridge removes the artificial requirement that the original direction
-itself lie in the initial-derivative radius.  The remaining smallness
-assumption is on `a • w`, and the model comparison output is correspondingly
-scaled by `a`. -/
-theorem radialJacobi_one_le_of_scaled_radius_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x (a • w) t)
-        (radialJacobiField (I := I) g p x (a • w) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r) (hwsmall : ‖a • w‖ < r)
-    (hinit : Real.sqrt (g.inner p (a • w) (a • w)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤ B := by
-  have hderiv :
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x (a • w)) 0 : E) = a • w := by
-    simpa [radialCurve] using hderivRadius x (a • w) hx hwsmall
-  have hscaled :
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x (a • w) 1)
-        (radialJacobiField (I := I) g p x (a • w) 1)) ≤ a * B := by
-    refine radialJacobi_one_le_at (I := I) g p x (a • w) hK hb h1b hγ hcard F hpar hON
-      hFdiff hJdiff hDJdiff hODE ?_
-    set vnorm : ℝ :=
-      Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) 0)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) 0))
-    have hvA : vnorm ≤ A := by
-      have hraw :
-          Real.sqrt (g.inner (radialCurve (I := I) g p x 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x (a • w)) 0)
-              (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-                (radialJacobiField (I := I) g p x (a • w)) 0)) ≤ A := by
-        rw [radialCurve_zero (I := I) g p x]
-        rw [hderiv]
-        exact hinit
-      simpa [vnorm] using hraw
-    have heps :
-        K * (b * vnorm) ≤ K * (b * A) := by
-      exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hvA hb) hK
-    have hmax : 0 ≤ max K 1 := le_max_of_le_right (by norm_num : (0 : ℝ) ≤ 1)
-    have hgb :
-        gronwallBound 0 (max K 1) (K * (b * vnorm)) 1 ≤
-          gronwallBound 0 (max K 1) (K * (b * A)) 1 :=
-      gronwallBound_zero_mono_eps hmax (by norm_num) heps
-    calc
-      vnorm + gronwallBound 0 (max K 1) (K * (b * vnorm)) 1
-          ≤ A + gronwallBound 0 (max K 1) (K * (b * A)) 1 :=
-            add_le_add hvA hgb
-      _ ≤ a * B := hmodel
-  exact radialJacobi_one_le_of_smul (I := I) g p x w ha hxrad hscaled
-
-/-- Single-direction endpoint bound from a small-radius derivative producer
-applied to a positive scalar multiple of the direction.
-
-This bridge removes the artificial requirement that the original direction
-itself lie in the initial-derivative radius.  The remaining smallness
-assumption is on `a • w`, and the model comparison output is correspondingly
-scaled by `a`. -/
-theorem radialJacobi_one_le_of_scaled_radius
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x (a • w) t)
-        (radialJacobiField (I := I) g p x (a • w) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r) (hwsmall : ‖a • w‖ < r)
-    (hinit : Real.sqrt (g.inner p (a • w) (a • w)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) ≤ B :=
-  radialJacobi_one_le_of_scaled_radius_at (I := I) g p x w ha hK hb h1b
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hJdiff hDJdiff hODE
-    hderivRadius hx hwsmall hinit hmodel hxrad
-
-/-- Single-direction lower endpoint bound from a small-radius derivative
-producer applied to a positive scalar multiple of the direction.
-
-This is the lower-route analogue of `radialJacobi_one_le_of_scaled_radius`.
-The model comparison hypothesis is stated for the scaled initial speed, so the
-small-radius derivative theorem is only used where it is valid. -/
-theorem radialJacobi_one_ge_of_scaled_radius_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {a r K b B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x (a • w) t)
-        (radialJacobiField (I := I) g p x (a • w) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r) (hwsmall : ‖a • w‖ < r)
-    (hmodel :
-      a * B ≤ Real.sqrt (g.inner p (a • w) (a • w)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner p (a • w) (a • w)))) 1)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) := by
-  have hderiv :
-      (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-        (radialJacobiField (I := I) g p x (a • w)) 0 : E) = a • w := by
-    simpa [radialCurve] using hderivRadius x (a • w) hx hwsmall
-  have hscaled :
-      a * B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x (a • w) 1)
-        (radialJacobiField (I := I) g p x (a • w) 1)) := by
-    refine radialJacobi_one_ge_at (I := I) g p x (a • w) hK hb h1b hγ hcard F hpar hON
-      hFdiff hJdiff hDJdiff hODE ?_
-    rw [radialCurve_zero (I := I) g p x]
-    rw [hderiv]
-    exact hmodel
-  exact radialJacobi_one_ge_of_smul (I := I) g p x w ha hxrad hscaled
-
-/-- Single-direction lower endpoint bound from a small-radius derivative
-producer applied to a positive scalar multiple of the direction.
-
-This is the lower-route analogue of `radialJacobi_one_le_of_scaled_radius`.
-The model comparison hypothesis is stated for the scaled initial speed, so the
-small-radius derivative theorem is only used where it is valid. -/
-theorem radialJacobi_one_ge_of_scaled_radius
-    (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
-    {a r K b B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) t) t)
-    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-      (chartRepAt (I := I) (radialCurve (I := I) g p x)
-        (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • w)) s) t) t)
-    (hODE : ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • w)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x (a • w) t)
-        (radialJacobiField (I := I) g p x (a • w) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r) (hwsmall : ‖a • w‖ < r)
-    (hmodel :
-      a * B ≤ Real.sqrt (g.inner p (a • w) (a • w)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner p (a • w) (a • w)))) 1)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-      (radialJacobiField (I := I) g p x w 1)
-      (radialJacobiField (I := I) g p x w 1)) :=
-  radialJacobi_one_ge_of_scaled_radius_at (I := I) g p x w ha hK hb h1b
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hJdiff hDJdiff hODE
-    hderivRadius hx hwsmall hmodel hxrad
-
-/-- Unit-direction lower endpoint bound from a small-radius derivative producer
-applied to a common positive scale of every coefficient direction.
-
-This packages the lower-route smallness/scaling bridge for the density
-consumer: the radius theorem is applied only to `a • sum_i v_i e_i`, and the
-endpoint lower bound is divided back to the original unit coefficient
-direction using endpoint linearity. -/
-theorem radialJacobi_dir_ge_of_scaled_radius_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {a r K b B : ℝ} (ha : 0 < a) (hB_nonneg : 0 ≤ B)
-    (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (a • (∑ i, v i • (chartModelBasis E) i))) t) t)
-    (hDJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (a • (∑ i, v i • (chartModelBasis E) i))) s) t) t)
-    (hODE : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Ico (0 : ℝ) b,
-        g.inner (radialCurve (I := I) g p x t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (a • (∑ i, v i • (chartModelBasis E) i))) s) t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (a • (∑ i, v i • (chartModelBasis E) i))) s) t)
-        ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-          (radialJacobiField (I := I) g p x
-            (a • (∑ i, v i • (chartModelBasis E) i)) t)
-          (radialJacobiField (I := I) g p x
-            (a • (∑ i, v i • (chartModelBasis E) i)) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hscaledSmall : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < r)
-    (hmodel : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      a * B ≤ Real.sqrt
-          (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-            (a • (∑ i, v i • (chartModelBasis E) i))) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt
-              (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                (a • (∑ i, v i • (chartModelBasis E) i))))) 1)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1) := by
-  intro v hv
-  set w : E := ∑ i, v i • (chartModelBasis E) i with hw
-  have hsqrt :
-      B ≤ Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x w 1)
-        (radialJacobiField (I := I) g p x w 1)) := by
-    exact radialJacobi_one_ge_of_scaled_radius_at (I := I) g p x w ha hK hb h1b hγ
-      hcard F hpar hON hFdiff (hJdiff v hv) (hDJdiff v hv) (hODE v hv)
-      hderivRadius hx (by simpa [hw] using hscaledSmall v hv)
-      (by simpa [hw] using hmodel v hv) hxrad
-  set q := expMap (I := I) g p (show TangentSpace I p from x) with hq
-  set J : TangentSpace I q := radialJacobiField (I := I) g p x w 1 with hJdef
-  have hsq : B ^ 2 ≤ (Real.sqrt (g.inner q J J)) ^ 2 := by
-    exact (sq_le_sq₀ hB_nonneg (Real.sqrt_nonneg _)).2 (by simpa [q, J] using hsqrt)
-  have hJ_nonneg : 0 ≤ g.inner q J J := by
-    rcases eq_or_ne J 0 with hJ | hJ
-    · rw [hJ]
-      have hzero :
-          (g.inner q) (0 : TangentSpace I q) = (0 : TangentSpace I q →L[ℝ] ℝ) :=
-        map_zero (g.inner q)
-      rw [hzero]
-      rfl
-    · exact (g.pos q J hJ).le
-  simpa [q, J, hw] using hsq.trans_eq (Real.sq_sqrt hJ_nonneg)
-
-/-- Unit-direction lower endpoint bound from a small-radius derivative producer
-applied to a common positive scale of every coefficient direction.
-
-This packages the lower-route smallness/scaling bridge for the density
-consumer: the radius theorem is applied only to `a • sum_i v_i e_i`, and the
-endpoint lower bound is divided back to the original unit coefficient
-direction using endpoint linearity. -/
-theorem radialJacobi_dir_ge_of_scaled_radius
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {a r K b B : ℝ} (ha : 0 < a) (hB_nonneg : 0 ≤ B)
-    (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (a • (∑ i, v i • (chartModelBasis E) i))) t) t)
-    (hDJdiff : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x
-              (a • (∑ i, v i • (chartModelBasis E) i))) s) t) t)
-    (hODE : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ∀ t ∈ Ico (0 : ℝ) b,
-        g.inner (radialCurve (I := I) g p x t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (a • (∑ i, v i • (chartModelBasis E) i))) s) t)
-          (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-              (radialJacobiField (I := I) g p x
-                (a • (∑ i, v i • (chartModelBasis E) i))) s) t)
-        ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-          (radialJacobiField (I := I) g p x
-            (a • (∑ i, v i • (chartModelBasis E) i)) t)
-          (radialJacobiField (I := I) g p x
-            (a • (∑ i, v i • (chartModelBasis E) i)) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hscaledSmall : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < r)
-    (hmodel : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      a * B ≤ Real.sqrt
-          (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-            (a • (∑ i, v i • (chartModelBasis E) i))) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt
-              (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                (a • (∑ i, v i • (chartModelBasis E) i))))) 1)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1)
-        (radialJacobiField (I := I) g p x
-          (∑ i, v i • (chartModelBasis E) i) 1) :=
-  radialJacobi_dir_ge_of_scaled_radius_at (I := I) g p x ha hB_nonneg hK hb h1b
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hJdiff hDJdiff hODE
-    hderivRadius hx hscaledSmall hmodel hxrad
-
-/-- Scaling preserves the lower scalar Gronwall model comparison.
-
-This is the scalar bridge needed before applying the small-radius derivative
-theorem to `a • w`: the metric initial speed and the zero-initial Gronwall
-error both scale by the same positive factor. -/
-lemma model_ge_of_smul
-    (g : SmoothRiemannianMetric I M) (p : M) (w : E)
-    {a K b B : ℝ} (ha : 0 < a)
-    (hmodel :
-      B ≤ Real.sqrt (g.inner p w w) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt (g.inner p w w))) 1) :
-    a * B ≤ Real.sqrt (g.inner p (a • w) (a • w)) -
-        gronwallBound 0 (max K 1)
-          (K * (b * Real.sqrt (g.inner p (a • w) (a • w)))) 1 := by
-  set s : ℝ := Real.sqrt (g.inner p w w) with hs
-  have hsqrt :
-      Real.sqrt (g.inner p (a • w) (a • w)) = a * s := by
-    have hscale :
-        g.inner p (a • w) (a • w) = a ^ 2 * g.inner p w w := by
-      let v : TangentSpace I p := w
-      have hscale_v : g.inner p (a • v) (a • v) = a ^ 2 * g.inner p v v := by
-        rw [map_smul (g.inner p), ContinuousLinearMap.smul_apply,
-          ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
-        ring
-      change g.inner p (a • v) (a • v) = a ^ 2 * g.inner p v v
-      exact hscale_v
-    rw [hscale, Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs, abs_of_pos ha, hs]
-  have herr :
-      gronwallBound 0 (max K 1) (K * (b * (a * s))) 1 =
-        a * gronwallBound 0 (max K 1) (K * (b * s)) 1 := by
-    have heps : K * (b * (a * s)) = a * (K * (b * s)) := by ring
-    rw [heps, gronwallBound_zero_mul_eps]
-  rw [hsqrt, herr]
-  have hmul := mul_le_mul_of_nonneg_left hmodel ha.le
-  nlinarith
-
-/-- Unit-direction family form of `model_ge_of_smul`. -/
-lemma dirModel_ge_smul
-    (g : SmoothRiemannianMetric I M) (p : M)
-    {a K b B : ℝ} (ha : 0 < a)
-    (hmodel : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ≤ Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt
-              (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                (∑ i, v i • (chartModelBasis E) i)))) 1) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      a * B ≤ Real.sqrt
-          (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-            (a • (∑ i, v i • (chartModelBasis E) i))) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt
-              (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                (a • (∑ i, v i • (chartModelBasis E) i))))) 1 := by
-  intro v hv
-  exact model_ge_of_smul (I := I) g p (∑ i, v i • (chartModelBasis E) i) ha
-    (hmodel v hv)
-
-/-- Lower scalar Gronwall model comparison from uniform initial lower/upper
-length bounds and one scalar error smallness condition. -/
-lemma dirModel_ge_of_bounds
-    (g : SmoothRiemannianMetric I M) (p : M)
-    {K b B₀ D B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (hlo : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B₀ ≤ Real.sqrt
-        (g.inner p (∑ i, v i • (chartModelBasis E) i)
-          (∑ i, v i • (chartModelBasis E) i)))
-    (hhi : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      Real.sqrt
-        (g.inner p (∑ i, v i • (chartModelBasis E) i)
-          (∑ i, v i • (chartModelBasis E) i)) ≤ D)
-    (hsmall :
-      B ≤ B₀ - gronwallBound 0 (max K 1) (K * (b * D)) 1) :
-    ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-      B ≤ Real.sqrt
-          (g.inner p (∑ i, v i • (chartModelBasis E) i)
-            (∑ i, v i • (chartModelBasis E) i)) -
-          gronwallBound 0 (max K 1)
-            (K * (b * Real.sqrt
-              (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                (∑ i, v i • (chartModelBasis E) i)))) 1 := by
-  intro v hv
-  set s : ℝ := Real.sqrt
-    (g.inner p (∑ i, v i • (chartModelBasis E) i)
-      (∑ i, v i • (chartModelBasis E) i)) with hs
-  have hslo : B₀ ≤ s := by
-    simpa [s] using hlo v hv
-  have hshi : s ≤ D := by
-    simpa [s] using hhi v hv
-  have heps : K * (b * s) ≤ K * (b * D) := by
-    exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hshi hb) hK
-  have hmax : 0 ≤ max K 1 := le_max_of_le_right (by norm_num : (0 : ℝ) ≤ 1)
-  have hgb :
-      gronwallBound 0 (max K 1) (K * (b * s)) 1 ≤
-        gronwallBound 0 (max K 1) (K * (b * D)) 1 :=
-    gronwallBound_zero_mono_eps hmax (by norm_num) heps
-  nlinarith
-
-/-- Unit coefficient directions admit a positive lower scalar model bound after
-choosing a sufficiently small time scale. -/
-lemma exists_dirModel_ge
-    (g : SmoothRiemannianMetric I M) (p : M)
-    {K : ℝ} (hK : 0 ≤ K) :
-    ∃ b B : ℝ, 0 < b ∧ 0 < B ∧
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1 := by
-  rcases exists_unitCoeff_bounds (I := I) g p with
-    ⟨B₀, D, hB₀_pos, hD_nonneg, hlo, hhi⟩
-  rcases exists_gron_small hB₀_pos hK hD_nonneg with ⟨b, B, hb_pos, hB_pos, hsmall⟩
-  refine ⟨b, B, hb_pos, hB_pos, ?_⟩
-  exact dirModel_ge_of_bounds (I := I) g p hK hb_pos.le hlo hhi hsmall
-
-/-- Unit coefficient directions admit a positive lower scalar model bound at
-time `1`, after choosing the curvature coefficient sufficiently small. -/
-lemma exists_dirModel_ge1
-    (g : SmoothRiemannianMetric I M) (p : M) :
-    ∃ K B : ℝ, 0 < K ∧ 0 < B ∧
-      ∀ {k : ℝ}, 0 ≤ k → k ≤ K →
-        ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-          B ≤ Real.sqrt
-              (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                (∑ i, v i • (chartModelBasis E) i)) -
-              gronwallBound 0 (max k 1)
-                (k * Real.sqrt
-                  (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                    (∑ i, v i • (chartModelBasis E) i))) 1 := by
-  rcases exists_unitCoeff_bounds (I := I) g p with
-    ⟨B₀, D, hB₀_pos, hD_nonneg, hlo, hhi⟩
-  rcases exists_gron_smallK hB₀_pos hD_nonneg with ⟨K, B, hK_pos, hB_pos, hsmall⟩
-  refine ⟨K, B, hK_pos, hB_pos, ?_⟩
-  intro k hk_nonneg hk_le v hv
-  set s : ℝ := Real.sqrt
-    (g.inner p (∑ i, v i • (chartModelBasis E) i)
-      (∑ i, v i • (chartModelBasis E) i)) with hs
-  have hslo : B₀ ≤ s := by
-    simpa [s] using hlo v hv
-  have hshi : s ≤ D := by
-    simpa [s] using hhi v hv
-  have hsmall' :
-      B ≤ B₀ - gronwallBound 0 (max k 1) (k * D) 1 :=
-    hsmall hk_nonneg hk_le
-  have heps : k * s ≤ k * D := mul_le_mul_of_nonneg_left hshi hk_nonneg
-  have hmax : 0 ≤ max k 1 := le_max_of_le_right (by norm_num : (0 : ℝ) ≤ 1)
-  have hgb :
-      gronwallBound 0 (max k 1) (k * s) 1 ≤
-        gronwallBound 0 (max k 1) (k * D) 1 :=
-    gronwallBound_zero_mono_eps hmax (by norm_num) heps
-  nlinarith
-
-/-- Basis-family endpoint bound from a small-radius derivative producer applied
-to a positive scalar multiple of each fixed basis vector.
-
-The original fixed basis vectors need not lie in the derivative radius; the
-explicit smallness assumption is on the scaled vectors `a • e_k`. -/
-theorem radialJacobi_fin_le_of_scaled_radius_at
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (h1b : (1 : ℝ) ≤ b)
-    (hγ : ∀ t ∈ Icc (0 : ℝ) b,
-      ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hscaledSmall : ∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < r)
-    (hinit : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  intro k
-  exact radialJacobi_one_le_of_scaled_radius_at (I := I) g p x ((chartModelBasis E) k)
-    ha hK hb h1b hγ hcard F hpar hON hFdiff (hJdiff k) (hDJdiff k) (hODE k)
-    hderivRadius hx (hscaledSmall k) (hinit k) hmodel hxrad
-
-/-- Basis-family endpoint bound from a small-radius derivative producer applied
-to a positive scalar multiple of each fixed basis vector.
-
-The original fixed basis vectors need not lie in the derivative radius; the
-explicit smallness assumption is on the scaled vectors `a • e_k`. -/
-theorem radialJacobi_fin_le_of_scaled_radius
-    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
-    {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
-    (h1b : (1 : ℝ) ≤ b)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x))
-    {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    (hcard : ∀ t : ℝ,
-      Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t)))
-    (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t))
-    (hpar : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0)
-    (hON : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-      g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-        if i = j then (1 : ℝ) else 0)
-    (hFdiff : ∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t)
-    (hJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) t) t)
-    (hDJdiff : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Icc (0 : ℝ) b,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) s) t) t)
-    (hODE : ∀ k : Fin (Module.finrank ℝ E), ∀ t ∈ Ico (0 : ℝ) b,
-      g.inner (radialCurve (I := I) g p x t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) s) t)
-        (covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-          (fun s => covDerivAlong (I := I) g (radialCurve (I := I) g p x)
-            (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k)) s) t)
-      ≤ K ^ 2 * g.inner (radialCurve (I := I) g p x t)
-        (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k) t)
-        (radialJacobiField (I := I) g p x (a • (chartModelBasis E) k) t))
-    (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w)
-    (hx : ‖x‖ < r)
-    (hscaledSmall : ∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < r)
-    (hinit : ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤ A)
-    (hmodel :
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B)
-    (hxrad : ‖x‖ < expMapC2Radius (I := I) g p) :
-    ∀ k : Fin (Module.finrank ℝ E),
-      Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-        (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B :=
-  radialJacobi_fin_le_of_scaled_radius_at (I := I) g p x ha hK hb h1b
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hJdiff hDJdiff hODE
-    hderivRadius hx hscaledSmall hinit hmodel hxrad
-
-open Bundle in
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-packaged upper endpoint bound for scaled fixed-basis radial Jacobi
-fields under the Rm04 analytic package. -/
-theorem exists_fin_le_rm04_at
-    [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ r : Real, 0 < r ∧ ∀ x : E, ‖x‖ < r →
-      ∀ {a K R Vb b A B : ℝ}, 0 < a → 0 ≤ K → 0 ≤ Vb → 0 ≤ b → b ≤ 1 →
-      (1 : ℝ) ≤ b →
-      (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < r) →
-      Real.sqrt (g.inner p x x) ≤ Vb →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          R * Vb ^ 2 ≤ K →
-      (∀ t (_ht : t ∈ Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
-      (∀ t ∈ Icc (0 : ℝ) b,
-        ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t) →
-      ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →
-      (∀ t : ℝ,
-        Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t))) →
-      (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t)) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0) →
-      (∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-        g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-          if i = j then (1 : ℝ) else 0) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B →
-      ‖x‖ < expMapC2Radius (I := I) g p →
-      ∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  obtain ⟨r, hr, hdata, hderiv⟩ := exists_rm04_pack (I := I) g hEnorm p
-  refine ⟨r, hr, ?_⟩
-  intro x hx a K R Vb b A B ha hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm
-    hγ ι _ _ _ hcard F hpar hON hFdiff hinit hmodel hxrad
-  letI : Fintype ι := ‹Fintype ι›
-  letI : DecidableEq ι := ‹DecidableEq ι›
-  letI : Nonempty ι := ‹Nonempty ι›
-  obtain ⟨hJdiff, hDJdiff, hODE⟩ :=
-    hdata x hx hK hVb hb1 hsmall hlaunch hKbound hRm
-  exact radialJacobi_fin_le_of_scaled_radius_at (I := I) g p x ha hK hb0 h1b hγ
-    hcard F hpar hON hFdiff hJdiff hDJdiff hODE hderiv hx hsmall hinit hmodel hxrad
-
-open Bundle in
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-packaged upper endpoint bound for scaled fixed-basis radial Jacobi
-fields under the Rm04 analytic package. -/
-theorem exists_fin_le_rm04
-    [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ r : Real, 0 < r ∧ ∀ x : E, ‖x‖ < r →
-      ∀ {a K R Vb b A B : ℝ}, 0 < a → 0 ≤ K → 0 ≤ Vb → 0 ≤ b → b ≤ 1 →
-      (1 : ℝ) ≤ b →
-      (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < r) →
-      Real.sqrt (g.inner p x x) ≤ Vb →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          R * Vb ^ 2 ≤ K →
-      (∀ t (_ht : t ∈ Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
-      ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) →
-      ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →
-      (∀ t : ℝ,
-        Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t))) →
-      (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t)) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0) →
-      (∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-        g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-          if i = j then (1 : ℝ) else 0) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B →
-      ‖x‖ < expMapC2Radius (I := I) g p →
-      ∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)
-          (radialJacobiField (I := I) g p x ((chartModelBasis E) k) 1)) ≤ B := by
-  obtain ⟨r, hr, h⟩ := exists_fin_le_rm04_at (I := I) g hEnorm p
-  refine ⟨r, hr, ?_⟩
-  intro x hx a K R Vb b A B ha hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm
-    hγ ι _ _ _ hcard F hpar hON hFdiff hinit hmodel hxrad
-  exact h x hx ha hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hinit hmodel hxrad
-
-open Bundle in
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-packaged lower unit-direction endpoint bound under the Rm04 analytic
-package. -/
-theorem exists_dir_ge_rm04_at
-    [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ r : Real, 0 < r ∧ ∀ x : E, ‖x‖ < r →
-      ∀ {a K R Vb b B : ℝ}, 0 < a → 0 ≤ B → 0 ≤ K → 0 ≤ Vb → 0 ≤ b →
-      b ≤ 1 → (1 : ℝ) ≤ b →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < r) →
-      Real.sqrt (g.inner p x x) ≤ Vb →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          R * Vb ^ 2 ≤ K →
-      (∀ t (_ht : t ∈ Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
-      (∀ t ∈ Icc (0 : ℝ) b,
-        ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t) →
-      ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →
-      (∀ t : ℝ,
-        Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t))) →
-      (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t)) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0) →
-      (∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-        g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-          if i = j then (1 : ℝ) else 0) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t) →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        a * B ≤ Real.sqrt
-            (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-              (a • (∑ i, v i • (chartModelBasis E) i))) -
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt
-                (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                  (a • (∑ i, v i • (chartModelBasis E) i))))) 1) →
-      ‖x‖ < expMapC2Radius (I := I) g p →
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) 1)
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) 1) := by
-  obtain ⟨r₀, hr₀, hdata⟩ := exists_rm04_data (I := I) g hEnorm p
-  obtain ⟨r₁, hr₁, hderiv⟩ := exists_radialJacobi_deriv_radius (I := I) g p
-  refine ⟨min r₀ r₁, lt_min hr₀ hr₁, ?_⟩
-  intro x hx a K R Vb b B ha hB hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm
-    hγ ι _ _ _ hcard F hpar hON hFdiff hmodel hxrad
-  letI : Fintype ι := ‹Fintype ι›
-  letI : DecidableEq ι := ‹DecidableEq ι›
-  letI : Nonempty ι := ‹Nonempty ι›
-  have hx₀ : ‖x‖ < r₀ := lt_of_lt_of_le hx (min_le_left _ _)
-  have hx₁ : ‖x‖ < r₁ := lt_of_lt_of_le hx (min_le_right _ _)
-  have hderiv' : ∀ x w : E, ‖x‖ < min r₀ r₁ → ‖w‖ < min r₀ r₁ →
-      (covDerivAlong (I := I) g
-        (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M))
-        (radialJacobiField (I := I) g p x w) 0 : E) = w := by
-    intro y z hy hz
-    exact hderiv y z (lt_of_lt_of_le hy (min_le_right _ _))
-      (lt_of_lt_of_le hz (min_le_right _ _))
-  refine radialJacobi_dir_ge_of_scaled_radius_at (I := I) g p x ha hB hK hb0 h1b hγ
-    hcard F hpar hON hFdiff ?_ ?_ ?_ hderiv' hx hsmall hmodel hxrad
-  · intro v hv
-    exact (hdata x (a • (∑ i, v i • (chartModelBasis E) i)) hx₀
-      (lt_of_lt_of_le (hsmall v hv) (min_le_left _ _))
-      hK hVb hb1 hlaunch hKbound hRm).1
-  · intro v hv
-    exact (hdata x (a • (∑ i, v i • (chartModelBasis E) i)) hx₀
-      (lt_of_lt_of_le (hsmall v hv) (min_le_left _ _))
-      hK hVb hb1 hlaunch hKbound hRm).2.1
-  · intro v hv
-    exact (hdata x (a • (∑ i, v i • (chartModelBasis E) i)) hx₀
-      (lt_of_lt_of_le (hsmall v hv) (min_le_left _ _))
-      hK hVb hb1 hlaunch hKbound hRm).2.2
-
-open Bundle in
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-packaged lower unit-direction endpoint bound under the Rm04 analytic
-package. -/
-theorem exists_dir_ge_rm04
-    [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ r : Real, 0 < r ∧ ∀ x : E, ‖x‖ < r →
-      ∀ {a K R Vb b B : ℝ}, 0 < a → 0 ≤ B → 0 ≤ K → 0 ≤ Vb → 0 ≤ b →
-      b ≤ 1 → (1 : ℝ) ≤ b →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < r) →
-      Real.sqrt (g.inner p x x) ≤ Vb →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          R * Vb ^ 2 ≤ K →
-      (∀ t (_ht : t ∈ Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
-      ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) →
-      ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →
-      (∀ t : ℝ,
-        Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p x t))) →
-      (F : ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p x t)) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        covDerivAlong (I := I) g (radialCurve (I := I) g p x) (F i) t = 0) →
-      (∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
-        g.inner (radialCurve (I := I) g p x t) (F i t) (F j t) =
-          if i = j then (1 : ℝ) else 0) →
-      (∀ i, ∀ t ∈ Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p x) (F i) t) t) →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        a * B ≤ Real.sqrt
-            (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-              (a • (∑ i, v i • (chartModelBasis E) i))) -
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt
-                (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                  (a • (∑ i, v i • (chartModelBasis E) i))))) 1) →
-      ‖x‖ < expMapC2Radius (I := I) g p →
-      ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ^ 2 ≤ g.inner (expMap (I := I) g p (show TangentSpace I p from x))
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) 1)
-          (radialJacobiField (I := I) g p x
-            (∑ i, v i • (chartModelBasis E) i) 1) := by
-  obtain ⟨r, hr, h⟩ := exists_dir_ge_rm04_at (I := I) g hEnorm p
-  refine ⟨r, hr, ?_⟩
-  intro x hx a K R Vb b B ha hB hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm
-    hγ ι _ _ _ hcard F hpar hON hFdiff hmodel hxrad
-  exact h x hx ha hB hK hVb hb0 hb1 h1b hsmall hlaunch hKbound hRm
-    (fun _ _ => hγ.contMDiffAt) hcard F hpar hON hFdiff hmodel hxrad
 
 end Radial
 

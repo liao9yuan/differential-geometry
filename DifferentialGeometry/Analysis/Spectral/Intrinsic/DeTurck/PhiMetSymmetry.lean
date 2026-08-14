@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckTopAppCc
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieCoeffAppCcValue
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GradSlotCurvature
 
-/-!
-# Symmetry of the Ricci--DeTurck top coefficient
 
-This file isolates the algebraic cancellation between the Ricci and DeTurck
-second-derivative coefficients at an arbitrary realized metric.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -22,10 +22,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (unitModel unitTensor smoothCcTensor_ext_of_unitModel traceHessianCoeff
-    ricciArmPrincipalCoeff gradSlotCurvCoeff gradSlotCurv_apply gradSlotCurv_spec)
+    ricciArmPrincipalCoeff gradSlot_sub_eq_curv)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricLmodel)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -79,17 +79,17 @@ private lemma unitModel_zero (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) 
 variable [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- The DeTurck top coefficient agrees with its pure cometric part on tensors
-that are symmetric in the two derivative slots. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] in
 theorem phiMet_symm_zero
     (g₀ g_bg g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (hWsymm : ∀ (x : M) (u₀ u₁ u₂ u₃ : TangentSpace I x),
       unitModel (I := I) (M := M) g₀ 4 W x ![u₀, u₁, u₂, u₃] =
         unitModel (I := I) (M := M) g₀ 4 W x ![u₁, u₀, u₂, u₃]) :
-    appCc (I := I) (M := M) g₀ 4 2
+    operatorFieldApply (I := I) (M := M) g₀ 4 2
         (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g
           - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
               (I := I) (M := M) g₀ g) W = 0 := by
@@ -104,19 +104,19 @@ theorem phiMet_symm_zero
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply]
   have hLie :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff_appCc_eq
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff_apply_eq
       (I := I) g₀ g g_bg W x v
   have hTHraw :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.traceHessianCoeff_appCc_eq
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.traceHessianCoeff_apply_eq
       (I := I) (M := M) g₀ g W x v
   have hRACraw :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeff_appCc_eq_combinedTrace
+    Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeff_appCc_eq_combinedTrace
       (I := I) (M := M) g₀ g W x v
   have hPure :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
+    Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
       (I := I) (M := M) g₀ g W x v
   have hTH : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
         (traceHessianCoeff (I := I) (M := M) g₀ g) W) x v =
       ∑ k : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 4 W x
@@ -131,7 +131,7 @@ theorem phiMet_symm_zero
     exact congrArg (fun t : Fin 4 → E => unitModel (I := I) (M := M) g₀ 4 W x t)
       (by funext i; fin_cases i <;> rfl)
   have hRAC : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
         (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g) W) x v =
       (1 / 2 : ℝ) *
         ((∑ k : Fin (Module.finrank ℝ E),
@@ -201,56 +201,59 @@ theorem phiMet_symm_zero
   rw [hswapA, hswapB]
   ring
 
-/-- The canonical background-curvature coefficient realizing the antisymmetric
-part of the first two slots of the second covariant derivative. -/
+
+
 noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 :=
-  gradSlotCurvCoeff (I := I) (M := M) g₀
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurvCoeff
+    (I := I) (M := M) g₀
 
-/-- The public gradient-swap coefficient has the explicit slotwise-curvature
-fibre value supplied by `gradSlotCurvCoeff`. -/
-@[simp] theorem gradSwapCurv_apply
-    (g₀ : SmoothRiemannianMetric I M) (x : M) :
+/-- The gradient-swap curvature coefficient is the canonical explicit
+slot-curvature operator field. -/
+@[simp] theorem gradSwapCurv_apply (g₀ : SmoothRiemannianMetric I M) (x : M) :
     (gradSwapCurvCoeff (I := I) (M := M) g₀).toSection x =
       (show TensorRSSpace 2 4 I x from
         TensorRSSpace.ofCLM
-          (slotFreeCurvOpFib (I := I) (M := M) g₀ 2 x)) := by
-  exact gradSlotCurv_apply (I := I) (M := M) g₀ x
+          (DifferentialGeometry.Integral.Connection.slotFreeCurvOpFib
+            (I := I) (M := M) g₀ 2 x)) :=
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurv_apply
+    (I := I) (M := M) g₀ x
 
-/-- The canonical background-curvature coefficient realizes covariant-derivative
-commutation in the first two derivative slots. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     iteratedCovGrad (I := I) g₀ 0 2 2 S
         - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection (I := I)
             g₀ (Equiv.swap (0 : Fin 4) 1) (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
-      appCcRS (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S :=
-  gradSlotCurv_spec (I := I) (M := M) g₀ S
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S :=
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurv_spec
+    (I := I) (M := M) g₀ S
 
-/-- The curvature coefficient left after symmetrizing the Ricci--DeTurck top
-coefficient in its two derivative slots. -/
+
+
 noncomputable def phiMetCurvCoeff
     (g₀ g_bg g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 2 :=
-  (1 / 2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
+  (1 / 2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
     (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g
       - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
           (I := I) (M := M) g₀ g)
     (gradSwapCurvCoeff (I := I) g₀)
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- At any realized metric, the non-pure part of the Ricci--DeTurck top
-coefficient applied to two covariant derivatives is a zeroth-order curvature
-coefficient. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem phiMet_curv_fold
     (g₀ g_bg g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
-    appCc (I := I) (M := M) g₀ 4 2
+    operatorFieldApply (I := I) (M := M) g₀ 4 2
         (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g
           - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
               (I := I) (M := M) g₀ g)
         (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
-      appCc (I := I) (M := M) g₀ 2 2 (phiMetCurvCoeff (I := I) g₀ g_bg g)
+      operatorFieldApply (I := I) (M := M) g₀ 2 2 (phiMetCurvCoeff (I := I) g₀ g_bg g)
         (iteratedCovGrad (I := I) g₀ 0 2 0 S) := by
   classical
   set Φd : SmoothCcTensor g₀ 4 2 :=
@@ -287,33 +290,33 @@ theorem phiMet_curv_fold
       ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
       hv u₀ u₁, hv u₁ u₀]
     exact add_comm _ _
-  have hkill : appCc (I := I) (M := M) g₀ 4 2 Φd
+  have hkill : operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd
       ((1 / 2 : ℝ) • (W + Wsw)) = 0 := by
     rw [appCc_smul_right, hΦd_def, phiMet_symm_zero (I := I) (M := M) g₀ g_bg g
       (W + Wsw) hsym, smul_zero]
   calc
-    appCc (I := I) (M := M) g₀ 4 2 Φd W =
-        appCc (I := I) (M := M) g₀ 4 2 Φd
+    operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd W =
+        operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd
           ((1 / 2 : ℝ) • (W + Wsw) + (1 / 2 : ℝ) • (W - Wsw)) := by rw [← hsplit]
-    _ = appCc (I := I) (M := M) g₀ 4 2 Φd ((1 / 2 : ℝ) • (W + Wsw))
-        + appCc (I := I) (M := M) g₀ 4 2 Φd ((1 / 2 : ℝ) • (W - Wsw)) :=
+    _ = operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1 / 2 : ℝ) • (W + Wsw))
+        + operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1 / 2 : ℝ) • (W - Wsw)) :=
       appCc_add_right (I := I) (M := M) g₀ 4 2 Φd _ _
-    _ = appCc (I := I) (M := M) g₀ 4 2 Φd ((1 / 2 : ℝ) • (W - Wsw)) := by
+    _ = operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1 / 2 : ℝ) • (W - Wsw)) := by
       rw [hkill, zero_add]
-    _ = (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 4 2 Φd (W - Wsw) :=
+    _ = (1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd (W - Wsw) :=
       appCc_smul_right (I := I) (M := M) g₀ 4 2 (1 / 2 : ℝ) Φd _
-    _ = (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 4 2 Φd
-        (appCcRS (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S) := by
+    _ = (1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S) := by
       rw [hW_def, hWsw_def, hW_def, gradSwapCurv_spec (I := I) (M := M) g₀ S]
-    _ = (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 2 2
-        (appCcRS (I := I) (M := M) g₀ 2 4 2 Φd
+    _ = (1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 Φd
           (gradSwapCurvCoeff (I := I) g₀)) S := by
-      rw [appCcRS_zero_eq_appCc, appCc_assoc]
-    _ = appCc (I := I) (M := M) g₀ 2 2
-        ((1 / 2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2 Φd
+      rw [appCcRS_zero_eq_appCc, operatorFieldApply_assoc]
+    _ = operatorFieldApply (I := I) (M := M) g₀ 2 2
+        ((1 / 2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 Φd
           (gradSwapCurvCoeff (I := I) g₀)) S := by
       rw [appCc_smul_left]
-    _ = appCc (I := I) (M := M) g₀ 2 2 (phiMetCurvCoeff (I := I) g₀ g_bg g)
+    _ = operatorFieldApply (I := I) (M := M) g₀ 2 2 (phiMetCurvCoeff (I := I) g₀ g_bg g)
         (iteratedCovGrad (I := I) g₀ 0 2 0 S) := by
       rw [iteratedCovGrad_zero, phiMetCurvCoeff, hΦd_def]
 

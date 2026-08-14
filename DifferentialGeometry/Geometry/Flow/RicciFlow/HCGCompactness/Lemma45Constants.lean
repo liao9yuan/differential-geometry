@@ -6,13 +6,13 @@ import Mathlib.Tactic.NormNum
 
 set_option autoImplicit false
 
-/-!
-# Constants for MSM135 Lemma 4.5
 
-This file contains only the geometry-free constants used to turn the informal
-"sum of terms" and "choose a larger constant" steps in MSM135 Lemma 4.5 into
-explicit finite algebra.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -21,20 +21,20 @@ namespace HCGCompactness
 
 open scoped BigOperators
 
-/-- One-step constant for bounding the Leibniz expansion of
-`nabla_H^k (A * T)` in MSM135 Lemma 4.5.
 
-`B a` is the order-`a` bound for the connection-difference tensor, and `m` is
-the tensor rank in the covariant `(0,m)` first pass. -/
+
+
+
+
 noncomputable def oneStepConst (B : Nat -> Real) (k m : Nat) : Real :=
   (m : Real) *
     Finset.sum (Finset.range (k + 1))
       (fun a => (k.choose a : Real) * B a)
 
-/-- Recursive constants for the abstract covariant version of MSM135 Lemma 4.5.
 
-The extra `+ 1` is deliberate: it makes positivity and monotonicity immediate,
-formalizing the book's "choose the next constant larger" step. -/
+
+
+
 noncomputable def lemma45Const (B : Nat -> Real) : Nat -> Nat -> Real
   | 0, _m => 1
   | p + 1, m =>
@@ -107,13 +107,13 @@ theorem lemma45Const_le_succ
   simp [lemma45Const]
   linarith
 
-/-- A convenient composition constant for MSM135 Chapter 4, Proposition
-"Composition of approximate isometries, I".
 
-The book displays a possible constant of the form
-`2^((p+2)/2) * (1 + p * C_{p,0,2})`.  For Lean bookkeeping we use a slightly
-larger natural-power version; later composition estimates only need a positive
-constant depending on `p` and the Corollary 4.6 constants. -/
+
+
+
+
+
+
 noncomputable def compApproxConst (C : Nat -> Real) (p : Nat) : Real :=
   (2 : Real) ^ (p + 3) * (1 + (p : Real) * C p)
 

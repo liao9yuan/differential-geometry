@@ -1,6 +1,7 @@
-import DifferentialGeometry.Geometry.Curvature.PerturbedRiemannOpDifferenceBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PerturbedRiemannOpDifferenceBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetBound
 
 /-!
 # Class-uniform order-zero curvature bound
@@ -430,37 +431,6 @@ private theorem curvSup_of_diff
             (mul_le_mul_of_nonneg_left hP3_conv hcoeff_nn) hΛ0.le
     _ = (Λ ^ 2 * (Cd + Real.sqrt Kb)) ^ 2 *
           g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by ring
-
-/-- **Order-0 curvature sup bound from a supplied Riemann-difference bound.**
-
-Given any nonnegative order-0 Riemann *difference* bound `hdiff` and
-`Λ`-comparability of `g₀` with `gBase`, the absolute Riemann operator
-of `g₀` is bounded in the `g₀` inner product. -/
-theorem unifCurvatureSup_singleLink_of_diff
-    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
-    (hcomp : ∀ (x : M) (v : TangentSpace I x),
-      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
-        g₀.inner x v v ≤ Λ * gBase.inner x v v)
-    {Cd : ℝ} (hCd : 0 ≤ Cd)
-    (hdiff : ∀ (x : M) (v w u : TangentSpace I x),
-      gBase.inner x
-          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
-            riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
-          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
-            riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
-        Cd ^ 2 * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u) :
-    ∃ F : ℝ, 0 ≤ F ∧
-      ∀ (x : M) (v w u : TangentSpace I x),
-        g₀.inner x
-            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
-            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
-          F ^ 2 * g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
-  obtain ⟨Kb, hKb0, hKb⟩ :=
-    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
-  refine ⟨Λ ^ 2 * (Cd + Real.sqrt Kb),
-    mul_nonneg (sq_nonneg _) (add_nonneg hCd (Real.sqrt_nonneg _)), ?_⟩
-  exact curvSup_of_diff (I := I) (M := M) gBase g₀ hΛ hcomp
-    hKb0 hKb hCd hdiff
 
 /-- The arbitrary-`Λ` curvature bound with the fixed background cap supplied. -/
 theorem unifCurvSup_of

@@ -3,16 +3,14 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Realized Family Scalar Operators
 
-The metric musical maps, gradient, divergence, and Laplacian live in
-DifferentialGeometry.Integral.DivergenceTheorem.  This compatibility layer keeps only the realized
-metric-family wrappers and maximum-principle input predicates.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -31,41 +29,41 @@ variable {Time : Type*}
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional Real (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional Real E)
-/-! ## Family-facing wrappers -/
 
-/-- Gradient at a time in a realized metric family. -/
+
+
 def gradientAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) : TangentSpace I x :=
   gradientFun (I := I) (G.metric t) f x
 
-/-- Divergence at a time in a realized metric family. -/
+
 def divergenceAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x) (x : M) : Real :=
   divergence (I := I) (G.connection t) X x
 
-/-- Laplacian at a time in a realized metric family. -/
+
 def laplacianAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) : Real :=
   laplacian (I := I) (G.connection t) (G.metric t) f x
 
-/-- Drift term `<X, grad f>_g` at a time in a realized metric family. -/
+
 def driftTerm
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     (f : M -> Real) (x : M) : Real :=
   (G.metric t).inner x (X x) (gradientAt (I := I) G t f x)
 
-/-- The scalar spatial operator `Delta_g f + <X, grad f>_g`. -/
+
 def heatOperatorWithDrift
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     (f : M -> Real) (x : M) : Real :=
   laplacianAt (I := I) G t f x + driftTerm (I := I) G t X f x
 
-/-- The driftless scalar heat operator `Delta_g f`. -/
+
 def heatOperator
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) : Real :=
@@ -95,7 +93,8 @@ section FamilyAlgebraicRules
 
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 
-/-- The drift term is unchanged by subtracting a spatial constant. -/
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem driftTerm_sub_const
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -108,7 +107,8 @@ theorem driftTerm_sub_const
   rw [gradientFun_const]
   simp
 
-/-- The drift term scales by a spatially constant scalar. -/
+
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem driftTerm_const_smul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -120,6 +120,7 @@ theorem driftTerm_const_smul
   rw [gradientFun_const_smul (I := I) (G.metric t) a hf]
   simp
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The drift term is additive in the scalar field. -/
 theorem driftTerm_add
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -134,6 +135,7 @@ theorem driftTerm_add
   rw [gradientFun_add (I := I) (G.metric t) hf hh]
   simp only [map_add]
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The heat operator with drift is unchanged by subtracting a spatial constant. -/
 theorem heatOperatorWithDrift_sub_const
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -147,7 +149,7 @@ theorem heatOperatorWithDrift_sub_const
   rw [laplacian_sub_const (I := I) (G.connection t) (G.metric t) c hf x]
   rw [driftTerm_sub_const (I := I) G t X c (hf x)]
 
-/-- The heat operator with drift scales by a spatially constant scalar. -/
+
 theorem heatOperatorWithDrift_const_smul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -162,7 +164,7 @@ theorem heatOperatorWithDrift_const_smul
   rw [driftTerm_const_smul (I := I) G t X a (hf x)]
   ring
 
-/-- Family-facing subtraction rule for the scalar Laplacian. -/
+
 theorem laplacianAt_sub
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -179,7 +181,7 @@ theorem laplacianAt_sub
   exact laplacian_sub (I := I) (G.connection t) (G.metric t)
     hf hh hgradf hgradh
 
-/-- Family-facing constant-scalar rule for the scalar Laplacian. -/
+
 theorem laplacianAt_smul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (a : Real) {f : M -> Real} {x : M}
@@ -213,9 +215,8 @@ theorem laplacianAt_add
     funext y
     exact gradientFun_add (I := I) (G.metric t) (hf y) (hh y)
   rw [hgradient]
-  exact divergence_add (I := I) (G.connection t) hgradf hgradh
-
-/-- Family-facing product rule for the realized gradient. -/
+  exact divergence_add (I := I) (G.connection t) inferInstance hgradf hgradh
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem gradientAt_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -227,6 +228,7 @@ theorem gradientAt_mul
   unfold gradientAt
   exact gradientFun_mul (I := I) (G.metric t) hf hh
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The drift term satisfies the scalar product rule. -/
 theorem driftTerm_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -241,6 +243,7 @@ theorem driftTerm_mul
   rw [gradientAt_mul (I := I) G t hf hh]
   simp only [map_add, map_smul, smul_eq_mul]
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- Family-facing chain rule for the realized gradient of a real power. -/
 theorem gradientAt_rpow
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -252,7 +255,7 @@ theorem gradientAt_rpow
   unfold gradientAt
   exact gradientFun_rpow (I := I) (G.metric t) p hf hpos
 
-/-- Family-facing scalar product rule for the realized Laplacian. -/
+
 theorem laplacianAt_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -276,8 +279,8 @@ theorem laplacianAt_mul
   exact laplacian_mul (I := I) (G.connection t) (G.metric t)
     hf hh hgradf hgradh hfgradh hhgradf
 
-/-- Family-facing scalar product rule with scalar-multiple gradient regularity
-produced from the two gradient regularity hypotheses. -/
+
+
 theorem laplacianAt_mul_of_scalarRegular
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -381,7 +384,7 @@ theorem laplacianAt_rpow
   exact laplacian_rpow (I := I) (G.connection t) (G.metric t)
     p hf hpos hgrad
 
-/-- Family-facing scalar-square Laplacian product rule. -/
+
 theorem laplacianAt_sq
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M}
@@ -417,8 +420,8 @@ theorem laplacianAt_sq
   rw [hmain]
   ring
 
-/-- Family-facing scalar-square Laplacian product rule with the `f ∇f`
-regularity input produced from scalar and gradient regularity. -/
+
+
 theorem laplacianAt_sq_of_scalarRegular
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M}
@@ -442,6 +445,7 @@ end FamilyAlgebraicRules
     gradientAt (I := I) G t f x = gradientFun (I := I) (G.metric t) f x := by
   rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem divergenceAt_eq
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x) (x : M) :
@@ -456,9 +460,9 @@ end FamilyAlgebraicRules
       laplacian (I := I) (G.connection t) (G.metric t) f x := by
   rfl
 
-/-! ## Minimum-point targets for Theorem 7.1 -/
 
-/-- At a spatial local minimum, the drift term vanishes. -/
+
+
 theorem driftTerm_eq_zero_at_spatial_min
     [I.Boundaryless]
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -471,7 +475,7 @@ theorem driftTerm_eq_zero_at_spatial_min
   rw [gradientFun_eq_zero_at_spatial_min (I := I) (G.metric t) hmin hf]
   simp
 
-/-- Family version of the second-order Laplacian positivity input. -/
+
 def LaplacianNonnegativeAtSpatialMinFamily
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -479,8 +483,8 @@ def LaplacianNonnegativeAtSpatialMinFamily
   forall t : Time,
     LaplacianNonnegativeAtSpatialMin (I := I) (G.connection t) (G.metric t)
 
-/-- A realized metric family supplies the Laplacian nonnegativity input at
-each time. -/
+
+
 theorem laplacianNonnegativeAtSpatialMinFamily_of_realizedMetricFamily
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -491,7 +495,7 @@ theorem laplacianNonnegativeAtSpatialMinFamily_of_realizedMetricFamily
   exact laplacianNonnegativeAtSpatialMin_of_metricCompatible (I := I)
     (G.connection t) (G.metric t) (G.metricCompatible t)
 
-/-- At a spatial local minimum, `Delta f + <X, grad f>` is nonnegative. -/
+
 theorem heatOperatorWithDrift_at_spatial_min_nonneg
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

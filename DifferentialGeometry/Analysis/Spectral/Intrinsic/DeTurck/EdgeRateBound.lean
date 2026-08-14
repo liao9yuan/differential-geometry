@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBound
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRiemCancel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MovingEdgeEnergy
 
 /-!
@@ -20,13 +19,9 @@ use the wrong realization identity.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 6400000
-set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Tensor0SBundle
-open scoped BigOperators Manifold ContDiff RealInnerProductSpace
+open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
 namespace PDE
@@ -39,15 +34,35 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
-open MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
+
+private local instance edgeRateTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance edgeRateTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance edgeRateTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance edgeRateTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
 
 /-! ## A refold normal form which retains the formal-partner data -/
 
@@ -74,9 +89,10 @@ energy estimate impossible to consume. -/
 theorem exists_edgePairRef
     (g g_bg : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g W x v w = ccTensorBilin (I := I) g W x w v)
+      smoothCcTensorBilinForm (I := I) g W x v w =
+        smoothCcTensorBilinForm (I := I) g W x w v)
     {delta : Real} (hdelta_nn : 0 ≤ delta) (hdelta_half : delta ≤ 1 / 2)
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) delta) :
     ∃ B0 : Real, 0 ≤ B0 ∧
       ∃ (C0 : Real → SmoothCcTensor g 2 2)
@@ -99,7 +115,7 @@ theorem exists_edgePairRef
                     (edgeMetric (I := I) (M := M) g W hdelta s) g_bg (C0 s))
                   (edgeRate1 (I := I) (M := M) g
                     (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W +
-                appCc (I := I) (M := M) g 2 2
+                operatorFieldApply (I := I) (M := M) g 2 2
                   (edgeTopPair (I := I) (M := M) g W hdelta
                     (edgeZeroBoundAt (I := I) (M := M) g hdelta_nn)
                     qA qB q epsilon s) W) x ![v, w] := by
@@ -118,7 +134,7 @@ theorem exists_edgePairRef
       (Finset.mem_range.mpr (by omega))
   have hhalf_lt : (1 / 2 : Real) < 1 := by norm_num
   have hdelta_lt : delta < 1 := lt_of_le_of_lt hdelta_half hhalf_lt
-  let hdeltaZ : gFibreOpBound (I := I) (M := M) g
+  let hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta :=
     edgeZeroBoundAt (I := I) (M := M) g hdelta_nn
   obtain ⟨LambdaR, hLambdaR, KR, hKR, qA, qB, hq, hRmain⟩ :=
@@ -141,18 +157,18 @@ theorem exists_edgePairRef
   have hquad : ∀ s ∈ Set.Icc (0 : Real) 1,
       edgeQuadArm (I := I) (M := M) g
           (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W =
-        (-2 : Real) • appCc (I := I) (M := M) g 2 2
+        (-2 : Real) • operatorFieldApply (I := I) (M := M) g 2 2
             (edgeRicciHalf (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s)) W +
-          appCc (I := I) (M := M) g 2 2 (C0 s) W +
-          appCc (I := I) (M := M) g 2 2
+          operatorFieldApply (I := I) (M := M) g 2 2 (C0 s) W +
+          operatorFieldApply (I := I) (M := M) g 2 2
             (edgeFold0 (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W +
-          appCc (I := I) (M := M) g 3 2
+          operatorFieldApply (I := I) (M := M) g 3 2
             (edgeQuad1 (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
             (iteratedCovGrad (I := I) g 0 2 1 W) +
-          appCc (I := I) (M := M) g 4 2 (C2 s)
+          operatorFieldApply (I := I) (M := M) g 4 2 (C2 s)
             (iteratedCovGrad (I := I) g 0 2 2 W) := by
     intro s hs
     have hmetric := edgeMetric_bal (I := I) (M := M)
@@ -160,25 +176,20 @@ theorem exists_edgePairRef
     have hriem := hidR s hs
     have hlie := hidD s hs
     simp only [iteratedCovGrad_zero] at hriem hlie
-    have hcancel := edgeRiem_cancel (I := I) (M := M) g
-      (realizedFam (I := I) (M := M) g W 0 hdelta hdeltaZ s) W
-      (C0R s)
-      ((2 : Real) •
-        riemannPalatiniRefoldC2Family (I := I) (M := M)
-          g W hdelta hdeltaZ qA qB s)
-      hriem
-    simp only [appCc_smul_left] at hcancel
     rw [hmetric]
     simp only [edgeQuadArm, edgeLowerArm, edgeQuad0,
       deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
-      edgeFold0, C0, C2,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
-    rw [hlie, ← hcancel]
+    rw [hlie]
+    simp only [edgeRicciHalf, edgeFold0, C0, C2,
+      appCc_add_left, appCc_sub_left, appCc_smul_left]
+    rw [hriem]
+    simp only [appCc_smul_left]
     module
   have htop : ∀ s : Real,
-      appCc (I := I) (M := M) g 4 2 (C2 s)
+      operatorFieldApply (I := I) (M := M) g 4 2 (C2 s)
           (iteratedCovGrad (I := I) g 0 2 2 W) =
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s) W := by
     intro s
@@ -198,7 +209,7 @@ theorem exists_edgePairRef
             (edgeMetric (I := I) (M := M) g W hdelta s) g_bg (C0 s))
           (edgeRate1 (I := I) (M := M) g
             (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W +
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s) W := by
     intro s hs
@@ -211,7 +222,8 @@ theorem exists_edgePairRef
   refine ⟨B0, Real.sqrt_nonneg _, C0, qA, qB, q, epsilon, hepsilon, ?_, ?_⟩
   · intro s hs x
     dsimp only [C0, B0]
-    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+    change riemannianFiberNormSq (I := I) (M := M) g 2 2 x
+      ((C0R s).toSection x + (C0D s).toSection x) ≤ _
     have hadd := riemannianFiberNormSq_add_le
       (I := I) (M := M) g 2 2 x ((C0R s).toSection x) ((C0D s).toSection x)
     have hR0 := hsupR s hs x
@@ -234,21 +246,7 @@ private theorem edge_unit_smul
     (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g 2 (c • A) x v =
       c * unitModel (I := I) (M := M) g 2 A x v := by
-  have hfun : unitModel (I := I) (M := M) g 2 (c • A) x =
-      c • unitModel (I := I) (M := M) g 2 A x := by
-    rw [unitModel, unitModel]
-    have hsec : (c • A).toSection x = c • A.toSection x := by
-      rw [SmoothCcTensor.toSection_smul]
-      rfl
-    rw [show
-      ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from
-          (c • A).toSection x) (unitTensor (I := I) (M := M) x)) =
-        c • (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from
-          A.toSection x) (unitTensor (I := I) (M := M) x) from by
-      rw [hsec]
-      rfl]
-    rw [Tensor0SSpace.toModel_smul]
-  rw [hfun, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [unitModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
 private theorem edge_lap_smul
     (g : SmoothRiemannianMetric I M) (c : Real)
@@ -267,7 +265,7 @@ private theorem edge_lap_smul
       (I := I) (M := M) g W x v,
     iteratedCovGrad_smul, appCc_smul_right,
     edge_unit_smul (I := I) (M := M) g c
-      (appCc (I := I) (M := M) g 4 2
+      (operatorFieldApply (I := I) (M := M) g 4 2
         (ricciArmPrincipalCoeffPure (I := I) (M := M) g g)
         (iteratedCovGrad (I := I) g 0 2 2 W)) x v]
 
@@ -281,52 +279,19 @@ private theorem edge_core_smul
     edge_lap_smul, iteratedCovGrad_smul, appCc_smul_right]
   module
 
-omit [NeZero (Module.finrank Real E)] [CompactSpace M] [SigmaCompactSpace M]
-    [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_bound_mono
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {a b : Real} (hab : a ≤ b)
-    (ha : gFibreOpBound (I := I) (M := M) g
+    (ha : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) a) :
-    gFibreOpBound (I := I) (M := M) g
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) b := by
   intro x v w
   exact (ha x v w).trans (mul_le_mul_of_nonneg_right
     (mul_le_mul_of_nonneg_right hab (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _))
-
-private lemma edge_symm_eq
-    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
-    (hS : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g S x v w =
-        ccTensorBilin (I := I) g S x w v) :
-    symmS (I := I) (M := M) g S = S := by
-  have hswap :
-      domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S = S := by
-    refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
-    rw [domDomCongrSection_unitModel]
-    refine ContinuousMultilinearMap.ext (fun v => ?_)
-    rw [ContinuousMultilinearMap.domDomCongr_apply]
-    have hv : ∀ u w : TangentSpace I x,
-        unitModel (I := I) (M := M) g 2 S x ![u, w] =
-          unitModel (I := I) (M := M) g 2 S x ![w, u] := by
-      intro u w
-      rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g S x u w,
-        unitModel_eq_ccTensorBilin_local (I := I) (M := M) g S x w u]
-      exact hS x u w
-    have hveta :
-        (fun i => v ((Equiv.swap (0 : Fin 2) 1) i)) = ![v 1, v 0] := by
-      funext i
-      fin_cases i <;> rfl
-    have hveta' : v = ![v 0, v 1] := by
-      funext i
-      fin_cases i <;> rfl
-    rw [hveta]
-    conv_rhs => rw [hveta']
-    exact hv (v 1) (v 0)
-  have htwo : S + S = (2 : Real) • S := (two_smul Real S).symm
-  rw [symmS, hswap, htwo, smul_smul,
-    show (1 / 2 : Real) * 2 = 1 by norm_num, one_smul]
 
 /-- Principal and lower-order absorption at a genuine slope parameter.
 
@@ -339,11 +304,11 @@ theorem edgeCore_path_le [Nonempty M]
       ∀ (C0 : SmoothCcTensor g 2 2) (C1 : SmoothCcTensor g 3 2)
         (W : SmoothCcTensor g 0 2)
         (_hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g W x v w =
-            ccTensorBilin (I := I) g W x w v)
+          smoothCcTensorBilinForm (I := I) g W x v w =
+            smoothCcTensorBilinForm (I := I) g W x w v)
         {B0 B1 delta s : Real},
         0 ≤ B0 → 0 ≤ B1 → delta < 1 / 2 → 0 ≤ delta →
-        (hWbound : gFibreOpBound (I := I) (M := M) g
+        (hWbound : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g W) delta) →
         delta / (1 - delta) + C * delta ≤ 1 / 2 →
         (∀ x : M,
@@ -387,13 +352,13 @@ theorem edgeCore_path_le [Nonempty M]
     exact hs.2.le
   have hrad : |s| * delta ≤ delta := by
     nlinarith [mul_nonneg (sub_nonneg.mpr hsabs) hdelta0]
-  have hPbound : gFibreOpBound (I := I) (M := M) g
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g P) delta :=
     edge_bound_mono (I := I) (M := M) g P hrad
       (by simpa only [P] using hPraw)
-  have hWfix : symmS (I := I) (M := M) g W = W :=
-    edge_symm_eq (I := I) (M := M) g W hWsymm
-  have hPfix : symmS (I := I) (M := M) g P = P := by
+  have hWfix : ccTensor02Symm (I := I) (M := M) g W = W :=
+    symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g W hWsymm
+  have hPfix : ccTensor02Symm (I := I) (M := M) g P = P := by
     simp only [P, symmS_smul, hWfix]
   have hp := hcore gm C0 C1 P hB0 hB1 hdelta hdelta0
     htie hPbound hPfix hsmall hC0 hC1
@@ -429,6 +394,7 @@ theorem edgeCore_path_le [Nonempty M]
 
 /-! ## Formal-partner absorption -/
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem edge_l2_of_rfns
     (g : SmoothRiemannianMetric I M) (ra sa rb sb : Nat)
     (A : SmoothCcTensor g ra sa) (B : SmoothCcTensor g rb sb)
@@ -464,22 +430,21 @@ theorem edgeTop_pair_le
     ∃ delta0 K : Real, 0 < delta0 ∧ delta0 < 1 / 2 ∧ 0 ≤ K ∧
       ∀ (W : SmoothCcTensor g 0 2)
         (_hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g W x v w =
-            ccTensorBilin (I := I) g W x w v)
+          smoothCcTensorBilinForm (I := I) g W x v w =
+            smoothCcTensorBilinForm (I := I) g W x w v)
         {delta : Real}, 0 ≤ delta → delta ≤ delta0 →
-        (hdelta : gFibreOpBound (I := I) (M := M) g
+        (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g W) delta) →
-        (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+        (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g
             (0 : SmoothCcTensor g 0 2)) delta) →
         ∀ (qA qB : Fin 4 → Equiv.Perm (Fin 4))
           (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
           (∀ i, |epsilon i| ≤ 1) →
           ∀ s ∈ Set.Icc (0 : Real) 1,
-            Inner.inner Real W
-              (appCc (I := I) (M := M) g 2 2
-                (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-                  qA qB q epsilon s) W) ≤
+            (⟪W, (operatorFieldApply (I := I) (M := M) g 2 2
+              (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+                qA qB q epsilon s) W)⟫_ℝ : Real) ≤
               (1 / 4 : Real) *
                   ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2 +
                 K * ‖W‖ ^ 2 := by
@@ -574,23 +539,19 @@ theorem edgeTop_pair_le
         dsimp only [A, B]
         ring
   have hpair :
-      Inner.inner Real W
-        (appCc (I := I) (M := M) g 2 2
-          (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-            qA qB q epsilon s) W) ≤
+      (⟪W, (operatorFieldApply (I := I) (M := M) g 2 2
+        (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+          qA qB q epsilon s) W)⟫_ℝ : Real) ≤
         (A * delta * ‖W‖ + B * delta * ‖D‖) * ‖D‖ := by
     calc
-      Inner.inner Real W
-          (appCc (I := I) (M := M) g 2 2
-            (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-              qA qB q epsilon s) W) =
-          -Inner.inner Real
-            (covDivergence (I := I) (M := M) g 3 P) D := by
+      (⟪W, (operatorFieldApply (I := I) (M := M) g 2 2
+        (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+          qA qB q epsilon s) W)⟫_ℝ : Real) =
+          -⟪covDivergence (I := I) (M := M) g 3 P, D⟫_ℝ := by
         simpa only [P, D] using
           edgeTop_green (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s
-      _ ≤ |Inner.inner Real
-          (covDivergence (I := I) (M := M) g 3 P) D| := by
+      _ ≤ |⟪covDivergence (I := I) (M := M) g 3 P, D⟫_ℝ| := by
         exact neg_le_abs _
       _ ≤ ‖covDivergence (I := I) (M := M) g 3 P‖ * ‖D‖ :=
         abs_real_inner_le_norm _ _
@@ -618,18 +579,17 @@ theorem edgeTop_pair_le
   have hzeroTerm : 2 * A ^ 2 * delta ^ 2 * ‖W‖ ^ 2 ≤
       K * ‖W‖ ^ 2 := by
     dsimp only [K]
+    have hcoef : 0 ≤ 2 * A ^ 2 := by positivity
+    have hdeltaCoef : 2 * A ^ 2 * delta ^ 2 ≤ 2 * A ^ 2 := by
+      simpa only [mul_one] using
+        mul_le_mul_of_nonneg_left hdelta_sq hcoef
     exact mul_le_mul_of_nonneg_right
-      (by
-        simpa only [mul_one] using
-          (mul_le_mul_of_nonneg_left hdelta_sq
-            (by positivity : 0 ≤ 2 * A ^ 2)))
-      (sq_nonneg ‖W‖)
+      hdeltaCoef (sq_nonneg ‖W‖)
   dsimp only [D] at hpair hcross hgrad ⊢
   calc
-      Inner.inner Real W
-        (appCc (I := I) (M := M) g 2 2
-          (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-            qA qB q epsilon s) W) ≤
+    (⟪W, (operatorFieldApply (I := I) (M := M) g 2 2
+      (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+        qA qB q epsilon s) W)⟫_ℝ : Real) ≤
         (A * delta * ‖W‖ + B * delta *
           ‖iteratedCovGrad (I := I) g 0 2 1 W‖) *
             ‖iteratedCovGrad (I := I) g 0 2 1 W‖ := hpair
@@ -659,13 +619,13 @@ theorem edgePair_pair_le [Nonempty M]
       ∀ (C0 : SmoothCcTensor g 2 2) (C1 : SmoothCcTensor g 3 2)
         (W : SmoothCcTensor g 0 2)
         (_hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g W x v w =
-            ccTensorBilin (I := I) g W x w v)
+          smoothCcTensorBilinForm (I := I) g W x v w =
+            smoothCcTensorBilinForm (I := I) g W x w v)
         {B0 B1 delta s : Real},
         0 ≤ B0 → 0 ≤ B1 → 0 ≤ delta → delta ≤ delta0 →
-        (hdelta : gFibreOpBound (I := I) (M := M) g
+        (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g W) delta) →
-        (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+        (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g
             (0 : SmoothCcTensor g 0 2)) delta) →
         delta / (1 - delta) + C * delta ≤ 1 / 2 →
@@ -681,7 +641,7 @@ theorem edgePair_pair_le [Nonempty M]
         tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
             (edgeCoreArm (I := I) (M := M) g
                 (edgeMetric (I := I) (M := M) g W hdelta s) C0 C1 W +
-              appCc (I := I) (M := M) g 2 2
+              operatorFieldApply (I := I) (M := M) g 2 2
                 (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
                   qA qB q epsilon s) W).toFun ≤
           (B0 + B1 ^ 2 + K) * ‖W‖ ^ 2 := by
@@ -699,14 +659,14 @@ theorem edgePair_pair_le [Nonempty M]
     qA qB q epsilon hepsilon s ⟨le_of_lt hs.1, le_of_lt hs.2⟩
   have htop1 :
       tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-          (appCc (I := I) (M := M) g 2 2
+          (operatorFieldApply (I := I) (M := M) g 2 2
             (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
               qA qB q epsilon s) W).toFun ≤
         (1 / 4 : Real) *
             ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2 +
           K * ‖W‖ ^ 2 := by
     rw [← SmoothCcTensor.inner_def (I := I) (M := M) W
-      (appCc (I := I) (M := M) g 2 2
+      (operatorFieldApply (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
           qA qB q epsilon s) W)]
     exact htop0
@@ -714,27 +674,27 @@ theorem edgePair_pair_le [Nonempty M]
       tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
           (edgeCoreArm (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) C0 C1 W +
-            appCc (I := I) (M := M) g 2 2
+            operatorFieldApply (I := I) (M := M) g 2 2
               (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
                 qA qB q epsilon s) W).toFun =
         tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
           (edgeCoreArm (I := I) (M := M) g
             (edgeMetric (I := I) (M := M) g W hdelta s) C0 C1 W).toFun +
         tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-          (appCc (I := I) (M := M) g 2 2
+          (operatorFieldApply (I := I) (M := M) g 2 2
             (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
               qA qB q epsilon s) W).toFun := by
     rw [← SmoothCcTensor.inner_def (I := I) (M := M) W
       (edgeCoreArm (I := I) (M := M) g
           (edgeMetric (I := I) (M := M) g W hdelta s) C0 C1 W +
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s) W),
       ← SmoothCcTensor.inner_def (I := I) (M := M) W
         (edgeCoreArm (I := I) (M := M) g
           (edgeMetric (I := I) (M := M) g W hdelta s) C0 C1 W),
       ← SmoothCcTensor.inner_def (I := I) (M := M) W
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s) W),
       inner_add_right]

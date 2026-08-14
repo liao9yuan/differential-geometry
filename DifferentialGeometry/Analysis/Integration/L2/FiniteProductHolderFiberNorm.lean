@@ -3,11 +3,9 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.MeanInequalities
 
+
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Manifold MeasureTheory Set Filter Bundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -141,8 +139,8 @@ namespace Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -156,8 +154,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem holder_integral_prod_riemannianFiberNormSq_le
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (r s : ι → ℕ) (S : ∀ m, SmoothCcTensor g (r m) (s m)) (θ : ι → ℝ)
@@ -220,8 +218,8 @@ theorem holder_integral_prod_riemannianFiberNormSq_le
               ^ (1 / θ m))
           θ hF_int hF_nn (fun m hm => (hθ m hm).le) hθ1
 
-set_option linter.unusedSectionVars false in
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} [DecidableEq ι]
     (t t₀ : Finset ι) (ht₀ : t₀ ⊆ t)
@@ -283,8 +281,8 @@ theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (holder_integral_prod_riemannianFiberNormSq_le (I := I) (M := M) g (t \ t₀) r s S θ hθ hθ1)
     (Finset.prod_nonneg hΛ_nn)
 
-set_option linter.unusedSectionVars false in
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (r s : ι → ℕ) (S : ∀ m, SmoothCcTensor g (r m) (s m))

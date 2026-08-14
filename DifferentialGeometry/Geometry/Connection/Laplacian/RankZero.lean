@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Tensor.RSTensor.Field
 
-/-!
-# Rank-zero connection Laplacian bridges
 
-This file connects the canonical embedding of a covariant tensor as a mixed
-tensor with zero contravariant slots to the induced mixed-tensor connection.
-The scalar connection-Laplacian bridge is the rank `(0, 0)` specialization.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,7 +23,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,7 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The mixed-tensor connection preserves the canonical rank-zero embedding. -/
+
 theorem nablaRS_toRS0
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -138,8 +138,6 @@ variable [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
   [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- A metric-orthonormal family of the model dimension is linearly
-independent. -/
 private theorem orthonormal_li
     (g : SmoothRiemannianMetric I M) {x : M}
     (frame : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -161,7 +159,7 @@ private theorem orthonormal_li
   · intro hj
     exact absurd (Finset.mem_univ j) hj
 
-/-- The smooth orthonormal frame at its center, packaged as a tangent basis. -/
+
 private noncomputable def orthoFrameBasis
     (g : SmoothRiemannianMetric I M) (x : M) :
     Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
@@ -172,6 +170,7 @@ private noncomputable def orthoFrameBasis
       (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j))
     (by rw [Fintype.card_fin]; rfl)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 private theorem orthoBasis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -181,7 +180,7 @@ private theorem orthoBasis_apply
   unfold orthoFrameBasis
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-/-- The raw mixed connection Laplacian preserves the rank-zero embedding. -/
+
 theorem rawLap_toRS0
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (A : Tensor0SField ∞ s (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M))
@@ -244,8 +243,9 @@ theorem rawLap_toRS0
   simp only [smul_sub]
   rfl
 
-/-- The scalar readout of the rank-zero second covariant derivative along a
-smooth vector field is the corresponding diagonal Hessian value. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem cov0_diag_hess
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -310,8 +310,9 @@ private theorem cov0_diag_hess
   rw [hpairing, duSec_apply,
     differential1FormFun_apply_eq_extDerivFun]
 
-/-- The mixed rank-zero second covariant derivative of the canonical lift of
-a smooth scalar is the canonical lift of its diagonal Hessian value. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem secondRS_scalar
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -386,9 +387,9 @@ theorem secondRS_scalar
   rw [ContinuousLinearMap.sub_apply, Tensor0SSpace.toRS0_apply,
     Tensor0SSpace.toRS0_apply, Tensor0SSpace.toRS0_apply, smul_sub]
 
-/-- The raw mixed connection Laplacian of the canonical rank-zero lift of a
-smooth scalar is exactly the canonical rank-zero lift of its scalar
-Laplace--Beltrami value. -/
+
+
+
 theorem rawLap_scalar
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :

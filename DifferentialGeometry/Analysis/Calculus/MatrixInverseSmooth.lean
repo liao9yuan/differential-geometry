@@ -1,23 +1,23 @@
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
-/-!
-# Smoothness of matrix determinant, adjugate and inverse (from smooth entries)
 
-The standalone-operator foundation for the Ricci-flow time-jet match (`hglue` corollary (a)'s `Φ`).
-The coordinate Ricci-flow RHS is a smooth function of the metric `2`-jet; its only non-polynomial
-ingredient is the inverse Gram matrix, which is `C∞` at any invertible matrix by Cramer's rule
-`M⁻¹ = (det M)⁻¹ • adjugate M`: the determinant and adjugate entries are POLYNOMIALS in the matrix
-entries (hence `C∞` whenever the entries are), and the scalar reciprocal `(det M)⁻¹` is `C∞` where
-`det M ≠ 0`.
 
-Stated over an arbitrary normed domain `X` with the matrix entries given as smooth `ℝ`-valued
-functions of `x`, so no norm on `Matrix` is needed (the matrix is only an intermediate; every output
-is `ℝ`-valued). These are the abstract analogues of the time-curve-specialised `matrixDet_contDiffOn`
-/ `matrixAdjugate_contDiffOn` in `Evolution/ExtendedSolutionRegularity.lean`; the domain-general form
-lets Faà-di-Bruno (the jet-match core) be applied to `Φ ∘ (time curve of the Gram 2-jet)`. No Mathlib
-lemma states these directly.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +28,8 @@ namespace Analysis
 
 variable {n : ℕ} {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
-/-- The determinant `x ↦ det (N x)` is `C∞` when every entry `x ↦ N x a b` is `C∞`
-(`Matrix.det_apply`: a finite sum of signed products of entries). -/
+
+
 theorem contDiff_det_of_entries (N : X → Matrix (Fin n) (Fin n) ℝ)
     (hN : ∀ a b : Fin n, ContDiff ℝ ∞ (fun x => N x a b)) :
     ContDiff ℝ ∞ (fun x => (N x).det) := by
@@ -38,9 +38,9 @@ theorem contDiff_det_of_entries (N : X → Matrix (Fin n) (Fin n) ℝ)
   exact ContDiff.sum (fun σ _ => ContDiff.const_smul (Equiv.Perm.sign σ)
     (contDiff_prod (fun i _ => hN (σ i) i)))
 
-/-- An adjugate entry `x ↦ (adjugate (N x)) k l` is `C∞` when every entry of `N` is `C∞`
-(`Matrix.adjugate_apply`: a determinant of a row-updated matrix whose entries are constants or
-entries of `N`). -/
+
+
+
 theorem contDiff_adjugate_of_entries (N : X → Matrix (Fin n) (Fin n) ℝ)
     (hN : ∀ a b : Fin n, ContDiff ℝ ∞ (fun x => N x a b)) (k l : Fin n) :
     ContDiff ℝ ∞ (fun x => (N x).adjugate k l) := by
@@ -54,9 +54,9 @@ theorem contDiff_adjugate_of_entries (N : X → Matrix (Fin n) (Fin n) ℝ)
   · simp only [Matrix.updateRow_ne h]
     exact hN a b
 
-/-- An inverse-matrix entry `x ↦ (N x)⁻¹ k l` is `C∞` at any `x₀` with `det (N x₀) ≠ 0`, by Cramer's
-rule `M⁻¹ = (det M)⁻¹ • adjugate M`: the reciprocal of the (`C∞`, non-vanishing here) determinant
-times the (`C∞`) adjugate entry. -/
+
+
+
 theorem contDiffAt_inv_of_entries (N : X → Matrix (Fin n) (Fin n) ℝ)
     (hN : ∀ a b : Fin n, ContDiff ℝ ∞ (fun x => N x a b)) {x₀ : X} (hx₀ : (N x₀).det ≠ 0)
     (k l : Fin n) :

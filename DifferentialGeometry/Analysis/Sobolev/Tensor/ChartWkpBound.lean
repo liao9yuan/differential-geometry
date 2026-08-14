@@ -1,8 +1,10 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpSupport
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpTransport
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkpHigherOrder
+import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmooth
 
 /-!
 # Quantitative `W^{2,p}` transport of weak tensor chart components
@@ -23,7 +25,6 @@ constant is independent of the transported weak component.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -38,7 +39,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,9 +58,10 @@ Euclidean coordinates and extended by zero off the source chart target. -/
 def transCoeffE
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P Q : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
-  etaEuclid (I := I) (M := M) β
+  chartCutoffEuclidean (I := I) (M := M) β
     (transportCoeffManifold (I := I) (M := M) g r s β α P Q)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The Euclidean transition coefficient is globally smooth. -/
 theorem transCoeffE_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
@@ -73,6 +75,7 @@ theorem transCoeffE_smooth
     (tsupport_transportCoeffManifold_subset_sourceβ
       (I := I) (M := M) g r s β α P Q)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The Euclidean transition coefficient has compact support. -/
 theorem transCoeffE_cpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
@@ -85,6 +88,7 @@ theorem transCoeffE_cpt
     (tsupport_transportCoeffManifold_subset_sourceβ
       (I := I) (M := M) g r s β α P Q)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- On the source chart, `transCoeffE` evaluates to the manifold transition
 coefficient at the corresponding point. -/
 theorem transCoeffE_apply
@@ -104,7 +108,7 @@ theorem transCoeffE_apply
 bounded on `W^{2,p}` of the source chart. -/
 theorem coeffMulJoint
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (β α : M) (P Q : TensorCompIdx (E := E) r s) :
     ∃ K : ℝ, 0 < K ∧ ∀ {v : EuclN → ℝ},
       MemWkp (d := Module.finrank ℝ E) 2 p v
@@ -112,11 +116,11 @@ theorem coeffMulJoint
       MemWkp (d := Module.finrank ℝ E) 2 p
           (fun y => transCoeffE (I := I) (M := M) g r s β α P Q y * v y)
           (chartTargetEuclid (I := I) (M := M) β) ∧
-        wkpNorm (d := Module.finrank ℝ E) 2 p
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p
             (fun y => transCoeffE (I := I) (M := M) g r s β α P Q y * v y)
             (chartTargetEuclid (I := I) (M := M) β) ≤
           ENNReal.ofReal K *
-            wkpNorm (d := Module.finrank ℝ E) 2 p v
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p v
               (chartTargetEuclid (I := I) (M := M) β) := by
   classical
   have h_smooth := transCoeffE_smooth (I := I) (M := M) g r s β α P Q
@@ -146,7 +150,7 @@ def secTransTerm
 controlled `W^{2,p}` function in every target chart. -/
 theorem secTermJoint
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (β α : M) (P Q : TensorCompIdx (E := E) r s) :
     ∃ K : ℝ, 0 < K ∧ ∀ {v : EuclN → ℝ},
       MemWkp (d := Module.finrank ℝ E) 2 p v
@@ -155,11 +159,11 @@ theorem secTermJoint
       MemWkp (d := Module.finrank ℝ E) 2 p
           (secTransTerm (I := I) (M := M) g r s β α P Q v)
           (chartTargetEuclid (I := I) (M := M) α) ∧
-        wkpNorm (d := Module.finrank ℝ E) 2 p
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p
             (secTransTerm (I := I) (M := M) g r s β α P Q v)
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal K *
-            wkpNorm (d := Module.finrank ℝ E) 2 p v
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p v
               (chartTargetEuclid (I := I) (M := M) β) := by
   classical
   obtain ⟨K_mul, hK_mul_pos, hK_mul⟩ :=
@@ -185,20 +189,20 @@ theorem secTermJoint
   have hcross := hK_cross hmul.1 hprod_support
   refine ⟨hcross.1, ?_⟩
   calc
-    wkpNorm (d := Module.finrank ℝ E) 2 p
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p
         (secTransTerm (I := I) (M := M) g r s β α P Q v)
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ENNReal.ofReal K_cross *
-        wkpNorm (d := Module.finrank ℝ E) 2 p
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p
           (fun y => transCoeffE (I := I) (M := M) g r s β α P Q y * v y)
           (chartTargetEuclid (I := I) (M := M) β) := hcross.2
     _ ≤ ENNReal.ofReal K_cross *
         (ENNReal.ofReal K_mul *
-          wkpNorm (d := Module.finrank ℝ E) 2 p v
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p v
             (chartTargetEuclid (I := I) (M := M) β)) :=
-      mul_le_mul_left' hmul.2 _
+      mul_le_mul_right hmul.2 _
     _ = ENNReal.ofReal (K_cross * K_mul) *
-        wkpNorm (d := Module.finrank ℝ E) 2 p v
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 p v
           (chartTargetEuclid (I := I) (M := M) β) := by
       rw [ENNReal.ofReal_mul hK_cross_pos.le]
       simp only [mul_assoc]

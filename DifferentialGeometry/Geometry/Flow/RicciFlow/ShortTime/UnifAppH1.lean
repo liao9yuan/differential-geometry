@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppGrad
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 
 /-!
 # Class-first H2-to-H1 application estimates

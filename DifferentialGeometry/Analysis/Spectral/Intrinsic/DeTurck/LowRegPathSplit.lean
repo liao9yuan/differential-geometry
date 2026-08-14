@@ -4,14 +4,15 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSP
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalCoeffH2
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMoser
 
-/-!
-# Low-regularity split of the Ricci--DeTurck top path arm
 
-This file separates the small path-coefficient deviation from the fixed
-background-curvature term left by commuting the two derivative slots.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +33,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -42,16 +43,12 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- The deviation of the total top coefficient along a realized path has the
-joint regularity needed to form its coefficient path integral. -/
 theorem phi_dev_joint
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound g₀
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound g₀
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound g₀
       (ccTensorBilinSymm (I := I) g₀ T') δ') :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
       (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
@@ -78,7 +75,42 @@ theorem phi_dev_joint
     (E := fun z : M => TensorRSSpace 4 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
-/-- Coefficient reindexing commutes with subtraction. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+theorem norm_sq_add_le
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (A B : SmoothCcTensor g₀ r s) :
+    ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
+  have h := norm_add_le A B
+  have hA : 0 ≤ ‖A‖ := norm_nonneg _
+  have hB : 0 ≤ ‖B‖ := norm_nonneg _
+  have hAB : 0 ≤ ‖A + B‖ := norm_nonneg _
+  nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+theorem norm_sq_sub_le
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (A B : SmoothCcTensor g₀ r s) :
+    ‖A - B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
+  have h := norm_sub_le A B
+  have hA : 0 ≤ ‖A‖ := norm_nonneg _
+  have hB : 0 ≤ ‖B‖ := norm_nonneg _
+  have hAB : 0 ≤ ‖A - B‖ := norm_nonneg _
+  nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem reindex_norm_sq
+    (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
+    (A : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
+    ‖iteratedCovGrad (I := I) g₀ r s i
+        (reindexCoeffGen (I := I) (M := M) g₀ r s A ρ)‖ ^ 2 =
+      ‖iteratedCovGrad (I := I) g₀ r s i A‖ ^ 2 := by
+  rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M) g₀ r s A ρ i,
+    norm_reindexCoeffGen_eq (I := I) (M := M) g₀ r (s + i)]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem reindex_sub
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
@@ -99,6 +131,7 @@ theorem reindex_sub
   rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
   exact ContinuousLinearMap.sub_comp _ _ _
 
+set_option maxHeartbeats 3200000 in
 /-- The second-order Lie refold is pointwise small using only fibre metric
 smallness; no Sobolev radius or high-order jet hypothesis is required. -/
 theorem lieRefold2_cap
@@ -228,10 +261,10 @@ theorem phiMet_cap
               deTurckPhiMetTotal (I := I) (M := M) g g_bg g).toSection x) ≤
           (K * (δ / (1 - δ))) ^ 2 := by
   obtain ⟨CTH, hCTH0, hCTH⟩ :=
-    traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    traceHessianCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g
   obtain ⟨CR, hCR0, hCR⟩ :=
-    ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    ricciArmPrincipalCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g
   let K0 : ℝ := 8 * CTH 0 + 8 * CR 0
   let n : ℝ := Module.finrank ℝ E
@@ -268,7 +301,7 @@ theorem phiMet_cap
     change riemannianFiberNormSq (I := I) (M := M) g 2 2 x
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM
-          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotEndo
+          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.metricComparisonDiffSlotEndo
             (I := I) g gm x)) ≤ _
     exact
       DifferentialGeometry.Analysis.Sobolev.TensorHilbert.riemannianFiberNormSq_gInvDiffSlotEndo_le
@@ -398,44 +431,6 @@ theorem path_add_sub_cap
   have hsqrt := Real.sqrt_le_sqrt (hcap t ht)
   simpa only [K, Real.sqrt_sq hΛ] using hsqrt
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] in
-/-- The squared norm of a sum is bounded by twice the two squared norms. -/
-theorem norm_sq_add_le
-    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (A B : SmoothCcTensor g₀ r s) :
-    ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
-  have h := norm_add_le A B
-  have hA : 0 ≤ ‖A‖ := norm_nonneg _
-  have hB : 0 ≤ ‖B‖ := norm_nonneg _
-  have hAB : 0 ≤ ‖A + B‖ := norm_nonneg _
-  nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] in
-/-- The squared norm of a difference is bounded by twice the two squared norms. -/
-theorem norm_sq_sub_le
-    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (A B : SmoothCcTensor g₀ r s) :
-    ‖A - B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
-  have h := norm_sub_le A B
-  have hA : 0 ≤ ‖A‖ := norm_nonneg _
-  have hB : 0 ≤ ‖B‖ := norm_nonneg _
-  have hAB : 0 ≤ ‖A - B‖ := norm_nonneg _
-  nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
-
-/-- Reindexing upper coefficient slots preserves every covariant-jet norm square. -/
-theorem reindex_norm_sq
-    (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
-    (A : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
-    ‖iteratedCovGrad (I := I) g₀ r s i
-        (reindexCoeffGen (I := I) (M := M) g₀ r s A ρ)‖ ^ 2 =
-      ‖iteratedCovGrad (I := I) g₀ r s i A‖ ^ 2 := by
-  rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M) g₀ r s A ρ i,
-    norm_reindexCoeffGen_eq (I := I) (M := M) g₀ r (s + i)]
-
-/-- A convex combination of two tensors in the same spectral `H²` ball
-remains in that ball. -/
 theorem convex_hs_bound
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {s R : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1)
@@ -461,21 +456,16 @@ theorem convex_hs_bound
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- On a three-dimensional spectral `H2` ball, the total Ricci--DeTurck top
-coefficient at every metric on a convex realization path differs from its
-background value by a pointwise and two-jet amount linear in the ball radius. -/
 theorem phi_dev_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (_hδ_lt : δ < 1)
-        (hδ : gFibreOpBound g₀
+        (hδ : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (_hδ'_lt : δ' < 1)
-        (hδ' : gFibreOpBound g₀
+        (hδ' : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ')
         {R : ℝ}, 0 ≤ R → R ≤ ρ →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
@@ -496,10 +486,10 @@ theorem phi_dev_h2
   classical
   obtain ⟨ρ, Cinv, hρ, hCinv, hinv⟩ := inv_coeff_h2 (I := I) (M := M) hDim g₀
   obtain ⟨CTH, hCTH_nn, hCTH⟩ :=
-    traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    traceHessianCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g₀
   obtain ⟨CR, hCR_nn, hCR⟩ :=
-    ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    ricciArmPrincipalCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g₀
   obtain ⟨DTH, hDTH_nn, hDTH⟩ :=
     traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
@@ -772,21 +762,16 @@ theorem phi_dev_h2
     exact hraw.trans (mul_le_mul_of_nonneg_right
       (by dsimp [K]; linarith [hKpt]) (sq_nonneg _))
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-/-- On a three-dimensional small spectral `H2` ball, the integrated total top
-coefficient differs from its background value by a pointwise and two-jet
-amount linear in the ball radius. -/
 theorem top_path_dev_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound g₀
+        (hδ : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_lt : δ' < 1)
-        (hδ' : gFibreOpBound g₀
+        (hδ' : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ')
         {R : ℝ}, 0 ≤ R → R ≤ ρ →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
@@ -925,33 +910,33 @@ theorem top_path_dev_h2
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjdev hCR
       (fun t ht => by simpa using (hper t ht).2)
 
-/-- The integrated top coefficient minus the fixed connection Laplacian is the
-small coefficient deviation plus a fixed zeroth-order curvature coefficient. -/
+
+
 theorem top_path_split
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound g₀
+    (hδ : metricCauchySchwarzBound g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound g₀
+    (hδ' : metricCauchySchwarzBound g₀
       (ccTensorBilinSymm (I := I) g₀ T') δ')
     (U : SmoothCcTensor g₀ 0 2) :
-    appCc (I := I) (M := M) g₀ 4 2
+    operatorFieldApply (I := I) (M := M) g₀ 4 2
         (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ')
         (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
       rawTensorConnLapSmooth (I := I) g₀ 0 2 U =
-    appCc (I := I) (M := M) g₀ 4 2
+    operatorFieldApply (I := I) (M := M) g₀ 4 2
         (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
             hδ_lt hδ hδ'_lt hδ' -
           deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)
         (iteratedCovGrad (I := I) g₀ 0 2 2 U) +
-      appCc (I := I) (M := M) g₀ 2 2
+      operatorFieldApply (I := I) (M := M) g₀ 2 2
         (phiMetCurvCoeff (I := I) g₀ g_bg g₀)
         (iteratedCovGrad (I := I) g₀ 0 2 0 U) := by
   have hlap : rawTensorConnLapSmooth (I := I) g₀ 0 2 U =
-      appCc (I := I) (M := M) g₀ 4 2
+      operatorFieldApply (I := I) (M := M) g₀ 4 2
         (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₀)
         (iteratedCovGrad (I := I) g₀ 0 2 2 U) := by
     apply smoothCcTensor_ext_of_unitModel
@@ -972,14 +957,14 @@ theorem top_path_split
   rw [appCc_add_left, appCc_sub_left,
     phiMet_curv_fold (I := I) (M := M) g₀ g_bg g₀ U]
 
-/-- The fixed curvature coefficient in `top_path_split` is bounded from
-spectral `H2` to spectral `H1` in dimension three. -/
+
+
 theorem fixed_curv_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ U : SmoothCcTensor g₀ 0 2,
       ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-          (appCc (I := I) (M := M) g₀ 2 2
+          (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (phiMetCurvCoeff (I := I) g₀ g_bg g₀) U)‖ ≤
         C * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ := by
   obtain ⟨Capp, hCapp, happ⟩ :=
@@ -1004,19 +989,19 @@ theorem fixed_curv_h1
   simpa only [C, B1] using happ
     (phiMetCurvCoeff (I := I) g₀ g_bg g₀) U B0 B1 hB0 hB1 hpoint (le_refl B1)
 
-/-- If the integrated top coefficient stays `H2`-close to its background
-value, then the top remainder is a small `H3 -> H1` arm plus a fixed
-`H2 -> H1` curvature arm. -/
+
+
+
 theorem top_path_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop Clow : ℝ, 0 ≤ Ctop ∧ 0 ≤ Clow ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound g₀
+        (hδ : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_lt : δ' < 1)
-        (hδ' : gFibreOpBound g₀
+        (hδ' : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ')
         (U : SmoothCcTensor g₀ 0 2) (A : ℝ),
         0 ≤ A →
@@ -1032,7 +1017,7 @@ theorem top_path_h1
                 hδ_lt hδ hδ'_lt hδ' -
               deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2) ≤ A ^ 2 →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-          (appCc (I := I) (M := M) g₀ 4 2
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                 hδ_lt hδ hδ'_lt hδ')
               (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
@@ -1054,26 +1039,26 @@ theorem top_path_h1
     hδ_lt hδ hδ'_lt hδ' U, ccTensorToHs_add]
   exact (norm_add_le _ _).trans (add_le_add htop' hlow')
 
-/-- The integrated Ricci--DeTurck top arm is a small `H3 -> H1` operator on a
-three-dimensional spectral `H2` metric ball, up to its fixed curvature
-`H2 -> H1` term. -/
+
+
+
 theorem top_path_ball_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ ρ Ctop Clow : ℝ, 0 < ρ ∧ 0 ≤ Ctop ∧ 0 ≤ Clow ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound g₀
+        (hδ : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_lt : δ' < 1)
-        (hδ' : gFibreOpBound g₀
+        (hδ' : metricCauchySchwarzBound g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ')
         {R : ℝ}, 0 ≤ R → R ≤ ρ →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R →
         ∀ U : SmoothCcTensor g₀ 0 2,
           ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-            (appCc (I := I) (M := M) g₀ 4 2
+            (operatorFieldApply (I := I) (M := M) g₀ 4 2
                 (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                   hδ_lt hδ hδ'_lt hδ')
                 (iteratedCovGrad (I := I) g₀ 0 2 2 U) -

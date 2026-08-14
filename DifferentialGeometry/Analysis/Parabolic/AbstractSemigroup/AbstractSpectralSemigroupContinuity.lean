@@ -1,25 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroupLaw
 
-/-!
-# Abstract spectral heat semigroup: strong continuity on `[0, ∞)`
-
-This file establishes the fourth structural property of the abstract
-spectral heat semigroup `abstractSpectralSemigroup b hlam`: strong
-continuity of `t ↦ S(t) v` on the half-line `[0, ∞)`.
-
-* `abstractSpectralSemigroup_continuous_at_zero` — right-limit strong
-  continuity at `0+`, proved by a head/tail decomposition of the
-  spectral series with dominated control by the squared Fourier
-  coefficients (Parseval tail) and pointwise convergence of the finite
-  head.
-* `abstractSpectralSemigroup_continuousOn` — strong continuity on
-  `Ici 0`, upgrading the `0+` statement via the contractive comparison
-  `‖S(t)v − S(t₀)v‖ ≤ ‖S(|t − t₀|)v − v‖`.
-
-Everything is generic Hilbert spectral calculus, depending only on
-non-negativity of the eigenvalue family `lam : ι → ℝ`.
--/
-
 noncomputable section
 
 open Set Filter Topology
@@ -32,7 +12,6 @@ namespace Parabolic
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-- Strong continuity at `t = 0+`: as `t → 0+`, `S(t) v → v`. -/
 theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) (v : X) :
     Filter.Tendsto
@@ -193,7 +172,6 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
     linarith [h_tail_le, h_lt, h_eq]
   linarith [h_head_bound, h_tail_bound]
 
-/-- For `t, t₀ ≥ 0`, `‖S(t)v − S(t₀)v‖ ≤ ‖S(|t − t₀|)v − v‖`. -/
 private lemma norm_abstractSpectralSemigroup_sub_le_diff (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t t₀ : ℝ} (ht : 0 ≤ t) (ht₀ : 0 ≤ t₀)
     (v : X) :
@@ -268,7 +246,6 @@ private lemma norm_abstractSpectralSemigroup_sub_le_diff (b : HilbertBasis ι �
           rw [one_mul, h_norm_swap]
       _ = ‖abstractSpectralSemigroup b hlam |t - t₀| v - v‖ := by rw [h_abs]
 
-/-- Strong continuity at every interior nonneg time `t > 0`. -/
 private theorem abstractSpectralSemigroup_continuous_at_pos (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 < t) (v : X) :
     ContinuousAt (fun u : ℝ => abstractSpectralSemigroup b hlam u v) t := by
@@ -319,7 +296,6 @@ private theorem abstractSpectralSemigroup_continuous_at_pos (b : HilbertBasis ι
     (x := abstractSpectralSemigroup b hlam t v))
   simpa using h_added
 
-/-- Strong continuity of the abstract spectral heat semigroup on `[0, ∞)`. -/
 theorem abstractSpectralSemigroup_continuousOn (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) (v : X) :
     ContinuousOn (fun u : ℝ => abstractSpectralSemigroup b hlam u v)

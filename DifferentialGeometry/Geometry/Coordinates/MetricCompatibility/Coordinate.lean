@@ -1,18 +1,15 @@
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
 
-/-!
-# Metric compatibility in local-frame components
 
-This file contains coordinate/local-frame consequences of metric compatibility
-that are independent of Ricci-flow time evolution.  In particular it exposes
-the component form of `nabla gInv = 0` for an arbitrary smooth metric and a
-metric-compatible connection.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
@@ -34,6 +31,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
+omit [FiniteDimensional ℝ E] in
 theorem invCovZeroLocal
     [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)

@@ -1,61 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
-import DifferentialGeometry.Geometry.Connection.Laplacian.RoughLaplacianSecondCovGradL2Bound
-
-/-! # The intrinsic Moser tame product and Gagliardo–Nirenberg interpolation
-
-This file provides the **Sobolev·Sobolev** multiplication estimates on a
-closed Riemannian manifold, phrased intrinsically against the iterated covariant gradient
-`iteratedCovGrad` and the metric `L²` norm `tensorL2Norm` of smooth compactly-supported
-tensor sections.
-
-The pre-existing library multiplication apparatus controls only **smooth-coefficient ·
-Sobolev** products — `wkpNorm_smul_smooth_bounded_lt_top`
-(`Euclidean/Multiplication/Multiply.lean`), `wkpNormChart_smooth_mul_le`
-(`Chart/SmoothDensity/SmoothMulQuant.lean`), `exists_per_chart_leibniz_multiplier_bound`
-(`Tensor/ChartComponentRawNorm.lean`), `christoffel_Ck_bound_from_metric_Ck1`,
-`wkpNorm_chosenWeakPartial_le_wkpNorm_succ` (`Euclidean/Multiplication/MultiplyQuantK.lean`):
-in each, one factor is a fixed `C^∞` function whose every derivative is sup-bounded, and only
-the *other* factor carries Sobolev regularity.  The genuinely new content here is the
-estimate when **both** factors carry only Sobolev regularity (the high-order derivative is
-*shared* between the two factors and must be redistributed by interpolation): the Moser tame
-inequality and the Gagliardo–Nirenberg interpolation inequality, neither of which previously
-existed in Mathlib or elsewhere in this library.
-
-These are the analytic engine of the higher-order covariant Faà-di-Bruno / Nemytskii estimate
-for the second-order quasilinear Ricci–DeTurck right-hand side
-(`Analysis/Spectral/Intrinsic/DeTurck/RHSHighOrderSobolevLipschitz.lean`): the covariant
-expansion of `∇^j(F(g₁) − F(g₂))` is a finite sum of products of (bounded) metric-jet
-coefficients with covariant gradients of the metric difference, in which the top-order
-derivative may land on *either* factor; the tame estimate is exactly what redistributes the
-derivative budget so that only the perturbation difference's covariant `L²`-jets appear on the
-right, while the metric jet enters in `L^∞` (controlled by the supercritical Sobolev embedding
-`H^{a+2} ↪ C⁰`).  The pointwise `C²`-jet embedding alone cannot reach the top metric jet on a
-manifold of dimension `≥ 4`; the `L²`-tame redistribution is mandatory, which is precisely why
-these primitives are needed.
-
-The Moser tame product is proven outright: under the `C^k`-sup hypothesis the bounded factor's
-every covariant jet is dominated by `Λ`, so each Leibniz summand keeps its high derivative on the
-perturbation factor in `L²`, and the finite-sum pointwise-to-`L²` packaging
-`tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum` plus a reflection reindexing close it (no
-interpolation needed, since the coefficient factor is `L^∞`-controlled at every order).  The
-Gagliardo–Nirenberg interpolation is reduced by a genuine `k`-th-root `rpow` extraction to its
-integer-power form `l2Interp_pow_iteratedCovGrad`, which is proven outright by composing the
-discrete log-convexity of the covariant `L²`-jets `aᵢ := ‖∇^i u‖_{L²}`
-(`l2jet_logConvex_iteratedCovGrad`, `aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂` — the closed-manifold covariant
-Green/IBP identity on the iterated bundle connection Laplacian), the discrete
-Hardy–Littlewood–Pólya power law (`hlp_real`, proven here as elementary real arithmetic via the
-discrete chord bound), and the `L^∞`-to-`L²` endpoint `l2Norm_le_sup_mul_sqrt_vol`
-(`a₀ ≤ Λ₀·vol^{1/2}`).  The log-convexity is in turn proven from the two closed-manifold Bochner
-halves: the integration-by-parts half
-`Integral.Connection.covGrad_l2NormSq_le_rawConnLap_mul_self_gen` and the valence-uniform
-rough-Laplacian-to-second-covariant-gradient `L²` trace bound
-`exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
-(`Geometry/Connection/Laplacian/RoughLaplacianSecondCovGradL2Bound.lean`).  All displayed
-cross-term statements are general real-valued `L²`-norm
-product/interpolation inequalities on iterated covariant gradients, structurally unrelated to the
-Nemytskii conclusions that consume them; no packaging. -/
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RoughLaplacianSecondCovGradL2Bound
 
 noncomputable section
 
@@ -70,44 +16,15 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Integral.Connection
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The intrinsic Moser tame product for iterated covariant gradients (the genuine
-Sobolev·Sobolev `L²` cross term).**
-
-Fix an anchor `g`, two valences `p, q`, and an order `k`.  There is a single constant `C ≥ 0`
-(depending only on `g, k, p, q` and the manifold) such that for any coefficient tensor `c`, any
-perturbation tensor `w`, any constants `Λ, Λ₀ ≥ 0`, and any result section `P` whose pointwise
-fibre norm of the top covariant gradient is *dominated by the covariant Leibniz product bound*
-```
-‖∇^k P(x)‖²
-  ≤ ∑_{i ∈ range (k+1)} (binom k i)² · ‖∇^i c(x)‖² · ‖∇^{k-i} w(x)‖²       (∀ x),
-```
-under the `C^k`-sup hypothesis `‖∇^i c(x)‖² ≤ Λ²` (`i ≤ k`, the bounded-coefficient factor) and
-the `C⁰`-sup hypothesis `‖w(x)‖² ≤ Λ₀²`, the metric `L²` norm of `P` is controlled by the **tame
-cross term**
-```
-‖∇^k P‖_{L²} ≤ C · ( Λ · ∑_{i ≤ k} ‖∇^i w‖_{L²} + Λ₀ · ∑_{i ≤ k} ‖∇^i c‖_{L²} ) .
-```
-
-This is the genuine **Moser tame inequality**: the top-order derivative is redistributed so that
-each product summand carries the high derivative on *one* factor (in `L²`) and the low
-derivatives on the other (in `L^∞`).  The proof composes the pointwise Leibniz product hypothesis
-with the `C^k`-sup domination of the bounded factor's covariant jets (each Leibniz summand keeps
-its high derivative on the perturbation factor in `L²`), the finite-sum pointwise-to-`L²`
-packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum`, and a reflection reindexing; no
-interpolation is needed, since the coefficient factor is `L^∞`-controlled at every order.
-
-The hypotheses are genuine analytic inputs about the *separate* tensors `c, w` (sup bounds on
-their covariant jets) and a *pointwise* Leibniz domination of `∇^k P`; the conclusion is a
-global `L²` bound on `∇^k P`.  The conclusion is structurally distinct from any consumer's
-Nemytskii conclusion (it is a `c, w`-cross-term `L²` product bound, not a chart-Sobolev or
-spectral statement); no packaging. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (p q k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -138,10 +55,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
   classical
   refine ⟨(2 : ℝ) ^ k, by positivity, ?_⟩
   intro c w P Λ Λ₀ hΛ hΛ₀ hc hw hP
-
   set Tw : ∀ i, Integral.L2.SmoothCcTensor g 0 (q + (k - i)) :=
     fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (k - i) w with hTw_def
-
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + k) x
@@ -158,7 +73,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     have hc_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
         ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i c).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (p + i) x _
-    have hw_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x) :=
+    have hw_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x
+      ((Tw i).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (k - i)) x _
     have hchoose : ((k.choose i : ℝ)) ^ 2 ≤ ((2 : ℝ) ^ k) ^ 2 := by
       have h1 : (k.choose i : ℝ) ≤ (2 : ℝ) ^ k := by
@@ -173,13 +89,13 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i c).toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x))
         ≤ ((2 : ℝ) ^ k) ^ 2 * (Λ ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x)) := by
+              riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x
+                ((Tw i).toSection x)) := by
           apply mul_le_mul hchoose ?_ (by positivity) (by positivity)
           exact mul_le_mul_of_nonneg_right hcΛ hw_nn
       _ = ((2 : ℝ) ^ k * Λ) ^ 2 *
             riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x) := by
           ring
-
   have hpack :
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P‖ ≤
         ((2 : ℝ) ^ k * Λ) * ∑ i ∈ Finset.range (k + 1), ‖Tw i‖ :=
@@ -187,7 +103,6 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       (fun i => q + (k - i)) Tw
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P)
       ((2 : ℝ) ^ k * Λ) (by positivity) hpt
-
   have hreindex : (∑ i ∈ Finset.range (k + 1), ‖Tw i‖) =
       ∑ i ∈ Finset.range (k + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q i w‖ := by
@@ -195,7 +110,6 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q i w‖) (k + 1)
     simpa [hTw_def, Nat.succ_sub_one] using this
   rw [hreindex] at hpack
-
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P)] at hpack
   have hsum_w_eq : (∑ i ∈ Finset.range (k + 1),
@@ -225,7 +139,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
           mul_nonneg (by positivity) (mul_nonneg hΛ₀ hSc_nn)
         rw [hexp]; linarith
 
-set_option maxHeartbeats 1600000 in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (p q r k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -269,13 +184,10 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
   classical
   refine ⟨Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k), by positivity, ?_⟩
   intro a b c P Λa Λb Λc hΛa hΛb hΛc ha hb hc hP
-
   set Ta : ∀ i, Integral.L2.SmoothCcTensor g 0 (p + (k - i)) :=
     fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a with hTa_def
-
   set D : ℝ := Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k) * (Λb * Λc) with hD_def
   have hD_nn : 0 ≤ D := by rw [hD_def]; positivity
-
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + r + k) x
@@ -369,7 +281,8 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       exact mul_nonneg
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (i - j)) x _)
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + j) x _)
-    have hDsq : D ^ 2 = ((k : ℝ) + 1) * (((2 : ℝ) ^ k) ^ 2 * ((2 : ℝ) ^ k) ^ 2) * (Λb ^ 2 * Λc ^ 2) := by
+    have hDsq : D ^ 2 = ((k : ℝ) + 1) * (((2 : ℝ) ^ k) ^ 2 * ((2 : ℝ) ^ k) ^ 2) *
+      (Λb ^ 2 * Λc ^ 2) := by
       rw [hD_def]
       have hsq : Real.sqrt ((k : ℝ) + 1) ^ 2 = (k : ℝ) + 1 := Real.sq_sqrt (by positivity)
       have h2 : ((2 : ℝ) ^ (2 * k)) = ((2 : ℝ) ^ k) * ((2 : ℝ) ^ k) := by
@@ -394,7 +307,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       _ = D ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
             ((Ta i).toSection x) := by
           rw [hDsq, hTa_def]; ring
-
   have hpack :
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P‖ ≤
         D * ∑ i ∈ Finset.range (k + 1), ‖Ta i‖ :=
@@ -402,7 +314,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       (fun i => p + (k - i)) Ta
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P)
       D hD_nn hpt
-
   have hreindex : (∑ i ∈ Finset.range (k + 1), ‖Ta i‖) =
       ∑ i ∈ Finset.range (k + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖ := by
@@ -410,7 +321,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖) (k + 1)
     simpa [hTa_def, Nat.succ_sub_one] using this
   rw [hreindex] at hpack
-
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P)] at hpack
   have hsum_a_eq : (∑ i ∈ Finset.range (k + 1),
@@ -448,7 +358,8 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
         apply mul_le_mul_of_nonneg_left _ hC_nn
         linarith
 
-set_option maxHeartbeats 1600000 in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) {n : ℕ} (hn : 0 < n) (p : Fin n → ℕ) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -467,7 +378,8 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
                   ∑ e ∈ Finset.Nat.antidiagonalTuple n k',
                     ∏ m : Fin n,
                       riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)) →
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection
+                            x)) →
         Integral.L2.tensorL2Norm (I := I) g 0 ((∑ m, p m) + k)
             (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toFun ≤
           (C * Real.sqrt K) * ∑ m : Fin n,
@@ -477,12 +389,14 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
                       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
   classical
   refine ⟨Real.sqrt (∑ k' ∈ Finset.range (k + 1),
-      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), by positivity, ?_⟩
+      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), Real.sqrt_nonneg _, ?_⟩
   intro c P Λ K hK hΛ hjet hP
   set i₀ : Fin n := ⟨0, hn⟩ with hi₀
   set Tcard : ℝ := ∑ k' ∈ Finset.range (k + 1),
       ((Finset.Nat.antidiagonalTuple n k').card : ℝ) with hTcard
-  have hTcard_nn : 0 ≤ Tcard := by rw [hTcard]; positivity
+  have hTcard_nn : 0 ≤ Tcard := by
+    rw [hTcard]
+    exact Finset.sum_nonneg (fun _ _ => Nat.cast_nonneg _)
   set C : ℝ := Real.sqrt Tcard with hC
   have hC_nn : 0 ≤ C := by rw [hC]; exact Real.sqrt_nonneg _
   set sK : ℝ := Real.sqrt K with hsK
@@ -615,8 +529,6 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
 
 section DiscreteLogConvex
 
-/-- One-step "slope-defect" iterated (bounded form): if `Δ i ≤ Δ (i+1) + d` for all
-`i < N`, then `Δ i ≤ Δ i' + (i'-i) * d` whenever `i ≤ i' ≤ N`. -/
 private lemma slope_spread (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
     (hstep : ∀ i, i < N → Δ i ≤ Δ (i + 1) + d) :
     ∀ i i' : ℕ, i ≤ i' → i' ≤ N → Δ i ≤ Δ i' + (i' - i : ℕ) * d := by
@@ -638,13 +550,6 @@ private lemma slope_spread (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
       · have hie : i = n + 1 := le_antisymm hii' hge
         subst hie; simp
 
-/-- The discrete chord bound from a convexity defect, in additive form. If
-`Δ i ≤ Δ (i+1) + d` for all `i + 1 < k` and `0 ≤ d`, then for `0 < j < k`
-```
-k * ∑_{i<j} Δ i ≤ j * ∑_{i<k} Δ i + k^3 * d.
-```
-Writing `Δ i = L (i+1) - L i` makes `∑_{i<n} Δ i = L n - L 0`, so this is exactly the
-log-convex chord bound for `L`. -/
 private lemma chord_bound (Δ : ℕ → ℝ) (d : ℝ) (hd : 0 ≤ d) (j k : ℕ)
     (hstep : ∀ i, i + 1 < k → Δ i ≤ Δ (i + 1) + d) (hj : 0 < j) (hjk : j < k) :
     (k : ℝ) * (∑ i ∈ Finset.range j, Δ i)
@@ -709,9 +614,6 @@ private lemma chord_bound (Δ : ℕ → ℝ) (d : ℝ) (hd : 0 ≤ d) (j k : ℕ
           nlinarith [hcastjk, hkd, hknn, hd, mul_le_mul_of_nonneg_right hcastjk hkd]
   nlinarith [key]
 
-/-- Positivity propagates downward from any positive term: with all `a ≥ 0`, the
-log-convexity `a (i+1)^2 ≤ M * a i * a (i+2)` forces `a (i+1) > 0 → a i > 0`, hence a
-single positive `a j` makes every earlier term positive. -/
 private lemma pos_propagate (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ)
     (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j : ℕ) (hpos : 0 < a j) :
     ∀ i, i ≤ j → 0 < a i := by
@@ -739,8 +641,6 @@ private lemma pos_propagate (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ)
   rw [heq]
   exact key0 (j - i) (by omega)
 
-/-- Positivity also propagates upward: a single positive `a j` (`0 < j`) makes every
-later term positive. -/
 private lemma pos_propagate_up (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ)
     (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j : ℕ) (hj : 0 < j)
     (hpos : 0 < a j) :
@@ -768,17 +668,6 @@ private lemma pos_propagate_up (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : �
       rw [hidx2] at hRr
       exact hRr
 
-/-- **Discrete log-convexity power law (Hardy–Littlewood–Pólya, real form).** A
-nonnegative sequence `a` satisfying `a (i+1)^2 ≤ M * a i * a (i+2)` with `1 ≤ M` obeys,
-for `0 < j < k`,
-```
-(a j)^k ≤ M^(k^3) * (a 0)^(k-j) * (a k)^j.
-```
-The proof reduces (via the `a (i+1)^2 ≤ M a i a (i+2)` square bound) to the all-positive
-case, in which `i ↦ Real.log (a i)` has a discrete second difference bounded below by
-`-Real.log M`; the chord bound `chord_bound` then yields the linear inequality on logs,
-which exponentiates to the claimed power law. This is elementary real arithmetic on the
-abstract `L²`-jets. -/
 private theorem hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M)
     (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j k : ℕ) (hj : 0 < j) (hjk : j < k) :
     (a j) ^ k ≤ M ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := by
@@ -837,35 +726,6 @@ private theorem hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM
 
 end DiscreteLogConvex
 
-/-- **The rough-Laplacian-to-second-covariant-gradient `L²` trace bound (uniform in valence).**
-
-There is a single multiplier `K ≥ 1` (depending only on `g` and the manifold, valence-uniform)
-such that for every valence `s'` and every smooth compactly-supported `(0, s')`-tensor `S`, the
-metric `L²` norm of the rough (connection) Laplacian `Δ_∇ S := rawTensorConnLapSmooth g 0 s' S`
-is controlled by the metric `L²` norm of the second iterated covariant gradient
-`∇²S := covGrad g 0 (s'+1) (covGrad g 0 s' S)`:
-```
-‖Δ_∇ S‖_{L²} ≤ K · ‖∇²S‖_{L²}.
-```
-
-This is the elementary metric-trace half of the closed-manifold Bochner package, the
-companion of the on-disk integration-by-parts half
-`covGrad_l2NormSq_le_rawConnLap_mul_self_gen`.  Pointwise the rough Laplacian is the diagonal
-`g`-trace of the Hessian, `Δ_∇ S (x) = ∑ᵢ ∇²_{Bᵢ,Bᵢ} S (x)` over a `g_x`-orthonormal frame
-`Bᵢ` (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), so the fibre norm of the trace is
-dominated by `dim` times the fibre norm of the full second covariant gradient (the metric trace
-of a bilinear form is bounded by `dim` times its sup-eigenvalue), and integrating this pointwise
-bound over the compact manifold gives the displayed `L²` inequality with `K := dim`.  Both sides
-are intrinsic metric `L²` norms; the statement is a valence-uniform real-valued `L²` inequality.
-
-It is proven by composition over the general-valence trace bound
-`exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
-(`Geometry/Connection/Laplacian/RoughLaplacianSecondCovGradL2Bound.lean`), whose elementary
-metric-trace assembly (the diagonal `g`-trace sum, the `n`-sub-additivity of the squared fibre
-norm, and the pointwise-to-`L²` integration) rests on the general-valence geometric input
-`secondCovDeriv_unit_frame_fiberNormSq_le`, proved in the same file: the orthonormal-frame
-Hessian-component fibre-norm bound `‖∇²_{Bᵢ,Bᵢ} S (x)‖_{fibre} ≤ ‖∇²S (x)‖_{fibre}` (the two-step
-covariant-gradient evaluation currying together with its component comparison). -/
 private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -874,33 +734,10 @@ private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
             (rawTensorConnLapSmooth (I := I) g 0 s' S).toFun ≤
           K * Integral.L2.tensorL2Norm (I := I) g 0 (s' + 1 + 1)
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s' + 1)
-              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s' S)).toFun :=
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s'
+                S)).toFun :=
   Integral.Connection.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen (I := I) (M := M) g
 
-/-- **The covariant `L²`-jets of a smooth compactly-supported tensor are log-convex on a
-closed manifold (the covariant Green identity).**
-
-Fix an anchor `g` and a base valence `s`. There is a single multiplier `K ≥ 1` (depending
-only on `g, s` and the manifold) such that for every smooth compactly-supported
-`(0, s)`-tensor `u` and every order `i`, the metric `L²` norms `aᵢ := ‖∇^i u‖_{L²}` of the
-iterated covariant gradients satisfy the discrete log-convexity
-```
-‖∇^{i+1} u‖_{L²}^2 ≤ K · ‖∇^i u‖_{L²} · ‖∇^{i+2} u‖_{L²}.
-```
-
-This is the covariant integration-by-parts / Green identity on the iterated bundle
-connection Laplacian on a closed manifold: setting `S := ∇^i u` (an `(0, s+i)`-tensor), the
-diagonal Green identity gives
-`‖∇^{i+1} u‖_{L²}^2 = ‖∇ S‖_{L²}^2 = ⟨∇ S, ∇ S⟩_{L²} = -⟨Δ_∇ S, S⟩_{L²} ≤
-‖Δ_∇ S‖_{L²} · ‖S‖_{L²} = ‖Δ_∇ S‖_{L²} · ‖∇^i u‖_{L²}` (the on-disk integration-by-parts half
-`covGrad_l2NormSq_le_rawConnLap_mul_self_gen`), and the rough Laplacian `Δ_∇` is the pointwise
-`g`-trace contraction of the second covariant gradient, whence
-`‖Δ_∇ S‖_{L²} ≤ K · ‖∇² S‖_{L²} = K · ‖∇^{i+2} u‖_{L²}` (the valence-uniform trace bound
-`exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm`). Multiplying gives the claim. Both ingredients
-are intrinsic and metric; the conclusion is a real-valued `L²`-jet inequality, structurally
-unrelated to any Nemytskii conclusion.
-
-It is proven outright from the two `L²` Bochner halves. -/
 private theorem l2jet_logConvex_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -915,13 +752,10 @@ private theorem l2jet_logConvex_iteratedCovGrad
   obtain ⟨K, hK1, htrace⟩ := exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm (I := I) (M := M) g
   refine ⟨K, hK1, ?_⟩
   intro u i
-
   simp only [PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s (i + 1) u,
     PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s i u]
-
   set S : Integral.L2.SmoothCcTensor g 0 (s + i) :=
     PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u with hS_def
-
   set aGrad : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 1))
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S).toFun
     with haGrad_def
@@ -931,29 +765,22 @@ private theorem l2jet_logConvex_iteratedCovGrad
       (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S)).toFun
     with haHess_def
   have haS_nn : 0 ≤ aS := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
-
   have hibp : aGrad ^ 2 ≤
       Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
           (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := by
     rw [haGrad_def, haS_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g (s + i) S
-
   have htr : Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
         (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun ≤ K * aHess := by
     rw [haHess_def]
     exact htrace (s + i) S
-
   calc aGrad ^ 2
       ≤ Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
           (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := hibp
     _ ≤ (K * aHess) * aS := mul_le_mul_of_nonneg_right htr haS_nn
     _ = K * aS * aHess := by ring
 
-/-- **The `L^∞`-to-`L²` endpoint.** For a smooth compactly-supported `(0, s)`-tensor `u`
-with pointwise fibre bound `‖u(x)‖² ≤ Λ₀²`, the metric `L²` norm of `u` is at most
-`Λ₀ · √(vol M)`. This is the constant-function comparison of the squared `L²` norm
-`‖u‖_{L²}^2 = ∫ ‖u(x)‖² ≤ ∫ Λ₀² = Λ₀² · vol M` (finite, the manifold being compact),
-square-rooted. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] in
 private theorem l2Norm_le_sup_mul_sqrt_vol
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ) (hΛ₀ : 0 ≤ Λ₀)
@@ -966,9 +793,7 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
   set μ := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   set V : ℝ := (μ Set.univ).toReal with hV
   have hVnn : 0 ≤ V := ENNReal.toReal_nonneg
-
   have hsq := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g s u
-
   have hint_mono : (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ∂μ)
       ≤ ∫ _x : M, Λ₀ ^ 2 ∂μ := by
     apply MeasureTheory.integral_mono
@@ -979,7 +804,6 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
     rw [MeasureTheory.integral_const, smul_eq_mul, hV, MeasureTheory.measureReal_def]
   have hsq_le : Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ^ 2 ≤ V * Λ₀ ^ 2 := by
     rw [hsq]; rw [hconst] at hint_mono; exact hint_mono
-
   have hnn : 0 ≤ Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun :=
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
   have hrhs_nn : 0 ≤ Λ₀ * Real.sqrt V := mul_nonneg hΛ₀ (Real.sqrt_nonneg V)
@@ -989,33 +813,6 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
   apply Real.sqrt_le_sqrt
   rw [mul_comm (Λ₀ ^ 2) V]; exact hsq_le
 
-/-- **The Gagliardo–Nirenberg interpolation in integer-power form** (the genuine deep analytic
-input of `exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le`).
-
-For a closed Riemannian manifold, a valence `s`, and a top order `k ≥ 1`, there is a single
-constant `C ≥ 0` such that for every smooth compactly-supported `(0, s)`-tensor `u` with `C⁰`-sup
-fibre bound `Λ₀` and every intermediate order `0 < j < k`, the `k`-th power of the metric `L²`
-norm of `∇^j u` is bounded by the interpolated product
-```
-‖∇^j u‖_{L²}^k ≤ C^k · Λ₀^{k-j} · ‖∇^k u‖_{L²}^j .
-```
-This is the standard tensor interpolation inequality on a closed manifold (Hamilton, Aubin):
-the discrete `L²`-jets `aᵢ := ‖∇^i u‖_{L²}` are log-convex up to a multiplier (closed-manifold
-covariant integration by parts: `aᵢ² = ⟨∇(∇^{i-1}u), ∇^i u⟩_{L²} = ⟨∇^{i-1}u, δ∇^i u⟩_{L²} ≤
-aᵢ₋₁·‖δ∇^i u‖_{L²} ≤ K·aᵢ₋₁·aᵢ₊₁`, since the divergence `δ` is a pointwise contraction of `∇`),
-and on a closed manifold the affine obstruction vanishes (`∇²u = 0 ⟹ ∇u = 0`), so the pure
-power-law holds with the `L^∞` endpoint `a₀ ≤ Λ₀·vol^{1/2}` folded in.  The exponentiated form is
-recorded because all powers are then integer, which lets the companion statement be obtained by a
-single `k`-th-root (`rpow (1/k)`) extraction.
-
-The proof composes three pieces: the log-convexity `l2jet_logConvex_iteratedCovGrad`
-(`aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂`, the closed-manifold covariant Green/IBP identity); the
-discrete Hardy–Littlewood–Pólya power law `hlp_real` (`aⱼ^k ≤ K^{k³}·a₀^{k-j}·aₖ^j`, proven
-outright as elementary real arithmetic on the abstract jets); and the `L^∞`-to-`L²` endpoint
-`l2Norm_le_sup_mul_sqrt_vol` (`a₀ ≤ Λ₀·√(vol M)`, the compact-manifold constant comparison).
-Choosing `C := K^{k²}·max 1 √(vol M)` absorbs the volume factor `√(vol M)^{k-j} ≤ (max 1 √(vol M))^k`,
-turning the HLP bound into the displayed interpolation.  Its conclusion is the integer-power
-interpolation, structurally distinct from any consumer's conclusion; no packaging. -/
 private theorem l2Interp_pow_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s k : ℕ) (_hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1040,18 +837,14 @@ private theorem l2Interp_pow_iteratedCovGrad
     rw [hC]; positivity
   refine ⟨C, hC_nn, ?_⟩
   intro u Λ₀ hΛ₀ hsup j hj0 hjk
-
   set a : ℕ → ℝ := fun i =>
     Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun with ha_def
   have ha_nn : ∀ i, 0 ≤ a i := fun i =>
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
-
   have ha_lc : ∀ i, (a (i + 1)) ^ 2 ≤ K * a i * a (i + 2) := fun i => hlc u i
-
   have hpow : (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j :=
     hlp_real a ha_nn K hK1 ha_lc j k hj0 hjk
-
   have ha0_eq : a 0 = Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun := by
     rw [ha_def]
     simp only [Nat.add_zero]
@@ -1059,14 +852,11 @@ private theorem l2Interp_pow_iteratedCovGrad
   have ha0_le : a 0 ≤ Λ₀ * V := by
     rw [ha0_eq, hV]
     exact l2Norm_le_sup_mul_sqrt_vol (I := I) (M := M) g s u Λ₀ hΛ₀ hsup
-
   have ha0_pow : (a 0) ^ (k - j) ≤ (Λ₀ * V) ^ (k - j) :=
     pow_le_pow_left₀ (ha_nn 0) ha0_le (k - j)
-
   have hΛ₀V_nn : 0 ≤ Λ₀ * V := mul_nonneg hΛ₀ hVnn
   have hak_pow_nn : 0 ≤ (a k) ^ j := pow_nonneg (ha_nn k) j
   have hKpow_nn : 0 ≤ K ^ (k ^ 3) := pow_nonneg (le_trans zero_le_one hK1) _
-
   have hKV_le_Ck : K ^ (k ^ 3) * V ^ (k - j) ≤ C ^ k := by
     have hVpow : V ^ (k - j) ≤ (max 1 V) ^ k := by
       calc V ^ (k - j) ≤ (max 1 V) ^ (k - j) := pow_le_pow_left₀ hVnn hmaxV (k - j)
@@ -1076,7 +866,6 @@ private theorem l2Interp_pow_iteratedCovGrad
       rw [hC, mul_pow, ← pow_mul, hexp]
     rw [hCk]
     apply mul_le_mul_of_nonneg_left hVpow hKpow_nn
-
   calc (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := hpow
     _ ≤ K ^ (k ^ 3) * (Λ₀ * V) ^ (k - j) * (a k) ^ j := by
         apply mul_le_mul_of_nonneg_right _ hak_pow_nn
@@ -1087,31 +876,6 @@ private theorem l2Interp_pow_iteratedCovGrad
         apply mul_le_mul_of_nonneg_right _ hak_pow_nn
         apply mul_le_mul_of_nonneg_right hKV_le_Ck (by positivity)
 
-/-- **The intrinsic Gagliardo–Nirenberg interpolation inequality for iterated covariant
-gradients.**
-
-Fix an anchor `g`, a valence `s`, and a top order `k ≥ 1`.  There is a single constant `C ≥ 0`
-such that for every smooth compactly-supported `(0, s)`-tensor `u` whose `C⁰`-sup fibre norm is
-`≤ Λ₀` and every intermediate order `0 < j < k`, the metric `L²` norm of the `j`-th iterated
-covariant gradient is controlled by the **interpolated** product of the `L^∞` sup `Λ₀` and the
-top-order covariant `L²`-jet, with the Gagliardo–Nirenberg exponent `j / k`:
-```
-‖∇^j u‖_{L²} ≤ C · Λ₀^{1 − j/k} · ‖∇^k u‖_{L²}^{j/k} .
-```
-
-This is the genuine **Gagliardo–Nirenberg interpolation**: the intermediate covariant gradient is
-estimated by interpolation between the `L^∞` bound (order `0`) and the top-order `L²` bound
-(order `k`), the exponents being the affine interpolation weights `1 − j/k` and `j/k`.  It is the
-companion of the Moser tame product above (the tame estimate uses it to move each intermediate
-factor between `L²` and `L^∞`).  Its conclusion is a real-valued interpolation inequality on the
-covariant `L²`-jets of a single tensor, structurally distinct from any consumer's Nemytskii
-conclusion; no packaging.
-
-The proof is the genuine `k`-th-root (`rpow (1/k)`) extraction from the integer-power form
-`l2Interp_pow_iteratedCovGrad` (`‖∇^j u‖²·…`, all exponents integer): take `rpow (1/k)` of both
-sides — monotone on nonnegatives — and simplify with `Real.pow_rpow_inv_natCast`, `Real.mul_rpow`,
-`Real.rpow_natCast`, `Real.rpow_mul`, using `(k - j : ℕ) = k - j` (since `j < k`) to turn the
-integer exponent `k - j` into the real interpolation weight `1 − j/k`. -/
 theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (s k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1135,13 +899,10 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + j) _
   have hak_nn : 0 ≤ ak :=
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + k) _
-
   have hpow : aj ^ k ≤ C ^ k * Λ₀ ^ (k - j) * ak ^ j := hC u Λ₀ hΛ₀ hsup j hj0 hjk
-
   have hmono : (aj ^ k) ^ ((k : ℝ)⁻¹) ≤ (C ^ k * Λ₀ ^ (k - j) * ak ^ j) ^ ((k : ℝ)⁻¹) :=
     Real.rpow_le_rpow (by positivity) hpow (by positivity)
   rw [Real.pow_rpow_inv_natCast haj_nn hk0] at hmono
-
   have hcast_sub : ((k - j : ℕ) : ℝ) = (k : ℝ) - (j : ℝ) := by
     rw [Nat.cast_sub (le_of_lt hjk)]
   have hexp1 : ((k : ℝ) - (j : ℝ)) * (k : ℝ)⁻¹ = 1 - (j : ℝ) / k := by
@@ -1153,10 +914,8 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
       Real.mul_rpow (by positivity) (by positivity)]
     rw [Real.pow_rpow_inv_natCast hC0 hk0]
     congr 1
-    · -- `(Λ₀ ^ (k - j)) ^ (1/k) = Λ₀ ^ (1 - j/k)`
-      rw [← Real.rpow_natCast Λ₀ (k - j), ← Real.rpow_mul hΛ₀, hcast_sub, hexp1]
-    · -- `(ak ^ j) ^ (1/k) = ak ^ (j/k)`
-      rw [← Real.rpow_natCast ak j, ← Real.rpow_mul hak_nn, div_eq_mul_inv]
+    · rw [← Real.rpow_natCast Λ₀ (k - j), ← Real.rpow_mul hΛ₀, hcast_sub, hexp1]
+    · rw [← Real.rpow_natCast ak j, ← Real.rpow_mul hak_nn, div_eq_mul_inv]
   rw [hrhs] at hmono
   exact hmono
 

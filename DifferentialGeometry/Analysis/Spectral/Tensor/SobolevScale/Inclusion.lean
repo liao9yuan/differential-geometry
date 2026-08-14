@@ -1,47 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 
-/-!
-# Continuous inclusions of the spectral `Hˢ` Sobolev scale
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
-spectral Sobolev spaces `tensorHs g r s σ` form a decreasing
-scale: a larger exponent `σ` imposes faster decay of the eigenbasis
-coordinates, so `Hˢ ⊆ Hᵗ` whenever `τ ≤ σ`. Concretely, since the
-weight `(1 + λᵢ)^σ` is monotone in the exponent (the base is `≥ 1`),
-weighted square-summability at `σ` implies it at any `τ ≤ σ`, and the
-`Hᵗ` norm of a vector is bounded by its `Hˢ` norm.
-
-This file constructs the continuous linear inclusion
-`tensorHsInclusion`, proves it is a coordinate-preserving contraction
-(operator norm `≤ 1`) and injective, and establishes its functoriality
-(identity at `τ = σ`, composition for `ρ ≤ τ ≤ σ`).
-
-Finally, it proves that the finitely-supported coordinate families —
-equivalently, finite linear combinations of the spectral basis vectors
-`tensorHsBasisVec` — are **dense** in every `Hˢ`. The proof transports
-the canonical finitely-supported `ℓ²` approximations along the
-diagonal rescaling isometry `rescaleEquivL2`.
-
-## Main definitions
-
-* `tensorHsInclusion hτσ` — the continuous linear inclusion
-  `Hˢ →L[ℝ] Hᵗ` for `τ ≤ σ`.
-* `tensorHsFiniteSupportSubmodule σ` — the submodule of `Hˢ`
-  of elements with finitely-supported coordinate family.
-
-## Main results
-
-* `tensorHsInclusion_coeff` — the inclusion preserves coordinates.
-* `tensorHsInclusion_opNorm_le_one`, `tensorHsInclusion_norm_le` — it is
-  a norm-non-increasing contraction.
-* `tensorHsInclusion_injective` — it is injective.
-* `tensorHsInclusion_refl`, `tensorHsInclusion_trans` — functoriality.
-* `tensorHs_hasSum_smul_basisVec` — every `T ∈ Hˢ` is the unconditional
-  sum `∑ᵢ (coeff i T) • bᵢ` of its spectral basis components.
-* `tensorHsFiniteSupportSubmodule_dense` — the finitely-supported
-  elements are dense in `Hˢ`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -53,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -68,8 +26,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The Sobolev weight `(1 + λᵢ)^σ` is monotone in the exponent: for
-`τ ≤ σ` the base `1 + λᵢ ≥ 1` gives `(1 + λᵢ)^τ ≤ (1 + λᵢ)^σ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSobolevWeight_mono {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {τ σ : ℝ} (hτσ : τ ≤ σ) :
     tensorSobolevWeight (I := I) (M := M) i τ ≤
@@ -82,8 +40,8 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-/-- For `τ ≤ σ`, the coordinate family of an `Hˢ` element is
-weighted-square-summable at the smaller exponent `τ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -99,20 +57,20 @@ lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
       tensorSobolevWeight_mono (I := I) (M := M) i hτσ
     exact mul_le_mul_of_nonneg_right hmono (sq_nonneg _)
 
-/-- The underlying function of the inclusion `Hˢ → Hᵗ` (`τ ≤ σ`): an
-`Hˢ` element is sent to the `Hᵗ` element with the *same* coordinate
-family. -/
 def inclusionFun {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     tensorHs (I := I) (M := M) g r s τ where
   coeff := T.coeff
   weighted_summable := weighted_summable_of_le (I := I) (M := M) hτσ T
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma inclusionFun_coeff {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     (inclusionFun (I := I) (M := M) hτσ T).coeff = T.coeff := rfl
 
-/-- `inclusionFun` is additive. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     inclusionFun (I := I) (M := M) hτσ (S + T) =
@@ -121,7 +79,8 @@ lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
   ext i
   simp only [inclusionFun_coeff, add_coeff]
 
-/-- `inclusionFun` is `ℝ`-homogeneous. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     inclusionFun (I := I) (M := M) hτσ (c • T) =
@@ -129,8 +88,8 @@ lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
   ext i
   simp only [inclusionFun_coeff, smul_coeff]
 
-/-- For `τ ≤ σ`, the `Hᵗ` norm of `inclusionFun T` is bounded by the
-`Hˢ` norm of `T`: the inclusion is norm-non-increasing. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖inclusionFun (I := I) (M := M) hτσ T‖ ≤ ‖T‖ := by
@@ -162,11 +121,6 @@ lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
 
 end tensorHs
 
-/-- For `τ ≤ σ`, the continuous linear inclusion of the spectral
-Sobolev space `Hˢ` into the larger space `Hᵗ`. It is the identity on
-coordinate families, has operator norm at most `1` (the weight is
-monotone in the exponent, making the inclusion a contraction), and is
-injective. See `tensorHsInclusion_coeff`. -/
 def tensorHsInclusion {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {τ σ : ℝ} (hτσ : τ ≤ σ) :
     tensorHs (I := I) (M := M) g r s σ →L[ℝ]
@@ -182,23 +136,24 @@ def tensorHsInclusion {g : SmoothRiemannianMetric I M} {r s : ℕ}
       rw [one_mul]
       exact tensorHs.norm_inclusionFun_le (I := I) (M := M) hτσ T)
 
-/-- `tensorHsInclusion` applied to `T` is the underlying
-`inclusionFun T`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorHsInclusion_apply {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T =
       tensorHs.inclusionFun (I := I) (M := M) hτσ T := rfl
 
-/-- The inclusion `Hˢ → Hᵗ` preserves the eigenbasis coordinate
-family. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsInclusion_coeff {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T).coeff =
       T.coeff := rfl
 
-/-- The eigenbasis coordinate of `tensorHsInclusion … T` at `i`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsInclusion_coeff_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {τ σ : ℝ}
     (hτσ : τ ≤ σ) (T : tensorHs (I := I) (M := M) g r s σ)
@@ -206,22 +161,23 @@ family. -/
     (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T).coeff i =
       T.coeff i := rfl
 
-/-- The operator norm of the inclusion `Hˢ → Hᵗ` is at most `1` for
-`τ ≤ σ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {τ σ : ℝ} (hτσ : τ ≤ σ) :
     ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-- For `τ ≤ σ`, the inclusion is norm-non-increasing:
-`‖incl T‖_{Hᵗ} ≤ ‖T‖_{Hˢ}`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_norm_le {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T‖ ≤ ‖T‖ :=
   tensorHs.norm_inclusionFun_le (I := I) (M := M) hτσ T
 
-/-- The inclusion `Hˢ → Hᵗ` is injective for `τ ≤ σ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_injective {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {τ σ : ℝ} (hτσ : τ ≤ σ) :
     Function.Injective
@@ -231,8 +187,8 @@ theorem tensorHsInclusion_injective {g : SmoothRiemannianMetric I M}
   have h := congrArg (fun U => tensorHs.coeff U i) hST
   simpa only [tensorHsInclusion_coeff] using h
 
-/-- The inclusion at the reflexive exponent `σ ≤ σ` is the identity
-continuous linear map. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsInclusion_refl {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {σ : ℝ} :
     tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) (le_refl σ) =
@@ -243,8 +199,8 @@ continuous linear map. -/
   funext i
   rw [tensorHsInclusion_coeff_apply, ContinuousLinearMap.id_apply]
 
-/-- Reflexive inclusion, applied form: `tensorHsInclusion … (le_refl σ)`
-fixes every vector. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsInclusion_refl_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ) :
@@ -252,8 +208,8 @@ fixes every vector. -/
   ext i
   simp only [tensorHsInclusion_coeff_apply]
 
-/-- The inclusions compose: for `ρ ≤ τ ≤ σ`, the inclusion `Hˢ → Hᵖ` is
-the composite `Hˢ → Hᵗ → Hᵖ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_trans {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {ρ τ σ : ℝ} (hρτ : ρ ≤ τ) (hτσ : τ ≤ σ) :
     tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) (hρτ.trans hτσ) =
@@ -263,8 +219,8 @@ theorem tensorHsInclusion_trans {g : SmoothRiemannianMetric I M}
   simp only [tensorHsInclusion_coeff_apply, ContinuousLinearMap.coe_comp',
     Function.comp_apply]
 
-/-- The inclusions compose, applied form: for `ρ ≤ τ ≤ σ`, including
-`Hˢ → Hᵖ` directly agrees with going through `Hᵗ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_trans_apply {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {ρ τ σ : ℝ} (hρτ : ρ ≤ τ) (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
@@ -278,10 +234,6 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
-/-- The submodule of `Hˢ` consisting of elements whose eigenbasis
-coordinate family has finite support. Equivalently, the span of the
-spectral basis vectors `tensorHsBasisVec`; see
-`tensorHsFiniteSupportSubmodule_eq_span`. -/
 def finiteSupportSubmodule (σ : ℝ) :
     Submodule ℝ (tensorHs (I := I) (M := M) g r s σ) where
   carrier := {T | (Function.support T.coeff).Finite}
@@ -308,6 +260,8 @@ def finiteSupportSubmodule (σ : ℝ) :
     intro hcon
     exact hi (by rw [hcon, mul_zero])
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma mem_finiteSupportSubmodule {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ) :
     T ∈ finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s) σ ↔
@@ -320,9 +274,8 @@ namespace tensorHs
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
 open scoped Classical in
-/-- The rescaling isometry carries the spectral basis component
-`(coeff i T) • bᵢ` to the canonical `ℓ²` unit family
-`lp.single 2 i (√(1+λᵢ)^σ · coeff i T)`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rescaleEquivL2_smul_basisVec
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -340,11 +293,8 @@ lemma rescaleEquivL2_smul_basisVec
   · subst h; simp
   · simp [h]
 
-/-- Every `T ∈ Hˢ` is the unconditional sum of its spectral basis
-components: `T = ∑ᵢ (coeff i T) • bᵢ`, where `bᵢ = tensorHsBasisVec`.
-The proof transports the canonical finitely-supported `ℓ²`
-approximation `lp.hasSum_single` of `rescaleEquivL2 T` back along the
-diagonal rescaling isometry. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasSum_smul_basisVec
     (T : tensorHs (I := I) (M := M) g r s σ) :
     HasSum (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -370,10 +320,8 @@ theorem hasSum_smul_basisVec
   rw [LinearIsometryEquiv.coe_toContinuousLinearEquiv,
     rescaleEquivL2_smul_basisVec]
 
-/-- Every `T ∈ Hˢ` is the limit of the finite partial sums of its
-spectral basis expansion: the finitely-supported elements (the span of
-`tensorHsBasisVec`) are dense in `Hˢ`. Stated as `T` lying in the
-topological closure of the finitely-supported submodule. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_closure_finiteSupportSubmodule
     (T : tensorHs (I := I) (M := M) g r s σ) :
     T ∈ closure
@@ -394,11 +342,8 @@ theorem mem_closure_finiteSupportSubmodule
 
 end tensorHs
 
-/-- The finitely-supported elements form a dense submodule of `Hˢ`:
-their topological closure is the whole space. Equivalently, the span of
-the spectral basis vectors `tensorHsBasisVec` is dense — this is what
-lets bounded operators be extended from finite linear combinations of
-eigenvectors to all of `Hˢ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsFiniteSupportSubmodule_topologicalClosure
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ} :
     (tensorHs.finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s)
@@ -408,7 +353,8 @@ theorem tensorHsFiniteSupportSubmodule_topologicalClosure
   rw [← SetLike.mem_coe, Submodule.topologicalClosure_coe]
   exact tensorHs.mem_closure_finiteSupportSubmodule (I := I) (M := M) T
 
-/-- The set of finitely-supported elements of `Hˢ` is dense. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsFiniteSupportSubmodule_dense
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ} :
     Dense (tensorHs.finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s)
@@ -418,17 +364,16 @@ theorem tensorHsFiniteSupportSubmodule_dense
   exact tensorHsFiniteSupportSubmodule_topologicalClosure
     (I := I) (M := M) (g := g) (r := r) (s := s)
 
-/-- The set of elements of `Hˢ` with finitely-supported coordinate
-family is dense, stated directly on the predicate. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHs_dense_finiteSupport {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {σ : ℝ} :
     Dense {T : tensorHs (I := I) (M := M) g r s σ |
       (Function.support T.coeff).Finite} :=
   tensorHsFiniteSupportSubmodule_dense (I := I) (M := M) (g := g) (r := r) (s := s)
 
-/-- The span of the spectral basis vectors `tensorHsBasisVec` is dense
-in `Hˢ`: every `Hˢ` element is approximated in `Hˢ`-norm by finite
-linear combinations of eigenvectors. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {σ : ℝ} :
     Dense (Submodule.span ℝ

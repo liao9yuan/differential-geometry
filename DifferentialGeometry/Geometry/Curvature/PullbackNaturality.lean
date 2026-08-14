@@ -4,15 +4,13 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Pullback naturality for metric curvature
 
-This file develops the native API needed to transport the metric
-Riemann tensor along a diffeomorphism.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -21,7 +19,7 @@ namespace DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [CompleteSpace E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -31,6 +29,8 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by
   decide
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [IsManifold I ∞ N] in
 private theorem mfderiv_eq_cle_apply
     (Phi : M ≃ₘ⟮I, I⟯ N) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zero x v =
@@ -39,6 +39,8 @@ private theorem mfderiv_eq_cle_apply
     Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zero
   exact congrArg (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f v) h
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [IsManifold I ∞ N] in
 theorem mpullback_symm_apply
     (Phi : M ≃ₘ⟮I, I⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     VectorField.mpullback I I (Phi.symm : N -> M) X (Phi x) =
@@ -78,20 +80,22 @@ theorem mpullback_symm_apply
     IsLocalDiffeomorphAt.mfderivToContinuousLinearEquiv, hlocal.mfderiv_eq]
   rfl
 
-/-- Push a tangent field on `M` forward to `N` along a diffeomorphism, written as
-Mathlib's pullback along the inverse diffeomorphism. -/
+
+
 private abbrev pushFwdField
     (Phi : M ≃ₘ⟮I, I⟯ N) (X : (p : M) -> TangentSpace I p) :
     (q : N) -> TangentSpace I q :=
   VectorField.mpullback I I (Phi.symm : N -> M) X
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [IsManifold I ∞ N] in
 @[simp] private theorem pushFwdField_apply_at_image
     (Phi : M ≃ₘ⟮I, I⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     pushFwdField (I := I) Phi X (Phi x) =
       mfderiv I I (Phi : M -> N) x (X x) :=
   mpullback_symm_apply (I := I) Phi X x
 
-/-- Smooth pushed-forward tangent section along a diffeomorphism. -/
+
 noncomputable def pushFwdSection
     [IsManifold I 1 M] [IsManifold I 1 N]
     (Phi : M ≃ₘ⟮I, I⟯ N)
@@ -110,6 +114,7 @@ noncomputable def pushFwdSection
       exact ContinuousLinearMap.isInvertible_equiv
     · simp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 @[simp] theorem pushFwdSection_apply_at_image
     [IsManifold I 1 M] [IsManifold I 1 N]
     (Phi : M ≃ₘ⟮I, I⟯ N)
@@ -119,19 +124,20 @@ noncomputable def pushFwdSection
       mfderiv I I (Phi : M -> N) x (X x) := by
   simp [pushFwdSection]
 
-/-- Naturality of a single Koszul directional-derivative term under the pullback metric:
-`∂_A ⟪P,Q⟫_{Φ*g}` at `x` equals `∂_{Φ_*A} ⟪Φ_*P,Φ_*Q⟫_g` at `Φ x`.  Proof: the inner-product
-function factors through `Φ` by `pullbackMetric_inner`, then the chain rule. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem directionalDeriv_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
     [IsManifold I 1 M] [IsManifold I 1 N]
     (g : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
     (A P Q : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
-    DifferentialGeometry.Integral.Connection.directionalDeriv (I := I) (fun p : M => A p)
+    DifferentialGeometry.Integral.Connection.directionalDerivAlong (I := I) (fun p : M => A p)
         (fun y : M =>
           (Diffeomorph.pullbackMetric (I := I) g Phi).inner y (P y) (Q y)) x =
-      DifferentialGeometry.Integral.Connection.directionalDeriv (I := I)
+      DifferentialGeometry.Integral.Connection.directionalDerivAlong (I := I)
         (fun q : N => pushFwdSection (I := I) Phi A q)
         (fun q : N =>
           g.inner q (pushFwdSection (I := I) Phi P q)
@@ -147,7 +153,7 @@ theorem directionalDeriv_pullback
     rw [Diffeomorph.pullbackMetric_inner]
     simp only [pushFwdSection_apply_at_image]
   rw [hfun]
-  unfold DifferentialGeometry.Integral.Connection.directionalDeriv
+  unfold DifferentialGeometry.Integral.Connection.directionalDerivAlong
   dsimp only
   rw [pushFwdSection_apply_at_image]
   rw [extDerivFun_real_eq_mfderiv, extDerivFun_real_eq_mfderiv]
@@ -156,7 +162,8 @@ theorem directionalDeriv_pullback
         (fun q : N =>
           g.inner q (pushFwdSection (I := I) Phi P q)
             (pushFwdSection (I := I) Phi Q q)) (Phi x) :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := I) (M := N) g
+    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := I)
+      (M := N) g
       (pushFwdSection (I := I) Phi P).contMDiff.contMDiffAt
       (pushFwdSection (I := I) Phi Q).contMDiff.contMDiffAt
       (by simp)).mdifferentiableAt (by simp)
@@ -170,9 +177,10 @@ theorem directionalDeriv_pullback
       (f := (Phi : M -> N)) (x := x) hG_diff hPhi_diff (A x)
   simpa [Function.comp_def] using hcomp
 
-/-- Naturality of a single Koszul bracket term under the pullback metric:
-`⟪A,[P,Q]⟫_{Φ*g}` at `x` equals `⟪Φ_*A,[Φ_*P,Φ_*Q]⟫_g` at `Φ x`.  Proof: Lie-bracket
-naturality `VectorField.mpullback_mlieBracket`, then `pullbackMetric_inner`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem inner_bracket_pullback_pushFwd
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
     [IsManifold I 1 M] [IsManifold I 1 N]
@@ -218,14 +226,16 @@ private theorem inner_bracket_pullback_pushFwd
   rw [Diffeomorph.pullbackMetric_inner]
   rw [pushFwdSection_apply_at_image]
 
-/-- Naturality of the full Koszul scalar under the pullback metric. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem koszulScalar_pullback_pushFwd
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
     [IsManifold I 1 M] [IsManifold I 1 N]
     (g : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
     (A B C : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
-    DifferentialGeometry.Integral.Connection.koszulScalar (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi)
+    DifferentialGeometry.Integral.Connection.koszulScalar (I := I)
+      (Diffeomorph.pullbackMetric (I := I) g Phi)
         (fun p : M => A p) (fun p : M => B p) (fun p : M => C p) x =
       DifferentialGeometry.Integral.Connection.koszulScalar (I := I) g
         (fun q : N => pushFwdSection (I := I) Phi A q)
@@ -240,11 +250,12 @@ private theorem koszulScalar_pullback_pushFwd
     inner_bracket_pullback_pushFwd (I := I) g Phi B C A x,
     inner_bracket_pullback_pushFwd (I := I) g Phi C A B x]
 
-/-- Smooth-input Levi-Civita connection naturality for the pullback metric.
 
-This is the connection-level producer behind pullback naturality: the
-Levi-Civita derivative of a field for the pullback metric is transported by
-`dPhi` to the Levi-Civita derivative of the pushed-forward field. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCov_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -288,7 +299,8 @@ theorem metricCov_pullback
               (Diffeomorph.pullbackMetric (I := I) g Phi)
               (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x := by
     rw [← hdw, ← Diffeomorph.pullbackMetric_inner, ← hXv, ← hZw]
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    exact
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi)
       (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x
       (Xv.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
@@ -305,7 +317,8 @@ theorem metricCov_pullback
               (fun q : N => pushFwdSection (I := I) Phi Y q)
               (fun q : N => pushFwdSection (I := I) Phi Zw q) (Phi x) := by
     rw [← hu, ← hv]
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    exact
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := I) g
       (fun q : N => pushFwdSection (I := I) Phi Xv q)
       (fun q : N => pushFwdSection (I := I) Phi Y q)
@@ -315,10 +328,11 @@ theorem metricCov_pullback
       ((pushFwdSection (I := I) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
   rw [hkoszul_h, hkoszul_g, koszulScalar_pullback_pushFwd (I := I) g Phi Xv Y Zw x]
 
-/-- Smooth-field curvature naturality for the Levi-Civita connection of a pullback metric.
 
-This is now an API consequence of the smooth-input Levi-Civita connection
-naturality lemma. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem connectionRiemannCurvatureField_pullback_pushFwd
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -345,11 +359,13 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwd
     metricCov (I := I) (M := N) g
   let ZYh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (Y p),
-      fun p => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      fun p
+        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) Y Z p⟩
   let ZXh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (X p),
-      fun p => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      fun p
+        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) X Z p⟩
   have hZY :
       (fun q : N => pushFwdSection (I := I) Phi ZYh q) =
@@ -476,6 +492,7 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwd
   rw [hZY, hZX, hbr]
   simp [covg]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRm04Std_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]

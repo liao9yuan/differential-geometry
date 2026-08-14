@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 
-/-!
-# Maximal-regularity solution-field links
 
-This file identifies the higher-spatial-regularity companion fields of the
-affine Duhamel map with its canonical `timeH1.toFun` representative after
-Sobolev inclusion.  The proof first establishes the scalar identity in every
-spectral mode and then assembles the countable family almost everywhere.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -20,7 +20,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,14 +41,16 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-- **Per-mode FTC for the homogeneous flow.**  The homogeneous-flow coordinate
-`t ↦ e^{−λᵢ t} cᵢ` is the indefinite integral of its derivative coordinate
-`t ↦ −λᵢ e^{−λᵢ t} cᵢ`, started at `cᵢ = u₀.coeff i`:
 
-  `homModeCoeff u₀ i (t) = u₀.coeff i + ∫₀ᵗ homDerivModeCoeff u₀ i (s) ds`,
 
-for every `t`.  This is elementary scalar calculus on the continuous
-representatives. -/
+
+
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem homModeCoeff_eq_init_add_integral
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -92,14 +94,16 @@ theorem homModeCoeff_eq_init_add_integral
   simp only [mul_zero, Real.exp_zero, one_mul]
   ring
 
-/-- **Per-mode FTC for the Duhamel flow.**  The maximal-regularity solution-field
-coordinate `solModeCoeff` is the indefinite integral of its derivative coordinate
-`derivModeCoeff`, started at `0`:
 
-  `solModeCoeff f i (t) = ∫₀ᵗ derivModeCoeff f i (s) ds`,
 
-for a.e. `t`.  This is the lifted per-mode fundamental theorem of calculus
-`perModeConvL2_eq_toFunL2`. -/
+
+
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem solModeCoeff_eq_integral (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -123,8 +127,10 @@ theorem solModeCoeff_eq_integral (hT : 0 ≤ T)
   rw [TimeSobolev.timeH1.toFun_apply, TimeSobolev.timeH1.init_mk,
     TimeSobolev.timeH1.deriv_mk, zero_add]
 
-/-- The carrier derivative coordinate splits a.e. as the sum of the homogeneous
-and Duhamel derivative-mode coordinates. -/
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamelMap_deriv_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -157,15 +163,17 @@ theorem maxRegDuhamelMap_deriv_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
   filter_upwards [hcoe, haddcoe] with s hs1 hs2
   rw [← hs1, hsum, hs2, Pi.add_apply]
 
-/-- **The structural per-mode identity.**  The `H^{a+2}` Duhamel solution-field
-coordinate is the indefinite `Hᵃ`-integral of the carrier's time-derivative
-coordinate, started at `u₀.coeff i`:
 
-  `(maxRegDuhamelSolField … u₀ g t).coeff i =
-      u₀.coeff i + ∫₀ᵗ ((maxRegDuhamelMap … u₀ g).deriv s).coeff i ds`,
 
-for a.e. `t`.  Assembled mode by mode from `homModeCoeff_eq_init_add_integral`
-(homogeneous) and `solModeCoeff_eq_integral` (Duhamel). -/
+
+
+
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -227,16 +235,18 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hs hsmem]
   rw [hcongr]
 
-/-- **The `H^{a+1}`-view structural per-mode identity.**  The `H^{a+1}`-view
-Duhamel solution-field coordinate is the indefinite `Hᵃ`-integral of the carrier's
-time-derivative coordinate, started at `u₀.coeff i`:
 
-  `(maxRegDuhamelSolFieldHa1 … u₀ g t).coeff i =
-      u₀.coeff i + ∫₀ᵗ ((maxRegDuhamelMap … u₀ g).deriv s).coeff i ds`,
 
-for a.e. `t`.  Same per-mode assembly as `maxRegDuhamelSolField_coeff_ae`, but at
-the `H^{a+1}` view: the spectral coordinate functional agrees across the inclusion
-scales, so the two views share the same coordinate identity. -/
+
+
+
+
+
+
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamelSolFieldHa1_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -292,8 +302,10 @@ theorem maxRegDuhamelSolFieldHa1_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hs hsmem]
   rw [hcongr]
 
-/-- The `H^{a+2}` Duhamel companion field represents the affine Duhamel map's
-canonical `timeH1` function after inclusion into `Hᵃ`, almost everywhere. -/
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem solField_toFun_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -343,8 +355,10 @@ theorem solField_toFun_ae (hT : 0 < T) (hT1 : T ≤ 1)
   rw [tensorHsInclusion_coeff_apply]
   exact ht i
 
-/-- The `H^{a+1}` Duhamel companion field represents the affine Duhamel map's
-canonical `timeH1` function after inclusion into `Hᵃ`, almost everywhere. -/
+
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem solFieldHa1_toFun_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))

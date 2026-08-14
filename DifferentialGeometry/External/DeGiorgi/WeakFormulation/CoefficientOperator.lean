@@ -355,7 +355,8 @@ theorem tendsto_eLpNorm_vector_of_componentwise
           eLpNorm (fun x => gseq n x i - g x i) 2 (volume.restrict Ω))
         atTop (nhds 0) := by
     simpa using tendsto_finset_sum (Finset.univ : Finset (Fin d)) (fun i _ => hcomp i)
-  exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hsum (fun n => zero_le _) hupper
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hsum (fun n => zero_le _)
+    hupper
 
 theorem coeffMulLpL_inner_gradLpOfWitness_eq_bilinFormOfCoeff
     {Ω : Set E} (A : EllipticCoeff d Ω)

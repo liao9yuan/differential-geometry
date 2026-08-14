@@ -5,28 +5,24 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSectionsLocal
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 
-/-!
-# The field-level upper covariant-derivative tower for `A_k` (Claim 1 m-fold, route i)
 
-`ric_bound` (MSM135 Lemma 3.11) Claim 1 `|∇^m A_k| ≤ C_m(1+|∇^{m+1}g_k|)`, with
-`A_k := connectionDifferenceTensorAt (LC g_k) (LC gRef) = ∇_k − ∇_ref` (so the lowered
-`A_k∗g_k` is the Koszul combination of `∇g_k` with coefficients `+½,+½,−½` — the
-`hkoszul` input of `claim1`).  The route differentiates the lowered relation `m` times
-(component route, user-resolved). The natural last-slot contraction `∗` (`contrTail`)
-has the proven single-step tower Leibniz `covDerivStepCompU_contrTail_leibniz`:
-`A_k`'s contracted UPPER slot steps by `covDerivStepCompU` (`+Γ`), `g_k`'s lower slot
-by `covDerivStepComp` (`−Γ`).
 
-This file builds the FIELD-level iterated upper tower `iterCovCompU` — the
-`covDerivStepCompU` analogue of `iterCovComp` (whose step's `ext` is `frameExtData`
-of the whole running field, NOT a single-point function). The `+1` (the contracted
-upper slot) is kept LAST in the rank so the recursion ranks `(r+a)+1` stay defeq.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -44,24 +40,24 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-! ## The tower shift `∇^{m+1} = reindex(∇^m ∘ ∇)` (bottom-pull, the m-fold engine) -/
 
-/-- The recursive rank-cast equiv `Fin ((r+1)+m) ≃ Fin (r+(m+1))` threading the
-component-tower shift (mirror of the bundled `HCGCompactness.shiftEquiv`). -/
+
+
+
 def shiftEquivC (r : ℕ) : (m : ℕ) → Fin ((r + 1) + m) ≃ Fin (r + (m + 1))
   | 0 => Equiv.refl _
   | (m + 1) => frontExtendEquiv (shiftEquivC r m)
 
-/-- **`covDerivStepComp` commutes with a free-slot reindex** (the component analogue of
-`covStep_domDomCongr`): reindexing both the `ext` data and the array by `e` on the `s`
-free slots, then stepping, equals stepping then reindexing by `frontExtendEquiv e` (which
-fixes the new leading derivative slot).  Pure component identity: the new slot and the
-contracted Christoffel sum reindex by `e`. -/
+
+
+
+
+
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
     (ext : (Fin s → Idx) → Idx → Real) (chr : Idx → Idx → Idx → Real)
     (A : (Fin s → Idx) → Real) (n : Fin (s' + 1) → Idx) :
@@ -85,13 +81,15 @@ theorem covDerivStepComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
         Function.update_of_ne h]
   rw [hupd]
 
-/-- **The component-tower shift** (`∇^{m+1} = reindex(∇^m ∘ ∇)`, bottom-pull):
-`iterCovComp base (m+1)` equals the `m`-fold tower of the single derivative
-`∇base = iterCovComp base 1`, reindexed by the rank-cast `shiftEquivC` (which absorbs the
-non-defeq `(r+1)+m = r+(m+1)`).  Induction on `m` from `iterCovComp_succ` +
-`covDerivStepComp_compReindex` (the `frameExtData` reindex being definitional).  This is
-the engine that turns the m-fold contraction-Leibniz into a clean recursion (the component
-analogue of the bundled `iterCov_shift`). -/
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iterCovComp_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -123,9 +121,11 @@ theorem iterCovComp_shift {r : ℕ}
       covDerivStepComp_compReindex (shiftEquivC r m), ← iterCovComp_succ]
     rfl
 
-/-- **Norm-level tower shift.**  `|∇^{m+1} base| = |∇^m (∇base)|`: the rank-cast is absorbed
-by the permutation-invariance of `compL2` (`compL2_comp_equiv`), the payoff of
-`iterCovComp_shift` for the bottom-pull norm inductions. -/
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem compL2_iterCovComp_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -138,20 +138,21 @@ theorem compL2_iterCovComp_shift {r : ℕ}
     (iterCovComp (I := I) frame chr (fun y => iterCovComp (I := I) frame chr base 1 y) m x)
     (shiftEquivC r m)
 
-/-- The `m`-fold front extension of a slot equiv (mirror of the bundled `frontExtendIter`). -/
+
 def frontExtendIterC {s s' : ℕ} (e : Fin s ≃ Fin s') :
     (m : ℕ) → Fin (s + m) ≃ Fin (s' + m)
   | 0 => e
   | (m + 1) => frontExtendEquiv (frontExtendIterC e m)
 
-/-- The slot rotation `[d, a, b] ↦ [a, d, b]`: moves the leading slot `0` to position `p`
-(the B-block single-step puts the new derivative into the B-block, i.e. position `p`).
-This is the `e₂` reindex of the field single-step's second (B) term. -/
+
+
+
 def rotEquiv (p q : ℕ) : Fin (p + (q + 1)) ≃ Fin (p + q + 1) :=
   (finCongr (by omega)).trans (Fin.cycleRange ⟨p, by omega⟩)
 
-/-- Slot identity for the field single-step's first (A) term: `[d, a, b]` regrouped from
-`(p+1)+q` to `(p+q)+1` is the same sequence, i.e. precomposition by the rank cast. -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem slotId1 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : Fin q → Idx) :
     (Fin.append (Fin.cons d aPart) bPart : Fin (p + 1 + q) → Idx) =
       fun j => (Fin.cons d (Fin.append aPart bPart) : Fin (p + q + 1) → Idx)
@@ -173,17 +174,17 @@ private theorem slotId1 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : F
       simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]
       omega, Fin.cons_succ, Fin.append_right]
 
-/-- Slot identity for the field single-step's second (B) term: `[a, d, b]` regrouped from
-`p+(q+1)` to `(p+q)+1` is the canonical word `[d, (a,b)]` precomposed by the rotation
-`rotEquiv` that pushes the new leading derivative slot past the `A`-block. -/
+
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem slotId2 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : Fin q → Idx) :
     (Fin.append aPart (Fin.cons d bPart) : Fin (p + (q + 1)) → Idx) =
       fun i => (Fin.cons d (Fin.append aPart bPart) : Fin (p + q + 1) → Idx)
         (rotEquiv p q i) := by
   funext i
   refine Fin.addCases (fun i' => ?_) (fun k => ?_) i
-  · -- A-block: i = castAdd (q+1) i' (value i' < p); rotEquiv shifts it to (castAdd q i').succ
-    rw [Fin.append_left,
+  · rw [Fin.append_left,
       show rotEquiv p q (Fin.castAdd (q + 1) i') = (Fin.castAdd q i').succ by
         apply Fin.ext
         simp only [rotEquiv, Equiv.trans_apply, Fin.val_succ, Fin.val_castAdd]
@@ -191,14 +192,12 @@ private theorem slotId2 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : F
         simp,
       Fin.cons_succ, Fin.append_left]
   · refine Fin.cases ?_ (fun j => ?_) k
-    · -- B-block head: i = natAdd p 0 (value p); rotEquiv sends it to 0 ↦ d
-      rw [Fin.append_right, Fin.cons_zero,
+    · rw [Fin.append_right, Fin.cons_zero,
         show rotEquiv p q (Fin.natAdd p (0 : Fin (q + 1))) = 0 by
           simp only [rotEquiv, Equiv.trans_apply]
           rw [Fin.cycleRange_of_eq (by apply Fin.ext; simp)],
         Fin.cons_zero]
-    · -- B-block tail: i = natAdd p j.succ (value > p); rotEquiv fixes it to (natAdd p j).succ
-      rw [Fin.append_right, Fin.cons_succ,
+    · rw [Fin.append_right, Fin.cons_succ,
         show rotEquiv p q (Fin.natAdd p j.succ) = (Fin.natAdd p j).succ by
           simp only [rotEquiv, Equiv.trans_apply]
           rw [Fin.cycleRange_of_gt (by rw [Fin.lt_def]; simp)]
@@ -207,8 +206,8 @@ private theorem slotId2 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : F
           omega,
         Fin.cons_succ, Fin.append_right]
 
-/-- Extend a slot equiv `e₀ : Fin p ≃ Fin p'` to `Fin (p+1) ≃ Fin (p'+1)` fixing the LAST
-slot (the contracted upper index of the `covDerivStepCompU` step). -/
+
+
 def extendLastEquiv {p p' : ℕ} (e₀ : Fin p ≃ Fin p') : Fin (p + 1) ≃ Fin (p' + 1) :=
   finSuccEquivLast.trans (e₀.optionCongr.trans finSuccEquivLast.symm)
 
@@ -228,7 +227,7 @@ def extendLastEquiv {p p' : ℕ} (e₀ : Fin p ≃ Fin p') : Fin (p + 1) ≃ Fin
   · rw [extendLastEquiv_last]; rfl
   · rw [extendLastEquiv_castSucc]; rfl
 
-/-- Front-extension and last-fixing extension of a slot equiv commute. -/
+
 theorem extendLast_frontExtend_comm {p p' : ℕ} (e : Fin p ≃ Fin p') :
     frontExtendEquiv (extendLastEquiv e) = extendLastEquiv (frontExtendEquiv e) := by
   apply Equiv.ext
@@ -245,8 +244,9 @@ theorem extendLast_frontExtend_comm {p p' : ℕ} (e : Fin p ≃ Fin p') :
           (Fin.succ_castSucc j').symm,
         frontExtendEquiv_succ, extendLastEquiv_castSucc, Fin.succ_castSucc]
 
-/-- `Function.update` commutes with precomposition by a bijection (with the image slot
-supplied explicitly so it matches a `simp`-reduced goal). -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_comp_equiv' {α β : Type*} [DecidableEq α] [DecidableEq β]
     (g : β → Idx) (e : α ≃ β) (s : α) (sv : β) (hsv : e s = sv) (a : Idx) :
     (fun i => Function.update g sv a (e i)) = Function.update (fun i => g (e i)) s a := by
@@ -256,10 +256,11 @@ private theorem update_comp_equiv' {α β : Type*} [DecidableEq α] [DecidableEq
   · subst h; simp only [Function.update_self]
   · rw [Function.update_of_ne (fun he => h (e.injective he)), Function.update_of_ne h]
 
-/-- **`covDerivStepCompU` commutes with a free-slot reindex fixing the upper (last) slot.**
-The upper analogue of `covDerivStepComp_compReindex`: the `−Γ` sum over the first `p` (lower)
-slots reindexes by `e₀`, while the `+Γ` upper correction on the last slot is fixed
-(`extendLastEquiv` fixes `Fin.last`). -/
+
+
+
+
+omit [DecidableEq Idx] in
 theorem covDerivStepCompU_compReindex {p p' : ℕ} (e₀ : Fin p ≃ Fin p')
     (ext : (Fin (p + 1) → Idx) → Idx → Real) (chr : Idx → Idx → Idx → Real)
     (A : (Fin (p + 1) → Idx) → Real) (n : Fin (p' + 1 + 1) → Idx) :
@@ -282,10 +283,12 @@ theorem covDerivStepCompU_compReindex {p p' : ℕ} (e₀ : Fin p ≃ Fin p')
     rw [update_comp_equiv' (Fin.tail n) (extendLastEquiv e₀) (Fin.last p)
       (Fin.last p') (extendLastEquiv_last e₀) a]
 
-/-- **`iterCovComp` commutes with a free-slot reindex** (iterated naturality, the component
-analogue of `iterCov_domDomCongr`): reindexing the base field by `e` then taking the `m`-fold
-tower equals the `m`-fold tower reindexed by `frontExtendIterC e m`.  Same induction as
-`iterCovComp_shift` (the reindex grows by `frontExtendEquiv` per level). -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -314,11 +317,11 @@ theorem iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
       covDerivStepComp_compReindex (frontExtendIterC e m), ← iterCovComp_succ]
     rfl
 
-/-- The field-level iterated **upper** covariant-derivative component tower: `a`
-applications of `covDerivStepCompU` to a base array whose LAST slot is the contracted
-upper index, with the running field's frame directional derivative as `ext` and fixed
-Christoffel data.  The `covDerivStepCompU` analogue of `iterCovComp`; the upper slot is
-kept last so ranks `(r+a)+1` stay definitionally equal across the recursion. -/
+
+
+
+
+
 def iterCovCompU {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -332,12 +335,16 @@ def iterCovCompU {r : ℕ}
         (chr x)
         (iterCovCompU frame chr base a x)
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem iterCovCompU_zero {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (base : M → (Fin (r + 1) → Idx) → Real) :
     iterCovCompU (I := I) frame chr base 0 = base := rfl
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem iterCovCompU_succ {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -349,10 +356,13 @@ def iterCovCompU {r : ℕ}
         (chr x)
         (iterCovCompU (I := I) frame chr base a x) := rfl
 
-/-- **The upper-tower shift** (`∇_U^{m+1} = reindex(∇_U^m ∘ ∇_U)`): the `covDerivStepCompU`
-analogue of `iterCovComp_shift`, with the reindex `extendLastEquiv (shiftEquivC r m)` fixing the
-upper (last) slot.  The succ step uses `covDerivStepCompU_compReindex` and the commute
-`extendLast_frontExtend_comm`. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem iterCovCompU_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -374,7 +384,8 @@ theorem iterCovCompU_shift {r : ℕ}
               (fun j => nn (extendLastEquiv (shiftEquivC r m) j))) from funext ih,
       show frameExtData (I := I) frame
             (fun y (nn : Fin (r + (m + 1) + 1) → Idx) =>
-              iterCovCompU (I := I) frame chr (fun z => iterCovCompU (I := I) frame chr base 1 z) m y
+              iterCovCompU (I := I) frame chr (fun z => iterCovCompU (I := I) frame chr base 1 z) m
+                y
                 (fun j => nn (extendLastEquiv (shiftEquivC r m) j))) x =
           fun (m' : Fin (r + (m + 1) + 1) → Idx) d =>
             frameExtData (I := I) frame
@@ -385,7 +396,10 @@ theorem iterCovCompU_shift {r : ℕ}
       extendLast_frontExtend_comm]
     rfl
 
-/-- Norm-level upper-tower shift: `|∇_U^{m+1} base| = |∇_U^m (∇_U base)|`. -/
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem compL2_iterCovCompU_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -398,14 +412,17 @@ theorem compL2_iterCovCompU_shift {r : ℕ}
     (iterCovCompU (I := I) frame chr (fun y => iterCovCompU (I := I) frame chr base 1 y) m x)
     (extendLastEquiv (shiftEquivC r m))
 
-/-! ## The frameExtData product rule for the natural contraction (the field-level `hext`) -/
 
-/-- **The frame directional derivative of a natural contraction is the Leibniz sum.**
-This is the field-level `hext` that discharges the hypothesis of the tower single-step
-`covDerivStepCompU_contrTail_leibniz`: the directional derivative of `contrTail (A ·) (B ·)`
-splits by the product rule (`extDerivFun_finset_sum_mul_at`), with the directional
-derivatives of the two factors becoming `frameExtData A`/`frameExtData B`.  Requires
-component-wise manifold-differentiability of the two fields at `x`. -/
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem frameExtData_contrTail {p q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (A : M → (Fin (p + 1) → Idx) → Real) (B : M → (Fin (q + 1) → Idx) → Real)
@@ -436,9 +453,12 @@ theorem frameExtData_contrTail {p q : ℕ}
     (fun c _ => hB (Fin.snoc (fun j : Fin q => idx (Fin.natAdd p j)) c))]
   exact Finset.sum_congr rfl fun c _ => by ring
 
-/-- `frameExtData` is additive in the (differentiable) base field.  The `∂`-part of
-`covDerivStepComp`'s linearity, the field-level analogue used by the bottom-pull m-fold
-induction. -/
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx]
+    [DecidableEq Idx] in
 theorem frameExtData_add {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (f₁ f₂ : M → (Fin r → Idx) → Real) (x : M)
@@ -456,7 +476,10 @@ theorem frameExtData_add {r : ℕ}
     mfderiv_add (hf₁ m) (hf₂ m)]
   rfl
 
-/-- `frameExtData` is scalar-homogeneous in the (differentiable) base field. -/
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx]
+    [DecidableEq Idx] in
 theorem frameExtData_smul {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (c : Real) (f : M → (Fin r → Idx) → Real) (x : M)
@@ -471,15 +494,17 @@ theorem frameExtData_smul {r : ℕ}
     const_smul_mfderiv (hf m) c]
   rfl
 
-/-! ## Differentiability of the component towers
 
-Each tower level is `extDerivFun` of the previous level along the frame minus
-Christoffel corrections, so smoothness on the frame domain propagates by induction:
-the analytic input is `contMDiffAt_extDerivFun_apply` (`SmoothSectionsLocal`), the
-rest is closure of `ContMDiffOn` under products, finite sums, and differences.  The
-`MDifferentiableAt` corollaries discharge the `hA`/`hB` hypotheses of the field-level
-single-step (`covDerivStepComp_frameExtData_contrTail`) at every tower level. -/
 
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum {ι : Type*} {u : Set M} (t : Finset ι)
     (F : ι → M → Real)
     (hF : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (F i) u) :
@@ -494,9 +519,11 @@ private theorem contMDiffOn_finsetSum {ι : Type*} {u : Set M} (t : Finset ι)
     rw [hsum]
     exact (hF a (by simp)).add (ih fun i hi => hF i (by simp [hi]))
 
-/-- **Differentiability of the `(0,s)` tower.**  If the frame, the Christoffel data,
-and the base components are `C^∞` on the open frame domain `u`, then every level of
-`iterCovComp` has `C^∞` components on `u`. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -533,9 +560,11 @@ theorem iterCovComp_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
       refine contMDiffOn_finsetSum _ _ fun p _ => ?_
       exact (hchr (n 0) (Fin.tail n s) p).mul (ih (Function.update (Fin.tail n) s p))
 
-/-- **Differentiability of the upper tower.**  Same induction as
-`iterCovComp_contMDiffOn` for the `covDerivStepCompU` tower (the upper contracted
-slot's `+Γ` correction is one more finite sum of products). -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovCompU_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -581,8 +610,10 @@ theorem iterCovCompU_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
       exact (hchr (n 0) c (Fin.tail n (Fin.last (r + a)))).mul
         (ih (Function.update (Fin.tail n) (Fin.last (r + a)) c))
 
-/-- The `(0,s)` tower's components are `MDifferentiableAt` at every point of the
-frame domain — the `hB` input of the field-level single-step at every level. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -596,8 +627,10 @@ theorem iterCovComp_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
   ((iterCovComp_contMDiffOn hu frame chr base hframe hchr hbase a n).contMDiffAt
     (hu.mem_nhds hx)).mdifferentiableAt (by simp)
 
-/-- The upper tower's components are `MDifferentiableAt` at every point of the
-frame domain — the `hA` input of the field-level single-step at every level. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovCompU_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -611,7 +644,10 @@ theorem iterCovCompU_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
   ((iterCovCompU_contMDiffOn hu frame chr base hframe hchr hbase a n).contMDiffAt
     (hu.mem_nhds hx)).mdifferentiableAt (by simp)
 
-/-- `frameExtData` respects germ equality of the differentiated field. -/
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtData_congr_nhds {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     {F₁ F₂ : M → (Fin r → Idx) → Real} {y : M}
@@ -622,10 +658,12 @@ private theorem frameExtData_congr_nhds {r : ℕ}
   filter_upwards [h] with z hz
   rw [hz]
 
-/-- **Field-level linearity of the tower.**  On the smooth frame domain `u`, the `a`-fold
-tower of a sum of fields is the sum of the towers.  Induction: the step's `∂`-part splits by
-`frameExtData_add` (after a germ-congruence to the summed field, valid since `u` is open and
-the levels are smooth, `iterCovComp_mdiffAt`), the Christoffel part by `covDerivStepComp_add`. -/
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_add {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -665,8 +703,10 @@ theorem iterCovComp_add {r : ℕ} {u : Set M} (hu : IsOpen u)
     rw [iterCovComp_succ, iterCovComp_succ, iterCovComp_succ, hext, harr,
       covDerivStepComp_add]
 
-/-- **Field-level scalar homogeneity of the tower** (mirror of `iterCovComp_add`): on the
-smooth frame domain `u`, the `a`-fold tower of `c • f` is `c •` the tower. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_smul {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -699,11 +739,14 @@ theorem iterCovComp_smul {r : ℕ} {u : Set M} (hu : IsOpen u)
         fun k => c * iterCovComp (I := I) frame chr f a y k := funext (ih y hy)
     rw [iterCovComp_succ, iterCovComp_succ, hext, harr, covDerivStepComp_smul]
 
-/-- **The field-level single-step contraction-Leibniz.**  One covariant-derivative step of
-the contraction field `y ↦ contrTail (A y) (B y)` (with `ext = frameExtData` of that field)
-splits into the upper step on `A` and the lower step on `B`.  This is
-`covDerivStepCompU_contrTail_leibniz` (the tower single-step) with its `hext` discharged by
-`frameExtData_contrTail`; it is the inductive engine of the m-fold binomial. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_frameExtData_contrTail {p q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -725,13 +768,16 @@ theorem covDerivStepComp_frameExtData_contrTail {p q : ℕ}
     (frameExtData_contrTail (I := I) frame A B x hA hB)
     d aPart bPart
 
-/-- **The field-level single-step contraction-Leibniz, in `compReindex` form** (general
-index `n`).  The first covariant derivative of `y ↦ contrTail (A y) (B y)` splits, as a
-field, into the upper step on `A` paired with `B` (reindexed by the rank-cast `e₁`, since
-`[d,a,b]` is the same word regrouped `(p+1)+q ↔ (p+q)+1`) plus `A` paired with the lower
-step on `B` (reindexed by the rotation `rotEquiv` moving the new derivative past the
-`A`-block).  This is the field equality the bottom-pull m-fold feeds into
-`iterCovComp ⋯ m` after `iterCovComp_shift`. -/
+
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem covStep_contrTail_field {p q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -764,12 +810,14 @@ theorem covStep_contrTail_field {p q : ℕ}
     slotId1 d aPart bPart, slotId2 d aPart bPart, ← hn]
   simp only [finCongr_apply]
 
-/-! ## The m-fold binomial norm bound `P(m)` (bottom-pull) -/
 
-/-- **Reindex norm-invariance through the tower.**  `compL2` of the `m`-fold tower of a
-free-slot-reindexed base field equals `compL2` of the un-reindexed tower (the reindex
-`frontExtendIterC e m` is a slot permutation, killed by `compL2_comp_equiv`).  The payoff
-of `iterCovComp_compReindex` for the m-fold binomial. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem compL2_iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -780,10 +828,13 @@ theorem compL2_iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
   rw [iterCovComp_compReindex]
   exact compL2_comp_equiv (iterCovComp (I := I) frame chr F m x) (frontExtendIterC e m)
 
-/-- **Germ-congruence of the tower.**  Two base fields agreeing on the open `u` have equal
-`m`-fold towers at every point of `u` (the step's `∂`-part only sees the germ,
-`frameExtData_congr_nhds`; the Christoffel part only the value).  Used to replace the inner
-single-derivative field by its single-step expansion (valid on `u`). -/
+
+
+
+
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem iterCovComp_congr_on {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -800,8 +851,10 @@ theorem iterCovComp_congr_on {r : ℕ} {u : Set M} (hu : IsOpen u)
       exact ih z hz
     rw [iterCovComp_succ, iterCovComp_succ, frameExtData_congr_nhds frame hfield, ih x hx]
 
-/-- The natural contraction of two fields with smooth components is smooth on `u`
-(`contrTail` is a finite sum of products of components). -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem contMDiffOn_contrTail {p q : ℕ} {u : Set M}
     (A : M → (Fin (p + 1) → Idx) → Real) (B : M → (Fin (q + 1) → Idx) → Real)
     (hA : ∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
@@ -811,18 +864,21 @@ theorem contMDiffOn_contrTail {p q : ℕ} {u : Set M}
   classical
   rw [show (fun y => contrTail (A y) (B y) m) =
       (fun y => ∑ c : Idx, A y (Fin.snoc (fun i : Fin p => m (Fin.castAdd q i)) c) *
-        B y (Fin.snoc (fun j : Fin q => m (Fin.natAdd p j)) c)) from by funext y; rw [contrTail_apply]]
+        B y (Fin.snoc (fun j : Fin q => m (Fin.natAdd p j)) c)) from by funext y; rw
+                                                                          [contrTail_apply]]
   exact contMDiffOn_finsetSum Finset.univ _ (fun c _ => (hA _).mul (hB _))
 
-/-- **`P(m)`: the m-fold binomial `ℓ²` bound for the natural contraction** (bottom-pull).
-On the smooth frame domain `u`, `|∇^m(A ∗ B)| ≤ ∑_c (m choose c) |∇_U^c A| |∇^{m-c} B|`
-(component `compL2` norms; `∇_U` is the upper tower of `A`, `∇` the tower of `B`).  Proof:
-shift the bottom derivative (`compL2_iterCovComp_shift`), split it by the field single-step
-(`covStep_contrTail_field`, valid on `u` via `iterCovComp_congr_on`), split the tower by
-linearity (`iterCovComp_add` + `compL2_add_le`), kill the slot reindexes
-(`compL2_iterCovComp_compReindex`), recurse on the two halves (each tower-shifted by
-`compL2_iterCov*_shift`), and close with `pascal_sum`.  Universally quantified over the two
-fields (the recursion changes them). -/
+
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -847,15 +903,12 @@ theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
     exact compL2_contrTail_le (A x) (B x)
   | succ m ih =>
     intro p q A B hA hB x hx
-    -- The two recursed fields' component smoothness on `u`.
     have hAU : ∀ k, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun y => iterCovCompU (I := I) frame chr A 1 y k) u :=
       iterCovCompU_contMDiffOn hu frame chr A hframe hchr hA 1
     have hB1 : ∀ k, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun y => iterCovComp (I := I) frame chr B 1 y k) u :=
       iterCovComp_contMDiffOn hu frame chr B hframe hchr hB 1
-    -- Abbreviate the two branch contraction fields `HL = ∇_U A ∗ B`, `HR = A ∗ ∇B`, and their
-    -- reindexed forms `LF`, `RF` (the field single-step output), so the calc stays small-term.
     set HL : M → (Fin (p + 1 + q) → Idx) → Real :=
       fun z => contrTail (iterCovCompU (I := I) frame chr A 1 z) (B z) with hHL
     set HR : M → (Fin (p + (q + 1)) → Idx) → Real :=
@@ -868,14 +921,12 @@ theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
       intro k; simp only [hLF, hHL]; exact contMDiffOn_contrTail _ _ hAU hB _
     have hRsm : ∀ k, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => RF y k) u := by
       intro k; simp only [hRF, hHR]; exact contMDiffOn_contrTail _ _ hA hB1 _
-    -- The field single-step, valid on `u`: `∇(A∗B) = LF + RF` (reindexed branch fields).
     have hsplit : ∀ y ∈ u, iterCovComp (I := I) frame chr (fun z => contrTail (A z) (B z)) 1 y =
         fun nn => LF y nn + RF y nn := by
       intro y hy
       rw [covStep_contrTail_field frame chr A B y
         (fun k => ((hA k).contMDiffAt (hu.mem_nhds hy)).mdifferentiableAt (by simp))
         (fun k => ((hB k).contMDiffAt (hu.mem_nhds hy)).mdifferentiableAt (by simp))]
-    -- L-branch: bound `|∇^m(∇_U A ∗ B)|` by IH on `(∇_U A, B)`, then shift the A-tower norm.
     have hL : compL2 (iterCovComp (I := I) frame chr HL m x) ≤
         ∑ c ∈ Finset.range (m + 1), (m.choose c : Real) *
           compL2 (iterCovCompU (I := I) frame chr A (c + 1) x) *
@@ -885,7 +936,6 @@ theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
         (le_of_eq ?_)
       refine Finset.sum_congr rfl fun c _ => ?_
       rw [compL2_iterCovCompU_shift frame chr A c x]
-    -- R-branch: bound `|∇^m(A ∗ ∇B)|` by IH on `(A, ∇B)`, then shift the B-tower norm.
     have hR : compL2 (iterCovComp (I := I) frame chr HR m x) ≤
         ∑ c ∈ Finset.range (m + 1), (m.choose c : Real) *
           compL2 (iterCovCompU (I := I) frame chr A c x) *
@@ -895,7 +945,6 @@ theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
         (le_of_eq ?_)
       refine Finset.sum_congr rfl fun c _ => ?_
       rw [compL2_iterCovComp_shift frame chr B (m - c) x]
-    -- Assemble: shift, single-step (on `u`), linearity, reindex, then the two branches + Pascal.
     calc compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (B z)) (m + 1) x)
         = compL2 (iterCovComp (I := I) frame chr
             (fun y => iterCovComp (I := I) frame chr (fun z => contrTail (A z) (B z)) 1 y) m x) :=
@@ -938,14 +987,16 @@ theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
             compL2 (iterCovComp (I := I) frame chr B (m + 1 - c) x) :=
           Finset.sum_congr rfl fun c _ => (mul_assoc _ _ _).symm
 
-/-! ## The bottom-pull array IDENTITY (the linchpin of `ISO(m)`) -/
 
-/-- **The bottom-pull array identity** (`P(m)`'s calc steps 1-3+5 kept as an `=`, not `≤`):
-on the open `u`, the `(m+1)`-fold tower of `A∗B` splits into the `m`-fold towers of the two
-branch contractions `(∇_U A)∗B` and `A∗(∇B)`, each precomposed by an explicit slot reindex.
-The reindexes are the bottom-pull composites `frontExtendIterC e ▸ shiftEquivC` (`e = finCongr`
-for the A-branch, `e = rotEquiv` for the B-branch).  This is the identity `ISO(m)`'s residual
-recursion differences across (the `(∇_U^{m+1}A)∗g` terms cancel against the recursive `Top`). -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_contrTail_succ {p q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -989,19 +1040,21 @@ theorem iterCovComp_contrTail_succ {p q : ℕ} {u : Set M} (hu : IsOpen u)
     funext n
     rw [iterCovComp_congr_on hu frame chr hsplit m x hx,
       iterCovComp_add hu frame chr LF RF hframe hchr hLsm hRsm m x hx,
-      hLF, hRF, iterCovComp_compReindex (finCongr (show p + 1 + q = p + q + 1 by omega)) frame chr HL m x,
+      hLF, hRF, iterCovComp_compReindex (finCongr (show p + 1 + q = p + q + 1 by omega)) frame chr
+        HL m x,
       iterCovComp_compReindex (rotEquiv p q) frame chr HR m x]
     simp only [Equiv.trans_apply]
 
-/-! ## `ISO(m)`: the residual (isolated-top) bound -/
 
-/-- The bottom-pull L-branch reindex (the composite from `iterCovComp_contrTail_succ`). -/
+
+
 def isoReindex (p q m : ℕ) : Fin (p + 1 + q + m) ≃ Fin (p + q + (m + 1)) :=
-  (frontExtendIterC (finCongr (show p + 1 + q = p + q + 1 by omega)) m).trans (shiftEquivC (p + q) m)
+  (frontExtendIterC (finCongr (show p + 1 + q = p + q + 1 by omega)) m).trans
+    (shiftEquivC (p + q) m)
 
-/-- **The recursively-isolated top term** `Top_m[A] ≈ (∇_U^m A)∗g`, defined to MATCH the
-bottom-pull L-branch reindex (so `ISO(m)`'s recursion `D_{m+1} = D_m[∇_U A]∘e_L + ∇^m(A∗∇g)∘e_R`
-holds with NO U-shift bookkeeping — that is deferred to the inversion step `isoTop_eq`). -/
+
+
+
 def isoTop {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real) :
     (m : ℕ) → {p : ℕ} → (A : M → (Fin (p + 1) → Idx) → Real) → (x : M) →
@@ -1011,11 +1064,15 @@ def isoTop {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
       isoTop g frame chr m (fun z => iterCovCompU (I := I) frame chr A 1 z) x
         (fun j => n (isoReindex p q m j))
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem isoTop_zero {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real)
     {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real) (x : M) :
     isoTop (I := I) g frame chr 0 A x = contrTail (A x) (g x) := rfl
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem isoTop_succ {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real)
     {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real) (m : ℕ) (x : M) :
@@ -1023,12 +1080,14 @@ def isoTop {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
       fun n => isoTop (I := I) g frame chr m (fun z => iterCovCompU (I := I) frame chr A 1 z) x
         (fun j => n (isoReindex p q m j)) := rfl
 
-/-- **`ISO(m)`: the residual bound.**  The deviation of the `m`-fold tower of the
-contraction from the recursively-isolated top word `isoTop ≈ (∇_U^m A)∗g` is bounded by
-the binomial sum WITHOUT its top (`c = m`) term — the isolation that powers the
-invert-trick.  Bottom-pull: the `(m+1)`-residual decomposes (via the array identity
-`iterCovComp_contrTail_succ` and `isoTop`'s matching reindex) into the `m`-residual of
-`∇_U A` plus the FULL `m`-binomial of `(A, ∇g)` (`P(m)`); `pascal_sum_notop` reassembles. -/
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1067,7 +1126,6 @@ theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     have hg1 : ∀ k, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun y => iterCovComp (I := I) frame chr g 1 y k) u :=
       iterCovComp_contMDiffOn hu frame chr g hframe hchr hg 1
-    -- the array decomposition `D_{m+1} = D_m[∇_U A]∘ψ + ∇^m(A∗∇g)∘ψ_R`
     have hdec : (fun n : Fin (p + q + (m + 1)) → Idx =>
         iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) (m + 1) x n -
           isoTop (I := I) g frame chr (m + 1) A x n) =
@@ -1079,7 +1137,8 @@ theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
               (fun j => n (isoReindex p q m j))) +
           iterCovComp (I := I) frame chr
               (fun z => contrTail (A z) (iterCovComp (I := I) frame chr g 1 z)) m x
-              (fun j => n ((frontExtendIterC (rotEquiv p q) m).trans (shiftEquivC (p + q) m) j)) := by
+              (fun j => n ((frontExtendIterC (rotEquiv p q) m).trans (shiftEquivC (p + q) m)
+                j)) := by
       funext n
       rw [iterCovComp_contrTail_succ hu frame chr hframe hchr A g hA hg m hx, isoTop_succ]
       exact add_sub_right_comm _ _ _
@@ -1112,7 +1171,6 @@ theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
           (fun z => contrTail (A z) (iterCovComp (I := I) frame chr g 1 z)) m x)
         ((frontExtendIterC (rotEquiv p q) m).trans (shiftEquivC (p + q) m))
     rw [hψ, hψR]
-    -- L: the ISO induction hypothesis at `∇_U A`, then shift the A-tower norms
     have hL : compL2 (fun nn : Fin (p + 1 + q + m) → Idx =>
           iterCovComp (I := I) frame chr
               (fun z => contrTail (iterCovCompU (I := I) frame chr A 1 z) (g z)) m x nn -
@@ -1124,7 +1182,6 @@ theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
         (le_of_eq ?_)
       refine Finset.sum_congr rfl fun c _ => ?_
       rw [compL2_iterCovCompU_shift frame chr A c x]
-    -- R: `P(m)` at `(A, ∇g)`, then shift the g-tower norms
     have hR : compL2 (iterCovComp (I := I) frame chr
           (fun z => contrTail (A z) (iterCovComp (I := I) frame chr g 1 z)) m x) ≤
         ∑ c ∈ Finset.range (m + 1), (m.choose c : Real) *
@@ -1135,7 +1192,6 @@ theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
       refine Finset.sum_congr rfl fun c _ => ?_
       rw [compL2_iterCovComp_shift frame chr g (m - c) x]
     refine le_trans (add_le_add hL hR) (le_of_eq ?_)
-    -- Pascal without the top term
     have hregroup : (∑ c ∈ Finset.range (m + 1), ((m + 1).choose c : Real) *
           compL2 (iterCovCompU (I := I) frame chr A c x) *
           compL2 (iterCovComp (I := I) frame chr g (m + 1 - c) x)) =
@@ -1155,10 +1211,10 @@ theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
         simp only [Finset.mem_range] at hc; omega
       rw [hsub]; ring
 
-/-! ## Identifying `isoTop` with the honest top word `(∇_U^m A)∗g` (norm level) -/
 
-/-- Block extension of a slot equiv: act as `e₀` on the first (castAdd) block, identity on
-the second (natAdd) block. -/
+
+
+
 def blockLeftEquiv {a a' : ℕ} (e₀ : Fin a ≃ Fin a') (b : ℕ) : Fin (a + b) ≃ Fin (a' + b) :=
   finSumFinEquiv.symm.trans ((e₀.sumCongr (Equiv.refl (Fin b))).trans finSumFinEquiv)
 
@@ -1170,9 +1226,10 @@ def blockLeftEquiv {a a' : ℕ} (e₀ : Fin a ≃ Fin a') (b : ℕ) : Fin (a + b
     blockLeftEquiv e₀ b (Fin.natAdd a j) = Fin.natAdd a' j := by
   simp [blockLeftEquiv]
 
-/-- `contrTail` intertwines a last-slot-fixing reindex of its FIRST factor with the block
-reindex of the contraction (the contracted slot is untouched, the free `A`-block moves by
-`e₀`, the `B`-block stays). -/
+
+
+
+omit [DecidableEq Idx] in
 theorem contrTail_extendLast {pT pF q : ℕ} (e₀ : Fin pT ≃ Fin pF)
     (T : (Fin (pT + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
     contrTail (fun n : Fin (pF + 1) → Idx => T (fun j => n (extendLastEquiv e₀ j))) B =
@@ -1195,9 +1252,12 @@ theorem contrTail_extendLast {pT pF q : ℕ} (e₀ : Fin pT ≃ Fin pF)
   · rw [extendLastEquiv_last, Fin.snoc_last, Fin.snoc_last]
   · rw [extendLastEquiv_castSucc, Fin.snoc_castSucc, Fin.snoc_castSucc]
 
-/-- **`isoTop` is the honest top word, in norm**: `|isoTop_m[A]| = |(∇_U^m A)∗g|`.  The
-recursive reindexes are slot permutations (`compL2_comp_equiv`); the U-tower shift enters
-through the first factor of `contrTail` via `contrTail_extendLast`. -/
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem compL2_isoTop_eq {q : ℕ}
     (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real)
@@ -1229,8 +1289,10 @@ theorem compL2_isoTop_eq {q : ℕ}
         (fun y => iterCovCompU (I := I) frame chr A 1 y) m x) (g x))
       (blockLeftEquiv (shiftEquivC p m) q)).symm
 
-/-- **The isolated-top bound**: `|(∇_U^m A)∗g| ≤ |∇^m(A∗g)| + (the no-top binomial)`.
-`isoTop = ∇^m(A∗g) − D_m`, so triangle (`compL2_sub_le`) + `ISO(m)` + `compL2_isoTop_eq`. -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_contrTail_topU_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1258,11 +1320,11 @@ theorem compL2_contrTail_topU_le {q : ℕ} {u : Set M} (hu : IsOpen u)
   exact le_trans (compL2_sub_le _ _)
     (add_le_add le_rfl (compL2_isoResidual_le hu frame chr hframe hchr g hg m A hA hx))
 
-/-! ## The inverse-metric cancellation and the invert bound -/
 
-/-- **The inverse cancellation**: contracting `T∗G` back with the inverse array recovers
-`T` — `(T∗G)∗Ginv = T` when `∑_l G[l,c]·Ginv[e,l] = δ_{ce}` (the only fact about the
-inverse metric the whole Claim-1 chain uses; no `∇Ginv` ever appears). -/
+
+
+
+
 theorem contrTail_contrTail_inv {P : ℕ}
     (T : (Fin (P + 1) → Idx) → Real) (G Ginv : (Fin (1 + 1) → Idx) → Real)
     (hinv : ∀ c e : Idx,
@@ -1322,8 +1384,8 @@ theorem contrTail_contrTail_inv {P : ℕ}
         · rw [Fin.snoc_castSucc]
           rfl
 
-/-- **The invert bound**: `|T| ≤ |T∗G|·|Ginv|` (recover `T` by the inverse cancellation,
-then the contraction Cauchy–Schwarz). -/
+
+
 theorem compL2_le_contrTail_inv {P : ℕ}
     (T : (Fin (P + 1) → Idx) → Real) (G Ginv : (Fin (1 + 1) → Idx) → Real)
     (hinv : ∀ c e : Idx,
@@ -1334,7 +1396,6 @@ theorem compL2_le_contrTail_inv {P : ℕ}
         rw [contrTail_contrTail_inv T G Ginv hinv]
     _ ≤ compL2 (contrTail T G) * compL2 Ginv := compL2_contrTail_le _ _
 
-/-! ## The abstract Claim 1 -/
 
 /-- The data-independent constant in the abstract Claim 1 induction. -/
 noncomputable def claim1Const (C0 KR K : Real) (m : ℕ) : Real :=
@@ -1365,6 +1426,7 @@ theorem claim1Const_nonneg (C0 KR K : Real) (m : ℕ) :
             (mul_nonneg (ih c (Finset.mem_range.mp hc)) (by linarith [le_max_right K 0])))
           (le_max_right K 0)
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- **Abstract Claim 1**: on the smooth frame domain, if the contraction field `A∗g`
 norm-realizes the metric derivative up to a constant (`hrelB`, the Koszul/eq-3.7 input:
 `|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` — geometrically `Ǎ = A∗g` is a constant slot-permutation
@@ -1413,13 +1475,11 @@ theorem claim1_abstract_bound {u : Set M} (hu : IsOpen u)
         (mul_nonneg (claim1Const_nonneg C0 KR K c) (by linarith))) hK'0
     have hgm1 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m + 1) x) :=
       compL2_nonneg _
-    -- the relation bound (with the nonneg-ized constant)
     have hrel3 : compL2 (iterCovComp (I := I) frame chr
           (fun z => contrTail (A z) (g z)) m x) ≤
         max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) :=
       le_trans (hrelB x hx m le_rfl)
         (mul_le_mul_of_nonneg_right (le_max_left KR 0) hgm1)
-    -- the core chain: invert + isolated top + the relation
     have hcore : compL2 (iterCovCompU (I := I) frame chr A m x) ≤
         compL2 (Ginv x) *
           (max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
@@ -1447,7 +1507,6 @@ theorem claim1_abstract_bound {u : Set M} (hu : IsOpen u)
               ∑ c ∈ Finset.range m, (m.choose c : Real) *
                 compL2 (iterCovCompU (I := I) frame chr A c x) *
                 compL2 (iterCovComp (I := I) frame chr g (m - c) x)) := mul_comm _ _
-    -- numeric: the lower-order block is ≤ S
     have hsum : (∑ c ∈ Finset.range m, (m.choose c : Real) *
           compL2 (iterCovCompU (I := I) frame chr A c x) *
           compL2 (iterCovComp (I := I) frame chr g (m - c) x)) ≤ S := by
@@ -1503,6 +1562,7 @@ theorem claim1_abstract_bound {u : Set M} (hu : IsOpen u)
           rw [claim1Const_eq, hSdef]
           ring
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `claim1_abstract_bound`. -/
 theorem claim1_abstract {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1532,6 +1592,7 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
   exact ⟨claim1Const C0 KR K m, claim1Const_nonneg C0 KR K m,
     claim1_abstract_bound hu frame chr hframe hchr C0 KR K m⟩
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- **Claim 1** (component form, with the lowered-Koszul relation explicit).  The connection
 difference `A` lowered by `g` (`contrTail A g`) is, on `u`, a fixed three-term slot
 combination of `∇g` (`hkoszul` — the eq-3.7 / `connDiffCompEq` content in this frame, with
@@ -1572,7 +1633,6 @@ theorem claim1_bound {u : Set M} (hu : IsOpen u)
   refine claim1_abstract_bound (p := 2) hu frame chr hframe hchr C0
     (|c₁| + |c₂| + |c₃|) K m g hg Ginv A hA hinv hGinv hK ?_
   intro x hx m' _
-  -- the single-term norm: |∇^{m'}(c • (∇g ∘ P))| = |c| · |∇^{m'+1}g|
   have hterm : ∀ (ci : Real) (Pi : Fin 3 ≃ Fin 3),
       compL2 (iterCovComp (I := I) frame chr
         (fun z (k : Fin 3 → Idx) => ci * iterCovComp (I := I) frame chr g 1 z (fun j => k (Pi j)))
@@ -1592,14 +1652,12 @@ theorem claim1_bound {u : Set M} (hu : IsOpen u)
       compL2_smul,
       compL2_iterCovComp_compReindex Pi frame chr (iterCovComp (I := I) frame chr g 1) m' x,
       ← compL2_iterCovComp_shift frame chr g m' x]
-  -- smoothness of the three smul'd reindexed fields
   have hFsm : ∀ (ci : Real) (Pi : Fin 3 ≃ Fin 3), ∀ k : Fin 3 → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun y => ci * iterCovComp (I := I) frame chr g 1 y (fun j => k (Pi j))) u :=
     fun ci Pi k =>
       contMDiffOn_const.mul
         (iterCovComp_contMDiffOn hu frame chr g hframe hchr hg 1 (fun j => k (Pi j)))
-  -- decompose the koszul tower and bound term-by-term
   rw [iterCovComp_congr_on hu frame chr hkoszul m' x hx,
     show iterCovComp (I := I) frame chr
         (fun y (idx : Fin 3 → Idx) =>
@@ -1630,13 +1688,16 @@ theorem claim1_bound {u : Set M} (hu : IsOpen u)
       funext (iterCovComp_add hu frame chr _ _ hframe hchr (hFsm c₂ P₂) (hFsm c₃ P₃) m' x hx)]
   have h23 := compL2_add_le
     (iterCovComp (I := I) frame chr
-      (fun z (k : Fin 3 → Idx) => c₂ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₂ j))) m' x)
+      (fun z (k : Fin 3 → Idx) => c₂ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₂ j))) m'
+        x)
     (iterCovComp (I := I) frame chr
-      (fun z (k : Fin 3 → Idx) => c₃ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₃ j))) m' x)
+      (fun z (k : Fin 3 → Idx) => c₃ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₃ j))) m'
+        x)
   rw [hterm c₂ P₂, hterm c₃ P₃] at h23
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `claim1_bound`. -/
 theorem claim1 {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)

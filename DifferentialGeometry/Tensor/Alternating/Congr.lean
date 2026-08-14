@@ -1,17 +1,8 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.LinearAlgebra.Alternating.Basic
-
-/-!
-# `domDomCongr` for continuous alternating maps
-
-This file defines `ContinuousAlternatingMap.domDomCongr`, which rearranges the domain index type
-of a continuous alternating map along an equivalence, and proves basic properties including
-linearity over addition and `Finset.sum`, and commutativity of alternatization with
-`MultilinearMap.domDomCongr`.
--/
 
 noncomputable section
 
@@ -23,9 +14,6 @@ variable
   {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
   {ι ι' : Type*}
 
-/-- Rearrange the domain index type of a continuous alternating map along an equivalence
-`σ : ι ≃ ι'`, producing `M [⋀^ι']→L[𝕜] N` via `domDomCongr σ f v = f (v ∘ σ)`.
-This is the alternating version of `ContinuousMultilinearMap.domDomCongr`. -/
 def domDomCongr (σ : ι ≃ ι') (f : M [⋀^ι]→L[𝕜] N) : M [⋀^ι']→L[𝕜] N :=
   { f.toContinuousMultilinearMap.domDomCongr σ with
     toFun := fun v => f (v ∘ σ)
@@ -33,13 +21,11 @@ def domDomCongr (σ : ι ≃ ι') (f : M [⋀^ι]→L[𝕜] N) : M [⋀^ι']→L
       f.map_eq_zero_of_eq (v ∘ σ) (i := σ.symm i) (j := σ.symm j)
         (by simpa using hv) (σ.symm.injective.ne hij) }
 
-/-- Evaluation formula for `domDomCongr`: `(domDomCongr σ f) v = f (v ∘ σ)`. -/
 @[simp]
 theorem domDomCongr_apply (σ : ι ≃ ι') (f : M [⋀^ι]→L[𝕜] N) (v : ι' → M) :
     (domDomCongr σ f) v = f (v ∘ σ) :=
   rfl
 
-/-- `domDomCongr` by the identity equivalence is the identity map. -/
 @[simp]
 theorem domDomCongr_refl (f : M [⋀^ι]→L[𝕜] N) :
     domDomCongr (Equiv.refl ι) f = f :=
@@ -63,7 +49,6 @@ theorem domDomCongr_sum {ι : Type*}
 
 variable {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
 
-/-- Alternatization commutes with `MultilinearMap.domDomCongr` by an equivalence. -/
 theorem alternatization_domDomCongr
     (e : ι₁ ≃ ι₂) (T : MultilinearMap 𝕜 (fun _ : ι₁ => M) N) :
     MultilinearMap.alternatization (T.domDomCongr e) =

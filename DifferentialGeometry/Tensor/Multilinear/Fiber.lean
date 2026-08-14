@@ -1,36 +1,8 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Basis
-/-!
-# Fiber-level results for the continuous multilinear map bundle
-
-This file establishes that the bundle topology on each fiber
-`Bundle.continuousMultilinearMap 𝕜 s F E x` agrees with the norm topology on
-`ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜`, and derives topological and
-algebraic instances from this fact.
-
-These results hold for any vector bundle `E` with normed fibers, not just the
-tangent bundle. The key tool is a continuous linear equivalence from the bundle fiber
-to the model fiber, constructed from the trivialization at each point.
-
-## Main Definitions
-
-* `Bundle.continuousMultilinearMap.continuousLinearEquivAt`: the CLE from the bundle fiber
-  at `x` to the model fiber, built from the trivialization at `x`.
-
-## Main Results
-
-* `Bundle.continuousMultilinearMap.topology_eq`: the bundle and norm topologies agree.
-* Derived instances: `NormedAddCommGroup`, `NormedSpace`, `T2Space`,
-  `IsTopologicalAddGroup`, `ContinuousSMul`, `FiniteDimensional` on fibers.
-* `Bundle.continuousMultilinearMap.finrank_eq`: dimension is `(finrank 𝕜 F) ^ s`.
-
-## Tags
-
-multilinear map, vector bundle, fiber topology, continuous linear equivalence
--/
 
 noncomputable section
 
@@ -50,42 +22,25 @@ variable [TopologicalSpace (TotalSpace F E)]
 variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable {s : ℕ}
 
-/-- `Bundle.continuousMultilinearMap` fibers inherit the `FunLike` coercion from
-`ContinuousMultilinearMap`, enabling direct function application. -/
 instance instFunLike (s : ℕ) (x : B) :
     FunLike (Bundle.continuousMultilinearMap 𝕜 s F E x) (Fin s → E x) 𝕜 :=
   ContinuousMultilinearMap.funLike
 
-/-!
-## Topology equivalence
-
-The bundle topology on `Bundle.continuousMultilinearMap 𝕜 s F E x` is defined as
-`induced (pretriv ∘ mk') product_topology`. We show this equals the norm topology on
-`ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜` by factoring through a
-homeomorphism to the model fiber.
--/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- The bundle and norm topologies on a `Bundle.continuousMultilinearMap` fiber agree.
-The bundle topology is induced from the pretrivialization (a continuous linear equivalence
-to the model fiber), and this coincides with the norm topology since the composition map
-is a homeomorphism. -/
+
 theorem topology_eq (s : ℕ) (x : B) :
     (inferInstance : TopologicalSpace (Bundle.continuousMultilinearMap 𝕜 s F E x)) =
     (inferInstanceAs (TopologicalSpace
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜))) := by
   change instTopologicalSpaceContinuousMultilinearMap 𝕜 s F E x = _
   simp only [instTopologicalSpaceContinuousMultilinearMap]
-
   set e := trivializationAt F E x
   set g : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜 →L[𝕜]
       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
     ContinuousMultilinearMap.compContinuousLinearMapL (fun _ => e.symmL 𝕜 x) with hg_def
   have hfactor : (↑(Pretrivialization.continuousMultilinearMap 𝕜 s e) ∘
       TotalSpace.mk' _ x) = Prod.mk x ∘ g := by funext; rfl
-
   rw [hfactor, ← induced_compose, (isInducing_prodMkRight x).eq_induced.symm]
-
   set g' := ContinuousMultilinearMap.compContinuousLinearMapL (F := 𝕜)
     (E₁ := fun _ : Fin s => F) (E := fun _ : Fin s => E x)
     (fun _ => e.continuousLinearMapAt 𝕜 x) with hg'_def
@@ -99,24 +54,13 @@ theorem topology_eq (s : ℕ) (x : B) :
   exact (Homeomorph.mk ⟨g, g', hleft, hright⟩
     g.continuous g'.continuous).isInducing.eq_induced.symm
 
-/-!
-## Normed instances
--/
-
-/-- The fiber `Bundle.continuousMultilinearMap 𝕜 s F E x` is a normed additive commutative
-group, using the norm topology which agrees with the bundle topology. -/
 instance instNormedAddCommGroup (s : ℕ) (x : B) :
     NormedAddCommGroup (Bundle.continuousMultilinearMap 𝕜 s F E x) := by
   delta Bundle.continuousMultilinearMap; infer_instance
 
-/-- The fiber `Bundle.continuousMultilinearMap 𝕜 s F E x` is a normed `𝕜`-module. -/
 instance instNormedSpace (s : ℕ) (x : B) :
     NormedSpace 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) := by
   delta Bundle.continuousMultilinearMap; exact ContinuousMultilinearMap.normedSpace
-
-/-!
-## Topological instances derived from the topology equality
--/
 
 instance instT2Space (s : ℕ) (x : B) :
     @T2Space (Bundle.continuousMultilinearMap 𝕜 s F E x) inferInstance :=
@@ -139,14 +83,6 @@ instance instContinuousAdd (s : ℕ) (x : B) :
     @ContinuousAdd (Bundle.continuousMultilinearMap 𝕜 s F E x) inferInstance _ :=
   @IsTopologicalAddGroup.toContinuousAdd _ inferInstance _ (instIsTopologicalAddGroup s x)
 
-/-!
-## Continuous linear equivalence to the model fiber
--/
-
-/-- The continuous linear equivalence from the multilinear bundle fiber at `x` to the model
-fiber `ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜`, constructed from the
-trivialization at `x`. The forward map precomposes with `e.symmL`, and the inverse
-precomposes with `e.continuousLinearMapAt`. -/
 def continuousLinearEquivAt (s : ℕ) (x : B) :
     Bundle.continuousMultilinearMap 𝕜 s F E x ≃L[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 where
@@ -185,10 +121,6 @@ def continuousLinearEquivAt (s : ℕ) (x : B) :
     exact (ContinuousMultilinearMap.compContinuousLinearMapL
       (fun _ => (trivializationAt F E x).continuousLinearMapAt 𝕜 x)).continuous
 
-/-!
-## Extensionality
--/
-
 omit [TopologicalSpace B] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
   [TopologicalSpace (TotalSpace F E)] [FiberBundle F E] [VectorBundle 𝕜 F E] in
 @[ext]
@@ -197,21 +129,6 @@ theorem ext {s : ℕ} {x : B}
     (h : ∀ m, T₁ m = T₂ m) : T₁ = T₂ :=
   ContinuousMultilinearMap.ext h
 
-/-!
-## Degeneracy of the `0`-multilinear bundle trivialization
-
-For the `0`-multilinear bundle, the trivialization at any base point is degenerate:
-because the trivialization precomposes with `symmL` per argument, and on `Fin 0` arguments
-this composition is vacuous, the trivialized form of any fiber element evaluated at any
-input reduces to the original element evaluated at the unique empty tuple.
-
-This degeneracy is the technical content that makes the equivalence between mixed
-`(0, s)`-sections and pure `s`-multilinear sections work smoothly.
--/
-
-/-- The trivialization at `x₀` of a `0`-multilinear bundle fiber element `T` at point `x`,
-when evaluated at any `Fin 0 → F` argument, equals `T Fin.elim0`. The trivialization is
-defined by precomposing with `symmL` per argument, which on `Fin 0` arguments is vacuous. -/
 theorem triv_zero_apply_eq (x₀ x : B)
     (T : Bundle.continuousMultilinearMap 𝕜 0 F E x)
     (w : Fin 0 → F) :
@@ -220,9 +137,6 @@ theorem triv_zero_apply_eq (x₀ x : B)
   change T (fun i : Fin 0 => (trivializationAt F E x₀).symmL 𝕜 x (w i)) = T Fin.elim0
   exact congrArg T (Subsingleton.elim _ _)
 
-/-- Symmetric version: applying the inverse of the trivialization at `x₀` to a model-fiber
-element `ω₀ : MLF 0` and then evaluating at `Fin.elim0` recovers `ω₀ 0`. Used to compute
-the trivialized form of `eval₀`-style smooth sections. -/
 theorem triv_zero_symmL_apply_elim0 (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
     (ω₀ : ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜) :
@@ -232,35 +146,16 @@ theorem triv_zero_symmL_apply_elim0 (x₀ x : B)
   set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
     (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀ with he_def
   have hbase : x ∈ e.baseSet := hx
-
   have hsymmL : (e.symmL 𝕜 x ω₀ : Bundle.continuousMultilinearMap 𝕜 0 F E x) =
       e.symm x ω₀ := by
     simp [Trivialization.symmL_apply]
   rw [hsymmL]
-
   have h1 := triv_zero_apply_eq (F := F) (E := E) x₀ x (e.symm x ω₀) 0
-
   have h2 : (e ⟨x, e.symm x ω₀⟩ : B × _) = (x, ω₀) :=
     e.apply_mk_symm hbase ω₀
   rw [show (e ⟨x, e.symm x ω₀⟩ : B × _).2 = ω₀ from congrArg Prod.snd h2] at h1
   exact h1.symm
 
-/-!
-## Inverse trivialization formula for `s`-multilinear bundles
-
-The inverse trivialization `e.symmL 𝕜 x T` of the multilinear bundle at `x₀` sends a
-model-fiber element `T : MLF s` to a fiber element that, when applied to any
-`v : Fin s → E x`, gives `T (fun i => (trivAt F E x₀).continuousLinearMapAt 𝕜 x (v i))`.
-
-This is the analog of `triv_zero_apply_eq` for the inverse direction and for general `s`.
--/
-
-/-- The inverse trivialization of the multilinear bundle at `x₀`, applied to a model-fiber
-element `T : MLF s` at point `x ∈ baseSet`, when evaluated at `v : Fin s → E x`, equals
-`T` applied to `(trivAt F E x₀).continuousLinearMapAt 𝕜 x` composed into each argument.
-
-The proof uses the round-trip: apply the forward trivialization to `e.symm x T` and use
-`e.apply_mk_symm` to recover `T`, then match via the forward trivialization formula. -/
 theorem triv_symmL_eq_compContinuousLinearMap {s : ℕ} (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
     (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :
@@ -272,58 +167,38 @@ theorem triv_symmL_eq_compContinuousLinearMap {s : ℕ} (x₀ x : B)
   set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
     (Bundle.continuousMultilinearMap 𝕜 s F E) x₀ with he_def
   have hbase : x ∈ e.baseSet := hx
-
   have hsymmL : (e.symmL 𝕜 x T : Bundle.continuousMultilinearMap 𝕜 s F E x) =
       e.symm x T := by
     simp [Trivialization.symmL_apply]
   rw [hsymmL]
-
   apply Bundle.continuousMultilinearMap.ext
   intro v
-
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-
   have h_fwd : ∀ (M : Bundle.continuousMultilinearMap 𝕜 s F E x)
       (w : Fin s → F),
       (e ⟨x, M⟩).2 w = M (fun i => (trivializationAt F E x₀).symmL 𝕜 x (w i)) := by
     intro M w; rfl
   have h_rt : (e ⟨x, e.symm x T⟩ : B × _) = (x, T) :=
     e.apply_mk_symm hbase T
-
   have h_snd : (e ⟨x, e.symm x T⟩ : B × _).2 = T := congrArg Prod.snd h_rt
-
   have h_apply := h_fwd (e.symm x T)
     (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
-
   rw [h_snd] at h_apply
-
   conv_rhs at h_apply =>
     arg 2; ext i
     rw [(trivializationAt F E x₀).symmL_continuousLinearMapAt hx (v i)]
-
   exact h_apply.symm
 
-/-!
-## Coercion to model fiber
-
-The continuous linear equivalence `continuousLinearEquivAt` identifies each fiber with
-the model fiber. We package this as `toModel` (forward direction) and `ofModel`
-(its inverse), together with linearity, continuity, and invertibility lemmas.
--/
-
-/-- Coerce a multilinear bundle fiber element to the model fiber via the trivialization CLE. -/
 def toModel {s : ℕ} {x : B}
     (T : Bundle.continuousMultilinearMap 𝕜 s F E x) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
   continuousLinearEquivAt (F := F) (E := E) s x T
 
-/-- `toModel` as a bundled `ContinuousLinearMap`. -/
 def toModelL (s : ℕ) (x : B) :
     Bundle.continuousMultilinearMap 𝕜 s F E x →L[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
   (continuousLinearEquivAt (F := F) (E := E) s x).toContinuousLinearMap
 
-/-- Construct a multilinear bundle fiber element from a model fiber element. -/
 def ofModel {s : ℕ} {x : B}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :
     Bundle.continuousMultilinearMap 𝕜 s F E x :=
@@ -401,10 +276,6 @@ theorem toModel_bijective {s : ℕ} {x : B} :
       (fun T : Bundle.continuousMultilinearMap 𝕜 s F E x =>
         toModel (F := F) (E := E) T) :=
   (continuousLinearEquivAt (F := F) (E := E) s x).bijective
-
-/-!
-## Finite-dimensionality and rank
--/
 
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
 

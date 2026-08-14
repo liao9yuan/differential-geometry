@@ -14,7 +14,6 @@ chartwise heat generator commutes with the chart projection.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -24,7 +23,7 @@ namespace Analysis
 namespace Sobolev
 namespace Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,7 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 quotient limit.  No `MetricSpace` or `CompleteSpace` instance is installed. -/
 theorem qfixed_limit
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     (P : WkpTensorQuot (I := I) (M := M) g r s k p hp →
       WkpTensorQuot (I := I) (M := M) g r s k p hp)
     (L : ℝ) (hLip : ∀ a b,
@@ -48,7 +47,7 @@ theorem qfixed_limit
     ∃ v : WkpTensorQuot (I := I) (M := M) g r s k p hp,
       Tendsto
           (fun n => qdist (I := I) (M := M) g r s k p hp (u n) v)
-          atTop (𝒩 0) ∧
+          atTop (𝓝 0) ∧
         P v = v := by
   obtain ⟨v, hv⟩ :=
     qdist_limit (I := I) (M := M) g r s k hp hp_top u h_cauchy
@@ -63,18 +62,20 @@ theorem qfixed_limit
       _ = d (P v) (P (u n)) + d (u n) v := by
         rw [hu n]
       _ ≤ L * d v (u n) + d (u n) v := by
-        exact add_le_add_right (hLip v (u n)) _
+        simpa only [d, add_comm] using
+          add_le_add_right (hLip v (u n)) (d (u n) v)
       _ = (L + 1) * d (u n) v := by
-        rw [qdist_symm (I := I) (M := M) g r s k hp v (u n)]
+        rw [show d v (u n) = d (u n) v from
+          qdist_symm (I := I) (M := M) g r s k hp v (u n)]
         ring
   have hscaled :
-      Tendsto (fun n => (L + 1) * d (u n) v) atTop (𝒩 0) := by
+      Tendsto (fun n => (L + 1) * d (u n) v) atTop (𝓝 0) := by
     have hconst :
-        Tendsto (fun _ : ℕ => L + 1) atTop (𝒩 (L + 1)) :=
+        Tendsto (fun _ : ℕ => L + 1) atTop (𝓝 (L + 1)) :=
       tendsto_const_nhds
     simpa only [mul_zero] using hconst.mul hv
   have hle : d (P v) v ≤ 0 :=
-    le_of_tendsto hscaled (Eventually.of_forall hbound)
+    ge_of_tendsto hscaled (Eventually.of_forall hbound)
   have heq : d (P v) v = 0 :=
     le_antisymm hle
       (qdist_nonneg (I := I) (M := M) g r s k hp (P v) v)

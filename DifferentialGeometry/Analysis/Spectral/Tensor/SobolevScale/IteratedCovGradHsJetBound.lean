@@ -4,9 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -22,7 +19,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -96,7 +93,6 @@ private theorem ccWeight_sum
     (fun m => tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m)
     hσk (ccWeight_even (I := I) (M := M) g₀ s k S h_compact)
 
-/-- The spectral Sobolev embedding of a smooth covariant tensor at real order `σ`. -/
 def ccTensorToHs (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (S : SmoothCcTensor g₀ 0 s) :
     tensorHs (I := I) (M := M) g₀ 0 s σ where
@@ -106,7 +102,6 @@ def ccTensorToHs (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
   weighted_summable := ccWeight_sum (I := I) (M := M) g₀ s σ S
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
 
-/-- The generic smooth spectral embedding retains the `L²` eigenbasis coefficients. -/
 @[simp] theorem ccTensorToHs_coeff
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (S : SmoothCcTensor g₀ 0 s)
@@ -118,7 +113,6 @@ def ccTensorToHs (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
       (SmoothCcTensor.toL2 S) m :=
   rfl
 
-/-- The generic smooth spectral embedding is additive in its tensor argument. -/
 @[simp] theorem ccTensorToHs_add
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (sigma : ℝ)
     (S T : SmoothCcTensor g₀ 0 s) :
@@ -133,7 +127,6 @@ def ccTensorToHs (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
       SmoothCcTensor.toL2 S + SmoothCcTensor.toL2 T from map_add _ _ _,
     tensorL2Coeff_add]
 
-/-- The generic smooth spectral embedding commutes with real scalar multiplication. -/
 @[simp] theorem ccTensorToHs_smul
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (sigma c : ℝ)
     (S : SmoothCcTensor g₀ 0 s) :
@@ -146,7 +139,6 @@ def ccTensorToHs (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
   rw [show SmoothCcTensor.toL2 (c • S) = c • SmoothCcTensor.toL2 S from map_smul _ _ _,
     tensorL2Coeff_smul]
 
-/-- The squared generic spectral norm is its weighted coefficient mass. -/
 theorem ccToHs_norm_sq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (S : SmoothCcTensor g₀ 0 s) :
@@ -160,8 +152,6 @@ theorem ccToHs_norm_sq
   rw [tensorHs.norm_sq_eq_tsum]
   exact tsum_congr (fun m => by rw [ccTensorToHs_coeff])
 
-/-- Every finite weighted coefficient mass of a smooth tensor is bounded by
-its full spectral Sobolev norm squared. -/
 theorem cc_partial_le_norm
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (S : SmoothCcTensor g₀ 0 s)
@@ -179,7 +169,6 @@ theorem cc_partial_le_norm
     (fun m _ => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) m σ)
       (sq_nonneg _))
 
-/-- The generic smooth spectral norm is monotone in the Sobolev order. -/
 theorem ccToHs_norm_mono
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {σ τ : ℝ} (hστ : σ ≤ τ)
     (S : SmoothCcTensor g₀ 0 s) :
@@ -564,8 +553,8 @@ private theorem mode_summable
     exact mul_le_mul_of_nonneg_right
       (pow_le_pow_left₀ hbase_nn hbase_le j) (sq_nonneg _)
 
-/-- Composing two iterated covariant gradients changes only the parenthesizing
-of the covariant rank, so their global `L2` norms agree. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem icg_comp_norm
     (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ =
@@ -586,13 +575,14 @@ theorem icg_comp_norm
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
         (s + (j + i)) (iteratedCovGrad (I := I) g₀ 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
   have h1 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i
       (iteratedCovGrad (I := I) g₀ 0 s j S)‖ := norm_nonneg _
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_iteratedCovGrad_order_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :
@@ -829,8 +819,6 @@ private theorem jet_odd
         add_le_add hlowsum htop_le
     _ = (Clow + Cgard * (((k + 1 : ℕ) : ℝ) + Ccommsum * Ceven)) * Nspec := by ring
 
-/-- The covariant `L²` jet through order `n` is controlled by the spectral
-`H^n` norm, uniformly over smooth covariant tensors of a fixed rank. -/
 theorem hsJet_le
     (g₀ : SmoothRiemannianMetric I M) (s n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -850,8 +838,6 @@ theorem hsJet_le
     subst hn
     exact hC S
 
-/-- The spectral `H^n` norm is controlled by the covariant `L²` jet through
-order `n`, uniformly over smooth covariant tensors of a fixed rank. -/
 theorem hs_le_jet
     (g₀ : SmoothRiemannianMetric I M) (s n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -962,8 +948,6 @@ theorem hs_le_jet
   rw [Real.sqrt_sq hnorm_nn, Real.sqrt_sq hrhs_nn] at hsqrt
   simpa only [hSall_def] using hsqrt
 
-/-- Iterating `j` covariant derivatives shifts the generic spectral Sobolev
-order by `j`, up to a rank- and order-dependent constant. -/
 theorem ccGrad_le
     (g₀ : SmoothRiemannianMetric I M) (s j k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1017,7 +1001,6 @@ theorem ccGrad_le
     _ = (C₁ * (((k + 1 : ℕ) : ℝ) * C₂)) *
         ‖ccTensorToHs (I := I) (M := M) g₀ s ((k + j : ℕ) : ℝ) S‖ := by ring
 
-/-- Rank-`(0,2)` compatibility specialization of `hsJet_le`. -/
 theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs
     (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -1,32 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.PerAlphaGradIntrinsic
 
-/-!
-# Intrinsic uniform chart-Sobolev `W^{1,2}` bound for chart-frame scalar components
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file delivers
-the chart-locality-free counterpart of the uniform chart-Sobolev `W^{1,2}` bound
-`tensorChartComponent_wkpNormChart_le`. None of these declarations carries a
-`HasLocallyConstantChartAt` hypothesis: the per-`α` gradient `L²` input is sourced
-from the already-proven intrinsic headline
-`tensorChartComponentScalar_grad_eLpNorm_le`, fed into the
-chart-locality-free per-`α` chart-Sobolev lemma
-`tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm` (which takes the
-gradient `L²` bound as an explicit hypothesis). The inactive-`α` branch is handled
-directly via the public active-finset machinery
-(`chartAtlasPOU_eq_zero_of_notMem_activeFinset`,
-`tensorChartComponentScalar_eq_zero_of_pou_zero`, `wkpNormChart_zero_fun`).
-
-## Public theorem
-
-* `tensorChartComponent_wkpNormChart_le`
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -43,7 +20,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,11 +31,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Chart-locality-free per-`α` existence of a chart-Sobolev `W^{1,2}` constant.
-The gradient `L²` input is sourced from the intrinsic `α`-uniform gradient
-headline `tensorChartComponentScalar_grad_eLpNorm_le` and fed into the
-chart-locality-free per-`α` chart-Sobolev lemma. Counterpart of
-`exists_perAlphaSobolevConstant`. -/
+omit [CompleteSpace E] in
 private lemma exists_perAlphaSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -82,6 +55,7 @@ private noncomputable def perAlphaSobolevConstant
   Classical.choose
     (exists_perAlphaSobolevConstant (I := I) (M := M) g r s α)
 
+omit [CompleteSpace E] in
 private lemma perAlphaSobolevConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     0 ≤ perAlphaSobolevConstant (I := I) (M := M) g r s α :=
@@ -89,6 +63,7 @@ private lemma perAlphaSobolevConstant_intrinsic_nonneg
     (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).1
 
+omit [CompleteSpace E] in
 private lemma perAlphaSobolevConstant_intrinsic_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s)
@@ -104,11 +79,7 @@ private lemma perAlphaSobolevConstant_intrinsic_bound
     (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).2 S Idx Jdx
 
-/-- On a chart base point `α` that is **not** active (its partition-of-unity
-weight is identically zero), the chart-Sobolev `W^{1,2}` norm of the chart-frame
-scalar component vanishes. Re-derived directly from the public active-finset
-machinery. Counterpart of
-`wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -133,6 +104,7 @@ private noncomputable def totalActiveSobolevConstant
   ∑ α ∈ chartAtlasPOU_activeFinset I M,
     perAlphaSobolevConstant (I := I) (M := M) g r s α
 
+omit [CompleteSpace E] in
 private lemma totalActiveSobolevConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActiveSobolevConstant (I := I) (M := M) g r s := by
@@ -141,6 +113,7 @@ private lemma totalActiveSobolevConstant_intrinsic_nonneg
   exact Finset.sum_nonneg (fun α _ =>
     perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s α)
 
+omit [CompleteSpace E] in
 private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
     (hα : α ∈ chartAtlasPOU_activeFinset I M) :
@@ -163,12 +136,7 @@ private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
       perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
 
-/-- **Intrinsic headline (unconditional uniform chart-Sobolev `W^{1,2}` bound).**
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, there is a
-non-negative real constant `C` (independent of the chart base point `α`, the
-section `S`, and the multi-indices) bounding the chart-Sobolev `W^{1,2}` norm of
-every chart-frame scalar component. Chart-locality-free counterpart of
-`tensorChartComponent_wkpNormChart_le`. -/
+omit [CompleteSpace E] in
 theorem tensorChartComponent_wkpNormChart_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

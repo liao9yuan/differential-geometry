@@ -2,35 +2,33 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestrictOpen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Restriction transport of the moving-metric Shi bound (`MovingShiBoundOn`)
 
-The restriction-analog of `MovingShiPullback.lean`: it transports the
-`MovingShiBoundOn` bound from a metric sequence `gSeq` on `M` to its open
-restriction `t ↦ (gSeq i t).restrictOpen U` on an open submanifold `U`.
 
-Unlike the pullback case, restriction *shares* tangent vectors: for `x : U` the
-fibre `TangentSpace I x` is literally the model fibre `TangentSpace I ↑x`, so
-there is no `mfderiv` in any statement.  The covariant-derivative tower is
-therefore germ-local under restriction:
 
-* `covDerivOfField_restrictOpen` — general base tower naturality
-  (`covDerivOfField (restrictOpen g) A0U a x slots = covDerivOfField g A0M a ↑x slots`).
-* `ricciSection_restrictOpen` — Ricci base case (both sides via
-  `ricciSection_eq_ricciTensor` + `ricciTensor_restrictOpen`).
-* `ricCovTower_restrictOpen` — the all-orders Ricci tower, reindexed to the
-  `iterCov`/`ricCovTower` `(2+s)` indexing.
-* `ricCovTower_normSq0S_restrictOpen` — the tower `normSq0S` is unchanged
-  (banked `normSq0S_restrictOpen_apply`).
-* `movingShiBoundOn_restrictOpen` — the endpoint Shi-bound transport.
 
-This is the frontier deferred by Brick 2 of the P4 conv engine; it composes with
-`movingShiBoundOn_pullback` (`MovingShiPullback.lean`) to land the moving-Shi
-bound on the recentered source flows.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -42,19 +40,21 @@ open DifferentialGeometry.Integral.Connection.CovariantDerivative
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
-  [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+  [IsManifold I 1 M] [IsManifold I 2 M]
 
-/-- General single-`covStep` recursion of `covDerivOfField` on an arbitrary
-rank-2 base (public re-derivation of the recursion used by the pullback engine).
-The leading slot gives the scalar directional derivative of the previous tower
-level; the remaining terms are the Levi-Civita corrections in the non-leading
-slots. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private theorem covDerivOfField_succ_eval
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -81,14 +81,16 @@ private theorem covDerivOfField_succ_eval
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (covDerivOfField (I := I) gRef A0 a) x
 
-/-- **Germ-locality of the `covDerivOfField` tower under restriction.**  For a
-rank-2 base field `A0U` on `U` and `A0M` on `M` whose values agree at shared
-points/vectors (`hA0`), the full `gRef`-covariant-derivative tower of `A0U`
-under the restricted background metric agrees with the tower of `A0M` under the
-ambient metric.  There is no `mfderiv`: the tangent vectors `slots q` are shared
-between `x : U` and `↑x : M`.  The successor step reduces the leading-slot term
-via `extDerivFun_restrictOpen` and the connection corrections via
-`metricCov_restrictOpen_globalSection`. -/
+
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_restrictOpen
     (gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -110,7 +112,6 @@ theorem covDerivOfField_restrictOpen
       exact hA0 x slots
   | succ a ih =>
       intro x slots
-      -- Ambient (`M`) witness sections for the slots at `↑x`.
       obtain ⟨X, hX⟩ :=
         ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
           (n := (⊤ : ℕ∞)) (x : M) (slots 0)
@@ -124,7 +125,6 @@ theorem covDerivOfField_restrictOpen
         exact
           (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
             (n := (⊤ : ℕ∞)) (x : M) (slots q.succ)).choose_spec
-      -- Their `U`-restrictions witness the same slots at `x : U`.
       let XU : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : U → Type _) :=
         restrictOpenTangentSection (I := I) U X
       let VU : Fin (a + 2) →
@@ -140,7 +140,6 @@ theorem covDerivOfField_restrictOpen
         have hright :=
           covDerivOfField_succ_eval (I := I) gRef A0M a X V (x : M)
         rw [hleft, hright]
-        -- Leading-slot directional-derivative term.
         have hderiv :
             extDerivFun (I := I)
                 (fun y : U => covDerivOfField (I := I) (gRef.restrictOpen (I := I) U) A0U a y
@@ -168,7 +167,6 @@ theorem covDerivOfField_restrictOpen
           exact extDerivFun_restrictOpen (I := I) U
             (fun z : M => covDerivOfField (I := I) gRef A0M a z
               (fun q : Fin (a + 2) => V q z)) x (X (x : M)) hf
-        -- Connection-correction sum.
         have hsum :
             (∑ p : Fin (a + 2),
               covDerivOfField (I := I) (gRef.restrictOpen (I := I) U) A0U a x
@@ -182,23 +180,18 @@ theorem covDerivOfField_restrictOpen
                         (fun z : M => V p z) (x : M)) (X (x : M)))) := by
           apply Finset.sum_congr rfl
           intro p _
-          -- The connection correction is germ-local (shared vector, no `mfderiv`).
           set covL : TangentSpace I x :=
             ((leviCivitaConnectionOfMetric (I := I) (gRef.restrictOpen (I := I) U))
               (fun y : U => VU p y) x) (XU x) with hcovL_def
           set covR : TangentSpace I (x : M) :=
             ((leviCivitaConnectionOfMetric (I := I) gRef)
               (fun z : M => V p z) (x : M)) (X (x : M)) with hcovR_def
-          -- `covL = covR` from `metricCov_restrictOpen_globalSection` (shared vector).
           have hcov : covL = covR := by
             have hcov' := metricCov_restrictOpen_globalSection (I := I) gRef U (V p) x (X (x : M))
-            -- `covL` is the LHS of `hcov'` (defeq: `VU p y = restrictOpenTangentField …`,
-            -- `XU x = X ↑x`, `leviCivitaConnectionOfMetric = metricCov`).
             rw [hcovL_def, hcovR_def]
             have hXU : XU x = X (x : M) := restrictOpenTangentSection_apply (I := I) U X x
             rw [hXU]
             exact hcov'
-          -- Slot vectors agree after the update (shared, via `hcov`).
           have hslots : (fun q : Fin (a + 2) =>
               Function.update (fun q : Fin (a + 2) => VU q x) p covL q) =
               (fun q : Fin (a + 2) =>
@@ -210,7 +203,6 @@ theorem covDerivOfField_restrictOpen
               exact hcov
             · rw [Function.update_of_ne hqp, Function.update_of_ne hqp]
               simp only [VU, restrictOpenTangentSection_apply]
-          -- Transport the tower level from `U` to `M` at the updated slots.
           have hih := ih x (Function.update (fun q : Fin (a + 2) => VU q x) p covL)
           calc
             covDerivOfField (I := I) (gRef.restrictOpen (I := I) U) A0U a x
@@ -221,7 +213,6 @@ theorem covDerivOfField_restrictOpen
                     (Function.update (fun q : Fin (a + 2) => V q (x : M)) p covR) :=
                   congrArg _ hslots
         rw [hderiv, hsum]
-      -- Reassemble both sides from their `Fin.cons` split.
       have hslotsU :
           slots = Fin.cons (slots 0) (fun q : Fin (a + 2) => slots q.succ) := by
         funext q
@@ -250,11 +241,14 @@ theorem covDerivOfField_restrictOpen
       rw [hcons, hconsM] at hsmooth
       exact hsmooth
 
-/-- **Germ-locality of the Ricci section under restriction.**  The realized
-Ricci section of the Levi-Civita connection of the restricted metric agrees with
-the ambient Ricci section at shared points/vectors.  Both sides reduce to
-`ricciTensor` (via `ricciSection_eq_ricciTensor`), which is germ-local
-(`ricciTensor_restrictOpen`). -/
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciSection_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -268,8 +262,6 @@ theorem ricciSection_restrictOpen
           (leviCivitaConnectionOfMetric (I := I) g)
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g)
           (x : M) slots := by
-  -- Reshape `slots` to `vec2 (slots 0) (slots 1)` at each flavor separately (the
-  -- `vec2` term's TangentSpace flavor is fixed by its expected argument type).
   have hLHS :
       CovariantDerivative.ricciSection (I := I)
           (leviCivitaConnectionOfMetric (I := I) (g.restrictOpen (I := I) U))
@@ -293,10 +285,13 @@ theorem ricciSection_restrictOpen
   rw [hLHS, hRHS]
   exact ricciTensor_restrictOpen (I := I) g U x (slots 0) (slots 1)
 
-/-- Evaluated form of `covDerivOfField_eq_iterCov`: `covDerivOfField gRef A0 m` at
-`x` on `slots` equals `iterCov gRef 2 A0 m` at `x` on the `acEquiv m`-reindexed
-slots.  (Local copy of `MovingShiPullback.covDerivOfField_apply_eq_iterCov` to
-avoid a cross-file import cycle.) -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem covDerivOfField_apply_eq_iterCov'
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -307,12 +302,14 @@ private theorem covDerivOfField_apply_eq_iterCov'
   rw [covDerivOfField_eq_iterCov]
   rfl
 
-/-- **Restriction naturality of the Ricci-derivative tower `ricCovTower`.**
-`ricCovTower (g.restrictOpen U)(g.restrictOpen U) s` at `x` evaluated on `slots`
-equals `ricCovTower g g s` at `↑x` evaluated on the *shared* `slots`.  Assembled
-from `covDerivOfField_restrictOpen` (Ricci base via `ricciSection_restrictOpen`),
-reindexed to the `iterCov` indexing of `ricCovTower` by
-`covDerivOfField_apply_eq_iterCov'`. -/
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricCovTower_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -331,17 +328,17 @@ theorem ricCovTower_restrictOpen
       (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g))
     (ricciSection_restrictOpen (I := I) g U) s x (slots ∘ (acEquiv s).symm)
   rw [covDerivOfField_apply_eq_iterCov', covDerivOfField_apply_eq_iterCov'] at hrestrict
-  -- `ricCovTower g gRef s = iterCov gRef 2 (ricciSection (leviCivita g)) s` (definitional),
-  -- so `convert` reduces to cancelling the `acEquiv`-reindexing on the slots.
   convert hrestrict using 2 <;>
     · funext i
       simp only [Function.comp_apply, Equiv.symm_apply_apply]
 
-/-- **The Ricci-tower `normSq0S` is unchanged by restriction.**  In the shared
-fibre at `x`, `normSq0S (g.restrictOpen U) x (ricCovTower (g.restrictOpen U) …)`
-equals `normSq0S g ↑x (ricCovTower g …)`.  Combines `ricCovTower_restrictOpen`
-(as a tensor equality, via `tensor0SSpace_ext`) with the banked
-`normSq0S_restrictOpen_apply`. -/
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricCovTower_normSq0S_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -354,7 +351,6 @@ theorem ricCovTower_normSq0S_restrictOpen
           (ricCovTower (I := I) g g s (x : M)) := by
   rw [normSq0S_restrictOpen_apply (I := I) g U (2 + s) x
     (ricCovTower (I := I) (g.restrictOpen (I := I) U) (g.restrictOpen (I := I) U) s x)]
-  -- The two towers agree as tensors in the shared fibre at `↑x`.
   have htensor :
       ricCovTower (I := I) (g.restrictOpen (I := I) U) (g.restrictOpen (I := I) U) s x
         = ricCovTower (I := I) g g s (x : M) := by
@@ -362,12 +358,14 @@ theorem ricCovTower_normSq0S_restrictOpen
     exact ricCovTower_restrictOpen (I := I) g U s x slots
   rw [htensor]
 
-/-- **The moving-metric Shi bound transfers under restriction.**  If the Shi
-bound `MovingShiBoundOn` holds for the metric sequence `gSeq` on a set `U₀ ⊆ M`,
-then it holds for the restricted sequence `i t ↦ (gSeq i t).restrictOpen U` on any
-set `V ⊆ U` whose image under the inclusion lies in `U₀`.  Per-point, the
-Ricci-tower `√normSq0S` is preserved (`ricCovTower_normSq0S_restrictOpen`), so the
-bound at `↑x` gives the bound at `x`. -/
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem movingShiBoundOn_restrictOpen
     (gSeq : ℕ → ℝ → SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]

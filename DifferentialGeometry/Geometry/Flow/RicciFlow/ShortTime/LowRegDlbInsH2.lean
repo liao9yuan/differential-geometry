@@ -300,8 +300,8 @@ private theorem insEndoH2_one
     slotInsertEndoCc (I := I) (M := M) g 0
       (endoDiffSection (I := I) (M := M) g gm g_bg) = _
   rw [endoDiffSection, slotInsertEndoCc_sub,
-    deTurckLieWEndoInsert_eq_cometricRaise,
-    deTurckLieWEndoInsert_eq_cometricRaise,
+    deTurckLieWEndoInsert_eq_cometricRaise_wAlpha,
+    deTurckLieWEndoInsert_eq_cometricRaise_wAlpha,
     connDiffDVFInsert_eq_cometricRaise,
     connDiffDVFInsert_eq_cometricRaise]
   rw [wAlpha, wAlpha, raise_add0_h2, raise_add0_h2, raise_sub0_h2]
@@ -319,8 +319,9 @@ private theorem omega_bg_sub_h2
         (connDiffLoweredCc (I := I) g g -
           connDiffLoweredCc (I := I) g g_bg) := by
   rw [wOmega_sub_refold (I := I) (M := M) g gT g_bg g,
-    wOmega_sub_refold (I := I) (M := M) g gU g_bg g,
-    appCcRS_sub_left]
+    wOmega_sub_refold (I := I) (M := M) g gU g_bg g]
+  simp only [appCcRS]
+  rw [appCcRS_sub_left]
 
 set_option linter.unusedVariables false in
 private theorem omega_pair_h3

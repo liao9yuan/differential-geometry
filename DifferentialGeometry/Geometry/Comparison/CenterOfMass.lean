@@ -6,15 +6,14 @@ import Mathlib.Analysis.Convex.Function
 import Mathlib.Topology.UnitInterval
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Center-of-mass energy
 
-This file begins the reusable Riemannian center-of-mass layer for MSM135
-Chapter 4, Step C.  It defines the finite weighted squared-distance energy and
-proves its continuity from the existing Riemannian-distance continuity API.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,25 +33,25 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 variable {ι : Type*} [Fintype ι]
 
-/-- A midpoint-strict convexity predicate for a scalar function along a chosen
-joining map. This is the small uniqueness input needed by the center-of-mass
-assembly; the Hessian-comparison layer is responsible for producing it. -/
+
+
+
 def StrictMidConvexOn {X : Type*} (join : X -> X -> Real -> X)
     (S : Set X) (φ : X -> Real) : Prop :=
   ∀ a ∈ S, ∀ b ∈ S, a ≠ b ->
     join a b (1 / 2 : Real) ∈ S ∧
       φ (join a b (1 / 2 : Real)) < max (φ a) (φ b)
 
-/-- Strict Jensen convexity at the midpoint selected by a joining map. This is
-the natural local Hessian-comparison output for each `1/2 d^2` summand. -/
+
+
 def StrictMidJensenOn {X : Type*} (join : X -> X -> Real -> X)
     (S : Set X) (φ : X -> Real) : Prop :=
   ∀ a ∈ S, ∀ b ∈ S, a ≠ b ->
     join a b (1 / 2 : Real) ∈ S ∧
       φ (join a b (1 / 2 : Real)) < (φ a + φ b) / 2
 
-/-- Along-curve strict convexity gives the midpoint Jensen input used by the
-center-of-mass uniqueness assembly. -/
+
+
 theorem jensen_of_strict {X : Type*} {join : X -> X -> Real -> X}
     {S : Set X} {φ : X -> Real}
     (hmid : ∀ a ∈ S, ∀ b ∈ S, a ≠ b -> join a b (1 / 2 : Real) ∈ S)
@@ -77,7 +76,7 @@ theorem jensen_of_strict {X : Type*} {join : X -> X -> Real -> X}
   rw [hzero a ha b hb, hone a ha b hb] at hlt_mid
   linarith
 
-/-- A midpoint-strictly convex function has at most one minimizer on the set. -/
+
 theorem min_unique_of_mid {X : Type*} {join : X -> X -> Real -> X}
     {S : Set X} {φ : X -> Real} (hstrict : StrictMidConvexOn join S φ)
     {x y : X} (hxS : x ∈ S) (hyS : y ∈ S)
@@ -96,15 +95,15 @@ section Metric
 
 variable {X : Type*} [MetricSpace X]
 
-/-- Half the squared distance to a fixed point. -/
+
 def halfSqDist (pt : X) (q : X) : Real :=
   (1 / 2 : Real) * dist q pt ^ 2
 
-/-- The finite weighted squared-distance energy in an arbitrary metric space. -/
+
 def metricEnergy (μ : ι -> Real) (pts : ι -> X) (q : X) : Real :=
   (1 / 2 : Real) * ∑ i : ι, μ i * dist q (pts i) ^ 2
 
-/-- The metric energy as a weighted sum of half squared distances. -/
+
 theorem metricEnergy_half (μ : ι -> Real) (pts : ι -> X) (q : X) :
     metricEnergy μ pts q = ∑ i : ι, μ i * halfSqDist (pts i) q := by
   simp [metricEnergy, halfSqDist, Finset.mul_sum, mul_assoc, mul_comm]
@@ -225,18 +224,7 @@ theorem fixed_of_nonexp (μ : ι -> Real) (pts : ι -> X)
     (metricEnergy_perm_le μ pts T e c hμ_nonneg hμ hpts hdist).trans
       (hcmin z)
 
-set_option maxHeartbeats 800000 in
-/-- **Argmin-stability of the center of mass.**  Let `μ, pts` be continuous families of weights and
-points over a (first-countable) parameter space `P`, and `c a` a global minimizer of
-`metricEnergy (μ a) (pts a)` lying in a fixed compact set `K`, with `c p₀` the *unique* global
-minimizer at `p₀`.  Then `c` is continuous at `p₀`.
 
-Standard argmin-stability: reduce to sequences (`P` first-countable); every subsequence of
-`c ∘ (params → p₀)` lies in the compact `K`, so has a convergent sub-subsequence `→ c*`
-(`IsCompact.tendsto_subseq`); passing the minimizing inequality
-`metricEnergy (μ aₙ) (pts aₙ) (c aₙ) ≤ metricEnergy (μ aₙ) (pts aₙ) y` to the limit (joint continuity
-of the energy in `(params, q)`) shows `c*` is a global minimizer at `p₀`, so `c* = c p₀` by
-uniqueness — hence every subsequence has a sub-subsequence `→ c p₀`. -/
 theorem metricEnergy_argmin_stable {P : Type*} [TopologicalSpace P] [FirstCountableTopology P]
     {K : Set X} (hK : IsCompact K)
     (μ : P -> ι -> Real) (pts : P -> ι -> X) (c : P -> X) (p₀ : P)
@@ -265,23 +253,30 @@ theorem metricEnergy_argmin_stable {P : Type*} [TopologicalSpace P] [FirstCounta
   have hcstar_min : ∀ y : X,
       metricEnergy (μ p₀) (pts p₀) cstar ≤ metricEnergy (μ p₀) (pts p₀) y := by
     intro y
+    have hpair : Filter.Tendsto
+        (fun n => ((seq (ns (φ n)), c (seq (ns (φ n)))) : P × X)) Filter.atTop
+        (nhds ((p₀, cstar) : P × X)) := hp_tend.prodMk_nhds hφ_tend
     have hLHS : Filter.Tendsto
         (fun n => metricEnergy (μ (seq (ns (φ n)))) (pts (seq (ns (φ n))))
           (c (seq (ns (φ n))))) Filter.atTop
-        (nhds (metricEnergy (μ p₀) (pts p₀) cstar)) :=
-      (Econt.tendsto (p₀, cstar)).comp (hp_tend.prodMk_nhds hφ_tend)
+        (nhds (metricEnergy (μ p₀) (pts p₀) cstar)) := by
+      have h := (Econt.tendsto ((p₀, cstar) : P × X)).comp hpair
+      exact h
+    have hconst : Continuous (fun a : P => ((a, y) : P × X)) :=
+      continuous_id.prodMk continuous_const
     have hRHS : Filter.Tendsto
         (fun n => metricEnergy (μ (seq (ns (φ n)))) (pts (seq (ns (φ n)))) y) Filter.atTop
-        (nhds (metricEnergy (μ p₀) (pts p₀) y)) :=
-      ((Econt.comp (continuous_id.prodMk continuous_const)).tendsto p₀).comp hp_tend
+        (nhds (metricEnergy (μ p₀) (pts p₀) y)) := by
+      have h := ((Econt.comp hconst).tendsto p₀).comp hp_tend
+      exact h
     exact le_of_tendsto_of_tendsto hLHS hRHS
       (Filter.Eventually.of_forall (fun n => hc_min (seq (ns (φ n))) y))
   refine ⟨φ, ?_⟩
   rw [huniq cstar hcstar_min] at hφ_tend
   exact hφ_tend
 
-/-- Weighted sums preserve strict midpoint Jensen convexity, provided all
-weights are nonnegative and at least one weight is positive. -/
+
+
 theorem metricEnergy_strict (μ : ι -> Real) (pts : ι -> X)
     {join : X -> X -> Real -> X} {S : Set X}
     (hμ_nonneg : ∀ i : ι, 0 ≤ μ i) (hμ_pos : ∃ i : ι, 0 < μ i)
@@ -338,6 +333,8 @@ theorem metricEnergy_strict (μ : ι -> Real) (pts : ι -> X)
     linarith
   exact lt_of_lt_of_le hmid havg_le
 
+
+
 /-- A compact strictly Jensen-convex finite point family has a unique center,
 and every set-preserving isometry that permutes the weighted family fixes that
 center. -/
@@ -373,8 +370,7 @@ theorem exists_fixed_center (μ : ι -> Real) (pts : ι -> X)
   intro y hy
   exact min_unique_of_mid hstrict hy.1 hcS hy.2.1 (fun z hz => hcmin hz)
 
-/-- If all input points are in `B(p,r)` and `q` is outside the `2r` ball, the
-weighted metric energy at `p` is strictly smaller than the energy at `q`. -/
+
 theorem metricEnergy_lt_far (μ : ι -> Real) (pts : ι -> X) {p q : X} {r : Real}
     (hr : 0 < r) (hpts : ∀ i : ι, dist p (pts i) < r)
     (hq : 2 * r ≤ dist p q) (hμ_nonneg : ∀ i : ι, 0 ≤ μ i)
@@ -412,6 +408,8 @@ theorem metricEnergy_lt_far (μ : ι -> Real) (pts : ι -> X) {p q : X} {r : Rea
       ∑ i : ι, μ i * dist q (pts i) ^ 2 :=
     Finset.sum_lt_sum (fun i _ => hsquares_le i) hsquares_lt
   exact mul_lt_mul_of_pos_left hsum (by norm_num : (0 : Real) < 1 / 2)
+
+
 
 /-- A compact strictly Jensen-convex region contains the unique global center
 when its chosen comparison point has strictly less energy than every point
@@ -485,8 +483,7 @@ theorem exists_unique_global (μ : ι -> Real) (pts : ι -> X)
   exact min_unique_of_mid hstrict hyS hcS
     (fun z _ => hymin z) (fun z _ => hcmin z)
 
-/-- If all input points are within `ε` of `qstar`, every global minimizer of
-the weighted metric energy is within `2ε` of `qstar`. -/
+
 theorem metricEnergy_min_dist_le (μ : ι -> Real) (pts : ι -> X) {q qstar : X}
     {ε : Real} (hε : 0 ≤ ε) (hpts : ∀ i : ι, dist qstar (pts i) ≤ ε)
     (hμ_nonneg : ∀ i : ι, 0 ≤ μ i) (hμ_pos : ∃ i : ι, 0 < μ i)
@@ -564,16 +561,16 @@ theorem metricEnergy_min_dist_le (μ : ι -> Real) (pts : ι -> X) {q qstar : X}
 end Metric
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
 
-/-- The finite weighted center-of-mass energy
-`q |-> (1 / 2) * sum_i mu_i * d(q, pts_i)^2`, using the real value of the
-Riemannian extended distance. -/
+
+
+
 def centerEnergy (g : SmoothRiemannianMetric I M) (μ : ι -> Real) (pts : ι -> M)
     (q : M) : Real :=
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -582,7 +579,9 @@ def centerEnergy (g : SmoothRiemannianMetric I M) (μ : ι -> Real) (pts : ι ->
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   (1 / 2 : Real) * ∑ i : ι, μ i * (riemannianEDist I q (pts i)).toReal ^ 2
 
-/-- The center energy only depends on target points carrying nonzero weight. -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem centerEnergy_congr (g : SmoothRiemannianMetric I M) (μ : ι → Real)
     {pts pts' : ι → M} (hpts : ∀ i, μ i ≠ 0 → pts i = pts' i) (q : M) :
     centerEnergy (I := I) g μ pts q = centerEnergy (I := I) g μ pts' q := by
@@ -595,7 +594,9 @@ theorem centerEnergy_congr (g : SmoothRiemannianMetric I M) (μ : ι → Real)
   · simp only [hi, zero_mul]
   · rw [hpts i hi]
 
-/-- The weighted center-of-mass energy is continuous. -/
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)]
+    [SigmaCompactSpace M] in
 theorem centerEnergy_cont (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :
     Continuous (centerEnergy (I := I) g μ pts) := by
@@ -621,7 +622,9 @@ theorem centerEnergy_cont (g : SmoothRiemannianMetric I M)
     continuous_finset_sum _ fun i _ => continuous_const.mul ((hdist i).pow 2)
   simpa [centerEnergy] using continuous_const.mul hsum
 
-/-- The center-of-mass energy attains a minimum on every nonempty compact set. -/
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)]
+    [SigmaCompactSpace M] in
 theorem exists_minOn_compact (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) {K : Set M}
     (hK : IsCompact K) (hne : K.Nonempty) :
@@ -629,8 +632,8 @@ theorem exists_minOn_compact (g : SmoothRiemannianMetric I M)
       centerEnergy (I := I) g μ pts q ≤ centerEnergy (I := I) g μ pts y := by
   exact hK.exists_isMinOn hne (centerEnergy_cont (I := I) g μ pts).continuousOn
 
-/-- On a complete connected Riemannian manifold, the center-of-mass energy
-attains a minimum on every nonempty closed Riemannian ball. -/
+
+
 theorem exists_minOn_ball [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -663,8 +666,10 @@ theorem exists_minOn_ball [T3Space M] (g : SmoothRiemannianMetric I M)
   exact exists_minOn_compact (I := I) g μ pts (isCompact_closedBall p R)
     ⟨p, by simpa [Metric.mem_closedBall] using hR⟩
 
-/-- In the proper Riemannian metric-space realization, `centerEnergy` is the
-usual weighted squared metric-distance energy. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_eq_dist [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) (q : M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -682,8 +687,10 @@ theorem centerEnergy_eq_dist [T3Space M] (g : SmoothRiemannianMetric I M)
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   simp [centerEnergy, metricEnergy, HopfRinow.riemMetric_dist_eq (I := I) (M := M)]
 
-/-- In the proper Riemannian metric realization, a global minimizer of the
-center energy stays within `2ε` of `qstar` when all input points do. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) {q qstar : M} {ε : Real} :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -711,8 +718,10 @@ theorem centerEnergy_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     centerEnergy_eq_dist (I := I) g μ pts y] at h
   exact h
 
-/-- The gradient of the center energy is the weighted sum of the gradients of
-the one-point half-squared-distance summands. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)]
+    [SigmaCompactSpace M] in
 theorem grad_centerEnergy [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -744,8 +753,10 @@ theorem grad_centerEnergy [T3Space M] (g : SmoothRiemannianMetric I M)
       (f := fun i : κ => halfSqDist (pts i)) (x := x)
       (by intro i _; exact hdiff i)
 
-/-- At a differentiable center-energy minimizer, the weighted sum of the
-one-point half-squared-distance gradients vanishes. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [T2Space (TangentBundle I M)]
+    [SigmaCompactSpace M] in
 theorem sum_grad_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -776,11 +787,12 @@ theorem sum_grad_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
     grad_centerEnergy (I := I) g μ pts q hdiffSummands
   rwa [hsum] at hgrad0
 
-/-- Conditional book-form gradient equation for a center-energy minimizer. Once
-the one-point first-variation theorem identifies
-`gradientFun g (halfSqDist pt)` with `- normalChartAt g q pt`, this rewrites the
-minimizer equation as the vanishing weighted sum of exponential inverse
-vectors. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem sum_expInv_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -826,10 +838,12 @@ theorem sum_expInv_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
     simpa [Finset.sum_neg_distrib, smul_neg] using hneg
   exact neg_eq_zero.mp hsum_neg
 
-/-- Curve-level derivative of one `halfSqDist` summand from a length-realising
-fixed-end geodesic variation. This is the center-of-mass-facing form of the
-first-variation calculation; constructing the relevant length-realising
-variation is the remaining geometric input for the moving inverse exponential. -/
+
+
+
+
+omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem halfSqDist_deriv_of_lengthVariation [MetricSpace M]
     (g : SmoothRiemannianMetric I M) (pt : M) (beta gamma : Real -> M)
     (f : Real -> Real -> M) (L : Real)
@@ -870,9 +884,10 @@ theorem halfSqDist_deriv_of_lengthVariation [MetricSpace M]
       (I := I) g gamma f L hf hL hgamma hfc hfixL' hUnit hdist' hdist0'
   simpa [halfSqDist, hinit, hgammaL] using h
 
-/-- Musical-map reduction for the one-point distance-squared gradient. The
-remaining geometric first-variation theorem should prove the displayed
-`mfderiv`/metric-flat covector identity. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem grad_halfSqDist_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
     (pt q : M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -894,8 +909,9 @@ theorem grad_halfSqDist_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
   intro hflat
   exact gradientFun_eq_of_flat (I := I) g hflat
 
-/-- Book-form center-of-mass equation from the first-variation covector form
-for each one-point `halfSqDist` summand. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem sum_expInv_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -924,9 +940,11 @@ theorem sum_expInv_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
   exact sum_expInv_eq_zero (I := I) g μ pts q hmin hdiffEnergy hdiffSummands
     (fun i => grad_halfSqDist_of_flat (I := I) g (pts i) q (hflat i))
 
-/-- In the proper Riemannian metric-space realization, strict midpoint Jensen
-convexity of each `1/2 d^2(·, pts i)` summand implies strict midpoint convexity
-of the full weighted center energy. -/
+
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_strict [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -953,9 +971,11 @@ theorem centerEnergy_strict [T3Space M] (g : SmoothRiemannianMetric I M)
     centerEnergy_eq_dist (I := I) g μ pts a,
     centerEnergy_eq_dist (I := I) g μ pts b] using hm_lt
 
-/-- Riemannian version of `metricEnergy_lt_far`: if all points are in `B(p,r)`
-and `q` is outside the `2r` ball, then the energy at `p` is strictly smaller
-than the energy at `q`. -/
+
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_lt_far [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -977,9 +997,9 @@ theorem centerEnergy_lt_far [T3Space M] (g : SmoothRiemannianMetric I M)
     centerEnergy_eq_dist (I := I) g μ pts q]
   exact metricEnergy_lt_far μ pts hr hpts hq hμ_nonneg hμ_pos
 
-/-- Existence half of the center-of-mass theorem: under nonnegative weights,
-with at least one positive weight, and all input points in `B(p,r)`, the
-weighted energy has a global minimizer in the closed `2r` ball around `p`. -/
+
+
+
 theorem exists_global_min [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1026,8 +1046,8 @@ theorem exists_global_min [T3Space M] (g : SmoothRiemannianMetric I M)
       centerEnergy_lt_far (I := I) g μ pts hr hpts hyfar hμ_nonneg hμ_pos
     exact le_trans hq_le_p hp_lt_y.le
 
-/-- Existence plus the metric stability estimate: if the input points are
-within `ε` of `qstar`, one global minimizer lies within `2ε` of `qstar`. -/
+
+
 theorem exists_global_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1065,9 +1085,9 @@ theorem exists_global_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
   refine ⟨q, hqball, hqmin, ?_⟩
   exact centerEnergy_min_dist_le (I := I) g μ pts hε hnear hμ_nonneg hμ_pos hqmin
 
-/-- Conditional uniqueness half of the center-of-mass theorem. The only
-geometric input left visible here is strict midpoint convexity of the weighted
-energy on the closed `2r` ball. -/
+
+
+
 theorem exists_unique_min [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1120,7 +1140,7 @@ theorem exists_unique_min [T3Space M] (g : SmoothRiemannianMetric I M)
   exact min_unique_of_mid hstrict hyball hqball
     (fun z _ => hymin z) (fun z _ => hqmin z)
 
-/-- Conditional uniqueness plus metric stability of the unique minimizer. -/
+
 theorem exists_unique_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1166,10 +1186,10 @@ theorem exists_unique_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
   refine ⟨q, hqball, hqmin, ?_, huniq⟩
   exact centerEnergy_min_dist_le (I := I) g μ pts hε hnear hμ_nonneg hμ_pos hqmin
 
-/-- Center-of-mass existence and uniqueness from the natural per-summand strict
-Jensen input for `1/2 d^2`. This is the C1 assembly theorem whose remaining
-geometric producer is the Hessian-comparison strict-convexity lemma for each
-summand. -/
+
+
+
+
 theorem exists_unique_jensen [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1211,8 +1231,8 @@ theorem exists_unique_jensen [T3Space M] (g : SmoothRiemannianMetric I M)
     hμ_nonneg hμ_pos
     (centerEnergy_strict (I := I) g μ pts hμ_nonneg hμ_pos hjensen)
 
-/-- Per-summand Jensen version of C1 uniqueness, packaged with the `2ε`
-stability estimate for points approaching `qstar`. -/
+
+
 theorem exists_unique_jensen_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1256,9 +1276,9 @@ theorem exists_unique_jensen_dist_le [T3Space M] (g : SmoothRiemannianMetric I M
     hε hnear hμ_nonneg hμ_pos
     (centerEnergy_strict (I := I) g μ pts hμ_nonneg hμ_pos hjensen)
 
-/-- Center-of-mass existence and uniqueness from strict convexity of each
-`1/2 d^2(., q_i)` summand along the chosen joining curves. This is the C1
-consumer shape expected from the Hessian-comparison producer. -/
+
+
+
 theorem exists_unique_curve [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -1310,8 +1330,8 @@ theorem exists_unique_curve [T3Space M] (g : SmoothRiemannianMetric I M)
   exact jensen_of_strict hmid hzero hone (fun a ha b hb hne =>
     hstrict i a ha b hb hne)
 
-/-- Along-curve strict-convexity version of C1 uniqueness, packaged with the
-`2ε` stability estimate for points approaching `qstar`. -/
+
+
 theorem exists_unique_curve_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=

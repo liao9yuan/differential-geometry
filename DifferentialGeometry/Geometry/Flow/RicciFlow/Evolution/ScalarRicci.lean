@@ -2,15 +2,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Scalar/Ricci Producer Bridges
 
-This file contains producer bridges that need both the Ricci evolution component
-API and the scalar-curvature heat-operator API.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -52,8 +50,9 @@ private theorem sum_swap_four
             _ = ∑ l : Idx, ∑ i : Idx, ∑ j : Idx, F i j k l := by
                   rw [Finset.sum_comm]
 
-/-- The two metric traces of the Ricci second covariant derivative agree after
-swapping the two traced index pairs. -/
+
+
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -88,12 +87,13 @@ theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
               gInv t x k l * nabla2Ric t x k l i j) := by
           simp [Finset.mul_sum]
 
-/-- Ricci-specific heat-operator producer for the canonical scalar Laplacian.
 
-The scalar Hessian supplied by the Hessian-trace API is allowed to be the
-`scalarHessianFromNabla2RicInFrame` trace of `nabla2Ric`.  The target rough
-Ricci Laplacian uses `roughLapRicInFrame`; the equality between the two scalar
-Laplacian traces is the finite-sum swap above. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -116,7 +116,8 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
         (scalarHess t x))
     (hcomp : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       forall i j : Idx,
-        scalarHess t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+        scalarHess t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x)
+          (frame j x)) =
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric t x i j) :
     ScalarLaplacianRealizesHeatOperatorOn (I := I) G T
       (scalarTraceInFrame (I := I) S gInv frame)
@@ -138,7 +139,8 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     refine Finset.sum_congr rfl fun j _hj => ?_
     congr 1
     have hinput :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j) Fin.elim0 =
+        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j)
+          Fin.elim0 =
           DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x) := by
       have hbi : basis i = frame i x := by
         simp [basis, IsLocalFrameOn.toBasisAt_coe]
@@ -147,7 +149,9 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
       rw [hbi, hbj]
       funext q
       fin_cases q
-      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput,
+        DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
       · rfl
     rw [hinput, hcomp t ht x i j]
   have htrace_tx := htrace t ht x

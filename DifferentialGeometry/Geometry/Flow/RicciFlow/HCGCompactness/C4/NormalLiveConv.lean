@@ -4,14 +4,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 
 set_option autoImplicit false
 
-/-!
-# Common live-slot normal branch convergence
 
-The finite live cage first extracts all normal-coordinate metric limits on one
-shared subsequence.  Projecting the finite Pi-valued convergence then produces
-matched stage and limit diagonal branches at every live center, without another
-subsequence or any transport of the live-slot subtype.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,8 +31,8 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace MetricCompactnessInputs
 
-/-- On one shared subsequence, every live center has a convergent normal metric
-and matched stage/limit diagonal branches with exact-inverse convergence. -/
+
+
 theorem exists_live_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -137,8 +137,8 @@ theorem exists_live_diag
     hpsi, hcenter, hgInf, hconv, hstage, hequiv, ?_⟩
   simpa only [index, Xpsi, c] using hpair
 
-/-- Prescribed slotwise radii produce matched stage/limit diagonal branches on
-the same finite live-slot subsequence as the slotwise normal-metric limits. -/
+
+
 theorem exists_slot_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
@@ -256,9 +256,9 @@ theorem exists_slot_diag
   exact ⟨psi, gInf, deltaStage, deltaInf, e, eInf,
     hpsi, hcenter, hmetric, hpair⟩
 
-/-- An eventual family of full minimizing branches can be retained on one
-further live-slot subsequence, and the canonical stage convergence transfers
-to those same selected branches. -/
+
+
+
 theorem exists_diag_full
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)

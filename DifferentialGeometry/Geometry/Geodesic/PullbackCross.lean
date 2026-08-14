@@ -1,15 +1,14 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.PullbackCross
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Cross-model naturality of geodesics
 
-This file records that a diffeomorphism sends geodesics of the pulled-back
-metric to geodesics of the original metric, even when the source and target
-manifolds use different model spaces.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,17 +22,18 @@ open scoped Topology Manifold ContDiff
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [Module.Finite ℝ F] [FiniteDimensional ℝ F] [CompleteSpace F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  [FiniteDimensional ℝ F] [CompleteSpace F]
   [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem velocity_rep_diffAt
     (gamma : ℝ → M) (t : ℝ)
     (hgamma : ContMDiffAt 𝓘(ℝ, ℝ) I ∞ gamma t) :
@@ -85,6 +85,7 @@ private theorem velocity_rep_diffAt
     exact happ
   exact hdu.congr_of_eventuallyEq (by simpa [a, u] using hev)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem geoEq_of_covVel_C2
     (g : SmoothRiemannianMetric I M) (gamma : ℝ → M) (t : ℝ)
     (hgamma : ContMDiffAt 𝓘(ℝ, ℝ) I 2 gamma t)
@@ -170,8 +171,9 @@ private theorem geoEq_of_covVel_C2
   exact ⟨deriv u t, deriv (deriv u) t, hu_hasDerivAt,
     hu_eventually_hasDerivAt, hderiv_hasDerivAt, hzero⟩
 
-/-- A cross-model diffeomorphism transports the moving-foot geodesic equation
-at a specified time using only pointwise smoothness of the source curve. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geoEq_mapCrossAt
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -246,9 +248,9 @@ theorem geoEq_mapCrossAt
     (hdelta.of_le
       (WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤))) htargetVelZero
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 /-- A cross-model diffeomorphism reflects the moving-foot geodesic equation
-at a specified time.  Thus geodesicity for a pullback metric can be checked
-after applying the diffeomorphism. -/
+at a specified time. -/
 theorem geoEq_of_mapCrossAt
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -336,8 +338,9 @@ theorem geoEq_of_mapCrossAt
     (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
     gamma t hgamma2 (by simpa [V] using hsourceZero)
 
-/-- A cross-model diffeomorphism transports the moving-foot geodesic equation
-along a globally smooth source curve. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geoEq_mapCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -353,8 +356,9 @@ theorem geoEq_mapCross
   geoEq_mapCrossAt (I := I) (J := J) g Phi gamma t
     hgamma.contMDiffAt hgeo
 
-/-- A cross-model diffeomorphism sends every smooth geodesic of the pullback
-metric to a geodesic of the original metric. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesic_mapCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -368,7 +372,8 @@ theorem geodesic_mapCross
     IsGeodesic (I := J) g (fun s => Phi (gamma s)) :=
   fun t => geoEq_mapCross (I := I) (J := J) g Phi gamma t hgamma (hgeo t)
 
-/-- Cross-model geodesic naturality restricted to an arbitrary time set. -/
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesicOn_mapCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -383,8 +388,9 @@ theorem geodesicOn_mapCross
     IsGeodesicOn (I := J) g (fun t => Phi (gamma t)) s :=
   fun t ht => geoEq_mapCross (I := I) (J := J) g Phi gamma t hgamma (hgeo t ht)
 
-/-- Cross-model geodesic naturality on an open time set. Smoothness is required
-only on that set, so no global extension of the curve is needed. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesicOn_mapLocal
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]

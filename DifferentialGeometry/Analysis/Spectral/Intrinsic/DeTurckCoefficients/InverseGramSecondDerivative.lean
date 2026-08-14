@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 
-/-!
-# Second chart derivatives of the inverse Gram matrix
 
-This file uses the second inverse-matrix identity and records entrywise bounds
-for the resulting second chart partials.  The final theorem
-chooses one bound for an entire metric family from uniform ellipticity and
-first/second chart-Gram bounds.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
@@ -17,7 +17,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -142,8 +142,9 @@ private lemma abs_prod3_lip
       gcongr
     _ = (2 * C * M_b * Q + M_b ^ 2) * J := by ring
 
-/-- Uniform entrywise inverse-Gram and first/second metric-derivative bounds
-control a second inverse-Gram partial. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -228,8 +229,9 @@ theorem invGramD2_abs_le
     _ = 2 * (Module.finrank ℝ E : ℝ) ^ 4 * (M_b ^ 3 * Q₁ ^ 2) +
           (Module.finrank ℝ E : ℝ) ^ 2 * (M_b ^ 2 * Q₂) := by ring
 
-/-- The second inverse-Gram partial is quantitatively Lipschitz in the metric
-chart `2`-jet, under common inverse-Gram and first/second Gram bounds. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_sub_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -384,8 +386,9 @@ theorem invGramD2_sub_le
       dsimp [K₅, K₃]
       ring
 
-/-- Uniform ellipticity and first/second chart-Gram bounds give one second
-inverse-Gram derivative bound on every active POU chart support. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_pou_bnd
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -445,9 +448,10 @@ theorem invGramD2_pou_bnd
   exact invGramD2_abs_le (I := I) (M := M) (gSeq k) α hy hM_b.le hQ₁_nn
     hMbOnE (hQ₁ α hα k b hb) (hQ₂ α hα k b hb) d m p q
 
-/-- A metric-equivalent family with uniform first and second chart-Gram bounds
-has one second-partial inverse-Gram Lipschitz constant on every active POU
-support. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_pou_lip
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

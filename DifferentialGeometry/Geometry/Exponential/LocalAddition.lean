@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
 import Mathlib.Topology.Connected.LocallyConnected
 
-set_option linter.unusedSectionVars false
 
 /-!
 # Component-local exponential addition
@@ -47,7 +46,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -142,6 +141,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
     connCompEMetric (I := I) g p
   exact ⟨fun _ _ => rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem connComp_enorm
     (g : SmoothRiemannianMetric I M) (p : M) :
     letI : RiemannianBundle

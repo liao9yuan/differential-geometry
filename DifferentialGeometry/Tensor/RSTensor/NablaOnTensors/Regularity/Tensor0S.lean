@@ -2,11 +2,10 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 import DifferentialGeometry.Tensor.RSTensor.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Regularity of covariant tensor nabla
--/
 
-set_option linter.unusedSectionVars false
+
+
+
 
 namespace Tensor0SBundle
 
@@ -15,14 +14,13 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
 private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -97,6 +95,7 @@ private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     rw [hcoe]
   exact hmdiff.contDiffWithinAt
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
 theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -107,6 +106,7 @@ theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
   exact (tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     (I := I) V x₀ hV).differentiableWithinAt (by simp)
 
+omit [IsManifold I 2 M] in
 theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -151,6 +151,8 @@ theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
     rw [hcoe]
   exact (hscalar.congr_of_eventuallyEq heq).mdifferentiableAt (by simp)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
+omit [IsManifold I ∞ M] in
 private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt_one
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
@@ -225,6 +227,8 @@ private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt_
     rw [hcoe]
   exact hmdiff.contDiffWithinAt
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
+omit [IsManifold I ∞ M] in
 theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt_one
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
@@ -235,6 +239,7 @@ theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt_on
   exact (tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt_one
     (I := I) V x₀ hV).differentiableWithinAt (by norm_num)
 
+omit [IsManifold I ∞ M] in
 theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt_one
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
@@ -283,6 +288,7 @@ theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt_one
     rw [hcoe]
   exact (hscalar.congr_of_eventuallyEq heq).mdifferentiableAt (by norm_num)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem tangentConst_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -311,8 +317,8 @@ theorem tangentConst_covariantDeriv_apply_contMDiffAt
     (by simp : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of one chart-constant correction term in the `(0,s)` tensor
-derivation formula. -/
+
+
 theorem tensor0S_eval_tangentConst_covariantDerivative_slot_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -643,11 +649,11 @@ theorem localCovariantDerivTensor0SAt_constInChart_contMDiffAt
       congr)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Definition 14.5 for the implemented `(0,s)` covariant derivative.
 
-Evaluating `nabla0SFun` on smooth moving slots agrees with the tensorial
-derivation rule: differentiate the scalar evaluation and subtract the
-connection correction in each covariant slot. -/
+
+
+
+
 theorem nabla0SFun_eval_smooth_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -709,8 +715,9 @@ theorem nabla0SFun_eval_smooth_slots {s : ℕ}
       (I := I) cov X W α x₀ hpair hV_md hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A smooth `(0,s)` tensor field evaluated on smooth moving tangent slots is
-smooth as a scalar function. -/
+
+
+omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -735,8 +742,9 @@ theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A smooth `(0,s)` tensor field evaluated on `C¹` moving tangent slots is
-`C¹` as a scalar function. -/
+
+
+omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -759,7 +767,8 @@ theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
     using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Differentiability form of `tensor0SField_eval_C1_slots_contMDiffAt_one`. -/
+
+omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_C1_slots_mdiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -775,7 +784,7 @@ theorem tensor0SField_eval_C1_slots_mdiffAt {s : ℕ}
     α V x₀ hV_at).mdifferentiableAt (by norm_num)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Definition 14.5 for `nabla0SFun` with only `C¹` moving slots. -/
+
 theorem nabla0SFun_eval_C1_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -821,8 +830,8 @@ theorem nabla0SFun_eval_C1_slots {s : ℕ}
       (I := I) cov X V α x₀ hpair hV_md hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Scalar coefficient smoothness for `nabla0SFun s` on chart-constant
-tangent slots. -/
+
+
 theorem nabla0SFun_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -928,9 +937,9 @@ theorem nabla0SFun_eval_tangentConstInChart_contMDiffAt
     (I := I) cov X V α p hpair_md hV_md hVmodel_p hcoord_p]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of the canonical raw covariant derivative for `(0,s)` tensor
-fields, proved by local-frame coefficients in the tangent-bundle
-trivialization. -/
+
+
+
 theorem nabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

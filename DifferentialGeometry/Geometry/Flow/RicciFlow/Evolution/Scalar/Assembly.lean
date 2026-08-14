@@ -1,14 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.RmTrace
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Scalar evolution assembly
 
-Product-rule assembly and local-frame wrappers for scalar curvature evolution.
--/
+
+
+
+
 
 noncomputable section
 
@@ -28,7 +26,8 @@ section TraceRoute
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- Product-rule derivative of the scalar trace `g^{ij} Ric_ij`. -/
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -82,7 +81,8 @@ theorem scalarTraceInFrame_hasDerivWithinAt
                   have hRic := h_ricci t x i j
                   exact hInv.mul hRic))))
 
-/-- Lemma 6.6 from Lemma 6.3 by tracing the Ricci equation. -/
+
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution
     [DecidableEq Idx]
@@ -95,14 +95,17 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
         (hframe.toBasisAt (hcover x)))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)
@@ -137,8 +140,9 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-/-- Lemma 6.6 from Lemma 6.3 by tracing the Ricci equation, with Ricci
-symmetry required only at regular flow times. -/
+
+
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
     [DecidableEq Idx]
@@ -151,14 +155,17 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
         (hframe.toBasisAt (hcover x)))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)
@@ -175,7 +182,8 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
   have hRmTrace : ScalarRmRicciTraceInFrame (I := I) S Rm04 gInv frame :=
     scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
       (I := I) S Rm04 gInv frame hframe hcover hTrace hOutput hFirst hinv hRicSym
-  have hInvSym : forall (τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y i j,
+  have hInvSym : forall (τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    D) y i j,
       gInv (τ : Real) y i j = gInv (τ : Real) y j i := by
     intro τ y i j
     have hy : y ∈ u := hcover y
@@ -192,8 +200,8 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-/-- Scalar-curvature evolution with Rm04 and Ricci symmetries produced from
-regular Levi-Civita curvature data. -/
+
+
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     [DecidableEq Idx]
@@ -209,7 +217,8 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
@@ -217,8 +226,10 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
+      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+        (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
     (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)

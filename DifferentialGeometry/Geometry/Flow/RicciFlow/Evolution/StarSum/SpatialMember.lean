@@ -2,28 +2,24 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarRoutin
 import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# `SpatialMember` — Brick 4, Phase P2: the spatial commutator is a star sum
 
-The spatial commutator `[Δ, ∇]∇ᵏRm` has components, at any `g_t`-orthonormal frame, equal to
-the components of a `StarSum2 S t (k+1)` element.  This is the spatial piece consumed by the P3
-time recursion (`E_{k+1} = ∇E_k + ∂ₜΓ ∗ ∇ᵏRm − [Δ,∇]∇ᵏRm`).
 
-`[Δ,∇]∇ᵏRm` is the difference (the LHS of `spatialComm_nablaKRm_split`)
-`metricTraceFirstTwo0STensor g (∇^{k+3}Rm) − totalNabla0SFun (Δ∇ᵏRm)` — i.e.
-`Δ∇^{k+1}Rm − ∇Δ∇ᵏRm`.
 
-## Status (2026-06-12): statement frozen; proof is the P2 frontier
 
-The proof recasts `spatialComm_nablaKRm_split`'s RHS as star terms.  See `SpatialMember.md` for
-the full structure and the two genuine walls (frozen-slot↔pointwise bridge for the antisym
-slot-diff; generic `(k,q)`-dependent `σ`-construction for the curvature action's per-slot sum).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,7 +30,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,7 +39,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem cotangentSharp_ortho_expand
+    [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -65,6 +65,8 @@ private theorem cotangentSharp_ortho_expand
   · intro h
     exact absurd (Finset.mem_univ i) h
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor05_vec5_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -94,6 +96,8 @@ private theorem tensor05_vec5_sum_last_idx
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_vec4_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
@@ -123,7 +127,9 @@ private theorem tensor04_vec4_sum_last_idx
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
+omit [Module.Finite ℝ E] in
 private theorem slotdiffBasisEq
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -309,13 +315,16 @@ private theorem slotdiffBasisEq
           congr 1
           exact Finset.sum_congr rfl (fun q _ => hq q)
 
-/-! ## CURVACT half — the diagonal curvature-action sum as `−∑_q` star q-terms
 
-`∑ᵢ curvatureAction(bᵢ, X, cons bᵢ tail)` (the `j = i` diagonal of `spatialComm_nablaKRm_split`'s
-curvature term) expands by `curvatureAction0SAt_eq_rm04` (at `gInv = δ`) into a triple sum that,
-after the diagonal collapse and sum-swaps, is exactly `−∑_q` of the per-`q` curvature star terms
-(`curvactStar0`/`curvactStarPos`). -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
 private theorem curvactReduce
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -371,7 +380,9 @@ private theorem curvactReduce
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [Finset.sum_comm]
 
+omit [Module.Finite ℝ E] in
 private theorem slotdiffReduce
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -453,7 +464,10 @@ private theorem sumDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hj h.symm), zero_mul]
   · intro h; exact absurd (Finset.mem_univ i) h
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
 private theorem curvRoute
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -488,15 +502,15 @@ private theorem curvRoute
   · rw [dif_neg hq]
     simpa using (curvactStarPos (I := I) S t k q hq basis horth' I0).symm
 
-/-! ## P2 — the frozen statement
 
-`[Δ,∇]∇ᵏRm`-components (the `spatialComm_nablaKRm_split` LHS, evaluated at the orthonormal frame
-tuple `basis ∘ I0`) equal the components of a star-sum element `T ∈ StarSum2 S t (k+1)`, uniformly
-in the centre `x`. -/
 
-/-- Constructor-tree cost of the spatial commutator witness in dimension
-`n`: two sums of length `4+k` and one sum of length `5+k`, each made of
-double-trace base terms. -/
+
+
+
+
+
+
+
 def commStarCost (n k : ℕ) : Real :=
   (n : Real) ^ 2 * (13 + 3 * k)
 
@@ -752,17 +766,18 @@ cost `commStarCost`. -/
 theorem commStarField_cost
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
+    {Idx : Type*} [Fintype Idx] :
     StarSum2Cost (I := I) Idx S (t : Real) (k + 1)
-      (commStarField (I := I) S t k) (commStarCost (Fintype.card Idx) k) :=
-  (commStarField_data (I := I) S hS t k).1
+      (commStarField (I := I) S t k) (commStarCost (Fintype.card Idx) k) := by
+  classical
+  exact (commStarField_data (I := I) S hS t k).1
 
 /-- Components of the canonical spatial-commutator field agree with the
 intrinsic commutator expression in every orthonormal basis. -/
 theorem commStarField_spec
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (x : M) (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.base.metric (t : Real)).inner x (basis i) (basis j)
       = if i = j then (1 : Real) else 0)
@@ -774,8 +789,9 @@ theorem commStarField_spec
             (metricTraceFirstTwoField (I := I) (M := M) (S.base.metric (t : Real))
               (nablaKRm04Field (I := I) S (t : Real) (k + 2))) x (fun p => basis (I0 p))
       = tensor0SComponent (I := I) (commStarField (I := I) S t k x)
-          (fun i => basis i) I0 :=
-  (commStarField_data (I := I) S hS t k).2 x basis horth I0
+          (fun i => basis i) I0 := by
+  letI : Fintype Idx := Fintype.ofFinite Idx
+  exact (commStarField_data (I := I) S hS t k).2 x basis horth I0
 
 /-- **Brick 4, P2 (compatibility form): the spatial commutator
 `[Δ,∇]∇ᵏRm` is a star sum.** -/

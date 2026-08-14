@@ -4,21 +4,20 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricContinuity
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# General-dimension operator-norm bound for the Ricci form from `‖Rm‖`
 
-This file builds, in **every dimension**, the curvature source for the
-unit-sphere Ricci bound `|Ric(u,u)| ≤ A` consumed (via the geometric Rayleigh
-bound `tensor02_quadForm_abs_le_of_unit_bound`) by `TwoTensorQuadBoundOnWindow`.
 
-The stack is built bottom-up:
-1. `exists_gOrthonormalBasis` — every tangent fiber has a `g`-orthonormal basis.
-2. the Ricci trace `Ric(Y,Z) = Σₐ Rm04(eₐ,Y,Z,eₐ)` over such a basis;
-3. a single Riemann component is `≤ √rmNormSq`;
-4. assemble `|Ric(u,u)| ≤ Cₙ·√rmNormSq` for `g`-unit `u`.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,9 +33,9 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-/-- **Existence of a `g`-orthonormal basis** on any tangent fiber, in every
-dimension. The metric installs an inner-product structure on the fiber (as in
-`ricciEigen3`); `stdOrthonormalBasis` then supplies the frame. -/
+
+
+
 theorem exists_gOrthonormalBasis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basis :
         Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real (TangentSpace I x),
@@ -61,11 +60,11 @@ theorem exists_gOrthonormalBasis (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact hob
 
-/-- **Unit-sphere Ricci bound from a component bound (any dimension).** If every
-`g`-orthonormal component of `Ric` has `|Ric(eᵢ,eⱼ)| ≤ R`, then `|Ric(u,u)| ≤ n·R`
-for every `g`-unit vector `u` — i.e. the operator norm satisfies `‖Ric‖_op ≤ n·R`.
-Combined with `tensor02_quadForm_abs_le_of_unit_bound` this discharges
-`TwoTensorQuadBoundOnWindow` with `A = n·R`. -/
+
+
+
+
+
 theorem ricci_unitSphere_le_of_componentBound
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -137,9 +136,9 @@ theorem ricci_unitSphere_le_of_componentBound
     _ = R * ((n : Real) * g.inner x u u) := by rw [← hgexp]
     _ = (n : Real) * R := by rw [hu]; ring
 
-/-- **A single tensor component is bounded by the fibre norm.** For a `g`-ortho-
-normal basis, `|A(e_{i₁},…,e_{iₛ})| ≤ √(normSq0S A)`, since `normSq0S` is the sum
-of all squared components. Dimension-free. -/
+
+
+
 theorem abs_component0S_le_sqrt_normSq0S
     (g : SmoothRiemannianMetric I M) {x : M} {ι : Type*} [Fintype ι] [DecidableEq ι]
     {s : ℕ} (basis : Module.Basis ι Real (TangentSpace I x))
@@ -153,8 +152,8 @@ theorem abs_component0S_le_sqrt_normSq0S
   exact Finset.single_le_sum (f := fun slots => (component0S (I := I) basis A slots) ^ 2)
     (fun slots _ => sq_nonneg _) (Finset.mem_univ slots₀)
 
-/-- A Ricci component obtained by tracing `Rm04` is bounded by the dimension
-times the Riemann tensor norm. -/
+
+
 theorem ricciComp_le_rmNorm
     (g : SmoothRiemannianMetric I M) {x : M}
     {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -184,9 +183,9 @@ theorem ricciComp_le_rmNorm
     _ = (Fintype.card ι : Real) * Real.sqrt (normSq0S (I := I) g x 4 Rm04) := by
       rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
 
-/-- A component of the canonical metric Ricci tensor in an orthonormal basis
-is bounded by the dimension times the norm of the canonical lowered Riemann
-tensor. -/
+
+
+
 theorem metricRicciComp_le
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -227,10 +226,10 @@ theorem metricRicciComp_le
     (metricRicciAt (I := I) (M := M) g x)
     (metricRm04At (I := I) (M := M) g x) htrace i j
 
-/-- **Unit-sphere Ricci bound from the Riemann trace (any dimension).** If `Ric`
-is the metric trace of `Rm04` over a `g`-orthonormal basis, then on `g`-unit
-vectors `|Ric(u,u)| ≤ n²·√(normSq0S Rm04)`. This is the curvature source
-`‖Ric‖_op ≤ n²·‖Rm‖` that feeds `tensor02_quadForm_abs_le_of_unit_bound`. -/
+
+
+
+
 theorem ricci_unitQuad_le_of_trace
     (g : SmoothRiemannianMetric I M) {x : M} {n : ℕ}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
@@ -265,11 +264,11 @@ theorem ricci_unitQuad_le_of_trace
   calc |Ric (vec2 (I := I) u u)| ≤ (n : Real) * ((n : Real) * B) := hmain
     _ = (n : Real) ^ 2 * B := by ring
 
-/-- **Quadratic form ≤ Hilbert–Schmidt norm (any dimension).** For any `(0,2)`-
-tensor `T` and Riemannian metric `g`, `|T(v,v)| ≤ n·√(normSq0S T)·g(v,v)`. This
-is the bound used to turn a `C⁰` tensor-norm closeness `‖h-g‖` into the
-multiplicative quadratic-form difference feeding
-`metricUniformEquivalentOn_of_quadFormDiff`. -/
+
+
+
+
+
 theorem tensor02_quadForm_abs_le_normSq0S
     (g : SmoothRiemannianMetric I M) {x : M}
     (T : Tensor02At (I := I) (M := M) x) (v : TangentSpace I x) :
@@ -302,8 +301,8 @@ theorem tensor02_quadForm_abs_le_normSq0S
     _ = (Module.finrank Real (TangentSpace I x) : Real)
           * Real.sqrt (normSq0S (I := I) g x 2 T) * g.inner x v v := by ring
 
-/-- The squared norm of the canonical lowered Riemann tensor of a fixed smooth
-metric is uniformly bounded on a compact manifold. -/
+
+
 theorem exists_rm04_bound [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :
     ∃ K : Real, 0 ≤ K ∧ ∀ x : M,
@@ -319,10 +318,10 @@ theorem exists_rm04_bound [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   refine ⟨max K 0, le_max_right _ _, fun x => ?_⟩
   exact (hK (Set.mem_range_self x)).trans (le_max_left _ _)
 
-/-- On a compact manifold, the Ricci quadratic form of a fixed smooth metric
-has a global operator bound depending only on the metric. -/
+
+
 theorem exists_ricci_bound
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+    [NeZero (Module.finrank Real E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) :

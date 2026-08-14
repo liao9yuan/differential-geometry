@@ -12,13 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 
-/-!
-# Three-piece chain rule for the pullback-pairing evaluation form
-
-Builds the geometry-slot and Fréchet data for the pulled-back inner-product pairing and assembles
-the additive three-piece time chain rule (metric-family, basepoint-motion, pushforward-kinetic)
-for the evaluation form.
--/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -47,7 +40,9 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem geometry_slot_joint_datum
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem exists_jointFDerivWithinAt_evalForm_pullbackPart
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -76,7 +71,9 @@ theorem geometry_slot_joint_datum
   let _ := hΦ
   exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
-theorem evalform_joint_frechet_datum
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem exists_jointFDerivWithinAt_evalFormTwoVar
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -102,7 +99,10 @@ theorem evalform_joint_frechet_datum
   let _ := hΦ
   exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
-theorem evalform_geometry_slot
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
+theorem evalForm_pullbackPart_hasDerivWithinAt_neg_lieDerivMetric_deTurckVF
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ_orbit : ∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
@@ -173,7 +173,7 @@ theorem evalform_geometry_slot
   let R : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
       (mfderiv I I (Φ_fam p.2 : M → M) x v)
       (mfderiv I I (Φ_fam p.2 : M → M) x w)
-  obtain ⟨R', hR'⟩ := geometry_slot_joint_datum (I := I) g_DT T Φ_fam hΦ
+  obtain ⟨R', hR'⟩ := exists_jointFDerivWithinAt_evalForm_pullbackPart (I := I) g_DT T Φ_fam hΦ
     (Cgeom) hclm_geom (Vpush) hpush_v (Wpush) hpush_w t ht x v w
   have hdiag : HasDerivWithinAt (fun s : ℝ => R (s, s)) (R' (1, 0) + R' (0, 1))
       (Set.Ici (0 : ℝ)) t :=
@@ -196,7 +196,8 @@ theorem evalform_geometry_slot
       = -metricTransportResidual (I := I) (g_DT t)
           (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w :=
     hasDerivWithinAt_Ici_unique ht0 hpart1 hbase
-  have hpush := DifferentialGeometry.PDE.RicciFlow.ODE.variational_flow_flat_pairing_hasDerivWithinAt
+  have hpush :=
+    DifferentialGeometry.PDE.RicciFlow.ODE.variational_flow_flat_pairing_hasDerivWithinAt
     (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w
     (T'v x v t) (P'v x v t) (T'w x w t) (P'w x w t)
     (hv_flat t ht x v) (hw_flat t ht x w) (hcorr_v t ht x v) (hcorr_w t ht x w)
@@ -213,7 +214,10 @@ theorem evalform_geometry_slot
   rw [hsum] at hdiag
   exact hdiag
 
-theorem total_eval_three_piece_chain_rule
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
+theorem evalFormTwoVar_diag_hasDerivWithinAt_deTurckRicciRHS_chainRule
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hDT_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,

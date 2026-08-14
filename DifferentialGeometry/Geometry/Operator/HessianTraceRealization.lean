@@ -16,18 +16,14 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Scalar Laplacian as a Hessian Trace
 
-This file contains the operator-level bridge between the scalar Laplacian
-`div grad` and the metric trace of the covariant derivative of `df`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -38,26 +34,23 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- The realized one-form `du`, represented as a `(0,1)` tensor. -/
+
 def differential1FormFun (u : M -> Real) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
   dualToCotangent_gen (I := I) (mfderiv I 𝓘(Real, Real) u x).toLinearMap
 
-/-- Raw differential one-form as a pointwise function. Bundling it as a smooth
-section is kept as an explicit regularity/realization step. -/
+
+
 def duField (u : M -> Real) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
   differential1FormFun (I := I) u x
 
-/-- A bundled one-form section realizes the raw differential of `u`. -/
+
 def DuFieldRealizes (u : M -> Real)
     (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (∞ : WithTop ℕ∞) 1) : Prop :=
@@ -136,8 +129,8 @@ private theorem duFun_contMDiff
   simp [F, differential1FormFun, extDerivFun, NormedSpace.fromTangentSpace]
   rfl
 
-/-- Canonical smooth one-form section `du` associated to a smooth scalar
-function. -/
+
+
 noncomputable def duSec
     (u : M -> Real) (hu : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) u) :
     OneFormSection (I := I) (M := M) := by
@@ -153,15 +146,15 @@ theorem duSec_apply
     duSec (I := I) u hu x = differential1FormFun (I := I) u x := by
   rfl
 
-/-- The canonical section realizes the legacy differential one-form predicate. -/
+
 theorem duSec_realizes
     (u : M -> Real) (hu : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) u) :
     DuFieldRealizes (I := I) u (duSec (I := I) u hu) := by
   intro x
   simp [duField]
 
-/-- Evaluating the raw differential one-form is the exterior derivative of the
-scalar. -/
+
+
 theorem differential1FormFun_apply_eq_extDerivFun
     (u : M -> Real) (x : M) (v : TangentSpace I x) :
     differential1FormFun (I := I) u x (fun _ : Fin 1 => v) =
@@ -169,8 +162,8 @@ theorem differential1FormFun_apply_eq_extDerivFun
   simp [differential1FormFun, extDerivFun, NormedSpace.fromTangentSpace]
   rfl
 
-/-- Smoothness of evaluating the scalar differential on a smooth vector
-section. -/
+
+
 theorem dphi_apply_smooth
     (u : M -> Real) (hu : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) u)
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _)) :
@@ -190,8 +183,8 @@ theorem dphi_apply_smooth
     exact differential1FormFun_apply_eq_extDerivFun (I := I) u p (Y p)
   simpa [hfun] using hraw
 
-/-- Pointwise differentiability of evaluating the scalar differential on a
-smooth vector section. -/
+
+
 theorem dphi_apply_mdiffAt
     (u : M -> Real) (hu : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) u)
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -200,7 +193,7 @@ theorem dphi_apply_mdiffAt
       (fun p : M => extDerivFun (I := I) u p (Y p)) x :=
   (dphi_apply_smooth (I := I) u hu Y).contMDiffAt.mdifferentiableAt (by simp)
 
-/-- The raw differential one-form is metric-dual to the gradient. -/
+
 theorem differential1FormFun_apply_eq_inner_gradientFun
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
     (x : M) (v : TangentSpace I x) :
@@ -209,15 +202,16 @@ theorem differential1FormFun_apply_eq_inner_gradientFun
   simpa [differential1FormFun] using
     (inner_gradientFun (I := I) g u x v).symm
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem extDerivFun_real_eq_mfderiv
     (u : M -> Real) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) u x v =
       mfderiv I 𝓘(Real, Real) u x v := by
   simp [extDerivFun, NormedSpace.fromTangentSpace]
 
-/-- Section-level covariant derivative of a bundled differential one-form along
-a smooth vector field. The separate `DuFieldRealizes` predicate records when
-the supplied one-form is actually `du`. -/
+
+
+
 noncomputable def nablaDuAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -226,8 +220,8 @@ noncomputable def nablaDuAt
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
   nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 cov X du x
 
-/-- Supplied Hessian candidate at a point. The equality with `∇du` is recorded
-by `HessianRealizesNablaDuAt`; this definition does not bake in that frontier. -/
+
+
 def hessianAt
     (Hess : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -235,8 +229,8 @@ def hessianAt
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
   Hess x
 
-/-- Pointwise frontier saying a supplied Hessian tensor is the tensor
-`(X,Y) ↦ (∇_X du)(Y)`. -/
+
+
 def HessianRealizesNablaDuAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -263,8 +257,8 @@ theorem nablaDu_eq_hessian
       Hess x (vec2 (X x) Y) :=
   (hHess X Y).symm
 
-/-- The general one-form covariant-derivative realization interface supplies
-the Hessian realization interface when the one-form is `du`. -/
+
+
 theorem hess_of_nabla
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -277,8 +271,8 @@ theorem hess_of_nabla
   intro X Y
   simpa [nablaDuAt] using h X Y
 
-/-- Canonical Hessian section of a smooth scalar function, defined as the total
-covariant derivative of the canonical section `duSec`. -/
+
+
 noncomputable def hessianSec
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -304,8 +298,8 @@ theorem hessianSec_apply
         1 cov (duSec (I := I) u hu) x := by
   rfl
 
-/-- The canonical Hessian section realizes the section-level covariant
-derivative of `duSec`. -/
+
+
 theorem hessianSec_nabla
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -328,8 +322,8 @@ theorem hessianSec_nabla
   rw [← hslots]
   simpa [hessianSec, nablaDuAt] using h
 
-/-- Changing the connection changes the scalar Hessian by minus the
-connection-difference tensor contracted with the differential. -/
+
+
 theorem hess_sub_conn
     [T2Space M]
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -387,7 +381,7 @@ theorem hess_sub_conn
   rw [connectionDifferenceOutput_apply]
   simpa [vec2] using hdiff
 
-/-- Pointwise Hessian realization for the canonical Hessian section. -/
+
 theorem hessianSec_realizesAt
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -401,8 +395,8 @@ theorem hessianSec_realizesAt
     (fun y : M => hessianSec (I := I) cov hcov u hu y) x
     ((hessianSec_nabla (I := I) cov hcov u hu) x)
 
-/-- A metric-compatible canonical Hessian is the metric pairing of the
-covariant derivative of the gradient, evaluated on arbitrary tangent vectors. -/
+
+
 theorem hessSec_inner_cov
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -490,8 +484,8 @@ theorem hessSec_inner_cov
     _ = g.inner x ((cov (fun y : M => gradientFun (I := I) g f y) x) v) w := by
       rw [hX, hY]
 
-/-- Canonical third covariant derivative section `∇ Hess u`, defined as the
-total covariant derivative of the canonical Hessian section. -/
+
+
 noncomputable def nablaHessSec
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -517,8 +511,8 @@ theorem nablaHess_apply
         2 cov (hessianSec (I := I) cov hcov u hu) x := by
   rfl
 
-/-- The canonical third derivative section realizes the pointwise second
-covariant derivative of the canonical one-form `duSec`. -/
+
+
 theorem nablaHess_realizes
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -551,8 +545,8 @@ theorem nablaHess_realizes
     (duSec (I := I) u hu) (hessianSec (I := I) cov hcov u hu)
     (nablaHessSec (I := I) cov hcov u hu) h1 h2 x
 
-/-- Freezing the first two slots of a two-tensor leaves no remaining slots, so
-the resulting scalar-valued tensor is the original tensor. -/
+
+
 theorem freezeFirst_elim0 {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
     freezeFirstTwo0S (I := I) T Fin.elim0 = T := by
@@ -573,7 +567,7 @@ theorem freezeFirst_elim0 {x : M}
   funext a
   fin_cases a <;> rfl
 
-/-- The first-two-slot trace of a two-tensor is the pair trace. -/
+
 theorem traceFirstTwo_elim0
     (g : SmoothRiemannianMetric I M) {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
@@ -581,9 +575,9 @@ theorem traceFirstTwo_elim0
       metricTracePair0SAt (I := I) g T := by
   rw [metricTraceFirstTwo0SAt, freezeFirst_elim0]
 
-/-- Direct scalar trace object attached to a supplied Hessian tensor.  This is
-the object-level Laplacian trace; realization predicates only identify an
-external scalar Laplacian with this value. -/
+
+
+
 def scalarLapTraceAt
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -611,8 +605,8 @@ theorem scalarLapTraceAt_eq_firstTwo
       metricTraceFirstTwo0SAt (I := I) g hessF Fin.elim0 := by
   rw [scalarLapTraceAt, traceFirstTwo_elim0]
 
-/-- A supplied scalar second-derivative tensor realizes the scalar Laplacian
-as its intrinsic metric trace at `x`. -/
+
+
 def ScalarLaplacianRealizesTraceAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -624,8 +618,8 @@ def ScalarLaplacianRealizesTraceAt
   laplacian (I := I) cov g f x =
     metricTraceFirstTwo0SAt (I := I) g hessF Fin.elim0
 
-/-- Basis-coordinate compatibility version of
-`ScalarLaplacianRealizesTraceAt`. -/
+
+
 def ScalarLaplacianRealizesTraceAtInBasis
     {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -639,8 +633,8 @@ def ScalarLaplacianRealizesTraceAtInBasis
   laplacian (I := I) cov g f x =
     metricTrace0S2InBasis (I := I) basis gInv hessF Fin.elim0
 
-/-- Convert an explicit intrinsic scalar Hessian trace equality into the scalar
-Laplacian trace realization predicate. -/
+
+
 theorem scalar_laplacian_trace_of_hessian
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -654,7 +648,7 @@ theorem scalar_laplacian_trace_of_hessian
     ScalarLaplacianRealizesTraceAt (I := I) cov g f hessF :=
   htrace
 
-/-- Direct-object bridge into the scalar-Laplacian trace realization predicate. -/
+
 theorem scalar_laplacian_trace_of_pair
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -669,8 +663,8 @@ theorem scalar_laplacian_trace_of_pair
   unfold ScalarLaplacianRealizesTraceAt
   rw [htrace, scalarLapTraceAt_eq_firstTwo]
 
-/-- A scalar-Laplacian trace realization is exactly equality with the direct
-Hessian trace object. -/
+
+
 theorem ScalarLaplacianRealizesTraceAt.eq_trace
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -685,9 +679,9 @@ theorem ScalarLaplacianRealizesTraceAt.eq_trace
   rw [h, traceFirstTwo_elim0]
   rfl
 
-/-- If the first two slots of a higher covariant tensor agree with a scalar
-Hessian candidate after freezing the remaining slots, then the corresponding
-metric trace is the scalar Laplacian realized by that Hessian. -/
+
+
+
 theorem lapTrace_of_slots
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -727,7 +721,7 @@ theorem lapTrace_of_slots
   exact htrace.trans
     ((ScalarLaplacianRealizesTraceAt.eq_trace (I := I) cov g f hessF hlap).symm)
 
-/-- A basis-coordinate scalar trace realization follows from the intrinsic one. -/
+
 theorem ScalarLaplacianRealizesTraceAt.toInBasis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -743,8 +737,8 @@ theorem ScalarLaplacianRealizesTraceAt.toInBasis
   unfold ScalarLaplacianRealizesTraceAtInBasis
   rw [h, metricTrace0S2InBasis_eq_metricTrace (I := I) g basis gInv hinv hessF Fin.elim0]
 
-/-- A chosen family of smooth vector fields realizes a pointwise tangent basis
-at `x`. -/
+
+
 def SmoothBasisFieldsAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -827,12 +821,12 @@ private theorem hessian_component_eq_inner_cov_gradient
           (basis j) := by
             rw [hfields i, hfields j]
 
-/-- Metric-compatible Hessian trace theorem for the scalar Laplacian.
 
-Mathematically, this is the identity
-`div(grad f) = tr_g (∇ df)`. Metric compatibility rewrites
-`(∇_X df)(Y)` as `g(∇_X grad f, Y)`, and the basis inverse turns the metric
-trace of that bilinear form into `trace (∇ grad f)`. -/
+
+
+
+
+
 theorem scalarLaplacianRealizesTraceAt_of_nablaDu
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -877,7 +871,7 @@ theorem scalarLaplacianRealizesTraceAt_of_nablaDu
     (I := I) cov g hmc basis f duSec hessF X hfields hdu hHess hgrad i j]
   rfl
 
-/-- Direct object-level version of `scalarLaplacianRealizesTraceAt_of_nablaDu`. -/
+
 theorem scalarLapTraceAt_of_nablaDu
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -903,11 +897,11 @@ theorem scalarLapTraceAt_of_nablaDu
     (scalarLaplacianRealizesTraceAt_of_nablaDu (I := I) cov g hmc basis gInv
       hinv f duSec hessF X hfields hdu hHess hgrad)
 
-/-- Canonical smooth-scalar producer for the scalar Laplacian trace identity.
 
-For a smooth scalar `f`, the canonical one-form `duSec f` and canonical Hessian
-section `hessianSec f` supply the realization inputs needed by the pointwise
-trace theorem. -/
+
+
+
+
 theorem scalarLap_canon
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -927,7 +921,8 @@ theorem scalarLap_canon
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
     fun k l =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x)
   let X :
       CoordinateIdx (𝕜 := Real) E ->
@@ -944,15 +939,15 @@ theorem scalarLap_canon
         (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
         x (basis i)).choose_spec
   exact scalarLaplacianRealizesTraceAt_of_nablaDu (I := I) cov g hmc basis gInv
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    (inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x)
     f (duSec (I := I) f hf)
     (fun y : M => hessianSec (I := I) cov hcov f hf y)
     X hfields (duSec_realizes (I := I) f hf)
     (hessianSec_realizesAt (I := I) cov hcov f hf x) hgrad
 
-/-- Canonical smooth-scalar producer with gradient regularity derived from
-smoothness of the scalar. -/
+
+
 theorem scalarLap_smooth
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -968,8 +963,8 @@ theorem scalarLap_smooth
   exact scalarLap_canon (I := I) cov hcov g hmc f hf
     (gradientFun_mdiffAt (I := I) g hf x)
 
-/-- The difference of two scalar Laplacians splits into the change of metric
-trace on the reference Hessian and the connection-difference correction. -/
+
+
 theorem lap_sub_conn
     [T2Space M]
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1023,10 +1018,10 @@ theorem lap_sub_conn
     MetricFiberData.inner, map_sub]
   ring
 
-/-- Global direct-object scalar Laplacian trace theorem.
 
-This packages the pointwise theorem by choosing, at each point, a coordinate
-basis and smooth section representatives of its basis vectors. -/
+
+
+
 theorem lapTrace_nablaSec
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1050,7 +1045,8 @@ theorem lapTrace_nablaSec
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) y
   let gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
     fun k l =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g y k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g y k
+        l
         (extChartAt I y y)
   let X :
       CoordinateIdx (𝕜 := Real) E ->
@@ -1067,7 +1063,8 @@ theorem lapTrace_nablaSec
         (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
         y (basis i)).choose_spec
   exact scalarLapTraceAt_of_nablaDu (I := I) cov g hmc basis gInv
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g y)
+    (inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g y)
     f duSec hessF X hfields hdu (hHess y) (hgrad y)
 
 end DifferentialGeometry.Integral.Connection

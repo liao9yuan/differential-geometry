@@ -3,16 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Metric derivative norms on flat nested open carriers
 
-This file combines ordinary open-subtype locality with diffeomorphism pullback
-naturality to compare a metric on an open carrier with its flat restriction to
-a smaller ambient open carrier.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,14 +20,15 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open TopologicalSpace
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem codRestr_mdiffAt
     {A B : Type*} [TopologicalSpace A] [ChartedSpace H A]
     [TopologicalSpace B] [ChartedSpace H B]
@@ -71,6 +70,8 @@ noncomputable def flatNestedDiffeo {U V : Opens M} (hVU : V ≤ U) :
     exact ((contMDiff_subtype_val (I := I) (U := U)).comp
       (contMDiff_subtype_val (I := I) (U := nestedOpen hVU))).contMDiffAt
 
+omit [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem flatNested_mfderiv {U V : Opens M} (hVU : V ≤ U) (x : V) :
     mfderiv I I (flatNestedDiffeo (I := I) hVU : V → nestedOpen hVU) x =
       ContinuousLinearMap.id Real E := by
@@ -89,6 +90,8 @@ private theorem flatNested_mfderiv {U V : Opens M} (hVU : V ≤ U) (x : V) :
     mfderiv_subtype_val (I := I) (nestedOpen hVU) (F x)] at hcomp
   simpa [F] using hcomp.symm
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem metric_ext
     {U : Opens M} {g g' : SmoothRiemannianMetric I U}
     (h : ∀ (x : U) (v w : TangentSpace I x), g.inner x v w = g'.inner x v w) :
@@ -100,6 +103,8 @@ private theorem metric_ext
   subst hi
   rfl
 
+omit [T2Space M] [SigmaCompactSpace M] [CompleteSpace E]
+    [NeZero (Module.finrank ℝ E)] in
 /-- Flat restriction to a smaller ambient open carrier is the pullback of the
 ordinary restriction to the corresponding nested open subtype. -/
 theorem restrictSubset_pull
@@ -120,6 +125,7 @@ theorem restrictSubset_pull
     flatNested_mfderiv (I := I)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_eq_of_pull
     {P Q : Type*} [TopologicalSpace P] [ChartedSpace H P]
     [TopologicalSpace Q] [ChartedSpace H Q]
@@ -145,8 +151,10 @@ private theorem norm_eq_of_pull
   exact metricDerivNorm_pullback (E := E) (H := H) (I := I)
     (M := P) (N := Q) gk gInf gRef F a x
 
-/-- Pointwise `metricDerivNorm` is unchanged by flat restriction from an open subtype `U` to
-a smaller ambient open subtype `V`. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDerivNorm_flat
     [I.Boundaryless] {U V : Opens M} (hVU : V ≤ U)
     [SigmaCompactSpace U] [T2Space U]

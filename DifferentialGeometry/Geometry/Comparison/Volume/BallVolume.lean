@@ -4,16 +4,15 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Ball-volume wrappers for capped normal-coordinate comparison
 
-This file starts Stage V1d of the volume-comparison lane.  It only converts the
-V1c normal-coordinate density upper bound into a model-ball upper bound under an
-explicit normal-coordinate image containment hypothesis.  Injectivity-radius
-and geodesic ball containment producers are intentionally not hidden here.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,8 +30,8 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 open Bundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -46,20 +45,21 @@ section BallUpper
 variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
-/-- Global pointwise Rm04 norm bound for the fixed metric.
 
-This is an honest geometric input for local volume comparison, not a producer:
-application layers should supply it from compactness, curvature, or flow
-hypotheses. -/
+
+
+
+
 def Rm04GlobalBound (g : SmoothRiemannianMetric I M) (Rm : ℝ) : Prop :=
   ∀ q : M,
     Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
       (DifferentialGeometry.Integral.Connection.metricRm04At
         (I := I) (M := M) g q)) ≤ Rm
 
-/-- Model-Haar measure of a positive-radius model ball, scaled from the unit
-ball.  This is the V1d scaling bridge consumed after the Jacobian bound has
-reduced the Riemannian volume estimate to a model-ball measure. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma modelHaar_ball {R : ℝ} (hR : 0 < R) :
     (modelHaar (E := E)) (Metric.ball (0 : E) R) =
       ENNReal.ofReal (R ^ Module.finrank ℝ E) *
@@ -68,8 +68,9 @@ lemma modelHaar_ball {R : ℝ} (hR : 0 < R) :
     (MeasureTheory.Measure.addHaar_ball_of_pos
       (μ := modelHaar (E := E)) (x := (0 : E)) hR)
 
-/-- A model ball with radius below the normal-coordinate `C²` radius is
-contained in the normal-chart target. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma ball_tgt_of_radius
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) :
@@ -79,13 +80,14 @@ lemma ball_tgt_of_radius
     simpa [Metric.mem_ball, dist_eq_norm] using hw
   exact ball_subset_normalChartAt_target (I := I) g p (hwR.trans_le hR)
 
-/-- V1d lower-bound shell from a pointwise normal-coordinate density lower
-bound.
 
-If the normal-chart density is bounded below by a constant on the
-normal-coordinate image of a measurable set, then the Riemannian volume is
-bounded below by that constant times the model-Haar measure of the image.  The
-future V1c lower determinant estimate supplies the density hypothesis. -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem vol_ge_of_density
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -117,8 +119,9 @@ theorem vol_ge_of_density
       intro w hw
       exact ENNReal.ofReal_le_ofReal (hdens w hw)
 
-/-- V1d upper-bound shell from a pointwise normal-coordinate density upper
-bound and a model-ball containment for the normal-coordinate image. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem vol_le_ball_of_density
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -152,8 +155,10 @@ theorem vol_le_ball_of_density
     _ ≤ ENNReal.ofReal C * (modelHaar (E := E)) (Metric.ball (0 : E) R) := by
       exact mul_le_mul_right (MeasureTheory.measure_mono hA_ball) (ENNReal.ofReal C)
 
-/-- A model ball contained in the normal-chart target has measurable inverse
-normal-coordinate image. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma coordBall_meas
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hball_target : Metric.ball (0 : E) R ⊆ (normalChartAt (I := I) g p).target) :
@@ -164,12 +169,12 @@ lemma coordBall_meas
       Metric.isOpen_ball hball_target
   exact hopen.measurableSet
 
-/-- V1d upper-bound shell.
 
-If the normal-coordinate image of a measurable set is contained in a model ball
-and the endpoint radial Jacobi fields satisfy a uniform length bound there, then
-the Riemannian volume of the set is bounded by the V1c density constant times
-the model-Haar measure of that ball. -/
+
+
+
+
+
 theorem vol_le_ball_of_len
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -203,10 +208,10 @@ theorem vol_le_ball_of_len
       by
         gcongr
 
-/-- Radius-capped form of `vol_le_ball_of_len`.
 
-If the model ball controlling the normal-coordinate image lies inside the
-Jacobi-valid radius, the separate radius-containment hypothesis is automatic. -/
+
+
+
 theorem vol_le_ball_of_len_radius
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -230,12 +235,12 @@ theorem vol_le_ball_of_len_radius
     exact Metric.mem_ball.mpr ((Metric.mem_ball.mp (hA_ball hw)).trans_le hR)
   exact vol_le_ball_of_len (I := I) g p hA_meas hA_source hB hA_rad hA_ball hJ
 
-/-- Normal-coordinate model-ball upper bound.
 
-This specializes the V1d upper shell to the image of a model ball under the
-inverse normal chart.  The theorem keeps measurability, chart-target
-containment, and Jacobi length control explicit; later V1d producers supply
-those hypotheses from injectivity-radius and Grönwall inputs. -/
+
+
+
+
+
 theorem coordBall_vol_le
     (g : SmoothRiemannianMetric I M) (p : M)
     {B R : ℝ} (hB : 0 ≤ B)
@@ -271,8 +276,8 @@ theorem coordBall_vol_le
     hA_meas hA_source hB hR hA_ball
     (fun w hw => hJ w (hA_ball hw))
 
-/-- Normal-coordinate model-ball upper bound with measurability discharged from
-the chart-target containment hypothesis. -/
+
+
 theorem coordBall_vol_le_tgt
     (g : SmoothRiemannianMetric I M) (p : M)
     {B R : ℝ} (hB : 0 ≤ B)
@@ -292,10 +297,10 @@ theorem coordBall_vol_le_tgt
   coordBall_vol_le (I := I) g p hB hR hball_target
     (coordBall_meas (I := I) g p hball_target) hJ
 
-/-- Scaled normal-coordinate model-ball upper bound.
 
-This is the target-contained coordinate-ball estimate with the model-Haar ball
-rewritten as `R ^ finrank` times the unit model-ball measure. -/
+
+
+
 theorem coordBall_vol_scale
     (g : SmoothRiemannianMetric I M) (p : M)
     {B R : ℝ} (hB : 0 ≤ B)
@@ -317,8 +322,8 @@ theorem coordBall_vol_scale
   simpa [modelHaar_ball (E := E) hRpos] using
     coordBall_vol_le_tgt (I := I) g p hB hR hball_target hJ
 
-/-- Scaled coordinate-ball upper bound with chart-target containment discharged
-from the `C²` radius bound. -/
+
+
 theorem coordBall_vol_scale_c2
     (g : SmoothRiemannianMetric I M) (p : M)
     {B R : ℝ} (hB : 0 ≤ B)
@@ -339,11 +344,12 @@ theorem coordBall_vol_scale_c2
   coordBall_vol_scale (I := I) g p hB hRpos hR
     (ball_tgt_of_radius (I := I) g p hR) hJ
 
-/-- Normal-coordinate model-ball lower bound from a density lower bound.
 
-This specializes `vol_ge_of_density` to the inverse normal-coordinate image of
-a model ball.  The target-containment hypothesis makes the normal-coordinate
-image exactly that model ball. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem coordBall_vol_ge
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R : ℝ}
@@ -382,7 +388,8 @@ theorem coordBall_vol_ge
   rw [hA_image] at hge
   simpa [φ] using hge
 
-/-- Scaled coordinate-ball lower bound from a density lower bound. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem coordBall_vol_ge_sc
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R : ℝ} (hRpos : 0 < R)
@@ -397,8 +404,8 @@ theorem coordBall_vol_ge_sc
   simpa [modelHaar_ball (E := E) hRpos] using
     coordBall_vol_ge (I := I) g p hball_target hdens
 
-/-- Scaled coordinate-ball lower bound with chart-target containment discharged
-from the `C²` radius bound. -/
+
+
 theorem coordBall_vol_ge_sc_c2
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R : ℝ} (hRpos : 0 < R)
@@ -415,13 +422,6 @@ theorem coordBall_vol_ge_sc_c2
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Normal-coordinate ball containment in the intrinsic Riemannian-distance
-ball, assuming explicit small-vector agreement with the intrinsic exponential.
-
-This is the V1d lower-containment producer in its reusable form: chart inverse
-points are radial exponential endpoints, and the radial length bound places
-them in `smallNormalBall`.  A later wrapper discharges the agreement hypothesis
-from the local `expMapIntrinsic = expMap` radius. -/
 theorem coordBall_subset_smallNormalBall_of_agree
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -457,13 +457,6 @@ theorem coordBall_subset_smallNormalBall_of_agree
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Existence form of the normal-coordinate lower-containment radius.
-
-There is a positive local agreement radius such that every coordinate ball
-whose `g_p`-radius is below both that agreement radius and `s` maps into the
-intrinsic Riemannian-distance ball of radius `s`.  This is still a local
-normal-coordinate containment statement, not the final injectivity-radius
-metric-ball theorem. -/
 theorem exists_coordBall_subset_smallNormalBall
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -487,12 +480,13 @@ theorem exists_coordBall_subset_smallNormalBall
   exact coordBall_subset_smallNormalBall_of_agree (I := I) g hEnorm p
     hball_target (fun w hw => hagree (hρball w hw)) hgs
 
-/-- Intrinsic Riemannian-distance ball lower-volume consumer for V1d.
 
-Once a target-contained coordinate ball is known to lie in `smallNormalBall p s`,
-the coordinate-ball lower estimate transfers to the intrinsic ball by measure
-monotonicity.  The containment is supplied by
-`coordBall_subset_smallNormalBall_of_agree` or its existence-radius wrapper. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smallNormalBall_vol_ge_sc
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -511,8 +505,8 @@ theorem smallNormalBall_vol_ge_sc
     (coordBall_vol_ge_sc (I := I) g p hRpos hball_target hdens)
     (MeasureTheory.measure_mono hcoord_subset)
 
-/-- Intrinsic Riemannian-distance ball lower-volume consumer with the
-chart-target containment discharged from the `C²` radius. -/
+
+
 theorem smallNormalBall_vol_ge_sc_c2
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -532,14 +526,6 @@ theorem smallNormalBall_vol_ge_sc_c2
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged local lower-volume theorem for intrinsic Riemannian-distance balls.
-
-There is a positive local agreement radius `ρ` such that, if the coordinate
-model ball lies below the `C²` radius, below `ρ` in `g_p`-radius, and below the
-target intrinsic-ball radius `s`, then a density lower bound on that coordinate
-ball gives the scaled lower volume estimate for `smallNormalBall p s`.  This is
-the local V1d lower theorem before converting `smallNormalBall` to the final
-realized `Metric.ball` formulation. -/
 theorem exists_smallNormalBall_vol_ge_sc
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -570,12 +556,9 @@ theorem exists_smallNormalBall_vol_ge_sc
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic Riemannian-distance ball lies in the realized metric ball.
-
-For the metric-space structure `HopfRinow.riemMetricSpace`, `dist` is the
-finite real value of `riemannianEDist`.  Thus `riemannianEDist < ofReal s`
-implies `dist < s`.  This is the local bridge used to turn the
-`smallNormalBall` lower theorem into the final `Metric.ball` formulation. -/
+omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem smallNormalBall_subset_metricBall
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -593,12 +576,9 @@ theorem smallNormalBall_subset_metricBall
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The realized metric ball lies in the intrinsic Riemannian-distance ball.
-
-This is the reverse bridge to `smallNormalBall_subset_metricBall`: finite
-Riemannian distance and `dist = toReal riemannianEDist` convert `dist < s` back
-to `riemannianEDist < ofReal s`.  It is useful for replacing `smallNormalBall`
-by the final realized metric ball when statements need equality of carriers. -/
+omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem metricBall_subset_smallNormalBall
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -617,8 +597,8 @@ theorem metricBall_subset_smallNormalBall
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Realized Hopf-Rinow metric balls are measurable for the Borel structure
-used by the Riemannian volume measure. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem metricBall_meas
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -632,13 +612,6 @@ theorem metricBall_meas
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged local lower-volume theorem for the realized Riemannian metric ball.
-
-This composes the local `smallNormalBall` lower theorem with
-`smallNormalBall_subset_metricBall`.  It is still conditional on a coordinate
-ball radius, a local intrinsic/exponential agreement radius, and a density lower
-bound; the later V1c Gronwall lower-Jacobian theorem supplies that density
-producer. -/
 theorem exists_metricBall_vol_ge_sc_local
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -670,6 +643,8 @@ theorem exists_metricBall_vol_ge_sc_local
     (hsmall hRpos hR hρball hgs hdens)
     (MeasureTheory.measure_mono (smallNormalBall_subset_metricBall (I := I) (M := M)))
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma norm_le_sqrt_div_sqrt_coercive
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     ‖x‖ ≤ Real.sqrt (g.inner p x x) / Real.sqrt (gpCoerciveConst (I := I) g p) := by
@@ -687,6 +662,8 @@ private lemma norm_le_sqrt_div_sqrt_coercive
   rw [le_div_iff₀ hsc_pos, mul_comm]
   exact hkey
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma sqrt_inner_le_opNorm_const
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     Real.sqrt (g.inner p x x) ≤ (Real.sqrt ‖g.inner p‖ + 1) * ‖x‖ := by
@@ -717,6 +694,7 @@ private noncomputable def basisNormSupBV : ℝ :=
       exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun k => ‖(chartModelBasis E) k‖)
 
+omit [CompleteSpace E] in
 private lemma basisNormSupBV_nonneg : 0 ≤ basisNormSupBV (E := E) := by
   classical
   unfold basisNormSupBV
@@ -728,6 +706,7 @@ private lemma basisNormSupBV_nonneg : 0 ≤ basisNormSupBV (E := E) := by
   exact hnn.trans (Finset.le_sup'
     (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
 
+omit [CompleteSpace E] in
 private lemma norm_basis_le_supBV
     (k : Fin (Module.finrank ℝ E)) :
     ‖(chartModelBasis E) k‖ ≤ basisNormSupBV (E := E) := by
@@ -737,6 +716,8 @@ private lemma norm_basis_le_supBV
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 private lemma exists_basis_upper_const
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ A : ℝ, ∀ k : Fin (Module.finrank ℝ E),
@@ -747,6 +728,8 @@ private lemma exists_basis_upper_const
     (mul_le_mul_of_nonneg_left (norm_basis_le_supBV (E := E) k)
       (by nlinarith [Real.sqrt_nonneg ‖g.inner p‖]))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma exists_metric_upper_launch_const
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ {R : ℝ}, 0 ≤ R →
@@ -822,14 +805,6 @@ private lemma exists_pos_le_mul_lt {C s R : ℝ}
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Small realized metric balls lie in the normal-chart source with controlled
-normal coordinates.
-
-The producer uses Hopf--Rinow minimizing vectors.  If the metric-ball radius
-`s` is below the local intrinsic/ordinary exponential agreement radius and the
-`g_p` normal-coordinate radius, and the Euclidean model radius `R` is strictly
-above `s / sqrt(gpCoerciveConst)`, then every point of `Metric.ball p s` is
-represented by a normal coordinate vector in `Metric.ball 0 R`. -/
 theorem metricBall_chartCtrl
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -908,14 +883,14 @@ theorem metricBall_chartCtrl
     rintro z ⟨y, hy, rfl⟩
     exact (hpoint y hy).2⟩
 
-/-- Metric-ball upper bound consumer for V1d.
 
-This theorem does not prove the hard minimizing-geodesic containment.  It says
-that once a metric ball lies in the normal-chart source and its normal-coordinate
-image lies in a controlled model ball below the `C²` radius, the V1c radial
-Jacobi length bound integrates to the desired upper estimate.  The next V1d
-producer supplies the two containment hypotheses from injectivity-radius and
-minimizing-geodesic inputs. -/
+
+
+
+
+
+
+
 theorem metricBall_vol_le [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
     {B R s : ℝ} (hB : 0 ≤ B)
@@ -939,12 +914,12 @@ theorem metricBall_vol_le [PseudoMetricSpace M]
     hball_meas hball_source hB hR hball_coord
     (fun w hw => hJ w (hball_coord hw))
 
-/-- Scaled metric-ball upper bound consumer for V1d.
 
-This is `metricBall_vol_le` with the model-Haar ball rewritten as
-`R ^ finrank *` the unit model-ball measure.  It still leaves the geometric
-metric-ball-to-normal-coordinate containment and the radial Jacobi bound as
-explicit producers. -/
+
+
+
+
+
 theorem metricBall_vol_scale [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
     {B R s : ℝ} (hB : 0 ≤ B)
@@ -968,7 +943,8 @@ theorem metricBall_vol_scale [PseudoMetricSpace M]
   simpa [modelHaar_ball (E := E) hRpos] using
     metricBall_vol_le (I := I) g p hB hR hball_meas hball_source hball_coord hJ
 
-/-- Scaled metric-ball upper bound from a pointwise density upper bound. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricBall_vol_scale_density [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
     {C R s : ℝ}
@@ -990,11 +966,6 @@ theorem metricBall_vol_scale_density [PseudoMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged local upper-volume theorem for small realized metric balls.
-
-This composes `metricBall_chartCtrl` with the scaled upper-volume consumer.
-It still leaves measurability of the realized metric ball and the V1c radial
-Jacobi endpoint-length bound explicit. -/
 theorem exists_metricBall_vol_scale_local
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1034,7 +1005,6 @@ theorem exists_metricBall_vol_scale_local
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged local upper-volume theorem from a pointwise density upper bound. -/
 theorem exists_metricBall_vol_le_dens_local
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1066,7 +1036,6 @@ theorem exists_metricBall_vol_le_dens_local
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local two-sided volume theorem from pointwise lower and upper density bounds. -/
 theorem exists_vol_two_dens
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1114,9 +1083,6 @@ theorem exists_vol_two_dens
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Two-radius local two-sided volume theorem from pointwise lower and upper
-density bounds.  The lower model ball radius `Rlo` and upper model ball radius
-`Rup` are kept separate. -/
 theorem exists_vol_two_dens_pairR
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1165,12 +1131,12 @@ theorem exists_vol_two_dens_pairR
     hlower hRlo_pos hRlo hρlo_ball' hgs hdensLower,
     hupper hRup_pos hsRup hsρup hsdiv hdensUpper⟩
 
-/-- Smooth radial extensions over a normal-coordinate model ball.
 
-For each launch vector in `Metric.ball 0 R`, `gamma w` is a globally `C²`
-curve that agrees with the usual radial curve on `Icc 0 b`.  This is the
-honest smooth-extension input needed before transporting or localizing frame
-data. -/
+
+
+
+
+
 structure RadialExtData
     (g : SmoothRiemannianMetric I M) (p : M) (R b : ℝ) where
   gamma : E → ℝ → M
@@ -1183,7 +1149,8 @@ structure RadialExtData
   eqOn : ∀ w ∈ Metric.ball (0 : E) R,
     Set.EqOn (gamma w) (radialCurve (I := I) g p w) (Set.Icc 0 b)
 
-/-- Uniformly chooses smooth radial extensions over a model ball. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radialExtData
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (hb1 : b ≤ 1)
@@ -1229,8 +1196,10 @@ lemma exists_radialExtData
     eqOn := fun w hw => (hgamma w hw).choose_spec.2.2.2 }
   exact ⟨D⟩
 
-/-- A radial extension agrees with the original radial curve as a germ at every
-time in the closed comparison interval. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialExt_eventuallyEq
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (D : RadialExtData (I := I) g p R b) :
@@ -1243,7 +1212,7 @@ lemma radialExt_eventuallyEq
   filter_upwards [isOpen_Ioo.mem_nhds htopen] with u hu
   exact D.eqOnNbhd w hw ⟨le_of_lt hu.1, le_of_lt hu.2⟩
 
-/-- Parallel orthonormal frame data along the smooth radial extensions. -/
+
 structure ExtFrameData
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1258,9 +1227,11 @@ attribute [instance] ExtFrameData.fintype
 attribute [instance] ExtFrameData.decidableEq
 attribute [instance] ExtFrameData.nonempty
 
-/-- Uniformly chooses parallel orthonormal frames along the smooth radial
-extensions.  This is still extension-frame data, not frame data along the
-original radial curves. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma exists_extFrameData
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1323,9 +1294,9 @@ lemma exists_extFrameData
   · intro w hw t ht i j
     simpa [Fd] using (hF w hw).2.2.2 t ht i.down j.down
 
-/-- Transport an extension-frame vector to the original radial curve on the
-time window where the extension agrees with that radial curve; outside the
-model ball or window, use the zero vector. -/
+
+
+
 def radialFrameOfExt
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1340,7 +1311,7 @@ def radialFrameOfExt
     else 0
   else 0
 
-/-- Frame data over a normal-coordinate model ball for the Rm04 volume package. -/
+
 structure Rm04FrameData
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M) (R b : ℝ) where
@@ -1354,9 +1325,9 @@ attribute [instance] Rm04FrameData.fintype
 attribute [instance] Rm04FrameData.decidableEq
 attribute [instance] Rm04FrameData.nonempty
 
-/-- `Rm04FrameData` carrier obtained from extension-frame data by pointwise
-transport on the equality interval.  Its derivative and parallelism fields are
-not automatic; those remain the next bridge. -/
+
+
+
 def rm04FrameDataOfExt
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1368,7 +1339,9 @@ def rm04FrameDataOfExt
   nonempty := inferInstance
   F := fun w i t => radialFrameOfExt (I := I) g D Fd w i t
 
-/-- The transported extension-frame carrier has the correct fibre cardinality. -/
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_card
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1386,8 +1359,10 @@ lemma rm04FrameDataOfExt_card
     Module.finrank ℝ E from rfl]
   simpa [rm04FrameDataOfExt] using h
 
-/-- The transported extension-frame carrier inherits orthonormality on the
-interval where the extension equals the original radial curve. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_ON
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1407,8 +1382,10 @@ lemma rm04FrameDataOfExt_ON
   rw [← hbase]
   simpa [rm04FrameDataOfExt, radialFrameOfExt, hw, htN] using hON w hw t ht i j
 
-/-- The transported extension-frame carrier agrees with the extension frame as
-model-space tangent vectors near every time in the comparison interval. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialFrameOfExt_evEq
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1425,8 +1402,10 @@ lemma radialFrameOfExt_evEq
     ⟨le_of_lt hs.1, le_of_lt hs.2⟩
   simp [rm04FrameDataOfExt, radialFrameOfExt, hw, hsN]
 
-/-- Parallelism transfers from extension-frame data to the transported
-radial-curve carrier by curve and section germ congruence. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_par
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1451,8 +1430,10 @@ lemma rm04FrameDataOfExt_par
     rfl
   simpa using hgoalE
 
-/-- Chart-representation differentiability transfers from extension-frame data
-to the transported radial-curve carrier by curve and section germ congruence. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_diff
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1472,8 +1453,9 @@ lemma rm04FrameDataOfExt_diff
   rw [hrep.differentiableAt_iff]
   exact hFdiff w hw i t ht
 
-/-- Radius-form producer for the `Rm04FrameData` package, routed through smooth
-radial extensions and then transported back to the original radial curves. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04FrameData_radius
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
@@ -1499,8 +1481,11 @@ lemma exists_rm04FrameData_radius
   · exact rm04FrameDataOfExt_ON (I := I) g Dext Fd hON
   · exact rm04FrameDataOfExt_diff (I := I) g Dext Fd hFdiff
 
-/-- Uniform frame data over a model ball, obtained by choosing the existing
-single-radial-curve parallel frame for each model point. -/
+
+
+omit [CompleteSpace E] in
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space (TangentBundle I M)] in
 lemma exists_rm04FrameData
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ} (hb : 0 < b)
@@ -1559,7 +1544,7 @@ lemma exists_rm04FrameData
   · intro w hw i t ht
     exact (hF w hw).2.1 i.down t ht
 
-/-- Proof package for the geometric hypotheses consumed by `exists_vol_two_rm04`. -/
+
 structure IsRm04VolHyp
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1618,9 +1603,9 @@ structure IsRm04VolHyp
             (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
               (a • (∑ i, v i • (chartModelBasis E) i))))) 1
 
-/-- Split-constant proof package for the geometric hypotheses consumed by
-`exists_vol_pair_rm04_at`.  The lower and upper scalar endpoint constants are
-kept separate as `Blo` and `Bhi`. -/
+
+
+
 structure IsRm04VolPairHyp
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1680,8 +1665,9 @@ structure IsRm04VolPairHyp
             (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
               (a • (∑ i, v i • (chartModelBasis E) i))))) 1
 
-/-- The `IsRm04VolHyp` radius fields give the local `C²` radial-curve
-regularity available on the time interval used by the package. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma IsRm04VolHyp.radialC2
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     {g : SmoothRiemannianMetric I M} {p : M}
@@ -1692,8 +1678,9 @@ lemma IsRm04VolHyp.radialC2
         (radialCurve (I := I) g p w) (Set.Icc (0 : ℝ) b) :=
   radialC2OnBallIcc (I := I) g p H.hRC2 H.hb1
 
-/-- The split-constant package carries the same radial `C²` radius data as the
-same-constant package. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma IsRm04VolPairHyp.radialC2
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     {g : SmoothRiemannianMetric I M} {p : M}
@@ -1704,8 +1691,9 @@ lemma IsRm04VolPairHyp.radialC2
         (radialCurve (I := I) g p w) (Set.Icc (0 : ℝ) b) :=
   radialC2OnBallIcc (I := I) g p H.hRC2 H.hb1
 
-/-- Radius and time bounds give the pointwise `C¹` radial-curve regularity
-needed by the Gronwall package. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialC1AtBall
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) (hb : b ≤ 1) :
@@ -1717,9 +1705,10 @@ lemma radialC1AtBall
   exact (radialCurve_contMDiffAt_Icc (I := I) g p w hb (hwR.trans_le hR) t ht).of_le
     (by norm_num)
 
-/-- Constructs the `IsRm04VolHyp` package while producing its frame data from
-the radius-form frame theorem.  All non-frame geometric and scalar inputs stay
-explicit. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_hyp
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1793,8 +1782,11 @@ lemma exists_rm04_hyp
     hmodelLe := hmodelLe
     hmodelGe := hmodelGe }⟩
 
-/-- Scales the fixed scalar model inputs to the common scale used by
-`IsRm04VolHyp`. -/
+
+
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma scalarModel_smul
     (g : SmoothRiemannianMetric I M) (p : M)
     {a K b A B : ℝ} (ha : 0 < a)
@@ -1824,8 +1816,11 @@ lemma scalarModel_smul
   obtain ⟨hinit, hle⟩ := basisModel_le_smul (I := I) g p ha hbasis hmodelLe
   exact ⟨hinit, hle, dirModel_ge_smul (I := I) g p ha hmodelGe⟩
 
-/-- Scales split lower/upper scalar model inputs to the common scale used by
-`IsRm04VolPairHyp`. -/
+
+
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma scalarModel_pair_smul
     (g : SmoothRiemannianMetric I M) (p : M)
     {a K b A Blo Bhi : ℝ} (ha : 0 < a)
@@ -1855,11 +1850,12 @@ lemma scalarModel_pair_smul
   obtain ⟨hinit, hle⟩ := basisModel_le_smul (I := I) g p ha hbasis hmodelLe
   exact ⟨hinit, hle, dirModel_ge_smul (I := I) g p ha hmodelGe⟩
 
-/-- Constructs the `IsRm04VolHyp` package from unscaled scalar model inputs.
 
-This is the scalar-model version of `exists_rm04_hyp`: frame data are still
-produced from the radius-form theorem, and the upper/lower scalar model
-assumptions are scaled internally. -/
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_scalar
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1905,8 +1901,9 @@ lemma exists_rm04_scalar
     hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hsmallBasis hsmallDir hlaunch
     hKbound hRm hinit hmodelLe' hmodelGe'
 
-/-- Constructs the split-constant `IsRm04VolPairHyp` package while producing
-its frame data from the radius-form frame theorem. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_pair_hyp
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1981,9 +1978,10 @@ lemma exists_rm04_pair_hyp
     hmodelLe := hmodelLe
     hmodelGe := hmodelGe }⟩
 
-/-- Constructs the split-constant package from unscaled scalar model inputs.
-Frame data are produced from the radius-form theorem, and the upper/lower
-scalar model assumptions are scaled internally. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_pair_scalar
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -2029,10 +2027,11 @@ lemma exists_rm04_pair_scalar
     hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hsmallBasis hsmallDir hlaunch
     hKbound hRm hinit hmodelLe' hmodelGe'
 
-/-- Chooses the common small scale needed by `IsRm04VolHyp`.
 
-The remaining geometric fields are supplied by the caller as a continuation
-that may depend on the chosen scale. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_scale
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -2047,7 +2046,8 @@ lemma exists_rm04_scale
   obtain ⟨a, ha, hsmallBasis, hsmallDir⟩ := basisUnitScaleSmall (E := E) hρ
   exact ⟨a, H a ha hsmallBasis hsmallDir⟩
 
-/-- Chooses the common small scale needed by `IsRm04VolPairHyp`. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_pair_scale
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -2064,7 +2064,6 @@ lemma exists_rm04_pair_scale
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local-regularity version of `exists_vol_two_rm04`. -/
 theorem exists_vol_two_rm04_at
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2181,8 +2180,6 @@ theorem exists_vol_two_rm04_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local two-sided volume theorem from the endpoint-closed Rm04 density package
-with separate lower and upper endpoint constants. -/
 theorem exists_vol_pair_rm04_at
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2299,11 +2296,6 @@ theorem exists_vol_pair_rm04_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Two-radius local volume theorem from the split Rm04 density package.
-
-The lower density is consumed on `Metric.ball 0 Rlo`, while the upper density is
-consumed on `Metric.ball 0 Rup`.  Shared radial-frame hypotheses are stated on
-the union of the two model balls. -/
 theorem exists_pairR_rm04_at
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2440,13 +2432,6 @@ theorem exists_pairR_rm04_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Two-radius volume theorem with launch, radial frames, and the Rm04 bound
-supplied from the radius-dependent global route.
-
-The lower radius `Rlo` is used only for the lower density and lower volume
-estimate.  The upper radius `Rup` supplies the shared frame data and the upper
-normal-coordinate containment, so this wrapper does not collapse back to the
-same-radius obstruction. -/
 theorem exists_pairR_rglobal
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2578,13 +2563,6 @@ theorem exists_pairR_rglobal
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one double-radius global Rm04 theorem with endpoint constants
-generated automatically.
-
-This keeps the lower and upper model radii explicit.  The lower endpoint
-constant is produced from the small-coefficient model theorem using the
-coefficient cap at `Rup`, because the shared launch/frame package is built on
-the upper model ball. -/
 theorem exists_pairR_rm1
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2668,14 +2646,6 @@ theorem exists_pairR_rm1
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Small-radius existence form of the double-radius time-one global Rm04
-volume theorem.
-
-For each global Rm04 bound and scalar initial upper bound, this chooses a small
-metric radius threshold.  Every smaller positive metric ball admits lower and
-upper model radii `Rlo` and `Rup` satisfying the double-radius volume bounds.
-The radii remain existential; this is the honest radius-selection wrapper, not
-the final explicit-constant comparison statement. -/
 theorem exists_pairR_small
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2759,13 +2729,6 @@ theorem exists_pairR_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Explicit scaled-radius form of the double-radius time-one global Rm04
-volume theorem.
-
-The theorem chooses fixed comparison constants `C`, `D`, and `Blo`.  For each
-global Rm04 bound and scalar initial bound, every sufficiently small metric
-radius `s` satisfies the two-sided estimate with lower model radius
-`s / (2 * C)` and upper model radius `D * s`. -/
 theorem exists_pairR_scaled
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2911,11 +2874,6 @@ theorem exists_pairR_scaled
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Explicit scaled-radius form of the double-radius time-one global Rm04
-volume theorem, with the model-frame initial scalar bound chosen automatically.
-
-The remaining theorem-facing geometric input is the global Rm04 bound `Rm`.
-The scalar constant `A` is now one of the produced comparison constants. -/
 theorem exists_pairR_autoA
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2963,11 +2921,6 @@ theorem exists_pairR_autoA
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Predicate-facing form of `exists_pairR_autoA`.
-
-The local comparison theorem now exposes the remaining curvature input through
-`Rm04GlobalBound`, while still choosing the scalar initial constant `A`
-internally. -/
 theorem exists_pairR_bound
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3011,8 +2964,6 @@ theorem exists_pairR_bound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged form of the split-constant Rm04 volume theorem using explicit frame
-data and a split proof package. -/
 theorem exists_vol_rm04_pair_pkg
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3050,8 +3001,6 @@ theorem exists_vol_rm04_pair_pkg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem with the common scale chosen
-automatically. -/
 theorem exists_vol_pair_scale
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3087,8 +3036,6 @@ theorem exists_vol_pair_scale
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem with frame data and scalar
-scaling chosen automatically. -/
 theorem exists_vol_pair_scalar
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3153,8 +3100,6 @@ theorem exists_vol_pair_scalar
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem with launch-speed, frame, and
-scalar scaling chosen automatically. -/
 theorem exists_vol_pair_launch
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3221,12 +3166,6 @@ theorem exists_vol_pair_launch
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem with launch speed bounded by
-the model radius through the fixed metric at `p`.
-
-This is the radius-dependent launch wrapper needed before a final capped
-ball-volume statement: the coefficient cap uses `(C * R)^2`, not the ambient
-normal-coordinate radius `ρ^2`. -/
 theorem exists_pair_rlaunch
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3297,8 +3236,6 @@ theorem exists_pair_rlaunch
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem with the radius-dependent
-launch speed and algebraic coefficient constant chosen automatically. -/
 theorem exists_pair_rcoeff
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3373,7 +3310,6 @@ theorem exists_pair_rcoeff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-dependent split-constant volume theorem from a global Rm04 bound. -/
 theorem exists_pair_rglobal
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3438,7 +3374,6 @@ theorem exists_pair_rglobal
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one specialization of the radius-dependent global Rm04 theorem. -/
 theorem exists_pair_rglobal1
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -3499,1541 +3434,6 @@ theorem exists_pair_rglobal1
     hBlo hBhi hRm_nonneg zero_le_one le_rfl le_rfl hRpos hRρ hRC2 hCRρ hgs hsR
     hsρ hsdiv hRmGlobal hbasis (by simpa [one_mul] using hmodelLe)
     (fun v hv => by simpa [one_mul] using hmodelGe v hv)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-dependent time-one global Rm04 theorem with the lower scalar model
-constant produced from a small curvature coefficient. -/
-theorem exists_pair_rrm1_ge
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ C κ Blo : ℝ, 0 < ρ ∧ 0 < C ∧ 0 < κ ∧ 0 < Blo ∧ ∀ {Rm A Bhi R s : ℝ},
-      0 ≤ Bhi → 0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      C * R < ρ →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2 ≤ κ →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2) * A) 1 ≤ Bhi →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, C, hρ, hC, hvol⟩ := exists_pair_rglobal1 (I := I) (M := M) g hEnorm p
-  obtain ⟨κ, Blo, hκ, hBlo, hmodelGe⟩ := exists_dirModel_ge1 (I := I) g p
-  refine ⟨ρ, C, κ, Blo, hρ, hC, hκ, hBlo, ?_⟩
-  intro Rm A Bhi R s hBhi hRm_nonneg hRpos hRρ hRC2 hCRρ hgs hsR hsρ hsdiv
-    hKcap hRmGlobal hbasis hmodelLe
-  have hK_nonneg :
-      0 ≤ Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2 := by
-    exact mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hRm_nonneg) (sq_nonneg (C * R))
-  exact hvol (Rm := Rm) (A := A) (Blo := Blo) (Bhi := Bhi) (R := R) (s := s)
-    hBlo.le hBhi hRm_nonneg hRpos hRρ hRC2 hCRρ hgs hsR hsρ hsdiv
-    hRmGlobal hbasis hmodelLe (hmodelGe hK_nonneg hKcap)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius-dependent time-one global Rm04 theorem with both endpoint scalar
-constants produced. -/
-theorem exists_pair_rrm1
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ C κ Blo : ℝ, 0 < ρ ∧ 0 < C ∧ 0 < κ ∧ 0 < Blo ∧ ∀ {Rm A R s : ℝ},
-      0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      C * R < ρ →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2 ≤ κ →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      let Bhi : ℝ :=
-        max
-          (A + gronwallBound 0
-            (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-              Rm * (C * R) ^ 2) 1)
-            ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-              Rm * (C * R) ^ 2) * A) 1)
-          0
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, C, κ, Blo, hρ, hC, hκ, hBlo, hvol⟩ :=
-    exists_pair_rrm1_ge (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, C, κ, Blo, hρ, hC, hκ, hBlo, ?_⟩
-  intro Rm A R s hRm_nonneg hRpos hRρ hRC2 hCRρ hgs hsR hsρ hsdiv hKcap
-    hRmGlobal hbasis
-  let Bhi : ℝ :=
-    max
-      (A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2) * A) 1)
-      0
-  have hBhi : 0 ≤ Bhi := by
-    dsimp [Bhi]
-    exact le_max_right _ _
-  have hmodelLe :
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * (C * R) ^ 2) * A) 1 ≤ Bhi := by
-    dsimp [Bhi]
-    exact le_max_left _ _
-  exact hvol (Rm := Rm) (A := A) (Bhi := Bhi) (R := R) (s := s) hBhi
-    hRm_nonneg hRpos hRρ hRC2 hCRρ hgs hsR hsρ hsdiv hKcap hRmGlobal hbasis
-    hmodelLe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem with the algebraic coefficient
-constant chosen from the Rm04 and radius bounds. -/
-theorem exists_vol_pair_coeff
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm b A Blo Bhi R s : ℝ},
-      0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * (b * A)) 1 ≤ Bhi →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        Blo ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_pair_launch (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm b A Blo Bhi R s hBlo hBhi hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2
-    hρball hgs hsR hsρ hsdiv hRm hbasis hmodelLe hmodelGe
-  let K : ℝ :=
-    Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) * Rm * ρ ^ 2
-  have hK : 0 ≤ K := by
-    exact mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hRm_nonneg) (sq_nonneg ρ)
-  have hKbound :
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 ≤ K := by
-    rfl
-  exact hvol (K := K) (Rm := Rm) (b := b) (A := A) (Blo := Blo) (Bhi := Bhi)
-    (R := R) (s := s) hBlo hBhi hK hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2
-    hρball hgs hsR hsρ hsdiv hKbound hRm hbasis (by simpa [K] using hmodelLe)
-    (by simpa [K] using hmodelGe)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem from an Rm04 norm bound on a
-region containing the radial comparison segments. -/
-theorem exists_vol_pair_regionRm
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm b A Blo Bhi R s : ℝ} {U : Set M},
-      0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        radialCurve (I := I) g p w t ∈ U) →
-      (∀ q ∈ U,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * (b * A)) 1 ≤ Bhi →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        Blo ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_pair_coeff (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm b A Blo Bhi R s U hBlo hBhi hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hcurve hRmU hbasis hmodelLe hmodelGe
-  refine hvol (Rm := Rm) (b := b) (A := A) (Blo := Blo) (Bhi := Bhi) (R := R)
-    (s := s) hBlo hBhi hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs hsR
-    hsρ hsdiv ?_ hbasis hmodelLe hmodelGe
-  intro w hw t ht
-  exact hRmU (radialCurve (I := I) g p w t) (hcurve w hw t ht)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Split-constant packaged Rm04 volume theorem from a global Rm04 norm bound. -/
-theorem exists_vol_pair_globalRm
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm b A Blo Bhi R s : ℝ},
-      0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * (b * A)) 1 ≤ Bhi →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        Blo ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_pair_regionRm (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm b A Blo Bhi R s hBlo hBhi hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hRmGlobal hbasis hmodelLe hmodelGe
-  exact hvol (Rm := Rm) (b := b) (A := A) (Blo := Blo) (Bhi := Bhi) (R := R)
-    (s := s) (U := Set.univ) hBlo hBhi hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2
-    hρball hgs hsR hsρ hsdiv (fun _ _ _ _ => Set.mem_univ _) (fun q _ => hRmGlobal q)
-    hbasis hmodelLe hmodelGe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one split-constant specialization of the global Rm04 volume theorem. -/
-theorem exists_vol_pair_globalRm1
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm A Blo Bhi R s : ℝ},
-      0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * A) 1 ≤ Bhi →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        Blo ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_pair_globalRm (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm A Blo Bhi R s hBlo hBhi hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ
-    hsdiv hRmGlobal hbasis hmodelLe hmodelGe
-  exact hvol (Rm := Rm) (b := 1) (A := A) (Blo := Blo) (Bhi := Bhi) (R := R) (s := s)
-    hBlo hBhi hRm_nonneg zero_le_one le_rfl le_rfl hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hRmGlobal hbasis (by simpa [one_mul] using hmodelLe)
-    (fun v hv => by simpa [one_mul] using hmodelGe v hv)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one global Rm04 split-constant volume theorem with the lower scalar
-model produced from a small curvature coefficient. -/
-theorem exists_vol_pair_rm1_ge
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ κ Blo : ℝ, 0 < ρ ∧ 0 < κ ∧ 0 < Blo ∧ ∀ {Rm A Bhi R s : ℝ},
-      0 ≤ Bhi → 0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 ≤ κ →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * A) 1 ≤ Bhi →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_pair_globalRm1 (I := I) (M := M) g hEnorm p
-  obtain ⟨κ, Blo, hκ, hBlo, hmodelGe⟩ := exists_dirModel_ge1 (I := I) g p
-  refine ⟨ρ, κ, Blo, hρ, hκ, hBlo, ?_⟩
-  intro Rm A Bhi R s hBhi hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv
-    hKcap hRmGlobal hbasis hmodelLe
-  have hK_nonneg :
-      0 ≤ Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 := by
-    exact mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hRm_nonneg) (sq_nonneg ρ)
-  exact hvol (Rm := Rm) (A := A) (Blo := Blo) (Bhi := Bhi) (R := R) (s := s)
-    hBlo.le hBhi hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv
-    hRmGlobal hbasis hmodelLe (hmodelGe hK_nonneg hKcap)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one global Rm04 split-constant volume theorem with both scalar endpoint
-constants produced.  The lower constant comes from small coefficient Gronwall
-positivity; the upper constant is chosen explicitly from the upper Gronwall
-expression. -/
-theorem exists_vol_pair_rm1_auto
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ κ Blo : ℝ, 0 < ρ ∧ 0 < κ ∧ 0 < Blo ∧ ∀ {Rm A R s : ℝ},
-      0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 ≤ κ →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      let Bhi : ℝ :=
-        max
-          (A + gronwallBound 0
-            (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-              Rm * ρ ^ 2) 1)
-            ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-              Rm * ρ ^ 2) * A) 1)
-          0
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (Bhi * Bhi) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, κ, Blo, hρ, hκ, hBlo, hvol⟩ :=
-    exists_vol_pair_rm1_ge (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, κ, Blo, hρ, hκ, hBlo, ?_⟩
-  intro Rm A R s hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hKcap
-    hRmGlobal hbasis
-  let Bhi : ℝ :=
-    max
-      (A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * A) 1)
-      0
-  have hBhi : 0 ≤ Bhi := by
-    dsimp [Bhi]
-    exact le_max_right _ _
-  have hmodelLe :
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * A) 1 ≤ Bhi := by
-    dsimp [Bhi]
-    exact le_max_left _ _
-  exact hvol (Rm := Rm) (A := A) (Bhi := Bhi) (R := R) (s := s) hBhi
-    hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hKcap hRmGlobal hbasis
-    hmodelLe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local two-sided volume theorem from the endpoint-closed Rm04 density package. -/
-theorem exists_vol_two_rm04
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {a K Rm Vb b A B R s : ℝ},
-      0 ≤ B → 0 < a → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb → 0 ≤ b →
-      b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R →
-      R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < ρ) →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R, Real.sqrt (g.inner p w w) ≤ Vb) →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * Vb ^ 2 ≤ K →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p w)) →
-      ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t : ℝ,
-        Fintype.card ι = Module.finrank ℝ (TangentSpace I (radialCurve (I := I) g p w t))) →
-      (F : ∀ w : E, ι → ∀ t : ℝ, TangentSpace I (radialCurve (I := I) g p w t)) →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) b,
-        covDerivAlong (I := I) g (radialCurve (I := I) g p w) (F w i) t = 0) →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t ∈ Set.Icc (0 : ℝ) b, ∀ i j,
-        g.inner (radialCurve (I := I) g p w t) (F w i t) (F w j t) =
-          if i = j then (1 : ℝ) else 0) →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) b,
-        DifferentiableAt ℝ
-          (chartRepAt (I := I) (radialCurve (I := I) g p w) (F w i) t) t) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        a * B ≤ Real.sqrt
-            (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-              (a • (∑ i, v i • (chartModelBasis E) i))) -
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt
-                (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                  (a • (∑ i, v i • (chartModelBasis E) i))))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, h⟩ := exists_vol_two_rm04_at (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro a K Rm Vb b A B R s hBnn ha hK hRm_nonneg hVb hb0 hb1 h1b hRpos hRρ
-    hRC2 hρball hgs hsR hsρ hsdiv hsmallBasis hsmallDir hlaunch hKbound hRm hγ
-    ι _ _ _ hcard F hpar hON hFdiff hinit hmodelLe hmodelGe
-  exact h hBnn ha hK hRm_nonneg hVb hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hsmallBasis hsmallDir hlaunch hKbound hRm
-    (fun w hw _ _ => (hγ w hw).contMDiffAt) hcard F hpar hON hFdiff
-    hinit hmodelLe hmodelGe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged form of `exists_vol_two_rm04` using explicit frame data and a proof package. -/
-theorem exists_vol_rm04_pkg
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {a K Rm Vb b A B R s : ℝ},
-      (D : Rm04FrameData (I := I) g p R b) →
-      IsRm04VolHyp (I := I) g p D ρ a K Rm Vb A B s →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_two_rm04_at (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro a K Rm Vb b A B R s D H
-  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-  letI : Fintype D.ι := D.fintype
-  letI : DecidableEq D.ι := D.decidableEq
-  letI : Nonempty D.ι := D.nonempty
-  exact hvol H.hBnn H.ha H.hK H.hRm_nonneg H.hVb H.hb0 H.hb1 H.h1b
-    H.hRpos H.hRρ H.hRC2 H.hρball H.hgs H.hsR H.hsρ H.hsdiv
-    H.hsmallBasis H.hsmallDir H.hlaunch H.hKbound H.hRm H.hγ
-    H.hcard D.F H.hpar H.hON H.hFdiff H.hinit H.hmodelLe H.hmodelGe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem with the common scale chosen automatically.
-
-The caller still proves every non-scale field of `IsRm04VolHyp` after the
-scale is chosen. -/
-theorem exists_vol_scale
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm Vb b A B R s : ℝ},
-      (D : Rm04FrameData (I := I) g p R b) →
-      (∀ a : ℝ, 0 < a →
-        (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < ρ) →
-        (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-          ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < ρ) →
-        IsRm04VolHyp (I := I) g p D ρ a K Rm Vb A B s) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_rm04_pkg (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro K Rm Vb b A B R s D H
-  obtain ⟨a, Ha⟩ := exists_rm04_scale (I := I) g p D hρ H
-  exact hvol D Ha
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem with frame data and scalar scaling chosen
-automatically.
-
-The caller still supplies the launch, Rm04-coefficient, and unscaled scalar
-model fields.  Radial-curve pointwise regularity is produced from the radius
-and time bounds. -/
-theorem exists_vol_scalar
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm Vb b A B R s : ℝ},
-      0 ≤ B → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R, Real.sqrt (g.inner p w w) ≤ Vb) →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * Vb ^ 2 ≤ K →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_rm04_pkg.{_, _, _, 0} (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro K Rm Vb b A B R s hBnn hK hRm_nonneg hVb hb0 hb1 h1b hRpos hRρ
-    hRC2 hρball hgs hsR hsρ hsdiv hlaunch hKbound hRm hbasis hmodelLe hmodelGe
-  obtain ⟨a, ha, hsmallBasis, hsmallDir⟩ := basisUnitScaleSmall (E := E) hρ
-  obtain ⟨D, H⟩ :=
-    exists_rm04_scalar.{_, _, _, 0} (I := I) g p hBnn ha hK hRm_nonneg hVb hb0 hb1 h1b
-      hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hsmallBasis hsmallDir hlaunch
-      hKbound hRm hbasis hmodelLe hmodelGe
-  exact hvol D H
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem with launch-speed, frame, and scalar scaling
-chosen automatically.
-
-The remaining geometric inputs are the Rm04 coefficient bound and unscaled
-scalar model fields. -/
-theorem exists_vol_launch
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm b A B R s : ℝ},
-      0 ≤ B → 0 ≤ K → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 ≤ K →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0 (max K 1)
-              (K * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_scalar (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro K Rm b A B R s hBnn hK hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2
-    hρball hgs hsR hsρ hsdiv hKbound hRm hbasis hmodelLe hmodelGe
-  let Vb : ℝ := ρ
-  have hVb : 0 ≤ Vb := by
-    exact hρ.le
-  have hlaunch : ∀ w ∈ Metric.ball (0 : E) R, Real.sqrt (g.inner p w w) ≤ Vb := by
-    intro w hw
-    exact le_of_lt (by simpa [Vb] using hρball w hw)
-  exact hvol (K := K) (Rm := Rm) (Vb := Vb) (b := b) (A := A) (B := B)
-    (R := R) (s := s) hBnn hK hRm_nonneg hVb hb0 hb1 h1b hRpos hRρ hRC2
-    hρball hgs hsR hsρ hsdiv hlaunch (by simpa [Vb] using hKbound) hRm hbasis
-    hmodelLe hmodelGe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem with the algebraic coefficient constant chosen
-from the Rm04 and radius bounds.
-
-The remaining geometric input is the pointwise Rm04 bound; scalar model fields
-are required for the chosen coefficient constant. -/
-theorem exists_vol_coeff
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm b A B R s : ℝ},
-      0 ≤ B → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * (b * A)) 1 ≤ B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_launch (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm b A B R s hBnn hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hRm hbasis hmodelLe hmodelGe
-  let K : ℝ :=
-    Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) * Rm * ρ ^ 2
-  have hK : 0 ≤ K := by
-    exact mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hRm_nonneg) (sq_nonneg ρ)
-  have hKbound :
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 ≤ K := by
-    rfl
-  exact hvol (K := K) (Rm := Rm) (b := b) (A := A) (B := B) (R := R) (s := s)
-    hBnn hK hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv
-    hKbound hRm hbasis (by simpa [K] using hmodelLe)
-    (by simpa [K] using hmodelGe)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem from an Rm04 norm bound on a region containing
-the radial comparison segments. -/
-theorem exists_vol_regionRm
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm b A B R s : ℝ} {U : Set M},
-      0 ≤ B → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        radialCurve (I := I) g p w t ∈ U) →
-      (∀ q ∈ U,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * (b * A)) 1 ≤ B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_coeff (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm b A B R s U hBnn hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hcurve hRmU hbasis hmodelLe hmodelGe
-  refine hvol (Rm := Rm) (b := b) (A := A) (B := B) (R := R) (s := s)
-    hBnn hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv ?_
-    hbasis hmodelLe hmodelGe
-  intro w hw t ht
-  exact hRmU (radialCurve (I := I) g p w t) (hcurve w hw t ht)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem from a global Rm04 norm bound. -/
-theorem exists_vol_globalRm
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm b A B R s : ℝ},
-      0 ≤ B → 0 ≤ Rm →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * (b * A)) 1 ≤ B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * (b * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i)))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_regionRm (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm b A B R s hBnn hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv hRmGlobal hbasis hmodelLe hmodelGe
-  exact hvol (Rm := Rm) (b := b) (A := A) (B := B) (R := R) (s := s)
-    (U := Set.univ) hBnn hRm_nonneg hb0 hb1 h1b hRpos hRρ hRC2 hρball hgs
-    hsR hsρ hsdiv (fun _ _ _ _ => Set.mem_univ _) (fun q _ => hRmGlobal q)
-    hbasis hmodelLe hmodelGe
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one specialization of the global Rm04 volume theorem.
-
-The parent theorem already forces `b = 1` by requiring both `b <= 1` and
-`1 <= b`; this wrapper removes that bookkeeping parameter while preserving the
-remaining scalar model and curvature inputs. -/
-theorem exists_vol_globalRm1
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {Rm A B R s : ℝ},
-      0 ≤ B → 0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * A) 1 ≤ B →
-      (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-        B ≤ Real.sqrt
-            (g.inner p (∑ i, v i • (chartModelBasis E) i)
-              (∑ i, v i • (chartModelBasis E) i)) -
-            gronwallBound 0
-              (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) 1)
-              ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-                Rm * ρ ^ 2) * Real.sqrt
-                (g.inner p (∑ i, v i • (chartModelBasis E) i)
-                  (∑ i, v i • (chartModelBasis E) i))) 1) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_globalRm (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro Rm A B R s hBnn hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv
-    hRmGlobal hbasis hmodelLe hmodelGe
-  exact hvol (Rm := Rm) (b := 1) (A := A) (B := B) (R := R) (s := s)
-    hBnn hRm_nonneg (by norm_num) (by norm_num) (by norm_num) hRpos hRρ hRC2
-    hρball hgs hsR hsρ hsdiv hRmGlobal hbasis
-    (by simpa [one_mul] using hmodelLe)
-    (by
-      intro v hv
-      simpa [one_mul] using hmodelGe v hv)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Time-one global Rm04 volume theorem with the lower scalar model produced
-from a small curvature coefficient.
-
-The theorem chooses a coefficient cap `κ` and a positive lower endpoint
-constant `B`.  Callers still provide the upper scalar model inequality for this
-same `B`; that compatibility is a real remaining input. -/
-theorem exists_vol_rm1_ge
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ κ B : ℝ, 0 < ρ ∧ 0 < κ ∧ 0 < B ∧ ∀ {Rm A R s : ℝ},
-      0 ≤ Rm →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 ≤ κ →
-      (∀ q : M,
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g q)) ≤ Rm) →
-      (∀ k : Fin (Module.finrank ℝ E),
-        Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
-      A + gronwallBound 0
-        (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) 1)
-        ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2) * A) 1 ≤ B →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_globalRm1 (I := I) (M := M) g hEnorm p
-  obtain ⟨κ, B, hκ, hB, hmodelGe⟩ := exists_dirModel_ge1 (I := I) g p
-  refine ⟨ρ, κ, B, hρ, hκ, hB, ?_⟩
-  intro Rm A R s hRm_nonneg hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hKcap
-    hRmGlobal hbasis hmodelLe
-  have hK_nonneg :
-      0 ≤ Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * ρ ^ 2 := by
-    exact mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hRm_nonneg) (sq_nonneg ρ)
-  exact hvol (Rm := Rm) (A := A) (B := B) (R := R) (s := s) hB.le hRm_nonneg
-    hRpos hRρ hRC2 hρball hgs hsR hsρ hsdiv hRmGlobal hbasis hmodelLe
-    (hmodelGe hK_nonneg hKcap)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged Rm04 volume theorem with the common scale and the radial frame data
-chosen automatically.
-
-The caller still supplies the launch, Rm04-coefficient, and scalar model fields;
-radial-curve `C¹` regularity is produced from the radius bound. -/
-theorem exists_vol_frame
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm Vb b A B R s : ℝ},
-      0 ≤ B → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb →
-      0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
-      0 < R → R ≤ ρ →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R, Real.sqrt (g.inner p w w) ≤ Vb) →
-      Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
-          Rm * Vb ^ 2 ≤ K →
-      (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
-            (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
-      (∀ a : ℝ, 0 < a →
-        (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < ρ) →
-        (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-          ‖a • (∑ i, v i • (chartModelBasis E) i)‖ < ρ) →
-        (∀ k : Fin (Module.finrank ℝ E),
-          Real.sqrt (g.inner p (a • (chartModelBasis E) k) (a • (chartModelBasis E) k)) ≤ A) ∧
-        A + gronwallBound 0 (max K 1) (K * (b * A)) 1 ≤ a * B ∧
-        (∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
-          a * B ≤ Real.sqrt
-              (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                (a • (∑ i, v i • (chartModelBasis E) i))) -
-              gronwallBound 0 (max K 1)
-                (K * (b * Real.sqrt
-                  (g.inner p (a • (∑ i, v i • (chartModelBasis E) i))
-                    (a • (∑ i, v i • (chartModelBasis E) i))))) 1)) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal (Real.sqrt ((B ^ 2) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-          (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-            (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρ, hvol⟩ := exists_vol_scale.{_, _, _, 0} (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρ, ?_⟩
-  intro K Rm Vb b A B R s hBnn hK hRm_nonneg hVb hb0 hb1 h1b hRpos hRρ
-    hRC2 hρball hgs hsR hsρ hsdiv hlaunch hKbound hRm hscalar
-  have hb : 0 < b := lt_of_lt_of_le zero_lt_one h1b
-  obtain ⟨D, hcard, hpar, hON, hFdiff⟩ :=
-    exists_rm04FrameData_radius.{_, _, _, 0} (I := I) g p hb hb1 hRC2
-  refine hvol (K := K) (Rm := Rm) (Vb := Vb) (b := b) (A := A)
-    (B := B) (R := R) (s := s) D ?_
-  intro a ha hsmallBasis hsmallDir
-  obtain ⟨hinit, hmodelLe, hmodelGe⟩ := hscalar a ha hsmallBasis hsmallDir
-  exact {
-    hBnn := hBnn
-    ha := ha
-    hK := hK
-    hRm_nonneg := hRm_nonneg
-    hVb := hVb
-    hb0 := hb0
-    hb1 := hb1
-    h1b := h1b
-    hRpos := hRpos
-    hRρ := hRρ
-    hRC2 := hRC2
-    hρball := hρball
-    hgs := hgs
-    hsR := hsR
-    hsρ := hsρ
-    hsdiv := hsdiv
-    hsmallBasis := hsmallBasis
-    hsmallDir := hsmallDir
-    hlaunch := hlaunch
-    hKbound := hKbound
-    hRm := hRm
-    hγ := radialC1AtBall (I := I) g p hRC2 hb1
-    hcard := hcard
-    hpar := hpar
-    hON := hON
-    hFdiff := hFdiff
-    hinit := hinit
-    hmodelLe := hmodelLe
-    hmodelGe := hmodelGe }
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Packaged local two-sided volume theorem for small realized metric balls.
-
-This is the V1d assembly shell: it combines the local lower-volume package and
-the local upper-volume package under one common smallness radius.  It still
-keeps the real V1c producers explicit: a density lower bound for the lower side,
-measurability of the realized metric ball, and a radial-Jacobi endpoint length
-bound for the upper side. -/
-theorem exists_metricBall_vol_two_local
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c B Rlo Rup s : ℝ},
-      0 ≤ B →
-      0 < Rlo →
-      0 < Rup →
-      Rlo ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) Rlo,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) Rlo,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      (∀ w ∈ Metric.ball (0 : E) Rlo,
-        c ≤ normalChartDensity (I := I) g p w) →
-      s < Rup →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < Rup →
-      Rup ≤ expMapC2Radius (I := I) g p →
-      (letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-       MeasurableSet (Metric.ball p s)) →
-      (∀ w ∈ Metric.ball (0 : E) Rup,
-        ∀ i : Fin (Module.finrank ℝ E),
-          Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from w))
-            (radialJacobiField (I := I) g p w ((chartModelBasis E) i) 1)
-            (radialJacobiField (I := I) g p w ((chartModelBasis E) i) 1)) ≤ B) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal c *
-          (ENNReal.ofReal (Rlo ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-            (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-              (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (Rup ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρlo, hρlo_pos, hlower⟩ := exists_metricBall_vol_ge_sc_local (I := I) g hEnorm p
-  obtain ⟨ρup, hρup_pos, hupper⟩ := exists_metricBall_vol_scale_local (I := I) (M := M) g hEnorm p
-  refine ⟨min ρlo ρup, lt_min hρlo_pos hρup_pos, ?_⟩
-  intro c B Rlo Rup s hB hRlo_pos hRup_pos hRlo hρlo_ball hgs hdens
-    hsRup hsρ hs_div_Rup hRup hmeas hJ
-  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-  have hρlo_ball' : ∀ w ∈ Metric.ball (0 : E) Rlo,
-      Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρlo :=
-    fun w hw => lt_of_lt_of_le (hρlo_ball w hw) (min_le_left _ _)
-  have hsρup : s < ρup := lt_of_lt_of_le hsρ (min_le_right _ _)
-  exact ⟨
-    hlower hRlo_pos hRlo hρlo_ball' hgs hdens,
-    hupper hB hRup_pos hsRup hsρup hs_div_Rup hRup hmeas hJ⟩
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local two-sided volume theorem with a single model radius.
-
-This is a specialization of `exists_metricBall_vol_two_local` with
-`Rlo = Rup = R`.  It is closer to the final capped-scale statement, where the
-model radius will be chosen as an explicit multiple of the metric-ball radius.
-The V1c density and radial-Jacobi inputs remain explicit. -/
-theorem exists_vol_two_same
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c B R s : ℝ},
-      0 ≤ B →
-      0 < R →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        c ≤ normalChartDensity (I := I) g p w) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-       MeasurableSet (Metric.ball p s)) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        ∀ i : Fin (Module.finrank ℝ E),
-          Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from w))
-            (radialJacobiField (I := I) g p w ((chartModelBasis E) i) 1)
-            (radialJacobiField (I := I) g p w ((chartModelBasis E) i) 1)) ≤ B) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal c *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-            (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-              (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρpos, htwo⟩ := exists_metricBall_vol_two_local (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρpos, ?_⟩
-  intro c B R s hB hRpos hR hρball hgs hdens hsR hsρ hsdiv hmeas hJ
-  exact htwo hB hRpos hRpos hR hρball hgs hdens hsR hsρ hsdiv hR hmeas hJ
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local single-radius two-sided volume theorem with metric-ball measurability
-discharged by the Hopf-Rinow metric-space instance.
-
-The V1c density and radial-Jacobi inputs remain explicit; this only removes the
-routine Borel measurability premise for the realized metric ball. -/
-theorem exists_vol_two_meas
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T3Space M] [ConnectedSpace M]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c B R s : ℝ},
-      0 ≤ B →
-      0 < R →
-      R ≤ expMapC2Radius (I := I) g p →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < ρ) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        Real.sqrt (g.inner p (show TangentSpace I p from w) (show TangentSpace I p from w)) < s) →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        c ≤ normalChartDensity (I := I) g p w) →
-      s < R →
-      s < ρ →
-      s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
-      (∀ w ∈ Metric.ball (0 : E) R,
-        ∀ i : Fin (Module.finrank ℝ E),
-          Real.sqrt (g.inner (expMap (I := I) g p (show TangentSpace I p from w))
-            (radialJacobiField (I := I) g p w ((chartModelBasis E) i) 1)
-            (radialJacobiField (I := I) g p w ((chartModelBasis E) i) 1)) ≤ B) →
-      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-      ENNReal.ofReal c *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-        riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
-        ENNReal.ofReal
-            (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
-              (B * B) ^ Module.finrank ℝ E)) *
-          (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-            (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
-  obtain ⟨ρ, hρpos, htwo⟩ := exists_vol_two_same (I := I) (M := M) g hEnorm p
-  refine ⟨ρ, hρpos, ?_⟩
-  intro c B R s hB hRpos hR hρball hgs hdens hsR hsρ hsdiv hJ
-  exact htwo hB hRpos hR hρball hgs hdens hsR hsρ hsdiv
-    (metricBall_meas (I := I) (M := M) p s) hJ
-
-/-- Metric-ball lower bound consumer for V1d.
-
-Once a target-contained coordinate ball lies inside the metric ball, a density
-lower bound on that coordinate ball gives a lower bound for the metric ball by
-measure monotonicity. -/
-theorem metricBall_vol_ge [PseudoMetricSpace M]
-    (g : SmoothRiemannianMetric I M) (p : M)
-    {c R s : ℝ}
-    (hball_target : Metric.ball (0 : E) R ⊆ (normalChartAt (I := I) g p).target)
-    (hcoord_subset :
-      (normalChartAt (I := I) g p).symm '' Metric.ball (0 : E) R ⊆ Metric.ball p s)
-    (hdens : ∀ w ∈ Metric.ball (0 : E) R,
-      c ≤ normalChartDensity (I := I) g p w) :
-    ENNReal.ofReal c * (modelHaar (E := E)) (Metric.ball (0 : E) R) ≤
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) := by
-  exact le_trans
-    (coordBall_vol_ge (I := I) g p hball_target hdens)
-    (MeasureTheory.measure_mono hcoord_subset)
-
-/-- Scaled metric-ball lower bound consumer for V1d. -/
-theorem metricBall_vol_ge_sc [PseudoMetricSpace M]
-    (g : SmoothRiemannianMetric I M) (p : M)
-    {c R s : ℝ} (hRpos : 0 < R)
-    (hball_target : Metric.ball (0 : E) R ⊆ (normalChartAt (I := I) g p).target)
-    (hcoord_subset :
-      (normalChartAt (I := I) g p).symm '' Metric.ball (0 : E) R ⊆ Metric.ball p s)
-    (hdens : ∀ w ∈ Metric.ball (0 : E) R,
-      c ≤ normalChartDensity (I := I) g p w) :
-    ENNReal.ofReal c *
-        (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-          (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) := by
-  simpa [modelHaar_ball (E := E) hRpos] using
-    metricBall_vol_ge (I := I) g p hball_target hcoord_subset hdens
-
-/-- Scaled metric-ball lower bound with chart-target containment discharged
-from the `C²` radius bound. -/
-theorem metricBall_vol_ge_sc_c2 [PseudoMetricSpace M]
-    (g : SmoothRiemannianMetric I M) (p : M)
-    {c R s : ℝ} (hRpos : 0 < R)
-    (hR : R ≤ expMapC2Radius (I := I) g p)
-    (hcoord_subset :
-      (normalChartAt (I := I) g p).symm '' Metric.ball (0 : E) R ⊆ Metric.ball p s)
-    (hdens : ∀ w ∈ Metric.ball (0 : E) R,
-      c ≤ normalChartDensity (I := I) g p w) :
-    ENNReal.ofReal c *
-        (ENNReal.ofReal (R ^ Module.finrank ℝ E) *
-          (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-      riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) :=
-  metricBall_vol_ge_sc (I := I) g p hRpos
-    (ball_tgt_of_radius (I := I) g p hR) hcoord_subset hdens
 
 end BallUpper
 

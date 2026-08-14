@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Explicit-metric distance bounds for Calabi broken paths
@@ -32,7 +31,7 @@ open Geometry.Riemannian.HopfRinow
 open Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -584,6 +583,11 @@ private theorem continuousAt_fiber_smul
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The extended distance of an explicitly supplied Riemannian metric is at
 most the arc length of any `C¹` curve joining the endpoints. -/
 theorem edistOf_le_arcLength
@@ -604,6 +608,11 @@ theorem edistOf_le_arcLength
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A broken path made of two `C¹` arcs bounds the explicit Riemannian
 extended distance by the sum of their arc lengths. -/
 theorem edistOf_le_two_arcs

@@ -2,14 +2,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
 
-/-!
-# Uniform continuity of scalar curvature in time
 
-Joint spacetime continuity of scalar curvature along a Ricci-flow solution is
-uniform in space near every regular time on a compact manifold.  The result is
-stated directly in the epsilon/eventually normal form used by bounded
-time-dependent multiplication operators.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,9 +27,6 @@ variable [IsManifold I ∞ M] [CompactSpace M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 omit [CompactSpace M] [SigmaCompactSpace M] [T2Space M] in
-/-- A jointly continuous scalar family varies by less than `epsilon` on one
-product neighborhood whenever its time carrier is a neighborhood of the
-center. -/
 private theorem time_patch
     (f : Real → M → Real) (K : Set Real)
     (hf : ContinuousOn (fun p : Real × M => f p.1 p.2)
@@ -71,8 +68,9 @@ private theorem time_patch
   have hty : (t, y) ∈ V ×ˢ W := ⟨ht, hy⟩
   exact hVW hty
 
-/-- Near a regular time, scalar curvature converges uniformly in space to its
-value at that time. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem scalar_unif
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

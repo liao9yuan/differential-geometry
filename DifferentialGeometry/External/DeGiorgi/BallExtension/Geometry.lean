@@ -382,7 +382,8 @@ lemma norm_fderiv_unitBallExtension_le_of_mem_outerShell
       (hasFDerivAt_unitBallCutoff_of_mem_outerShell (d := d) hx)
   have hinv :
       HasFDerivAt inv (fderiv ℝ inv x) x := by
-    simpa [inv, (EuclideanGeometry.hasFDerivAt_inversion (c := (0 : E)) (R := (1 : ℝ)) hx0).fderiv] using
+    simpa [inv, (EuclideanGeometry.hasFDerivAt_inversion (c := (0 : E)) (R := (1 : ℝ)) hx0).fderiv]
+      using
       (EuclideanGeometry.hasFDerivAt_inversion (c := (0 : E)) (R := (1 : ℝ)) hx0)
   have hcomp :
       HasFDerivAt (fun y : E => u (inv y))

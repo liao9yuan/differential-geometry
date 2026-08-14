@@ -4,17 +4,15 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Cross-model naturality of the covariant derivative along a curve
 
-This file transports the intrinsic Levi-Civita derivative along a smooth curve
-through a diffeomorphism whose source and target use different manifold models.
-The section-level statement combines the covariant chain rule with the
-cross-model naturality of the pullback Levi-Civita connection.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,17 +24,18 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [Module.Finite ℝ F] [FiniteDimensional ℝ F] [CompleteSpace F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  [FiniteDimensional ℝ F] [CompleteSpace F]
   [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem chartRep_restrict
     (gamma : ℝ → M) (X : ∀ y : M, TangentSpace I y) (t : ℝ) :
     chartRepAt (I := I) gamma (fun r => X (gamma r)) t =
@@ -44,6 +43,8 @@ private theorem chartRep_restrict
   funext s
   rfl
 
+omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem deriv_repr_comp_at
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (gamma : ℝ → M)
@@ -56,7 +57,6 @@ private theorem deriv_repr_comp_at
             (extChartAt I (gamma t)).symm)
           (extChartAt I (gamma t) (gamma t))
         (deriv (chartCurve (I := I) (gamma t) gamma) t) := by
-  letI : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
   classical
   set a : M := gamma t with ha_def
   set f : E → E :=
@@ -97,6 +97,8 @@ private theorem deriv_repr_comp_at
   rw [← heq.deriv_eq]
   exact hcomp_hd.deriv
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covAlong_restrict_at
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (gamma : ℝ → M)
@@ -106,7 +108,6 @@ private theorem covAlong_restrict_at
     covDerivAlong (I := I) g gamma (fun r => Y (gamma r)) t =
       (LeviCivita (I := I) g) (fun x : M => Y x) (gamma t)
         ((mfderiv 𝓘(ℝ, ℝ) I gamma t : ℝ →L[ℝ] _) (1 : ℝ)) := by
-  letI : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
   classical
   set a : M := gamma t with ha_def
   set v : TangentSpace I a :=
@@ -159,6 +160,8 @@ private theorem covAlong_restrict_at
     exact deriv_repr_comp_at (I := I) gamma Y t hgamma
   rw [hderiv, hchris]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem mfderiv_from_chart
     [I.Boundaryless] [IsManifold I 1 M]
     (f : M → F) (a p : M) (hp : p ∈ (chartAt H a).source)
@@ -222,6 +225,8 @@ private theorem mfderiv_from_chart
   rw [hfield]
   exact hchainApply.symm.trans hwithin
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem triv_mfderiv_cross
     [I.Boundaryless] [J.Boundaryless]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -259,6 +264,8 @@ private theorem triv_mfderiv_cross
         (extChartAt I a p) v := by
       simpa [writtenInExtChartAt, Function.comp_def] using hfixed
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem chartRep_mapCross_ev
     [I.Boundaryless] [J.Boundaryless]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -299,6 +306,8 @@ private theorem chartRep_mapCross_ev
     (triv_mfderiv_cross (I := I) (J := J) Phi (gamma t) (gamma s)
       (Phi (gamma t)) hs hPhis w)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem deriv_fderiv_apply_zero
     (psi : E → F) (u w : ℝ → E) (t : ℝ)
     (hpsi : ContDiffAt ℝ 2 psi (u t))
@@ -310,6 +319,8 @@ private theorem deriv_fderiv_apply_zero
     exact ((hpsi.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)).comp t hu
   rw [deriv_clm_apply hDpsi hw, hwt, map_zero, zero_add]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem chartRep_mapCross_diff
     [I.Boundaryless] [J.Boundaryless]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -344,6 +355,8 @@ private theorem chartRep_mapCross_diff
     hgamma.continuousAt
   exact hright.congr_of_eventuallyEq (by simpa [a, psi, u, w] using hev)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompleteSpace F]
+    [NeZero (Module.finrank ℝ F)] in
 private theorem covAlong_mapCross_zero
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -452,8 +465,9 @@ private theorem covAlong_mapCross_zero
     ← trivFromE_trivToE (I := J) b hbBase
       (covDerivAlong (I := J) g delta W t), hleftCoord, hrightCoord]
 
-/-- Pointwise cross-model naturality for the restriction of a smooth ambient
-tangent section. Only smoothness of the curve at the evaluation time is used. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_mapCrossAt
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
@@ -470,8 +484,6 @@ theorem covAlong_mapCrossAt
           gamma (fun s => Y (gamma s)) t) =
       covDerivAlong (I := J) g (fun s => Phi (gamma s))
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t := by
-  letI : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
-  letI : NormedSpace ℝ F := InnerProductSpace.toNormedSpace
   let delta : ℝ → N := fun s => Phi (gamma s)
   let Ypush := DifferentialGeometry.Integral.Connection.pushFwdSectionCross
     (I := I) (J := J) Phi Y
@@ -518,8 +530,9 @@ theorem covAlong_mapCrossAt
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t := by
       simp [delta, Ypush]
 
-/-- Cross-model naturality for the restriction of a smooth ambient tangent
-section along a globally smooth curve. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_mapCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
@@ -538,8 +551,9 @@ theorem covAlong_mapCross
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t :=
   covAlong_mapCrossAt (I := I) (J := J) g Phi gamma Y t hgamma.contMDiffAt
 
-/-- Pointwise cross-model naturality for an arbitrary differentiable section
-along the curve. Only smoothness of the curve at the evaluation time is used. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_natCrossAt
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -650,8 +664,9 @@ theorem covAlong_natCrossAt
         (fun s => Ymap s + Rmap s) t := htargetAdd.symm
     _ = covDerivAlong (I := J) g delta Vmap t := by rw [htarget]
 
-/-- Cross-model naturality for an arbitrary differentiable section along a
-globally smooth curve. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_natCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]

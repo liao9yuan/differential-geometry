@@ -26,8 +26,7 @@ spatial derivative of the initial slice.
 noncomputable section
 
 open Real
-open scoped NNReal RealInnerProductSpace
-
+open scoped BoundedContinuousFunction NNReal RealInnerProductSpace
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
@@ -73,6 +72,7 @@ variable {V U G F : Type*}
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
+omit [NormedSpace ℝ U] in
 /-- Pointwise two-arm difference estimate for a nonlinear coefficient acting
 on a first derivative.  This is the algebraic estimate used for the divergence
 flux `A(u) Du`. -/
@@ -116,6 +116,7 @@ def coeffBCF (A : U → G →L[ℝ] F) (hA : Continuous A)
         _ ≤ K * ‖d‖ :=
           mul_le_mul_of_nonneg_left (d.norm_coe_le_norm x) hK0)
 
+omit [NormedSpace ℝ U] in
 /-- Supremum norm of the packaged coefficient flux. -/
 theorem coeffBCF_norm (A : U → G →L[ℝ] F) (hA : Continuous A)
     (K : ℝ) (hK0 : 0 ≤ K) (u : V →ᵇ U) (d : V →ᵇ G)
@@ -131,6 +132,7 @@ theorem coeffBCF_norm (A : U → G →L[ℝ] F) (hA : Continuous A)
         _ ≤ K * ‖d‖ :=
           mul_le_mul_of_nonneg_left (d.norm_coe_le_norm x) hK0)
 
+omit [NormedSpace ℝ U] in
 /-- Supremum-norm nonlinear difference estimate for coefficient fluxes.
 
 For the Ricci--DeTurck principal arm, `A` is the inverse-metric coefficient
@@ -178,6 +180,10 @@ variable {V U G F : Type*}
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [NormedSpace ℝ U] in
 /-- `C⁰` stability of the divergence flux in the weighted pointwise part
 of the rough norm.  The coefficient variation is controlled only by the
 `C⁰` state difference; both first-derivative factors retain their
@@ -226,11 +232,13 @@ section HeatFlux
 
 variable {V U G F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [Nontrivial V]
+  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup U] [NormedSpace ℝ U]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
+omit [CompleteSpace F]
+  [NormedSpace ℝ U] in
 /-- Difference estimate for the spatial integrand of the divergence-form
 Ricci--DeTurck Duhamel arm.  Time integration is intentionally left to the
 rough parabolic solution norm; this lemma is the exact `D H * (A(u) Du)`
@@ -272,6 +280,7 @@ variable {U G H F : Type*}
   [NormedAddCommGroup H] [NormedSpace ℝ H]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
+omit [NormedSpace ℝ U] in
 /-- Three-arm difference estimate for the compensating quadratic-gradient
 term `DA(u)[Du] Dw` produced by `coeffD2_refold`.
 
@@ -298,7 +307,7 @@ theorem corrDiff_norm (C : U → G →L[ℝ] H →L[ℝ] F)
         ≤ ‖(C u₁ - C u₂) d₁ e₁‖ + ‖C u₂ (d₁ - d₂) e₁‖ +
             ‖C u₂ d₂ (e₁ - e₂)‖ := by
           exact (norm_add_le _ _).trans
-            (add_le_add_right (norm_add_le _ _) _)
+            (add_le_add (norm_add_le _ _) le_rfl)
     _ ≤ (‖C u₁ - C u₂‖ * ‖d₁‖) * ‖e₁‖ +
           (‖C u₂‖ * ‖d₁ - d₂‖) * ‖e₁‖ +
           (‖C u₂‖ * ‖d₂‖) * ‖e₁ - e₂‖ := by
@@ -335,6 +344,10 @@ variable {V U G H F : Type*}
   [NormedAddCommGroup H] [NormedSpace ℝ H]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [NormedSpace ℝ U] in
 /-- `C⁰` stability of the compensating quadratic-gradient arm in the
 weighted source norm.  This is the time-weighted counterpart of
 `corrDiff_norm`; none of its three arms is dropped. -/
@@ -426,7 +439,7 @@ theorem corrDiffWt (C : U → G →L[ℝ] H →L[ℝ] F) {L : ℝ≥0}
           (Real.sqrt t * ‖e₁ (t, x)‖) +
         K * (Real.sqrt t * ‖d₂ (t, x)‖) *
           (Real.sqrt t * ‖e₁ (t, x) - e₂ (t, x)‖) := by
-      rw [← Real.sq_sqrt ht.le]
+      nth_rewrite 1 [← Real.sq_sqrt ht.le]
       ring
     _ ≤ (L : ℝ) * D * A₁ * E₁ + K * AΔ * E₁ + K * A₂ * EΔ := by
       exact add_le_add (add_le_add hterm₁ hterm₂) hterm₃

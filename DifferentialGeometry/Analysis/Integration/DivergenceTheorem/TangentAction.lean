@@ -10,27 +10,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.LineDeriv.Basic
 
-/-!
-# Action of a smooth tangent section on a smooth scalar function
-
-For a smooth tangent section `X` and a smooth scalar function `f : M → ℝ`,
-the *tangent action* `tangentSectionAction X f x := mfderiv I 𝓘(ℝ) f x (X x)` is
-the directional derivative of `f` along `X` at `x`. This is an intrinsic
-operation — no chart appears in the definition.
-
-This file develops two facts about `tangentSectionAction`:
-
-1. **Smoothness**: if `X` is a smooth tangent section and `f` is smooth, then
-   `tangentSectionAction X f` is a smooth real-valued function on `M`.
-2. **Chart-local representation**: in any chart `α : M`, on the chart base set,
-   `tangentSectionAction X f x = ∑ i, chartCoeff α X i x · partialDeriv i (f ∘ symm) (φ x)`,
-   where `partialDeriv` is the model-space partial derivative in the direction
-   of the `i`-th model basis vector.
-
-These are the standard coordinate identities. Together they provide the
-intrinsic right-hand side of the chart-local integration-by-parts identity used
-later for chart-invariance of the chart-local Voss–Weyl divergence.
--/
 
 noncomputable section
 
@@ -41,27 +20,22 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The action of a smooth tangent section `X` on a smooth scalar function
-`f : M → ℝ` at a point `x : M`. By definition, this is the directional
-derivative `mfderiv I 𝓘(ℝ) f x (X x)`. -/
 def tangentSectionAction
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) : M → ℝ :=
   fun x => mfderiv I 𝓘(ℝ) f x (X x)
 
+omit [Module.Finite ℝ E] in
 @[simp] lemma tangentSectionAction_def
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
     tangentSectionAction (I := I) X f x = mfderiv I 𝓘(ℝ) f x (X x) := rfl
-
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
-/-- The tangent action obeys the scalar Leibniz rule at points where both
-factors are manifold-differentiable. -/
+omit [Module.Finite ℝ E] in
 theorem tangent_mul
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f h : M → ℝ} {x : M}
@@ -81,6 +55,7 @@ on the chart target `(extChartAt I α).target ⊆ E`. -/
 def scalarOnE (α : M) (f : M → ℝ) : E → ℝ :=
   fun y => f ((extChartAt I α).symm y)
 
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 @[simp] lemma scalarOnE_def (α : M) (f : M → ℝ) (y : E) :
     scalarOnE (I := I) α f y = f ((extChartAt I α).symm y) := rfl
 
@@ -88,26 +63,24 @@ def scalarOnE (α : M) (f : M → ℝ) : E → ℝ :=
 extended-chart target. -/
 def chartPullZero (α : M) (f : M → ℝ) : E → ℝ :=
   (extChartAt I α).target.indicator (scalarOnE (I := I) α f)
-
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartPullZero_mem (α : M) (f : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     chartPullZero (I := I) α f y = scalarOnE (I := I) α f y :=
   Set.indicator_of_mem hy _
-
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartPullZero_nmem (α : M) (f : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     chartPullZero (I := I) α f y = 0 :=
   Set.indicator_of_notMem hy _
-
-/-- The map `f : M → ℝ` on the chart source equals the composition of its
-chart-pullback `scalarOnE α f` with the extended chart. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma scalarOnE_extChartAt (α : M) (f : M → ℝ) {x : M}
     (hx : x ∈ (extChartAt I α).source) :
     scalarOnE (I := I) α f (extChartAt I α x) = f x := by
   change f ((extChartAt I α).symm (extChartAt I α x)) = f x
   rw [(extChartAt I α).left_inv hx]
 
-/-- Smoothness of the pullback `scalarOnE α f` of a smooth function `f`. -/
+omit [Module.Finite ℝ E] in
 lemma scalarOnE_contDiffOn (α : M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) :
     ContDiffOn ℝ ∞ (scalarOnE (I := I) α f) (extChartAt I α).target := by
@@ -119,8 +92,7 @@ lemma scalarOnE_contDiffOn (α : M) {f : M → ℝ}
     hf_on.comp hsymm (fun _ _ => mem_univ _)
   exact hcomp.contDiffOn
 
-/-- Smoothness of the chart-pulled-back function `scalarOnE α f`, restricted
-to a continuous-differentiability statement on `E`. -/
+omit [Module.Finite ℝ E] in
 lemma scalarOnE_contDiffWithinAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -263,14 +235,6 @@ lemma mfderiv_chartBasisVecFiber (α : M)
   rw [hmfderiv_chartBasis]
   rfl
 
-/-- **Chart-local representation of `tangentSectionAction`.**
-For `f : M → ℝ` smooth, `X` a smooth tangent section, `α : M`, and `x` in
-the chart base set at `α` whose chart image lies in the interior of the chart
-target,
-`tangentSectionAction X f x = ∑ᵢ chartCoeff α X i x * partialDeriv i (scalarOnE α f) (φ_α x)`.
-Both sides are equal as values in `ℝ`. The right-hand side depends on `α`
-even though the left-hand side does not — this is the standard component-vs-action
-duality. -/
 theorem tangentSectionAction_chartLocal
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -295,7 +259,7 @@ theorem tangentSectionAction_chartLocal
   rw [mfderiv_chartBasisVecFiber (I := I) α hf hx hx_int i]
   exact smul_eq_mul ..
 
-/-- Under `[I.Boundaryless]`, the chart target is open and equals its interior. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_target_subset_interior_of_boundaryless [I.Boundaryless] (α : M) :
     (extChartAt I α).target ⊆ interior (extChartAt I α).target := by
   intro y hy
@@ -360,8 +324,6 @@ theorem tangentSectionAction_chartLocal_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact tangentSectionAction_chartLocal (I := I) α X hf hx hx_int
 
-/-- The pulled-back partial derivative is smooth on the interior of the chart
-target. -/
 private lemma partialDeriv_scalarOnE_contDiffOn_interior
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (i : Fin (Module.finrank ℝ E)) :
@@ -380,8 +342,6 @@ private lemma partialDeriv_scalarOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
-/-- The pulled-back partial derivative composed with the chart map is smooth
-on the smoothness domain. -/
 private lemma partialDeriv_scalarOnE_comp_extChartAt_contMDiffOn
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (i : Fin (Module.finrank ℝ E)) :
@@ -414,8 +374,6 @@ private lemma partialDeriv_scalarOnE_comp_extChartAt_contMDiffOn
     fun _ hx => hx.2
   exact hpartialM.comp hchart' hsubset
 
-/-- `tangentSectionAction X f` is `C^∞` on the chart base set at `α` whose chart
-image lies in the interior of the chart target. -/
 theorem tangentSectionAction_contMDiffOn
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -450,8 +408,6 @@ theorem tangentSectionAction_contMDiffOn
     exact this
   · exact partialDeriv_scalarOnE_comp_extChartAt_contMDiffOn (I := I) α hf i
 
-/-- Under `[I.Boundaryless]`, `tangentSectionAction X f` is `C^∞` on the entire
-chart base set at `α`. -/
 theorem tangentSectionAction_contMDiffOn_baseSet [I.Boundaryless]
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -469,8 +425,6 @@ theorem tangentSectionAction_contMDiffOn_baseSet [I.Boundaryless]
     · congr 1
       exact (isOpen_extChartAt_target (I := I) α).interior_eq
 
-/-- `tangentSectionAction X f` is `C^∞` on `M` (under `[I.Boundaryless]`),
-since smoothness can be established locally in any chart. -/
 theorem tangentSectionAction_contMDiff [I.Boundaryless]
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) :

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTopSep
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0TraceRadiusFree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
@@ -1639,6 +1641,9 @@ private theorem b4App_sub
     appCc (I := I) (M := M) g₀ 3 3 Φ (W - V) =
       appCc (I := I) (M := M) g₀ 3 3 Φ W -
         appCc (I := I) (M := M) g₀ 3 3 Φ V := by
+  change operatorFieldApply (I := I) (M := M) g₀ 3 3 Φ (W - V) =
+    operatorFieldApply (I := I) (M := M) g₀ 3 3 Φ W -
+      operatorFieldApply (I := I) (M := M) g₀ 3 3 Φ V
   rw [sub_eq_add_neg, appCc_add_right]
   have hneg := appCc_smul_right (I := I) (M := M) g₀ 3 3
     (-1 : ℝ) Φ V

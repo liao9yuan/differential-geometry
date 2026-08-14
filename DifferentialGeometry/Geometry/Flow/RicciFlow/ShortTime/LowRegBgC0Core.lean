@@ -417,7 +417,9 @@ private theorem refold_a1
   rw [LowBaseInternal.c1_eq (I := I) (M := M)
     g g T hδ_lt hδ hδZ]
   simp only [refoldData, appCc_add_left]
-  rw [self_aff_int (I := I) (M := M) g T hT hδ_lt hδ hδZ]
+  have hself := self_aff_int (I := I) (M := M) g T hT hδ_lt hδ hδZ
+  simp only [appCc] at hself
+  rw [hself]
   abel
 
 private theorem refold_eq

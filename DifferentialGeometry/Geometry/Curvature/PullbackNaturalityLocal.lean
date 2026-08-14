@@ -2,24 +2,22 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Local pullback naturality for metric curvature
 
-The metric `(0,4)` Riemann tensor is natural under a diffeomorphism between two
-open submanifolds.  This composes the germ-locality `metricRm04StdAt_restrictOpen`
-with the global same-model naturality `metricRm04Std_pullback`: a local section of
-a covering (a diffeomorphism between an open set of the quotient and an open set of
-the total space) transports curvature exactly like a global diffeomorphism.
 
-## Main result
 
-* `metricRm04StdAt_pullback_localDiffeo` — the `(0,4)` metric Riemann tensor of the
-  pullback of a restricted metric along an open-submanifold diffeomorphism equals
-  the ambient tensor at the image point on the pushed-forward vectors.
--/
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,15 +31,17 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
-variable [IsManifold I 1 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+variable [IsManifold I 1 N]
 variable [T2Space N] [SigmaCompactSpace N]
 
-/-- **Local pullback naturality of the `(0,4)` metric Riemann tensor.**  For a
-diffeomorphism `Ψ` between an open submanifold `W ⊆ M` and an open submanifold
-`V ⊆ N`, the pullback of the restricted metric `g|_V` has the same Riemann tensor
-as `g` itself at the image point.  This is `metricRm04Std_pullback` (global
-naturality) composed with `metricRm04StdAt_restrictOpen` (germ-locality), and is
-the curvature-descent tool for a covering local section. -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace N] in
 theorem metricRm04StdAt_pullback_localDiffeo
     (g : SmoothRiemannianMetric I N)
     (V : TopologicalSpace.Opens N) [SigmaCompactSpace V] [T2Space V]

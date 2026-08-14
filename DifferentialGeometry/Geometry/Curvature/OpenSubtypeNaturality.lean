@@ -3,15 +3,13 @@ import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Open-subtype naturality for metric connections
 
-This file collects reusable locality lemmas for restricting metric connection
-expressions to open submanifolds.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -29,9 +27,10 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by
   decide
 
-/-- Non-degeneracy of a smooth Riemannian metric at one tangent fibre.  This
-variant does not require an ambient `InnerProductSpace` instance on the model
-space; positivity of `g` is enough. -/
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem SmoothRiemannianMetric.eq_of_inner_eq_gen
     (g : SmoothRiemannianMetric I M) {x : M} {v w : TangentSpace I x}
     (h : ∀ ζ : TangentSpace I x, g.inner x v ζ = g.inner x w ζ) : v = w := by
@@ -45,9 +44,11 @@ theorem SmoothRiemannianMetric.eq_of_inner_eq_gen
   have hne' : v - w ≠ 0 := sub_ne_zero.mpr hne
   exact (lt_irrefl (0 : Real)) (hself ▸ g.pos x _ hne')
 
-/-- Scalar directional derivatives are unchanged by restricting a scalar
-function to an open subtype, once the ambient scalar is differentiable at the
-point. -/
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 theorem extDerivFun_restrictOpen
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (f : M -> Real) (x : U) (v : TangentSpace I x)
@@ -63,14 +64,16 @@ theorem extDerivFun_restrictOpen
     mfderiv_comp_apply (I := I) (I' := I) (I'' := 𝓘(Real, Real))
       x hf hval v
 
-/-- Restrict an ambient tangent field to the tangent bundle of an open subtype.
-The tangent fibers in this project are model fibers, so this is the identity on
-the underlying model vector. -/
+
+
+
 noncomputable def restrictOpenTangentField
     (U : TopologicalSpace.Opens M)
     (Y : (p : M) -> TangentSpace I p) : (y : U) -> TangentSpace I y :=
   VectorField.mpullback I I (Subtype.val : U -> M) Y
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 @[simp]
 theorem restrictOpenTangentField_apply
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -86,8 +89,9 @@ theorem restrictOpenTangentField_apply
   rw [mfderiv_subtype_val (I := I) U x]
   rfl
 
-/-- A smooth ambient tangent section restricts to a smooth tangent section on an
-open subtype. -/
+
+
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem mdiffAt_restrictOpen_section
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -111,8 +115,9 @@ theorem mdiffAt_restrictOpen_section
     (I := I) (I' := I) (f := (Subtype.val : U -> M)) (V := fun y : M => Y y)
     (x₀ := x) (n := (∞ : WithTop ℕ∞)) hY hval hval_inv hmn
 
-/-- A smooth ambient tangent section restricts to a smooth tangent section on
-an open subtype. -/
+
+
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_restrictOpen_section
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _)) :
@@ -129,8 +134,8 @@ theorem contMDiff_restrictOpen_section
       (f := ContinuousLinearEquiv.refl Real E))
   · simp
 
-/-- Bundled restriction of a smooth ambient tangent section to an open
-subtype. -/
+
+
 noncomputable def restrictOpenTangentSection
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _)) :
@@ -138,6 +143,7 @@ noncomputable def restrictOpenTangentSection
   toFun := restrictOpenTangentField (I := I) U (fun y : M => Y y)
   contMDiff_toFun := contMDiff_restrictOpen_section (I := I) U Y
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 @[simp]
 theorem restrictOpenTangentSection_apply
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -146,8 +152,9 @@ theorem restrictOpenTangentSection_apply
     restrictOpenTangentSection (I := I) U Y x = Y (x : M) := by
   simp [restrictOpenTangentSection]
 
-/-- Lie brackets commute with restriction to an open subtype for restricted
-ambient fields. -/
+
+
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem mlieBracket_restrictOpen
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -185,19 +192,20 @@ theorem mlieBracket_restrictOpen
       hval hmin
   simpa [restrictOpenTangentField] using hbr
 
-/-- Directional derivatives of metric pairings are unchanged after restricting
-the metric and all three ambient fields to an open subtype. -/
+
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem directionalDeriv_restrictOpen_inner
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x : U) :
-    directionalDeriv (I := I)
+    directionalDerivAlong (I := I)
         (restrictOpenTangentField (I := I) U (fun y : M => X y))
         (fun y : U => (g.restrictOpen (I := I) U).inner y
           (restrictOpenTangentField (I := I) U (fun z : M => Y z) y)
           (restrictOpenTangentField (I := I) U (fun z : M => Z z) y)) x =
-      directionalDeriv (I := I)
+      directionalDerivAlong (I := I)
         (fun y : M => X y)
         (fun y : M => g.inner y (Y y) (Z y)) (x : M) := by
   have hf :
@@ -207,12 +215,13 @@ theorem directionalDeriv_restrictOpen_inner
       (I := I) (M := M) g
       Y.contMDiff.contMDiffAt Z.contMDiff.contMDiffAt
       (by simp)).mdifferentiableAt (by simp)
-  simpa [directionalDeriv] using
+  simpa [directionalDerivAlong] using
     extDerivFun_restrictOpen (I := I) U
       (fun y : M => g.inner y (Y y) (Z y)) x (X (x : M)) hf
 
-/-- The Koszul scalar is unchanged after restricting the metric and ambient
-fields to an open subtype. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem koszulScalar_restrictOpen
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -233,9 +242,10 @@ theorem koszulScalar_restrictOpen
     ← mlieBracket_restrictOpen (I := I) U X Y x]
   simp
 
-/-- The Levi-Civita connection of the restricted metric agrees with the
-ambient Levi-Civita connection on restricted ambient smooth sections.  This
-section-direction form is the useful API for tensor/nabla tower arguments. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricCov_restrictOpen_apply_section
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -288,8 +298,9 @@ theorem metricCov_restrictOpen_apply_section
       (Z.contMDiff.contMDiffAt.mdifferentiableAt infty_ne_zero)
   rw [hleft, hright, koszulScalar_restrictOpen (I := I) g U X Y Z x]
 
-/-- Arbitrary-direction version of `metricCov_restrictOpen_apply_section`,
-obtained by extending the point tangent vector to an ambient smooth section. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricCov_restrictOpen_globalSection
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]

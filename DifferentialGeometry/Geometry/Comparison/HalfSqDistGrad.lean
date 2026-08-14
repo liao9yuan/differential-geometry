@@ -5,29 +5,28 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
 
-set_option linter.unusedSectionVars false
 
-/-!
-# One-summand distance-squared gradient (MSM135 Ch4 §6)
 
-This file builds the one-summand first-variation covector identity feeding the
-center-of-mass gradient `grad (½ d²(·, pt)) = -exp_q⁻¹(pt)`
-(`CenterOfMass.grad_halfSqDist_of_flat` / `CenterOfMass.sum_expInv_of_flat`).
 
-The route is the comparison trick: along a base curve through `q`, the half
-squared distance to `pt` is bounded above by the half squared arc length of a
-fixed-endpoint variation, with equality at the central minimizing geodesic.  The
-first variation of arc length supplies the derivative, and the comparison forces
-the distance derivative to agree.
 
-## Foundational bricks (this pass)
 
-* `arcLength_radial` — the arc length of the intrinsic radial geodesic
-  `t ↦ expMapIntrinsic g p (t • v)` on `[a, b]` is `(b - a) · √(g_p v v)`
-  (constant speed).
-* `hasDerivAt_eq_of_le` — if `f ≤ h` near `c`, `f c = h c`, and both have
-  derivatives at `c`, then the derivatives agree (touching graphs).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -42,10 +41,10 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- **Comparison derivative lemma.**  If `f ≤ h` eventually near `c`, the two
-functions agree at `c`, and both are differentiable at `c`, then their
-derivatives agree: the graph of `f` touches that of `h` from below at `c`, so
-`h - f` has a local minimum there. -/
+
+
+
+
 theorem hasDerivAt_eq_of_le {f h : ℝ → ℝ} {f' h' c : ℝ}
     (hle : ∀ᶠ s in nhds c, f s ≤ h s) (heq : f c = h c)
     (hf : HasDerivAt f f' c) (hh : HasDerivAt h h' c) : f' = h' := by
@@ -61,7 +60,7 @@ theorem hasDerivAt_eq_of_le {f h : ℝ → ℝ} {f' h' c : ℝ}
 section Radial
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -72,10 +71,8 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Arc length of the intrinsic radial geodesic.**  The intrinsic radial
-geodesic `t ↦ expMapIntrinsic g p (t • v)` has constant speed `√(g_p v v)`
-(`intrinsicGeodesic_speedSq_eq`), so its arc length on `[a, b]` is
-`(b - a) · √(g_p v v)`. -/
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem arcLength_radial
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -97,11 +94,6 @@ theorem arcLength_radial
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Distance equals the `g`-norm of the inverse exponential (small radius).**
-For each base point `q` there is a positive radius `ρ` such that for every
-tangent vector `v` with `√(g_q v v) < ρ`, the Riemannian distance from `q` to
-`expMapIntrinsic g q v` is exactly `√(g_q v v)`.  This is the real-valued form of
-`radial_riemannianEDist_eq_of_small'` under the Hopf–Rinow metric realization. -/
 theorem exists_dist_eq_sqrt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -123,12 +115,7 @@ theorem exists_dist_eq_sqrt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **The inverse exponential round-trip (small radius).**  For each base point
-`q` there is a positive radius `ρ` such that whenever `pt` lies in the normal
-chart source with `g`-small normal coordinate, the intrinsic exponential recovers
-`pt` from its inverse-exponential vector `normalChartAt g q pt`:
-`expMapIntrinsic g q (normalChartAt g q pt) = pt`.  This exposes the central
-geodesic launch velocity `normalChartAt g q pt` consumed by the gradient. -/
+omit [ConnectedSpace M] in
 theorem exists_expMapIntrinsic_normalChart
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -160,12 +147,6 @@ theorem exists_expMapIntrinsic_normalChart
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **The central minimizing geodesic to `pt`.**  For `pt` in a small normal ball
-of `q` with `pt ≠ q`, there is a unit-speed geodesic `γ = intrinsicGeodesic g q u`
-on `[0, L]`, `L = dist q pt`, with `γ L = pt`, initial velocity `u` satisfying
-`L • u = normalChartAt g q pt` (the inverse exponential), `arcLength γ 0 L = L`, and
-`mfderiv γ 0 1 = u`.  This packages all the geometric data the first variation of
-`½ d²(·, pt)` consumes. -/
 theorem exists_central_geodesic
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -219,10 +200,6 @@ theorem exists_central_geodesic
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Near a fixed point `pt`, the half squared distance to `pt` is
-manifold-differentiable.  The proof uses the fixed normal chart at `pt`, where
-the function agrees locally with the smooth quadratic form
-`v ↦ (1 / 2) * g_pt(v, v)`. -/
 theorem exists_halfSqDist_md
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

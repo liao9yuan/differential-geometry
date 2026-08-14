@@ -422,7 +422,9 @@ theorem c0Data_self
     g g T hδ_lt hδ hδZ]
   rw [LowBaseActionData.a1]
   simp only [c0Data, appCc_add_left]
-  rw [self_aff_int (I := I) (M := M) g T hT hδ_lt hδ hδZ]
+  have hself := self_aff_int (I := I) (M := M) g T hT hδ_lt hδ hδZ
+  simp only [appCc] at hself
+  rw [hself]
   abel
 
 set_option maxHeartbeats 1600000 in

@@ -3,16 +3,18 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 
-/-!
-# Joint regularity of the iterated curvature component tower
 
-The component recursion preserves joint spacetime smoothness when its base
-array and Christoffel array are jointly smooth in a fixed smooth local frame.
--/
+
+
+
+
+
 
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
 open scoped Manifold ContDiff
@@ -23,10 +25,10 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-/-- Joint spacetime smoothness propagates through the component recursion for
-iterated covariant derivatives of the lowered Riemann tensor. -/
+
+
 theorem iterRmComp_smoothAt
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -71,4 +73,3 @@ theorem iterRmComp_smoothAt
       simpa [iteratedRmComp_succ, covDerivStepComp, frameExtData] using hstep
 
 end DifferentialGeometry.PDE.RicciFlow
-

@@ -4,42 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6Isometry
 
 set_option autoImplicit false
 
-/-!
-# Local transition-map limits + cocycle (MSM135 Ch4 Step B, `lbl394` transition part)
-
-The transition half of `lbl394`.  For `α, β` with overlapping balls, the book's
-normal-coordinate transition maps
-
-  `J_k^{αβ} : E^α → Ē^β`,   `J̄_k^{αβ} : Ē^α → vec E^β`,   `J̄_k^{βα} ∘ J_k^{αβ} = id_β`
-
-are Riemannian isometries between the pulled-back metrics with uniformly bounded
-derivatives, so a (diagonalized) subsequence converges in `C^∞` on compacts to limit
-transition maps `J_∞^{αβ}`, `J̄_∞^{αβ}` satisfying the limit cocycle
-`J̄_∞^{βα} ∘ J_∞^{αβ} = id_β`.
-
-The transition maps live on nested **Euclidean balls of the same model space `E`**
-(`E^α, Ē^β ⊆ E`), so this is the `F = E` case of the localized diffeomorphism
-compactness `isometry_seq_diffeo_on` (B-loc).  `exists_transitionLimit_on` packages it
-in the book's `J`/`J̄` cocycle language; the inverse identities stay **conditional on
-domain membership** (the inner-ball containment `E^β ⊆ Ē^β ⊆ vec E^β` discharges them in
-B-glue), exactly as in `isometry_seq_diffeo_on`.
-
-## HCG framed-transition wrapper
-
-`exists_trans_h6` wires `normalTransition` — the per-object instance-packaging
-alias for `framedTransition` — and the localized H6 metric-isometry derivative
-producer into `exists_transitionLimit_on`, for a fixed pair of center sequences
-`x k, y k : (X.obj k).M`.  The geometric domain facts remain explicit:
-
-* `C^∞` smoothness of the framed transition on `U`;
-* the chart-overlap containment `NormalOverlapOn (X.obj k) (x k) (y k) U`;
-* metric and exponential-radius containments for the convergence domains and
-  independent bounded target anchors.
-
-The cocycle `hLeft`/`hRight` stay **conditional on `U`/`V`** (the overlap), never global
-(`framedTransition` is junk off the overlap).  See `StepBTransition.md`.
--/
-
 namespace DifferentialGeometry
 namespace HCGCompactness
 
@@ -47,15 +11,15 @@ open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 
-/-- **Local transition-map limits + cocycle** (`lbl394` transition part, generic
-model-coordinate form).  Transition maps `J k : U → V` and `J̄ k : V → U` on nested open
-Euclidean domains `U, V ⊆ E`, each `C^∞` on its domain, both satisfying the localized
-isometry derivative bounds, and mutually inverse, have a subsequence whose limits
-`Jinf`, `J̄inf` converge in `C^∞` on compacts and satisfy the **limit cocycle**
-`J̄inf (Jinf x) = x` (and symmetrically) — stated conditionally on domain membership
-(`Jinf x ∈ V`, `J̄inf y ∈ U`), supplied later by the book's nested-ball containment.
 
-This is `isometry_seq_diffeo_on` in transition (`F = E`, same model space) language. -/
+
+
+
+
+
+
+
+
 theorem exists_transitionLimit_on
     {U V : Set E} (hU : IsOpen U) (hV : IsOpen V)
     (J : ℕ → E → E) (Jbar : ℕ → E → E)
@@ -71,8 +35,6 @@ theorem exists_transitionLimit_on
         (∀ y ∈ V, Jbarinf y ∈ U → Jinf (Jbarinf y) = y) :=
   isometry_seq_diffeo_on hU hV J Jbar hJ hJbar hbJ hbJbar hLeft hRight
 
-/-! ## HCG-facing H6 wrapper for framed-transition limits -/
-
 section HCGNormalTransition
 
 open Bundle
@@ -83,15 +45,15 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 universe u uE uH
 
+section Raw
+
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- **Chart-overlap domain input** for framed normal coordinates: on `U`, every
-point lies in the framed exponential source at `x`, and its image lies in the
-framed normal-chart source at `y`. -/
+/-- **Chart-overlap domain input** for normal coordinates. -/
 def NormalOverlapOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) (U : Set E) : Prop :=
   letI : TopologicalSpace Y.M := Y.topology
@@ -99,14 +61,11 @@ def NormalOverlapOn
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   forall z : E, z ∈ U ->
-    z ∈ (framedExpDiffeo (I := I) Y.metric x).source ∧
-      framedExpDiffeo (I := I) Y.metric x z ∈
-        (framedChartAt (I := I) Y.metric y).source
+    z ∈ (expMapDiffeo (I := I) Y.metric x).source ∧
+      expMapDiffeo (I := I) Y.metric x z ∈
+        (normalChartAt (I := I) Y.metric y).source
 
-/-- **`normalTransition` smoothness producer** (the `hsmoothJ` frontier, discharged).
-On an open `U` contained in `x`'s intrinsic framed source-radius ball, and mapped
-by `framedExpDiffeo x` into the corresponding framed exponential image at `y`,
-the transition map is `ContDiffOn ℝ ⊤`. -/
+/-- Smoothness of a normal-coordinate transition on a mapped normal ball. -/
 theorem contDiffOn_normalTransition
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) {U : Set E}
     (hUx :
@@ -114,36 +73,42 @@ theorem contDiffOn_normalTransition
       letI : ChartedSpace H Y.M := Y.charted
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      U ⊆ Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x))
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x))
     (hmaps :
       letI : TopologicalSpace Y.M := Y.topology
       letI : ChartedSpace H Y.M := Y.charted
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      Set.MapsTo (fun z => framedExpDiffeo (I := I) Y.metric x z) U
-        (framedExpMap (I := I) Y.metric y ''
-          Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric y))) :
+      Set.MapsTo (fun z => expMapDiffeo (I := I) Y.metric x z) U
+        ((fun v : E =>
+          (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M)) ''
+            Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y))) :
     ContDiffOn ℝ (⊤ : ℕ∞) (normalTransition (I := I) Y x y) U := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  have hovl :
-      (legacyBallChart (I := I) Y x).OverlapOn
-        (legacyBallChart (I := I) Y y) U :=
-    (legacyOverlap_iff (I := I) Y x y U).2 fun z hz =>
-      ⟨hUx hz, hmaps hz⟩
-  rw [← legacyTransition_eq (I := I) Y x y]
-  exact (legacyBallChart (I := I) Y x).transition_smooth
-    (legacyBallChart (I := I) Y y) hovl
+  rw [← contMDiffOn_iff_contDiffOn]
+  have hexp : ContMDiffOn 𝓘(ℝ, E) I ∞
+      (fun z => expMapDiffeo (I := I) Y.metric x z) U :=
+    (expMapDiffeo_contMDiffOn_expBall (I := I) Y x).mono hUx
+  have hchart : ContMDiffOn I 𝓘(ℝ, E) ∞ (normalChartAt (I := I) Y.metric y)
+      ((fun v : E =>
+        (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M)) ''
+          Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y)) :=
+    normalChartAt_contMDiffOn_infty (I := I) Y.metric y
+  exact hchart.comp hexp hmaps
 
-/-- Extract fixed-pair normal-transition limits from the H6 metric-jet producer.
+end Raw
 
-The convergence domains `U` and `V` are independent of the bounded target-anchor
-sets `Ua` and `Va` used by `H6Isometry.normal_bounds_on`.  Thus the forward map
-is controlled on `U` with image anchor `Va`, while the reverse map is controlled
-on `V` with image anchor `Ua`; the limit cocycle is still conditional on the
-original convergence domains. -/
+section H6
+
+variable {E : Type uE} [NormedAddCommGroup E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
 theorem exists_trans_h6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -163,7 +128,7 @@ theorem exists_trans_h6
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (x k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x k)))
     (hVexp : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -171,7 +136,7 @@ theorem exists_trans_h6
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       V ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (y k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y k)))
     (hUaexp : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -179,7 +144,7 @@ theorem exists_trans_h6
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Ua ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (x k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x k)))
     (hVaexp : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -187,7 +152,7 @@ theorem exists_trans_h6
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Va ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (y k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y k)))
     (hJ : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x k) (y k)) U)
     (hJbar : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
@@ -225,6 +190,8 @@ theorem exists_trans_h6
       hUanorm hVmetric hUametric hVexp hUaexp hJbar hovlJbar hmapJbar
   · exact hLeft
   · exact hRight
+
+end H6
 
 end HCGNormalTransition
 

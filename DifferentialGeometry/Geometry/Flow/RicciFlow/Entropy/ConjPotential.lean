@@ -5,14 +5,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.JointRegula
 
 set_option autoImplicit false
 
-/-!
-# The conjugate-heat scalar potential on a frozen spectral scale
 
-After reversing time at `T`, the lower-order term in the conjugate heat
-equation is multiplication by `-R(T - s)`.  This file realizes that term as a
-genuine `H¹(gT) →L H⁰(gT)` family and supplies its short-time continuity,
-strong measurability, and uniform operator bound.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -41,8 +41,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The smooth coefficient `-R(t)` in the forward time-reversed conjugate heat
-equation. -/
+
+
 noncomputable def conjCoeff
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     C^∞⟮I, M; Real⟯ :=
@@ -51,7 +51,7 @@ noncomputable def conjCoeff
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- Evaluation of the reversed scalar-curvature coefficient. -/
+omit [SigmaCompactSpace M] in
 @[simp] theorem conjCoeff_apply
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
@@ -60,8 +60,6 @@ omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The conjugate-heat scalar coefficient is jointly smooth at every regular
-spacetime point. -/
 theorem conjCoeff_joint
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
@@ -73,8 +71,8 @@ theorem conjCoeff_joint
   simpa only [conjCoeff_apply] using
     (scalar_joint (I := I) S hS).neg
 
-/-- The reflected scalar coefficient as an ordinary scalar-valued spacetime
-map, with space in the first factor. -/
+
+
 noncomputable def conjCoeffRev
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D) (T : Real) :
     M × Real → Real := fun p =>
@@ -82,8 +80,6 @@ noncomputable def conjCoeffRev
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The time-reversed conjugate-heat scalar coefficient is jointly smooth in
-space and reflected time wherever the reflected time is regular. -/
 theorem conjCoeff_rev
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -103,8 +99,8 @@ theorem conjCoeff_rev
     (conjCoeff_joint (I := I) S hS).comp hmove
       (fun p hp => ⟨hp.2, Set.mem_univ p.1⟩)
 
-/-- The genuine lower-order conjugate-heat perturbation on the spectral scale
-frozen at terminal time `T`. -/
+
+
 noncomputable def conjA1
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (s : Real) :
@@ -113,8 +109,9 @@ noncomputable def conjA1
   scalarPotH0 (I := I) (M := M) (S.family.metric (T : Real))
     (conjCoeff (I := I) (M := M) S ((T : Real) - s))
 
-/-- The frozen-scale conjugate-heat potential is operator-norm continuous on
-sets whose reflected center times are regular. -/
+
+
+omit [BoundarylessManifold I M] in
 theorem conjA1_cont
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) {A : Set Real}
@@ -165,9 +162,10 @@ theorem conjA1_cont
     simpa only [conjA1] using hpair
   exact hop.trans_lt (half_lt_self heta)
 
-/-- On a nontrivial short interval, the genuine conjugate-heat potential is
-continuous, strongly measurable, and bounded by one finite nonnegative
-operator constant. -/
+
+
+
+omit [BoundarylessManifold I M] in
 theorem conjA1_short
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -288,8 +286,7 @@ theorem conjA1_short
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The reversed scalar-curvature coefficient has one finite pointwise bound
-on a nontrivial closed time interval. -/
+omit [SigmaCompactSpace M] in
 theorem conjCoeff_bound
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

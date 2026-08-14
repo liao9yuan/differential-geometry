@@ -2,37 +2,9 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Connection.Realization.Connection
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
-/-!
-# Dual covariant derivative on T*M
-
-Given a `CovariantDerivative` on `TM`, this file constructs the induced dual covariant
-derivative on the cotangent bundle `T*M = Bundle.dual ℝ (TangentSpace I)`.
-
-## Main definition
-
-* `dualCovariantDerivative` : the dual `CovariantDerivative` on `Bundle.dual ℝ (TangentSpace I)`.
-
-## Strategy
-
-For a 1-form `α` and vector fields `V`, `Y` differentiable at `x`, the scalar
-```
-Ψ_α(V, Y)(x) := extDerivFun(α·Y) x (V x) - α x (cov Y x (V x))
-```
-is *tensorial* in BOTH `V` and `Y` at `x`. The `V`-tensoriality is automatic because
-`extDerivFun(α·Y) x` and `α x ∘L cov Y x` are continuous linear maps. The `Y`-tensoriality
-is the standard product-rule cancellation.
-
-By `TensorialAt.mkHom₂`, this gives a continuous bilinear map
-`T_xM →L[ℝ] T_xM →L[ℝ] ℝ` representing `(∇* α)(x)`. The first argument is the differentiation
-direction `v`; the second is the input to the resulting 1-form `(∇*_v α)`.
--/
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
@@ -46,50 +18,36 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ### Abbreviations for differentiability of 1-forms and vector fields. -/
-
-/-- "α is differentiable at x" for a 1-form α, in total-space form. -/
 private abbrev MDiffAtDual
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x) (x : M) : Prop :=
   MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ))
     (fun y => TotalSpace.mk' (E →L[ℝ] ℝ)
       (E := fun x : M => (TangentSpace I x →L[ℝ] (Bundle.Trivial M ℝ) x)) y (α y)) x
 
-/-- "Y is differentiable at x" for a vector field Y, in total-space form. -/
 private abbrev MDiffAtVec
     (Y : Π x : M, TangentSpace I x) (x : M) : Prop :=
   MDifferentiableAt I (I.prod 𝓘(ℝ, E))
     (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x
 
-/-- Pairing α(Y) is differentiable when α and Y are. Goes from total-space form
-to "scalar function M → ℝ" form via Trivial bundle trivialization. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mdiffAt_pairing
     {α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x}
     {Y : Π x : M, TangentSpace I x} {x : M}
     (hα : MDiffAtDual I M α x) (hY : MDiffAtVec I M Y x) :
     MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y => α y (Y y)) x := by
-
   have h := MDifferentiableAt.clm_bundle_apply (b := id) hα hY
-
   have h' : MDifferentiableAt I (I.prod 𝓘(ℝ, ℝ))
       (fun m => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) m (α m (Y m))) x := h
-
   rw [mdifferentiableAt_section (F := ℝ) (E := Bundle.Trivial M ℝ)] at h'
-
   exact h'
 
-/-! ### The raw scalar operator -/
-
-/-- The raw scalar operator
-`Ψ_α(V, Y)(x) := extDerivFun(α·Y) x (V x) - α x (cov Y x (V x))`. -/
 private def Psi
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
     (V Y : Π x : M, TangentSpace I x) (x : M) : ℝ :=
   extDerivFun (fun y => α y (Y y)) x (V x) - (α x) (cov Y x (V x))
 
-/-! ### Tensoriality in V (the differentiation direction): automatic from CLM linearity. -/
-
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_add_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -99,6 +57,7 @@ private theorem Psi_add_left
   simp only [Psi, h_add, ContinuousLinearMap.map_add]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_smul_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -108,8 +67,7 @@ private theorem Psi_smul_left
   simp only [Psi, h_smul, ContinuousLinearMap.map_smul, smul_eq_mul]
   ring
 
-/-! ### Tensoriality in Y (the input to the resulting 1-form): the product-rule cancellation. -/
-
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_add_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -117,7 +75,6 @@ private theorem Psi_add_right
     (hα : MDiffAtDual I M α x)
     (hY : MDiffAtVec I M Y x) (hY' : MDiffAtVec I M Y' x) :
     Psi I M cov α V (Y + Y') x = Psi I M cov α V Y x + Psi I M cov α V Y' x := by
-
   have hαY : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y => α y (Y y)) x :=
     mdiffAt_pairing I M hα hY
   have hαY' : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y => α y (Y' y)) x :=
@@ -126,7 +83,6 @@ private theorem Psi_add_right
       (fun y => α y (Y y)) + (fun y => α y (Y' y)) := by
     funext y
     simp [Pi.add_apply, ContinuousLinearMap.map_add]
-
   have hY_T : MDiffAt (T% fun y => Y y) x := hY
   have hY'_T : MDiffAt (T% fun y => Y' y) x := hY'
   simp only [Psi]
@@ -136,6 +92,7 @@ private theorem Psi_add_right
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_smul_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -158,13 +115,11 @@ private theorem Psi_smul_right
     simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
   have h_prod := fromTangentSpace_mfderiv_smul_apply (I := I) hf hαY (V x)
   rw [h_extDeriv_eq _ _ (V x), h_prod]
-
   rw [show (f • Y : Π x : M, TangentSpace I x) = f • (fun x => Y x) from rfl,
     cov.isCovariantDerivativeOn.leibniz hY_T hf]
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.map_add,
     ContinuousLinearMap.map_smul, smul_eq_mul]
-
   have h_eq2 : (NormedSpace.fromTangentSpace ((α x) (Y x)))
       (((mfderiv I 𝓘(ℝ, ℝ) (fun y => α y (Y y))) x) (V x)) =
       (extDerivFun (fun y => α y (Y y)) x) (V x) :=
@@ -176,9 +131,7 @@ private theorem Psi_smul_right
   rw [h_eq2, h_eq3]
   ring
 
-/-! ### Bilinear tensoriality of `Psi α V Y x` -/
-
-/-- Tensoriality in V (left argument) at x — for any Y. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_tensorialAt_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -187,7 +140,7 @@ private theorem Psi_tensorialAt_left
   smul := fun _ _ => Psi_smul_left I M cov α
   add := fun _ _ => Psi_add_left I M cov α
 
-/-- Tensoriality in Y (right argument) at x — when α is differentiable at x. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_tensorialAt_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -196,24 +149,18 @@ private theorem Psi_tensorialAt_right
   smul := fun hf hY => Psi_smul_right I M cov α hα hf hY
   add := fun hY hY' => Psi_add_right I M cov α hα hY hY'
 
-/-! ### The dual covariant derivative on T*M -/
-
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dual_section_mdiff
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)
     (x : M) : MDiffAtDual I M (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x) x :=
   α.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem vec_section_mdiff
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     MDiffAtVec I M (Y : Π x : M, TangentSpace I x) x :=
   Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
-/-- The dual covariant derivative pointwise function. For each section
-`α : Π x, (Bundle.dual ℝ (TangentSpace I)) x` and point `x`, returns a CLM
-`T_xM →L[ℝ] T*M_x`.
-
-If `α` is differentiable at `x`, the value is the bilinear map built via
-`TensorialAt.mkHom₂`. For non-differentiable α, returns the junk value `0`. -/
 noncomputable def dualCovariantDerivativeFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -228,8 +175,7 @@ noncomputable def dualCovariantDerivativeFun
       (fun V _ => Psi_tensorialAt_right I M cov α hα V)
   · exact 0
 
-/-- Specification: when `α`, `V`, `Y` are all differentiable at `x`, the dual covariant
-derivative applied bilinearly to `V x` and `Y x` returns `Psi α V Y x`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dualCovariantDerivativeFun_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -244,7 +190,7 @@ private theorem dualCovariantDerivativeFun_apply
     (fun Y _ => Psi_tensorialAt_left I M cov α Y)
     (fun V _ => Psi_tensorialAt_right I M cov α hα V) hV hY
 
-/-- The junk value: when α is not differentiable at x, the dual connection is zero. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dualCovariantDerivativeFun_of_not_mdiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -253,16 +199,13 @@ private theorem dualCovariantDerivativeFun_of_not_mdiff
   unfold dualCovariantDerivativeFun
   rw [dif_neg hα]
 
-/-! ### IsCovariantDerivativeOn -/
-
-/-- The dual covariant derivative satisfies `IsCovariantDerivativeOn` on `Set.univ`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem dualCovariantDerivativeFun_isCovOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (E →L[ℝ] ℝ)
       (dualCovariantDerivativeFun I M cov) Set.univ where
   add := by
     intro α₁ α₂ x hα₁ hα₂ _hx
-
     have hα₁' : MDiffAtDual I M α₁ x := hα₁
     have hα₂' : MDiffAtDual I M α₂ x := hα₂
     have hα_sum : MDiffAtDual I M (α₁ + α₂) x :=
@@ -282,7 +225,6 @@ private theorem dualCovariantDerivativeFun_isCovOn
     rw [dualCovariantDerivativeFun_apply I M cov (α₁ + α₂) hα_sum hV_diff hY_diff]
     rw [dualCovariantDerivativeFun_apply I M cov α₁ hα₁' hV_diff hY_diff]
     rw [dualCovariantDerivativeFun_apply I M cov α₂ hα₂' hV_diff hY_diff]
-
     have h_funeq : (fun y => (α₁ + α₂) y (Y y)) =
         (fun y => α₁ y (Y y)) + (fun y => α₂ y (Y y)) := by
       funext y
@@ -311,7 +253,6 @@ private theorem dualCovariantDerivativeFun_isCovOn
       vec_section_mdiff I M Y x
     rw [show (v : TangentSpace I x) = (V : Π x : M, TangentSpace I x) x from hVx.symm]
     rw [show (w : TangentSpace I x) = (Y : Π x : M, TangentSpace I x) x from hYx.symm]
-
     rw [dualCovariantDerivativeFun_apply I M cov (g • α) hgα hV_diff hY_diff]
     change Psi I M cov (g • α) V Y x =
       g x • (dualCovariantDerivativeFun I M cov α x (V x)) (Y x) +
@@ -334,7 +275,6 @@ private theorem dualCovariantDerivativeFun_isCovOn
     have hgα_apply : (g • α) x = g x • α x := rfl
     rw [hgα_apply]
     simp only [ContinuousLinearMap.smul_apply, smul_eq_mul]
-
     have h_eq2 : (NormedSpace.fromTangentSpace ((α x) (Y x)))
         (((mfderiv I 𝓘(ℝ, ℝ) (fun y => α y (Y y))) x) (V x)) =
         (extDerivFun (fun y => α y (Y y)) x) (V x) :=
@@ -346,9 +286,6 @@ private theorem dualCovariantDerivativeFun_isCovOn
     rw [h_eq2, h_eq3]
     ring
 
-/-! ### The bundled `CovariantDerivative` -/
-
-/-- The dual covariant derivative on `T*M`, packaged as a `CovariantDerivative`. -/
 noncomputable def dualCovariantDerivative
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     CovariantDerivative I (E →L[ℝ] ℝ)
@@ -356,26 +293,7 @@ noncomputable def dualCovariantDerivative
   toFun := dualCovariantDerivativeFun I M cov
   isCovariantDerivativeOnUniv := dualCovariantDerivativeFun_isCovOn I M cov
 
-/-! ### ContMDiffCovariantDerivative instance (smoothness)
-
-For a `C^∞` covariant derivative `cov` on `TM` and a smooth 1-form `α`, the dual covariant
-derivative `dualCov α` is a smooth section of `Hom(TM, T*M)`. This is established in two
-steps:
-
-1. **Section helper** `dualCov_section_smooth`: for smooth α and smooth vector field Y,
-   the section `x ↦ ⟨x, (dualCov α x)(Y x)⟩` is a smooth section of T*M. The proof uses
-   the `dualCovariantDerivativeFun_apply` lemma to rewrite the value as
-   `extDerivFun(α·Y) x - α x ∘L cov Y x`, then composes the smoothness lemmas from
-   `SmoothSections.lean` and the connection.
-2. **Bridge**: `contMDiff_clm_section_of_pointwise` lifts pointwise smoothness in step 1
-   to total-space smoothness of the Hom-bundle section `x ↦ ⟨x, dualCov α x⟩`. -/
-
-/-- For smooth α and smooth Y, the section `x ↦ ⟨x, (dualCov α x)(Y x)⟩` of `T*M` is smooth.
-
-The proof uses the bridge `contMDiff_clm_section_of_pointwise` with
-`V₁ = TangentSpace I, V₂ = Trivial M ℝ`: for each smooth section `Z` of TM, the scalar
-`x ↦ (dualCov α x)(Y x)(Z x) = extDerivFun(α·Z) x (Y x) - α x (cov Z x (Y x))` is smooth,
-which lifts to total-space smoothness as a section of `dual ℝ TangentSpace I = Hom(TM, ℝ)`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem dualCov_section_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -385,12 +303,10 @@ private theorem dualCov_section_smooth
       (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => (TangentSpace I x →L[ℝ] (Bundle.Trivial M ℝ) x))
         x ((dualCovariantDerivativeFun I M cov α x) (Y x))) := by
-
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (V₁ := TangentSpace I) (V₂ := Bundle.Trivial M ℝ)
     (φ := fun x => (dualCovariantDerivativeFun I M cov α x) (Y x))
   intro Z
-
   have hαZ : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y => α y (Z y)) :=
     contMDiff_dual_apply_section I M α Z
   let fαZ : C^∞⟮I, M; ℝ⟯ := ⟨_, hαZ⟩
@@ -400,57 +316,43 @@ private theorem dualCov_section_smooth
         x (extDerivFun (fun y => α y (Z y)) x)) := by
     have := contMDiff_extDerivFun_section I M fαZ
     simpa [fαZ] using this
-
   have h_extDeriv_at_Y : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => extDerivFun (fun y => α y (Z y)) x (Y x)) := by
     let dα : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯ :=
       ⟨fun x => extDerivFun (fun y => α y (Z y)) x, h_extDeriv⟩
     have := contMDiff_dual_apply_section I M dα Y
     simpa [dα] using this
-
   have h_concreteConn : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => α x ((concreteConn I M cov Y Z) x)) :=
     contMDiff_dual_apply_section I M α (concreteConn I M cov Y Z)
   have h_α_cov : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => α x (cov Z x (Y x))) := h_concreteConn
-
   have h_diff : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => extDerivFun (fun y => α y (Z y)) x (Y x) - α x (cov Z x (Y x))) :=
     h_extDeriv_at_Y.sub h_α_cov
-
   have h_eq : ∀ x, (dualCovariantDerivativeFun I M cov α x) (Y x) (Z x) =
       extDerivFun (fun y => α y (Z y)) x (Y x) - α x (cov Z x (Y x)) := by
     intro x
-
     have hα := dual_section_mdiff I M α x
     have hY := vec_section_mdiff I M Y x
     have hZ := vec_section_mdiff I M Z x
     rw [dualCovariantDerivativeFun_apply I M cov α hα hY hZ]
     rfl
-
   intro x₀
   rw [contMDiffAt_section]
-
   have h_diff_at := h_diff x₀
-
   refine h_diff_at.congr_of_eventuallyEq ?_
   filter_upwards with x
   rw [h_eq]
-
   simp [Bundle.Trivial.fiberBundle_trivializationAt']
 
-/-! ### ContMDiffCovariantDerivative instance -/
-
-/-- The dual covariant derivative on T*M is `C^∞`. -/
 noncomputable instance dualCovariantDerivative_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞] :
     ContMDiffCovariantDerivative (dualCovariantDerivative I M cov) ∞ where
   contMDiff := {
     contMDiff := by
-
       intro α hα
-
       have hα_smooth : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
           (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
             (E := fun x : M => (TangentSpace I x →L[ℝ] (Bundle.Trivial M ℝ) x)) x (α x)) := by
@@ -458,7 +360,6 @@ noncomputable instance dualCovariantDerivative_contMDiff
         rwa [← contMDiffOn_univ]
       let α_section : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯ :=
         ⟨α, hα_smooth⟩
-
       rw [contMDiffOn_univ]
       apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
         (V₁ := TangentSpace I)
@@ -468,12 +369,7 @@ noncomputable instance dualCovariantDerivative_contMDiff
       exact dualCov_section_smooth I M cov α_section Y
   }
 
-/-! ### Pointwise computation lemma -/
-
-/-- Pointwise characterization: when α is a smooth 1-form and Y a smooth vector field,
-the dual covariant derivative applied bilinearly to `v ∈ T_xM` and `Y x` has the value
-`extDerivFun(α·Y) x v - α x (cov Y x v)` (the standard product-rule formula
-`(∇*_v α)(Y x) = v(α(Y)) - α(∇_v Y)`). -/
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem dualCovariantDerivative_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)

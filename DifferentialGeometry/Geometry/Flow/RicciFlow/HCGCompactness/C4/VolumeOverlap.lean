@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeComp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCovering
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # A0′ `VolumeComparisonInput` producer (brick B7, sequence assembly)
@@ -24,12 +22,14 @@ count `segBall_card` (`Comparison/Volume/SegmentCount.lean`) as the deep
   discharges `MetricCompactBase.dist_eq`.  Only `hd.dist`/`hreal` are consumed;
   `hd.decay` is never used, so A0′ is independent of the CGT input.
 
-## Endpoint status
+## Transitive-`sorry` status
 
-The A0′ producer is complete.  Its full dependency path through `segBall_card`,
-`segBall_vol_fin`, and `segBall_vol_rel` is proved, and the exact downstream
-replay of `volInput_of_bg` contains no `sorryAx`.  The remaining axioms are only
-`propext`, `Classical.choice`, and `Quot.sound`.
+This file adds **no** `sorry` of its own.  `volInput_of_bg` nonetheless remains
+transitively `sorry`'d through `segBall_card`'s dependence on the two intended
+frontier `sorry`s in `Comparison/Volume/SegmentPolar.lean` (the manifold-valued
+non-injective area inequality and its truncated polar companion).  Per plan §7,
+the A0′ endpoint stays at 0% until those close (bricks B5b/B5c); this brick only
+lands the assembly, whose own content is `sorry`-free.
 
 ## Ricci input
 
@@ -69,6 +69,9 @@ section Dim1
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)] in
 /-- In dimension one the Levi-Civita Riemann operator vanishes identically: it is
 antisymmetric in its first two arguments, which both lie in a one-dimensional
 space and are therefore proportional. -/
@@ -95,6 +98,9 @@ theorem riemannOp_dim1_zero (h1 : Module.finrank ℝ E = 1)
     ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, hee,
     smul_zero, smul_zero]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)] in
 /-- In dimension one the Ricci tensor vanishes, so `Ric ≥ 0`. -/
 theorem ricci_dim1_bddBelow (h1 : Module.finrank ℝ E = 1)
     (g : SmoothRiemannianMetric I M) :
@@ -221,10 +227,8 @@ def volInput_of_bg
   exact segBall_card (I := I) (X.obj k).metric hEnorm hq hr0 hRic hr hcap
     centers hsep' z J hJz'
 
-/-- **Total packing producer.** Uniform bounded geometry, realized Riemannian
-distance, completeness, and connectedness bound every finite
-`hd.lambda D r`-separated subset of the radius-`r` basepoint ball, uniformly in
-the sequence index. -/
+/-- Uniform bounded geometry, realized Riemannian distance, completeness, and
+connectedness bound every finite separated subset of a basepoint ball. -/
 def packInput_of_bg
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (bg : SeqBoundedGeometry (I := I) X)

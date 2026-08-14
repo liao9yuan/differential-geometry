@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Initial-edge bounds for a smooth Ricci-flow family
@@ -31,13 +29,16 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [BoundarylessManifold I M]
+  [I.Boundaryless] in
 /-- Joint chart-Gram regularity up to the initial time gives one metric
 equivalence constant on every compact initial subinterval.  This is the
 zeroth-order component of the regularizing-edge estimates used in smooth
@@ -150,6 +151,8 @@ theorem ricciEdgeMetric
       _ = (g t).inner x v v := by simp [hΛpos.ne']
   · exact hu.trans (mul_le_mul_of_nonneg_right hC₁Λ hq₀)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- On the regular interior, the geometric Ricci-flow equation is exactly the
 weakly parabolic chart-Gram `2`-jet equation.  This is the coordinate PDE that
 an initial-edge gauge or boundary-regularity argument must improve to a
@@ -187,6 +190,9 @@ theorem ricciEdgeChartPDE
     (chartBasisVecFiber (I := I) α k ((extChartAt I α).symm y))).mono
       (fun r hr => hr.1.le)
 
+omit [CompactSpace M]
+  [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- On every compact time interval strictly inside the regular slab, the
 metric variation is the time integral of `-2 Ric`.  Joint interior
 chart-Gram smoothness supplies continuity (hence integrability) of the Ricci
@@ -233,6 +239,9 @@ theorem ricciEdgeIntegral
   have hrmem : r ∈ Set.Ico a b := ⟨har.le, lt_of_le_of_lt hr.2 ht⟩
   exact (hpde r hrmem x v w).hasDerivAt (Ici_mem_nhds har)
 
+omit [CompactSpace M]
+  [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- The interior Ricci integrals have the correct improper limit at the
 initial edge.  This is deliberately an improper-limit statement: the exact
 endpoint hypotheses do not yet imply Lebesgue integrability of `Ric` on the

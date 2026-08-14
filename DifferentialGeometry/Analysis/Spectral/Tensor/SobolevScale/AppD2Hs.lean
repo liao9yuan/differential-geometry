@@ -39,9 +39,13 @@ private noncomputable def appD2CcLin
     appCc (I := I) (M := M) g (s + 2) c Φ
       (iteratedCovGrad (I := I) g 0 s 2 U)
   map_add' := fun U V => by
-    rw [iteratedCovGrad_add, appCc_add_right]
+    rw [iteratedCovGrad_add]
+    exact appCc_add_right (I := I) (M := M) g (s + 2) c Φ
+      (iteratedCovGrad (I := I) g 0 s 2 U) (iteratedCovGrad (I := I) g 0 s 2 V)
   map_smul' := fun a U => by
-    simp only [RingHom.id_apply, iteratedCovGrad_smul, appCc_smul_right]
+    rw [iteratedCovGrad_smul]
+    exact appCc_smul_right (I := I) (M := M) g (s + 2) c a Φ
+      (iteratedCovGrad (I := I) g 0 s 2 U)
 
 /-- A fixed smooth mixed-tensor coefficient acting on a second covariant
 derivative, completed from spectral `H4` to spectral `H2`. -/

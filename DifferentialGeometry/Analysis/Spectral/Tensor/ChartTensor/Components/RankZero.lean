@@ -1,14 +1,14 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 
-/-!
-# Rank-zero chart components
 
-This file identifies the raw chart component of a smooth compactly-supported
-`(0, 0)` tensor with its scalar readout.  The comparison is made only after
-evaluating the rank-zero input and output, avoiding equality of whole mixed
-tensor fibres.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -25,14 +25,16 @@ namespace TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The raw chart component of a smooth `(0, 0)` tensor is its scalar
-readout on the chart source. -/
+
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem scalar0_raw_eq
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0)
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :

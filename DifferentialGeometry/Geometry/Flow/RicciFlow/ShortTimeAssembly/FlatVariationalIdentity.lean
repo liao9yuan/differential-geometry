@@ -12,12 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.FlowRealisation.LocalChart
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
-/-!
-# Flat per-slot variational identities for the conjugating flow
-
-Discharges the flat (Lie-type) raw variational identities and the per-slot Christoffel-correction
-equations for the conjugating diffeomorphism flow, which feed the flat-route pullback assembly.
--/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -46,29 +40,9 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The D.3 flat-jet producer: the producer's flat factor value is the negative
-trivialised-flat derivative.**
-
-The genuine analytic identity behind the flat value-jet equation.  The producer's flat factor
-values `T'`, `P'` (the chart-smoothness data of the concrete flow) carry, on the orbit
-pushforward of `v`, the derivative value `T' (dΦv) + P' v`; the flat variational ODE realisation
-`hodejet` records that this curve's derivative is read by the *trivialised flat derivative*
-`fderiv (fun z => -(chartTrivRepr α X z)) (φ α) (dΦv)` — the chart-`α` conjugated linearisation
-of the generator `-X`.  Combining the two genuine `HasDerivAt`s of the *same* orbit-pushforward
-curve `s ↦ mfderiv (Φ_fam s) x v` (the producer's `RawVariationalIdentityFlat` value `hflat` and
-the trivialised flat ODE value `hodejet`) by derivative uniqueness, and splitting the trivialised
-flat derivative into the raw flat `fderiv` plus the moving-trivialisation `D²φ` correction via the
-committed reconciliation `flatLinearization_eq_rawFderiv_add_movingTriv`, yields
-
-  `T' (dΦv) + P' v = -(fderiv (chartRawRepr α X) (φ α) (dΦv) + movingTrivCorrection α X (dΦv))`.
-
-`hodejet` is the genuine chart-coordinate variational-ODE datum (the trivialised flat
-linearisation of the orbit pushforward), dischargeable from the concrete flow's joint smoothness;
-`hRdiff`/`hCdiff` are the convention-bridge differentiability side conditions.  No
-hypothesis-packaging: `hflat` and `hodejet` are `HasDerivAt`s of the orbit-pushforward curve (the
-producer datum and the chart linearisation), neither of which is the `E`-value equation that is
-the conclusion. -/
-theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (T' P' : E →L[ℝ] E)
@@ -99,9 +73,9 @@ theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
   exact flatLinearization_eq_rawFderiv_add_movingTriv (I := I) (Φ_fam t x)
     (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x v) hRdiff hCdiff
 
-set_option linter.unusedVariables false in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem flat_raw_variational_identity
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -137,6 +111,9 @@ theorem flat_raw_variational_identity
   choose! Tv Pv hTv using hpoint
   exact ⟨Tv, Pv, fun t ht x v => hTv t ht x v⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem flat_christoffel_correction_eqn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -187,6 +164,8 @@ theorem flat_christoffel_correction_eqn
   rw [hjet t ht x v, negCovariantSlotValue, hbridge]
   abel
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem flat_value_jet_identity
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
@@ -211,7 +190,7 @@ theorem flat_value_jet_identity
           + movingTrivCorrection (I := I) (Φ_fam t x)
               (X : ∀ y : M, TangentSpace I y)
               (mfderiv I I (Φ_fam t : M → M) x v)) :=
-  flatProducerJet_eq_neg_rawFderiv_add_movingTriv (I := I) X Φ_fam t x v T' P'
+  flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection (I := I) X Φ_fam t x v T' P'
     hflat hodejet hRdiff hCdiff
 
 end DifferentialGeometry.PDE.RicciFlow

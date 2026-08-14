@@ -2,17 +2,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeomet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Metric Cheeger--Gromov Compactness
 
-This file states the pointed Riemannian compactness theorem corresponding to
-MSM135 Theorem 3.9.  Its proof is the single honest global compactness frontier:
-Cheeger--Gromov compactness, direct-limit/exhaustion construction, and smooth
-Arzela--Ascoli.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,14 +22,17 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
+
+section MetricCompactnessCore
+
+variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-/-- Exhaustion and comparison maps for pointed Cheeger--Gromov convergence of
-pointed Riemannian manifolds. -/
+
+
 structure PointedRiemannianCGMaps
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (L : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -116,6 +117,7 @@ def map
     (X.obj (subseq k)).charted
   exact fun x => (Φ.partialDiffeomorph k) x
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem source_open
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -131,6 +133,7 @@ theorem source_open
     (X.obj (subseq k)).charted
   exact (Φ.partialDiffeomorph k).open_source
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem target_open
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -146,6 +149,7 @@ theorem target_open
     (X.obj (subseq k)).charted
   exact (Φ.partialDiffeomorph k).open_target
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem source_subset
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -159,8 +163,8 @@ theorem source_subset
   letI : TopologicalSpace L.M := L.topology
   exact Φ.source_exhausts.subset K hK
 
-/-- Reuse comparison maps after restoring the original distinguished points of
-a sequence whose terms were changed only by `PointedRiemannianSeq.repoint`. -/
+
+
 def unrepoint
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -181,6 +185,7 @@ def unrepoint
   base_mem := Φ.base_mem
   basepoint_map := hbase
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem unrepoint_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -200,8 +205,8 @@ def unrepoint
 
 end PointedRiemannianCGMaps
 
-/-- The source of the `k`th Riemannian comparison map as a bundled open subset
-of the limit manifold. -/
+
+
 def metricSourceOpen
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -212,8 +217,8 @@ def metricSourceOpen
   letI : TopologicalSpace L.M := L.topology
   exact ⟨Φ.source k, Φ.source_open k⟩
 
-/-- The target of the `k`th Riemannian comparison map as a bundled open subset
-of the sequence manifold. -/
+
+
 def metricTargetOpen
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -226,7 +231,7 @@ def metricTargetOpen
     (X.obj (subseq k)).topology
   exact ⟨Φ.target k, Φ.target_open k⟩
 
-/-- Source domain of a metric Cheeger--Gromov comparison map. -/
+
 abbrev MetricSourceDomain
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -235,7 +240,7 @@ abbrev MetricSourceDomain
   letI : TopologicalSpace L.M := L.topology
   (metricSourceOpen (I := I) Φ k : Type _)
 
-/-- Target domain of a metric Cheeger--Gromov comparison map. -/
+
 abbrev MetricTargetDomain
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -245,7 +250,7 @@ abbrev MetricTargetDomain
     (X.obj (subseq k)).topology
   (metricTargetOpen (I := I) Φ k : Type _)
 
-/-- The canonical topology on a Riemannian comparison source domain. -/
+
 @[implicit_reducible]
 noncomputable def metricSourceDomTop
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -257,8 +262,8 @@ noncomputable def metricSourceDomTop
   change TopologicalSpace (metricSourceOpen (I := I) Φ k)
   infer_instance
 
-/-- The canonical charted-space structure on a Riemannian comparison source
-domain. -/
+
+
 @[implicit_reducible]
 noncomputable def metricSourceDomCharted
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -276,8 +281,8 @@ noncomputable def metricSourceDomCharted
   exact TopologicalSpace.Opens.instChartedSpace (H := H) (M := L.M)
     (s := metricSourceOpen (I := I) Φ k)
 
-/-- The canonical Hausdorff structure on a Riemannian comparison source
-domain. -/
+
+
 @[implicit_reducible]
 noncomputable def metricSourceDomT2
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -294,8 +299,8 @@ noncomputable def metricSourceDomT2
   change T2Space {x : L.M // x ∈ Φ.source k}
   infer_instance
 
-/-- The canonical smooth-manifold structure on a Riemannian comparison source
-domain. -/
+
+
 @[implicit_reducible]
 noncomputable def metricSourceDomSmooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -317,8 +322,9 @@ noncomputable def metricSourceDomSmooth
   change IsManifold I ∞ (metricSourceOpen (I := I) Φ k)
   exact { (metricSourceOpen (I := I) Φ k).instHasGroupoid (contDiffGroupoid ∞ I) with }
 
-/-- A metric source domain is sigma-compact once its underlying open source is
-sigma-compact as a subset of the limit manifold. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricSourceDomSigmaOf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -334,7 +340,7 @@ theorem metricSourceDomSigmaOf
   change SigmaCompactSpace {x : L.M // x ∈ Φ.source k}
   exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
 
-/-- The canonical topology on a Riemannian comparison target domain. -/
+
 @[implicit_reducible]
 noncomputable def metricTargetDomTop
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -347,8 +353,8 @@ noncomputable def metricTargetDomTop
   change TopologicalSpace (metricTargetOpen (I := I) Φ k)
   infer_instance
 
-/-- The canonical charted-space structure on a Riemannian comparison target
-domain. -/
+
+
 @[implicit_reducible]
 noncomputable def metricTargetDomCharted
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -368,8 +374,8 @@ noncomputable def metricTargetDomCharted
   exact TopologicalSpace.Opens.instChartedSpace (H := H)
     (M := (X.obj (subseq k)).M) (s := metricTargetOpen (I := I) Φ k)
 
-/-- The canonical Hausdorff structure on a Riemannian comparison target
-domain. -/
+
+
 @[implicit_reducible]
 noncomputable def metricTargetDomT2
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -387,8 +393,8 @@ noncomputable def metricTargetDomT2
   change T2Space {x : (X.obj (subseq k)).M // x ∈ Φ.target k}
   infer_instance
 
-/-- The canonical smooth-manifold structure on a Riemannian comparison target
-domain. -/
+
+
 @[implicit_reducible]
 noncomputable def metricTargetDomSmooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -412,8 +418,9 @@ noncomputable def metricTargetDomSmooth
   change IsManifold I ∞ (metricTargetOpen (I := I) Φ k)
   exact { (metricTargetOpen (I := I) Φ k).instHasGroupoid (contDiffGroupoid ∞ I) with }
 
-/-- A metric target domain is sigma-compact once its underlying open target is
-sigma-compact as a subset of the sequence manifold. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricTargetDomSigmaOf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -433,6 +440,7 @@ theorem metricTargetDomSigmaOf
   change SigmaCompactSpace {x : (X.obj (subseq k)).M // x ∈ Φ.target k}
   exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 private theorem metricContMDiffOpenCod
     {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [TopologicalSpace N] [ChartedSpace H N]
@@ -450,8 +458,8 @@ private theorem metricContMDiffOpenCod
     have hy := hf.2 (y : N)
     simpa [Function.comp_def, extChartAt, TopologicalSpace.Opens.chartAt_eq] using hy
 
-/-- The comparison partial diffeomorphism, restricted to its open source and
-open target, is an honest diffeomorphism of the bundled metric domains. -/
+
+
 noncomputable def metricSourceTargetDiff
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -521,6 +529,7 @@ noncomputable def metricSourceTargetDiff
         (f := fun z : (X.obj (subseq k)).M => e.toPartialEquiv.symm z) (x := y)).2 hAt
     exact metricContMDiffOpenCod (I := I) (U := metricSourceOpen (I := I) Φ k) hbase
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp]
 theorem metricSourceTargetDiff_apply
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -544,8 +553,9 @@ theorem metricSourceTargetDiff_apply
       Φ.map k (x : L.M) := by
   rfl
 
-/-- The differential of the source-to-target diffeomorphism is the ambient differential of the
-comparison map. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricSourceTargetDiff_mfderiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -649,6 +659,7 @@ theorem metricSourceTargetDiff_mfderiv
   rw [htarget, hsource] at happ
   exact happ
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp]
 theorem metricSourceTargetDiff_symm_apply
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -680,8 +691,9 @@ def metricSourceCompactSet
     (K : Set L.M) : Set (MetricSourceDomain (I := I) Φ k) :=
   {x | (x : L.M) ∈ K}
 
-/-- Compact subsets of the limit manifold remain compact after restricting to a
-source domain, once the compact set is contained in that source. -/
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricSourceCompactSet_isCompact
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -711,7 +723,7 @@ theorem metricSourceCompactSet_isCompact
   rw [hImage]
   exact hK
 
-/-- Open-source metric data for MSM135 Definition 3.5. -/
+
 structure MetricSourceData
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -782,8 +794,8 @@ structure MetricSourceData
 
 namespace MetricSourceData
 
-/-- Metric source data is unchanged when only the sequence basepoints and the
-corresponding `basepoint_map` proof are replaced. -/
+
+
 def unrepoint
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -812,9 +824,9 @@ def unrepoint
   limit_inner := D.limit_inner
   pullback_inner := D.pullback_inner
 
-/-- Build metric source-domain data from the canonical open-subtype
-topology/charted/manifold structures, leaving only sigma-compactness, the three
-metrics, and the two restriction/pullback formulas as inputs. -/
+
+
+
 noncomputable def ofCanonical
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -910,9 +922,9 @@ noncomputable def ofCanonical
   limit_inner := limit_inner
   pullback_inner := pullback_inner
 
-/-- Build metric source-domain data from actual open-subtype metric restriction
-on the limit/source and sequence/target domains, then pull back the target
-metric along the checked source-target diffeomorphism. -/
+
+
+
 noncomputable def ofRestrictPullback
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1135,6 +1147,7 @@ noncomputable def derivNormSupOn
     (metricSourceCompactSet (I := I) Φ k K) p
     D.pullbackMetric D.limitMetric D.referenceMetric
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem unrepoint_supOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -1156,8 +1169,8 @@ noncomputable def derivNormSupOn
 
 end MetricSourceData
 
-/-- Concrete `C^p` convergence on compact subsets of the metric limit source
-domains. -/
+
+
 def MetricSourceCPConvOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1171,8 +1184,8 @@ def MetricSourceCPConvOn
     exists k0 : Nat, forall k : Nat, k0 <= k ->
       K ⊆ Φ.source k /\ (D k).derivNormSupOn (I := I) K p < ε
 
-/-- Compact-open smooth metric convergence after the comparison
-diffeomorphisms of MSM135 Definition 3.5. -/
+
+
 structure MetricCGConvergenceData
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1186,9 +1199,9 @@ structure MetricCGConvergenceData
 
 namespace MetricCGConvergenceData
 
-/-- Metric Cheeger--Gromov convergence is invariant under changing only the
-basepoints of the sequence terms, provided the comparison maps hit the restored
-basepoints. -/
+
+
+
 def unrepoint
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -1211,9 +1224,9 @@ def unrepoint
     simpa only [PointedRiemannianCGMaps.unrepoint_source,
       MetricSourceData.unrepoint_supOn] using Cd.converges K hK p ε hε
 
-/-- Constructor for metric Cheeger--Gromov convergence data from raw
-source-domain seminorm convergence.  The source-exhaustion condition in
-`MetricSourceCPConvOn` is supplied here. -/
+
+
+
 noncomputable def of_derivNormSupOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1236,9 +1249,9 @@ noncomputable def of_derivNormSupOn
     refine ⟨hSrc k (le_trans (Nat.le_max_left kSrc kConv) hk), ?_⟩
     exact hConv k (le_trans (Nat.le_max_right kSrc kConv) hk)
 
-/-- Metric Cheeger--Gromov convergence data built from the canonical
-source-domain restrict/pullback metrics, assuming the resulting seminorms
-converge on compact subsets. -/
+
+
+
 noncomputable def ofRestrictPullback
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1275,8 +1288,8 @@ noncomputable def ofRestrictPullback
 
 end MetricCGConvergenceData
 
-/-- MSM135 Definition 3.5, packaged around the source exhaustion and partial
-diffeomorphism data. -/
+
+
 structure PointedRiemannianCGConverges
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (L : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -1286,8 +1299,8 @@ structure PointedRiemannianCGConverges
 
 namespace PointedRiemannianCGConverges
 
-/-- Pointed metric convergence after restoring the original sequence
-basepoints. -/
+
+
 def unrepoint
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -1306,8 +1319,8 @@ def unrepoint
     PointedRiemannianCGConverges (I := I) X L subseq (Φ.unrepoint b hbase) where
   metrics := C.metrics.unrepoint b hbase
 
-/-- Build pointed Riemannian Cheeger--Gromov convergence from comparison maps,
-source-domain metric data, and raw seminorm convergence. -/
+
+
 noncomputable def of_derivNormSupOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1323,8 +1336,8 @@ noncomputable def of_derivNormSupOn
     PointedRiemannianCGConverges (I := I) X L subseq Φ where
   metrics := MetricCGConvergenceData.of_derivNormSupOn (I := I) hconv
 
-/-- Build pointed Riemannian Cheeger--Gromov convergence from canonical
-source-domain restrict/pullback metrics and raw seminorm convergence. -/
+
+
 noncomputable def ofRestrictPullback
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1359,7 +1372,7 @@ noncomputable def ofRestrictPullback
 
 end PointedRiemannianCGConverges
 
-/-- Conclusion of MSM135 Theorem 3.9. -/
+
 structure MetricCompactnessConclusion
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   subseq : Nat -> Nat
@@ -1369,12 +1382,35 @@ structure MetricCompactnessConclusion
   maps : PointedRiemannianCGMaps (I := I) X limit subseq
   convergence : PointedRiemannianCGConverges (I := I) X limit subseq maps
 
-/-!
-The unconditional theorem is assembled in
-`C4/MetricCompactnessUncondH6.lean`.  Keeping the conclusion structures in
-this lower module lets the Chapter-4 implementation import them without an
-import cycle; the public HCG umbrella imports the endpoint module.
--/
+end MetricCompactnessCore
+
+section IntrinsicInjectivityEndpoint
+
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {I : ModelWithCorners Real E H}
+variable [I.Boundaryless]
+
+
+/-- **Endpoint ruling (2026-07-05):** this unconditional form is NOT the Chapter 4
+working target.  Its `sorry` decomposes as
+`C4.MetricCompactnessInputs.metricCompactness` (the now-checked conditional
+Theorem 3.9) **plus** native producers for the book-external theorems bundled
+there (Cheeger–Gromov–Taylor `lbl384`, Bishop–Gromov, and the localized [H6]
+normal-coordinate inputs) and per-member connectedness.  It stays `sorry`
+until those citations are proved natively; the Steps A→D assembly is no longer
+part of this frontier.  See `C4/MetricCompactnessEndpoint.lean` and
+`HCGCompactness/PROJECT_MAP.md`. -/
+def metricCompactness
+    [I.Boundaryless]
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (_hcomplete : SeqMetricComplete (I := I) X)
+    (_hgeom : SeqBoundedGeometry (I := I) X)
+    (_hinj : BaseInjBound (I := I) X) :
+    MetricCompactnessConclusion (I := I) X := by
+  sorry
+
+end IntrinsicInjectivityEndpoint
 
 end HCGCompactness
 end DifferentialGeometry

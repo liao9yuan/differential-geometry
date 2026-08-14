@@ -32,7 +32,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -67,10 +67,10 @@ def ricciRefold0
   ricciArmOrder0RiemannCoeff (I := I) (M := M) g g +
     (2 : ℝ) •
       (ricciArmOrder0AACommCoeffField (I := I) (M := M) g g₁ +
-        (appCcRS (I := I) (M := M) g 2 2 2
-            (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g g₁ -
-              ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g g)
-            (ccSlotSwapField (I := I) (M := M) g) +
+        (ccOperatorFieldComp (I := I) (M := M) g 2 2 2
+            (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g g₁ -
+              ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g g)
+            (ccInputSlotSwapField (I := I) (M := M) g) +
           (1 / 2 : ℝ) •
             ricciArmSharpGradKoszulResidualField (I := I) (M := M) g g₁ P -
           ricciArmRicciFoldRemainderField (I := I) (M := M) g g₁ P))
@@ -157,32 +157,7 @@ private lemma symmS_eq_self
       ccTensorBilin (I := I) g S x v w =
         ccTensorBilin (I := I) g S x w v) :
     symmS (I := I) (M := M) g S = S := by
-  have hswap :
-      domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S = S := by
-    refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
-    rw [domDomCongrSection_unitModel]
-    refine ContinuousMultilinearMap.ext (fun v => ?_)
-    rw [ContinuousMultilinearMap.domDomCongr_apply]
-    have hv : ∀ u w : TangentSpace I x,
-        unitModel (I := I) (M := M) g 2 S x ![u, w] =
-          unitModel (I := I) (M := M) g 2 S x ![w, u] := by
-      intro u w
-      rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g S x u w,
-        unitModel_eq_ccTensorBilin_local (I := I) (M := M) g S x w u]
-      exact hS x u w
-    have hveta :
-        (fun i => v ((Equiv.swap (0 : Fin 2) 1) i)) = ![v 1, v 0] := by
-      funext i
-      fin_cases i <;> rfl
-    have hveta' : v = ![v 0, v 1] := by
-      funext i
-      fin_cases i <;> rfl
-    rw [hveta]
-    conv_rhs => rw [hveta']
-    exact hv (v 1) (v 0)
-  have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
-  rw [symmS, hswap, htwo, smul_smul,
-    show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
+  exact foldSymmS_eq_self (I := I) (M := M) g S hS
 
 private lemma ricciRefold2_eq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
@@ -224,13 +199,13 @@ theorem ricciRefold_app
     (hδZ : gFibreOpBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) δ)
     {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (ricciArmOrder0RiemannCoeff (I := I) (M := M) g
           (realizedFam (I := I) g T 0 hδ hδZ s)) T =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (ricciRefold0 (I := I) (M := M) g
             (realizedFam (I := I) g T 0 hδ hδZ s) (s • T)) T +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (ricciRefold2 (I := I) (M := M) g T hδ hδZ s)
           (iteratedCovGrad (I := I) g 0 2 2 T) := by
   have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
@@ -248,24 +223,25 @@ theorem ricciRefold_app
     intro x v w
     rw [bilin_smul (I := I) (M := M), bilin_smul (I := I) (M := M), hT x v w]
   have hprim :=
-    ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
+    ricciArmOrder0RiemannHalfBgDiff_appCc_eq_residualFieldSum_add_refoldKernelSecondGrad
       (I := I) (M := M) g
       (realizedFam (I := I) g T 0 hδ hδZ s) (s • T) htie hPsymm T
   have hC2 := ricciRefold2_eq (I := I) (M := M) g T hT hδ hδZ s
   rw [ricciRefold0, hC2, appCc_add_left, appCc_smul_left,
     appCc_smul_left]
-  rw [iteratedCovGrad_smul, appCc_smul_right] at hprim
+  rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.iteratedCovGrad_smul_real,
+    appCc_smul_right] at hprim
   have htwice :
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (ricciArmOrder0RiemannCoeff (I := I) (M := M) g
             (realizedFam (I := I) g T 0 hδ hδZ s)) T -
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (ricciArmOrder0RiemannCoeff (I := I) (M := M) g g) T =
       (2 : ℝ) • ((1 / 2 : ℝ) •
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g
               (realizedFam (I := I) g T 0 hδ hδZ s)) T -
-          appCc (I := I) (M := M) g 2 2
+          operatorFieldApply (I := I) (M := M) g 2 2
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g g) T)) := by
     rw [smul_smul, show (2 : ℝ) * (1 / 2) = 1 by norm_num, one_smul]
   rw [hprim] at htwice
@@ -283,14 +259,14 @@ theorem lieRefold_app
     (hδZ : gFibreOpBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) δ)
     (s : ℝ) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (deTurckLieCovDerivArmField (I := I) (M := M) g g₁ g_bg) T =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (lieRefold0 (I := I) (M := M) g g₁ g_bg T hδ hδZ s) T +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (lieRefold2 (I := I) (M := M) g T hδ hδZ s)
           (iteratedCovGrad (I := I) g 0 2 2 T) := by
-  rw [lieRefold0, lieRefold2, appCc_sub_left,
+  rw [lieRefold0, lieRefold2, foldAppCc_sub_left,
     edgeLiePair_apply (I := I) (M := M) g T hδ hδZ lieRefoldQ lieRefoldEps s]
   abel
 
@@ -308,12 +284,12 @@ theorem rhsLow0_refold
     (hδZ : gFibreOpBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) δ)
     {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (DeTurckCoefficients.rhsLow0Coeff
           (I := I) (M := M) g g_bg T 0 hδ hδZ s) T =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (rhsRefold0 (I := I) (M := M) g g_bg T hδ hδZ s) T +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (rhsRefold2 (I := I) (M := M) g T hδ hδZ s)
           (iteratedCovGrad (I := I) g 0 2 2 T) := by
   have hRic := ricciRefold_app (I := I) (M := M) g T hT hδ_lt hδ hδZ hs
@@ -323,7 +299,7 @@ theorem rhsLow0_refold
     deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
     edgeRicciHalf]
   change
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         ((-2 : ℝ) •
             linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g
               (realizedFam (I := I) g T 0 hδ hδZ s) +

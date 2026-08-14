@@ -1,16 +1,16 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Manifold
 
-/-!
-# The corrected chart ODE has bare manifold velocity
 
-A chart-coordinate curve solving the corrected chart ODE `u' = chartTrivRepr α (X t) u`,
-when pulled back by `(extChartAt I α).symm`, has the **bare** manifold velocity
-`X t (point)`.  The trivialised `chartTrivRepr` correction is precisely what cancels the
-chart-pushforward transport, so the resulting manifold derivative is the intrinsic field
-value — never the raw chart projection.  This is the convention-correct heart of the
-corrected anchor flow.
--/
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -25,10 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Pointwise convention identity: at a chart coordinate `c` in the chart target, the corrected
-chart representation `chartTrivRepr α (X s) c` equals the tangent coordinate change of the field
-value `X s` at the pulled-back point.  Used to convert the corrected chart ODE velocity into the
-form consumed by `chartflow_eq_bareflow_on_U`. -/
 private lemma chartTrivRepr_eq_tangentCoordChange_of_target
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (s : ℝ) {c : E}
     (hc : c ∈ (extChartAt I α).target) :
@@ -38,19 +34,21 @@ private lemma chartTrivRepr_eq_tangentCoordChange_of_target
   have hq_src : (extChartAt I α).symm c ∈ (chartAt H α).source := by
     rw [← extChartAt_source (I := I) α]
     exact (extChartAt I α).map_target hc
-  show (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((extChartAt I α).symm c)
+  change (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((extChartAt I α).symm c)
         (X s ((extChartAt I α).symm c)) = _
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hq_src]
   rfl
 
-set_option linter.unusedSectionVars false in
-/-- A chart curve solving the corrected chart ODE `u' = chartTrivRepr α (X t) u`, pulled back
-by `(extChartAt I α).symm`, has the bare manifold velocity `X t (point)`: the trivialised
-correction cancels the chart-pushforward transport. -/
+
+
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chartflow_eq_bareflow
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (flow : E → ℝ → E) (y : E) {a b : ℝ}
     (hconf : ∀ t ∈ Set.Ioo a b, flow y t ∈ (extChartAt I α).target)
-    (hode : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t)) (Set.Ioo a b) t) :
+    (hode : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t))
+      (Set.Ioo a b) t) :
     ∀ t ∈ Set.Ioo a b,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (extChartAt I α).symm (flow y s)) (Set.Ioo a b) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t ((extChartAt I α).symm (flow y t)))) := by

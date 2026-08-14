@@ -5,43 +5,6 @@ import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.Data.Fin.Tuple.Basic
 
-/-!
-# Slot-permutation invariance of the pointwise tensor inner product
-
-Let `M` be a smooth finite-dimensional manifold modelled on a real normed
-space `E` equipped with a smooth Riemannian metric `g`. The pointwise inner
-product `tensorInnerPointwise_0s` on covariant `(0, s)`-tensors (defined in
-`PointwiseInner.Defs`) curries off one model slot at a time and contracts
-through the inverse Gram matrix of `g(x)` on the fixed model-space basis
-`chartModelBasis E`.
-
-This file establishes that `tensorInnerPointwise_0s` is invariant under a
-**simultaneous permutation of its `Fin s` covariant slots**: for any
-`σ : Equiv.Perm (Fin s)`,
-
-```
-tensorInnerPointwise_0s s g x (S.domDomCongr σ) (T.domDomCongr σ)
-  = tensorInnerPointwise_0s s g x S T,
-```
-
-where `ContinuousMultilinearMap.domDomCongr σ` reindexes the domain slots.
-
-The proof goes through an explicit closed form: unfolding the recursion
-fully expresses the pointwise inner product as a double sum over
-slot-index tuples `i j : Fin s → Fin (Module.finrank ℝ E)`,
-
-```
-tensorInnerPointwise_0s s g x S T
-  = ∑ i, ∑ j, (∏ a, (G(x))⁻¹ (i a) (j a))
-                * S (e ∘ i) * T (e ∘ j),
-```
-
-with `e = chartModelBasis E`. In this form, simultaneously precomposing both
-tuples by `σ` is a bijective reindexing of the double sum, leaving it
-unchanged. The headline is therefore an `=`-identity, with the adjacent
-transposition and block-move (cyclic) cases following as immediate
-instances of the general permutation statement.
--/
 
 noncomputable section
 
@@ -55,13 +18,10 @@ namespace L2
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Collapse a sum over a leading index together with a tail tuple into a
-single sum over `(s+1)`-tuples, using the head/tail splitting equivalence
-`Fin.consEquiv`. -/
 private lemma sum_cons_collapse {n s : ℕ}
     (F : Fin n → (Fin s → Fin n) → ℝ)
     (G : (Fin (s + 1) → Fin n) → ℝ)
@@ -75,17 +35,10 @@ private lemma sum_cons_collapse {n s : ℕ}
           rw [hF]; rfl)]
   rw [Fintype.sum_prod_type]
 
-/-- **Explicit closed form** of the pointwise `(0, s)` inner product.
-Unfolding the recursion fully, the pointwise inner product is a double sum
-over slot-index tuples `i j : Fin s → Fin (Module.finrank ℝ E)`: each term
-is the product of the inverse-Gram-matrix entries `(G(x))⁻¹ (i a) (j a)`
-over the slots `a`, weighted by the tensor components `S (e ∘ i)` and
-`T (e ∘ j)` evaluated on the corresponding basis tuples, where
-`e = chartModelBasis E`. -/
 theorem tensorInnerPointwise_0s_eq_sum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S T =
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S T =
       ∑ i : Fin s → Fin (Module.finrank ℝ E),
         ∑ j : Fin s → Fin (Module.finrank ℝ E),
           (∏ a : Fin s,
@@ -124,7 +77,7 @@ theorem tensorInnerPointwise_0s_eq_sum
       have hstep :
           ∀ p q : Fin n,
             (gramMatrixAt (I := I) (M := M) g x)⁻¹ p q *
-                tensorInnerPointwise_0s (I := I) (M := M) s g x
+                covariantTensorInnerPointwise (I := I) (M := M) s g x
                   (S.curryLeft ((chartModelBasis E) p))
                   (T.curryLeft ((chartModelBasis E) q))
               = ∑ i : Fin s → Fin n,
@@ -246,20 +199,13 @@ theorem tensorInnerPointwise_0s_eq_sum
         rfl
       rw [hcollapse_outer]
 
-/-- **Slot-permutation invariance of the pointwise `(0, s)` inner
-product.** Reindexing the `Fin s` covariant slots of *both* arguments by
-the same permutation `σ` via `ContinuousMultilinearMap.domDomCongr` leaves
-the pointwise inner product unchanged. In the explicit closed form, the
-double sum over slot-index tuples is reindexed by the bijection
-`i ↦ i ∘ σ`, which is the same bijection in both arguments; this is a
-bijective reindexing of the sum, so the value is invariant. -/
 theorem tensorInnerPointwise_0s_domDomCongr
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (σ : Equiv.Perm (Fin s))
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (S.domDomCongr σ) (T.domDomCongr σ) =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S T := by
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S T := by
   classical
   set n := Module.finrank ℝ E with hn_def
   rw [tensorInnerPointwise_0s_eq_sum, tensorInnerPointwise_0s_eq_sum]
@@ -331,48 +277,31 @@ theorem tensorInnerPointwise_0s_domDomCongr
       S (fun a => (chartModelBasis E) (i a)) *
         T (fun a => (chartModelBasis E) (j a)))
 
-/-- **Adjacent / arbitrary transposition** special case of slot-permutation
-invariance: swapping two covariant slots `a b : Fin s` of both arguments
-simultaneously leaves the pointwise `(0, s)` inner product unchanged. -/
 theorem tensorInnerPointwise_0s_domDomCongr_swap
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (a b : Fin s)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (S.domDomCongr (Equiv.swap a b)) (T.domDomCongr (Equiv.swap a b)) =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S T :=
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S T :=
   tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x s
     (Equiv.swap a b) S T
 
-/-- **Block-move (cyclic) special case** of slot-permutation invariance.
-`Fin.cycleRange b : Equiv.Perm (Fin s)` is the cyclic permutation rotating
-`{0, 1, …, b}` by one step (sending `b ↦ 0`, `k ↦ k + 1` for `k < b`, and
-fixing the slots beyond `b`). Reindexing the covariant slots of both
-arguments of the pointwise `(0, s)` inner product by `Fin.cycleRange b`
-leaves the inner product unchanged.
-
-This is the slot move used downstream when a distinguished slot must be
-brought to the front past a block of earlier slots. -/
 theorem tensorInnerPointwise_0s_domDomCongr_cycleRange
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (b : Fin s)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (S.domDomCongr (Fin.cycleRange b))
         (T.domDomCongr (Fin.cycleRange b)) =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S T :=
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S T :=
   tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x s
     (Fin.cycleRange b) S T
 
-/-- **Reverse-rotation block-move special case** of slot-permutation
-invariance. `finRotate s : Equiv.Perm (Fin s)` is the full cyclic rotation
-sending `k ↦ k + 1` (and the last slot to `0`). Reindexing the covariant
-slots of both arguments of the pointwise `(0, s)` inner product by
-`finRotate s` leaves the inner product unchanged. -/
 theorem tensorInnerPointwise_0s_domDomCongr_finRotate
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (S.domDomCongr (finRotate s)) (T.domDomCongr (finRotate s)) =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S T :=
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S T :=
   tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x s
     (finRotate s) S T
 

@@ -7,38 +7,36 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Brick D — window-uniform `C^∞` upgrade (MSM135 Lemma 3.11 / Thm 3.10 input)
 
-P3 produces, for each fixed time `t` in the flow window `[β, ψ]`, a `C^∞`-on-
-compacts convergent subsequence of the spatial metrics `gSeq k t → gInf t`
-(Bricks A–C, spatial preconvergence).  Brick D upgrades this *pointwise-in-`t`*
-convergence to convergence that is **uniform over the whole window**, which is the
-shape `SourceMetricCPConvOnWindow` (`PointedConvergence.lean`) that the Thm 3.10
-assembly (P4) consumes (`ε → k0 → ∀ k ≥ k0 → ∀ t ∈ [β,ψ]`).
 
-The mechanism is the classical `3ε` / equicontinuity argument: a finite `δ`-net of
-the compact window, the per-time convergence at the net centres, and the uniform
-time-Lipschitz control (the `q = 1` derivative bound, supplied as a hypothesis) of
-both the sequence and the limit, combine to give window-uniform convergence.
 
-The per-time convergence `hconv` is the deliberate abstraction boundary: Brick C
-discharges it (and the dense-time diagonal supplies the common subsequence baked
-into `gSeq`).  This file does NOT depend on `MetricPreconv.lean` (Brick B's area).
 
-## Contents
 
-* `sqrt_sum_sq_add_le` — Euclidean ℓ² triangle inequality (pure real).
-* `sqrtNormSq0S_add_le` — triangle inequality for the `gRef`-fibre norm
-  `√normSq0S` (via a `gRef`-orthonormal basis).
-* `metricDerivNorm_triangle` — the metric `C^a` difference seminorm satisfies the
-  triangle inequality.
-* `metricDerivNormSupOn_le_of_forall` — pointwise bound `⇒` `sSup` bound.
-* `windowPreconv` — the `3ε` window-uniform upgrade (the Brick D endpoint).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -52,8 +50,8 @@ open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.Integral.Connection
 
-/-- **Euclidean ℓ² triangle inequality** (pure real, via discrete Cauchy–Schwarz
-`Finset.sum_mul_sq_le_sq_mul_sq`). -/
+
+
 theorem sqrt_sum_sq_add_le {ι : Type*} [Fintype ι] (a b : ι → Real) :
     Real.sqrt (∑ i, (a i + b i) ^ 2) ≤
       Real.sqrt (∑ i, (a i) ^ 2) + Real.sqrt (∑ i, (b i) ^ 2) := by
@@ -81,11 +79,11 @@ theorem sqrt_sum_sq_add_le {ι : Type*} [Fintype ι] (a b : ι → Real) :
     _ = Real.sqrt (∑ i, (a i) ^ 2) + Real.sqrt (∑ i, (b i) ^ 2) :=
         Real.sqrt_sq (by positivity)
 
-/-- **Euclidean ℓ² vector mean value inequality** (pure real).  If each scalar
-component `c i` has time derivative `c' i r` on the window and the derivative
-vector has ℓ² norm `≤ L`, then `√(∑ (c i s - c i t)²)` is `L`-Lipschitz.  Proved by
-lifting to `EuclideanSpace ℝ ι` (via the `PiLp` continuous linear equivalence) and
-applying the vector mean value inequality `norm_image_sub_le_of_norm_hasDerivWithin_le`. -/
+
+
+
+
+
 theorem sqrt_sum_sq_sub_le_of_hasDerivAt {ι : Type*} [Fintype ι] {β ψ L : Real}
     (c c' : ι → Real → Real)
     (hderiv : ∀ i : ι, ∀ r ∈ Set.Icc β ψ, HasDerivAt (c i) (c' i r) r)
@@ -129,19 +127,21 @@ theorem sqrt_sum_sq_sub_le_of_hasDerivAt {ι : Type*} [Fintype ι] {β ψ L : Re
 noncomputable section ManifoldSection
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-/-- **Triangle inequality for the `gRef`-fibre norm `√normSq0S`.**  In a
-`gRef`-orthonormal basis the squared norm is the sum of squared components
-(`normSq0S_identity_eq_sum_sq`), so `sqrt_sum_sq_add_le` applies. -/
+
+
+
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem sqrtNormSq0S_add_le
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (u w : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -168,9 +168,12 @@ theorem sqrtNormSq0S_add_le
   simp_rw [hcomp]
   exact sqrt_sum_sq_add_le _ _
 
-/-- **Triangle inequality for the metric `C^a` difference seminorm.**  The
-difference tower `metricDiffCovDerivAt a A C` telescopes through any `B`
-(`sub_add_sub_cancel`), so `√normSq0S` subadditivity gives the result. -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_triangle
     (a : Nat) (A B C gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) a A C gRef x ≤
@@ -183,7 +186,11 @@ theorem metricDerivNorm_triangle
   rw [htel]
   exact sqrtNormSq0S_add_le (I := I) gRef x (a + 2) _ _
 
-/-- **`sSup` bound from a uniform pointwise bound.** -/
+
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNormSupOn_le_of_forall
     (K : Set M) (p : Nat) (gk gInf gRef : SmoothRiemannianMetric I M)
     (c : Real) (hc : 0 ≤ c)
@@ -194,16 +201,19 @@ theorem metricDerivNormSupOn_le_of_forall
   rintro r ⟨a, hap, x, hxK, rfl⟩
   exact h a hap x hxK
 
-/-- **The `q = 1` time-Lipschitz estimate.**  If for every `x ∈ K` and `s` in the
-window the order-`a` tower evaluation `r ↦ ∇^a g(r)(x)(v)` has time derivative
-`Ev s x v` (the `∂ₜ∇ᵖg = -2∇ᵖRc` family of `hevComp_of_solutions`), and the
-evolution tensor `Ev s x` has `gRef`-norm `≤ L` uniformly on the window, then the
-difference seminorm `metricDerivNorm a (g s) (g t)` is `L`-Lipschitz in `(s, t)`.
 
-Proof: in a `gRef`-orthonormal basis the difference tower is the difference of the
-component vectors, so the componentwise `HasDerivAt`s and the bound
-`∑ comp(Ev)² = normSq0S(Ev) ≤ L²` feed the Euclidean vector mean value inequality
-`sqrt_sum_sq_sub_le_of_hasDerivAt`. -/
+
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem timeLipschitz_of_hasDerivAt
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
     (g : Real → SmoothRiemannianMetric I M)
@@ -252,13 +262,16 @@ theorem timeLipschitz_of_hasDerivAt
   rw [hmd]
   exact hkey
 
-/-- **Brick D endpoint — the `3ε` window-uniform upgrade.**  Given uniform time-
-Lipschitz control of both the sequence `gSeq k ·` and the limit family `gInf ·`
-(constant `L`, in the `metricDerivNorm` difference seminorm) and the *abstract
-per-time convergence* `hconv` on a dense set `S ⊆ [β,ψ]` (the Brick C output, after
-the dense-time diagonal), the convergence `gSeq k t → gInf t` is uniform over the
-whole window — matching the `SourceMetricCPConvOnWindow` quantifier shape
-(`ε → k0 → ∀ k ≥ k0 → ∀ t ∈ [β,ψ]`). -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem windowPreconv
     (K : Set M) (β ψ : Real) (p : Nat)
     (gSeq : Nat → Real → SmoothRiemannianMetric I M)
@@ -281,7 +294,6 @@ theorem windowPreconv
   have hLpos : (0 : Real) < L + 1 := by linarith
   set δ : Real := ε / (3 * (L + 1)) with hδdef
   have hδpos : 0 < δ := by rw [hδdef]; positivity
-  -- finite δ-net of the compact window with centres in `S ∩ Icc`
   have hcover : Set.Icc β ψ ⊆ ⋃ τ : {τ : Real // τ ∈ S ∧ τ ∈ Set.Icc β ψ},
       Metric.ball (τ : Real) δ := by
     intro t ht
@@ -292,7 +304,6 @@ theorem windowPreconv
   obtain ⟨F, hF⟩ := (isCompact_Icc (a := β) (b := ψ)).elim_finite_subcover
     (fun τ : {τ : Real // τ ∈ S ∧ τ ∈ Set.Icc β ψ} => Metric.ball (τ : Real) δ)
     (fun _ => Metric.isOpen_ball) hcover
-  -- a convergence threshold at each net centre (at level `ε/3`)
   have hk0 : ∀ τ : {τ : Real // τ ∈ S ∧ τ ∈ Set.Icc β ψ},
       ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k → ∀ a : Nat, a ≤ p → ∀ x ∈ K,
         metricDerivNorm (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) gRef x < ε / 3 :=
@@ -309,14 +320,14 @@ theorem windowPreconv
   refine lt_of_le_of_lt
     (metricDerivNormSupOn_le_of_forall (I := I) K p (gSeq k t) (gInf t) gRef c hcnn ?_) hc_lt
   intro a hap x hxK
-  -- locate the net centre `τ` near `t`
   obtain ⟨τ, hτF, htτ⟩ := Set.mem_iUnion₂.1 (hF ht)
   have hdist : |t - (τ : Real)| < δ := by
     rw [Metric.mem_ball, Real.dist_eq] at htτ; exact htτ
-  -- three-term split
-  have h1 : metricDerivNorm (I := I) a (gSeq k t) (gSeq k (τ : Real)) gRef x ≤ L * |t - (τ : Real)| :=
+  have h1 : metricDerivNorm (I := I) a (gSeq k t) (gSeq k (τ : Real)) gRef x ≤ L * |t -
+    (τ : Real)| :=
     hgLip k t ht (τ : Real) τ.2.2 a hap x hxK
-  have h3 : metricDerivNorm (I := I) a (gInf (τ : Real)) (gInf t) gRef x ≤ L * |t - (τ : Real)| := by
+  have h3 : metricDerivNorm (I := I) a (gInf (τ : Real)) (gInf t) gRef x ≤ L * |t -
+    (τ : Real)| := by
     have := hInfLip (τ : Real) τ.2.2 t ht a hap x hxK
     rwa [abs_sub_comm] at this
   have h2 : metricDerivNorm (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) gRef x < ε / 3 :=
@@ -327,7 +338,8 @@ theorem windowPreconv
         + metricDerivNorm (I := I) a (gInf (τ : Real)) (gInf t) gRef x) := by
     refine le_trans
       (metricDerivNorm_triangle (I := I) a (gSeq k t) (gSeq k (τ : Real)) (gInf t) gRef x) ?_
-    have := metricDerivNorm_triangle (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) (gInf t) gRef x
+    have := metricDerivNorm_triangle (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) (gInf t) gRef
+      x
     linarith
   have hδbound : L * |t - (τ : Real)| ≤ L * δ := mul_le_mul_of_nonneg_left hdist.le hL
   nlinarith [htri, h1, h2, h3, hδbound, hcdef.ge]

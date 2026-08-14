@@ -1,16 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
 
-/-!
-# Ricci-flow component evolution interfaces
 
-This module contains the Section 6.2 component predicates and finite-sum
-algebra used by the folder-level Ricci-flow API.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,10 +21,10 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Section 6.2: Ricci and scalar evolution interfaces -/
+
 
 section Components
 
@@ -444,14 +441,15 @@ private theorem ricciNormDerivativeSimplifies_pure
               (Q := quadraticBy G A)
               (R := raise2By G A)
 
-/-- Interpret the canonical pointwise Ricci family as the two-tensor field used
-by the coordinate Bochner layer. -/
+
+
 def ricciTwoTensorField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     Real -> DifferentialGeometry.Integral.Connection.RawTwoTensorField (I := I) (M := M) :=
   fun t x X Y => S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 X Y)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciTwoTensorField_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -460,7 +458,7 @@ def ricciTwoTensorField
       S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 X Y) := by
   rfl
 
-/-- Canonical Ricci component in a time-dependent frame. -/
+
 def ricciCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -468,6 +466,8 @@ def ricciCompInFrame
     (t : Real) (x : M) (i j : Idx) : Real :=
   S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame j x))
 
+omit [Fintype Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciCompInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -477,18 +477,20 @@ def ricciCompInFrame
       S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame j x)) := by
   rfl
 
-/-- Ricci with both indices raised, as the solution-level projection of the
-generic frame algebra in `Bochner.lean`:
-`Ric^{ij} = g^{ia} g^{jb} Ric_ab`. -/
+
+
+
 abbrev raisedRicciCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) (i j : Idx) : Real :=
-  DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame (I := I) (M := M) (Time := Real)
+  DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame (I := I) (M := M)
+    (Time := Real)
     (ricciTwoTensorField (I := I) S) gInv frame t x i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem raisedRicciCompInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -501,8 +503,8 @@ abbrev raisedRicciCompInFrame
           ricciCompInFrame (I := I) S frame t x a b := by
   rfl
 
-/-- Ricci with the second index raised:
-`Ric_i^k = g^{ka} Ric_ia`. -/
+
+
 def ricciOneUpCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -511,6 +513,7 @@ def ricciOneUpCompInFrame
     (t : Real) (x : M) (i k : Idx) : Real :=
   ∑ a : Idx, gInv t x k a * ricciCompInFrame (I := I) S frame t x i a
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciOneUpCompInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -521,7 +524,7 @@ def ricciOneUpCompInFrame
       ∑ a : Idx, gInv t x k a * ricciCompInFrame (I := I) S frame t x i a := by
   rfl
 
-/-- The quadratic term `Ric_i^k Ric_kj` from Lemma 6.3. -/
+
 def ricciQuadraticCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -532,6 +535,7 @@ def ricciQuadraticCompInFrame
     ricciOneUpCompInFrame (I := I) S gInv frame t x i k *
       ricciCompInFrame (I := I) S frame t x k j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciQuadraticCompInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -544,7 +548,7 @@ def ricciQuadraticCompInFrame
           ricciCompInFrame (I := I) S frame t x k j := by
   rfl
 
-/-- The curvature-Ricci contraction `R_ikjl Ric^{kl}` from Lemma 6.3. -/
+
 def rmRicciContractionCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -556,6 +560,7 @@ def rmRicciContractionCompInFrame
     DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x i k j l *
       raisedRicciCompInFrame (I := I) S gInv frame t x k l
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem rmRicciContractionCompInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -569,10 +574,10 @@ def rmRicciContractionCompInFrame
           raisedRicciCompInFrame (I := I) S gInv frame t x k l := by
   rfl
 
-/-- Component RHS for Lemma 6.3 in the project lowered-curvature convention:
-`Delta Ric_ij - 2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj`. -/
--- Convention note: with standard slots `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, the
--- implementation below has a minus sign on `rmRicciContractionCompInFrame`.
+
+
+
+
 def ricciEvolutionRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -585,6 +590,7 @@ def ricciEvolutionRHSInFrame
     2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame t x i j -
       2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciEvolutionRHSInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -599,8 +605,8 @@ def ricciEvolutionRHSInFrame
           2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   rfl
 
-/-- Coordinate Ricci norm square for a folder-level Ricci-flow solution,
-projected from the generic frame algebra in `Bochner.lean`. -/
+
+
 abbrev ricciNormSqInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -610,6 +616,7 @@ abbrev ricciNormSqInFrame
   DifferentialGeometry.Integral.Connection.ricciNormSqInFrame (I := I) (M := M) (Time := Real)
     (ricciTwoTensorField (I := I) S) gInv frame
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciNormSqInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -622,9 +629,10 @@ abbrev ricciNormSqInFrame
           raisedRicciCompInFrame (I := I) S gInv frame t x i j := by
   rfl
 
-/-- The coordinate Ricci norm in any frame agrees with the intrinsic squared
-Ricci norm, provided the supplied inverse components really are the inverse
-metric in the matching pointwise basis. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem ricciNormSq_basis
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [DecidableEq Idx]
@@ -646,8 +654,9 @@ theorem ricciNormSq_basis
     (fun i j : Idx => gInv t x i j) hinv (S.ricci t x) (S.ricci t x)]
   simp only [ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.ricciNormSqInFrame_apply,
     ricciTwoTensorField_apply, SolutionOn.ricciAt_eq,
-    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame_apply, SolutionOn.ricci_eq,
-    SolutionFamily.ricci_apply, DifferentialGeometry.Integral.Connection.vec2, hbasis, Fin.isValue,
+    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame_apply,
+      SolutionOn.ricci_eq,
+    SolutionFamily.ricci_apply, hbasis, Fin.isValue,
     Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -665,9 +674,9 @@ theorem ricciNormSq_basis
     fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2]
   rw [hij, hkl]
 
-/-- Coordinate inner product `<roughDelta Ric, Ric>` for a folder-level
-Ricci-flow solution, projected from the generic frame algebra in
-`Bochner.lean`. -/
+
+
+
 abbrev roughLapRicciInnerInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -675,9 +684,11 @@ abbrev roughLapRicciInnerInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     Real -> M -> Real :=
-  DifferentialGeometry.Integral.Connection.roughLapRicciInnerInFrame (I := I) (M := M) (Time := Real)
+  DifferentialGeometry.Integral.Connection.roughLapRicciInnerInFrame (I := I) (M := M)
+    (Time := Real)
     roughLapRic (ricciTwoTensorField (I := I) S) gInv frame
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem roughLapRicciInnerInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -691,7 +702,7 @@ abbrev roughLapRicciInnerInFrame
           raisedRicciCompInFrame (I := I) S gInv frame t x i j := by
   rfl
 
-/-- Coordinate squared norm of `nabla Ric`. -/
+
 def nablaRicComp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -702,6 +713,8 @@ def nablaRicComp
       2 (S.family.connection t) (S.ricci t) x
         (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x))
 
+omit [Fintype Idx] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem nablaRicComp_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -710,17 +723,19 @@ def nablaRicComp
     nablaRicComp (I := I) S frame t x a i j =
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.family.connection t) (S.ricci t) x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) := by
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+            (frame j x)) := by
   rfl
 
-/-- Coordinate squared norm of a supplied `nabla Ric` component array,
-projected from the generic frame algebra in `Bochner.lean`. -/
+
+
 abbrev nablaRicciNormSqInFrame
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
     Real -> M -> Real :=
   DifferentialGeometry.Integral.Connection.nablaRicciNormSqInFrame (M := M) nablaRic gInv
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem nablaRicciNormSqInFrame_apply
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -734,14 +749,17 @@ abbrev nablaRicciNormSqInFrame
 private def fin3Slots (a b c : Idx) : Fin 3 -> Idx :=
   fun q => if q = 0 then a else if q = 1 then b else c
 
+omit [Fintype Idx] in
 @[simp] private theorem fin3Slots_zero (a b c : Idx) :
     fin3Slots (Idx := Idx) a b c 0 = a := by
   simp [fin3Slots]
 
+omit [Fintype Idx] in
 @[simp] private theorem fin3Slots_one (a b c : Idx) :
     fin3Slots (Idx := Idx) a b c 1 = b := by
   simp [fin3Slots]
 
+omit [Fintype Idx] in
 @[simp] private theorem fin3Slots_two (a b c : Idx) :
     fin3Slots (Idx := Idx) a b c 2 = c := by
   simp [fin3Slots]
@@ -759,6 +777,7 @@ private def fin3PairEquiv :
     rcases p with ⟨⟨⟨⟨⟨a, b⟩, i⟩, j⟩, k⟩, l⟩
     simp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem coordInner3_eq
     {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -768,7 +787,8 @@ private theorem coordInner3_eq
       ∑ a : Idx, ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
         gInv a b * gInv i k * gInv j l *
           A (DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis a) (basis i) (basis j)) *
-            B (DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis b) (basis k) (basis l)) := by
+            B (DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis b) (basis k)
+              (basis l)) := by
   classical
   unfold coordInner0S tensor0SComponent
   rw [← Fintype.sum_prod_type']
@@ -804,12 +824,14 @@ private theorem coordInner3_eq
         (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) a i j q)) =
           DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis a) (basis i) (basis j) := by
       funext q
-      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3,
+        DifferentialGeometry.Integral.Connection.vec3]
     have hB :
         (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) b k l q)) =
           DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis b) (basis k) (basis l) := by
       funext q
-      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3,
+        DifferentialGeometry.Integral.Connection.vec3]
     rw [hA, hB]
     simp [fin3Slots]
   · intro p
@@ -823,8 +845,9 @@ private theorem coordInner3_eq
       fin_cases q <;> simp
     simp [fin3PairEquiv, h1, h2]
 
-/-- A component array realizing the canonical covariant derivative of Ricci has
-the same squared norm as the intrinsic tensor `|∇ Ric|²`. -/
+
+
+omit [SigmaCompactSpace M] in
 private theorem nablaRicciNorm_basis
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [DecidableEq Idx]
@@ -841,7 +864,8 @@ private theorem nablaRicciNorm_basis
     (hnabla : ∀ a i j : Idx,
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.family.connection t) (S.ricci t) x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+            (frame j x)) =
         nablaRic t x a i j) :
     nablaRicciNormSqInFrame (M := M) nablaRic gInv t x =
       ricciGradSq (I := I) S t x := by
@@ -860,14 +884,16 @@ private theorem nablaRicciNorm_basis
   have hnabla' : ∀ a i j : Idx,
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.base.connection t) (S.base.ricci t) x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+            (frame j x)) =
         nablaRic t x a i j := by
     intro a i j
     simpa [SolutionOn.family, SolutionOn.ricci] using hnabla a i j
   simp [nablaRicciNormSqInFrame, hbasis, hnabla', mul_left_comm, mul_comm]
 
-/-- The canonical frame components of `∇ Ric` have squared norm equal to the
-intrinsic `|∇ Ric|²`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem nablaRicciNorm_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [DecidableEq Idx]
@@ -885,7 +911,7 @@ theorem nablaRicciNorm_can
   nablaRicciNorm_basis (I := I) S (nablaRicComp (I := I) S frame) gInv frame
     basis hinv hbasis (by intro a i j; rfl)
 
-/-- The curvature-Ricci-Ricci term `R_ikjl Ric^ij Ric^kl`. -/
+
 def curvRicciRicciInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -899,6 +925,7 @@ def curvRicciRicciInFrame
         raisedRicciCompInFrame (I := I) S gInv frame t x i j *
           raisedRicciCompInFrame (I := I) S gInv frame t x k l
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem curvRicciRicciInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -913,10 +940,10 @@ def curvRicciRicciInFrame
             raisedRicciCompInFrame (I := I) S gInv frame t x k l := by
   rfl
 
-/-- Canonical curvature reaction in the Ricci-norm evolution formula.
 
-With the project standard convention `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, the book term
-`R_ikjl Ric^{ij} Ric^{kl}` is the negative of `curvRicciRicciInFrame`. -/
+
+
+
 def ricciNormCurvatureReactionInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -926,6 +953,7 @@ def ricciNormCurvatureReactionInFrame
     Real -> M -> Real :=
   fun t x => -curvRicciRicciInFrame (I := I) S Rm04 gInv frame t x
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciNormCurvatureReactionInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -937,9 +965,9 @@ def ricciNormCurvatureReactionInFrame
       -curvRicciRicciInFrame (I := I) S Rm04 gInv frame t x := by
   rfl
 
-/-- The inverse-metric part of the Ricci-flow metric evolution:
-`partial_t g^{ij} = 2 Ric^{ij}`.  The future geometric proof differentiates
-`g^{ik} g_kj = delta^i_j` and uses `partial_t g_ij = -2 Ric_ij`. -/
+
+
+
 def inverseMetricEvolutionRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -948,14 +976,15 @@ def inverseMetricEvolutionRHSInFrame
     (t : Real) (x : M) (i j : Idx) : Real :=
   2 * raisedRicciCompInFrame (I := I) S gInv frame t x i j
 
-/-- Component equation `partial_t g^{ij} = 2 Ric^{ij}`. -/
+
 def InverseMetricEvolutionEquationInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u -> ∀ (i j : Idx),
+  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    ∀ (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => gInv s x i j)
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
@@ -963,7 +992,7 @@ def InverseMetricEvolutionEquationInFrame
       D.carrier
       (t : Real)
 
-/-- Product-rule RHS for differentiating `Ric^{ij}`. -/
+
 def raisedRicciDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -981,7 +1010,7 @@ def raisedRicciDerivRHSInFrame
         gInv t x i a * gInv t x j b *
           ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic t x a b)
 
-/-- Product-rule RHS for differentiating `|Ric|^2 = Ric_ij Ric^ij`. -/
+
 def ricciNormDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -996,11 +1025,11 @@ def ricciNormDerivRHSInFrame
       ricciCompInFrame (I := I) S frame t x i j *
         raisedRicciDerivRHSInFrame (I := I) S Rm04 gInv frame roughLapRic t x i j)
 
-/-- The remaining finite-sum simplification in Lemma 6.7.
 
-This is the explicit cancellation/reindexing frontier: after the product rule,
-the inverse-metric variation terms cancel the `-2 Ric_i^k Ric_kj` part of
-Lemma 6.3, leaving `2 <roughDelta Ric, Ric> + 4 R_ikjl Ric^ij Ric^kl`. -/
+
+
+
+
 def RicciNormDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1014,11 +1043,12 @@ def RicciNormDerivativeSimplifiesInFrame
         (t : Real) x =
       2 * roughLapInner (t : Real) x + 4 * reaction (t : Real) x
 
-/-- Pointwise canonical finite-sum simplification for the time derivative of
-`|Ric|^2`.
 
-This is the form used by coordinate-frame producers centered at the evaluation
-point; it only needs inverse-metric and Ricci symmetry at that point. -/
+
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciDerivSimpAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1075,7 +1105,8 @@ theorem ricciDerivSimpAt
         ∑ i : Idx, ∑ j : Idx, L i j * raise2By G A i j := by
     simp [G, A, L, roughLapRicciInnerInFrame, raise2By]
   let R4 : Idx -> Idx -> Idx -> Idx -> Real :=
-    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x i k j l
+    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real))
+                     frame x i k j l
   let AR : Idx -> Idx -> Real := fun i j => raise2By G A i j
   have hcurv :
       (∑ i : Idx, ∑ j : Idx, C i j * raise2By G A i j) =
@@ -1101,13 +1132,14 @@ theorem ricciDerivSimpAt
             (t : Real) x := by
           rw [hrough, hreaction]
 
-/-- Canonical finite-sum simplification for the time derivative of
-`|Ric|^2`.
 
-After differentiating the inverse metrics and substituting Lemma 6.3, the
-inverse-metric derivative terms cancel the Ricci-quadratic terms, and the
-curvature term is recorded with the project standard `Rm04(X,Y,Z,W)` slot
-convention. -/
+
+
+
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormDerivativeSimplifiesInFrame_canonical
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1162,7 +1194,8 @@ theorem ricciNormDerivativeSimplifiesInFrame_canonical
         ∑ i : Idx, ∑ j : Idx, L i j * raise2By G A i j := by
     simp [G, A, L, roughLapRicciInnerInFrame, raise2By]
   let R4 : Idx -> Idx -> Idx -> Idx -> Real :=
-    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x i k j l
+    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real))
+                     frame x i k j l
   let AR : Idx -> Idx -> Real := fun i j => raise2By G A i j
   have hcurv :
       (∑ i : Idx, ∑ j : Idx, C i j * raise2By G A i j) =
@@ -1188,8 +1221,8 @@ theorem ricciNormDerivativeSimplifiesInFrame_canonical
             (t : Real) x := by
           rw [hrough, hreaction]
 
-/-- Lemma 6.3 in component/equation form.  This is the geometric frontier
-needed before the norm evolution proof can be made constructive. -/
+
+
 def RicciEvolutionEquationInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1197,7 +1230,8 @@ def RicciEvolutionEquationInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
@@ -1205,7 +1239,8 @@ def RicciEvolutionEquationInFrame
       D.carrier
       (t : Real)
 
-/-- Project the inverse-metric evolution equation at fixed components. -/
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricEvolutionEquationInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1223,15 +1258,17 @@ theorem inverseMetricEvolutionEquationInFrame_apply
       (t : Real) :=
   h t x hx i j
 
-/-- Constructor for the inverse-metric evolution equation from component
-derivative equalities. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricEvolutionEquationInFrame_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
-    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x
+      ∈ u ->
       ∀ (i j : Idx),
       HasDerivWithinAt
         (fun s : Real => gInv s x i j)
@@ -1242,7 +1279,8 @@ theorem inverseMetricEvolutionEquationInFrame_of_components
     InverseMetricEvolutionEquationInFrame (I := I) S gInv frame u :=
   h
 
-/-- Project Lemma 6.3's component equation at fixed components. -/
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1261,8 +1299,9 @@ theorem ricciEvolutionEquationInFrame_apply
       (t : Real) :=
   h t x i j
 
-/-- Constructor for Lemma 6.3's component equation from component derivative
-equalities. -/
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrame_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1270,7 +1309,8 @@ theorem ricciEvolutionEquationInFrame_of_components
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (i j : Idx),
       HasDerivWithinAt
         (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
         (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
@@ -1280,7 +1320,8 @@ theorem ricciEvolutionEquationInFrame_of_components
     RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic :=
   h
 
-/-- Product-rule derivative of the raised Ricci components. -/
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem raisedRicciCompInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1349,9 +1390,10 @@ theorem raisedRicciCompInFrame_hasDerivWithinAt
                   have hprod := (hia.mul hjb).mul hrab
                   simpa [Pi.mul_apply, mul_assoc, add_mul] using hprod))))
 
-/-- Pointwise product-rule derivative of the raised Ricci components.  This is
-the centered variant used with coordinate frames, where Lemma 6.3 is only
-available at the coordinate center. -/
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem raisedRicciDerivAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1427,7 +1469,8 @@ theorem raisedRicciDerivAt
                   have hprod := (hia.mul hjb).mul hrab
                   simpa [Pi.mul_apply, mul_assoc, add_mul] using hprod))))
 
-/-- Product-rule derivative of the coordinate Ricci norm square. -/
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormSqInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1487,9 +1530,10 @@ theorem ricciNormSqInFrame_hasDerivWithinAt
                   have hprod := hRic.mul hRaised
                   simpa [Pi.mul_apply] using hprod))))
 
-/-- Pointwise product-rule derivative of the coordinate Ricci norm square.
-This avoids requiring a global evolution equation for a local coordinate
-frame; only the component derivatives at the evaluation point are used. -/
+
+
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormSqDerivAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

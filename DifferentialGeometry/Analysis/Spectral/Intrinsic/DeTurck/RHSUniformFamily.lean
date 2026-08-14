@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSAbsoluteBound
 
-/-!
-# Family-uniform Ricci--DeTurck right-hand-side bound
 
-This module combines the family-uniform Ricci and Lie-summand chart estimates.
--/
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -16,14 +16,15 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- For a fixed DeTurck background, a metric-equivalent family with uniform
-chart Gram bounds through order two has one full Ricci--DeTurck RHS Lipschitz
-constant on every active partition-of-unity chart support. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -118,9 +119,10 @@ theorem chartRHS_pou_lip
     _ = (2 * Cric + Clie) * chartMetricJet2DiffSup (I := I) (M := M)
           (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by ring
 
-/-- For a fixed DeTurck background, a metric-equivalent family with uniform
-chart Gram bounds through order two has one absolute Ricci--DeTurck RHS bound
-on every active partition-of-unity chart support. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

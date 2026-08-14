@@ -27,12 +27,10 @@ namespace Sobolev
 namespace Chart
 
 variable {E H : Type*}
-  [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-/-- Square-integrable time-dependent values in the separated chart Sobolev
-space.  The spatial exponent `p` and the time exponent `2` are independent. -/
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I (⊤ : WithTop ℕ∞) M]
 abbrev WkpTimeL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -62,7 +60,7 @@ theorem wkpTime_fixed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤)
-    (T : ℝ) {K : ℝ≥0}
+    (T : ℝ) {K : NNReal}
     {Phi : WkpTimeL2 (I := I) (M := M) g k p hp_one T →
       WkpTimeL2 (I := I) (M := M) g k p hp_one T}
     (hPhi : ContractingWith K Phi) :

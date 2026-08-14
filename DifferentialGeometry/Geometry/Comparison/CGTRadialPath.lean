@@ -180,7 +180,7 @@ theorem radialFlat_len
         Real.sqrt (g.inner p v v) = ‖u‖ := by
       dsimp only [v]
       exact normalFrame_sqrt (I := I) g p u
-    rw [Geodesic.pathELength_eq_arcLength (I := I) g zero_le_one
+    rw [Geodesic.pathELength_eq_arcLength_riemannianBundle (I := I) g zero_le_one
       (Geodesic.speedSqrt_integrableOn_Icc_of_C1
         (I := I) g zero_le_one hγC1)
       (fun t _ => hEnorm (γ t)

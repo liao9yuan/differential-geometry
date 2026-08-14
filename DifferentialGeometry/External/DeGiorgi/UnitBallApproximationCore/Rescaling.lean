@@ -114,7 +114,8 @@ private lemma weakPartialDeriv_rescale_to_unitBall
     have hcont : Continuous (fun x : E => R⁻¹ • (x - x₀)) :=
       (continuous_const_smul R⁻¹).comp (continuous_id.sub continuous_const)
     have h2 := hφ_sub ((tsupport_comp_subset_preimage _ hcont) hx)
-    rw [Metric.mem_ball, dist_zero_right, norm_smul, Real.norm_of_nonneg (inv_nonneg.mpr hR.le)] at h2
+    rw [Metric.mem_ball, dist_zero_right, norm_smul, Real.norm_of_nonneg (inv_nonneg.mpr hR.le)]
+      at h2
     rw [Metric.mem_ball, dist_eq_norm]
     rwa [inv_mul_lt_iff₀ hR, mul_one] at h2
   have key := hg_weak ψ hψ_smooth hψ_supp hψ_tsub

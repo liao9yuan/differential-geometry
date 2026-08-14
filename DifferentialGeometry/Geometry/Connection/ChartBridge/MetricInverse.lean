@@ -1,12 +1,12 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
-/-!
-# Chart inverse Gram matrix as an intrinsic inverse metric
 
-This file connects the inverse Gram matrix of a chart-induced tangent basis to
-the basis-level inverse-metric predicate used by intrinsic tensor formulas.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -19,14 +19,14 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-- The chart inverse Gram matrix is the inverse metric in the chart-induced
-tangent basis at every point of the chart trivialization. -/
+
+
 theorem chartInvGram_inverse
     (g : SmoothRiemannianMetric I M) (alpha : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) alpha).baseSet) :

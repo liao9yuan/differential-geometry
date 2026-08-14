@@ -15,83 +15,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralMa
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularity
 
-/-!
-# The smooth per-mode time-coordinate of the Ricci–DeTurck engine forcing
-
-For the genuinely-second-order Nemytskii forcing of the Ricci–DeTurck flow about a
-closed background metric `g₀`,
-
-  `gforce =ᵐ deTurckSobolevNHa2 g₀ g_bg a ∘ (maxRegDuhamelSolField a hT hT1 0 gforce)`,
-
-in the supercritical regularity regime `2·finrank + 10 ≤ a` with zero initial datum, this
-file isolates the **single genuinely-irreducible quasilinear parabolic prerequisite** the
-forcing time-bootstrap rests on, and assembles the consumer-facing coordinate field on top
-of it.
-
-## The split: two irreducible classical inputs, one core assembly, one consumer glue
-
-* `deTurckForcing_solCoeff_jetSpectralMass` — **POSIT (A)**, the all-orders interior-time
-  smoothing of the zero-datum quasilinear maximal-regularity solution field at the level of
-  its eigen-coordinates (the solution is `C∞`-in-time into *every* spatial order, with the
-  full all-order time-jet/all-order spatial spectral-mass majorant), together with the a-priori
-  bound that the solution stays inside the Nemytskii realizability ball
-  (`‖u t‖_{H^{a+2}} ≤ deTurckRealizabilityRadius`) on `[0,T]`.  **Proved** (commit
-  `358687842`); its analytic content is the Galerkin uniform spatial mass estimate of
-  `GalerkinLimitUniformMass.lean` plus the per-mode ODE recursion.
-
-* `deTurckSobolevNHa2_jetSpectralMass_preserving` — **POSIT (B)**, the order-preserving
-  smoothness of the Ricci–DeTurck Nemytskii forcing on the supercritical Sobolev algebra: it
-  carries an **in-ball** jet-spectral-mass-controlled input coordinate field to a
-  jet-spectral-mass-controlled output coordinate field.  The in-ball guard is essential — the
-  ball-retraction truncation inside `deTurckSobolevNHa2` is only Lipschitz (a kink) at the
-  realizability sphere, so smoothness preservation is a statement about in-ball data, where the
-  nonlinearity is the genuine smooth intrinsic remainder.  **Proved** (commits
-  `b369c07f0`, `272498f86`), through the finite-order layer of
-  `ForcingFiniteOrderTimeRegularity.lean` and the a.e.-agreement diagonal.
-
-* `deTurckForcing_timeModeCoeff_smooth_allOrderJet` — **the deep core**, stated at the most
-  primitive grain: the `L²` TIME-MODE coordinate elements `timeModeCoeff gforce i` carry
-  `C∞`-in-time representatives with an all-order time-jet spectral-mass majorant on the closed
-  slab `[0,T]`, agreeing a.e. with `timeModeCoeff gforce i` itself.  It is **sorry-free GLUE**
-  over (A) and (B): (B) applied to (A)'s solution-coordinate field supplies the smooth
-  representative with the majorant, and the a.e. agreement bridges `timeModeCoeff gforce i`
-  through `timeModeCoeff_coeFn` and `hforce` to the Nemytskii-image coordinate.
-
-* `deTurckForcing_smoothCoordinate_aeTimeJet` — **the consumer leaf**, assembled as
-  sorry-free glue over the core: the per-mode forcing coordinate field `f` with the same
-  smoothness and all-order time-jet majorant, agreeing a.e. with the bare pointwise
-  coordinate `fun t => (gforce t).coeff i`.  The only step beyond the core is bridging
-  `timeModeCoeff gforce i =ᵐ fun t => (gforce t).coeff i` via the already-proven
-  `timeModeCoeff_coeFn`.
-
-The per-mode forcing coordinate `t ↦ (gforce t).coeff i` is the `i`-th eigenbasis
-coordinate of the Nemytskii image `N(u(t))` of the maximal-regularity Duhamel solution
-`u`.  Because the datum is the **smooth (zero)** initial perturbation, the solution is
-`C∞`-up-to-`t = 0` (the classical small-data parabolic interior-time smoothing — Amann
-maximal regularity; Ladyzhenskaya–Solonnikov–Uraltseva; Lieberman), and the Nemytskii
-forcing is a smooth function of the solution, so the per-mode coordinate is genuinely
-`C∞`-in-time.  Its time-jets couple all modes (the nonlinear coupling), so the all-order
-time-jet spectral-mass control does **not** reduce to the per-mode scalar ODE recursion of
-the *linear* heat semigroup (the forcing coordinate is `N(u).coeff i`, not the Duhamel
-solution coordinate `u.coeff i`, hence not the per-mode convolution
-`perModeConv λᵢ (timeModeCoeff gforce i)` of the linear theory), nor to the
-integrated-in-time spatial forcing mass `forcingMass gforce c` (which controls
-`∫₀ᵀ |coeffᵢ|²` but neither the pointwise-in-`t` value nor any time-derivative).  It is the
-genuine quasilinear smoothing input, isolated here as the two classical deep prerequisites
-(A) the quasilinear interior-time smoothing of the solution and (B) the order-preserving
-smoothness of the Nemytskii forcing, with the core assembled sorry-free on top of them.
-
-STATUS: this file is `sorry`-free.  POSIT (A) and POSIT (B) above were discharged
-(commits `358687842`, `b369c07f0`, `272498f86`); the deep core and the consumer leaf are
-sorry-free glue over them, and nothing here depends on `sorryAx`.
-
-The `SymmSCoefficientBlockTransfer` section exports four public reusable pieces that the
-`a = 2` lane of `ShortTime/LowRegAllOrderJet.lean` consumes:
-`exists_smoothCcPath_realizing_coeff` (all-order spatial mass ⟹ a smooth tensor path) and
-the symmetrizer coordinate transport `symmCoeffPath` with `symmCoeffPath_contDiff`,
-`symmCoeffPath_realizes` and `symmCoeffPath_spectralMass`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -112,7 +35,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -123,14 +46,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedVariables false in
 theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hspatial : ∀ σ : ℝ, ∃ Cσ : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -199,7 +121,7 @@ theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass
 section SymmSCoefficientBlockTransfer
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-  (symmS domDomCongrSection tensorResolventHilbertEigenbasisSigma
+  (ccTensor02Symm domDomCongrSection tensorResolventHilbertEigenbasisSigma
     tensorResolventHilbertEigenbasisSigma_apply eigenvectorSmooth_toL2)
 
 private noncomputable def eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
@@ -207,6 +129,8 @@ private noncomputable def eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
   Finset.univ.map ⟨Sigma.mk i.1, sigma_mk_injective⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mem_eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} :
     j ∈ eigenBlockFinset (I := I) (M := M) g₀ i ↔ j.1 = i.1 := by
@@ -246,7 +170,6 @@ private lemma tensorL2_eq_of_coeff_eq (g₀ : SmoothRiemannianMetric I M)
   exact h k
 
 open scoped Classical in
-
 private lemma tensorL2Coeff_sum_smul_basis (g₀ : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
@@ -352,7 +275,8 @@ private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetri
     (X : SmoothCcTensor g₀ 0 2)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
-        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (symmS (I := I) (M := M) g₀ X)) i =
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (ccTensor02Symm (I := I) (M := M) g₀ X)) i
+          =
       (1 / 2 : ℝ) * (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) X) i +
         ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
@@ -360,15 +284,17 @@ private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetri
             tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
               (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) X) j) := by
   have htoL2 : SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-      (symmS (I := I) (M := M) g₀ X) =
+      (ccTensor02Symm (I := I) (M := M) g₀ X) =
       (1 / 2 : ℝ) • (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) X +
         SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) X)) := by
-    simp only [symmS]
+    simp only [ccTensor02Symm]
     rw [map_smul, map_add]
   rw [htoL2, tensorL2Coeff_smul, tensorL2Coeff_add,
     tensorL2Coeff_toL2_swap_eq_blockSum (I := I) (M := M) g₀ X i]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} (h : j.1 = i.1) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) j σ = tensorSobolevWeight (I := I) (M := M) i σ := by
@@ -379,20 +305,12 @@ private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M
     rw [h]
   rw [hlam]
 
-/-- **The eigen-coordinate family of the slot symmetrization.**  If `φ` realizes the
-eigen-coordinates of a smooth path, then `symmCoeffPath g₀ φ` realizes those of the
-slot-symmetrized path `symmS g₀ ∘ ·` (`symmCoeffPath_realizes`).  Only the finitely
-many coordinates in the same eigenvalue block are mixed, which is what keeps time
-regularity (`symmCoeffPath_contDiff`) and spectral mass (`symmCoeffPath_spectralMass`)
-intact. -/
 noncomputable def symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) (t : ℝ) : ℝ :=
   (1 / 2 : ℝ) * (φ i t + ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
     swapEigenCoeff (I := I) (M := M) g₀ i j * φ j t)
 
-/-- The symmetrized coordinate family inherits the time regularity of `φ`: it is a
-finite block combination of the `φ j`. -/
 lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} {n : WithTop ℕ∞}
     (hφ : ∀ i, ContDiff ℝ n (φ i)) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
@@ -401,9 +319,6 @@ lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
   exact contDiff_const.mul ((hφ i).add
     (ContDiff.sum fun j _ => contDiff_const.mul (hφ j)))
 
-/-- **`symmCoeffPath` realizes the eigen-coordinates of the symmetrized tensor.**  If the
-smooth tensor `X` has eigen-coordinates `φ · t`, then `symmS g₀ X` has eigen-coordinates
-`symmCoeffPath g₀ φ · t`. -/
 lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (X : SmoothCcTensor g₀ 0 2) {t : ℝ}
@@ -411,7 +326,8 @@ lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) X) j = φ j t)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
-        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (symmS (I := I) (M := M) g₀ X)) i =
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (ccTensor02Symm (I := I) (M := M) g₀ X)) i
+          =
       symmCoeffPath (I := I) (M := M) g₀ φ i t := by
   rw [tensorL2Coeff_toL2_symmS_eq_blockSum (I := I) (M := M) g₀ X i, hX i]
   unfold symmCoeffPath
@@ -437,7 +353,7 @@ private lemma iteratedDeriv_finsetSum_const_mul {ι' : Type*} (s : Finset ι')
     congr 1
     exact iteratedDeriv_const_mul_field (c b) (f b)
 
-private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
+lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
     (hφ : ∀ j, ContDiff ℝ (k : ℕ) (φ j))
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) (t : ℝ) :
@@ -450,10 +366,6 @@ private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     ((ContDiff.sum fun j _ => contDiff_const.mul (hφ j)).contDiffAt),
     iteratedDeriv_finsetSum_const_mul _ _ _ k hφ t]
 
-/-- **The symmetrizer preserves jet spectral mass.**  A `τ`-mass majorant for the `k`-th
-time jet of `φ`, together with one at the Weyl-shifted order `τ + (weylSobolevExp + 1)`,
-majorizes the `τ`-mass of the `k`-th jet of `symmCoeffPath g₀ φ`.  The shifted input pays
-for the Cauchy--Schwarz over the eigenvalue block. -/
 lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
     {d : ℝ} (hd_pos : 0 < d)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
@@ -505,7 +417,6 @@ lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           (iteratedDeriv k (φ j) t) ^ 2 :=
         le_trans hcs (mul_le_of_le_one_left hsum_nn
           (sum_sq_swapEigenCoeff_le_one (I := I) (M := M) g₀ i))
-
       have hstep : tensorSobolevWeight (I := I) (M := M) i τ *
           ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i, (iteratedDeriv k (φ j) t) ^ 2 =
           tensorSobolevWeight (I := I) (M := M) i (-ρ) *
@@ -552,10 +463,6 @@ lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           add_le_add (mul_le_mul_of_nonneg_left h1 (by norm_num))
             (mul_le_mul_of_nonneg_left h2 (by norm_num))
 
-/-- **All-order spatial spectral mass reconstructs a smooth tensor path.**  A coordinate
-family with a summable `σ`-mass majorant at every `σ ≥ 0` on `Icc 0 d₂` is realized, at each
-time of that slab, by a genuine `SmoothCcTensor`.  This is the `(S2)` step of the forcing
-time-regularity template. -/
 theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetric I M)
     {d₂ : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
@@ -620,11 +527,11 @@ private theorem deTurckSobolevNHa2Symm_embed_eq_raw_embed_symmS
     (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) X‖ ≤
       (Classical.choose (deTurckSobolevNHa2_exists_of_super
         (I := I) (M := M) g₀ a ha_super)).1) :
-    deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+    deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) X) =
-      deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-          (symmS (I := I) (M := M) g₀ X)) := by
+          (ccTensor02Symm (I := I) (M := M) g₀ X)) := by
   classical
   obtain ⟨hp_pos, hp_lt, hp_ball⟩ := Classical.choose_spec
     (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super)
@@ -632,14 +539,14 @@ private theorem deTurckSobolevNHa2Symm_embed_eq_raw_embed_symmS
       (I := I) (M := M) g₀ a ha_super)).2 < 1 :=
     lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E))
   rw [deTurckSobolevNHa2Symm_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super X hδ_lt
-    (gFibreOpBound_symmS (I := I) (M := M) g₀ X (hp_ball X hball)) hball]
+    (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ X (hp_ball X hball))
+      hball]
   exact (deTurckSobolevNHa2_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
-    (symmS (I := I) (M := M) g₀ X) hδ_lt
-    (gFibreOpBound_symmS (I := I) (M := M) g₀ X (hp_ball X hball))
+    (ccTensor02Symm (I := I) (M := M) g₀ X) hδ_lt
+    (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ X (hp_ball X hball))
     (le_trans (norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ ((a : ℝ) + 2) X)
       hball)).symm
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_jetSpectralMass_preservingSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -654,7 +561,7 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
         =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i) :
     ∃ ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ ψ d₂ ∧
-        ∀ i, (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
+        ∀ i, (fun t => (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
             =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] ψ i := by
   classical
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
@@ -694,7 +601,7 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
     rw [htall j, smoothCcToTensorHs_coeff, hF_coeff t htmem j]
   have hw'_ball : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-          (symmS (I := I) (M := M) g₀ (F t))‖ ≤
+          (ccTensor02Symm (I := I) (M := M) g₀ (F t))‖ ≤
         deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super := by
     filter_upwards [hw_ball, hwF] with t hwball_t hwF_t
     refine le_trans (norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ ((a : ℝ) + 2)
@@ -702,7 +609,7 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
     rw [← hwF_t]
     exact hwball_t
   have hw'_ae : ∀ i, (fun t => (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-      (symmS (I := I) (M := M) g₀ (F t))).coeff i)
+      (ccTensor02Symm (I := I) (M := M) g₀ (F t))).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
         symmCoeffPath (I := I) (M := M) g₀ φ i := by
     intro i
@@ -715,7 +622,7 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
     deTurckSobolevNHa2_jetSpectralMass_preserving (I := I) (M := M) g₀ g_bg a ha_super
       _hT hd₂_pos _hd₂_le
       (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-        (symmS (I := I) (M := M) g₀ (F t)))
+        (ccTensor02Symm (I := I) (M := M) g₀ (F t)))
       hw'_ball (symmCoeffPath (I := I) (M := M) g₀ φ) ⟨hφ'_smooth, hφ'_mass⟩ hw'_ae
   refine ⟨ψ, hψ_ctrl, fun i => ?_⟩
   filter_upwards [hψ_ae i, hw_ball, hwF] with t hψt hwball_t hwF_t
@@ -728,7 +635,6 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
     g₀ g_bg a ha_super (F t) hballF]
   exact hψt
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -754,7 +660,7 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
           ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂,
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (ψ i) t) ^ 2 ≤ B i) ∧
-      (∀ i, (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
+      (∀ i, (fun t => (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] ψ i) := by
   classical
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
@@ -793,7 +699,7 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     rw [htall j, smoothCcToTensorHs_coeff, hF_coeff t htmem j]
   have hw'_ball : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-          (symmS (I := I) (M := M) g₀ (F t))‖ ≤
+          (ccTensor02Symm (I := I) (M := M) g₀ (F t))‖ ≤
         deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super := by
     filter_upwards [hw_ball, hwF] with t hwball_t hwF_t
     refine le_trans (norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ ((a : ℝ) + 2)
@@ -801,7 +707,7 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     rw [← hwF_t]
     exact hwball_t
   have hw'_ae : ∀ i, (fun t => (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-      (symmS (I := I) (M := M) g₀ (F t))).coeff i)
+      (ccTensor02Symm (I := I) (M := M) g₀ (F t))).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
         symmCoeffPath (I := I) (M := M) g₀ φ i := by
     intro i
@@ -814,7 +720,7 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     deTurckSobolevNHa2_finiteOrder_jetSpectralMass_preserving (I := I) (M := M)
       g₀ g_bg a ha_super hT hd₂_pos hd₂_le
       (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-        (symmS (I := I) (M := M) g₀ (F t)))
+        (ccTensor02Symm (I := I) (M := M) g₀ (F t)))
       hw'_ball k (symmCoeffPath (I := I) (M := M) g₀ φ) hφ'_smooth hφ'_mass hw'_ae
   refine ⟨ψ, hψ_smooth, hψ_mass, fun i => ?_⟩
   filter_upwards [hψ_ae i, hw_ball, hwF] with t hψt hwball_t hwF_t
@@ -827,7 +733,6 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     g₀ g_bg a ha_super (F t) hballF]
   exact hψt
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_finiteOrderSmoothDriverSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -835,7 +740,7 @@ private theorem deTurckForcing_finiteOrderSmoothDriverSymm
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hspatial : ∀ σ : ℝ, ∃ Cσ : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -879,7 +784,7 @@ private theorem deTurckForcing_finiteOrderSmoothDriverSymm
   have hsub : Set.Icc (0 : ℝ) d ⊆ Set.Icc (0 : ℝ) T := Set.Icc_subset_Icc le_rfl hd_le
   have hforce_coeff : ∀ i, (fun t => (gforce t).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d)]
-        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (fun t => (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) := by
     intro i
@@ -942,7 +847,6 @@ private theorem deTurckForcing_finiteOrderSmoothDriverSymm
         hφ_cont hφ_mass hw_coeff
     exact ⟨ψ, hψ_smooth, hψ_mass, fun i => (hforce_coeff i).trans (hψ_ae i)⟩
 
-set_option linter.unusedVariables false in
 
 theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -950,7 +854,7 @@ theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hspatial : ∀ σ : ℝ, ∃ Cσ : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -1018,21 +922,20 @@ theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
 
 end SymmSCoefficientBlockTransfer
 
-set_option linter.unusedVariables false in
 
 theorem maxRegSolField_parabolicInterior_jetSpectralMassSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :
@@ -1156,21 +1059,20 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMassSymm
         hforce_ae ht
     exact hstep1.trans hstep2
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_smoothForcingDriverSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :
@@ -1199,28 +1101,27 @@ private theorem deTurckForcing_smoothForcingDriverSymm
     Set.Icc_subset_Icc le_rfl hd₂_le
   have hforce_coeff : (fun t => (gforce t).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
-        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (fun t => (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
     MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub
       (hforce.fun_comp (fun w => w.coeff i))
   exact hforce_coeff.trans (hψ_ae i)
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_fixedPoint_coeff_smooth_and_massSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :
@@ -1248,21 +1149,20 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_massSymm
       (timeModeCoeff_coeFn (I := I) (M := M) gforce i)
   exact hbridge.trans (hf_ae i)
 
-set_option linter.unusedVariables false in
 
 theorem deTurckForcing_timeModeCoeff_smooth_allOrderJetSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :
@@ -1279,21 +1179,20 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJetSymm
   deTurckForcing_fixedPoint_coeff_smooth_and_massSymm (I := I) (M := M)
     g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
 
-set_option linter.unusedVariables false in
 
 theorem deTurckForcing_smoothCoordinate_aeTimeJetSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :

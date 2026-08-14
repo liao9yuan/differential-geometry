@@ -2,36 +2,9 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwise
 
-/-!
-# Identification of the cotangent-extension and bundled `(0,1)`-tensor covariant derivatives
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`,
-there are two a-priori distinct Lean realizations of the Levi-Civita covariant derivative of a
-covector field:
-
-* `cotangentCov (LeviCivita g)` — the cotangent extension of the Levi-Civita connection on
-  `T*M`, built by Leibniz over the canonical pairing
-  `(∇_v θ)(w) = v(θ(w)) − θ(∇_v w)` (`CotangentExtension.lean`); and
-* `tensorCovDerivAt g 0 1` — the bundled `(0, 1)`-tensor covariant derivative, a value in the
-  Hom-bundle `Hom(Tensor0SSpace 0, Tensor0SSpace 1)` (`CovDerivPointwise.lean`), read on the
-  unit `(0, 0)`-tensor section to recover a `(0, 1)`-tensor (covector) value.
-
-Both compute the same `∇^g θ`. This file proves the identification, connecting the
-`cotangentCov`/`cotangentScalar` calculus to the `tensorCovDerivAt`/`tensor0SCovariantDerivative`
-calculus.
-
-## Main theorem
-
-* `cotangentCov_eq_tensorCovDerivAt_ccTensor01` — for a smooth covector field `θ` that is the
-  realization (`cotangentToCLM`) of the unit-evaluation of a smooth compactly-supported
-  `(0, 1)`-tensor `σ`, the cotangent-extension covariant derivative of `θ` equals the bundled
-  `(0, 1)`-tensor covariant derivative of `σ`, both read on a tangent vector:
-  `cotangentCov (LeviCivita g) θ x v w
-     = cotangentToCLM ((tensorCovDerivAt g 0 1 σ x v) (unitZeroSec x)) w`.
--/
 
 noncomputable section
 
@@ -49,7 +22,7 @@ open TensorRSNabla
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -58,17 +31,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The realized covector field of a smooth `(0, 1)`-tensor `σ`: the unit-evaluation
-`σ(·)(unit) : Tensor0SSpace 1` read through `cotangentToCLM` as a continuous functional
-`TangentSpace I b →L[ℝ] ℝ`. -/
-def ccTensor01Covec (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) :
+def ccTensorOneForm (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) :
     Π b : M, TangentSpace I b →L[ℝ] ℝ :=
   fun b => cotangentToCLM (I := I)
     (unitEvalSection (I := I) (M := M) g 1 σ b)
 
-/-- The unit-evaluation of the bundled `(0, 1)`-tensor covariant derivative reduces to the
-abstract `(0, 1)`-tensor covariant derivative of the unit-evaluated section, since the unit
-`(0, 0)`-tensor is `∇`-parallel. -/
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_unitEval
     (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1)
     (x : M) (v : TangentSpace I x) :
@@ -89,11 +58,8 @@ lemma tensorCovDerivAt_unitEval
   exact tensor0SCovariantDerivative_unitZero_eq_zero (I := I) (M := M)
     (LeviCivita (I := I) g) x v
 
-/-- The abstract `(0, 1)`-tensor covariant derivative of a covector section `α`, read through
-`cotangentToCLM` on a tangent vector `w` (extended to a smooth field `Y` with `Y x = w`), is the
-cotangent-extension Leibniz defect `cotangentScalar`: `v(θ(Y)) − θ(∇_v Y)`. This is the
-unit-evaluation `(s = 0)` instance of the slot-`0` covariant Leibniz peel
-`tensor0SCovariantDerivative_succ_consEval_peel`. -/
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_one_cotangentToCLM
     (g : SmoothRiemannianMetric I M)
     (α : Π b : M, Tensor0SSpace 1 I b) {x : M}
@@ -120,8 +86,7 @@ lemma tensor0SCovariantDerivative_one_cotangentToCLM
   rw [hCLM, ← hconsEq (Y x)]
   refine hpeel.trans ?_
   congr 1
-  · -- the `(0, 0)` derivative term is the exterior derivative of the curried pairing
-    rw [tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g
+  · rw [tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g
       (fun y : M => curriedSection I M α y (Y y)) x v]
     have hscalar : Tensor0SNabla.scalarFn I M
         (fun y : M => curriedSection I M α y (Y y)) =
@@ -137,27 +102,18 @@ lemma tensor0SCovariantDerivative_one_cotangentToCLM
       exact hconsEq (Y b)
     rw [hscalar]
     rfl
-  · -- the Christoffel-correction term matches `cotangentToCLM (α x) (∇_v Y)`
-    rw [hCLM]
+  · rw [hCLM]
     congr 1
     exact hconsEq ((LeviCivita (I := I) g).toFun (fun y => Y y) x v)
 
-/-- **The cotangent-extension covariant derivative equals the bundled `(0, 1)`-tensor
-covariant derivative.** For a smooth compactly-supported `(0, 1)`-tensor `σ`, with `hθ` the
-manifold-differentiability of its realized covector field `ccTensor01Covec g σ` (the
-unit-evaluation of `σ` read through `cotangentToCLM`) and `hUz` the manifold-differentiability
-of the unit-evaluated `(0, 1)`-tensor section `unitEvalSection g 1 σ` (both genuine smoothness
-preconditions on the `σ`-data at `x`), the cotangent-extension covariant derivative
-`cotangentCov (LeviCivita g)` of that covector field, read on a direction `v` and a tangent
-vector `w`, equals the bundled `(0, 1)`-tensor covariant derivative `tensorCovDerivAt g 0 1 σ`
-read on the unit `(0, 0)`-tensor and then through `cotangentToCLM` on `w`. Both compute `∇^g`
-on the same covector. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
     (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) {x : M}
-    (hθ : MDiffAtCotangent (ccTensor01Covec g σ) x)
+    (hθ : MDiffAtCotangent (ccTensorOneForm g σ) x)
     (hUz : TensorSectionMDiffAt (I := I) 1 (unitEvalSection (I := I) (M := M) g 1 σ) x)
     (v w : TangentSpace I x) :
-    cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
+    cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
       cotangentToCLM (I := I)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
             tensorCovDerivAt g 0 1 σ x v) (unitZeroSec (I := I) (M := M) x)) w := by
@@ -170,32 +126,28 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
     X.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hYmd : MDiffAt (T% (fun b : M => Y b)) x :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-
-  have hcov : cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
-      cotangentScalar ((LeviCivita (I := I) g).toFun) (ccTensor01Covec g σ) x
+  have hcov : cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
+      cotangentScalar ((LeviCivita (I := I) g).toFun) (ccTensorOneForm g σ) x
         (fun b : M => X b) (fun b : M => Y b) := by
-    have hco : cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
-        cotangentCovAt (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w := by
+    have hco : cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
+        cotangentCovAt (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w := by
       rw [cotangentCov_toFun, cotangentCovFun_apply]
     rw [hco, ← hXx, ← hYx]
     exact cotangentCovAt_apply_of_diff (LeviCivita (I := I) g) hθ hXmd hYmd
   rw [hcov, cotangentScalar_def]
   simp only []
   rw [hXx]
-
   have hpair := tensor0SCovariantDerivative_one_cotangentToCLM (I := I) (M := M)
     g (unitEvalSection (I := I) (M := M) g 1 σ) hUz Y v
-
-  have hθeq : (fun b : M => ccTensor01Covec g σ b (Y b)) =
+  have hθeq : (fun b : M => ccTensorOneForm g σ b (Y b)) =
       (fun b : M => cotangentToCLM (I := I)
         (unitEvalSection (I := I) (M := M) g 1 σ b) (Y b)) := rfl
   rw [hθeq]
-  rw [show (ccTensor01Covec g σ x)
+  rw [show (ccTensorOneForm g σ x)
         ((LeviCivita (I := I) g).toFun (fun b : M => Y b) x v) =
       cotangentToCLM (I := I) (unitEvalSection (I := I) (M := M) g 1 σ x)
         ((LeviCivita (I := I) g).toFun (fun y => Y y) x v) from rfl]
   rw [← hpair]
-
   rw [← hYx]
   congr 2
   rw [tensorCovDerivAt_def]

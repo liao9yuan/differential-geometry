@@ -6,15 +6,15 @@ import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 
 set_option autoImplicit false
 
-/-!
-# Model-space realization of the metric Koszul expression
 
-For a smooth Riemannian metric on a real model space, this file identifies the
-canonical Levi--Civita derivative of constant vector fields with the raised
-coordinate Koszul expression built from the Fréchet derivative of the metric.
-This is the invariant realization layer between metric-jet estimates and a
-coordinate geodesic ODE.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -25,10 +25,9 @@ namespace Connection
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional Real E] in
 private theorem fderiv_eval2
     {B : E → E →L[Real] E →L[Real] Real} {z : E}
@@ -48,10 +47,10 @@ omit [FiniteDimensional Real E] in
 private theorem dir_const_eval2
     {B : E → E →L[Real] E →L[Real] Real} {z : E}
     (hB : DifferentiableAt Real B z) (u v w : E) :
-    directionalDeriv (I := 𝓘(Real, E)) (fun _ : E ↦ v)
+    directionalDerivAlong (I := 𝓘(Real, E)) (fun _ : E ↦ v)
         (fun y ↦ B y w u) z =
       fderiv Real B z v w u := by
-  unfold directionalDeriv
+  unfold directionalDerivAlong
   rw [extDerivFun_real_eq_mfderiv, mfderiv_eq_fderiv]
   exact fderiv_eval2 hB u v w
 
@@ -73,8 +72,8 @@ private theorem tangentConst_model (z v : E) :
   simp
   rfl
 
-/-- Lowered model-space realization: the Levi--Civita derivative of constant
-fields is the coordinate Koszul covector of the metric derivative. -/
+
+
 theorem const_flat_eq_koszul
     (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real)
@@ -121,8 +120,8 @@ theorem const_flat_eq_koszul
   rw [MetricKoszul.koszulCov_apply]
   exact hKos
 
-/-- Local lowered realization: it is enough for the metric coefficients to
-agree with `B` on a neighborhood of the evaluation point. -/
+
+
 theorem const_flat_eq_nhds
     (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real) {z : E}
@@ -160,24 +159,24 @@ theorem const_flat_eq_nhds
     filter_upwards [hB] with y hy
     exact congrArg (fun L : E →L[Real] E →L[Real] Real ↦ L v w) hy
   have hdir_wu :
-      directionalDeriv (I := 𝓘(Real, E)) (fun _ : E ↦ v)
+      directionalDerivAlong (I := 𝓘(Real, E)) (fun _ : E ↦ v)
           (fun y ↦ g.inner y w u) z =
         fderiv Real B z v w u := by
-    unfold directionalDeriv
+    unfold directionalDerivAlong
     rw [extDerivFun_real_eq_mfderiv, mfderiv_eq_fderiv, hwu.fderiv_eq]
     exact fderiv_eval2 hBdiff u v w
   have hdir_uv :
-      directionalDeriv (I := 𝓘(Real, E)) (fun _ : E ↦ w)
+      directionalDerivAlong (I := 𝓘(Real, E)) (fun _ : E ↦ w)
           (fun y ↦ g.inner y u v) z =
         fderiv Real B z w v u := by
-    unfold directionalDeriv
+    unfold directionalDerivAlong
     rw [extDerivFun_real_eq_mfderiv, mfderiv_eq_fderiv, huv.fderiv_eq]
     exact fderiv_eval2 hBdiff u w v
   have hdir_vw :
-      directionalDeriv (I := 𝓘(Real, E)) (fun _ : E ↦ u)
+      directionalDerivAlong (I := 𝓘(Real, E)) (fun _ : E ↦ u)
           (fun y ↦ g.inner y v w) z =
         fderiv Real B z u v w := by
-    unfold directionalDeriv
+    unfold directionalDerivAlong
     rw [extDerivFun_real_eq_mfderiv, mfderiv_eq_fderiv, hvw.fderiv_eq]
     exact fderiv_eval2 hBdiff w u v
   rw [hB.eq_of_nhds] at hKos
@@ -189,8 +188,8 @@ theorem const_flat_eq_nhds
   rw [MetricKoszul.koszulCov_apply]
   exact hKos
 
-/-- Raised model-space realization: coercivity identifies the canonical
-Levi--Civita derivative of constant fields with `MetricKoszul.koszulVec`. -/
+
+
 theorem const_cov_eq_koszul
     (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real)
@@ -211,8 +210,8 @@ theorem const_cov_eq_koszul
       rw [const_flat_eq_koszul g B hB hBdiff v w]
     _ = MetricKoszul.koszulVec hco (fderiv Real B z) v w := rfl
 
-/-- Local raised realization: neighborhood equality of the coefficient field
-is sufficient for the constant-field Levi--Civita derivative. -/
+
+
 theorem const_cov_eq_nhds
     (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real) {z : E}
@@ -233,9 +232,9 @@ theorem const_cov_eq_nhds
       rw [const_flat_eq_nhds g B hB hBdiff v w]
     _ = MetricKoszul.koszulVec hco (fderiv Real B z) v w := rfl
 
-/-- In a real model space, the Levi--Civita derivative of a differentiable
-vector field is its Frechet derivative plus the raised metric-Koszul
-correction. -/
+
+
+
 theorem cov_eq_fderiv_add
     [NeZero (Module.finrank Real E)]
     (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)

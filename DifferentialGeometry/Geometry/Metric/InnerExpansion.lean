@@ -164,3 +164,4 @@ theorem inner_self_eq_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
 end Riemannian
 end Geometry
 end DifferentialGeometry
+

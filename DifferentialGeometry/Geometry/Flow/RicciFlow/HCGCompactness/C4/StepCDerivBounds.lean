@@ -5,32 +5,30 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4 Step C: C2 = `lbl430`(i), QUANTITATIVE derivative bounds of the center of mass
 
-`centerOfMass_contDiffAt` (`lbl430`(ii)) proves the center of mass is `C^n` for every finite `n`.
-That is *regularity*, not *bounds*: it gives no uniform-in-configuration constants.  This file is the
-**quantitative half** — eq `lbl431`, `|∇_q^α ∇_μ^β cm| ≤ C̃_{|α|+|β|+1}` uniform over configurations
-at the book scale (`r < c(n)/√C₀`, `inj(q) > 3r`) — which is needed to produce the arbitrary-order
-metric bounds inside `StepB1RawInput`.
 
-## Book route (chapter4.tex L2709+, proof of `lbl430`(i)) — mirrored, not a general IFT engine
-The center of mass `cm` is the unique zero of `G(q) = Σ μᵢ exp_q⁻¹ qᵢ`.  The book:
-1. `∇_q G` positive definite, smallest eigenvalue `≥ λ_min(C₀, Σμ)` (Lemma `lbl413`) ⟹
-   `‖(∇_q G)⁻¹‖ ≤ Λ`.
-2. `‖∇^{≤j} G‖ ≤ B_j` via Prop `lbl418`(i) (S6, `ExpInverseDerivBoundInput`); weights enter linearly.
-3. Differentiate `G(cm(params), params) = 0` (eq `lbl432`): order 1 gives `D cm = −(∂_z G)⁻¹ ∂_p G`,
-   `‖D cm‖ ≤ Λ B₁`; order `j` isolates `∂_z G · D^j cm = −(poly in D^{<j} cm and D^{≤j} G)` and bounds
-   by induction with `Λ`, `B_{≤j}`.
 
-This file proves the order-one and order-two bounds (`cmChartFDerivLe`, `cmChartDerivLe2`) and the
-reusable higher-order Faà-di-Bruno bricks.  It deliberately does not state the arbitrary-order
-endpoint until order-`p` regularity and a recursive numerical majorant are threaded honestly.
-See `StepCDerivBounds.md`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -43,12 +41,12 @@ section AbstractOneBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- **Base case (order 1) of the `lbl430`(i) derivative-bound induction — abstract IFT form.**
-For a family `G : E → P → E` (`P = (ι→ℝ)×(ι→E)`) with implicit solution `f` (`G(f params, params) =
-0` near `params₀`, `f params₀ = z₀`), invertible `z`-block `∂_z G = L` at `(z₀, params₀)` with
-`‖L⁻¹‖ ≤ Λ`, and joint derivative `Dⱼ` bounded `‖Dⱼ‖ ≤ B`, the implicit derivative satisfies
-`‖Df‖ ≤ Λ · B`.  This is the book's `D cm = −(∂_z G)⁻¹ ∂_p G` estimate (eq `lbl432` at order 1),
-proved by chain-ruling the constant relation `G(f, ·) = 0` and reading off the `z`-block. -/
+
+
+
+
+
+
 theorem implicitDeriv_one_le
     {ι : Type} [Fintype ι]
     (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
@@ -62,7 +60,6 @@ theorem implicitDeriv_one_le
     (hB : ‖Dj‖ ≤ B)
     (hrel : ∀ᶠ params in nhds params₀, G (f params) params = 0) :
     ‖Df‖ ≤ Λ * B := by
-  -- The `z`-block of the joint derivative is `L` (chain rule + uniqueness), as in `implicitSol`.
   have hk : HasFDerivAt (fun z : E => (z, params₀))
       (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))) z₀ :=
     (hasFDerivAt_id z₀).prodMk (hasFDerivAt_const params₀ z₀)
@@ -81,13 +78,11 @@ theorem implicitDeriv_one_le
         = (a, (0 : (ι → ℝ) × (ι → E))) + ((0 : E), b) :=
       Prod.ext (add_zero a).symm (zero_add b).symm
     rw [hdecomp, map_add, hDv]
-  -- The relation `G(f, ·) = 0` has derivative `Dⱼ ∘ (Df, id) = 0`.  Ascribe the explicit
-  -- composite `_ ∘ (fun params => (f params, params))` (as in `hLz` above) so `.comp` pins the
-  -- inner map from the ascription rather than mis-guessing it from `hGf`'s point.
   have hpair : HasFDerivAt (fun params : (ι → ℝ) × (ι → E) => (f params, params))
       (Df.prod (ContinuousLinearMap.id ℝ ((ι → ℝ) × (ι → E)))) params₀ :=
     hf.prodMk (hasFDerivAt_id params₀)
-  have hGf : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) Dj (f params₀, params₀) := by
+  have hGf : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) Dj
+    (f params₀, params₀) := by
     rw [hf0]; exact hG
   have hcomp := HasFDerivAt.comp (𝕜 := ℝ) (E := (ι → ℝ) × (ι → E))
       (F := E × ((ι → ℝ) × (ι → E))) (G := E)
@@ -130,14 +125,14 @@ theorem implicitDeriv_one_le
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hB (norm_nonneg _)) hΛ0
     _ = Λ * B * ‖v‖ := by ring
 
-/-- **Implicit-function derivative formula, at one point** (`lbl430`(i) ingredient (a), pointwise).
-For `G(f q, q) = 0` near `p₀` with `f` differentiable (`hf`), `G` jointly differentiable (`hG`, joint
-derivative `Dⱼ` at `(f p₀, p₀)`), and the `z`-block `∂_zG = Dⱼ∘inl` invertible in the Banach algebra
-`E →L[ℝ] E` (`hinv`), the derivative of the implicit function is
-`Df = −(∂_zG)⁻¹ ∘ ∂_pG`, where `∂_pG = Dⱼ∘inr`.  Chain-rule the constant relation `G(f,·) = 0`
-(`Dⱼ∘(Df,id) = 0`), read off `∂_zG∘Df = −∂_pG`, and left-compose `Ring.inverse (∂_zG)` using
-`Ring.inverse_mul_cancel`.  (`Ring.inverse` is the `E →L[ℝ] E` ring inverse; on the invertible set it
-agrees with the genuine inverse.) -/
+
+
+
+
+
+
+
+
 theorem implicitFDeriv_eq {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (G : E → P → E) (f : P → E) (p₀ : P)
     (Df : P →L[ℝ] E) (Dj : (E × P) →L[ℝ] E)
@@ -188,11 +183,11 @@ theorem implicitFDeriv_eq {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     _ = -(Ring.inverse (Dj.comp (ContinuousLinearMap.inl ℝ E P))).comp
           (Dj.comp (ContinuousLinearMap.inr ℝ E P)) := ContinuousLinearMap.comp_neg _ _
 
-/-- **Implicit-function derivative formula on a neighbourhood** (`lbl430`(i) ingredient (a)).  The
-eventual (`=ᶠ[𝓝 params₀]`) form of `implicitFDeriv_eq`: `∇f =ᶠ fun p => −(∂_zG(f p,p))⁻¹ ∘ ∂_pG(f p,p)`,
-from `f` eventually differentiable (`hf`, e.g. from `C^n` regularity), `G` eventually jointly
-differentiable (`hG`), the IFT relation `G(f,·) = 0` (`hrel`), and eventual `z`-block invertibility
-(`hinv`, the neighbourhood Hessian input).  This is the object the `j ≥ 2` induction differentiates. -/
+
+
+
+
+
 theorem implicitFDeriv_eventuallyEq {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (G : E → P → E) (f : P → E) (params₀ : P)
     (Df : P → P →L[ℝ] E) (Dj : P → (E × P) →L[ℝ] E)
@@ -207,11 +202,11 @@ theorem implicitFDeriv_eventuallyEq {P : Type*} [NormedAddCommGroup P] [NormedSp
   rw [hfp.fderiv]
   exact implicitFDeriv_eq G f p (Df p) (Dj p) hfp hGp hrelp hinvp
 
-/-- **Graph-pulled derivative of a CLM-block family** (`lbl430`(i) step (1) engine).  A CLM-valued
-map `H` (concretely: `fderiv` of the joint equation `G`) differentiated through the graph
-`p ↦ (f p, p)` and post-restricted to a fixed slot `j` (concretely `inl`/`inr`) gives the block
-family `p ↦ (H (f p, p)).comp j`, differentiable with the quantitative bound
-`‖D'‖ ≤ ‖H'‖ · max ‖Df₀‖ 1` when `‖j‖ ≤ 1` — the book's `‖∇(∂G ∘ graph)‖ ≤ ‖∇²G‖·(‖∇f‖ + 1)`. -/
+
+
+
+
+
 theorem graphBlockDeriv {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
     (H : E × P → ((E × P) →L[ℝ] E)) (f : P → E) (params₀ : P) (Df₀ : P →L[ℝ] E)
@@ -254,13 +249,13 @@ theorem graphBlockDeriv {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
                 mul_le_mul_of_nonneg_right (le_max_right _ _) (norm_nonneg _)
     _ = ‖H'‖ * max ‖Df₀‖ 1 * ‖v‖ := by ring
 
-/-- **Order-2 bound for the implicit function** (`lbl430`(i) step (3) at `j = 2`).  Differentiating
-the neighbourhood formula `∇f =ᶠ −(∂_zG)⁻¹∘∂_pG` (`implicitFDeriv_eventuallyEq`) once more:
-`‖∇²f‖ ≤ Λ²·a₂·b₁ + Λ·b₂`, where `Λ` bounds the inverse `z`-block at the base point, `b₁` bounds
-`‖∂_pG‖`, and `a₂`, `b₂` bound the derivatives of the block families `p ↦ ∂_zG(f p, p)`,
-`p ↦ ∂_pG(f p, p)` (supplied by `graphBlockDeriv` from `‖∇²G‖` in the concrete case).  The inverse
-factor differentiates by Mathlib's `hasFDerivAt_ringInverse` (`∇(inverse) = −u⁻¹·(·)·u⁻¹`), giving
-the `Λ²` — the `i = 1` case of the Neumann bound `norm_iteratedFDeriv_ringInverse_le`. -/
+
+
+
+
+
+
+
 theorem implicitDeriv_two_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     [CompleteSpace E]
     (G : E → P → E) (f : P → E) (params₀ : P)
@@ -286,7 +281,6 @@ theorem implicitDeriv_two_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ
     have h : Ring.inverse ((Dj params₀).comp (ContinuousLinearMap.inl ℝ E P))
         = (↑u⁻¹ : E →L[ℝ] E) := by rw [← hu, Ring.inverse_unit]
     rw [← h]; exact hΛ
-  -- derivative of the inverse factor at the base `z`-block
   have hinv_d : HasFDerivAt (Ring.inverse : (E →L[ℝ] E) → (E →L[ℝ] E))
       (-(ContinuousLinearMap.mulLeftRight ℝ (E →L[ℝ] E) ↑u⁻¹ ↑u⁻¹))
       ((Dj params₀).comp (ContinuousLinearMap.inl ℝ E P)) := by
@@ -348,10 +342,10 @@ theorem implicitDeriv_two_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ
           _ ≤ Λ * (b₂ * ‖v‖) + Λ * Λ * (a₂ * ‖v‖) * b₁ := add_le_add h1 h2
           _ = (Λ ^ 2 * a₂ * b₁ + Λ * b₂) * ‖v‖ := by ring
 
-/-! Bricks for the `j ≥ 3` recursion (step (c)): the pair-function iterated bound.  These feed the
-`norm_iteratedFDeriv(Within)_comp_le` chain for `‖∇^i(∂G ∘ graph)‖` in the general induction. -/
 
-/-- `‖M.prod N‖ ≤ max ‖M‖ ‖N‖` for continuous multilinear maps into a sup-norm product. -/
+
+
+
 theorem multilinear_prod_opNorm_le {n : ℕ}
     {P F G : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -366,7 +360,7 @@ theorem multilinear_prod_opNorm_le {n : ℕ}
   · exact (M.le_opNorm m).trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hprod0)
   · exact (N.le_opNorm m).trans (mul_le_mul_of_nonneg_right (le_max_right _ _) hprod0)
 
-/-- The identity has all iterated derivatives of order `≥ 1` bounded by `1`. -/
+
 theorem norm_iteratedFDeriv_id_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (i : ℕ) (hi : 1 ≤ i) (x : P) :
     ‖iteratedFDeriv ℝ i (fun p : P => p) x‖ ≤ 1 := by
@@ -381,9 +375,9 @@ theorem norm_iteratedFDeriv_id_le {P : Type*} [NormedAddCommGroup P] [NormedSpac
     · rw [iteratedFDeriv_const_of_ne (Nat.succ_ne_zero l)]
       simp
 
-/-- **Graph iterated bound** (step (c) brick): the graph `p ↦ (f p, p)` inherits the iterated
-bounds of `f` — `‖∇^i (f, id)‖ ≤ max ‖∇^i f‖ 1` for `1 ≤ i ≤ n` given `C^n`-at-the-point.  This is
-the inner-function `D^i`-shape input of `norm_iteratedFDeriv_comp_le` for `∂G ∘ graph`. -/
+
+
+
 theorem norm_iteratedFDeriv_graph_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {n : WithTop ℕ∞} (f : P → E) (x : P) (hf : ContDiffAt ℝ n f x)
     {i : ℕ} (hi : 1 ≤ i) (hin : (i : WithTop ℕ∞) ≤ n) :
@@ -396,12 +390,12 @@ theorem norm_iteratedFDeriv_graph_le {P : Type*} [NormedAddCommGroup P] [NormedS
   exact (multilinear_prod_opNorm_le _ _).trans
     (max_le_max le_rfl (norm_iteratedFDeriv_id_le i hi x))
 
-/-- **Iterated bound for a graph pullback `H ∘ (f, id)`** (step (c) brick, Faà-di-Bruno).  If `H`
-is `C^m` at `(f x, x)` with `‖∇^i H (f x, x)‖ ≤ C` (`i ≤ m`), `f` is `C^m` at `x` with the
-`D^i`-shape bounds (`1 ≤ i ≤ m`, `1 ≤ D`), then `‖∇^m (H(f·,·)) x‖ ≤ m!·C·D^m`.  The inner
-`D^i`-shape for the graph comes from `norm_iteratedFDeriv_graph_le`.  Applied with
-`H := fderiv (uncurried G)` this bounds the iterated derivatives of the block families `∂_zG`,
-`∂_pG` from `‖∇^{i+1}G‖` and the induction hypotheses on `f`. -/
+
+
+
+
+
+
 theorem norm_iteratedFDeriv_graphComp_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {F' : Type*} [NormedAddCommGroup F'] [NormedSpace ℝ F']
     (H : E × P → F') (f : P → E) (x : P) (m : ℕ) (C D : ℝ)
@@ -427,13 +421,11 @@ theorem norm_iteratedFDeriv_graphComp_le {P : Type*} [NormedAddCommGroup P] [Nor
     have h : p ∈ (fun p : P => (f p, p)) ⁻¹' interior t := interior_subset hp.2
     exact Set.mem_preimage.mp h
   have hgrx : ((f x, x) : E × P) ∈ interior t := hmaps hxs
-  -- outer bounds within the open `interior t` = ambient bounds
   have hC' : ∀ i, i ≤ m →
       ‖iteratedFDerivWithin ℝ i H (interior t) ((f x, x) : E × P)‖ ≤ C := by
     intro i him
     rw [iteratedFDerivWithin_of_isOpen i isOpen_interior hgrx]
     exact hC i him
-  -- inner `D^i`-shape for the graph, via the pair bound
   have hD' : ∀ i, 1 ≤ i → i ≤ m →
       ‖iteratedFDerivWithin ℝ i (fun p : P => (f p, p)) s x‖ ≤ D ^ i := by
     intro i hi him
@@ -450,7 +442,6 @@ end AbstractOneBound
 
 section CmBounds
 
-set_option synthInstance.maxHeartbeats 1000000
 
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
@@ -458,7 +449,7 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -469,33 +460,24 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Honest input (1) — quantitative Hessian nondegeneracy (`lbl413`, the `‖L⁻¹‖` field).**
-The qualitative `CmHessianInput` (invertible `∂_z G`) upgraded with the operator-norm bound
-`‖L⁻¹‖ ≤ Λ` on the inverse `z`-block of the readout equation `chartCmEqn'`.
-
-*Why true, at which scale, who discharges it* (audit rule): below the convexity radius the summands
-`∂_z(exp_y⁻¹ qᵢ)` are close to `−id`, so `∂_z G = Σ μᵢ ∂_z(exp_y⁻¹ qᵢ) ≈ −(Σμᵢ)·id`; the Neumann
-series gives invertibility with `‖L⁻¹‖ ≤ (Σμᵢ(1−ε))⁻¹`, uniformly in the `lbl413` regime
-(`r < c(n)/√C₀`, `inj > 3r`).  This is a per-configuration honest input, discharged at D6 adjacent to
-`Item3GpScaleInput` (the same `lbl413` curvature-comparison family); it is not proved natively. -/
 structure CmHessianBoundInput
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E)) where
-  /-- The book's `Λ` — an upper bound for `‖(∂_z G)⁻¹‖`. -/
+
   Λ : ℝ
-  /-- The invertible `z`-block `∂_z G` of the readout equation at `(z₀, params₀)`. -/
+
   L : E ≃L[ℝ] E
   hL : HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀
-  /-- The quantitative content: `‖L⁻¹‖ ≤ Λ` (the `lbl413` smallest-eigenvalue bound). -/
+
   hLinv : ‖(L.symm : E →L[ℝ] E)‖ ≤ Λ
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The qualitative `hinv'` datum (readout-form `CmHessianInput`) underlying a
-`CmHessianBoundInput` — the C^n endpoints (`readoutSol_contDiffAt`, …) consume exactly this. -/
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem CmHessianBoundInput.toInv
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     {g : SmoothRiemannianMetric I M}
@@ -509,18 +491,6 @@ theorem CmHessianBoundInput.toInv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Honest input (2) — `G`-derivative bounds (`lbl418`/S6 threaded through the readout chain).**
-`‖∇^j (chartCmEqn')‖ ≤ B j` for `j ≤ pOrd`, at the configuration `(z₀, params₀)`.
-
-*Reduction to S6* (audit rule): `chartCmEqn' = Σ μᵢ • readoutᵢ`, with `readoutᵢ` the
-trivialization-at-`p` readout of `diagExpInv`, i.e. (up to the trivialization CLE, a fixed linear
-iso) the double-exponential `exp_{exp_p z}⁻¹(exp_p ξᵢ)`.  Weights enter linearly, so
-`‖∇^j chartCmEqn'‖ ≤ (Σ|μᵢ|)·‖∇^j readout‖`.  `j = 0` reduces to `ExpInverseDerivBoundInput` (S6,
-`lbl418`) at order 0 — boundedness on the `r₁`-capped ball.  `j ≥ 1` needs the readout-chain
-comp-bound transfer (Faà-di-Bruno via `norm_iteratedFDeriv_comp_le`: the double-exp composition with
-S6's `NormalTransitionDerivBound` and `lbl395` parametrization bounds, times the constant CLE
-factor) — a minimal `MapConvergenceComp` bounds-sibling, deferred.  Carried here as an honest input
-whose fields are the S6/`lbl395` quantities. -/
 def CmGDerivBound
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -535,19 +505,6 @@ def CmGDerivBound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Honest input (1') — neighbourhood Hessian nondegeneracy along the center family (`lbl413`).**
-The neighbourhood strengthening of `CmHessianBoundInput`, bound to a center family `c`: at every
-parameter `q` near `params₀`, the `z`-block `∂_zG = Dⱼ(q)∘inl` of the joint derivative of the
-readout equation along the graph `q ↦ (chart(c q), q)` is invertible (in the Banach algebra
-`E →L[ℝ] E`), with the inverse-norm bound `‖(∂_zG)⁻¹‖ ≤ Λ` at the base point.
-
-*Why true, at which scale, who discharges it* (audit rule): identical in content to the pointwise
-`CmHessianBoundInput` — below the convexity radius each summand `∂_z(exp_y⁻¹ qᵢ)` is close to
-`−id`, so `∂_zG ≈ −(Σμᵢ)·id` and the Neumann series gives invertibility with
-`‖(∂_zG)⁻¹‖ ≤ (Σμᵢ(1−ε))⁻¹`; nearby configurations `(chart(c q), q)` stay below the same radius, so
-the *same* Neumann argument applies verbatim on a neighbourhood.  Scale: the `lbl413` regime
-(`r < c(n)/√C₀`, `inj > 3r`).  Discharger: per-configuration honest input, D6-adjacent (the same
-`lbl413` curvature-comparison family as `Item3GpScaleInput`); not proved natively. -/
 structure CmHessianNbhdInput
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -555,14 +512,14 @@ structure CmHessianNbhdInput
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι]
     (c : ((ι → ℝ) × (ι → E)) → M) (params₀ : (ι → ℝ) × (ι → E)) where
-  /-- The book's `Λ` — an upper bound for the inverse `z`-block norm at the base configuration. -/
+
   Λ : ℝ
-  /-- Eventual invertibility of the `z`-block along the graph of the center family. -/
+
   ev_isUnit : ∀ᶠ q in nhds params₀,
     IsUnit ((fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
       ((NormalCoordinates.normalChartAt (I := I) g p (c q) : E), q)).comp
       (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))))
-  /-- The quantitative content at the base point: `‖(∂_zG)⁻¹‖ ≤ Λ`. -/
+
   inv_le : ‖Ring.inverse
       ((fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
         ((NormalCoordinates.normalChartAt (I := I) g p (c params₀) : E), params₀)).comp
@@ -570,11 +527,8 @@ structure CmHessianNbhdInput
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Base case (order 1) of eq `lbl431` for the chart center of mass.**  Specializes
-`implicitDeriv_one_le` to `G = chartCmEqn'`, `f = normalChartAt g p ∘ c`: for any center family `c`
-solving the readout equation (`hc_solves`) with derivative `Df` (`hcderiv` — from
-`center_hasStrictFDerivAt`), the first covariant derivative is bounded `‖∇(chart∘c)‖ ≤ Λ · B₁`, from
-the quantitative Hessian input `hbd` and the joint-`G` order-1 bound `hB`. -/
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem cmChartFDerivLe
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -598,23 +552,14 @@ theorem cmChartFDerivLe
       ≤ hbd.Λ * B1 := by
   rw [norm_iteratedFDeriv_one, hcderiv.fderiv]
   exact implicitDeriv_one_le (fun z params => chartCmEqn' (I := I) g hEnorm p z params) z₀ params₀
-    (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df Dj hbd.L hbd.Λ B1
+    (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df Dj hbd.L hbd.Λ
+      B1
     hc0 hcderiv hG hbd.hL hbd.hLinv hB hc_solves
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Order-two part of eq `lbl431`, quantitative derivative bounds of the center of mass.**
-`‖D^j (normalChartAt g p ∘ cm)‖ ≤ C̃ j` for `j ≤ 2`, uniformly over configurations satisfying the
-audited inputs `hbd` (`CmHessianBoundInput`, `Λ`) and `hGbd` (`CmGDerivBound`, `B`).
-
-`j = 0` (`‖cm‖ ≤ C̃ 0`) and `j = 1` (`cmChartFDerivLe`, `‖D cm‖ ≤ Λ·B₁ ≤ C̃ 1`) are the base
-cases.  The `j = 2` case uses the neighbourhood implicit-derivative formula
-(`implicitFDeriv_eventuallyEq`, fed by the `C²` regularity `hf2`/`hG2` and the neighbourhood
-Hessian input `hnbhd`) differentiates once more via `implicitDeriv_two_le`, with the block
-derivatives supplied by `graphBlockDeriv` from `‖∇²G‖ ≤ B 2` and `‖∇f‖ ≤ Λ·B₁`; the constant is
-`C̃₂ = Λ'²·a₂·B₁ + Λ'·a₂` with `a₂ = B₂·(Λ·B₁+1)` (`hC2`).  The arbitrary-order theorem is not
-stated here: it additionally needs order-`p` regularity and an explicit recursive construction of
-`C̃`; neither follows from the order-two hypotheses below. -/
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem cmChartDerivLe2
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -651,23 +596,18 @@ theorem cmChartDerivLe2
         ≤ Ctil j := by
   intro j hj
   obtain _ | _ | _ | n := j
-  · -- j = 0: `‖cm‖ = ‖z₀‖ ≤ C̃ 0`.
-    rw [norm_iteratedFDeriv_zero, hc0]; exact hC0
-  · -- j = 1: base case via `cmChartFDerivLe`.
-    have hB : ‖Dj‖ ≤ B 1 := by
+  · rw [norm_iteratedFDeriv_zero, hc0]; exact hC0
+  · have hB : ‖Dj‖ ≤ B 1 := by
       have h := hGbd 1 hj
       rwa [norm_iteratedFDeriv_one, hG.fderiv] at h
     exact le_trans
       (cmChartFDerivLe (I := I) g hEnorm p z₀ params₀ hbd Dj (B 1) hG hB c Df hcderiv hc0 hc_solves)
       hC1
-  · -- j = 2: Route A — the neighbourhood formula differentiated once (`implicitDeriv_two_le`).
-    -- Eventual differentiability of `f = chart ∘ c` from the `C²` regularity.
-    have hf_ev : ∀ᶠ q in nhds params₀,
+  · have hf_ev : ∀ᶠ q in nhds params₀,
         HasFDerivAt (fun q' => (NormalCoordinates.normalChartAt (I := I) g p (c q') : E))
           (fderiv ℝ (fun q' => (NormalCoordinates.normalChartAt (I := I) g p (c q') : E)) q) q := by
       filter_upwards [hf2.eventually (by simp)] with q hq
       exact (hq.differentiableAt (by norm_num)).hasFDerivAt
-    -- The graph tends to the base configuration.
     have htend : Filter.Tendsto
         (fun q => ((NormalCoordinates.normalChartAt (I := I) g p (c q) : E), q))
         (nhds params₀) (nhds (z₀, params₀)) := by
@@ -676,7 +616,6 @@ theorem cmChartDerivLe2
           (nhds params₀) (nhds z₀) := by
         rw [← hc0]; exact hf2.continuousAt
       exact hf_cont.prodMk_nhds Filter.tendsto_id
-    -- Eventual joint differentiability of `G` along the graph.
     have hG_ev : ∀ᶠ q in nhds params₀,
         HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
           (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
@@ -684,7 +623,6 @@ theorem cmChartDerivLe2
           ((NormalCoordinates.normalChartAt (I := I) g p (c q) : E), q) := by
       filter_upwards [htend.eventually (hG2.eventually (by simp))] with q hq
       exact (hq.differentiableAt (by norm_num)).hasFDerivAt
-    -- `‖∇f‖ ≤ Λ·B₁` (the `j = 1` content) and the second-derivative datum `H'` with `‖H'‖ ≤ B₂`.
     have hB1 : ‖Dj‖ ≤ B 1 := by
       have h := hGbd 1 (by omega)
       rwa [norm_iteratedFDeriv_one, hG.fderiv] at h
@@ -724,7 +662,6 @@ theorem cmChartDerivLe2
         rw [← norm_iteratedFDeriv_one]
         exact norm_iteratedFDeriv_fderiv
       rw [heq2]; exact h
-    -- Block derivatives via `graphBlockDeriv` at `j = inl` and `j = inr`.
     obtain ⟨A', hAd, hA'le⟩ := graphBlockDeriv
       (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2))
       (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀ Df _
@@ -743,7 +680,6 @@ theorem cmChartDerivLe2
     have hb₂ : ‖B'‖ ≤ B 2 * (hbd.Λ * B 1 + 1) :=
       hB'le.trans (mul_le_mul hH'le hmax_le
         (le_trans zero_le_one (le_max_right _ _)) hB2nonneg)
-    -- `∂_pG` bound at the base configuration.
     have hfam0 : fderiv ℝ
         (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
         ((NormalCoordinates.normalChartAt (I := I) g p (c params₀) : E), params₀) = Dj := by
@@ -759,7 +695,6 @@ theorem cmChartDerivLe2
             (ContinuousLinearMap.norm_inr_le_one ℝ E ((ι → ℝ) × (ι → E))) (norm_nonneg _)
             (le_trans (norm_nonneg _) hB1)
         _ = B 1 := mul_one _
-    -- Assemble via the abstract order-2 bound.
     have hmain := implicitDeriv_two_le
       (fun z params => chartCmEqn' (I := I) g hEnorm p z params)
       (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀

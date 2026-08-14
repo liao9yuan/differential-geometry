@@ -4,20 +4,20 @@ import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Tactic.Ring
 
-/-!
-# Derivation algebra for tensor components
 
-This file contains geometry-free finite-sum algebra for component calculations
-with mixed tensors.  It deliberately mentions only finite index types, scalar
-arrays, products, finite sums, and abstract derivative/product-rule hypotheses.
--/
+
+
+
+
+
+
 
 open scoped BigOperators
 
 namespace DifferentialGeometry.Integral.Connection
 
-/-- Contract the upper multi-index of a mixed component array against a
-covariant probe component array. -/
+
+
 def contractUpper {R Idx : Type*} [AddCommMonoid R] [Mul R] [Fintype Idx]
     {r s : Nat}
     (theta : (Fin r -> Idx) -> R)
@@ -25,12 +25,12 @@ def contractUpper {R Idx : Type*} [AddCommMonoid R] [Mul R] [Fintype Idx]
     (K : Fin s -> Idx) : R :=
   ∑ L : Fin r -> Idx, theta L * beta L K
 
-/-- Algebraic cancellation behind the commutator product rule for an
-upper-slot contraction.
 
-The hypotheses are the two second-product-rule expansions for derivative
-orders `ij` and `ji`.  The conclusion is the commutator form:
-`theta ⋅ commBeta = commContract - commTheta ⋅ beta`. -/
+
+
+
+
+
 theorem contractUpper_commutator_of_second_product_rules
     {R Idx : Type*} [CommRing R] [Fintype Idx] {r s : Nat}
     (theta theta_i theta_j theta_ij theta_ji : (Fin r -> Idx) -> R)
@@ -69,13 +69,13 @@ theorem contractUpper_commutator_of_second_product_rules
   rw [hright, hleft, hij K, hji K]
   ring
 
-/-- Build a second-product-rule expansion for an upper-slot contraction from
-the first-product-rule expansions of its two differentiated summands.
 
-The intended coordinate reading is:
-`contract_j = theta_j ⋅ beta + theta ⋅ beta_j`; differentiating this in the
-`i` direction gives the two summands `left` and `right`, and their first
-product rules combine into the four-term second-product formula. -/
+
+
+
+
+
+
 theorem contractUpper_second_product_of_first_product_rules
     {R Idx : Type*} [CommSemiring R] [Fintype Idx] {r s : Nat}
     (theta theta_i theta_j theta_ij : (Fin r -> Idx) -> R)
@@ -100,14 +100,14 @@ theorem contractUpper_second_product_of_first_product_rules
   rw [hcontract K, hleft K, hright K]
   ring
 
-/-- Localized first-product rule for `contractUpper`.
 
-Unlike `contractUpper_first_product_of_scalar_derivation`, this theorem only
-asks for the finite-sum and product derivative identities that occur in this
-single contraction component.  This is the right algebraic shape for the
-coordinate producer: the geometric layer should supply these hypotheses from
-the concrete coordinate derivative, without pretending that the derivative is
-available as a derivation on all scalar functions. -/
+
+
+
+
+
+
+
 theorem contractUpper_first_product_of_local_rules
     {R Ω Idx : Type*} [AddCommMonoid R] [Mul R] [Fintype Idx] {r s : Nat}
     (D : (Ω -> R) -> R) (z₀ : Ω)
@@ -142,13 +142,13 @@ theorem contractUpper_first_product_of_local_rules
           contractUpper (theta z₀) betaD K := by
             rfl
 
-/-- First-product rule for `contractUpper` with respect to an abstract scalar
-derivation `D`.
 
-This is deliberately independent of manifolds.  It is the finite-sum algebra
-needed to instantiate coordinate derivatives later: once `D` is a coordinate
-directional derivative and `thetaD`/`betaD` are the corresponding component
-derivatives, the contraction derivative is the expected Leibniz sum. -/
+
+
+
+
+
+
 theorem contractUpper_first_product_of_scalar_derivation
     {R Ω Idx : Type*} [AddCommMonoid R] [Mul R] [Fintype Idx] {r s : Nat}
     (D : (Ω -> R) -> R) (z₀ : Ω)

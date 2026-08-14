@@ -7,21 +7,21 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Pullback Naturality For Metric Covariant Derivative Towers
 
-This file starts the source-domain pullback bridge for the HCG compactness
-layer.  The first producer is the order-one metric-covariant-derivative
-naturality statement, proved from the scalar directional-derivative and
-Levi-Civita connection naturality APIs in `Curvature/PullbackNaturality.lean`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite
 namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
@@ -29,8 +29,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Connection.CovariantDerivative
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -38,8 +38,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 variable [BoundarylessManifold I M] [BoundarylessManifold I N]
 
-/-- Naturality of the first background covariant derivative of a metric tensor
-under pullback by a diffeomorphism, evaluated on smooth section slots. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricCovDeriv_one_pullback_sections
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -69,8 +71,9 @@ theorem metricCovDeriv_one_pullback_sections
       (fun a : Fin 2 => pushFwdSection (I := I) Phi (V a)) (Phi x)
   rw [hleft, hright]
   have hdir := directionalDeriv_pullback (I := I) h Phi X (V 0) (V 1) x
-  unfold directionalDeriv at hdir
-  rw [hdir]
+  have hdir' := hdir
+  simp only [directionalDerivAlong] at hdir'
+  rw [hdir']
   congr 1
   apply Finset.sum_congr rfl
   intro a _
@@ -98,8 +101,10 @@ theorem metricCovDeriv_one_pullback_sections
       simp [pushFwdSection_apply_at_image]
   rw [hslot 0, hslot 1]
 
-/-- Pointwise naturality of the first background covariant derivative of a
-metric tensor under pullback by a diffeomorphism. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricCovDeriv_one_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -130,9 +135,11 @@ theorem metricCovDeriv_one_pullback
   simpa [hX, hV, pushFwdSection_apply_at_image] using
     metricCovDeriv_one_pullback_sections (I := I) h gRef Phi X V x
 
-/-- Boundaryless-free smooth-slot recursion for one `metricCovDeriv` step.  The
-coordinate-frame version lives in `MetricCovDerivCoordStep`; this local form is
-the invariant formula needed by the pullback induction. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 private theorem metricCovDeriv_succ_eval_smooth_slots'
     [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -159,10 +166,12 @@ private theorem metricCovDeriv_succ_eval_smooth_slots'
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (metricCovDeriv (I := I) h gRef a) x
 
-/-- Boundaryless-free smooth-slot recursion for one `covDerivOfField` step on an
-arbitrary rank-`2` base field `A0`.  Generalises
-`metricCovDeriv_succ_eval_smooth_slots'` (whose base is the metric tensor field)
-to any base; the invariant formula needed by the general pullback induction. -/
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 private theorem covDerivOfField_succ_eval_smooth_slots
     [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -192,8 +201,10 @@ private theorem covDerivOfField_succ_eval_smooth_slots
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (covDerivOfField (I := I) gRef A0 a) x
 
-/-- Pointwise naturality of the full background metric-covariant derivative
-tower under pullback by a diffeomorphism. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricCovDeriv_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -359,12 +370,14 @@ theorem metricCovDeriv_pullback
       rw [hpushSlots, hslots]
       simpa [hX, hV, pushFwdSection_apply_at_image] using hsmooth
 
-/-- **General base naturality of the `covDerivOfField` tower under pullback.**
-For any rank-`2` base field whose values transport under `Φ`
-(`hA0 : A0M x = A0N (Φ x) ∘ dΦ`), the full `gRef`-covariant-derivative tower of
-`A0` transports under the simultaneous pullback by `Φ`.  This generalises
-`metricCovDeriv_pullback` (metric base) to an arbitrary base, so it applies to
-the Ricci-tensor base of `ricCovTower`. -/
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem covDerivOfField_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -528,26 +541,30 @@ theorem covDerivOfField_pullback
       rw [hpushSlots, hslots]
       simpa [hX, hV, pushFwdSection_apply_at_image] using hsmooth
 
-/-- **Reduction of the Ricci section to the metric Ricci tensor.**  The realized
-Ricci section of the Levi-Civita connection of `g`, evaluated on `vec2 v w`,
-equals the canonical metric Ricci tensor `ricciTensor g x v w`.  Bridges
-`ricciSection_apply` (→ `ricciCurvatureAt`) with `metricRicciAt_apply_eq_ricciTensor`
-(using `metricCov = leviCivitaConnectionOfMetric` definitionally). -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem ricciSection_eq_ricciTensor
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
         (I := I) (M := M)
         (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) (M := M) g) x (vec2 (I := I) v w)
       = ricciTensor (I := I) g x v w := by
   rw [DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection_apply]
   exact metricRicciAt_apply_eq_ricciTensor (I := I) g x v w
 
-/-- **The `(0,4)` Std curvature as the lowered Riemann operator.**  Extracted from the
-first half of `metricRm04StdAt_eq_chartRiemannCLM`: `metricRm04StdAt g x X Y Z W` is the
-`g`-inner product of `W` with the Riemann operator `riemannOp (LeviCivita g) x X Y Z`. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricRm04StdAt_eq_inner_riemannOp
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (x : M) (X Y Z W : TangentSpace I x) :
@@ -564,13 +581,15 @@ theorem metricRm04StdAt_eq_inner_riemannOp
     show riemannOp (cov := metricCov (I := I) g) x X Y Z
         = riemannOp (cov := LeviCivita (I := I) g) x X Y Z from rfl]
 
-/-- **Naturality of the Ricci tensor under a non-endo diffeomorphism `M ≃ₘ N`.**
-The Ricci tensor of a pullback metric is the pullback of the Ricci tensor.  Proved
-by the orthonormal-trace formula on both sides, bridged term-by-term through the
-proven `M ≃ₘ N` `(0,4)` pullback `metricRm04Std_pullback` (via
-`metricRm04StdAt_eq_inner_riemannOp`), with the source orthonormal frame pushed to
-a target orthonormal frame by `pullbackMetric_inner`.  Generalises the endo-only
-`ricciTensor_pullback_conjugation`. -/
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem ricciTensor_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -607,8 +626,10 @@ theorem ricciTensor_pullback
           (mfderiv I I (Φ : M → N) x (B i)) (mfderiv I I (Φ : M → N) x v)
           (mfderiv I I (Φ : M → N) x w))]
 
-/-- **Naturality of the Ricci section (`vec2`-slot form) under `M ≃ₘ N`.**  The base
-case `hA0` that `covDerivOfField_pullback` consumes for the `ricCovTower` (Ricci) base. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem ricciSection_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -634,9 +655,11 @@ theorem ricciSection_pullback
         funext i; fin_cases i <;> rfl] at hRHS
   rw [hLHS, hpb, ← hRHS]
 
-/-- The metric-covariant difference tower transports under pullback by a
-diffeomorphism, evaluated on arbitrary slots.  This is the algebraic bridge
-from the all-orders tower naturality theorem to the seminorm transport layer. -/
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricDiffCovDerivAt_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -675,15 +698,17 @@ theorem metricDiffCovDerivAt_pullback
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- Squared norms of covariant tensors are preserved by a pullback metric, in
-an orthonormal source basis.  The tensor on the source is supplied by its
-evaluated pullback relation `hT`, avoiding a separate cross-manifold tensor
-object. -/
+
+
+
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem normSq0S_pullback_eval_of_orthonormal
     [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 1 M] [IsManifold I 1 N]
     (g : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : ∀ i j : Idx,
@@ -715,7 +740,7 @@ theorem normSq0S_pullback_eval_of_orthonormal
       basis' i = mfderiv I I (Phi : M -> N) x (basis i) := by
     intro i
     have hmap : basis' i = dPhi (basis i) := by
-      show (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
+      change (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
       rw [Module.Basis.map_apply]
       rfl
     rw [hmap, hdPhi_apply (basis i)]
@@ -748,11 +773,13 @@ theorem normSq0S_pullback_eval_of_orthonormal
   rw [component0S_apply, component0S_apply, hT]
   exact congrArg T (funext fun q => (hbasis'_apply (slots q)).symm)
 
-/-- Pointwise `metricDerivNorm` is preserved under pullback by a diffeomorphism,
-once the source tensor norm is evaluated in an orthonormal basis for the
-pullback reference metric.  The remaining task for the source-domain layer is
-to package the choice of such a basis and lift this pointwise equality through
-`metricDerivNormSupOn`. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricDerivNorm_pullback_of_orthonormal
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -762,7 +789,7 @@ theorem metricDerivNorm_pullback_of_orthonormal
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
     (gk gInf gRef : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
     (a : Nat) (x : M)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : ∀ i j : Idx,
       (Diffeomorph.pullbackMetric (I := I) gRef Phi).inner x (basis i) (basis j) =
@@ -784,8 +811,10 @@ theorem metricDerivNorm_pullback_of_orthonormal
   intro slots
   exact metricDiffCovDerivAt_pullback (I := I) gk gInf gRef Phi a x slots
 
-/-- Pointwise `metricDerivNorm` is invariant under simultaneous pullback of the
-two metrics being compared and the reference metric. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricDerivNorm_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -808,8 +837,10 @@ theorem metricDerivNorm_pullback
     metricDerivNorm_pullback_of_orthonormal
       (I := I) gk gInf gRef Phi a x basis hON
 
-/-- Pullback invariance lifted to the raw `metricDerivNormSupOn` seminorm: the
-source supremum over `K` equals the target supremum over `Phi '' K`. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricDerivNormSupOn_pullback_image
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -838,8 +869,10 @@ theorem metricDerivNormSupOn_pullback_image
     rw [metricDerivNorm_pullback (I := I) gk gInf gRef Phi a x]
     exact hr
 
-/-- Compact-open smooth convergence of metrics is preserved by simultaneous pullback along a
-fixed diffeomorphism. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricCInf_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -860,12 +893,13 @@ theorem metricCInf_pullback
   rw [metricDerivNormSupOn_pullback_image (I := I)]
   exact hk₀ k hk
 
-set_option maxHeartbeats 400000 in
-/-- **Naturality of the scalar curvature under `M ≃ₘ N`.**  Scalar curvature is an isometry
-invariant: `metricScalarAt (Φ^*g) x = metricScalarAt g (Φ x)`.  The scalar analog of
-`ricciTensor_pullback`: orthonormal-trace of the Ricci tensor (`metricTracePair0SAt_eq_sum_basis`
-on a `Φ^*g`-orthonormal basis, pushed to a `g`-orthonormal basis at `Φ x` by `pullbackMetric_inner`)
-plus per-summand `ricciTensor_pullback`. -/
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+    [BoundarylessManifold I N] in
 theorem metricScalarAt_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -884,7 +918,7 @@ theorem metricScalarAt_pullback
     intro i
     have hco :=
       Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zero
-    show (basis.map dPhi.toLinearEquiv) i = _
+    change (basis.map dPhi.toLinearEquiv) i = _
     rw [Module.Basis.map_apply]
     exact congrArg
       (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f (basis i)) hco

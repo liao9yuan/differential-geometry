@@ -2,19 +2,18 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTransitionOverlap
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
-/-!
-# Common metric/transition refinement for live Step-C atoms
 
-The origin-metric and transition-map compactness arguments are parallel.  This
-file runs the metric extraction first, runs the transition extraction on that
-refined sequence, and preserves the metric limit along the second refinement.
-Only stabilized live slots participate.  Since a live slot may still use its
-totalized fallback centre at finitely many early indices, the geometric inputs
-are required only eventually and a common finite prefix is discarded before
-the transition extraction.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,12 +33,12 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- H6-driven common refinement for the live Step-C transition family.
 
-The fixed coordinate target ball supplies the order-zero anchor missing from
-metric isometry alone.  H6 controls every positive derivative on the source
-and target metric balls, and the finite-Pi bound packages the live slots into
-the single map consumed by Arzela--Ascoli. -/
+
+
+
+
+
 theorem existsLiveJointH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -61,7 +60,7 @@ theorem existsLiveJointH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric (beta k)))
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (beta k)))
     (hmapsJ : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -69,10 +68,12 @@ theorem existsLiveJointH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U
-        (framedExpMap (I := I) (X.obj (L.φ k)).metric
-          (seqCenterD hd P L k (gamma.1 : Nat)) '' Metric.ball (0 : E) rho))
+        ((fun v : E => expMap (I := I) (X.obj (L.φ k)).metric
+          (seqCenterD hd P L k (gamma.1 : Nat))
+          (show TangentSpace I (seqCenterD hd P L k (gamma.1 : Nat)) from v)) ''
+            Metric.ball (0 : E) rho))
     (hVmetric : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
         (metricInput.radius (L.φ k)
@@ -84,7 +85,7 @@ theorem existsLiveJointH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric
           (seqCenterD hd P L k (gamma.1 : Nat)))) :
     ∃ (psi : Nat → Nat)
         (gInf : E → (LiveSlot L pb r → (E →L[Real] E →L[Real] Real)))
@@ -123,7 +124,7 @@ theorem existsLiveJointH6
             (X.obj (L.φ (psi1 k))).smooth
          letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 k))).M) :=
             (X.obj (L.φ (psi1 k))).t2TangentBundle
-         U ⊆ Metric.ball (0 : E) (expRadiusGp (I := I)
+         U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I)
             (X.obj (L.φ (psi1 k))).metric (beta (psi1 k)))) ∧
         (letI : TopologicalSpace (X.obj (L.φ (psi1 k))).M :=
             (X.obj (L.φ (psi1 k))).topology
@@ -134,10 +135,12 @@ theorem existsLiveJointH6
          letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 k))).M) :=
             (X.obj (L.φ (psi1 k))).t2TangentBundle
          Set.MapsTo
-            (fun z => framedExpDiffeo (I := I) (X.obj (L.φ (psi1 k))).metric
+            (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi1 k))).metric
               (beta (psi1 k)) z) U
-            (framedExpMap (I := I) (X.obj (L.φ (psi1 k))).metric
-              (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)) ''
+            ((fun v : E => expMap (I := I) (X.obj (L.φ (psi1 k))).metric
+              (seqCenterD hd P L (psi1 k) (gamma.1 : Nat))
+              (show TangentSpace I
+                (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)) from v)) ''
                 Metric.ball (0 : E) rho)) ∧
         Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
           (metricInput.radius (L.φ (psi1 k))
@@ -151,7 +154,7 @@ theorem existsLiveJointH6
          letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 k))).M) :=
             (X.obj (L.φ (psi1 k))).t2TangentBundle
          Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
-          (expRadiusGp (I := I) (X.obj (L.φ (psi1 k))).metric
+          (expMapC2Radius (I := I) (X.obj (L.φ (psi1 k))).metric
             (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)))) ∧
         seqCenter hd D P (L.φ (psi1 k)) (gamma.1 : Nat) =
           some (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)) := by

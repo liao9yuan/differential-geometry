@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.CurvatureDerivativeAlong
 import DifferentialGeometry.Geometry.Exponential.IntrinsicJacobiJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
 
 set_option autoImplicit false
@@ -23,7 +24,7 @@ namespace HCGCompactness
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E]
   [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]

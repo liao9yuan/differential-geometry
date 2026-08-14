@@ -26,18 +26,21 @@ incorrect (Lean's total `fderiv` is zero when total differentiability fails).
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
-open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
+open scoped Bundle Manifold Topology ContDiff ENNReal NNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
-open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -47,12 +50,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 /-! ## The global intrinsic local addition on a connected component -/
 
-private noncomputable def hmfRiemBundle
+@[reducible] private noncomputable def hmfRiemBundle
     (q : SmoothRiemannianMetric I M) :
     RiemannianBundle (fun x : M => TangentSpace I x) :=
   ⟨q.toRiemannianMetric⟩
 
-private noncomputable def hmfContBundle
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+@[reducible] private noncomputable def hmfContBundle
     (q : SmoothRiemannianMetric I M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       hmfRiemBundle (I := I) q
@@ -61,15 +66,25 @@ private noncomputable def hmfContBundle
     hmfRiemBundle (I := I) q
   exact ⟨q.inner, q.contMDiff.continuous, fun _ _ _ => rfl⟩
 
-private noncomputable def hmfEMetric
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+@[reducible] private noncomputable def hmfEMetric
     (q : SmoothRiemannianMetric I M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       hmfRiemBundle (I := I) q
     PseudoEMetricSpace M := by
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
     hmfRiemBundle (I := I) q
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    hmfContBundle (I := I) q
   exact PseudoEMetricSpace.ofRiemannianMetric I M
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+  [ConnectedSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 private theorem hmfEnorm
     (q : SmoothRiemannianMetric I M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -82,6 +97,8 @@ private theorem hmfEnorm
   rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
   rfl
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The intrinsic diagonal exponential for the fixed target metric `q`, with
 all metric-space structures kept local to the definition. -/
 noncomputable def hmfDiagExp
@@ -93,6 +110,9 @@ noncomputable def hmfDiagExp
   letI : PseudoEMetricSpace M := hmfEMetric (I := I) q
   exact diagExp (I := I) q (hmfEnorm (I := I) q)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The intrinsic diagonal exponential used by the HMF local addition is
 finite-order smooth at every point of the zero section. -/
 theorem hmfDiagExp_cd_zero
@@ -118,13 +138,18 @@ noncomputable def hmfAdd
     (hmfDiagExp (I := I) (M := M) q
       (⟨x, hmfUnknown (I := I) q S x⟩ : TangentBundle I M)).2
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfUnknown_zero
     (q : SmoothRiemannianMetric I M) (x : M) :
     hmfUnknown (I := I) q (0 : SmoothCcTensor q 0 1) x = 0 := by
-  simp only [hmfUnknown, unitEvalSection_apply, SmoothCcTensor.toSection_zero,
-    ContMDiffSection.coe_zero, Pi.zero_apply, ContinuousLinearMap.zero_apply,
-    map_zero]
+  change hmfUnknownLM (I := I) q x 0 = 0
+  exact map_zero _
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The exponential-section realization sends the zero section to the identity
 map.  This is the base point for the finite-dimensional first-variation and
 Jacobi calculations. -/
@@ -143,6 +168,7 @@ Jacobi calculations. -/
   rw [hmfUnknown_zero, diagExp_snd,
     expMapIntrinsic_zero (I := I) q (hmfEnorm (I := I) q) x]
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfAdd_zero_md
     (q : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (hmfAdd (I := I) (M := M) q
@@ -162,13 +188,16 @@ noncomputable def hmfSpecLaunch
     (hmfUnknown (I := I) q
       (hmfSpecIncl (I := I) (M := M) q S p.1) p.2)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfSpecLaunch_zero
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1)) (x : M) :
     hmfSpecLaunch (I := I) (M := M) q S (0, x) =
       (⟨x, (0 : E)⟩ : TangentBundle I M) := by
   simp only [hmfSpecLaunch, map_zero, hmfUnknown_zero]
+  rfl
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The finite spectral launch field is jointly smooth in the coefficient and
 the base point.  This is proved as a finite sum of smooth scalar coefficients
 times fixed smooth tangent sections; no topology on the full space of smooth
@@ -176,26 +205,30 @@ sections is introduced. -/
 theorem hmfSpecLaunch_cd
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1)) :
-    ContMDiff (𝒘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent ∞
+    ContMDiff (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent
+      (∞ : WithTop ℕ∞)
       (hmfSpecLaunch (I := I) (M := M) q S) := by
   classical
   have hterm : ∀ j : {i // i ∈ S},
-      ContMDiff (𝒘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent ∞
+      ContMDiff (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent
+        (∞ : WithTop ℕ∞)
         (fun p : EuclideanSpace ℝ {i // i ∈ S} × M =>
           TotalSpace.mk' E p.2
             (p.1 j • hmfUnknown (I := I) q
               (eigenvectorSmooth (I := I) (M := M) q 0 1 j.1) p.2)) := by
     intro j
     have hc : ContMDiff
-        (𝒘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) 𝒘(ℝ, ℝ) ∞
+        (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) 𝓘(ℝ, ℝ)
+          (∞ : WithTop ℕ∞)
         (fun p : EuclideanSpace ℝ {i // i ∈ S} × M => p.1 j) := by
-      have hp : ContDiff ℝ ∞
+      have hp : ContDiff ℝ (∞ : WithTop ℕ∞)
           (EuclideanSpace.proj (𝕜 := ℝ) j :
             EuclideanSpace ℝ {i // i ∈ S} →L[ℝ] ℝ) :=
         (EuclideanSpace.proj (𝕜 := ℝ) j).contDiff
       exact hp.contMDiff.comp contMDiff_fst
     have hs : ContMDiff
-        (𝒘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent ∞
+        (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent
+          (∞ : WithTop ℕ∞)
         (fun p : EuclideanSpace ℝ {i // i ∈ S} × M =>
           TotalSpace.mk' E p.2
             (hmfUnknown (I := I) q
@@ -203,14 +236,16 @@ theorem hmfSpecLaunch_cd
       (hmfUnknownSec (I := I) q
         (eigenvectorSmooth (I := I) (M := M) q 0 1 j.1)).contMDiff.comp
           contMDiff_snd
-    simpa only [EuclideanSpace.coe_proj] using hc.smul_section hs
+    simpa only [EuclideanSpace.coe_proj] using hc.smul_bundle hs
   have hsum : ContMDiff
-      (𝒘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent ∞
+      (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent
+        (∞ : WithTop ℕ∞)
       (fun p : EuclideanSpace ℝ {i // i ∈ S} × M =>
         TotalSpace.mk' E p.2
           (∑ j : {i // i ∈ S}, p.1 j • hmfUnknown (I := I) q
             (eigenvectorSmooth (I := I) (M := M) q 0 1 j.1) p.2)) := by
-    exact ContMDiff.sum_section (s := Finset.univ) (fun j _ => hterm j)
+    exact ContMDiff.sum_bundle (F := E) contMDiff_snd Finset.univ
+      (fun j _ => hterm j)
   refine hsum.congr (fun p => ?_)
   simp only [hmfSpecLaunch, hmfSpecIncl_apply]
   apply congrArg (TotalSpace.mk' E p.2)
@@ -222,6 +257,7 @@ theorem hmfSpecLaunch_cd
   intro j _
   rw [map_smul, hmfUnknownLM_apply]
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- For a fixed finite spectral trial space and finite differentiability
 order, one coefficient ball launches entirely into the smooth locus of the
 intrinsic diagonal exponential.  The radius is uniform in the manifold point
@@ -240,7 +276,8 @@ theorem hmfSpecChart
   let U : Set (TangentBundle I M) :=
     {z | ContMDiffAt I.tangent (I.prod I) (n : ℕ∞)
       (hmfDiagExp (I := I) (M := M) q) z}
-  have hfinite : (n : ℕ∞) ≠ ∞ := by simp
+  have hfinite : ((n : ℕ∞) : WithTop ℕ∞) ≠ (∞ : WithTop ℕ∞) := by
+    simp
   have hU_open : IsOpen U := by
     rw [isOpen_iff_mem_nhds]
     intro z hz
@@ -269,6 +306,7 @@ theorem hmfSpecChart
     ⟨hR_ball hu, hunivB (Set.mem_univ x)⟩
   exact hAB hux
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- On the fixed finite-spectral coefficient ball supplied by
 `hmfSpecChart`, the exponential-section map is jointly smooth in the
 coefficient and the manifold point. -/
@@ -290,7 +328,8 @@ theorem hmfSpecAdd_cd
   have hlaunch :
       ContMDiffAt (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I.tangent
         (n : ℕ∞) (hmfSpecLaunch (I := I) (M := M) q S) p :=
-    (hmfSpecLaunch_cd (I := I) (M := M) q S).contMDiffAt.of_le (by simp)
+    (hmfSpecLaunch_cd (I := I) (M := M) q S).contMDiffAt.of_le
+      (by exact_mod_cast le_top)
   exact ((hchart p.1 hp.1 p.2).comp p hlaunch).contMDiffWithinAt
 
 /-! ## Moving-domain Dirichlet energy -/
@@ -311,10 +350,11 @@ noncomputable def hmfDirDensity
     ∑ i : Fin (Module.finrank ℝ E),
       q.inner (Phi x)
         (mfderiv I I Phi x
-          (gInvRaisedEndo (I := I) q h x
+          (metricComparisonEndo (I := I) q h x
             (smoothOrthoFrame (I := I) q x i x)))
         (mfderiv I I Phi x (smoothOrthoFrame (I := I) q x i x))
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfDirDensity_zero
     (q h : SmoothRiemannianMetric I M) (x : M) :
     hmfDirDensity (I := I) (M := M) q h
@@ -322,11 +362,12 @@ noncomputable def hmfDirDensity
       (1 / 2 : ℝ) *
         ∑ i : Fin (Module.finrank ℝ E),
           q.inner x
-            (gInvRaisedEndo (I := I) q h x
+            (metricComparisonEndo (I := I) q h x
               (smoothOrthoFrame (I := I) q x i x))
             (smoothOrthoFrame (I := I) q x i x) := by
-  simp only [hmfDirDensity, hmfAdd_zero, id_eq, mfderiv_id,
-    ContinuousLinearMap.id_apply]
+  rw [hmfDirDensity, hmfAdd_zero]
+  simp only [id_eq, mfderiv_id]
+  rfl
 
 /-- Dirichlet energy of the exponential-section map represented by `S`, with
 moving domain metric `h` and fixed target metric `q`. -/
@@ -380,6 +421,7 @@ noncomputable def hmfSpecPrin
   -(hmfFinForm (I := I) (M := M) q (g t)
       (hmfSpecIncl (I := I) (M := M) q S) u)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfSpecPrin_apply
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -404,6 +446,7 @@ noncomputable def hmfSpecLow
   hmfSpecResid (I := I) (M := M) q g S t u -
     hmfSpecPrin (I := I) (M := M) q g S t u
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Exact principal/remainder decomposition of the finite Dirichlet residual.
 The content of the subsequent analytic step is to estimate `hmfSpecLow`, not
 to alter this identity. -/
@@ -418,6 +461,7 @@ theorem hmfSpec_split
   simp only [hmfSpecLow]
   abel
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfSpecPrin_zero
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -426,6 +470,7 @@ theorem hmfSpec_split
     hmfSpecPrin (I := I) (M := M) q g S t 0 = 0 := by
   simp only [hmfSpecPrin, map_zero, neg_zero]
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- On a metric ball where the moving inverse cometric remains elliptic, the
 signed spectral principal part is dissipative. -/
 theorem hmfSpecPrin_nonpos
@@ -437,7 +482,7 @@ theorem hmfSpecPrin_nonpos
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       (g t).inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_half : δ < 1 / 2) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) q k δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) q k δ)
     (u : EuclideanSpace ℝ {i // i ∈ S}) :
     hmfSpecPrin (I := I) (M := M) q g S t u u ≤ 0 := by
   rw [hmfSpecPrin_apply]
@@ -445,6 +490,7 @@ theorem hmfSpecPrin_nonpos
     q (g t) k htie hδ_half hδ_nn hδ
     (hmfSpecIncl (I := I) (M := M) q S u))
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Quantitative frozen-gradient coercivity of the negative spectral
 principal part.  This is exactly the smooth-core estimate needed in the
 Galerkin energy identity; its constant is independent of the spectral
@@ -460,7 +506,7 @@ theorem hmfSpecPrin_lower
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       (g t).inner y v w = q.inner y v w + k y v w)
     {δ : ℝ} (hδ_half : δ < 1 / 2) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) q k δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) q k δ)
     (u : EuclideanSpace ℝ {i // i ∈ S}) :
     (1 - δ / (1 - δ)) *
         hmfWeakForm (I := I) (M := M) q q
@@ -473,6 +519,7 @@ theorem hmfSpecPrin_lower
       k htie hδ_half hδ_nn hδ
       (hmfSpecIncl (I := I) (M := M) q S u))
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfSpecLow_zero
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -492,6 +539,7 @@ noncomputable def hmfSpecResidR
     EuclideanSpace ℝ {i // i ∈ S} →L[ℝ] ℝ :=
   hmfSpecResid (I := I) (M := M) q g S t (ballRetraction R u)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 theorem hmfSpecResidR_eq
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -502,6 +550,7 @@ theorem hmfSpecResidR_eq
       hmfSpecResid (I := I) (M := M) q g S t u := by
   rw [hmfSpecResidR, ballRetraction_eq_self_of_mem hu]
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Consumer-shaped radial-globalization theorem for the actual finite
 Dirichlet residual.  Once its joint continuity and state derivative are proved
 on a fixed coefficient ball, no additional growth hypothesis is needed for

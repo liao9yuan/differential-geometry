@@ -197,7 +197,7 @@ theorem partials_l2_le_wkp
     eLpNorm (fun x : E => Real.sqrt (∑ i : Fin d,
         ((fderiv ℝ f x) (EuclideanSpace.single i 1)) ^ 2)) 2
         (volume.restrict Omega) ≤
-      wkpNorm (d := d) 1 2 f Omega := by
+      iteratedWeakSobolevNorm (d := d) 1 2 f Omega := by
   classical
   have hp : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hcomp : ∀ i : Fin d,
@@ -264,7 +264,7 @@ theorem partials_l2_le_wkp
         eLpNorm (chosenWeakPartial' (d := d) (2 : ℝ≥0∞) i f Omega) 2
           (volume.restrict Omega) :=
         Finset.sum_congr rfl (fun i _ => heach i)
-    _ ≤ wkpNorm (d := d) 1 2 f Omega := by
+    _ ≤ iteratedWeakSobolevNorm (d := d) 1 2 f Omega := by
       have hblock :
           (∑ β : Fin 1 → Fin d,
               eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) 1 β f Omega) 2

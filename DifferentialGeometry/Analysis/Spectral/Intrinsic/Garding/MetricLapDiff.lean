@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarHessBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 
-/-!
-# Support-independent energy bound for a moving scalar Laplacian
 
-The pointwise invariant moving-metric estimate is integrated against the
-fixed reference volume and combined with the scalar spectral Hessian and
-gradient bounds.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -42,9 +42,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The fixed-reference `L²` energy of the canonical scalar Laplacian
-difference is controlled by the `C¹` metric modulus, with a constant
-independent of finite spectral support. -/
+
+
+
 theorem lapDiff_energy_le
     (g : SmoothRiemannianMetric I M) :
     exists C : Real, 0 <= C ∧

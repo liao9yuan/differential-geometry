@@ -187,7 +187,8 @@ theorem moser_preMoser
   have hae_grad :
       hwvSob.weakGrad =ᵐ[μ] hwvReal.weakGrad := by
     simpa [μ, Ω] using
-      (MemW1pWitness.ae_eq_p (d := d) Metric.isOpen_ball (p := (2 : ℝ)) (by norm_num) hwvSob hwvReal)
+      (MemW1pWitness.ae_eq_p (d := d) Metric.isOpen_ball (p := (2 : ℝ)) (by norm_num) hwvSob
+        hwvReal)
   have hgrad_sq_eq :
       ∫ x in Ω, ‖hwvSob.weakGrad x‖ ^ 2 ∂volume =
         ∫ x in Ω, ‖hwvReal.weakGrad x‖ ^ 2 ∂volume := by
@@ -314,7 +315,8 @@ theorem moser_preMoser
   have hleft_int :
       IntegrableOn (fun x => |max (u x) 0| ^ (moserChi d * p))
         (Metric.ball (0 : E) r) volume := by
-    refine (hv_int.mono_set (Metric.ball_subset_ball (le_of_lt hrs))).congr_fun ?_ measurableSet_ball
+    refine (hv_int.mono_set (Metric.ball_subset_ball (le_of_lt hrs))).congr_fun ?_
+      measurableSet_ball
     intro x hx
     exact hpow_eq_on x hx
   have hleft_integral_le :
@@ -420,7 +422,8 @@ theorem moser_preMoser
           (2 * Cη ^ 2 * (A.1.Λ * (p / (p - 1)) ^ 2 + 1) *
             ∫ x in Ω, |max (u x) 0| ^ p ∂volume) ^ (1 / (2 : ℝ)) := by
       exact Real.rpow_nonneg
-        (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg Cη)) hcoeff_nonneg) hIp_nonneg) _
+        (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg Cη)) hcoeff_nonneg) hIp_nonneg)
+          _
     have hqexp_mul :
         (1 / qexp : ℝ) * (2 / p) = 1 / (moserChi d * p) := by
       dsimp [qexp, moserChi]
@@ -458,7 +461,8 @@ theorem moser_preMoser
                 0 ≤
                   2 * Cη ^ 2 * (A.1.Λ * (p / (p - 1)) ^ 2 + 1) *
                     ∫ x in Ω, |max (u x) 0| ^ p ∂volume := by
-              exact mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg Cη)) hcoeff_nonneg) hIp_nonneg
+              exact mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg Cη)) hcoeff_nonneg)
+                hIp_nonneg
             calc
               ((C_gns d 2) *
                   (2 * Cη ^ 2 * (A.1.Λ * (p / (p - 1)) ^ 2 + 1) *

@@ -4,17 +4,15 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Time derivative of the squared gradient norm
 
-This file packages joint spacetime regularity and the invariant rank-one
-moving-metric norm derivative for the realized differential one-form.  The
-regularity theorem consumes scalar chart-Gram data, while the derivative
-theorem contains no basis or tensor-component input.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,8 +28,8 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The squared norm of the gradient of a jointly smooth scalar family is
-jointly smooth wherever the moving chart-Gram entries are jointly smooth. -/
+
+
 theorem gradSq_joint
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {U : Set Real} (hUo : IsOpen U)
@@ -199,9 +197,9 @@ theorem gradSq_joint
           hframe.toBasisAt_coe]
   exact (hrhs.congr_of_eventuallyEq heq).contMDiffWithinAt
 
-/-- If `∂ₜg = -2Q` and the scalar differentials have time derivative `dft`, then
-the squared gradient norm has the invariant derivative
-`2 Q(∇f,∇f) + 2 g(∇ft,∇f)`. -/
+
+
+
 theorem normGradSq_time {x : M} {t : Real}
     (g : Real -> SmoothRiemannianMetric I M)
     (f : Real -> M -> Real) (ft : M -> Real)

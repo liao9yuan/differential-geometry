@@ -2,17 +2,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.IntrinsicDerivation
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Ricci-Flow Regularity Producers
 
-This file is the producer layer from the metric Ricci-flow predicate
-`IsSolutionOn` to the stronger smooth package `IsSmoothSolutionOn`.
-Downstream evolution files should consume the fields of `IsSmoothSolutionOn`;
-they should not introduce their own general smooth-solution predicates.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,14 +24,15 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- Fixed-time smoothness of the canonical scalar curvature produced from a
-metric Ricci-flow solution.
 
-This is the lower metric-to-curvature regularity producer needed by
-`scalarRegOfSol`. -/
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem scalarSmoothOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -42,8 +41,9 @@ theorem scalarSmoothOfSol
   simpa [SolutionOn.scalar, SolutionFamily.scalar] using
     metricScalar_smooth (I := I) (M := M) (S.family.metric t)
 
-/-- Spacetime continuity of the canonical scalar curvature produced from a
-metric Ricci-flow solution. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem scalarContOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -52,8 +52,9 @@ theorem scalarContOfSol
       (D.carrier ×ˢ (Set.univ : Set M)) := by
   exact hS.scalarCont
 
-/-- Within-time differentiability of the canonical scalar curvature produced
-from a metric Ricci-flow solution. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem scalarTimeOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -63,7 +64,8 @@ theorem scalarTimeOfSol
     DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t := by
   exact hS.scalarTime ht hK x
 
-/-- Scalar regularity produced from a metric Ricci-flow solution. -/
+
+omit [SigmaCompactSpace M] in
 theorem scalarRegOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -99,10 +101,13 @@ theorem scalarRegOfSol
       exact hsmooth.contMDiffAt.mdifferentiableAt (by simp)
     have hgrad : ∀ y : M,
         MDiffAt (T% fun z : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t) (S.scalar t) z) y := by
+          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+            (S.scalar t) z) y := by
       intro y
-      exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t) hsmooth y
-    exact DifferentialGeometry.Integral.Connection.scalar_mul_grad_mdiffAt (I := I) (S.family.metric t)
+      exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I)
+        (S.family.metric t) hsmooth y
+    exact DifferentialGeometry.Integral.Connection.scalar_mul_grad_mdiffAt (I := I)
+      (S.family.metric t)
       hspace hgrad
   · intro t ht x
     have hsmooth := scalarSmoothOfSol (I := I) S t
@@ -121,7 +126,8 @@ theorem scalarRegOfSol
           (fun y : M => S.scalar t y * S.scalar t y) :=
         hsmooth.mul hsmooth
       simpa [pow_two] using hmul
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t) hsq x
+    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t)
+      hsq x
   · intro t ht x
     have hsmooth := scalarSmoothOfSol (I := I) S t
     have hsq : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
@@ -145,13 +151,15 @@ theorem scalarRegOfSol
     have hsqDiv : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
         (fun y : M => S.scalar t y ^ 2 / 3) := by
       simpa [div_eq_mul_inv] using hsq.mul contMDiff_const
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t) hsqDiv x
+    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t)
+      hsqDiv x
   · intro t ht c x
     have hsmooth := scalarSmoothOfSol (I := I) S t
     have hshift : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
         (fun z : M => S.scalar t z - c) :=
       hsmooth.sub contMDiff_const
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t) hshift x
+    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t)
+      hshift x
   · intro t ht a c x
     have hsmooth := scalarSmoothOfSol (I := I) S t
     have hshift : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
@@ -160,14 +168,16 @@ theorem scalarRegOfSol
     have hscaled : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
         (fun z : M => a * (S.scalar t z - c)) :=
       contMDiff_const.mul hshift
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t) hscaled x
+    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t)
+      hscaled x
 
-/-- Scalar spacetime continuity produced from the metric Ricci-flow solution
-package.
 
-As in the scalar WMP route, this package is only the scalar
-spacetime-continuity projection of the stronger canonical scalar regularity
-package.  The real producer frontier is therefore `scalarRegOfSol`. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem scalarSTContOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -176,8 +186,9 @@ theorem scalarSTContOfSol
   exact CanonicalScalarRegularOn.toScalarSTCont (I := I) (M := M)
     (scalarRegOfSol (I := I) S hS)
 
-/-- Ricci tensor and Ricci-norm regularity produced from a metric Ricci-flow
-solution. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem ricciRegOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -189,7 +200,7 @@ theorem ricciRegOfSol
       ricci_norm_space := hS.ricciNormSpace
       ricci_norm_grad := hS.ricciNormGrad }
 
-/-- Scalar evolution produced from a metric Ricci-flow solution. -/
+
 theorem scalarEvolOfSol
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -211,8 +222,8 @@ theorem scalarEvolOfSol
           (t : Real) := by
   exact scalarEvolution_of_isSolution (I := I) S hS
 
-/-- Coordinate inverse-metric evolution produced from a metric Ricci-flow
-solution. -/
+
+
 theorem invEvolOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -224,7 +235,7 @@ theorem invEvolOfSol
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   exact coordInvEvol (I := I) S hS x0
 
-/-- Coordinate Ricci evolution produced from a metric Ricci-flow solution. -/
+
 theorem ricciEvolOfSol
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -245,8 +256,8 @@ theorem ricciEvolOfSol
       (t : Real) := by
   exact coordRicciEvol (I := I) S hS x0 t i j
 
-/-- Symmetry of the canonical coordinate inverse metric produced from a metric
-Ricci-flow solution. -/
+
+
 theorem invSymmOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -260,7 +271,7 @@ theorem invSymmOfSol
     DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric t) x0
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x0) i j
 
-/-- Symmetry of Ricci components produced from a metric Ricci-flow solution. -/
+
 theorem ricciSymmOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -279,13 +290,13 @@ theorem ricciSymmOfSol
       (fun a b => coordInv (I := I) S x0 t x0 a b) hinv i j
   simpa [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt] using hsym
 
-/-- Canonical second Ricci derivative components agree with the coordinate
-formula used by `coordNab2Ric`.
 
-This is the remaining fixed-time coordinate realization frontier for the
-Ricci-norm Laplacian producer.  It should be proved from
-`TotalNabla0SRealizes.eval_C1_slots` in the coordinate frame, plus the
-component equality for the canonical first derivative. -/
+
+
+
+
+
+
 theorem coordNab2_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -345,7 +356,8 @@ theorem coordNab2_can
           (fun y : M =>
             (⟨y, frame r y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x0 := by
       simpa [frame] using
-        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I) x0).contMDiffAt
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I)
+          x0).contMDiffAt
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) x0)
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x0) r
     exact htop.of_le (by simp)
@@ -360,13 +372,16 @@ theorem coordNab2_can
     · simpa [V] using hframeAt j
   have hslots3 : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hslots4 :
       Fin.cons (X x0) (fun q : Fin 3 => V q x0) =
-        DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0) (frame i x0)
+        DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0)
+          (frame i x0)
           (frame j x0) := by
     rw [hX, hslots3 x0]
     funext q
@@ -374,7 +389,8 @@ theorem coordNab2_can
   have hfun :
       (fun y : M => nablaA y (fun q : Fin 3 => V q y)) =
         fun y : M =>
-          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt
+            (I := I) x0)
             t y a i j := by
     funext y
     rw [hslots3 y]
@@ -388,7 +404,8 @@ theorem coordNab2_can
         (S.family.connection t) frame hframe x0 u v p
   let N : Idx -> Idx -> Idx -> Real :=
     fun u v w =>
-      nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+      nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I)
+        x0)
         t x0 u v w
   have hterm0 :
       nablaA x0
@@ -428,9 +445,11 @@ theorem coordNab2_can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame p x0) (frame i x0) (frame j x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame p x0) (frame i x0)
+                  (frame j x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 p i j]
           simp [N, smul_eq_mul]
@@ -472,9 +491,11 @@ theorem coordNab2_can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame p x0) (frame j x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame p x0)
+                  (frame j x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 a p j]
           simp [N, smul_eq_mul]
@@ -516,9 +537,11 @@ theorem coordNab2_can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame i x0) (frame p x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame i x0)
+                  (frame p x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 a i p]
           simp [N, smul_eq_mul]
@@ -534,11 +557,13 @@ theorem coordNab2_can
     rw [hterm0, hterm1, hterm2]
   calc
     nabla2A x0
-        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0) (frame i x0)
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0)
+          (frame i x0)
           (frame j x0)) =
         extDerivFun (I := I)
           (fun y : M =>
-            nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+            nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt
+              (I := I) x0)
               t y a i j) x0 (frame d x0) -
           (∑ q : Fin 3,
             nablaA x0
@@ -550,8 +575,8 @@ theorem coordNab2_can
           rw [hcorr]
           ring
 
-/-- The intrinsic rough Laplacian of the canonical second derivative has the
-centered coordinate components used by `coordRoughRic`. -/
+
+
 theorem coordRough_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -568,7 +593,8 @@ theorem coordRough_can
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j x)) =
         coordNab2Ric (I := I) S x t x a b i j)
     (i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
-    DifferentialGeometry.Integral.Connection.roughLap0STensor (I := I) (S.family.metric t) (nabla2A x)
+    DifferentialGeometry.Integral.Connection.roughLap0STensor (I := I) (S.family.metric t)
+      (nabla2A x)
         (DifferentialGeometry.Integral.Connection.vec2 (I := I)
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x i x)
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j x)) =
@@ -586,23 +612,27 @@ theorem coordRough_can
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x i x)
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j x))
   calc
-    DifferentialGeometry.Integral.Connection.roughLap0STensor (I := I) (S.family.metric t) (nabla2A x)
+    DifferentialGeometry.Integral.Connection.roughLap0STensor (I := I) (S.family.metric t)
+      (nabla2A x)
         (DifferentialGeometry.Integral.Connection.vec2 (I := I)
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x i x)
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j x)) =
-        DifferentialGeometry.Integral.Connection.metricTraceFirstTwo0SAt (I := I) (S.family.metric t)
+        DifferentialGeometry.Integral.Connection.metricTraceFirstTwo0SAt (I := I)
+          (S.family.metric t)
           (nabla2A x)
           (DifferentialGeometry.Integral.Connection.vec2 (I := I)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x i x)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j x)) := by
           rw [DifferentialGeometry.Integral.Connection.roughLap0STensor_apply]
     _ =
-        DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis gInv (nabla2A x)
+        DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis gInv
+          (nabla2A x)
           (DifferentialGeometry.Integral.Connection.vec2 (I := I)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x i x)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j x)) := htrace
     _ = coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j := by
-          unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis coordRoughRic basis gInv
+          unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis coordRoughRic basis
+            gInv
           refine Finset.sum_congr rfl fun a _ => ?_
           refine Finset.sum_congr rfl fun b _ => ?_
           have hinput :
@@ -623,8 +653,8 @@ theorem coordRough_can
             fin_cases q <;> rfl
           rw [hinput, hnab2 a b i j]
 
-/-- Ricci-norm Bochner/Laplacian expansion produced from a metric Ricci-flow
-solution. -/
+
+
 theorem ricciLapOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -640,7 +670,8 @@ theorem ricciLapOfSol
   classical
   intro t x
   let Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E
-  let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real := flowG (I := I) S
+  let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
+    flowG (I := I) S
   let basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x) :=
     fun x => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let frame : Idx -> (x : M) -> TangentSpace I x :=
@@ -670,20 +701,24 @@ theorem ricciLapOfSol
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 4 :=
     fun t => (derivs t).nabla2A
   let roughA : Real -> (x : M) -> DifferentialGeometry.Integral.Connection.Tensor02At (I := I) x :=
-    fun t x => DifferentialGeometry.Integral.Connection.roughLap0STensor (I := I) (S.base.metric t) (nabla2A t x)
+    fun t x => DifferentialGeometry.Integral.Connection.roughLap0STensor (I := I) (S.base.metric t)
+                 (nabla2A t x)
   let f : Real -> M -> Real :=
-    fun t y => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y (A t y)
+    fun t y => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y
+                 (A t y)
   have hf : ∀ t : Real,
       ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (f t) := by
     intro t
     simpa [f, A] using
-      DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M) (S.base.metric t) (S.ricci t)
+      DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M) (S.base.metric t)
+        (S.ricci t)
   let du : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 :=
     fun t => DifferentialGeometry.Integral.Connection.duSec (I := I) (f t) (hf t)
   let normSecond : Real -> (y : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y :=
-    fun t y => DifferentialGeometry.Integral.Connection.hessianSec (I := I) (S.base.connection t) (hcov t)
+    fun t y => DifferentialGeometry.Integral.Connection.hessianSec (I := I) (S.base.connection t)
+                 (hcov t)
       (f t) (hf t) y
   let X : (x : M) -> Idx ->
       ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
@@ -699,7 +734,8 @@ theorem ricciLapOfSol
         (basis x) (gInv t x) := by
     intro t x
     simpa [G, basis, gInv, flowG] using coordInvReal (I := I) S x t
-  have hfields : ∀ x, DifferentialGeometry.Integral.Connection.SmoothBasisFieldsAt (I := I) (basis x) (X x) := by
+  have hfields : ∀ x, DifferentialGeometry.Integral.Connection.SmoothBasisFieldsAt (I := I)
+    (basis x) (X x) := by
     intro x i
     dsimp [X]
     exact
@@ -712,14 +748,17 @@ theorem ricciLapOfSol
           (normSecond t x) Fin.elim0 := by
     intro t x
     have hlap :=
-      DifferentialGeometry.Integral.Connection.scalarLap_smooth (I := I) (x := x) (S.base.connection t) (hcov t)
+      DifferentialGeometry.Integral.Connection.scalarLap_smooth (I := I) (x := x)
+        (S.base.connection t) (hcov t)
         (S.base.metric t) (G.metricCompatible t) (f t) (hf t)
     have hbasis :=
       DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAt.toInBasis
         (I := I) (S.base.connection t) (S.base.metric t) (basis x)
         (gInv t x) (hinv t x) (f t) (normSecond t x) hlap
-    simpa [ricciNormLap, flowG, G, DifferentialGeometry.Integral.Connection.laplacianAt, ricciNorm, f, A,
-      DifferentialGeometry.Integral.Connection.normSq02, DifferentialGeometry.Integral.Connection.inner02, Tensor0SBundle.normSq0S,
+    simpa [ricciNormLap, flowG, G, DifferentialGeometry.Integral.Connection.laplacianAt, ricciNorm,
+      f, A,
+      DifferentialGeometry.Integral.Connection.normSq02,
+        DifferentialGeometry.Integral.Connection.inner02, Tensor0SBundle.normSq0S,
       normSecond] using hbasis
   have hA : ∀ t,
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
@@ -736,11 +775,13 @@ theorem ricciLapOfSol
     intro t
     simpa [du] using DifferentialGeometry.Integral.Connection.duSec_realizes (I := I) (f t) (hf t)
   have hHess : ∀ t x,
-      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I) (G.connection t) (du t)
+      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I) (G.connection t)
+        (du t)
         (normSecond t) x := by
     intro t x
     simpa [G, flowG, du, normSecond] using
-      DifferentialGeometry.Integral.Connection.hessianSec_realizesAt (I := I) (S.base.connection t) (hcov t)
+      DifferentialGeometry.Integral.Connection.hessianSec_realizesAt (I := I) (S.base.connection t)
+        (hcov t)
         (f t) (hf t) x
   have hrough : ∀ t x,
       DifferentialGeometry.Integral.Connection.RoughLap0SRealizesMetricTraceInBasis (I := I)
@@ -749,7 +790,8 @@ theorem ricciLapOfSol
     exact
       DifferentialGeometry.Integral.Connection.rough_lap_0s_apply_basis (I := I) (S.base.metric t)
         (basis x) (gInv t x) (nabla2A t x) (roughA t x)
-        (DifferentialGeometry.Integral.Connection.roughLap0STensor_realizes (I := I) (S.base.metric t)
+        (DifferentialGeometry.Integral.Connection.roughLap0STensor_realizes (I := I)
+          (S.base.metric t)
           (nabla2A t x))
         (by simpa [G, flowG] using hinv t x) tail
   have hAComp : ∀ t x i j,
@@ -758,7 +800,8 @@ theorem ricciLapOfSol
     intro t x i j
     simp [A, ricciTwoTensorField]
   have hnablaComp : ∀ t x a i j,
-      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+        (frame j x)) =
         nablaRicComp (I := I) S frame t x a i j := by
     intro t x a i j
     simp [nablaA, derivs, nablaRicComp, frame,
@@ -808,12 +851,12 @@ theorem ricciLapOfSol
   rw [hnabla] at hval
   simpa [roughLapRic, gInv, frame] using hval
 
-/-- Upgrade a metric Ricci-flow solution to the strong smooth-solution package.
 
-The remaining frontier is to derive all scalar regularity, Ricci regularity,
-coordinate inverse-metric evolution, coordinate Ricci evolution, symmetries,
-and the Ricci-norm Bochner/Laplacian expansion from the metric smoothness and
-Ricci-flow equation recorded by `IsSolutionOn`. -/
+
+
+
+
+
 theorem smoothOfSol
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

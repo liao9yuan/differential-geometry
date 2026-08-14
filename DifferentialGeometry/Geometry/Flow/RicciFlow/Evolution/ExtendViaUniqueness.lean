@@ -1,38 +1,36 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueWiring
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgBootstrap
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGaugeRemoval
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Extending a Ricci flow past a finite endpoint by an interior restart + uniqueness
 
-Alternative to the restart-*at-ω* + C∞-glue route of `CinftyLimitGlue` / `ricci_flow_extends_construction`.
-Instead of restarting from the BBS limit `g(ω)` *at* time ω (which forces the DeTurck
-C∞-**up-to-the-initial-time** Gate-R, the jet-matching, and Gate-L), we restart from an **interior**
-time `t* < ω` where `g_fam` is genuinely C∞. If the restart `rr` exists for time `TT` with
-`ω < t* + TT`, then ω is an *interior* time of `rr(·−t*)`, so C∞-at-ω is free (interior regularity);
-forward uniqueness patches `rr(·−t*) = g_fam` on the overlap `[t*, ω)`, dissolving the seam.
 
-After the truth/circularity audit (`ExtendViaUniqueness.md` §VERIFIED, checked against GSM77): the
-doubling-based "flow exists `≥ c/K`" is TRUE but its textbook proof contains the long-time-existence
-theorem (= `extends_of_rmBounded` itself), so it must NOT be cited here. The faithful decomposition:
 
-* `ricci_flow_unif_existence` — **black box (N)**: uniform short-time existence on C³-bounded,
-  uniformly-elliptic initial data (parabolic continuous dependence; no blow-up criterion inside).
-* `ricci_flow_forward_unique` — **black box (B)**: forward uniqueness for smooth flows on closed `M`
-  (GSM77 Ch. 7 §5.2 Ricci–DeTurck uniqueness + harmonic-map-flow conversion).
-* `ricci_flow_interior_restart` — **(A), a wiring TARGET, not a black box**: provable from (N) plus
-  the two tail-bound producers (ellipticity + chart-C³ bounds near ω), which are honest analysis
-  bricks fed by `|Rm| ≤ K` and Shi-type `|∇ᵏRm| ≤ Cₖ, k ≤ 3` bounds.
-* `extend_construction_of_restart` — **Brick U (DONE, sorry-free)**: the consumer assembly.
 
-See `ExtendViaUniqueness.md` (verdict, plan, brick board).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -45,13 +43,13 @@ open DifferentialGeometry.PDE
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 
--- NOTE (import inversion, sanctioned): this file imports `HCGCompactness.AllTimesBounds` so the
--- (N)/(A) tail data bound speaks the producer's own intrinsic predicate `MetricCovDerivOrderBoundOn`
--- (Lemma 3.11's output language).  This is directory-nominally an inversion, but cycle-free —
--- `AllTimesBounds`' import closure never touches the `CinftyLimitGlue`/`MaximalTime` branch — and the
--- dependency footprint is unchanged since `MaximalTime` (which consumes this route) already imports HCG.
--- It replaced the retired bespoke chart-C³ adapter: the covariant→chart bookkeeping now lives inside
--- the cited (N) short-time-existence axiom, where the rest of the parabolic machinery already is.
+
+
+
+
+
+
+
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -60,26 +58,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Black box (N): uniform short-time existence on three-dimensional,
-C³-bounded, uniformly-elliptic data**
-(parabolic continuous dependence — the faithful, non-circular quantitative source for the interior
-restart). For a fixed background metric `gBase` the box chooses a finite chart-centre family `S`
-(internally: a covering good-set atlas); then for every bound `Λ ≥ 1` there is a uniform existence
-time `τ₀ = τ₀(gBase, Λ, S) > 0` such that EVERY smooth metric `g₀` that is `Λ`-comparable to
-`gBase` and whose chart-Gram spatial jets of order `≤ 3` are bounded by `Λ` on the `S`-charts flows
-for time at least `τ₀`, with the standard short-time regularity fields (chart-Gram jointly C∞ up to
-the initial corner — `Ico`-slab, per the 2026-07-25 ruling in `ShortTime/FORWARD_UNIQUE_PRO_RULING.md`;
-the now-redundant C⁰ field is kept to minimize API churn; the Ricci-flow PDE on `[0, τ₀)`).
-For smooth initial data this up-to-corner smoothness is the standard quasilinear parabolic statement
-on a closed manifold (no compatibility obstruction); in the maximal-regularity discharge it is an
-a-posteriori endpoint bootstrap of the one low-regularity solution on its fixed horizon — never a
-per-order re-run with shrinking horizons (ruling §"(N) cost").
 
-TRUE and standard: the DeTurck fixed-point existence time depends only on the ellipticity constant
-and coefficient/data bounds, uniformly on such sets (GSM77 Ch. 7 vocabulary); the proof contains NO
-blow-up criterion, so citing it for `extends_of_rmBounded` is non-circular (verified,
-`ExtendViaUniqueness.md` §VERIFIED). Faithful cited PDE input, same lane as
-`deturck_ricci_flow_parabolic_short_time_existence`; may later migrate to the `ShortTime` layer. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem ricci_flow_unif_existence (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) :
     ∀ Λ : ℝ, 1 ≤ Λ → ∃ τ₀ : ℝ, 0 < τ₀ ∧
@@ -111,16 +103,15 @@ theorem ricci_flow_unif_existence (hDim : Module.finrank ℝ E = 3)
     ricci_gauge_of_dt (I := I) g₀ gBase g_DT hDT hJ
   exact ⟨g_RF, hinit, hsmooth, hcont, hpde⟩
 
-/-- **(A) revised: interior restart reaching past ω — a WIRING TARGET (provable from
-`ricci_flow_unif_existence`), NOT a black box.** Hypotheses are the two tail-bound producers near
-`ω`: `hell` — uniform `Λ`-ellipticity of the tail `{g_fam s : s ∈ [t₁, ω)}` against the fixed
-background `g_fam α` (from `|Ric| ≤ cK` metric equivalence, Gronwall); `hC3` — for every finite
-centre family, uniform chart-Gram C³ bounds on a tail (from Shi-type `|∇ᵏRm| ≤ Cₖ, k ≤ 3` plus the
-chart bootstrap, Chow–Knopf pp. 223–224). Proof route (Brick V): obtain `S` from the box at
-`gBase := g_fam α`; `Λ := max` of the two producers' constants; `τ₀` from the box; pick
-`t_star := max t₁ t₂ (ω − τ₀/2) ((α+ω)/2)`-style with `t_star ∈ (α, ω)` STRICTLY interior (so the
-ambient flow is jointly smooth up to `t_star` for the smooth-class (B) consumer, per the 2026-07-25
-ruling) and `ω < t_star + τ₀`; apply the box at `g₀ := g_fam t_star`; `TT := τ₀`. -/
+
+
+
+
+
+
+
+
+
 theorem ricci_flow_interior_restart
     (hDim : Module.finrank ℝ E = 3)
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
@@ -143,19 +134,15 @@ theorem ricci_flow_interior_restart
         (∀ t ∈ Set.Ico (0 : ℝ) TT, ∀ x : M, ∀ v w : TangentSpace I x,
           HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
             ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
-  -- (N) provides a uniform existence time `τ₀(Λ)` over bounded-geometry data (no chart cover now).
   have hbox := ricci_flow_unif_existence (I := I) hDim (g_fam α)
   obtain ⟨Λ₁, hΛ₁, t₁, ht₁, hell'⟩ := hell
   obtain ⟨Λ₂, hΛ₂, t₂, ht₂, hcov'⟩ := hcov
-  -- one bound `Λ` dominating both producers; feed it to the box.
   set Λ : ℝ := max Λ₁ Λ₂ with hΛdef
   have hΛ₁le : Λ₁ ≤ Λ := by rw [hΛdef]; exact le_max_left _ _
   have hΛ₂le : Λ₂ ≤ Λ := by rw [hΛdef]; exact le_max_right _ _
   have hΛ : 1 ≤ Λ := le_trans hΛ₁ hΛ₁le
   have hΛ₁pos : 0 < Λ₁ := lt_of_lt_of_le zero_lt_one hΛ₁
   obtain ⟨τ₀, hτ₀, hexist⟩ := hbox Λ hΛ
-  -- interior restart time: past both producers' thresholds, within `τ₀/2` of `ω`, and STRICTLY
-  -- past `α` (the midpoint arm; the strict interiority feeds the smooth-class (B) consumer).
   set t_star : ℝ := max (max t₁ t₂) (max (omega - τ₀ / 2) ((α + omega) / 2)) with hts_def
   have ht1_le : t₁ ≤ t_star := le_trans (le_max_left t₁ t₂) (le_max_left _ _)
   have ht2_le : t₂ ≤ t_star := le_trans (le_max_right t₁ t₂) (le_max_left _ _)
@@ -172,7 +159,6 @@ theorem ricci_flow_interior_restart
     have hge : omega - τ₀ / 2 ≤ t_star := by
       rw [hts_def]; exact le_trans (le_max_left _ _) (le_max_right _ _)
     linarith
-  -- weaken the producers' bounds from `Λ₁`/`Λ₂` to `Λ`, matching the box's ellipticity/C³ inputs.
   have hell_star : ∀ x : M, ∀ v : TangentSpace I x,
       Λ⁻¹ * (g_fam α).inner x v v ≤ (g_fam t_star).inner x v v ∧
         (g_fam t_star).inner x v v ≤ Λ * (g_fam α).inner x v v := by
@@ -187,21 +173,19 @@ theorem ricci_flow_interior_restart
       MetricCovDerivOrderBoundOn Set.univ a (g_fam t_star) (g_fam α) Λ := by
     intro a ha x hx
     exact ((hcov' t_star hstar_mem_2 a ha) x hx).trans hΛ₂le
-  -- apply the box at the restart metric; its output fields ARE the conclusion (with `TT := τ₀`).
   obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hcov_star
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
-/-- **Black box (B): forward uniqueness of the Ricci flow on a closed manifold, in the smooth
-class.** Two solutions on `[a, b)` with equal initial metric at `a`, each chart-Gram jointly C∞
-UP TO the initial time (`Ico`-slab; the C⁰ fields are retained but now redundant) and solving
-`∂ₜg = −2 Ric` up to `a`, agree on `[a, b)`.
 
-TRUE and standard for closed `M`: GSM77 Ch. 7 §5.2 (uniqueness of the Ricci–DeTurck flow) + the
-harmonic-map-flow conversion; invoked as standard throughout GSM77 (Ch. 4, Ch. 6). The smooth-class
-(`Ico`) hypotheses are the faithful textbook class — statement surgery per the 2026-07-25 GPT Pro
-ruling (`ShortTime/FORWARD_UNIQUE_PRO_RULING.md`; the earlier C⁰-at-edge class was NOT covered by
-the citation and would have required Burkhardt-Guim-scale rough-parabolic machinery). Proof route
-(ratified, ruling §2–§5): Kotschwar-style moving-`g₁(t)`-carrier triple energy — bricks K1–K3. -/
+
+
+
+
+
+
+
+
+
 theorem ricci_flow_forward_unique
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -233,13 +217,15 @@ theorem ricci_flow_forward_unique
     (fuSlab_of_gram (I := I) g₁ g₂ h1smooth h2smooth h1pde h2pde)
     (energyEdgeCont (I := I) g₁ g₂ hab h1smooth h2smooth)
 
-/-- **Brick U (consumer assembly): interior restart + uniqueness ⟹ the extension tuple.**  Given the
-left-flow data on `[α, ω)` (as `ricciTensor`-form PDE + chart-Gram smooth/continuity), restart data
-`rr` at an interior time `t*` reaching past `ω` (the `(A)` output shape), and the uniqueness
-consequence `rr(·−t*) = g_fam` on the overlap `[t*, ω)`, this produces the extension tuple with
-`ε := t* + TT − ω > 0` and `g_ext := gluedFamily g_fam (rr(·+(ω−t*))) ω`.  The output shape matches
-what `ricci_flow_extends_construction` returns and `isSolutionOn_of_extendData` consumes.  Fully
-decoupled from the paused obligations `(A)`/`(B)`: their output shapes are hypotheses here. -/
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem extend_construction_of_restart
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (_hαω : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -285,7 +271,6 @@ theorem extend_construction_of_restart
   have hωε : omega + ε = t_star + TT := by rw [hε_def]; ring
   set r : ℝ → SmoothRiemannianMetric I M := fun u => rr (u + (omega - t_star)) with hr_def
   set g_ext : ℝ → SmoothRiemannianMetric I M := gluedFamily (I := I) g_fam r omega with hgext_def
-  -- Step 1: master identity `g_ext s = rr (s − t*)` for `s ≥ t*`.
   have hext_eq_r : ∀ s : ℝ, t_star ≤ s → g_ext s = rr (s - t_star) := by
     intro s hs
     by_cases hso : s < omega
@@ -295,16 +280,13 @@ theorem extend_construction_of_restart
       simp only [hr_def]
       congr 1
       ring
-  -- Step 2: agreement below ω.
   have hagree : ∀ s : ℝ, s < omega → g_ext s = g_fam s := by
     intro s hs; rw [hgext_def]; exact gluedFamily_of_lt (I := I) g_fam r omega hs
-  -- The time-shift `Ψ : (s, x) ↦ (s − t*, x)` is `C∞`.
   have hshift : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
       (fun p : ℝ × M => ((p.1 - t_star, p.2) : ℝ × M)) :=
     (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
   refine ⟨ε, hε, g_ext, hagree, ?_, ?_, ?_⟩
-  · -- Step 3: gram smoothness on `Ioo α (ω+ε) ×ˢ B`.
-    intro x₀ i j
+  · intro x₀ i j
     apply contMDiffOn_of_locally_contMDiffOn
     intro p hp
     by_cases hpo : p.1 < omega
@@ -325,14 +307,14 @@ theorem extend_construction_of_restart
         exact ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hωε]⟩, hq.2⟩
       have hcomp :
           ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-            (fun q : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr (q.1 - t_star)) x₀ q.2 i j)
+            (fun q : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr (q.1 - t_star)) x₀ q.2 i
+              j)
             (Set.Ioo t_star (omega + ε) ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
         (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
       refine (hcomp.mono Set.inter_subset_right).congr ?_
       intro q hq
       rw [hext_eq_r q.1 (le_of_lt hq.2.1.1)]
-  · -- Step 4: gram continuity on `Ico α (ω+ε) ×ˢ B`.
-    intro x₀ i j
+  · intro x₀ i j
     set B := (trivializationAt E (TangentSpace I) x₀).baseSet with hB
     set m : ℝ := (t_star + omega) / 2 with hm
     have hm1 : t_star < m := by rw [hm]; linarith
@@ -358,7 +340,8 @@ theorem extend_construction_of_restart
       · intro q hq
         simp only [Function.comp_apply]
         rw [hext_eq_r q.1 (le_of_lt (lt_of_lt_of_le hm1 hq.1.1))]
-    have hs_eq : Set.Ico α (omega + ε) ×ˢ B = (Set.Icc α m ×ˢ B) ∪ (Set.Ico m (omega + ε) ×ˢ B) := by
+    have hs_eq : Set.Ico α (omega + ε) ×ˢ B = (Set.Icc α m ×ˢ B) ∪
+      (Set.Ico m (omega + ε) ×ˢ B) := by
       ext q
       simp only [Set.mem_prod, Set.mem_union, Set.mem_Ico, Set.mem_Icc]
       constructor
@@ -388,8 +371,7 @@ theorem extend_construction_of_restart
         rw [closure_prod_eq]
         rintro ⟨hc1, _⟩
         exact absurd (closure_minimal Set.Ico_subset_Icc_self isClosed_Icc hc1).1 (not_le.mpr h2)
-  · -- Step 5: PDE on `Ico α (ω+ε)`.
-    intro t ht x v w
+  · intro t ht x v w
     by_cases hto : t < omega
     · have hfun : (fun s : ℝ => (g_ext s).inner x v w) =ᶠ[𝓝[Set.Ici α] t]
           (fun s : ℝ => (g_fam s).inner x v w) := by
@@ -419,9 +401,9 @@ theorem extend_construction_of_restart
         rw [hext_eq_r s (le_of_lt hs)]
       · rw [hext_t]
 
-/-- Scalar log-difference ⟹ two-sided exponential comparison.  (Local port of the pure-scalar
-`exp_bounds_of_abs_log_sub_le`, which lives in the downstream `HCGCompactness` lane and therefore
-cannot be imported into this evolution file.) -/
+
+
+
 private theorem expBounds_of_logDiff {fa fb R : ℝ}
     (hfa : 0 < fa) (hfb : 0 < fb) (hlog : |Real.log fb - Real.log fa| ≤ R) :
     Real.exp (-R) * fa ≤ fb ∧ fb ≤ Real.exp R * fa := by
@@ -442,13 +424,16 @@ private theorem expBounds_of_logDiff {fa fb R : ℝ}
     calc fb = (fb / fa) * fa := by field_simp
       _ ≤ Real.exp R * fa := mul_le_mul_of_nonneg_right hratio_upper hfa.le
 
-/-- **Brick X (the `hell` producer): a curvature-controlled Ricci flow keeps its metric uniformly
-equivalent to the initial slice.**  If `∂ₜg = −2 Ric` on `[α, ω)` (one-sided at `α`) and the Ricci
-curvature is `K`-bounded by the metric (`|Ric(v,v)| ≤ K·g(v,v)`), then every slice `g_s`,
-`s ∈ [α, ω)`, is `Λ`-comparable to `g_α` with `Λ = exp(2K(ω−α))`.  This discharges the `hell`
-hypothesis of `ricci_flow_interior_restart` (with `t₁ = α`).  Route: fix `(x, v)` with `v ≠ 0`;
-`f t := g_t(v,v) > 0`; the PDE and `|Ric| ≤ K f` give `|(log f)'| ≤ 2K`, so the mean value theorem on
-`[α, s]` bounds `|log f(s) − log f(α)| ≤ 2K(s−α) ≤ 2K(ω−α)`; exponentiate. -/
+
+
+
+
+
+
+
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricEquiv_of_ricBound
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     {K : ℝ} (hK : 0 ≤ K)
@@ -473,12 +458,10 @@ theorem metricEquiv_of_ricBound
       rw [((g_fam s).inner x).map_zero, ContinuousLinearMap.zero_apply]
     rw [h0α, h0s, mul_zero, mul_zero]
     exact ⟨le_refl 0, le_refl 0⟩
-  -- `v ≠ 0`: positive-definiteness makes `f t = g_t(v,v)` strictly positive along the interval.
   have hpos : ∀ t : ℝ, 0 < (g_fam t).inner x v v := fun t => (g_fam t).pos x v hv
   have hs_lt : s < omega := hs.2
   have hα_le_s : α ≤ s := hs.1
   have hsub : Set.Icc α s ⊆ Set.Ico α omega := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hs_lt⟩
-  -- within-`[α,s]` derivative of `log f` and its `2K` bound.
   have hderiv : ∀ y ∈ Set.Icc α s,
       HasDerivWithinAt (fun t : ℝ => Real.log ((g_fam t).inner x v v))
         ((-2 : ℝ) * ricciTensor (I := I) (g_fam y) x v v / (g_fam y).inner x v v)
@@ -501,7 +484,8 @@ theorem metricEquiv_of_ricBound
     hderiv hbound (Set.left_mem_Icc.mpr hα_le_s) (Set.right_mem_Icc.mpr hα_le_s)
   have hlogdiff : |Real.log ((g_fam s).inner x v v) - Real.log ((g_fam α).inner x v v)|
       ≤ 2 * K * (s - α) := by
-    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (show (0 : ℝ) ≤ s - α by linarith)] at hmvt
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (show (0 : ℝ) ≤ s - α by linarith)]
+      at hmvt
     exact hmvt
   obtain ⟨hlo, hhi⟩ := expBounds_of_logDiff (hpos α) (hpos s) hlogdiff
   have hfα_nn : 0 ≤ (g_fam α).inner x v v := (hpos α).le
@@ -509,7 +493,8 @@ theorem metricEquiv_of_ricBound
     mul_le_mul_of_nonneg_left (by linarith) (mul_nonneg (by norm_num) hK)
   refine ⟨?_, ?_⟩
   · rw [← Real.exp_neg]
-    exact le_trans (mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr (neg_le_neg hle_exp)) hfα_nn) hlo
+    exact le_trans (mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr (neg_le_neg hle_exp)) hfα_nn)
+      hlo
   · exact le_trans hhi (mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr hle_exp) hfα_nn)
 
 end DifferentialGeometry.PDE.RicciFlow

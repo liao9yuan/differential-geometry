@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
-import Mathlib.Topology.Covering
+import Mathlib.Topology.Covering.Basic
 import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
@@ -15,15 +15,15 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Logic.Equiv.Basic
 import Mathlib.Data.Finite.Defs
 
-/-!
-# Completeness pullback to the universal cover
 
-The projection `proj : M' -> M` of the universal cover is `1`-Lipschitz for the
-lifted/induced extended metric. Tails of Cauchy sequences in `M'` whose
-projection converges enter a single sheet of an evenly covered neighbourhood,
-and pulling the limit back through the sheet homeomorphism yields a limit
-upstairs. Consequently `CompleteSpace M ⇒ CompleteSpace M'`.
--/
+
+
+
+
+
+
+
+
 
 open Set Function Filter Bundle
 open scoped Topology ContDiff
@@ -51,15 +51,19 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M] [PseudoEMetricSpace M] [SecondCountableTopology M]
 
-/-- **The differential of `proj` is the identity in tangent coordinates.**
 
-At every cover point `x'`, the covering projection `proj : UC M → M`
-written in the preferred extended charts (the cover chart at `x'`, the
-base chart at `proj x'`) is the identity map on a neighbourhood of the
-chart coordinate of `x'`. This is the content of `extChartAt_proj_eq`,
-which says the two chart coordinate systems agree along `proj`. As a
-consequence the manifold derivative `mfderiv I I proj x'` is the
-identity continuous linear map on the model fibre `E`. -/
+
+
+
+
+
+
+
+
+omit [PseudoEMetricSpace M] [SecondCountableTopology M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem hasMFDerivAt_proj
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     HasMFDerivAt I I
@@ -74,7 +78,7 @@ theorem hasMFDerivAt_proj
       extChartAt_target_mem_nhdsWithin x'
     refine Filter.eventuallyEq_of_mem hmem ?_
     intro y hy
-    show extChartAt I (proj (X := M) x')
+    change extChartAt I (proj (X := M) x')
         (proj (X := M) ((extChartAt I x').symm y)) = y
     have hproj :=
       (extChartAt_proj_eq (I := I) (M := M) x' ((extChartAt I x').symm y)).symm
@@ -87,7 +91,7 @@ theorem hasMFDerivAt_proj
       writtenInExtChartAt I I x'
           (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
           (extChartAt I x' x') = (id : E → E) (extChartAt I x' x') := by
-    show extChartAt I (proj (X := M) x')
+    change extChartAt I (proj (X := M) x')
         (proj (X := M) ((extChartAt I x').symm (extChartAt I x' x'))) =
         extChartAt I x' x'
     have hproj :=
@@ -106,16 +110,11 @@ variable [Nonempty M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Path-length is preserved under `proj`.**
-
-For any `C¹` path `γ` in the universal cover (on `[0,1]`), the projected path
-`proj ∘ γ` in `M` has the same `pathELength`.  The manifold derivative of
-`proj` is the identity (`hasMFDerivAt_proj`), so the chain rule identifies
-`mfderiv (proj ∘ γ) t 1` with `mfderiv γ t 1`.  The fibrewise extended norms
-then match: both reduce to `√(g.inner (proj (γ t)) w w)` — the base one via the
-hypothesis `hEnormBase` (the bundle norm — square-root inner-product identity,
-exactly as exposed for `pathELength_eq_arcLength`), the cover one via
-`hEnormCover` together with the lifted-metric definition. -/
+omit [Nonempty M] in
+omit [PseudoEMetricSpace M] [SecondCountableTopology M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 private theorem proj_pathELength_eq
     (g : SmoothRiemannianMetric I M)
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -158,25 +157,11 @@ private theorem proj_pathELength_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`proj` is `1`-Lipschitz for the principled lifted extended metric.**
-
-With the principled `PseudoEMetricSpace (UC M)` structure
-`uc_pseudoEMetricSpace (liftedMetric g)` injected via `letI`, the covering
-projection `proj : UC M → M` is `1`-Lipschitz with respect to the ambient
-`PseudoEMetricSpace M`, provided `M` is a Riemannian manifold and the cover
-carries the lifted Riemannian-bundle structure.
-
-The two `hEnorm` hypotheses are the bundle-norm — square-root inner-product
-identifications on the base and cover fibres, the same structural fact exposed
-as a hypothesis in `pathELength_eq_arcLength`.
-
-Proof: for any `C¹` path `γ : [0,1] → UC M` from `x'` to `y'`, the projected
-path `proj ∘ γ` is a `C¹` path from `proj x'` to `proj y'` of equal length
-(`proj_pathELength_eq`).  Hence `riemannianEDist I (proj x') (proj y')`, the
-infimum of projected path-lengths, is at most `riemannianEDist I x' y'`.
-Translating both sides through the `IsRiemannianManifold` predicates
-(`edist = riemannianEDist`) yields the edist comparison and so
-`LipschitzWith 1 proj`. -/
+omit [Nonempty M] in
+omit [SecondCountableTopology M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem proj_lipschitzWith_one [RegularSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
@@ -240,19 +225,8 @@ end ProjLipschitz
 open Manifold MeasureTheory in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Tail of a Cauchy sequence lies in a single sheet.**
-Given a Cauchy sequence `x' : ℕ → M'` (for the principled lifted extended
-metric `uc_pseudoEMetricSpace (liftedMetric g)`) whose projection converges to
-`y ∈ M`, there exists an open neighbourhood `U'` of some `y' ∈ proj⁻¹{y}` such
-that eventually `x' n ∈ U'`.
-
-Proof: the projected limit eventually lies in an evenly covered neighbourhood
-`U` of `y`; choose an `ε`-emetric ball around the eventual base limit that is
-contained in `U` and over which a single sheet is a section, then use
-Cauchy-ness to trap a tail of `x'` inside that sheet (the sheets over `U` are
-`ε`-separated upstairs because `proj` is `1`-Lipschitz and locally isometric,
-so two points in distinct sheets projecting near `y` cannot be `< ε` apart).
--/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
@@ -464,7 +438,7 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     refine ⟨hmemsrc, ?_⟩
     have happ : t (t.toOpenPartialHomeomorph.symm (y, pt)) = (y, pt) :=
       t.apply_symm_apply (t.mem_target.2 hyU)
-    show t (t.toOpenPartialHomeomorph.symm (y, pt)) ∈ slice.source
+    change t (t.toOpenPartialHomeomorph.symm (y, pt)) ∈ slice.source
     rw [happ]
     exact ⟨hyU, Set.mem_singleton _⟩
   · intro z hz
@@ -482,7 +456,7 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     have hx_src : x' n ∈ t.source := t.mem_source.2 hmemU
     rw [he_def, OpenPartialHomeomorph.trans_source]
     refine ⟨hx_src, ?_⟩
-    show t (x' n) ∈ slice.source
+    change t (x' n) ∈ slice.source
     have hfst : (t (x' n)).1 = p (x' n) := t.coe_fst hx_src
     have hsnd : (t (x' n)).2 = pt := htail_fib n hn
     rw [hslice_def]
@@ -492,12 +466,13 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     · show (t (x' n)).2 ∈ ({pt} : Set (p ⁻¹' {y}))
       rw [hsnd]; exact Set.mem_singleton _
 
-/-- **Each sheet over an evenly covered open set is a homeomorphism with the
-base.** Given a point `y ∈ M`, there exists an open neighbourhood `U ∋ y`
-and, for some lift `y' ∈ proj⁻¹{y}`, an open neighbourhood `U' ∋ y'` such that
-`proj` restricts to a homeomorphism `U' ≃ U`. This is the standard sheet
-structure of the covering map `proj`, packaged via
-`IsCoveringMapOn.isLocalHomeomorphOn`. -/
+
+
+
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] [PseudoEMetricSpace M] [SecondCountableTopology M] in
 theorem sheet_homeomorph [Nonempty M] (y : M) :
     ∃ (U : Set M) (_hU : IsOpen U) (_hyU : y ∈ U)
       (y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -526,19 +501,8 @@ theorem sheet_homeomorph [Nonempty M] (y : M) :
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Lifting the projected limit.**
-Combining the tail-in-single-sheet statement with the local-homeomorphism
-structure of the covering projection, the preimage `y'` of `y` inside the
-eventually-stable sheet satisfies `x' n → y'` in `M'`.
-
-Proof: `tail_in_single_sheet` produces an open neighbourhood `U'` of a lift
-`y'` of `y` containing a tail of `x'`.  Shrinking `U'` to a sheet over which
-`proj` is a partial homeomorphism `e` (covering-map local homeomorphism), we
-have `x' n = e.symm (proj (x' n))` on the tail; continuity of `e.symm` at
-`y = e y'` together with `proj (x' n) → y` yields `x' n → e.symm y = y'`.
-Convergence is purely topological, so it is stated for the principled lifted
-extended metric (whose topology is defeq to the slice topology).
--/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem lift_the_limit [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
@@ -588,15 +552,8 @@ theorem lift_the_limit [Nonempty M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **The universal cover is complete.**
-If `M` is complete then the universal cover, equipped with the lifted extended
-metric `uc_pseudoEMetricSpace (liftedMetric g)`, is a `CompleteSpace`. Every
-Cauchy sequence in the cover projects (via the `1`-Lipschitz `proj_lipschitzWith_one`)
-to a Cauchy sequence in `M`, which converges to some `y` by `CompleteSpace M`;
-`lift_the_limit` lifts `y` back to a limit in the cover. Completeness follows
-from the Cauchy-sequence criterion `UniformSpace.complete_of_cauchySeq_tendsto`.
-The two `hEnorm` hypotheses are the bundle-norm — square-root inner-product
-identifications on the base and cover fibres, as in `proj_lipschitzWith_one`. -/
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem completeSpace_of_complete [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)

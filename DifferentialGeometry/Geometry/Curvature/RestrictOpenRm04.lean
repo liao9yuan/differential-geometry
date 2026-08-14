@@ -2,25 +2,23 @@ import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Germ-locality of the metric `(0,4)` Riemann tensor
 
-The lowered metric Riemann tensor `metricRm04StdAt` depends only on the germ of
-the metric: restricting the metric to an open submanifold does not change its
-curvature at interior points.  This lifts the connection-level germ-locality
-`metricCov_restrictOpen_globalSection` to the `(0,4)` curvature level.
 
-## Main results
 
-* `connectionRiemannCurvatureField_restrictOpen` — the connection curvature
-  field of the restricted Levi-Civita connection on restricted ambient sections
-  equals the ambient curvature field.
-* `metricRm04StdAt_restrictOpen` — the `(0,4)` metric Riemann tensor is unchanged
-  by restricting the metric to an open submanifold.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,14 +32,15 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [T2Space M] [SigmaCompactSpace M]
 
-/-- The connection curvature field of the restricted Levi-Civita connection,
-evaluated on restricted ambient smooth sections, equals the ambient connection
-curvature field.  This is the section-level germ-locality of curvature; it is
-proved term by term from `metricCov_restrictOpen_globalSection` (each covariant
-derivative factor) and `mlieBracket_restrictOpen` (the bracket term). -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem connectionRiemannCurvatureField_restrictOpen
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -54,7 +53,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
         (restrictOpenTangentField (I := I) U (fun p : M => Zs p)) x =
       connectionRiemannCurvatureField (I := I) (metricCov (I := I) (M := M) g)
         (fun p : M => Xs p) (fun p : M => Ys p) (fun p : M => Zs p) (x : M) := by
-  -- Ambient nested sections `∇_· Z` contracted with `Y`, resp. `X`.
   let ZYs : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
     ⟨fun p : M => (metricCov (I := I) (M := M) g (fun q : M => Zs q) p) (Ys p),
       cov_smooth_apply_contMDiffAt (I := I) (metricCov (I := I) (M := M) g)
@@ -63,8 +61,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
     ⟨fun p : M => (metricCov (I := I) (M := M) g (fun q : M => Zs q) p) (Xs p),
       cov_smooth_apply_contMDiffAt (I := I) (metricCov (I := I) (M := M) g)
         (metricCov_smooth (I := I) (M := M) g) Xs Zs⟩
-  -- The inner section `y ↦ (covU (restrict Z) y) (restrict Y y)` is the
-  -- restriction of the ambient nested section `ZYs`.
   have hZY :
       (fun y : U =>
           (metricCov (I := I) (M := U) (g.restrictOpen (I := I) U)
@@ -85,7 +81,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
     rw [restrictOpenTangentField_apply (I := I) U (fun p : M => ZXs p) y,
       restrictOpenTangentField_apply (I := I) U (fun p : M => Xs p) y]
     exact metricCov_restrictOpen_globalSection (I := I) g U Zs y (Xs (y : M))
-  -- The bracket term restricts to the ambient bracket at the point.
   have hbr :
       VectorField.mlieBracket I
           (restrictOpenTangentField (I := I) U (fun p : M => Xs p))
@@ -104,9 +99,10 @@ theorem connectionRiemannCurvatureField_restrictOpen
       (VectorField.mlieBracket I (fun p : M => Xs p) (fun p : M => Ys p) (x : M))]
   rfl
 
-/-- **Germ-locality of the `(0,4)` metric Riemann tensor.**  Restricting a smooth
-Riemannian metric to an open submanifold does not change its lowered `(0,4)`
-Riemann tensor at interior points. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricRm04StdAt_restrictOpen
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -126,7 +122,6 @@ theorem metricRm04StdAt_restrictOpen
   obtain ⟨Ws, hWs⟩ :=
     ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
       (n := (⊤ : ℕ∞)) (x : M) W
-  -- Reduce the ambient side to the connection curvature field.
   have hR :
       metricRm04StdAt (I := I) (M := M) g (x : M) X Y Z W =
         g.inner (x : M) W
@@ -142,7 +137,6 @@ theorem metricRm04StdAt_restrictOpen
             (metricCov_smooth (I := I) (M := M) g) (x : M) from rfl,
       riemannCurvature04At_apply_smooth (I := I) g (metricCov (I := I) (M := M) g)
         (metricCov_smooth (I := I) (M := M) g) Xs Ys Zs Ws (x : M), hWs]
-  -- Reduce the restricted side, then apply germ-locality of the curvature field.
   have hL :
       metricRm04StdAt (I := I) (M := U) (g.restrictOpen (I := I) U) x X Y Z W =
         g.inner (x : M) W

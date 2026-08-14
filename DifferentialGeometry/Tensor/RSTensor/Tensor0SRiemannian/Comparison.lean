@@ -3,16 +3,14 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.KroneckerQuadForm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Comparing Covariant Tensor Norms In Diagonal Coordinates
 
-This file contains the finite-sum algebra behind MSM135 Lemma 3.13 in the
-covariant case.  The analytic/geometric producer that diagonalizes two
-equivalent metrics at a point is intentionally kept separate.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -30,11 +28,11 @@ section DiagonalCoordinate
 variable {Idx : Type*} [DecidableEq Idx]
 variable {x : M}
 
-/-- Diagonal inverse-metric components in a basis. -/
+
 def diagonalInvMetric (μ : Idx -> Real) : Idx -> Idx -> Real :=
   fun i j => if i = j then μ i else 0
 
-/-- Identity inverse-metric components in a basis. -/
+
 def identityInvMetric : Idx -> Idx -> Real :=
   diagonalInvMetric (fun _ : Idx => 1)
 
@@ -84,7 +82,8 @@ private theorem prod_mu_le_pow
 
 variable [Fintype Idx]
 
-/-- Coordinate squared norm for a diagonal inverse metric. -/
+
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_diagonal_eq_sum
     (s : Nat) (μ : Idx -> Real)
     (A : Tensor0SSpace s I x)
@@ -109,7 +108,8 @@ theorem coordInner0S_diagonal_eq_sum
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ I0))
 
-/-- Coordinate squared norm for the identity inverse metric. -/
+
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_eq_sum_sq
     (s : Nat) (A : Tensor0SSpace s I x)
     (basis : Module.Basis Idx Real (TangentSpace I x)) :
@@ -124,7 +124,8 @@ theorem coordInner0S_identity_eq_sum_sq
   rw [coordInner0S_diagonal_eq_sum (I := I) (x := x) s (fun _ : Idx => 1) A basis]
   simp
 
-/-- Coordinate inner product for the identity inverse metric. -/
+
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_eq_sum
     (s : Nat) (A B : Tensor0SSpace s I x)
     (basis : Module.Basis Idx Real (TangentSpace I x)) :
@@ -148,8 +149,8 @@ theorem coordInner0S_identity_eq_sum
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ I0))
 
-/-- In an orthonormal-coordinate basis, pairing a covariant tensor with a basis
-covariant tensor reads off the matching component. -/
+
+
 theorem inner0S_basisTensor_left_identity
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -182,8 +183,8 @@ theorem inner0S_basisTensor_left_identity
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ slots))
 
-/-- In an orthonormal-coordinate basis, pairing a covariant tensor against a
-basis covariant tensor on the right reads off the matching component. -/
+
+
 theorem inner0S_basisTensor_right_identity
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -216,8 +217,8 @@ theorem inner0S_basisTensor_right_identity
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ slots))
 
-/-- In an orthonormal-coordinate basis, the squared norm of a covariant tensor
-is the sum of squares of its components. -/
+
+
 theorem normSq0S_identity_eq_sum_sq
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -289,8 +290,8 @@ theorem normSq0S_le_card_of_component_bound
     _ = (Fintype.card (Fin s -> Idx) : Real) * B ^ 2 := by
           rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
 
-/-- The `(0,3)` specialization of `normSq0S_identity_eq_sum_sq`, with the
-first slot separated as the derivative direction. -/
+
+
 theorem normSq0S_three_identity_eq_sum
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -307,12 +308,13 @@ theorem normSq0S_three_identity_eq_sum
   intro d _
   rw [sum_fin_two_fun]
 
-/-- Diagonal-coordinate norm comparison for covariant tensors.
 
-If every diagonal inverse component `μ_i` of `h^{-1}` is bounded by `C`, then
-the squared covariant tensor norm defined using `h` is bounded by `C^s` times
-the squared norm in a `g`-orthonormal coordinate basis.  This is the finite-sum
-core of MSM135 Lemma 3.13 for `(0,s)` tensors. -/
+
+
+
+
+
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_diagonal_le_pow_identity
     (s : Nat) (μ : Idx -> Real) (C : Real)
     (hμ_nonneg : forall i : Idx, 0 <= μ i)
@@ -331,12 +333,13 @@ theorem coordInner0S_diagonal_le_pow_identity
     (prod_mu_le_pow (μ := μ) (C := C) hμ_nonneg hμ_le I0)
     (sq_nonneg _)
 
-/-- **Reverse** diagonal-coordinate norm comparison.  If every diagonal inverse
-component `μ_i` is bounded **below** by `m > 0`, then the identity-coordinate
-(raw component `ℓ²`) squared norm is bounded by `(1/m)^s` times the diagonal one.
-The mirror of `coordInner0S_diagonal_le_pow_identity`; used to pass from an
-intrinsic `gRef`-norm to the raw frame-component `ℓ²` when the frame Gram (hence
-the inverse-metric eigenvalues) is bounded below. -/
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_le_pow_diagonal
     (s : Nat) (μ : Idx -> Real) (m : Real) (hm : 0 < m)
     (hμ_lb : forall i : Idx, m <= μ i)
@@ -363,14 +366,14 @@ theorem coordInner0S_identity_le_pow_diagonal
           mul_le_mul_of_nonneg_left hprod (by positivity)
   nlinarith [hge1, sq_nonneg (tensor0SComponent (I := I) A (fun i => basis i) I0)]
 
-/-- Squared norm comparison for covariant tensors in a basis where the first
-metric has identity inverse components and the second has diagonal inverse
-components.
 
-This is the invariant-norm version of the diagonal finite-sum estimate above.
-For a `(0,s)` tensor it gives the squared estimate
-`|A|_h^2 <= C^s |A|_g^2`, corresponding to MSM135 Lemma 3.13 after taking
-square roots. -/
+
+
+
+
+
+
+
 theorem normSq0S_diag_le
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -387,12 +390,13 @@ theorem normSq0S_diag_le
     normSq0S_eq_coord (I := I) g x s basis (identityInvMetric (Idx := Idx)) hginv A]
   exact coordInner0S_diagonal_le_pow_identity (I := I) (x := x) s μ C hμ_nonneg hμ_le A basis
 
-/-- **Non-diagonal coordinate norm comparison.**  If the symmetric inverse-metric
-kernel `Q` dominates `(1/C)·Id` as a quadratic form on index vectors, the raw
-component `ℓ²` (the identity-coordinate squared norm) is bounded by `C^s` times
-the `Q`-coordinate squared norm.  The non-diagonal generalization of
-`coordInner0S_identity_le_pow_diagonal`, via the Kronecker-power PSD bound
-`quadForm_id_le_pow`. -/
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_le_pow_quad
     (s : Nat) (Q : Idx -> Idx -> Real) (C : Real) (hC : 0 < C)
     (hQsymm : forall i j : Idx, Q i j = Q j i)
@@ -427,11 +431,11 @@ theorem coordInner0S_identity_le_pow_quad
               tensor0SComponent (I := I) A (fun i => basis i) J0)) :=
         mul_le_mul_of_nonneg_left hkey (le_of_lt (pow_pos hC s))
 
-/-- **Component `ℓ²` versus intrinsic norm under a bounded-below inverse Gram**
-(the pointwise core of the `ric_bound` component↔intrinsic bridge at non-ON
-points).  If `Q` realizes the inverse metric of `g` in `basis`, is symmetric,
-and dominates `(1/C)·Id` as a quadratic form, then the raw component `ℓ²` of any
-`(0,s)` tensor is bounded by `C^s` times its intrinsic squared `g`-norm. -/
+
+
+
+
+
 theorem sum_comp_sq_le_pow_normSq0S
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -448,11 +452,11 @@ theorem sum_comp_sq_le_pow_normSq0S
     ← coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis]
   exact coordInner0S_identity_le_pow_quad (I := I) (x := x) s Q C hC hQsymm hQlb A basis
 
-/-- **Intrinsic norm versus component `ℓ²` under a near-identity inverse Gram**
-(the reverse of `sum_comp_sq_le_pow_normSq0S`): if `Q` realizes the inverse
-metric of `g` in `basis` and is entrywise within `ε` of the identity, the
-intrinsic squared `g`-norm of a `(0,s)` tensor is bounded by
-`((1+ε)·card)^s` times the raw component `ℓ²`. -/
+
+
+
+
+
 theorem normSq0S_le_pow_sum_comp_sq
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -482,12 +486,12 @@ end DiagonalCoordinate
 
 section MetricEquiv
 
-/-- Pointwise diagonal inverse-metric data produced by two-sided tangent metric
-equivalence.
 
-Relative to a `g`-orthonormal eigenbasis of the `g`-self-adjoint operator
-`g^{-1} h`, the inverse components of `h` are diagonal and bounded above by the
-same equivalence constant. -/
+
+
+
+
+
 theorem exists_diagInv_of_equiv
     (g h : SmoothMetric_gen I M) (x : M) {C : Real}
     (hC : 1 <= C)
@@ -626,7 +630,8 @@ theorem exists_diagInv_of_equiv
         exact False.elim (hj (Finset.mem_univ j))
   exact ⟨mu, basis, hginv, hhinv, hmu_nonneg, hmu_le⟩
 
-/-- Pointwise tangent metric equivalence is symmetric with the same constant. -/
+
+omit [FiniteDimensional ℝ E] in
 theorem metric_equiv_symm
     (g h : SmoothMetric_gen I M) (x : M) {C : Real}
     (hC : 1 <= C)
@@ -655,8 +660,8 @@ theorem metric_equiv_symm
       _ <= C * h.inner x v v :=
         mul_le_mul_of_nonneg_left hlow hC_nonneg
 
-/-- Upper squared-norm comparison for covariant tensors under pointwise metric
-equivalence. -/
+
+
 theorem normSq0S_upper_le_of_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
     (hC : 1 <= C)
@@ -673,8 +678,8 @@ theorem normSq0S_upper_le_of_equiv
     (I := I) (g := g) (h := h) (x := x) (s := s)
     basis mu C hginv hhinv hmu_nonneg hmu_le T
 
-/-- Lower squared-norm comparison for covariant tensors under pointwise metric
-equivalence. -/
+
+
 theorem normSq0S_lower_le_of_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
     (hC : 1 <= C)
@@ -694,8 +699,8 @@ theorem normSq0S_lower_le_of_equiv
   rw [inv_mul_le_iff₀ hpow_pos]
   exact hupper
 
-/-- Two-sided squared-norm comparison for covariant tensors under pointwise
-metric equivalence. -/
+
+
 theorem normSq0S_le_of_metric_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
     (hC : 1 <= C)
@@ -718,11 +723,11 @@ theorem normSq0S_le_of_metric_equiv
   · simpa using hlower
   · simpa using hupper
 
-/-- **Square-root form of the upper covariant-tensor norm comparison.**  Under
-pointwise metric equivalence `C⁻¹ g ≤ h ≤ C g`, the covariant-tensor norm
-`√normSq0S h` is bounded by `√(C^s)` times `√normSq0S g`.  This is the book's
-`(1+ε)^{(r+q₂)/2}` factor in MSM135 Corollary *Norms of covariant derivatives of
-tensors, II* (`lbl370`), where `C = 1+ε` and `s = r + q₂`. -/
+
+
+
+
+
 theorem sqrt_normSq0S_le_of_metric_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
     (hC : 1 <= C)
@@ -779,7 +784,7 @@ private theorem exists_onFrame
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- Square roots distribute over finite products of nonnegative reals. -/
+
 private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
     (hf : ∀ a ∈ s, 0 <= f a) :
     Real.sqrt (∏ a ∈ s, f a) = ∏ a ∈ s, Real.sqrt (f a) := by
@@ -791,12 +796,13 @@ private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
         Real.sqrt_mul (hf a (Finset.mem_cons_self a s)),
         ih (fun b hb => hf b (Finset.mem_cons_of_mem hb))]
 
-/-- **Pointwise Cauchy–Schwarz for covariant tensors.**  At a `g`-orthonormal
-basis, a `(0,s)` tensor evaluated on tangent vectors is bounded by its `g`-norm
-times the product of the vectors' `g`-norms.  This is the C⁰ input of the
-covariant→coordinate derivative conversion behind MSM135 Corollary `lbl351`
-(metrics with bounded derivatives preconverge). -/
-theorem abs_apply_le_sqrt_normSq0S
+
+
+
+
+
+omit [Fintype Idx] in
+theorem abs_apply_le_sqrt_normSq0S [Finite Idx]
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : forall i j : Idx,
@@ -806,12 +812,11 @@ theorem abs_apply_le_sqrt_normSq0S
       Real.sqrt (normSq0S (I := I) g x s T) *
         ∏ a : Fin s, Real.sqrt (g.inner x (v a) (v a)) := by
   classical
-  -- the inverse-metric witness of orthonormality
+  letI := Fintype.ofFinite Idx
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
       (identityInvMetric (Idx := Idx)) := by
     intro i j
     constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
-  -- multilinear expansion of the evaluation over the basis
   have hexp : T v = ∑ I0 : Fin s -> Idx,
       (∏ a : Fin s, basis.repr (v a) (I0 a)) *
         T (fun a : Fin s => basis (I0 a)) := by
@@ -829,7 +834,6 @@ theorem abs_apply_le_sqrt_normSq0S
           refine Finset.sum_congr rfl fun I0 _ => ?_
           rw [T.map_smul_univ, smul_eq_mul]
   rw [hexp]
-  -- Cauchy–Schwarz over the slot-index sum
   have hCS2 : (∑ I0 : Fin s -> Idx,
         (∏ a : Fin s, basis.repr (v a) (I0 a)) *
           T (fun a : Fin s => basis (I0 a))) ^ 2 <=
@@ -847,14 +851,12 @@ theorem abs_apply_le_sqrt_normSq0S
       ← Real.sqrt_mul (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
     exact Real.sqrt_le_sqrt hCS2
   refine le_trans habs ?_
-  -- the coefficient factor is the product of the slot Parsevals
   have hfac1 : (∑ I0 : Fin s -> Idx,
         (∏ a : Fin s, basis.repr (v a) (I0 a)) ^ 2)
       = ∏ a : Fin s, ∑ i : Idx, basis.repr (v a) i ^ 2 := by
     rw [Finset.prod_univ_sum]
     refine Finset.sum_congr rfl fun I0 _ => ?_
     rw [← Finset.prod_pow]
-  -- Parseval at the orthonormal basis
   have hPar : ∀ a : Fin s, (∑ i : Idx, basis.repr (v a) i ^ 2)
       = g.inner x (v a) (v a) := by
     intro a
@@ -869,7 +871,6 @@ theorem abs_apply_le_sqrt_normSq0S
     rw [Finset.sum_ite_eq Finset.univ i
       (fun j => basis.repr (v a) j * basis.repr (v a) i)]
     simp [sq]
-  -- the tensor factor is the squared norm
   have hfac2 : (∑ I0 : Fin s -> Idx, T (fun a : Fin s => basis (I0 a)) ^ 2)
       = normSq0S (I := I) g x s T := by
     rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]

@@ -1,73 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.VariationalIdentity
 
-/-!
-# Polarised Bochner-Weitzenböck identity for smooth `(φ, v)`
-
-For a closed smooth Riemannian manifold `(M, g)` and two smooth real-valued
-functions `φ, v : C^∞⟮I, M; ℝ⟯`, this module derives the polarised
-Bochner-Weitzenböck identity
-
-```
-Δ_g(g(∇φ, ∇v))(x) =
-    g(∇(Δφ), ∇v)(x) + g(∇φ, ∇(Δv))(x)
-  + 2 · hessPairingChart g φ v x
-  + 2 · ricciTensor g x (∇φ x) (∇v x)
-```
-
-from the unpolarised `bochner_pointwise_concrete_metric_unconditional` applied
-to `(φ + v)` and `(φ - v)`, divided by `4`.
-
-Rearranged into `(1 - Δ_g)` form:
-
-```
-(1 - Δ_g)(g(∇φ, ∇v))(x) =
-    g(∇φ, ∇v)(x)
-  - g(∇(Δφ), ∇v)(x) - g(∇φ, ∇(Δv))(x)
-  - 2 · hessPairingChart g φ v x
-  - 2 · ricciTensor g x (∇φ x) (∇v x).
-```
-
-This is the **smooth-case pointwise content** of the unconditional Bochner
-candidate identification:
-
-```
-gradInnerLaplacianCandidateUnconditional g φ (smoothToH1Compl_mem_laplacianDomainPow_two g v)
-  =ᵐ smoothToLp((1-Δ_classical)(g(∇φ, ∇v))).
-```
-
-## Key technical insight
-
-The pointwise polarisation requires `Δ_g(-f) = -Δ_g(f)` and `gradFun(-f) = -gradFun(f)`,
-which themselves rely on `Δ_g` being independent of the specific smoothness witness
-(since `Δ_g g hf := divergence_g g (grad_g g hf)`, and `grad_g g hf` is a
-`ContMDiffSection` whose underlying function is `gradFun g f` — which depends only
-on `f`, not on `hf`). We expose this fact as `Δ_g_smoothness_irrelevant` and use
-it to build linearity lemmas for `Δ_g`.
-
-## Main results
-
-* `grad_g_congr` — two `grad_g` calls with the same underlying function produce
-  equal `ContMDiffSection`s.
-
-* `Δ_g_congr_func` — `Δ_g` only depends on the underlying function `f`, not on
-  the smoothness witness.
-
-* `gradFun_neg` — pointwise gradient of a negation.
-
-* `gradFun_sub` — pointwise gradient of a difference.
-
-* `Δ_g_neg` — Laplacian of a negation.
-
-* `Δ_g_sub` — Laplacian of a difference.
-
-* `g_inner_grad_lap_polar` — the polarisation of `g(∇f, ∇Δf)` for smooth `(φ, v)`.
-
-* `normGradSqFun_polar` — the polarisation of `|∇·|²_g` for smooth `(φ, v)`.
-
-* `bochner_polarised_pointwise` — the headline polarised Bochner identity.
-
-* `bochner_polarised_pointwise_oneSubLap` — the same identity in `(1 - Δ_g)`-form.
--/
 
 noncomputable section
 
@@ -80,7 +12,7 @@ namespace Analysis
 namespace Laplacian
 namespace BochnerPolarised
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -99,8 +31,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- `grad_g g hf` depends only on the underlying function `f`, not on the
-smoothness witness `hf`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma grad_g_congr
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf₁ hf₂ : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -108,8 +39,7 @@ lemma grad_g_congr
       (grad_g (I := I) g hf₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) := by
   refine ContMDiffSection.ext (fun _ => rfl)
 
-/-- `Δ_g g hf` depends only on the underlying function `f`, not on the smoothness
-witness `hf`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma Δ_g_congr_func
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf₁ hf₂ : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
@@ -119,8 +49,7 @@ lemma Δ_g_congr_func
     divergence_g (I := I) g (grad_g (I := I) g hf₂) x
   rw [h]
 
-/-- `grad_g` for two (syntactically distinct but pointwise-equal) functions
-agrees as a section. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma grad_g_congr_funext
     (g : SmoothRiemannianMetric I M) {f₁ f₂ : M → ℝ}
     (hf₁ : ContMDiff I 𝓘(ℝ, ℝ) ∞ f₁) (hf₂ : ContMDiff I 𝓘(ℝ, ℝ) ∞ f₂)
@@ -128,11 +57,10 @@ lemma grad_g_congr_funext
     (grad_g (I := I) g hf₁ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) =
       (grad_g (I := I) g hf₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) := by
   refine ContMDiffSection.ext (fun x => ?_)
-  show gradFun (I := I) g f₁ x = gradFun (I := I) g f₂ x
+  change gradFun (I := I) g f₁ x = gradFun (I := I) g f₂ x
   rw [h_eq]
 
-/-- `Δ_g g hf` for two (syntactically distinct but pointwise-equal) functions
-agrees pointwise. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma Δ_g_congr_funext
     (g : SmoothRiemannianMetric I M) {f₁ f₂ : M → ℝ}
     (hf₁ : ContMDiff I 𝓘(ℝ, ℝ) ∞ f₁) (hf₂ : ContMDiff I 𝓘(ℝ, ℝ) ∞ f₂)
@@ -143,7 +71,8 @@ lemma Δ_g_congr_funext
     divergence_g (I := I) g (grad_g (I := I) g hf₂) x
   rw [h]
 
-/-- The pointwise gradient of a negation: `∇(-f)(x) = -∇f(x)`. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradFun_neg
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
@@ -155,7 +84,8 @@ lemma gradFun_neg
   rw [gradFun_const_smul (I := I) g (-1 : ℝ) hf]
   rw [neg_smul, one_smul]
 
-/-- The pointwise gradient of a difference of differentiable functions. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradFun_sub
     (g : SmoothRiemannianMetric I M) {f h : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -173,7 +103,7 @@ lemma gradFun_sub
   rw [gradFun_neg (I := I) g hh]
   abel
 
-/-- Laplacian of a negation: `Δ_g(-f)(x) = -Δ_g(f)(x)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma Δ_g_neg
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -191,7 +121,7 @@ lemma Δ_g_neg
     exact Δ_g_const (I := I) g (0 : ℝ) x
   linarith [h_add, hΔ_sum_eq_zero]
 
-/-- Laplacian of a difference. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma Δ_g_sub
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}
@@ -204,7 +134,7 @@ lemma Δ_g_sub
     have h_smul := h_const.mul hh
     refine h_smul.congr ?_
     intro y
-    simp [neg_one_mul]
+    simp
   have h_sub_eq_add_neg : (fun y : M => f y - h y) = (fun y : M => f y + -h y) := by
     funext y; ring
   rw [Δ_g_congr_funext (I := I) g hsub (hf.add hneg) h_sub_eq_add_neg x]
@@ -212,8 +142,8 @@ lemma Δ_g_sub
   rw [Δ_g_neg (I := I) g hh hneg x]
   ring
 
-/-- Polarisation of `g(∇f, ∇f)` for smooth `(φ, v)` at the pointwise level:
-`g(∇(φ+v), ∇(φ+v))(x) - g(∇(φ-v), ∇(φ-v))(x) = 4 g(∇φ, ∇v)(x)`. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normGradSqFun_polar
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (x : M) :
     normGradSqFun (I := I) g (fun y : M => φ y + v y) x -
@@ -232,7 +162,9 @@ lemma normGradSqFun_polar
     (gradFun (I := I) g (φ : M → ℝ) x)
     (gradFun (I := I) g (v : M → ℝ) x)
 
-/-- Polarisation of `ricciTensor(∇f, ∇f)` for smooth `(φ, v)` at the pointwise level. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciTensor_grad_polar
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (x : M) :
     ricciTensor (I := I) g x
@@ -254,7 +186,8 @@ lemma ricciTensor_grad_polar
     (gradFun (I := I) g (φ : M → ℝ) x)
     (gradFun (I := I) g (v : M → ℝ) x)
 
-/-- Polarisation of `g(∇f, ∇Δf)` for smooth `(φ, v)` at the pointwise level. -/
+omit [CompactSpace M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma g_inner_grad_lap_polar
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (x : M)
     (hφv_add : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y))
@@ -326,18 +259,7 @@ lemma g_inner_grad_lap_polar
   rw [hp1, hp2]
   ring
 
-/-- **The polarised Bochner-Weitzenböck identity** for smooth `(φ, v)` at the
-pointwise level. For all `x : M`:
-
-```
-Δ_g(g(∇φ, ∇v))(x) =
-    g(∇φ, ∇Δv)(x) + g(∇v, ∇Δφ)(x)
-  + 2 · hessPairingChart g φ v x
-  + 2 · ricciTensor g x (∇φ x) (∇v x).
-```
-
-Note: the statement is parametrised by smoothness witnesses for `φ + v`,
-`φ - v`, and `g(∇φ, ∇v)`. -/
+omit [CompactSpace M] in
 theorem bochner_polarised_pointwise
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯)
     (hφv_add : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y))
@@ -363,44 +285,35 @@ theorem bochner_polarised_pointwise
     (I := I) g hφv_add x
   have hΔ_sub := bochner_pointwise_concrete_metric_unconditional
     (I := I) g hφv_sub x
-
   have hpolar_norm := normGradSqFun_polar (I := I) (M := M) g φ v x
-
   set N1 : M → ℝ := normGradSqFun (I := I) g (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y)
     with hN1_def
   set N2 : M → ℝ := normGradSqFun (I := I) g (fun y : M => (φ : M → ℝ) y - (v : M → ℝ) y)
     with hN2_def
-
   have hN1_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ N1 :=
     normGradSqFun_contMDiff (I := I) g hφv_add
   have hN2_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ N2 :=
     normGradSqFun_contMDiff (I := I) g hφv_sub
-
   have hN_sub_eq : ∀ y : M,
       (N1 y - N2 y) = 4 * g.inner y
         (gradFun (I := I) g (φ : M → ℝ) y)
         (gradFun (I := I) g (v : M → ℝ) y) :=
     fun y => normGradSqFun_polar (I := I) (M := M) g φ v y
-
   have hN_sub_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => N1 y - N2 y) :=
     hN1_smooth.sub hN2_smooth
-
   have h_4gphi_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun y : M => 4 * g.inner y
         (gradFun (I := I) g (φ : M → ℝ) y)
         (gradFun (I := I) g (v : M → ℝ) y)) := by
     have h_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (4 : ℝ)) := contMDiff_const
     exact h_const.mul h_gphi_gv_smooth
-
   have h_Δ_N_sub := Δ_g_sub (I := I) g hN1_smooth hN2_smooth hN_sub_smooth x
-
   have hN_eq_4ginner :
       (fun y : M => N1 y - N2 y) =
       (fun y : M => 4 * g.inner y
         (gradFun (I := I) g (φ : M → ℝ) y)
         (gradFun (I := I) g (v : M → ℝ) y)) := by
     funext y; exact hN_sub_eq y
-
   have h_Δ_N_sub_eq_Δ_4ginner :
       Δ_g (I := I) g hN_sub_smooth x =
       Δ_g (I := I) g h_4gphi_smooth x := by
@@ -419,9 +332,7 @@ theorem bochner_polarised_pointwise
           (gradFun (I := I) g (v : M → ℝ) z)) y
       rw [hN_eq_4ginner]
     rw [h_grad_eq]
-
   have h_const_smul_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (4 : ℝ)) := contMDiff_const
-
   have h_Δ_4ginner_eq :
       Δ_g (I := I) g h_4gphi_smooth x = 4 * Δ_g (I := I) g h_gphi_gv_smooth x := by
     have h_witness_eq :
@@ -451,17 +362,14 @@ theorem bochner_polarised_pointwise
       exact Δ_g_const (I := I) g (4 : ℝ) x
     rw [hΔ_const_4]
     simp only [ContinuousLinearMap.zero_apply, mul_zero, add_zero]
-
   have h_Δ_4ginner_eq_sub :
       4 * Δ_g (I := I) g h_gphi_gv_smooth x =
       Δ_g (I := I) g hN1_smooth x - Δ_g (I := I) g hN2_smooth x := by
     rw [← h_Δ_4ginner_eq]
     rw [← h_Δ_N_sub_eq_Δ_4ginner]
     exact h_Δ_N_sub
-
   have hN1_witness_eq : hN1_smooth = normGradSqFun_contMDiff (I := I) g hφv_add := rfl
   have hN2_witness_eq : hN2_smooth = normGradSqFun_contMDiff (I := I) g hφv_sub := rfl
-
   have hΔN1 :
       Δ_g (I := I) g hN1_smooth x =
         2 * chartHessFrobeniusSq (I := I) g
@@ -474,7 +382,6 @@ theorem bochner_polarised_pointwise
               (gradFun (I := I) g (Δ_g (I := I) g hφv_add) x) := by
     rw [hN1_witness_eq]
     exact hΔ_add
-
   have hΔN2 :
       Δ_g (I := I) g hN2_smooth x =
         2 * chartHessFrobeniusSq (I := I) g
@@ -487,7 +394,6 @@ theorem bochner_polarised_pointwise
               (gradFun (I := I) g (Δ_g (I := I) g hφv_sub) x) := by
     rw [hN2_witness_eq]
     exact hΔ_sub
-
   have h_hessPolar :
       chartHessFrobeniusSq (I := I) g
           (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y) x -
@@ -495,13 +401,10 @@ theorem bochner_polarised_pointwise
           (fun y : M => (φ : M → ℝ) y - (v : M → ℝ) y) x =
       4 * hessPairingChart (I := I) g φ v x :=
     chartHessFrobeniusSq_polar_eq_hessPairing (I := I) (M := M) g φ v x
-
   have h_ricciPolar :=
     ricciTensor_grad_polar (I := I) (M := M) g φ v x
-
   have h_gradLapPolar :=
     g_inner_grad_lap_polar (I := I) (M := M) g φ v x hφv_add hφv_sub
-
   have key :
       4 * Δ_g (I := I) g h_gphi_gv_smooth x =
         8 * hessPairingChart (I := I) g φ v x +
@@ -517,21 +420,9 @@ theorem bochner_polarised_pointwise
     rw [h_Δ_4ginner_eq_sub]
     rw [hΔN1, hΔN2]
     linarith [h_hessPolar, h_ricciPolar, h_gradLapPolar]
-
   linarith [key]
 
-/-- **The polarised Bochner-Weitzenböck identity, `(1 - Δ_g)` form**. For all `x`:
-
-```
-(1 - Δ_g)(g(∇φ, ∇v))(x) =
-    g(∇φ, ∇v)(x)
-  - g(∇Δφ, ∇v)(x) - g(∇φ, ∇Δv)(x)
-  - 2 · hessPairingChart g φ v x
-  - 2 · ricciTensor g x (∇φ x) (∇v x).
-```
-
-This is the target Lp-class-level identity for the unconditional Bochner
-candidate identification. -/
+omit [CompactSpace M] in
 theorem bochner_polarised_pointwise_oneSubLap
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯)
     (hφv_add : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y))

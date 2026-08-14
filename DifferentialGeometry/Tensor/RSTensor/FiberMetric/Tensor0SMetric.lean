@@ -1,21 +1,11 @@
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Covariant Tensor Fibers
-
-The metric on `T_x M` induces metrics on all covariant tensor powers.  The
-construction is intrinsic on the fiber `Tensor0SSpace s I x`; coordinate
-formulas are evaluation theorems for local frames.
--/
 
 namespace Tensor0SBundle
 
@@ -50,7 +40,6 @@ def realFlatLinear : Real →ₗ[Real] Module.Dual Real Real where
     ext
     simp [smul_eq_mul]
 
-/-- The standard metric on the real scalar fiber. -/
 def real : MetricFiberData Real :=
   MetricFiberData.ofFlat realFlatLinear
     (by
@@ -66,7 +55,6 @@ def real : MetricFiberData Real :=
       change 0 <= a * a
       nlinarith [sq_nonneg a])
 
-/-- Pull a metric back along a linear equivalence. -/
 def pullback [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
     (e : V ≃ₗ[Real] W) (D : MetricFiberData W) : MetricFiberData V where
@@ -80,16 +68,6 @@ def pullback [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     change 0 <= D.flat (e v) (e v)
     exact D.nonneg (e v)
 
-/-- The Hilbert-Schmidt flat map on a finite-dimensional algebraic Hom fiber.
-
-Expected construction: the flat map sends `A` to the functional
-`B ↦ tr(A† ∘ B)`, where `A†` is the metric adjoint built from `DV` and `DW`.
-The proof obligation is that this flat map is symmetric and positive
-semidefinite, hence gives genuine metric data on `V →ₗ[Real] W`.
-
-We use algebraic Hom here because the metric is fiberwise. Continuous Hom
-models are connected to this one by finite-dimensional continuity equivalences
-at the tensor-curry boundary. -/
 private def homFlatLinear [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
     (DV : MetricFiberData V) (DW : MetricFiberData W) :
@@ -351,9 +329,6 @@ def hom [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     (hom_nonneg DV DW).2.1
     (hom_nonneg DV DW).2.2
 
-/-- The Hilbert-Schmidt metric on continuous Hom fibers, obtained by
-transporting the algebraic Hom metric across finite-dimensional automatic
-continuity. -/
 def homCLM [AddCommGroup V] [Module Real V] [TopologicalSpace V]
     [IsTopologicalAddGroup V] [ContinuousSMul Real V] [T2Space V]
     [FiniteDimensional Real V]
@@ -367,7 +342,6 @@ def homCLM [AddCommGroup V] [Module Real V] [TopologicalSpace V]
 
 end MetricFiberData
 
-/-- The scalar metric on `(0,0)` tensor fibers. -/
 def scalarMetricData (_g : SmoothMetric I M) (x : M) :
     MetricFiberData (Tensor0SSpace 0 I x) :=
   MetricFiberData.pullback
@@ -375,11 +349,6 @@ def scalarMetricData (_g : SmoothMetric I M) (x : M) :
       (continuousMultilinearCurryFin0 Real (TangentSpace I x) Real).toLinearEquiv)
     MetricFiberData.real
 
-/-- One recursive step for the metric on covariant tensor powers.
-
-Using `tensor0S_curry`, a `(0,s+1)` tensor is a continuous linear map
-`T_x M -> Tensor0SSpace s I x`. The metric is the Hilbert-Schmidt metric
-on that Hom fiber. -/
 def tensor0SMetricStep
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (D : MetricFiberData (Tensor0SSpace s I x)) :
@@ -425,12 +394,11 @@ def tensor0SMetricStep
     (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x).toLinearEquiv
     (@MetricFiberData.homCLM
       (TangentSpace I x) (Tensor0SSpace s I x)
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd0 hContSMul0 inferInstance
       (tangentMetricData (I := I) g x).metric D)
 
-/-- The Riemannian metric on covariant `s`-tensor fibers, constructed
-recursively from `g`. -/
 def tensor0SMetricData (g : SmoothMetric I M) (x : M) :
     (s : Nat) -> MetricFiberData (Tensor0SSpace s I x)
   | 0 => scalarMetricData (I := I) g x
@@ -438,19 +406,16 @@ def tensor0SMetricData (g : SmoothMetric I M) (x : M) :
   | s + 2 =>
       tensor0SMetricStep (I := I) g x (s + 1) (tensor0SMetricData g x (s + 1))
 
-/-- Metric-induced inner product on covariant tensor fibers. -/
 def inner0S
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace s I x) : Real :=
   (tensor0SMetricData (I := I) g x s).inner A B
 
-/-- Metric flat map on covariant tensor fibers. -/
 def flat0S
     (g : SmoothMetric I M) (x : M) (s : Nat) :
     Tensor0SSpace s I x ≃ₗ[Real] Module.Dual Real (Tensor0SSpace s I x) :=
   (tensor0SMetricData (I := I) g x s).flat
 
-/-- Squared norm of a covariant tensor. -/
 def normSq0S
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (A : Tensor0SSpace s I x) : Real :=
@@ -508,13 +473,13 @@ theorem inner0S_one_eq_cotangent
       cotangentInner (I := I) g x α β := by
   rfl
 
-/-- Component of a covariant tensor in a pointwise frame. -/
 def tensor0SComponent {Idx : Type*} {s : Nat} {x : M}
     (A : Tensor0SSpace s I x)
     (frame : Idx -> TangentSpace I x)
     (slots : Fin s -> Idx) : Real :=
   A (fun a => frame (slots a))
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tensor0SComponent_apply {Idx : Type*} {s : Nat} {x : M}
     (A : Tensor0SSpace s I x)
     (frame : Idx -> TangentSpace I x)
@@ -523,7 +488,6 @@ def tensor0SComponent {Idx : Type*} {s : Nat} {x : M}
       A (fun a => frame (slots a)) := by
   rfl
 
-/-- Coordinate contraction for the covariant tensor metric. -/
 def coordInner0S
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -575,6 +539,7 @@ private theorem sum_fin_one_fun {Idx : Type*} [Fintype Idx]
   funext a
   simpa [Equiv.funUnique] using congrArg I0 (Subsingleton.elim a (0 : Fin 1))
 
+omit [FiniteDimensional ℝ E] in
 private theorem basis_repr_eq_sum_inv_inner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -753,7 +718,8 @@ private theorem homCLM_normSq_eq_basis
     (A : TangentSpace I x →L[Real] W) :
     (@MetricFiberData.homCLM
       (TangentSpace I x) W
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
       (tangentMetricData (I := I) g x).metric D).flat A A =
       ∑ i : Idx, ∑ j : Idx,
@@ -773,13 +739,15 @@ private theorem homCLM_inner_eq_basis
     (A B : TangentSpace I x →L[Real] W) :
     (@MetricFiberData.homCLM
       (TangentSpace I x) W
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
       (tangentMetricData (I := I) g x).metric D).flat A B =
       ∑ i : Idx, ∑ j : Idx,
         gInv i j * D.inner (A (basis i)) (B (basis j)) := by
   exact hom_inner_eq_basis (I := I) g x basis gInv hinv D A.toLinearMap B.toLinearMap
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_one_apply
     {x : M} (A : Tensor0SSpace 2 I x)
     (X Y : TangentSpace I x) :
@@ -799,6 +767,7 @@ private theorem tensor0S_curry_one_apply
   funext a
   fin_cases a <;> simp [Fin.cons_zero]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_apply_cons
     {x : M} (s : Nat) (A : Tensor0SSpace (s + 1) I x)
     (X : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
@@ -814,10 +783,6 @@ private theorem tensor0S_curry_apply_cons
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
-/-- Direct coordinate squared-norm formula for `(0,2)` covariant tensors.
-
-This is the no-`sorry` bridge used by the Bochner layer while the fully general
-`inner0S_eq_coord` induction remains open. -/
 theorem normSq0S_two_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -929,10 +894,6 @@ theorem normSq0S_two_eq_coord
           intro l _
           ring
 
-/-- Direct coordinate inner-product formula for `(0,2)` covariant tensors.
-
-This is the bilinear analogue of `normSq0S_two_eq_coord`; it avoids the
-currently open general tensor-power coordinate theorem. -/
 theorem inner0S_two_eq_coord_direct
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -1061,6 +1022,7 @@ private theorem inner0S_zero_eq
   simp [tensor0SSpace_continuousLinearEquiv]
   congr
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_zero_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -1074,6 +1036,7 @@ private theorem coordInner0S_zero_eq
     Finset.sum_singleton]
   congr <;> funext a <;> exact Fin.elim0 a
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_one_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -1166,8 +1129,9 @@ private theorem tensor0SMetricStep_inner_eq_coordStep
   intro j _
   rfl
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_succ_summand_eq
-    {Idx : Type*}  {x : M} (s : Nat)
+    {Idx : Type*} {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
     (A B : Tensor0SSpace (s + 1) I x)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1201,7 +1165,7 @@ private theorem coordInner0S_succ_summand_eq
   rw [hA, hB]
   simp [Fin.cons_zero, Fin.cons_succ]
 
-set_option maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_succ_eq
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -1280,11 +1244,6 @@ private theorem coordInner0S_succ_eq
           intro tailJ _
           ring
 
-/-- Coordinate formula for the covariant tensor metric in a basis.
-
-This is the general tensor-power contraction theorem. The `s = 1` theorem is
-proved in `CotangentRiemannian`; the `s = 2` form used by Bochner is exposed
-below. The remaining proof is finite-dimensional tensor-basis induction. -/
 theorem inner0S_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M) (s : Nat)
@@ -1340,7 +1299,6 @@ theorem inner0S_eq_coord
                   basis
           rw [ih]
 
-/-- Coordinate formula for the covariant tensor squared norm. -/
 theorem normSq0S_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M) (s : Nat)
@@ -1352,8 +1310,6 @@ theorem normSq0S_eq_coord
       coordInner0S (I := I) (x := x) s gInv A A basis := by
   rw [normSq0S_eq_inner, inner0S_eq_coord (I := I) g x s basis gInv hinv]
 
-/-- The `(0,2)` coordinate formula in the nested-index form used by Ricci
-calculations. -/
 theorem inner0S_two_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -1368,8 +1324,6 @@ theorem inner0S_two_eq_coord
             B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
   exact inner0S_two_eq_coord_direct (I := I) g x basis gInv hinv A B
 
-/-- Coordinate squared norms are independent of the chosen frame realization,
-because both coordinate sums equal the intrinsic norm. -/
 theorem coord_normSq0S_eq_coord
     {Idx₁ Idx₂ : Type*} [Fintype Idx₁] [DecidableEq Idx₁]
     [Fintype Idx₂] [DecidableEq Idx₂]
@@ -1385,6 +1339,7 @@ theorem coord_normSq0S_eq_coord
       coordInner0S (I := I) (x := x) s gInv₂ A A basis₂ := by
   rw [← normSq0S_eq_coord (I := I) g x s basis₁ gInv₁ hinv₁ A,
     ← normSq0S_eq_coord (I := I) g x s basis₂ gInv₂ hinv₂ A]
+
 
 end
 

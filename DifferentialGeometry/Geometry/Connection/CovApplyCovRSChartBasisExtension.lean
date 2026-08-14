@@ -1,43 +1,10 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSSecondCovariantDerivative
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-/-!
-# Global smooth extension of the `(r,s)`-tensor covariant derivative along the chart
-basis on the chart-α good set
-
-For a smooth compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a
-chart-centre `α : M`, and a coordinate index `k : Fin (Module.finrank ℝ E)`, the
-fiber-valued tangent section `chartBasisVecFiber α k : Π x : M, TangentSpace I x` is
-smooth only on the trivialization base set `(triv α).baseSet`; in particular it is
-smooth on `chartLeviCivitaGoodSet α`. The pointwise raw section
-
-  `S_k y := covApply cov_RS (chartBasisVecFiber α k) T₀.toSection y
-          := (cov_RS).toFun T₀.toSection y (chartBasisVecFiber α k y)`
-
-is therefore well-defined on all of `M` but only smooth on
-`chartLeviCivitaGoodSet α`.
-
-This file packages a *globally smooth bundle section* `S_k_ext` of the `(r, s)`-tensor
-bundle that agrees with `S_k` on an open neighbourhood of any given chart-α good-set
-point `b₀`. The construction multiplies the chart-basis tangent section by a
-`SmoothBumpFunction I b₀` whose topological support lies inside
-`chartLeviCivitaGoodSet α`; the bump is identically `1` on a neighbourhood of `b₀`,
-so the covariant-derivative section based on the bumped tangent field coincides with
-the un-bumped one on that neighbourhood.
-
-## Main result
-
-* `covApply_covRS_chartBasis_globalSmoothExtension` — the global smooth extension
-  exists, witnessed together with the open neighbourhood `U ∋ b₀` of agreement.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -47,7 +14,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -58,8 +25,8 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
-/-- For any chart-α good-set point `b₀`, there exists a smooth bump function based
-at `b₀` whose topological support is contained in `chartLeviCivitaGoodSet α`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] in
 private lemma exists_bump_tsupport_in_goodSet
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ chartLeviCivitaGoodSet (I := I) α) :
     ∃ χ : SmoothBumpFunction I b₀,
@@ -72,6 +39,8 @@ private lemma exists_bump_tsupport_in_goodSet
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) b₀).mem_iff.mp hnhds
   exact ⟨χ, hχ⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] in
 lemma bumpedChartBasis_contMDiff
     (α : M) {b₀ : M}
     (k : Fin (Module.finrank ℝ E))
@@ -103,10 +72,8 @@ lemma bumpedChartBasis_contMDiff
   exact ContMDiffOn.smul_section_of_tsupport hχ_on_good
     (chartLeviCivitaGoodSet_isOpen (I := I) α) hχ_tsupp hChart_on_good
 
-/-- **The global smooth extension.** For any chart-α good-set point `b₀`, there is a
-globally smooth bundle section `S_k_ext` of the `(r, s)`-tensor bundle that agrees
-on an open neighbourhood `U ∋ b₀` (with `U ⊆ chartLeviCivitaGoodSet α`) with the raw
-section `y ↦ (cov_RS).toFun T₀.toSection y (chartBasisVecFiber α k y)`. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covApply_covRS_chartBasis_globalSmoothExtension
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))

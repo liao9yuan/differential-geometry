@@ -2,16 +2,14 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Covariant Tensor Fibers
 
-The metric on `T_x M` induces metrics on all covariant tensor powers.  The
-construction is intrinsic on the fiber `Tensor0SSpace s I x`; coordinate
-formulas are evaluation theorems for local frames.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -24,8 +22,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Inner product of a pointwise `(0,1) ⊗ (0,2)` tensor product splits into
-the product of the induced tensor inner products. -/
+
+
 theorem inner0S_product_one_two
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -62,8 +60,8 @@ theorem inner0S_product_one_two
   intro j _
   ring
 
-/-- Contracting a `(0,3)` tensor against a product `alpha tensor A` is the
-same as raising `alpha` and contracting the first slot of the `(0,3)` tensor. -/
+
+
 theorem inner0S_three_product_right
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -105,7 +103,7 @@ theorem inner0S_three_product_right
   intro j _
   ring
 
-/-- Squared norm of `r • N - α ⊗ A` for a `(0,1) ⊗ (0,2)` product. -/
+
 theorem normSq0S_smul_sub_product_one_two
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -803,6 +801,7 @@ theorem inner0S_two_metricCompatible_coord_algebra
       (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
         U i k * U j l * (NA i j * B k l + A i j * NB k l)) := hright.symm
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem deriv4sum
     {Idx : Type*} [Fintype Idx]
     (U A B : M -> Idx -> Idx -> Real)

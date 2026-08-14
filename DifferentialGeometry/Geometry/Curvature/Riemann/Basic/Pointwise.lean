@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped BigOperators Manifold ContDiff Topology
@@ -19,6 +17,7 @@ variable {M : Type _} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace CovariantDerivative
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_add_first
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -63,6 +62,7 @@ private theorem riemannCurvatureAux_tangentConst_add_first
   simp [Pi.add_apply, map_add]
   module
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_smul_first
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -97,6 +97,7 @@ private theorem riemannCurvatureAux_tangentConst_smul_first
   simp [Pi.smul_apply, map_smul]
   module
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_add_second
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -141,6 +142,7 @@ private theorem riemannCurvatureAux_tangentConst_add_second
   simp [Pi.add_apply, map_add]
   module
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_smul_second
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -175,6 +177,7 @@ private theorem riemannCurvatureAux_tangentConst_smul_second
   simp [Pi.smul_apply, map_smul]
   module
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem riemannCurvatureAux_tangentConst_add_third
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -252,6 +255,7 @@ private theorem riemannCurvatureAux_tangentConst_add_third
   simp
   module
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem riemannCurvatureAux_tangentConst_smul_third
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -355,6 +359,7 @@ private noncomputable def riemannCurvatureZCLM
         rw [riemannCurvatureAux_tangentConst_smul_third cov hcov x a X Y Z]
         exact map_smul (cotangentToDual_gen α) a _ }
 
+omit [CompleteSpace E] in
 @[simp] private theorem riemannCurvatureZCLM_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) (x : M)
@@ -471,7 +476,7 @@ private noncomputable def riemannCurvatureModel
           rw [riemannCurvatureAux_tangentConst_smul_first cov hcov x a X (v 0) (v 1)]
           exact map_smul (cotangentToDual_gen α) a _ })
 
-/-- The pointwise `(1,3)` Riemann curvature tensor of a covariant derivative. -/
+
 noncomputable def riemannCurvatureAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) (x : M) :
@@ -568,6 +573,7 @@ private noncomputable def tangentFlatCotangentModelCLM
         exact congrArg (fun L : Module.Dual Real (TangentSpace I x) => L V)
           ((tangentFlatLinear_gen (I := I) g x).map_smul c W) }
 
+omit [CompleteSpace E] in
 @[simp] private theorem tangentFlatCotangentModelCLM_apply
     (g : SmoothRiemannianMetric I M) (x : M) (W : TangentSpace I x) :
     tangentFlatCotangentModelCLM (I := I) g x W =
@@ -575,7 +581,7 @@ private noncomputable def tangentFlatCotangentModelCLM
         (LinearMap.toContinuousLinearMap ((tangentFlatLinear_gen (I := I) g x) W)) := by
   simp [tangentFlatCotangentModelCLM]
 
-/-- The lowered pointwise `(0,4)` Riemann curvature tensor. -/
+
 noncomputable def riemannCurvature04At
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -643,7 +649,7 @@ theorem riemannCurvature04At_apply_const
   rw [tangentFlatCotangentModelCLM_apply]
   rfl
 
-/-- The pointwise Ricci tensor, obtained by tracing the `(1,3)` tensor. -/
+
 noncomputable def ricciCurvatureAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) (x : M) :
@@ -656,7 +662,7 @@ theorem ricciCurvatureAt_eq_trace
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) (x : M) :
     ricciCurvatureAt cov hcov x = ricciFromRm13At (riemannCurvatureAt cov hcov x) := rfl
 
-/-- The lowered `(0,4)` tensor is evaluation of the metric on the `(1,3)` tensor. -/
+
 theorem riemannCurvature04At_eq_lower_riemannCurvatureAt
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

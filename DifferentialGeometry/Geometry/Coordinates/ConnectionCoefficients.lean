@@ -3,16 +3,14 @@ import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Coordinate connection coefficients
 
-This file contains the bridge between the fixed-chart connection endomorphism
-used by `NablaOnTensors` and the Christoffel coefficients in the chart-induced
-coordinate frame.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,16 +21,16 @@ open scoped Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A chart-constant tangent field for a model basis vector agrees near the
-base point with the corresponding coordinate-frame vector field. -/
+
+
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 theorem tangentConstInChart_eq_coordinateFrame_eventually
     (x₀ : M) (i : CoordinateIdx (𝕜 := 𝕜) E) :
     (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ ((Module.finBasis 𝕜 E) i) :
@@ -48,9 +46,8 @@ theorem tangentConstInChart_eq_coordinateFrame_eventually
   rw [coordinateFrameAt_apply_of_mem (I := I) (x₀ := x₀) (x := x) hx i]
   rfl
 
-set_option linter.flexible false in
-/-- Model connection coefficients agree with coordinate-frame Christoffel
-coefficients in the chart-induced coordinate frame. -/
+
+
 theorem connCoeff_eq_christoffelAlong_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : (x : M) -> TangentSpace I x) (x₀ : M)

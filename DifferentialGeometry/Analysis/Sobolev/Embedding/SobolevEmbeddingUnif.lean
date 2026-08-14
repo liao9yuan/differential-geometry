@@ -149,7 +149,7 @@ private lemma rfns0_eq_normSq0S
     (W.toSection x)]
   rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
         (TensorRSSpace.toModel (W.toSection x)) (TensorRSSpace.toModel (W.toSection x)) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x
           (TensorRSSpace.toModel (W.toSection x)))
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x

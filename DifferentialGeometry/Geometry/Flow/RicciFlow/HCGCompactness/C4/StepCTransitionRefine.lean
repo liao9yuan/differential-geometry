@@ -1,16 +1,15 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTransition
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
-/-!
-# Step C transition refinement
 
-This file records the small subsequence-stability bridge needed before Step C can
-fold the fixed-pair Step-B transition producer over a finite hat family.  It does
-not choose the finite hat domains; it only says that the existing transition
-producer can be rerun after a previously chosen strict subsequence.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,15 +29,15 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- H6-driven fixed-pair transition extraction after an existing strict
-subsequence.  The normal-coordinate metric jets are reindexed along `phi0`,
-while the convergence domains and independent target-anchor sets are retained
-verbatim. -/
+
+
+
+
 theorem existsTransRefH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -63,7 +62,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (x k)))
+        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (x k)))
     (hVexp : ∀ k,
       letI : TopologicalSpace (X.obj (phi0 k)).M := (X.obj (phi0 k)).topology
       letI : ChartedSpace H (X.obj (phi0 k)).M := (X.obj (phi0 k)).charted
@@ -71,7 +70,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       V ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (y k)))
+        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (y k)))
     (hUaexp : ∀ k,
       letI : TopologicalSpace (X.obj (phi0 k)).M := (X.obj (phi0 k)).topology
       letI : ChartedSpace H (X.obj (phi0 k)).M := (X.obj (phi0 k)).charted
@@ -79,7 +78,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       Ua ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (x k)))
+        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (x k)))
     (hVaexp : ∀ k,
       letI : TopologicalSpace (X.obj (phi0 k)).M := (X.obj (phi0 k)).topology
       letI : ChartedSpace H (X.obj (phi0 k)).M := (X.obj (phi0 k)).charted
@@ -87,7 +86,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       Va ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (y k)))
+        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (y k)))
     (hJ : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj (phi0 k)) (x k) (y k)) U)
     (hJbar : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
@@ -130,11 +129,11 @@ theorem existsTransRefH6
   · simpa [PointedRiemannianSeq.subseq] using hconv
   · simpa [PointedRiemannianSeq.subseq] using hconvbar
 
-/-- Finite-family transition extraction with one shared subsequence.
 
-This is the abstract finite-hat diagonal for Step C once the concrete hat layer
-has supplied centers, domains, overlap containment, and cocycle data for every
-active transition pair. -/
+
+
+
+
 theorem existsTransFinite
     {ι : Type*} (s : Finset ι)
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -161,28 +160,28 @@ theorem existsTransFinite
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       U i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
     (hVexp : forall i, i ∈ s -> forall k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       V i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
     (hUaexp : forall i, i ∈ s -> forall k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Ua i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
     (hVaexp : forall i, i ∈ s -> forall k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Va i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
     (hJ : forall i, i ∈ s -> forall k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x i k) (y i k)) (U i))
     (hJbar : forall i, i ∈ s -> forall k, ContDiffOn Real (⊤ : ℕ∞)
@@ -285,13 +284,13 @@ theorem existsTransFinite
         · simpa [Function.comp_apply] using hconv.comp_subseq hphi1
         · simpa [Function.comp_apply] using hconvbar.comp_subseq hphi1
 
-/-- Full finite-type family form of `existsTransFinite`.
 
-The finite extractor above is convenient for induction over an arbitrary
-`Finset`.  Step C's hats are indexed by a full finite type, so this theorem
-specializes to `Finset.univ` and exposes the transition limits as actual
-families `Jinf i` and `Jbarinf i`, with continuity facts for the averaging
-bridge. -/
+
+
+
+
+
+
 theorem existsTransUniv
     {ι : Type*} [Finite ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -318,28 +317,28 @@ theorem existsTransUniv
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       U i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
     (hVexp : forall i k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       V i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
     (hUaexp : forall i k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Ua i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
     (hVaexp : forall i k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Va i ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
     (hJ : forall i k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x i k) (y i k)) (U i))
     (hJbar : forall i k, ContDiffOn Real (⊤ : ℕ∞)
@@ -436,12 +435,12 @@ theorem existsTransUniv
     dsimp [Jinf, Jbarinf] at hwU ⊢
     exact hright w hw hwU
 
-/-- Pointwise two-way normal-transition data used by the finite H6 extractor.
 
-The convergence domains `U` and `V` are independent of the bounded target
-anchors `Ua` and `Va`.  This predicate packages only the data at one sequence
-index; openness and boundedness of the fixed sets are recorded once by the
-extractor. -/
+
+
+
+
+
 structure NormalTransAt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} {ι : Type*}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -457,28 +456,28 @@ structure NormalTransAt
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     U i ⊆ Metric.ball (0 : E)
-      (expRadiusGp (I := I) (X.obj k).metric (x i k))
+      (expMapC2Radius (I := I) (X.obj k).metric (x i k))
   Vexp :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     V i ⊆ Metric.ball (0 : E)
-      (expRadiusGp (I := I) (X.obj k).metric (y i k))
+      (expMapC2Radius (I := I) (X.obj k).metric (y i k))
   Uaexp :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     Ua i ⊆ Metric.ball (0 : E)
-      (expRadiusGp (I := I) (X.obj k).metric (x i k))
+      (expMapC2Radius (I := I) (X.obj k).metric (x i k))
   Vaexp :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     Va i ⊆ Metric.ball (0 : E)
-      (expRadiusGp (I := I) (X.obj k).metric (y i k))
+      (expMapC2Radius (I := I) (X.obj k).metric (y i k))
   J : ContDiffOn Real (⊤ : ℕ∞)
     (normalTransition (I := I) (X.obj k) (x i k) (y i k)) (U i)
   Jbar : ContDiffOn Real (⊤ : ℕ∞)
@@ -496,10 +495,10 @@ structure NormalTransAt
     normalTransition (I := I) (X.obj k) (x i k) (y i k)
       (normalTransition (I := I) (X.obj k) (y i k) (x i k) w) = w
 
-/-- Extract a common H6 transition subsequence from an eventual finite family.
 
-One finite tail shift makes all pointwise `NormalTransAt` data valid at every
-new index; `existsTransUniv` then performs the usual finite diagonal. -/
+
+
+
 theorem existsTransTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} {ι : Type*} [Finite ι]
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -593,3 +592,4 @@ end HCGNormalTransition
 
 end HCGCompactness
 end DifferentialGeometry
+

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairingPolarized
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSZeroRefold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ConnLapPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
@@ -160,9 +160,28 @@ theorem phiMet_fold_comm
         appCc (I := I) (M := M) g₀ 2 2 K
           (oneMinusConnLapSmooth (I := I) g₀ 0 2 S) := by
   dsimp only
-  rw [phiMet_curv_fold (I := I) (M := M) g₀ g_bg g S,
+  have hS :
+      appCc (I := I) (M := M) g₀ 4 2
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g -
+            ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
+        appCc (I := I) (M := M) g₀ 2 2
+          (phiMetCurvCoeff (I := I) g₀ g_bg g)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 S) :=
+    phiMet_curv_fold (I := I) (M := M) g₀ g_bg g S
+  have hLS :
+      appCc (I := I) (M := M) g₀ 4 2
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g -
+            ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g)
+          (iteratedCovGrad (I := I) g₀ 0 2 2
+            (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)) =
+        appCc (I := I) (M := M) g₀ 2 2
+          (phiMetCurvCoeff (I := I) g₀ g_bg g)
+          (iteratedCovGrad (I := I) g₀ 0 2 0
+            (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)) :=
     phiMet_curv_fold (I := I) (M := M) g₀ g_bg g
-      (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)]
+      (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)
+  rw [hS, hLS]
   simp only [iteratedCovGrad_zero]
 
 /-- At a fixed path parameter, the complete centered diagonal zero/top block
@@ -292,12 +311,25 @@ theorem edge_center_s_nf
     simp only [deTurckPrincipalCometricArm,
       deTurckPrincipalCometricCoeff, sub_self, appCc_zero_left, add_zero] at hg
     dsimp only [C, Ds, Ks, K0]
+    change operatorFieldApply (I := I) (M := M) g 4 2
+        (deTurckPhiMetTotal (I := I) (M := M) g g_bg gs -
+          deTurckPhiMetTotal (I := I) (M := M) g g_bg g)
+        (iteratedCovGrad (I := I) g 0 2 2 W) =
+      deTurckPrincipalCometricArm (I := I) (M := M) g gs W +
+        operatorFieldApply (I := I) (M := M) g 2 2
+          (phiMetCurvCoeff (I := I) g g_bg gs -
+            phiMetCurvCoeff (I := I) g g_bg g) W
     rw [appCc_sub_left, hgs, hg, appCc_sub_left]
     module
   have hlowApp := congrArg
     (fun F : SmoothCcTensor g 2 2 =>
       appCc (I := I) (M := M) g 2 2 F T) hlow
   simp only [appCc_add_left] at hlowApp
+  change operatorFieldApply (I := I) (M := M) g 2 2 A0 T =
+      operatorFieldApply (I := I) (M := M) g 2 2 R0 T + Z at hrefold
+  change operatorFieldApply (I := I) (M := M) g 2 2 A0 T +
+      operatorFieldApply (I := I) (M := M) g 2 2 Ks T =
+        operatorFieldApply (I := I) (M := M) g 2 2 E0 T at hlowApp
   have hinside :
       appCc (I := I) (M := M) g 2 2 (R0 + K0) T + Z +
           appCc (I := I) (M := M) g 4 2 C
@@ -305,6 +337,7 @@ theorem edge_center_s_nf
         appCc (I := I) (M := M) g 2 2 E0 T + Ds T := by
     rw [htop T]
     simp only [appCc_add_left, appCc_sub_left]
+    change _ = operatorFieldApply (I := I) (M := M) g 2 2 E0 T + Ds T
     rw [← hlowApp, hrefold]
     module
   change J =

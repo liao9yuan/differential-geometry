@@ -11,13 +11,13 @@ import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Step D2: open-ball stage systems and limiting metrics
 
-This file begins the realization layer between the directed partial comparison maps of D1 and the
-abstract smooth direct-limit API.  The first brick restricts adjacent partial diffeomorphisms to
-open metric balls and assembles the resulting smooth open embeddings into a `SmoothSeqSystem`.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,38 +29,34 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 open Set Topology TopologicalSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : ℕ → Type u} [∀ j, MetricSpace (M j)] [∀ j, ChartedSpace H (M j)]
   [∀ j, IsManifold I ∞ (M j)] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
 
-/-- The open metric ball used as stage `j` of the Step-D direct system. -/
+
 def ballOpen (b : ∀ j, M j) (r : ℕ → ℝ) (j : ℕ) : Opens (M j) :=
   ⟨Metric.ball (b j) (r j), Metric.isOpen_ball⟩
 
-/-- The shrunk stage ball after a tail shift: stage `n` lies in member `j₀ + n` but has radius
-`2^n`.  The gap to the D1 control radius `2^(j₀+n)` supplies compact nesting. -/
+
+
 def tailBallOpen (b : ∀ j, M j) (j₀ n : ℕ) : Opens (M (j₀ + n)) :=
   ⟨Metric.ball (b (j₀ + n)) ((2 : ℝ) ^ n), Metric.isOpen_ball⟩
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- A positive-radius ball stage is nonempty. -/
 theorem ballOpen_nonempty (b : ∀ j, M j) (r : ℕ → ℝ) (j : ℕ) (hr : 0 < r j) :
     Nonempty (ballOpen b r j) := by
   refine ⟨⟨b j, ?_⟩⟩
   exact Metric.mem_ball_self hr
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- Every shrunk tail stage contains its ambient basepoint. -/
 theorem tailBall_nonempty (b : ∀ j, M j) (j₀ n : ℕ) :
     Nonempty (tailBallOpen b j₀ n) :=
   ⟨⟨b (j₀ + n), Metric.mem_ball_self (by positivity)⟩⟩
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- The shrunk radius-`2^n` tail stage is contained in the large radius-`2^(j₀+n)` stage used
-to construct the stage-limit metric. -/
 theorem tailBall_le_large (b : ∀ j, M j) (j₀ n : ℕ) :
     tailBallOpen b j₀ n ≤ ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) := by
   intro x hx
@@ -69,7 +65,7 @@ theorem tailBall_le_large (b : ∀ j, M j) (j₀ n : ℕ) :
   rw [Metric.mem_ball] at hx ⊢
   exact hx.trans_le (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (by omega))
 
-/-- Restrict a large-stage limit metric to the flat shrunk tail stage. -/
+
 noncomputable def tailMetric
     (b : ∀ j, M j) (j₀ : ℕ)
     (gInf : ∀ n, SmoothRiemannianMetric I
@@ -80,18 +76,18 @@ noncomputable def tailMetric
       (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
   exact (gInf n).restrictOpenOfSubset (I := I) (tailBall_le_large b j₀ n)
 
-/-- Radius of the compact inner core used to measure escape from the `n`th tail stage. -/
+
 def coreRadius (n : ℕ) : ℝ := (2 : ℝ) ^ n / 2
 
-/-- The ambient center, regarded as a point of the shrunk tail stage. -/
+
 def tailCenter (b : ∀ j, M j) (j₀ n : ℕ) : tailBallOpen b j₀ n :=
   ⟨b (j₀ + n), Metric.mem_ball_self (by positivity)⟩
 
-/-- The compact closed half-ball inside a shrunk tail stage. -/
+
 def tailCore (b : ∀ j, M j) (j₀ n : ℕ) : Set (tailBallOpen b j₀ n) :=
   {x | dist (b (j₀ + n)) (x : M (j₀ + n)) ≤ coreRadius n}
 
-/-- Image of the compact inner core in a smooth direct limit. -/
+
 def limitCore (b : ∀ j, M j) (j₀ : ℕ)
     [∀ n, Nonempty (tailBallOpen b j₀ n)]
     (S : SmoothSeqSystem I (fun n => tailBallOpen b j₀ n)) (n : ℕ) :
@@ -99,7 +95,6 @@ def limitCore (b : ∀ j, M j) (j₀ : ℕ)
   S.toSeqSystem.incl n '' tailCore b j₀ n
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- The ambient closed half-ball lies in the open shrunk tail stage. -/
 theorem core_subset_tail (b : ∀ j, M j) (j₀ n : ℕ) :
     Metric.closedBall (b (j₀ + n)) (coreRadius n) ⊆
       (tailBallOpen b j₀ n : Set (M (j₀ + n))) := by
@@ -112,8 +107,6 @@ theorem core_subset_tail (b : ∀ j, M j) (j₀ n : ℕ) :
   nlinarith
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- Compactness of the inner tail core comes from ambient properness, not properness of the open
-stage metric. -/
 theorem tailCore_compact (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))] : IsCompact (tailCore b j₀ n) := by
   rw [Subtype.isCompact_iff]
@@ -131,7 +124,6 @@ theorem tailCore_compact (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] in
-/-- The image of an inner core is closed in the Hausdorff smooth direct limit. -/
 theorem limitCore_closed (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))]
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
@@ -142,8 +134,6 @@ theorem limitCore_closed (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- A stage point strictly inside the half-radius core maps to an interior point of its limit
-image. -/
 theorem incl_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
     (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
@@ -169,7 +159,6 @@ theorem incl_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-/-- The image of the ambient center lies in the interior of every compact half-radius core. -/
 theorem center_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
     (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m)) :
@@ -180,8 +169,6 @@ theorem center_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] in
-/-- Every frontier point of a compact half-radius core has an ambient representative at exactly
-the core radius. -/
 theorem frontier_core_radius (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))]
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
@@ -204,7 +191,7 @@ theorem frontier_core_radius (b : ∀ j, M j) (j₀ n : ℕ)
   have hint := incl_mem_coreInt b j₀ n S hlt
   exact hnotInt (hxeq ▸ hint)
 
-/-- Restrict the adjacent partial comparison map to two prescribed open-ball stages. -/
+
 def ballStep
     (b : ∀ j, M j) (r : ℕ → ℝ)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -236,7 +223,7 @@ def ballSystem
     (fun j => PartialDiffeomorph.opensMap_inv_mdiff (I := I) (M := M j) (N := M (j + 1))
       (Ψ j) (hsrc j) (hmap j))
 
-/-- The actual pullback of a target metric to a source open through a partial diffeomorphism. -/
+
 def ballPullbackMetric {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -251,7 +238,8 @@ def ballPullbackMetric {j l : ℕ}
     PartialDiffeomorph.toOpensDiffeo Φ hU
   exact Diffeomorph.pullbackMetric (I := I) (g.restrictOpen (I := I) W) F
 
-/-- Evaluation of `ballPullbackMetric` in ambient tangent vectors. -/
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_inner {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -274,8 +262,8 @@ theorem ballPullback_inner {j l : ℕ}
     PartialDiffeomorph.opensDiffeo_mfderiv Φ hU x w]
   rfl
 
-/-- Source inclusion for a composite partial diffeomorphism on an open whose first image lies in
-the source of the second map. -/
+
+
 def ballTransSource {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -285,7 +273,7 @@ def ballTransSource {j l m : ℕ}
   intro x hx
   exact ⟨hU hx, hnext (Set.mem_image_of_mem _ hx)⟩
 
-/-- Pull a metric through a tail map on the image open and then through a fixed prefix map. -/
+
 def nestedBallPullback {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -302,7 +290,8 @@ def nestedBallPullback {j l m : ℕ}
     PartialDiffeomorph.toOpensDiffeo Φ hU
   exact Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F
 
-/-- The actual pullback by a composite partial diffeomorphism is the nested ball pullback. -/
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_trans {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -352,7 +341,8 @@ theorem ballPullback_trans {j l m : ℕ}
   rw [hcomp]
   rfl
 
-/-- Pullback metrics agree when the underlying partial maps have the same coercion. -/
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_congr {j l : ℕ}
     (Φ Ψ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (U : Opens (M j)) (hΦ : (U : Set (M j)) ⊆ Φ.source)
@@ -373,8 +363,9 @@ theorem ballPullback_congr {j l : ℕ}
   intro x v w
   rw [ballPullback_inner, ballPullback_inner, hmap]
 
-/-- Transporting a target stage, its partial map, and its metric along the same index equality does
-not change the source pullback metric. -/
+
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_cast {j l m : ℕ} (h : l = m)
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (g : ∀ n, SmoothRiemannianMetric I (M n))
@@ -384,7 +375,8 @@ theorem ballPullback_cast {j l m : ℕ} (h : l = m)
   subst h
   rfl
 
-/-- Reassociating the target index of a chain does not change its pullback metric. -/
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_assoc
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
@@ -399,7 +391,7 @@ theorem ballPullback_assoc
     ballPullback_cast (I := I) (M := M) (Nat.add_assoc j a b).symm
       (chainComp (I := I) (Mf := M) Ψ j (a + b)) g U hU hA
 
-/-- Pull all later-stage metrics back to one fixed source open along the chain maps. -/
+
 noncomputable def chainPullbackSeq
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
@@ -408,7 +400,8 @@ noncomputable def chainPullbackSeq
     (k : ℕ) : SmoothRiemannianMetric I U :=
   ballPullbackMetric (chainComp (I := I) (Mf := M) Ψ j k) U (hU k) (g (j + k))
 
-/-- Pulling back the metric at tail length zero is exactly its restriction to the source open. -/
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem chainPullback_zero
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
@@ -438,8 +431,9 @@ theorem chainPullback_zero
   rw [hmfd]
   rfl
 
-/-- Peeling the first map from a finite chain identifies the source-stage pullback inner product
-with the next-stage pullback inner product evaluated along the open-to-open step map. -/
+
+
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem chainPullback_step
     [NeZero (Module.finrank ℝ E)]
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -449,7 +443,7 @@ theorem chainPullback_step
     (hV : ∀ k, (V : Set (M (j + 1))) ⊆
       (chainComp (I := I) (Mf := M) Ψ (j + 1) k).source)
     (hmap : (chainComp (I := I) (Mf := M) Ψ j 1 : M j → M (j + 1)) ''
-      (U : Set (M j)) ⊆ (V : Set (M (j + 1))) )
+      (U : Set (M j)) ⊆ (V : Set (M (j + 1))))
     (b : ℕ) (x : U) (v w : TangentSpace I x) :
     (chainPullbackSeq (I := I) Ψ g U hU (1 + b)).inner x v w =
       (chainPullbackSeq (I := I) Ψ g V hV b).inner
@@ -505,8 +499,8 @@ theorem chainPullback_step
       rfl
     _ = _ := rfl
 
-/-- The shifted open stages and their one-step restricted chain maps form the smooth direct system
-used by the Step-D limit. -/
+
+
 noncomputable def chainBallSystem
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -515,7 +509,7 @@ noncomputable def chainBallSystem
     (hmap : ∀ n,
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
         M (j₀ + n) → M (j₀ + (n + 1))) '' (U n : Set (M (j₀ + n))) ⊆
-        (U (n + 1) : Set (M (j₀ + (n + 1)))) ) :
+        (U (n + 1) : Set (M (j₀ + (n + 1))))) :
     SmoothSeqSystem I (fun n => U n) :=
   SmoothSeqSystem.ofSucc
     (fun n => PartialDiffeomorph.opensMap
@@ -527,8 +521,10 @@ noncomputable def chainBallSystem
     (fun n => PartialDiffeomorph.opensMap_inv_mdiff
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n))
 
-/-- Adjacent pullback compatibility of the stage-limit metrics supplies the full metric cocycle
-for `chainBallSystem`. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)]
+    [∀ (j : ℕ), T2Space (M j)] [I.Boundaryless] in
 theorem chainMetricCocycle
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     [∀ n, SigmaCompactSpace (U n)]
@@ -538,7 +534,7 @@ theorem chainMetricCocycle
     (hmap : ∀ n,
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
         M (j₀ + n) → M (j₀ + (n + 1))) '' (U n : Set (M (j₀ + n))) ⊆
-        (U (n + 1) : Set (M (j₀ + (n + 1)))) )
+        (U (n + 1) : Set (M (j₀ + (n + 1)))))
     (gInf : ∀ n, SmoothRiemannianMetric I (U n))
     (hstep : ∀ n,
       let F : U n → U (n + 1) := PartialDiffeomorph.opensMap
@@ -558,8 +554,8 @@ theorem chainMetricCocycle
   rw [hF]
   exact (hstep n x v w).symm
 
-/-- The ambient pointed sequence underlying a chain of open stages.  Its basepoints are the
-stage-system transports of `O₀`, coerced from each open subtype to the original manifold. -/
+
+
 def chainAmbientSeq
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     (S : SmoothSeqSystem I (fun n => U n)) (O₀ : U 0)
@@ -570,8 +566,8 @@ def chainAmbientSeq
       basepoint := (S.toSeqSystem.F (Nat.zero_le n) O₀ : M (j₀ + n))
       metric := g (j₀ + n) }
 
-/-- Lift the direct-limit comparison maps from open-stage codomains to the original ambient
-manifolds.  Sources and exhaustion are unchanged; each target is exactly `U n`. -/
+
+
 noncomputable def chainAmbientMaps
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     [∀ n, SigmaCompactSpace (U n)]
@@ -599,16 +595,16 @@ section ApproxData
 
 open Bundle
 
-variable [∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (M j)]
 variable [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
 variable [∀ j, IsRiemannianManifold I (M j)]
 variable [NeZero (Module.finrank ℝ E)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 include I in
-/-- A positive-radius tail ball is preconnected for the ambient Riemannian distance. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), IsManifold I ∞ (M j)]
+    [∀ (j : ℕ), SigmaCompactSpace (M j)] [∀ (j : ℕ), T2Space (M j)] [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)] in
 theorem tailBall_preconn (b : ∀ j, M j) (j₀ n : ℕ) :
     PreconnectedSpace (tailBallOpen b j₀ n) := by
   have hR : 0 < (2 : ℝ) ^ n := by positivity
@@ -644,7 +640,7 @@ theorem tailBall_preconn (b : ∀ j, M j) (j₀ n : ℕ) :
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)]
   [NeZero (Module.finrank ℝ E)] in
-/-- Lower quadratic-form bound from the `C⁰` tensor error. -/
+omit [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)] [∀ (j : ℕ), T2Space (M j)] in
 theorem speed_ge_of_c0 {j : ℕ}
     (P : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
       (I := I) (M := M j) (n := (∞ : WithTop ℕ∞)) 2)
@@ -681,8 +677,7 @@ theorem speed_ge_of_c0 {j : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- On a source open contained in the approximation carrier, the intrinsic covariant norm of the
-actual pullback metric equals the ambient norm of the supplied pullback witness field. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_covNorm {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -718,8 +713,7 @@ theorem ballPullback_covNorm {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- Positive-order intrinsic bounds for the actual ball pullback metric are exactly the bounds
-carried by `PreApproxIsoDataOn`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_cov_le {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -739,8 +733,6 @@ theorem ballPullback_cov_le {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- A positive-order tail bound transports unchanged through any fixed prefix.  The reference
-metric on the source is the prefix pullback of the intermediate-stage metric. -/
 theorem prefixTail_cov_le {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -760,21 +752,20 @@ theorem prefixTail_cov_le {j l m : ℕ}
   letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
   rw [ballPullback_trans]
-  let W : Opens (M l) :=
-    ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
-  letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
-    (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
-  let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
-    PartialDiffeomorph.toOpensDiffeo Φ hU
-  change metricCovDerivNorm (I := I) q
-      (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
-      (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ ε
-  rw [metricCovDerivNorm_pullback (I := I)]
-  exact ballPullback_cov_le Θ W hnext hUK gMid g D hq1 hqp (F x)
+  · let W : Opens (M l) :=
+      ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
+    letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
+    let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
+      PartialDiffeomorph.toOpensDiffeo Φ hU
+    change metricCovDerivNorm (I := I) q
+        (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
+        (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ ε
+    rw [metricCovDerivNorm_pullback (I := I)]
+    exact ballPullback_cov_le Θ W hnext hUK gMid g D hq1 hqp (F x)
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- The fixed-prefix bound in the target-parenthesized full-chain form. -/
 theorem chainPrefix_cov_le
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     {j a b : ℕ} {K : Set (M (j + a))} (U : Opens (M j))
@@ -807,9 +798,9 @@ theorem chainPrefix_cov_le
     (chainCompAssoc_eq (I := I) (Mf := M) Ψ j a b)]
   exact prefixTail_cov_le Φ Θ U hpre hnext hUK gMid g D hq1 hqp x
 
-omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [I.Boundaryless]
+  [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-/-- The actual pullback metric has the lower quadratic bound encoded by `c0_small`. -/
 theorem ballPullback_lower {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -834,7 +825,7 @@ theorem ballPullback_lower {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- The actual pullback metric has the upper quadratic bound encoded by `c0_small`. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_upper {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -859,8 +850,7 @@ theorem ballPullback_upper {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- A `C⁰` error at most `1/2` gives a uniform order-zero covariant bound for the actual
-pullback metric. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_zero_le {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -898,8 +888,7 @@ theorem ballPullback_zero_le {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- Approximate-isometry data bounds the metric-difference seminorm of the actual pullback at
-every order, including the separate order-zero tensor-error case. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackDiff_le {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -948,8 +937,7 @@ theorem pullbackDiff_le {j l : ℕ}
     exact ballPullback_cov_le Φ U hU hUK gRef g D hq1 hqp x
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A pointwise derivative bound shared by every member of a compact-open convergent sequence is
-inherited by its limit. -/
+omit [I.Boundaryless] in
 theorem limitDiff_le
     {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
     [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
@@ -983,8 +971,7 @@ theorem limitDiff_le
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- The fixed-stage limit inherits every uniform approximate-isometry derivative bound relative
-to the original stage metric. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chainLimit_base_le
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1026,8 +1013,7 @@ theorem chainLimit_base_le
       (g j) (g (j + ρ k)) (D (ρ k)).forward hqp x
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Change the reference of a positive-order metric-difference seminorm from `gBase` to a nearby
-metric `gInf`, in the exact quantitative form supplied by MSM135 Corollary II. -/
+omit [I.Boundaryless] in
 theorem diffNorm_change_le
     {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
     [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
@@ -1109,15 +1095,15 @@ theorem diffNorm_change_le
   simp_rw [hright] at hcor
   exact hcor
 
-/-- A finite scalar factor dominating the order-zero norm change and every positive-order
-Corollary-II loss up to order `p`. -/
+
+
 noncomputable def limitRefFactor (p : ℕ) : ℝ :=
   4 + ∑ r ∈ Finset.range (p + 1),
     Real.sqrt ((2 : ℝ) ^ (2 + r)) *
       (2 + 2 * lemma45CorConst (E := E) 2 p * (r : ℝ))
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The finite reference-change factor is strictly positive. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem limitRefFactor_pos (p : ℕ) : 0 < limitRefFactor (E := E) p := by
   have hterm : ∀ r : ℕ, 0 ≤ Real.sqrt ((2 : ℝ) ^ (2 + r)) *
       (2 + 2 * lemma45CorConst (E := E) 2 p * (r : ℝ)) := by
@@ -1133,7 +1119,7 @@ theorem limitRefFactor_pos (p : ℕ) : 0 < limitRefFactor (E := E) p := by
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The order-zero norm-change coefficient is bounded by `limitRefFactor`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem four_le_refFactor (p : ℕ) : 4 ≤ limitRefFactor (E := E) p := by
   have hterm : ∀ r : ℕ, 0 ≤ Real.sqrt ((2 : ℝ) ^ (2 + r)) *
       (2 + 2 * lemma45CorConst (E := E) 2 p * (r : ℝ)) := by
@@ -1149,8 +1135,7 @@ theorem four_le_refFactor (p : ℕ) : 4 ≤ limitRefFactor (E := E) p := by
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Every positive-order reference-change coefficient through order `p` is bounded by the
-single finite factor `limitRefFactor p`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem refTerm_le_factor (p r : ℕ) (hrp : r ≤ p) :
     Real.sqrt ((2 : ℝ) ^ (2 + r)) *
         (2 + 2 * lemma45CorConst (E := E) 2 p * (r : ℝ)) ≤
@@ -1171,8 +1156,7 @@ theorem refTerm_le_factor (p r : ℕ) (hrp : r ≤ p) :
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- For every target tolerance there is a positive scalar tolerance that simultaneously makes
-the order-zero metric equivalence and all finite-order reference-change losses small. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem exists_refDelta (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ∃ δ : ℝ, 0 < δ ∧ δ < 1 ∧
       (Module.finrank ℝ E : ℝ) * δ ≤ 1 / 2 ∧
@@ -1209,9 +1193,7 @@ theorem exists_refDelta (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-/-- Two metrics that are uniformly `δ`-close to one base metric through order `p` are
-`ε`-close when derivatives and norms are both measured using the second metric, provided the
-finite scalar reference-change budget is small. -/
+omit [I.Boundaryless] in
 theorem diffNorm_limit_le
     {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
     [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
@@ -1326,7 +1308,6 @@ theorem diffNorm_limit_le
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- The order-zero tail bound also transports unchanged through a fixed prefix. -/
 theorem prefixTail_zero_le {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -1347,21 +1328,20 @@ theorem prefixTail_zero_le {j l m : ℕ}
   letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
   rw [ballPullback_trans]
-  let W : Opens (M l) :=
-    ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
-  letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
-    (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
-  let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
-    PartialDiffeomorph.toOpensDiffeo Φ hU
-  change metricCovDerivNorm (I := I) 0
-      (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
-      (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ _
-  rw [metricCovDerivNorm_pullback (I := I)]
-  exact ballPullback_zero_le Θ W hnext hUK gMid g D hε (F x)
+  · let W : Opens (M l) :=
+      ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
+    letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
+    let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
+      PartialDiffeomorph.toOpensDiffeo Φ hU
+    change metricCovDerivNorm (I := I) 0
+        (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
+        (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ _
+    rw [metricCovDerivNorm_pullback (I := I)]
+    exact ballPullback_zero_le Θ W hnext hUK gMid g D hε (F x)
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- The order-zero fixed-prefix bound in target-parenthesized full-chain form. -/
 theorem chainPrefix_zero_le
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     {j a b : ℕ} {K : Set (M (j + a))} (U : Opens (M j))
@@ -1397,8 +1377,7 @@ theorem chainPrefix_zero_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A positive-length prefix with `(1/2,0)` data maps its source stage ball into the
-corresponding open ball at the end of the prefix. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem chain_image_open
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1445,7 +1424,7 @@ theorem chain_image_open
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Closed-ball consequence of `chain_image_open`. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem chain_image_ball
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1465,7 +1444,7 @@ theorem chain_image_ball
 omit [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)]
   [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [NeZero (Module.finrank ℝ E)] in
-/-- The shrunk tail ball lies in every chain source controlled on the larger D1 ball. -/
+omit [∀ (j : ℕ), SigmaCompactSpace (M j)] in
 theorem tailBall_source
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1485,7 +1464,7 @@ theorem tailBall_source
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- One-step D1 data maps the shrunk tail ball into the next shrunk radius. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailBall_image
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1530,8 +1509,7 @@ theorem tailBall_image
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- With a positive tail shift, the image of the closed shrunk ball still lies strictly inside the
-next shrunk stage. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailClosed_image
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1594,7 +1572,6 @@ theorem tailClosed_image
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The shrunk tail balls and the restricted chain maps form a smooth sequential system. -/
 noncomputable def tailBallSystem
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1622,8 +1599,7 @@ noncomputable def tailBallSystem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every adjacent transition of the shrunk tail system carries the ambient center to the next
-ambient center. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailSystem_center
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1665,8 +1641,7 @@ theorem tailSystem_center
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Transporting the stage-zero center through the shrunk tail system gives the center at every
-later stage. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailCenter_map
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1704,7 +1679,7 @@ theorem tailCenter_map
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- All shrunk-stage centers represent the same point of the direct limit. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailCenter_incl
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1738,8 +1713,7 @@ theorem tailCenter_incl
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- In a proper ambient sequence, every shrunk-stage transition has relatively compact image
-in the next shrunk stage. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailSystem_compact
     [∀ j, ProperSpace (M j)]
     (b : ∀ j, M j)
@@ -1815,7 +1789,7 @@ theorem tailSystem_compact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The cocycle of the large-stage limit metrics restricts to the shrunk tail system. -/
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailMetricCocycle
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1906,7 +1880,7 @@ theorem tailMetricCocycle
 omit [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)]
   [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [NeZero (Module.finrank ℝ E)] in
-/-- Fixed-stage `(1/2,0)` data places the source ball in every chain source. -/
+omit [∀ (j : ℕ), SigmaCompactSpace (M j)] in
 theorem chainBall_source
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1923,8 +1897,6 @@ theorem chainBall_source
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Bounds for the fixed-stage chain-pullback sequence. The order-`r` reference is the pullback
-at a sufficiently late positive prefix; compact boundedness absorbs the finite initial segment. -/
 theorem chainPullback_bdd
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2020,7 +1992,6 @@ theorem chainPullback_bdd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A fixed-stage chain-pullback sequence has a smooth `C^∞`-on-compacts limit. -/
 theorem exists_chain_limit
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2058,8 +2029,7 @@ theorem exists_chain_limit
 
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-/-- Eventual directed approximation data supplies the fixed-start and late-tail data used by
-`exists_chain_limit`, uniformly for every start after one initial shift. -/
+omit [∀ (j : ℕ), SigmaCompactSpace (M j)] in
 theorem exists_chain_data
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2100,9 +2070,6 @@ theorem exists_chain_data
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- One common target-index subsequence gives `C^∞` limits on every fixed source stage. The
-stage-`s` pullback uses chain length `φ k - s`, so all sufficiently late terms land at target
-stage `φ k`. -/
 theorem exists_limits_diag
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2236,9 +2203,6 @@ theorem exists_limits_diag
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A common diagonal subsequence supplies both the fixed-stage smooth limits and the book's
-uniform all-tail estimate `lbl407`, with every derivative and norm measured using the limit
-metric of that stage. -/
 theorem exists_limits_close
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2370,11 +2334,9 @@ theorem exists_limits_close
     have hleft' := Filter.Tendsto.congr' hevent hleft
     exact tendsto_nhds_unique hleft' hright
 
-set_option linter.unusedSectionVars false in
-omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [I.Boundaryless]
+  [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-/-- The order-zero part of `lbl407` eventually bounds every shrunk tail metric below by half of
-the corresponding ambient member metric. -/
 theorem half_ambient_le_tail
     (b : ∀ j, M j) (j₀ : ℕ)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2455,13 +2417,11 @@ theorem half_ambient_le_tail
   rw [abs_le] at hbound'
   nlinarith [hbound'.2]
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
   [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)] in
-/-- A half-metric lower bound makes the open-subtype inclusion at most two-Lipschitz on tangent
-extended norms. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem enorm_val_le_two
     (b : ∀ j, M j) (j₀ n : ℕ)
     (gAmb : SmoothRiemannianMetric I (M (j₀ + n)))
@@ -2505,8 +2465,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
   [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)] in
-/-- Under a half-metric lower bound, forgetting the open-subtype carrier multiplies every `C¹`
-path length by at most two. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem pathELength_val_le
     (b : ∀ j, M j) (j₀ n : ℕ)
     (gAmb : SmoothRiemannianMetric I (M (j₀ + n)))
@@ -2548,8 +2507,8 @@ theorem pathELength_val_le
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-/-- A `C¹` limit path from the center to the complement of the `n`th compact core has length at
-least `2^n / 4`. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem path_escape_core
     (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))]
@@ -2667,8 +2626,8 @@ theorem path_escape_core
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-/-- Every point at limit distance less than `2^n / 4` from the `n`th center lies in the compact
-half-radius core. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_core_of_edist
     (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))]
@@ -2705,7 +2664,8 @@ theorem mem_core_of_edist
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-/-- Every finite limit ball about the common tail center lies in one shrunk-stage range. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem baseRange_exhausts
     [∀ j, ProperSpace (M j)]
     (b : ∀ j, M j) (j₀ : ℕ)
@@ -2756,8 +2716,8 @@ theorem baseRange_exhausts
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-/-- Basepoint exhaustion and finite basepoint distance imply finite-ball exhaustion around every
-center. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem finiteRange_exhausts
     [∀ j, ProperSpace (M j)]
     (b : ∀ j, M j) (j₀ : ℕ)
@@ -2796,7 +2756,8 @@ theorem finiteRange_exhausts
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The shrunk tail system exhausts every finite Riemannian ball in its limit. -/
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tailRangeExhausts
     [∀ j, ProperSpace (M j)]
     (b : ∀ j, M j)
@@ -2898,7 +2859,6 @@ theorem tailRangeExhausts
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The shrunk tail system has a complete direct-limit metric. -/
 theorem tailLimitComplete
     [∀ j, ProperSpace (M j)]
     (b : ∀ j, M j)
@@ -2983,12 +2943,10 @@ theorem tailLimitComplete
     compactCover_of_step S gTail hgTail hexh hcompact
   exact limitComplete_cover S (tailCenter b j₀ 0) gTail hgTail hcover
 
-set_option linter.unusedSectionVars false in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)]
   [NeZero (Module.finrank ℝ E)] in
-/-- The pointwise all-tail `lbl407` estimate gives the compact supremum estimate required by
-Cheeger--Gromov convergence, uniformly in every tail length. -/
+omit [I.Boundaryless] in
 theorem tail_derivSup_lt
     (j₀ : ℕ)
     (U : ∀ n, Opens (M (j₀ + n)))
@@ -3025,11 +2983,9 @@ theorem tail_derivSup_lt
       (gInf n) (gInf n) (ε / 2) (by linarith)
       (fun q hqp x _ => hn₀ n hn l q hqp x)) (by linarith)
 
-set_option linter.unusedSectionVars false in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- The large-stage `lbl407` estimate restricts to compact-open convergence on the shrunk tail
-stages.  Only the stage sequence (`l = 0`) is needed for ambient Cheeger--Gromov convergence. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tailFlatSup_lt
     (b : ∀ j, M j) (j₀ : ℕ)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -3100,12 +3056,8 @@ theorem tailFlatSup_lt
               ((g (j₀ + n)).restrictOpen (I := I) U) (gInf n) (gInf n) q x
     _ ≤ ε / 2 := hbig
 
-set_option maxHeartbeats 800000 in
-set_option linter.unusedSectionVars false in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- Stagewise compact-open convergence on the open stages gives Cheeger--Gromov convergence to
-the direct limit with comparison maps landing in the original ambient manifolds. -/
 def ambientCGConverges
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n)))
     [∀ n, Nonempty (U n)] [∀ n, SigmaCompactSpace (U n)]
@@ -3299,12 +3251,8 @@ def ambientCGConverges
       (gInf k) (gInf k) < ε
   exact hkConv k hkC _ hKtarget
 
-set_option linter.unusedSectionVars false in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- **D4c for a chain of open stages.**  The zeroth tail metric is the sequence metric on each
-stage, while `gInf` is the compatible stage-limit family.  The all-tail `lbl407` estimate at
-`l = 0` supplies the stagewise compact-open input of `limitCGConverges`. -/
 def chainCGConverges
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n)))
     [∀ n, Nonempty (U n)] [∀ n, SigmaCompactSpace (U n)]
@@ -3352,12 +3300,8 @@ def chainCGConverges
   refine ⟨n₀, fun n hn K hK => ?_⟩
   simpa only [gSeq] using hn₀ n hn 0 K hK
 
-set_option linter.unusedSectionVars false in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-/-- **Ambient-target D4c for a chain of open stages.**  The comparison maps land in the original
-manifolds with target `U n`; the `l = 0` all-tail estimate is rewritten by `chainPullback_zero` to
-the restriction of the original sequence metric. -/
 def chainAmbientConv
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n)))
     [∀ n, Nonempty (U n)] [∀ n, SigmaCompactSpace (U n)]
@@ -3405,9 +3349,6 @@ def chainAmbientConv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The shrunk tail sequence converges to the same direct-limit metric used by
-`tailLimitComplete`, with comparison maps landing in the original ambient manifolds. -/
 def tailAmbientConv
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -3481,8 +3422,6 @@ def tailAmbientConv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- One-step approximate-isometry data on the closed stage balls supplies the source and image
-control needed by `ballSystem`. -/
 def ballSystemOfData
     (b : ∀ j, M j) (r ε : ℕ → ℝ) (hr : ∀ j, 0 < r j) (hε : ∀ j, 0 ≤ ε j)
     (p : ℕ → ℕ)
@@ -3519,9 +3458,6 @@ def ballSystemOfData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The eventual directed-approximation conclusion yields a smooth open-ball system after one
-tail shift.  Only the fixed parameters `ε = 1/2`, `p = 0`, and composite length `1` are needed
-for this topological realization. -/
 noncomputable def directedBallSystem
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))

@@ -11,13 +11,13 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 
-/-!
-# Rank-zero spectral realization
 
-This file identifies the rough connection Laplacian of a finite-support
-rank-zero spectral representative both with the spectral scale Laplacian in
-`L²` and with the invariant scalar Laplace--Beltrami operator pointwise.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,7 +37,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -46,8 +46,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The rank-zero spectral rough Laplacian at base Sobolev order zero, with its
-domain normalized from `H^(0 + 2)` to `H²`. -/
+
+
 noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g 0 0 2 →L[ℝ]
       tensorHs (I := I) (M := M) g 0 0 0 :=
@@ -58,7 +58,8 @@ noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
         (by norm_num : (2 : ℝ) = 0 + 2)).toContinuousLinearEquiv.toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-/-- The scalar scale Laplacian multiplies the `i`-th coordinate by `-λᵢ`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarScaleLap_coeff
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -74,9 +75,9 @@ omit [BoundarylessManifold I M] in
     -TensorEigenIdx.lambda (I := I) (M := M) i * v.coeff i
   rw [tensorHs.castEquiv_coeff]
 
-/-- On smooth rank-zero tensors, the spectral rough Laplacian at every base
-order agrees with the spectral embedding of the geometric rough connection
-Laplacian. -/
+
+
+
 theorem scalarLapHs_core
     (g : SmoothRiemannianMetric I M)
     (m : ℝ) (S : SmoothCcTensor g 0 0) :
@@ -92,8 +93,9 @@ theorem scalarLapHs_core
     rawLap_coeff (I := I) (M := M) g 0
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) S i]
 
-/-- The scalar readout of the rough connection Laplacian of an arbitrary
-smooth rank-zero tensor is its invariant scalar Laplacian. -/
+
+
+omit [CompactSpace M] in
 theorem rawLap_cc_scalar
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -133,7 +135,8 @@ theorem rawLap_cc_scalar
       (I := I) g hf x]
 
 omit [BoundarylessManifold I M] in
-/-- The scalar spectral Laplacian is norm-non-increasing from `H²` to `H⁰`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_scalarLap_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2) :
@@ -148,8 +151,8 @@ theorem norm_scalarLap_le
     _ = ‖v‖ := (tensorHs.castEquiv (I := I) (M := M)
       (g := g) (r := 0) (s := 0) _).norm_map v
 
-/-- The genuine smooth scalar represented by a finite-support rank-zero
-spectral Sobolev element. -/
+
+
 noncomputable def reprScalar0
     {g : SmoothRiemannianMetric I M}
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -158,8 +161,6 @@ noncomputable def reprScalar0
     (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection
 
 omit [BoundarylessManifold I M] in
-/-- The scalar readout of the finite rank-zero spectral representative is
-smooth. -/
 theorem reprScalar0_smooth
     {g : SmoothRiemannianMetric I M}
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -169,8 +170,6 @@ theorem reprScalar0_smooth
     (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection
 
 omit [BoundarylessManifold I M] in
-/-- The finite rank-zero spectral representative is the canonical mixed lift
-of its scalar readout. -/
 theorem repr_eq_lift
     {g : SmoothRiemannianMetric I M}
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -183,8 +182,8 @@ theorem repr_eq_lift
     (TensorRSField.lift_scalar0 (n := (∞ : WithTop ℕ∞))
       (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection)
 
-/-- The first covariant gradient of a finite rank-zero representative reads
-as the differential of its scalar realization. -/
+
+
 theorem grad_repr_apply
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -242,8 +241,8 @@ theorem grad_repr_apply
           (reprScalar0 (I := I) (M := M) v hv) x X)) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-/-- The diagonal second covariant gradient of a finite rank-zero
-representative reads as the Hessian of its scalar realization. -/
+
+
 theorem grad2_repr_diag
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -319,8 +318,8 @@ theorem grad2_repr_diag
           (vec2 (I := I) (B x) (B x)))) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-/-- Pointwise, the rough Laplacian of the finite rank-zero spectral
-representative is the canonical lift of its invariant scalar Laplacian. -/
+
+
 theorem rawLap_repr_scalar
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -335,8 +334,8 @@ theorem rawLap_repr_scalar
   exact rawLap_scalar (I := I) (M := M) g
     (reprScalar0_smooth (I := I) (M := M) v hv) x
 
-/-- In fixed-metric `L²`, the rough Laplacian of a finite-support smooth
-representative is exactly the spectral scale Laplacian. -/
+
+
 theorem rawLap_repr_toL2
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -366,8 +365,8 @@ theorem rawLap_repr_toL2
   rw [SmoothCcTensor.toL2_apply, hrepr, tensorHsToL2_tensorL2Coeff,
     tensorHsToL2_tensorL2Coeff, scalarScaleLap_coeff]
 
-/-- The fixed-metric rough Laplacian estimate for a finite spectral
-representative, with a constant independent of its spectral support. -/
+
+
 theorem rawLap_repr_norm
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -383,9 +382,9 @@ theorem rawLap_repr_norm
     (scalarScaleLap (I := I) (M := M) g v)).trans
       (norm_scalarLap_le (I := I) (M := M) g v)
 
-/-- The covariant gradient of a finite rank-zero spectral representative is
-bounded in fixed-metric `L²` by its spectral `H²` norm, independently of the
-finite support. -/
+
+
+
 theorem grad_repr_norm
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)

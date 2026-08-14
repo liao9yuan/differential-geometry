@@ -203,7 +203,8 @@ private lemma exists_smooth_logApprox {ε : ℝ} (hε : 0 < ε) :
       have hh_at : ContDiffAt ℝ (⊤ : ℕ∞) h t := by
         have hh_smooth : ContDiff ℝ (⊤ : ℕ∞) h := by
           simpa [h, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using
-            ((contDiff_const.mul contDiff_id) : ContDiff ℝ (⊤ : ℕ∞) (fun t : ℝ => (-(1 / ε : ℝ)) * t))
+            ((contDiff_const.mul contDiff_id) : ContDiff ℝ (⊤ : ℕ∞)
+              (fun t : ℝ => (-(1 / ε : ℝ)) * t))
         exact hh_smooth.contDiffAt
       exact (hχ_smooth.contDiffAt.mul hg_at).add
         ((contDiff_const.sub hχ_smooth).contDiffAt.mul hh_at)
@@ -219,7 +220,8 @@ private lemma exists_smooth_logApprox {ε : ℝ} (hε : 0 < ε) :
       convert ((hasDerivAt_const t ε).add (hasDerivAt_id t)) using 1
       ring
     have hlog : HasDerivAt (fun s : ℝ => Real.log (ε + s)) ((ε + t)⁻¹) t := by
-      simpa [one_div, add_comm] using h1.log (by simpa [add_comm] using ne_of_gt (by linarith : 0 < ε + t))
+      simpa [one_div, add_comm] using h1.log
+        (by simpa [add_comm] using ne_of_gt (by linarith : 0 < ε + t))
     have hg : HasDerivAt g (-(1 / (t + ε))) t := by
       convert (hlog.neg.add (hasDerivAt_const t (Real.log ε))) using 1
       · ext s
@@ -374,7 +376,8 @@ private lemma exists_smooth_recipApprox {ε : ℝ} (hε : 0 < ε) :
         linarith
       have hg_at : ContDiffAt ℝ (⊤ : ℕ∞) g t := by
         have harg : ContDiffAt ℝ (⊤ : ℕ∞) (fun s : ℝ => s + ε) t := by
-          simpa using (contDiffAt_id.add contDiffAt_const : ContDiffAt ℝ (⊤ : ℕ∞) (fun s : ℝ => s + ε) t)
+          simpa using (contDiffAt_id.add contDiffAt_const : ContDiffAt ℝ (⊤ : ℕ∞)
+            (fun s : ℝ => s + ε) t)
         have hInv : ContDiffAt ℝ (⊤ : ℕ∞) (fun s : ℝ => 1 / (s + ε)) t :=
           (contDiffAt_const.div harg (ne_of_gt htε_pos))
         simpa [g] using hInv.sub contDiffAt_const
@@ -850,7 +853,8 @@ private theorem supersolution_energy_identity_eps
       _ = Cφ ^ 2 / ε ^ 2 := by ring
   have hQ_int :
       Integrable (fun x => φ x ^ 2 / (u x + ε) ^ 2 *
-        @inner ℝ E _ (hw_u.weakGrad x) (matMulE (A.a x) (hw_u.weakGrad x))) (volume.restrict Ω) := by
+        @inner ℝ E _ (hw_u.weakGrad x) (matMulE (A.a x) (hw_u.weakGrad x)))
+          (volume.restrict Ω) := by
     have hbase :=
       integrable_bounded_mul_bilinFormIntegrand A hw_u hweight_sq_meas hweight_sq_bound
     convert hbase using 1
@@ -1219,13 +1223,15 @@ theorem log_gradient_bound_of_supersolution
           positivity
         simpa [hφ0] using hnonneg
     have hgrad_sq_meas : AEStronglyMeasurable (fun x => ‖hw_u.weakGrad x‖ ^ 2) μ := by
-      exact (hw_u.weakGrad_norm_memLp.aestronglyMeasurable.aemeasurable.pow_const 2).aestronglyMeasurable
+      exact (hw_u.weakGrad_norm_memLp.aestronglyMeasurable.aemeasurable.pow_const
+        2).aestronglyMeasurable
     have hg_meas : ∀ n, AEMeasurable (g n) μ := by
       intro n
       exact (hweight_sq_meas n).aemeasurable.mul hgrad_sq_meas.aemeasurable
     have hg0_meas : AEStronglyMeasurable g0 μ := by
       exact ((hφ.continuous.aestronglyMeasurable.aemeasurable.div
-        hw_u.memLp.aestronglyMeasurable.aemeasurable).pow_const 2).aestronglyMeasurable.mul hgrad_sq_meas
+        hw_u.memLp.aestronglyMeasurable.aemeasurable).pow_const 2).aestronglyMeasurable.mul
+          hgrad_sq_meas
     have hg_nonneg : ∀ n, 0 ≤ᵐ[μ] g n := by
       intro n
       exact Filter.Eventually.of_forall fun x => by

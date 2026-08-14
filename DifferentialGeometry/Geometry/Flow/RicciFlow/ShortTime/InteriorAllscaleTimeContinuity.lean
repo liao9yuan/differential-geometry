@@ -31,30 +31,33 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open MeasureTheory Set
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The interior heat-trace summability
 
-The proved non-sharp global Weyl estimate `tensorEigen_summable_negpow` supplies
-an exponent `p > 0` with `∑ᵢ (1 + λᵢ)^{-p}` summable for `(0, 2)` tensors. From
-this fact the
-**interior heat-trace summability** `∑ᵢ (1 + λᵢ)^σ · e^{-2 λᵢ ε} < ∞` follows for
-every `σ` and every `ε > 0`: the heat factor `e^{-2 λᵢ ε}` overwhelms any
-polynomial weight, so `(1 + λᵢ)^σ e^{-2 λᵢ ε} ≤ C · (1 + λᵢ)^{-p}` (a
-`λ`-uniform polynomial-times-exponential bound), and comparison with the
-summable tail closes it. -/
 
-/-- **Interior heat-trace summability from eigenvalue-tail summability.**
-For every `σ ≥ 0` and `ε > 0`, the heat-weighted spectral family
-`i ↦ (1 + λᵢ)^σ · e^{-2 λᵢ ε}` is summable.  This is the finiteness of
-`tr(e^{2εΔ} (1 − Δ)^σ)`, derived from the eigenvalue tail
-`∑ᵢ (1 + λᵢ)^{-p} < ∞` by the `λ`-uniform smoothing bound
-`(1 + λᵢ)^{σ+p} e^{-2 λᵢ ε} ≤ tensorSmoothingConst (σ+p) · (min ε 1)^{-(σ+p)}`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatTraceWeighted_summable_of_tailSummable
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (htail : EigenvalueTailSummable (I := I) (M := M) g r s)
@@ -87,11 +90,13 @@ theorem heatTraceWeighted_summable_of_tailSummable
           exact Real.rpow_nonneg hbase_pos.le _
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hom_integral_eq
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2)
-    {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) T) :
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) τ)
       = (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * s) - 1) * u₀.coeff i := by
   set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
@@ -99,7 +104,8 @@ private theorem hom_integral_eq
   have hderiv : ⇑(homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) =ᵐ[timeMeasure T]
       fun t => -lam * (Real.exp (-lam * t) * c) :=
     coeFn_ofContinuousOn _
-  have hint_congr : (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) τ)
+  have hint_congr : (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
+    τ)
       = ∫ τ in (0:ℝ)..s, -lam * (Real.exp (-lam * τ) * c) := by
     refine intervalIntegral.integral_congr_ae ?_
     have hsub : Set.uIoc (0 : ℝ) s ⊆ Set.Icc (0 : ℝ) T :=
@@ -130,7 +136,7 @@ private theorem coeffFun_u_eq
     (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 a) T)
     (hT : 0 < T) (hT1 : T ≤ 1)
     (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2)
-    {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) T) :
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     (timeH1.toFun (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce) s).coeff i
       = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * s) * u₀.coeff i
         + ∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) τ := by
@@ -146,7 +152,8 @@ private theorem coeffFun_u_eq
   have hval : (timeH1.toFun u s).coeff i =
       (u.init).coeff i + ∫ τ in (0:ℝ)..s, (u.deriv τ).coeff i := by
     have he : (timeH1.toFun u s).coeff i =
-        (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i) (timeH1.toFun u s) := rfl
+        (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i) (timeH1.toFun u s) :=
+          rfl
     rw [he, timeH1.toFun_apply, map_add, hcomm]
     rfl
   rw [hval]
@@ -179,11 +186,13 @@ private theorem coeffFun_u_eq
   ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem duhamel_integral_abs_le
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2)
-    {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) T) :
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     |∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := a) hT gforce i) τ|
       ≤ Real.sqrt T * ‖derivModeCoeff (I := I) (M := M) (a := a) hT gforce i‖ := by
   set v := derivModeCoeff (I := I) (M := M) (a := a) hT gforce i with hv_def
@@ -198,6 +207,8 @@ private theorem duhamel_integral_abs_le
   exact hbound
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem u0_coeff_sq_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} (ha2 : 0 ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2)) :
@@ -211,6 +222,8 @@ private theorem u0_coeff_sq_summable
         mul_le_mul_of_nonneg_right hw (sq_nonneg _)
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hom_majorant_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} (ha2 : 0 ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -248,6 +261,8 @@ private theorem hom_majorant_summable
     nlinarith [hkey, hA2, hB2]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_derivModeCoeff_le
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -258,6 +273,8 @@ private theorem norm_derivModeCoeff_le
   exact perModeConvDerivL2_sq_le _ (tensor_lambda_nonneg (I := I) (M := M) i) hT _
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem duhamel_majorant_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -313,16 +330,21 @@ private theorem duhamel_majorant_summable
             + (1 + lam) ^ (-p)) := by rw [hA2, hB2]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem tsum_singleModeCLM_coeff
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
-    (hsum : Summable (fun j => singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)))
+    (hsum : Summable (fun j => singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j
+      (c j)))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
-    (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)).coeff i = c i := by
+    (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)).coeff i = c
+      i := by
   classical
   have hmap := ContinuousLinearMap.map_tsum
     (coeffCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) i) hsum
-  have hlhs : (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)).coeff i
+  have hlhs : (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j
+    (c j)).coeff i
       = (coeffCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) i)
           (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)) := rfl
   rw [hlhs, hmap]
@@ -337,19 +359,25 @@ private theorem tsum_singleModeCLM_coeff
   rw [tsum_congr hterm, tsum_ite_eq i c]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem continuousOn_coeffFun_u
     {g_bg : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u : MaxRegSolutionSpace (I := I) (M := M) a T)
     (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2) :
     ContinuousOn (fun s => (timeH1.toFun u s).coeff i) (Set.Icc (0:ℝ) T) := by
   have hcomp : ContinuousOn
-      (fun s => coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i (timeH1.toFun u s))
+      (fun s => coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i
+        (timeH1.toFun u s))
       (Set.Icc (0:ℝ) T) :=
-    (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i).continuous.comp_continuousOn
+    (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a)
+      i).continuous.comp_continuousOn
       u.continuousOn_toFun
   simpa only [coeffCLM_apply] using hcomp
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_singleModeCLM_eq
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) (c : ℝ) :
@@ -358,18 +386,19 @@ private theorem norm_singleModeCLM_eq
   rw [singleModeCLM_apply, norm_smul, norm_tensorHsBasisVec (I := I) (M := M) i,
     Real.norm_eq_abs, mul_comm]
 
-/-- **All-scale interior time-continuity of the maximal-regularity solution.**
 
-The conclusion asks for a pointwise-in-time, `Hˢ`-valued continuous path `uσ`
-on `[ε, T]` agreeing (after the spectral inclusion) with the base-scale
-represented path `timeH1.toFun u`.  The witness is synthesised mode-by-mode: `uσ s`
-is the `Hˢ` element with eigen-coordinates `i ↦ (timeH1.toFun u s).coeff i`, which
-is the unconditional sum `∑ᵢ ((toFun u s).coeff i) • bᵢ` of single-mode fields.
-Strong `Hˢ`-continuity on `[ε, T]` is the Weierstrass `M`-test
-(`continuousOn_tsum`): each single-mode summand is continuous in time and the
-mode-series of `Hˢ`-norms is dominated, uniformly on `[ε, T]`, by a summable
-family whose finiteness is the **interior heat-trace summability**
-`heatTraceWeighted_summable_of_tailSummable`. -/
+
+
+
+
+
+
+
+
+
+
+
+omit [BoundarylessManifold I M] in
 theorem interior_allscale_time_continuity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
@@ -414,7 +443,8 @@ theorem interior_allscale_time_continuity
   set Maj : TensorEigenIdx (I := I) (M := M) g_bg 0 2 → ℝ := fun i => Mhom i + Mduh i with hMaj_def
   have hMaj_sum : Summable Maj := hMhom_sum.add hMduh_sum
   have hbound : ∀ i, ∀ s ∈ Set.Icc ε T,
-      ‖singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s)‖ ≤ Maj i := by
+      ‖singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s)‖ ≤ Maj
+        i := by
     intro i s hsεT
     have hsT : s ∈ Set.Icc (0:ℝ) T := ⟨le_trans hε.le hsεT.1, hsεT.2⟩
     set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam
@@ -453,16 +483,19 @@ theorem interior_allscale_time_continuity
           mul_le_mul_of_nonneg_left habs hwσsqrt_nn
       _ = Maj i := by rw [hMaj_def, hMhom_def, hMduh_def, hwσsqrt]; ring
   have hsummable : ∀ s ∈ Set.Icc ε T,
-      Summable (fun i => singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s)) := by
+      Summable (fun i => singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i
+        (cfun i s)) := by
     intro s hs
     exact Summable.of_norm_bounded hMaj_sum (fun i => hbound i s hs)
-  refine ⟨fun s => ∑' i, singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s), ?_, ?_⟩
+  refine ⟨fun s => ∑' i, singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i
+    (cfun i s), ?_, ?_⟩
   · refine continuousOn_tsum ?_ hMaj_sum (fun i s hs => hbound i s hs)
     intro i
     have hcfcont : ContinuousOn (fun s => cfun i s) (Set.Icc ε T) :=
       (continuousOn_coeffFun_u (I := I) (M := M) u i).mono
         (fun s hs => ⟨le_trans hε.le hs.1, hs.2⟩)
-    exact (singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i).continuous.comp_continuousOn hcfcont
+    exact (singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ)
+      i).continuous.comp_continuousOn hcfcont
   · intro s hs
     refine tensorHs.ext ?_
     funext i

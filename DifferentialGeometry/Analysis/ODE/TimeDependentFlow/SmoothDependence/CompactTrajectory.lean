@@ -24,6 +24,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M]
 
+omit [BoundarylessManifold I M] [T2Space M] in
 /-- A smooth time-dependent vector field has a common positive local-flow
 window over a compact set of initial points at one anchor time. -/
 theorem exists_flow_compact [CompleteSpace E] [I.Boundaryless]

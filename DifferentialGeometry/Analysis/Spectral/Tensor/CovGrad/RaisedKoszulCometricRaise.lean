@@ -3,12 +3,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -23,7 +21,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,6 +67,8 @@ def cometricRaiseSlot0Field (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   toSection := cometricRaiseSlot0FieldSection (I := I) (M := M) g₀ s S
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma cometricRaiseSlot0Field_toSection (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g₀ 0 (s + 2)) (x : M) :
     (cometricRaiseSlot0Field (I := I) (M := M) g₀ s S).toSection x =
@@ -76,7 +76,8 @@ def cometricRaiseSlot0Field (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from S.toSection x)
           (unitTensor (I := I) (M := M) x)) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma cometricRaiseSlot0Fib_clm_apply (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 2) I x) (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
@@ -94,7 +95,8 @@ noncomputable def koszulCovecCc (g₀ : SmoothRiemannianMetric I M)
         - domDomCongrSection (I := I) g₀ (Equiv.swap (1 : Fin 3) 2)
           (symmSCovGrad3 (I := I) g₀ T))
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma koszulCovecCc_unitModel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (x : M) (a b c : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ T) x ![c, a, b] =
@@ -118,12 +120,11 @@ lemma koszulCovecCc_unitModel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcT
               ![c, a, b]
           - unitModel (I := I) (M := M) g₀ 3 (domDomCongrSection (I := I) g₀
               (Equiv.swap (1 : Fin 3) 2) W) x ![c, a, b]) := by
-    simp only [koszulCovecCc, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
+    simp only [koszulCovecCc, unitModel, SmoothCcTensor.toSection_smul,
+      SmoothCcTensor.toSection_add,
       SmoothCcTensor.toSection_sub, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
       ContMDiffSection.coe_sub, Pi.smul_apply, Pi.add_apply, Pi.sub_apply,
-      ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply,
-      Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_sub,
-      smul_eq_mul]
+]
     rfl
   rw [hlin, hperm, hperm, hperm]
   have e1 : (fun i => (![c, a, b] : Fin 3 → TangentSpace I x) ((Equiv.swap (0 : Fin 3) 2) i)) =

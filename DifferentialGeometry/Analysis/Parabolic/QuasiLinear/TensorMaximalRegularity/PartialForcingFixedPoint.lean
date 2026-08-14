@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,7 @@ def lowerState (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ) :
   lowerBall (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
     (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)) R
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem zero_mem_lowerState (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     {R : ℝ} (hR : 0 ≤ R) :
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) ∈
@@ -91,6 +92,7 @@ theorem field_mem_lower
     _ ≤ 2 * ρ := mul_le_mul hsqrt hF (norm_nonneg F) (by positivity)
     _ ≤ R := hρR
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- The mixed pointwise estimate on a lower-norm state set integrates to the
 same mixed time-`L²` estimate. -/
 theorem nemytskiiOn_mixed
@@ -284,7 +286,6 @@ theorem partial_sol_const
           div_nonneg C₂.coe_nonneg (by positivity : (0 : ℝ) ≤ (C₂ : ℝ) + 1)]
   have hΛle : Λ ≤ 1 / 2 := by rw [hΛdef]; linarith
   have hΛlt : Λ < 1 := by linarith
-
   set z₀ : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := 0 with hz₀
   set ρt := recenteredBallRetraction z₀ ρ with hρtdef
   have hρt_mem : ∀ F, ρt F ∈ Metric.closedBall z₀ ρ := fun F =>
@@ -295,7 +296,7 @@ theorem partial_sol_const
     rw [Metric.mem_closedBall, hz₀, dist_zero_right] at h
     exact h
   have hρt_lip : LipschitzWith 1 ρt :=
-    recenteredBallRetraction_lipschitzWith hρ.le z₀
+    recenteredBallRetraction_lipschitzWith_one hρ.le z₀
   set field : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
       timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T :=
     fun F => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
@@ -310,7 +311,6 @@ theorem partial_sol_const
       timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T :=
     fun F => nemytskiiOn hz hLip (field F) (hstate F)
     with hΨdef
-
   have hΨ_retr : ∀ F F',
       ‖Ψ F - Ψ F'‖ ≤ Λ * ‖ρt F - ρt F'‖ := by
     intro F F'
@@ -366,7 +366,6 @@ theorem partial_sol_const
     · refine LipschitzWith.of_dist_le_mul (fun F F' => ?_)
       rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ hΛnn]
       exact hΨ_lip F F'
-
   have hρt0 : ρt z₀ = z₀ :=
     recenteredBallRetraction_eq_self_of_mem (Metric.mem_closedBall_self hρ.le)
   have hfield0 : field z₀ = 0 := by
@@ -411,7 +410,6 @@ theorem partial_sol_const
           ((mul_le_mul_of_nonneg_left hretr0 hΛnn).trans
             (mul_le_mul_of_nonneg_right hΛle hρ.le)) le_rfl
       _ = ρ := by ring
-
   set Fstar := ContractingWith.fixedPoint Ψ hcontr with hFstar_def
   have hfix : Ψ Fstar = Fstar := ContractingWith.fixedPoint_isFixedPt hcontr
   have hFstar : ‖Fstar‖ ≤ ρ := by rw [← hfix]; exact hΨstay Fstar
@@ -445,7 +443,6 @@ theorem partial_sol_const
   have hforceAe : ⇑Fstar =ᵐ[timeMeasure T]
       fun t => Nfun (aeSetLift hz trueField t) := by
     simpa only [hfieldstar] using hforceAe₀
-
   refine ⟨maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar,
     Fstar, ?_⟩

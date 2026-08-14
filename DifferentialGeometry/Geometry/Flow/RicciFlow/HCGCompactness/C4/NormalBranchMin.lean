@@ -809,8 +809,10 @@ theorem hess_half_ctrl
           (fun z => -(show TangentSpace I z from (B.inv (z, pt)).snd)) y :=
     (LeviCivita (I := I) Y.metric).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
       hgrad_at hneg_at Filter.univ_mem hgrad
-  rw [hessFun_eq_cov_local (I := I) Y.metric hSopen hsmooth hyS v w,
-    hcov]
+  rw [hessFun_eq_cov_local (I := I) Y.metric hSopen hsmooth hyS v w]
+  have hcov' := hcov
+  simp only [gradient_eq_gradFun] at hcov'
+  rw [hcov']
 
 /-- A controlled tangent vector over a point in the half-cage belongs to the
 source of the selected quantitative branch. -/
@@ -823,10 +825,8 @@ theorem tan_mem_of_small
     (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
     (hq : 0 < q)
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
-      (c := legacyBallChart (I := I) (X.obj k) x))
-    (hf : NormalDiagFence (I := I) (X.obj k) x q e
-      (c := legacyBallChart (I := I) (X.obj k) x))
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
     {y : (X.obj k).M} :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -890,9 +890,9 @@ theorem tan_mem_of_small
     ne_of_lt (hy.trans ENNReal.ofReal_lt_top)
   have hyReal : (riemannianEDist I x y).toReal < ρ / 2 :=
     (ENNReal.lt_ofReal_iff_toReal_lt hyFin).mp hy
-  have hyControl := hb.chart_mem_norm_le k x y
+  have hyControl := hb.raw_chart_mem_norm_le k x y
     ⟨hyFin, hyReal.trans_le hρexp⟩
-  let a : E := NormalCoordinates.framedChartAt
+  let a : E := NormalCoordinates.normalChartAt
     (I := I) (X.obj k).metric x y
   have haρ : ‖a‖ < ρ := by
     calc
@@ -912,15 +912,36 @@ theorem tan_mem_of_small
     (hfence (a, 0) haClosed).1
   have haSource : a ∈ (normalExpPD (I := I) (X.obj k) x).source := by
     simpa only [normalExpPD_source] using haNormal
-  have hyDecode : NormalCoordinates.framedExpDiffeo
+  have haNorm : ‖a‖ < expMapC2Radius (I := I) (X.obj k).metric x := by
+    have haNormal' := haNormal
+    change a ∈ Metric.ball (0 : E)
+      (expMapC2Radius (I := I) (X.obj k).metric x) at haNormal'
+    rwa [Metric.mem_ball, dist_zero_right] at haNormal'
+  have haExpSource : a ∈
+      (NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius
+      (I := I) (X.obj k).metric x haNorm
+  have haTarget : a ∈
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).target :=
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).map_source
+      hyControl.1
+  have hyDecode : NormalCoordinates.expMapDiffeo
       (I := I) (X.obj k).metric x a = y := by
-    change (NormalCoordinates.framedChartAt
-      (I := I) (X.obj k).metric x).symm a = y
-    exact (NormalCoordinates.framedChartAt
-      (I := I) (X.obj k).metric x).left_inv hyControl.1
+    calc
+      NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x a =
+          expMap (I := I) (X.obj k).metric x a :=
+        NormalCoordinates.expMapDiffeo_apply_eq
+          (I := I) (X.obj k).metric x haExpSource
+      _ = (NormalCoordinates.normalChartAt
+          (I := I) (X.obj k).metric x).symm a :=
+        (NormalCoordinates.normalChartAt_symm_apply
+          (I := I) (X.obj k).metric x haTarget).symm
+      _ = y :=
+        (NormalCoordinates.normalChartAt
+          (I := I) (X.obj k).metric x).left_inv hyControl.1
   have hyTarget : y ∈ (normalExpPD (I := I) (X.obj k) x).target := by
     have hmap := (normalExpPD (I := I) (X.obj k) x).map_source haSource
-    change NormalCoordinates.framedExpDiffeo
+    change NormalCoordinates.expMapDiffeo
       (I := I) (X.obj k).metric x a ∈
         (normalExpPD (I := I) (X.obj k) x).target at hmap
     rwa [hyDecode] at hmap
@@ -942,7 +963,7 @@ theorem tan_mem_of_small
       normalTangent (I := I) (X.obj k) x z = A z :=
         (normalTanHome_apply (I := I) (X.obj k) x z hzNormal).symm
       _ = u := hAz
-  have hbase : NormalCoordinates.framedExpDiffeo
+  have hbase : NormalCoordinates.expMapDiffeo
       (I := I) (X.obj k).metric x z.1 = y := by
     simpa only [normalTangent, u] using
       congrArg (Bundle.TotalSpace.proj :
@@ -951,11 +972,11 @@ theorem tan_mem_of_small
     simpa only [normalExpPD_source] using hzNormal)
   have hz1 : z.1 = a := by
     calc
-      z.1 = NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x
-          (NormalCoordinates.framedExpDiffeo
+      z.1 = NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x
+          (NormalCoordinates.expMapDiffeo
             (I := I) (X.obj k).metric x z.1) := hzLeft.symm
-      _ = NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x y :=
-        congrArg (NormalCoordinates.framedChartAt
+      _ = NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x y :=
+        congrArg (NormalCoordinates.normalChartAt
           (I := I) (X.obj k).metric x) hbase
       _ = a := rfl
   have hzMetric : z.1 ∈ Metric.ball (0 : E) (hb.radius k x) := by
@@ -1000,8 +1021,8 @@ theorem tan_mem_of_small
   rw [← htransport.1]
   exact ⟨z, hzBall, hAz⟩
 
-/-- For a controlled pair, the selected inverse is the globally minimizing
-intrinsic Hopf--Rinow tangent. -/
+
+
 theorem inv_is_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1604,8 +1625,10 @@ theorem hess_half_inv
           (fun z => -(show TangentSpace I z from (B.inv (z, pt)).snd)) y :=
     (LeviCivita (I := I) (X.obj k).metric).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
       hgrad_at hneg_at Filter.univ_mem hgrad
-  rw [hessFun_eq_cov_local (I := I) (X.obj k).metric hSopen hsmooth hyS v w,
-    hcov]
+  rw [hessFun_eq_cov_local (I := I) (X.obj k).metric hSopen hsmooth hyS v w]
+  have hcov' := hcov
+  simp only [gradient_eq_gradFun] at hcov'
+  rw [hcov']
 
 end IsNormalDiag
 

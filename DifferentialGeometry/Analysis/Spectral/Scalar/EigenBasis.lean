@@ -3,46 +3,6 @@ import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 
-/-!
-# Spectral eigenbasis of the L² resolvent on a closed Riemannian manifold
-
-For a closed Riemannian manifold `(M, g)`, this file assembles the spectral
-eigenbasis of the compact self-adjoint resolvent
-
-  `R := resolventL2 g : Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g`
-
-into a `HilbertBasis` of `Lp ℝ 2 μ_g`, indexed by the disjoint union of finite-
-dimensional bases of every nonzero-eigenvalue eigenspace, and lifts these
-eigenvectors to the Laplacian's domain.
-
-## Main definitions
-
-* `NonzeroResolventEigenvalue g` — the subtype of nonzero eigenvalues of `R`.
-* `resolventEigenbasisSigma g` — the sigma-indexed orthonormal basis of
-  `Lp ℝ 2 μ_g` whose vector at index `⟨μ, k⟩` is the `k`-th vector of an
-  orthonormal basis of `resolventEigenspace g μ.val`.
-* `resolventHilbertEigenbasisSigma g` — the same data packaged as a
-  `HilbertBasis`.
-* `laplacianEigenfunction g i` — the lifted eigenvector in `laplacianDomain g`
-  associated to a basis index `i`.
-
-## Main results
-
-* `resolventL2_apply_resolventEigenbasisSigma`: each basis vector is an
-  eigenvector of `R` at the corresponding nonzero eigenvalue.
-* `H1ComplToLp_laplacianEigenfunction`: the lifted eigenvector projects back
-  to the corresponding L² basis vector.
-* `laplacianOp_laplacianEigenfunction`: the variational Laplacian acts on the
-  lifted eigenvector by multiplication by the (negative) Laplacian eigenvalue.
-* `nonzeroResolventEigenvalue_pos`, `nonzeroResolventEigenvalue_le_one`,
-  `laplacianEigenvalueOf_nonneg`: the basic inequalities.
-
-## Sign convention
-
-We follow the geometer convention `Δ_g = div_g ∘ grad_g`, so the Laplacian is
-non-positive on a closed manifold. The resolvent is `(1 - Δ_g)⁻¹` and its
-spectrum lies in `(0, 1]`.
--/
 
 noncomputable section
 
@@ -69,7 +29,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- `resolventL2 g` is injective on `Lp ℝ 2 μ_g`: its kernel is `{0}`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
     Function.Injective (resolventL2 (I := I) (M := M) g) := by
   rw [injective_iff_map_eq_zero]
@@ -95,7 +55,7 @@ theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
   rw [(resolvent (I := I) (M := M) g).map_zero]
   exact h_resolvent_zero
 
-/-- The eigenspace of `R` at the eigenvalue `0` is trivial. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem resolventEigenspace_zero_eq_bot (g : SmoothRiemannianMetric I M) :
     resolventEigenspace (I := I) (M := M) g 0 = ⊥ := by
   unfold resolventEigenspace
@@ -103,12 +63,6 @@ theorem resolventEigenspace_zero_eq_bot (g : SmoothRiemannianMetric I M) :
   rw [LinearMap.ker_eq_bot]
   exact resolventL2_injective (I := I) (M := M) g
 
-/-- A nonzero eigenvalue of the L² resolvent `R = resolventL2 g`.
-
-This subtype indexes the nonzero spectrum: every element packages an
-eigenvalue `μ ∈ ℝ` with the proofs `μ ≠ 0` and `Module.End.HasEigenvalue
-((resolventL2 g).toLinearMap) μ`. Together with `resolvent_eigenvalue_nonneg`
-and `resolvent_eigenvalue_le_one`, this guarantees `0 < μ ≤ 1`. -/
 def NonzeroResolventEigenvalue (g : SmoothRiemannianMetric I M) : Type _ :=
   { μ : ℝ // μ ≠ 0 ∧
     Module.End.HasEigenvalue ((resolventL2 (I := I) (M := M) g).toLinearMap) μ }
@@ -117,27 +71,25 @@ namespace NonzeroResolventEigenvalue
 
 variable {g : SmoothRiemannianMetric I M}
 
-/-- The underlying real value of a nonzero resolvent eigenvalue. -/
 def val (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) : ℝ := μ.1
 
-/-- The nonzero hypothesis. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma val_ne_zero (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
     μ.val ≠ 0 := μ.2.1
 
-/-- The eigenvalue hypothesis. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hasEigenvalue (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
     Module.End.HasEigenvalue
       ((resolventL2 (I := I) (M := M) g).toLinearMap) μ.val :=
   μ.2.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[ext] lemma ext (μ ν : NonzeroResolventEigenvalue (I := I) (M := M) g)
     (h : μ.val = ν.val) : μ = ν := Subtype.ext h
 
 end NonzeroResolventEigenvalue
 
-/-- The set of nonzero eigenvalues of `R = resolventL2 g`, exhibited as the
-countable union over `n : ℕ` of the finite shells `{μ | μ ≠ 0 ∧ HasEigenvalue
-... μ ∧ 1/(n+1) ≤ |μ|}`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma nonzero_resolvent_eigenvalues_set_eq_iUnion
     (g : SmoothRiemannianMetric I M) :
     { μ : ℝ | μ ≠ 0 ∧
@@ -162,8 +114,6 @@ private lemma nonzero_resolvent_eigenvalues_set_eq_iUnion
     have h_abs_pos : 0 < |μ| := lt_of_lt_of_le h_pos hμ_size
     exact abs_pos.mp h_abs_pos
 
-/-- The set of nonzero eigenvalues of `R = resolventL2 g` is countable: a
-countable union of finite sets. -/
 theorem nonzero_resolvent_eigenvalues_set_countable
     (g : SmoothRiemannianMetric I M) :
     Set.Countable
@@ -177,8 +127,6 @@ theorem nonzero_resolvent_eigenvalues_set_countable
   exact (resolvent_eigenvalues_finite_above_on_closed
     (I := I) (M := M) g h_pos).countable
 
-/-- The subtype `{μ : ℝ // μ ≠ 0 ∧ HasEigenvalue ... μ}` (i.e.
-`NonzeroResolventEigenvalue g`) is countable. -/
 instance NonzeroResolventEigenvalue.instCountable
     (g : SmoothRiemannianMetric I M) :
     Countable (NonzeroResolventEigenvalue (I := I) (M := M) g) := by
@@ -186,14 +134,12 @@ instance NonzeroResolventEigenvalue.instCountable
   exact (nonzero_resolvent_eigenvalues_set_countable
     (I := I) (M := M) g).to_subtype
 
-/-- `NonzeroResolventEigenvalue g` carries a (noncomputable) `Encodable`
-instance, derived from countability. -/
 noncomputable instance NonzeroResolventEigenvalue.instEncodable
     (g : SmoothRiemannianMetric I M) :
     Encodable (NonzeroResolventEigenvalue (I := I) (M := M) g) :=
   Encodable.ofCountable _
 
-/-- A nonzero eigenvalue of `R = resolventL2 g` is strictly positive. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonzeroResolventEigenvalue_pos
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -205,7 +151,7 @@ theorem nonzeroResolventEigenvalue_pos
   have h_ne : μ.val ≠ 0 := μ.val_ne_zero
   exact lt_of_le_of_ne h_nn (Ne.symm h_ne)
 
-/-- A nonzero eigenvalue of `R = resolventL2 g` is at most `1`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonzeroResolventEigenvalue_le_one
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -214,8 +160,7 @@ theorem nonzeroResolventEigenvalue_le_one
   have hu_in : u ∈ resolventEigenspace (I := I) (M := M) g μ.val := hu_mem
   exact resolvent_eigenvalue_le_one (I := I) (M := M) g hu_in hu_ne
 
-/-- The Laplacian eigenvalue `λ = (1 - μ)/μ` corresponding to a nonzero
-resolvent eigenvalue `μ` is non-negative. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianEigenvalueOf_nonneg
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -226,8 +171,6 @@ theorem laplacianEigenvalueOf_nonneg
   have h_num_nn : 0 ≤ 1 - μ.val := by linarith
   exact div_nonneg h_num_nn h_pos.le
 
-/-- The eigenspace of `R = resolventL2 g` at a nonzero eigenvalue is
-finite-dimensional. -/
 instance NonzeroResolventEigenvalue.instFiniteDimensional
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -235,9 +178,6 @@ instance NonzeroResolventEigenvalue.instFiniteDimensional
       (resolventEigenspace (I := I) (M := M) g μ.val) :=
   resolventEigenspace_finiteDim_of_eigenvalue_ne_zero (I := I) (M := M) g μ.val_ne_zero
 
-/-- The standard orthonormal basis of the (finite-dimensional) eigenspace of
-`R = resolventL2 g` at a nonzero eigenvalue, indexed by
-`Fin (finrank ℝ ↥(resolventEigenspace g μ.val))`. -/
 noncomputable def resolventEigenspaceONB
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -247,8 +187,7 @@ noncomputable def resolventEigenspaceONB
       ℝ (resolventEigenspace (I := I) (M := M) g μ.val) :=
   stdOrthonormalBasis ℝ (resolventEigenspace (I := I) (M := M) g μ.val)
 
-/-- The family of eigenspaces of `R = resolventL2 g` indexed by nonzero
-eigenvalues is an orthogonal family in `Lp ℝ 2 μ_g`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem resolventEigenspace_orthogonalFamily_nonzero
     (g : SmoothRiemannianMetric I M) :
     OrthogonalFamily ℝ
@@ -269,9 +208,6 @@ theorem resolventEigenspace_orthogonalFamily_nonzero
     fun μ ν h => Subtype.ext h
   exact h_full.comp h_inj
 
-/-- The sigma-indexed family of vectors forming the eigenbasis: at index
-`⟨μ, k⟩`, this is the `k`-th `stdOrthonormalBasis` vector of
-`resolventEigenspace g μ.val`, viewed as an element of `Lp ℝ 2 μ_g`. -/
 noncomputable def resolventEigenbasisVec
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -282,7 +218,6 @@ noncomputable def resolventEigenbasisVec
     resolventEigenspace (I := I) (M := M) g i.1.val) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
 
-/-- Each eigenbasis vector lies in its eigenspace. -/
 theorem resolventEigenbasisVec_mem
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -293,7 +228,6 @@ theorem resolventEigenbasisVec_mem
   unfold resolventEigenbasisVec
   exact (resolventEigenspaceONB (I := I) (M := M) i.1 i.2).property
 
-/-- The eigenbasis family is orthonormal. -/
 theorem resolventEigenbasisVec_orthonormal (g : SmoothRiemannianMetric I M) :
     Orthonormal ℝ
       (resolventEigenbasisVec (I := I) (M := M) g) := by
@@ -304,8 +238,6 @@ theorem resolventEigenbasisVec_orthonormal (g : SmoothRiemannianMetric I M) :
   have h_sig := h_fam.orthonormal_sigma_orthonormal h_each
   convert h_sig using 1
 
-/-- Span of the eigenbasis vectors lies inside the supremum (over nonzero
-eigenvalues) of the eigenspaces. -/
 private lemma span_resolventEigenbasisVec_le_iSup_eigenspace
     (g : SmoothRiemannianMetric I M) :
     Submodule.span ℝ (Set.range
@@ -318,9 +250,6 @@ private lemma span_resolventEigenbasisVec_le_iSup_eigenspace
   refine Submodule.mem_iSup_of_mem i.1 ?_
   exact resolventEigenbasisVec_mem (I := I) (M := M) g i
 
-/-- For each nonzero eigenvalue, its eigenspace is contained in the span of
-the eigenbasis vectors (because the per-eigenspace basis already spans the
-eigenspace). -/
 private lemma resolventEigenspace_le_span_resolventEigenbasisVec
     (g : SmoothRiemannianMetric I M)
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -386,8 +315,6 @@ private lemma resolventEigenspace_le_span_resolventEigenbasisVec
   rw [h_subtype_apply] at h_after_map
   exact Submodule.span_mono h_subtype_subset h_after_map
 
-/-- The span (in `Lp ℝ 2 μ_g`) of the eigenbasis vectors equals the supremum
-over nonzero eigenvalues of the resolvent eigenspaces. -/
 theorem span_resolventEigenbasisVec_eq_iSup_eigenspace
     (g : SmoothRiemannianMetric I M) :
     Submodule.span ℝ (Set.range
@@ -399,8 +326,6 @@ theorem span_resolventEigenbasisVec_eq_iSup_eigenspace
   exact iSup_le (resolventEigenspace_le_span_resolventEigenbasisVec
     (I := I) (M := M) g)
 
-/-- The orthogonal complement of the supremum (over nonzero eigenvalues) of
-the resolvent eigenspaces is `⊥`. -/
 theorem nonzero_iSup_resolventEigenspace_orthogonal_eq_bot
     (g : SmoothRiemannianMetric I M) :
     (⨆ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -436,7 +361,6 @@ theorem nonzero_iSup_resolventEigenspace_orthogonal_eq_bot
                 (fun μ : NonzeroResolventEigenvalue (I := I) (M := M) g =>
                   resolventEigenspace (I := I) (M := M) g μ.val) hν_in_subtype
 
-/-- The orthogonal complement of the span of the eigenbasis vectors is `⊥`. -/
 theorem span_resolventEigenbasisVec_orthogonal_eq_bot
     (g : SmoothRiemannianMetric I M) :
     (Submodule.span ℝ (Set.range
@@ -444,14 +368,6 @@ theorem span_resolventEigenbasisVec_orthogonal_eq_bot
   rw [span_resolventEigenbasisVec_eq_iSup_eigenspace]
   exact nonzero_iSup_resolventEigenspace_orthogonal_eq_bot (I := I) (M := M) g
 
-/-- The sigma-indexed orthonormal basis of `Lp ℝ 2 μ_g` consisting of
-eigenvectors of `R = resolventL2 g`, indexed by pairs `⟨μ, k⟩` with `μ` a
-nonzero eigenvalue and `k` an index in the standard orthonormal basis of
-the corresponding eigenspace.
-
-This is built via `HilbertBasis.mkOfOrthogonalEqBot` from the eigenbasis
-family and the trivial-orthogonal-complement theorem; the underlying coercion
-gives back the sigma-indexed family of eigenvectors. -/
 noncomputable def resolventHilbertEigenbasisSigma
     (g : SmoothRiemannianMetric I M) :
     HilbertBasis
@@ -477,10 +393,6 @@ noncomputable def resolventHilbertEigenbasisSigma
       (span_resolventEigenbasisVec_orthogonal_eq_bot (I := I) (M := M) g))
     i
 
-/-- The sigma-indexed orthonormal-basis function (alias of
-`resolventHilbertEigenbasisSigma g`, but typed as a function for convenient
-restatement). The basis vector at index `⟨μ, k⟩` is the `k`-th
-`stdOrthonormalBasis` vector of the eigenspace at `μ.val`. -/
 noncomputable def resolventEigenbasisSigma
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -499,8 +411,6 @@ noncomputable def resolventEigenbasisSigma
   unfold resolventEigenbasisSigma
   exact resolventHilbertEigenbasisSigma_apply (I := I) (M := M) g i
 
-/-- Each sigma-indexed eigenbasis vector is an eigenvector of `R` at the
-corresponding nonzero eigenvalue: `R (b ⟨μ, k⟩) = μ.val • b ⟨μ, k⟩`. -/
 theorem resolventL2_apply_resolventEigenbasisSigma
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -516,7 +426,6 @@ theorem resolventL2_apply_resolventEigenbasisSigma
   exact (mem_resolventEigenspace_iff (I := I) (M := M) g i.1.val
     (resolventEigenbasisVec (I := I) (M := M) g i)).mp h_mem
 
-/-- Membership of the lifted eigenvector in `laplacianDomain g`. -/
 private lemma laplacianEigenfunction_mem
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -529,10 +438,6 @@ private lemma laplacianEigenfunction_mem
   refine ⟨(i.1.val)⁻¹ • resolventEigenbasisSigma (I := I) (M := M) g i, ?_⟩
   rw [(resolvent (I := I) (M := M) g).map_smul]
 
-/-- The variational-Laplacian eigenfunction in `laplacianDomain g`
-corresponding to a sigma index `i = ⟨μ, k⟩`: the lifted vector
-`μ.val⁻¹ • resolvent g (b i) ∈ laplacianDomain g` whose `H1ComplToLp` image
-is `b i` itself. -/
 noncomputable def laplacianEigenfunction
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -543,8 +448,6 @@ noncomputable def laplacianEigenfunction
       (resolventEigenbasisSigma (I := I) (M := M) g i),
     laplacianEigenfunction_mem (I := I) (M := M) g i⟩
 
-/-- The H¹→L² image of the lifted eigenvector recovers the original L²
-eigenbasis vector. -/
 theorem H1ComplToLp_laplacianEigenfunction
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -571,9 +474,6 @@ theorem H1ComplToLp_laplacianEigenfunction
   rw [(H1ComplToLp (I := I) (M := M) g).map_smul]
   rw [h_replace, hRb, smul_smul, inv_mul_cancel₀ i.1.val_ne_zero, one_smul]
 
-/-- The variational Laplacian acts on the lifted eigenvector as multiplication
-by the negative Laplacian eigenvalue:
-`Δ_g (laplacianEigenfunction g i) = -laplacianEigenvalueOf i.1.val • b i`. -/
 theorem laplacianOp_laplacianEigenfunction
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,

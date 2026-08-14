@@ -6,14 +6,14 @@ import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
 set_option autoImplicit false
 
-/-!
-# Quantitative isometry derivative bounds from H6
 
-This file develops the geometric producer behind `IsometryDerivBounds`.  It
-contains the pointwise first-derivative estimate and the differentiated
-metric-isometry/Koszul argument giving the exact second-derivative formula and
-an explicit norm bound, together with their normal-transition specialization.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -29,8 +29,16 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace Real E]
   [NormedAddCommGroup F] [NormedSpace Real F]
 
-/-- An exact isometry between metrics with the H6 model-norm comparison sends
-each vector to one of norm at most twice the original norm. -/
+noncomputable local instance nestedBilinNormedGroup :
+    NormedAddCommGroup (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance nestedBilinNormedSpace :
+    NormedSpace Real (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+
+
 theorem norm_apply_le_two
     (g : E →L[Real] E →L[Real] Real)
     (h : F →L[Real] F →L[Real] Real)
@@ -46,8 +54,8 @@ theorem norm_apply_le_two
     nlinarith
   exact le_of_sq_le_sq hsq (mul_nonneg (by norm_num) (norm_nonneg v))
 
-/-- The operator norm of an exact isometry between metrics satisfying the H6
-`1/2` and `2` model comparison is at most `2`. -/
+
+
 theorem opNorm_le_two
     (g : E →L[Real] E →L[Real] Real)
     (h : F →L[Real] F →L[Real] Real)
@@ -59,7 +67,7 @@ theorem opNorm_le_two
   refine ContinuousLinearMap.opNorm_le_bound L (by norm_num) ?_
   exact norm_apply_le_two g h L hg hh hiso
 
-/-- The order-one iterated derivative of a metric isometry has H6 bound `2`. -/
+
 theorem isom_first_bound
     (B : E →L[Real] E →L[Real] Real)
     (C : F →L[Real] F →L[Real] Real) (Phi : E -> F) (x : E)
@@ -71,8 +79,8 @@ theorem isom_first_bound
   rw [norm_iteratedFDeriv_one]
   exact opNorm_le_two B C (fderiv Real Phi x) hB hC hiso
 
-/-- A linear metric isometry is injective when the source metric has the
-standard H6 lower bound. -/
+
+
 theorem isom_injective
     (g : E →L[Real] E →L[Real] Real)
     (h : F →L[Real] F →L[Real] Real) (L : E →L[Real] F)
@@ -90,8 +98,8 @@ theorem isom_injective
     nlinarith [sq_nonneg ‖a - b‖]
   exact sub_eq_zero.mp (norm_eq_zero.mp hnorm)
 
-/-- A pointwise bilinear estimate gives the corresponding nested operator
-norm estimate. -/
+
+
 theorem opNorm₂_le
     (T : E →L[Real] E →L[Real] F) {C : Real} (hC : 0 <= C)
     (hT : forall u v : E, ‖T u v‖ <= C * ‖u‖ * ‖v‖) :
@@ -103,9 +111,9 @@ theorem opNorm₂_le
   intro v
   simpa only [mul_assoc] using hT u v
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Differentiating the coordinate isometry identity once gives the metric-jet
-term and the two derivatives of the moving differential. -/
+
+
+-- Nested continuous-linear-map codomains require a deep deterministic instance search.
 theorem isom_jet_one
     (B : E -> E →L[Real] E →L[Real] Real)
     (C : F -> F →L[Real] F →L[Real] Real)
@@ -153,12 +161,11 @@ section LoweredJet
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Differentiating a lowered second-derivative identity isolates the next
-derivative of the map.  Every remaining term contains only derivatives of the
-coefficient fields or lower derivatives of the map. -/
+
+
+
+-- Differentiating the lowered four-linear identity needs a larger elaboration budget.
+-- Its nested continuous-linear-map types also require deeper instance synthesis.
 theorem lowered_jet_next
     (C : F -> F →L[Real] F →L[Real] Real)
     (Phi : E -> F) (A : E -> E →L[Real] F)
@@ -231,14 +238,10 @@ theorem lowered_jet_next
 
 end LoweredJet
 
-variable {E0 F0 : Type*}
-  [NormedAddCommGroup E0] [InnerProductSpace Real E0]
-  [NormedAddCommGroup F0] [InnerProductSpace Real F0]
-  [FiniteDimensional Real E0] [FiniteDimensional Real F0]
-
-/-- A lowered metric pairing recovers a vector norm with constant `4` under
-the H6 lower metric bound and the inverse first-derivative bound `2`. -/
 theorem lowered_norm_le
+    {E0 F0 : Type*}
+    [NormedAddCommGroup E0] [NormedSpace Real E0]
+    [NormedAddCommGroup F0] [NormedSpace Real F0]
     (C : F0 →L[Real] F0 →L[Real] Real) (e : E0 ≃L[Real] F0)
     (T : F0) (R : E0 →L[Real] Real)
     (hClower : forall q : F0, (1 / 2 : Real) * ‖q‖ ^ 2 <= C q q)
@@ -268,10 +271,16 @@ theorem lowered_norm_le
   · have hTpos : 0 < ‖T‖ := lt_of_le_of_ne (norm_nonneg T) (Ne.symm hT)
     nlinarith [norm_nonneg R]
 
+variable {E0 F0 : Type*}
+  [NormedAddCommGroup E0] [NormedSpace Real E0]
+  [NormedAddCommGroup F0] [NormedSpace Real F0]
+
 section Gram
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
+
+variable [ContinuousDualEquiv E0] [CoerciveBilinInverse E0]
 
 noncomputable local instance dualNormedGroup :
     NormedAddCommGroup (E0 →L[Real] Real) :=
@@ -279,14 +288,6 @@ noncomputable local instance dualNormedGroup :
 
 noncomputable local instance dualNormedSpace :
     NormedSpace Real (E0 →L[Real] Real) :=
-  ContinuousLinearMap.toNormedSpace
-
-noncomputable local instance bilinNormedGroup :
-    NormedAddCommGroup (E0 →L[Real] E0 →L[Real] Real) :=
-  ContinuousLinearMap.toNormedAddCommGroup
-
-noncomputable local instance bilinNormedSpace :
-    NormedSpace Real (E0 →L[Real] E0 →L[Real] Real) :=
   ContinuousLinearMap.toNormedSpace
 
 noncomputable local instance endoNormedGroup :
@@ -313,68 +314,137 @@ noncomputable local instance triNormedSpace :
     NormedSpace Real (E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) :=
   ContinuousLinearMap.toNormedSpace
 
-/-- The metric-flat Gram operator depends continuously and linearly on its
-bilinear form. -/
-private noncomputable def gramCLM [CompleteSpace E0] :
+
+
+private noncomputable def gramCLM :
     (E0 →L[Real] E0 →L[Real] Real) →L[Real] (E0 →L[Real] E0) :=
   ContinuousLinearMap.compL Real E0 (E0 →L[Real] Real) E0
-    (InnerProductSpace.toDual Real E0).symm.toContinuousLinearEquiv.toContinuousLinearMap
+    (ContinuousDualEquiv.normalizedEquiv E0).symm.toContinuousLinearMap
 
-/-- The linear Gram construction agrees with Mathlib's Riesz representation of
-a bilinear form. -/
-private theorem gramCLM_apply [CompleteSpace E0]
+
+
+omit [CoerciveBilinInverse E0] in
+private theorem gramCLM_apply
     (B : E0 →L[Real] E0 →L[Real] Real) :
-    gramCLM B = InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B := by
+    gramCLM B =
+      (ContinuousDualEquiv.normalizedEquiv E0).symm.toContinuousLinearMap.comp B := by
   rfl
 
-/-- A coercive bilinear form has a unit-valued Gram operator. -/
+
 private theorem gram_isUnit [CompleteSpace E0]
     {B : E0 →L[Real] E0 →L[Real] Real} (hB : IsCoercive B) :
     IsUnit (gramCLM B) := by
-  rw [gramCLM_apply]
-  exact ⟨hB.continuousLinearEquivOfBilin.toUnit, rfl⟩
+  let eB : E0 ≃L[Real] (E0 →L[Real] Real) :=
+    ContinuousLinearEquiv.ofBijective B
+      (LinearMap.ker_eq_bot.mpr hB.bilin_injective)
+      (LinearMap.range_eq_top.mpr (CoerciveBilinInverse.surjective hB))
+  let e : E0 ≃L[Real] E0 :=
+    eB.trans (ContinuousDualEquiv.normalizedEquiv E0).symm
+  refine ⟨e.toUnit, ?_⟩
+  change (ContinuousDualEquiv.normalizedEquiv E0).symm.toContinuousLinearMap.comp B =
+    gramCLM B
+  rfl
 
-/-- Ring inversion of a coercive Gram operator is the inverse Lax--Milgram
-map. -/
+
+
 private theorem gram_inv_eq [CompleteSpace E0]
     {B : E0 →L[Real] E0 →L[Real] Real} (hB : IsCoercive B) :
     Ring.inverse (gramCLM B) =
-      (hB.continuousLinearEquivOfBilin.symm : E0 →L[Real] E0) := by
-  rw [gramCLM_apply]
-  change Ring.inverse
-      (↑hB.continuousLinearEquivOfBilin.toUnit : E0 →L[Real] E0) = _
+      hB.sharpCLM.comp
+        (ContinuousDualEquiv.normalizedEquiv E0).toContinuousLinearMap := by
+  let eB : E0 ≃L[Real] (E0 →L[Real] Real) :=
+    ContinuousLinearEquiv.ofBijective B
+      (LinearMap.ker_eq_bot.mpr hB.bilin_injective)
+      (LinearMap.range_eq_top.mpr (CoerciveBilinInverse.surjective hB))
+  let e : E0 ≃L[Real] E0 :=
+    eB.trans (ContinuousDualEquiv.normalizedEquiv E0).symm
+  change Ring.inverse (↑e.toUnit : E0 →L[Real] E0) = _
   rw [Ring.inverse_unit]
-  rfl
+  apply ContinuousLinearMap.ext
+  intro q
+  apply hB.bilin_injective
+  rw [ContinuousLinearMap.comp_apply, hB.sharpCLM_apply, hB.apply_sharp]
+  have he := e.apply_symm_apply q
+  change (ContinuousDualEquiv.normalizedEquiv E0).symm
+      (B (e.symm q)) = q at he
+  apply (ContinuousDualEquiv.normalizedEquiv E0).symm.injective
+  simpa using he
 
-/-- The H6 lower metric comparison bounds the inverse Gram operator by `2`. -/
+
+private noncomputable def gramInvBound : Real :=
+  max 1 (2 * ‖((ContinuousDualEquiv.normalizedEquiv E0) :
+    E0 →L[Real] (E0 →L[Real] Real))‖)
+
+
+omit [CoerciveBilinInverse E0] in
+private theorem one_le_gramInvBound :
+    1 ≤ gramInvBound (E0 := E0) :=
+  le_max_left _ _
+
+omit [CoerciveBilinInverse E0] in
+private theorem gramInvBound_nonneg :
+    0 ≤ gramInvBound (E0 := E0) :=
+  zero_le_one.trans (one_le_gramInvBound (E0 := E0))
+
+
 private theorem gram_inv_norm_le [CompleteSpace E0]
     {B : E0 →L[Real] E0 →L[Real] Real} (hB : IsCoercive B)
     (hlower : ∀ v : E0, (1 / 2 : Real) * ‖v‖ ^ 2 ≤ B v v) :
-    ‖Ring.inverse (gramCLM B)‖ ≤ 2 := by
+    ‖Ring.inverse (gramCLM B)‖ ≤ gramInvBound (E0 := E0) := by
   rw [gram_inv_eq hB]
-  refine ContinuousLinearMap.opNorm_le_bound _ (by norm_num) ?_
+  refine ContinuousLinearMap.opNorm_le_bound _ (by
+    exact gramInvBound_nonneg (E0 := E0)) ?_
   intro v
-  have h := hB.symm_norm_le (c := (1 / 2 : Real)) (by norm_num)
+  have h := hB.sharp_norm_le (c := (1 / 2 : Real)) (by norm_num)
     (by
       intro w
-      simpa only [pow_two, mul_assoc] using hlower w) v
-  norm_num at h ⊢
-  exact h
+      simpa only [pow_two, mul_assoc] using hlower w)
+    (ContinuousDualEquiv.normalizedEquiv E0 v)
+  rw [ContinuousLinearMap.comp_apply, hB.sharpCLM_apply]
+  calc
+    ‖hB.sharp
+        (ContinuousDualEquiv.normalizedEquiv E0 v)‖ ≤
+        2 * ‖ContinuousDualEquiv.normalizedEquiv E0 v‖ := by
+      norm_num at h ⊢
+      exact h
+    _ ≤ 2 *
+        (‖((ContinuousDualEquiv.normalizedEquiv E0) :
+          E0 →L[Real] (E0 →L[Real] Real))‖ * ‖v‖) := by
+      gcongr
+      exact ContinuousLinearMap.le_opNorm
+        ((ContinuousDualEquiv.normalizedEquiv E0) :
+          E0 →L[Real] (E0 →L[Real] Real)) v
+    _ = (2 * ‖((ContinuousDualEquiv.normalizedEquiv E0) :
+          E0 →L[Real] (E0 →L[Real] Real))‖) * ‖v‖ := by ring
+    _ ≤ gramInvBound (E0 := E0) * ‖v‖ := by
+      gcongr
+      exact le_max_right _ _
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Passing one bilinear form to its Gram operator does not increase its norm. -/
-private theorem gram_apply_norm_le [CompleteSpace E0]
+
+omit [CoerciveBilinInverse E0] in
+private theorem gram_apply_norm_le
     (B : E0 →L[Real] E0 →L[Real] Real) :
     ‖gramCLM B‖ ≤ ‖B‖ := by
   refine ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg B) ?_
   intro v
-  change ‖(InnerProductSpace.toDual Real E0).symm (B v)‖ ≤ ‖B‖ * ‖v‖
-  rw [(InnerProductSpace.toDual Real E0).symm.norm_map]
-  exact ContinuousLinearMap.le_opNorm B v
+  change ‖(ContinuousDualEquiv.normalizedEquiv E0).symm (B v)‖ ≤
+    ‖B‖ * ‖v‖
+  calc
+    ‖(ContinuousDualEquiv.normalizedEquiv E0).symm (B v)‖ ≤
+        ‖((ContinuousDualEquiv.normalizedEquiv E0).symm :
+          (E0 →L[Real] Real) →L[Real] E0)‖ * ‖B v‖ :=
+      ContinuousLinearMap.le_opNorm
+        ((ContinuousDualEquiv.normalizedEquiv E0).symm :
+          (E0 →L[Real] Real) →L[Real] E0) (B v)
+    _ ≤ 1 * ‖B v‖ := by
+      gcongr
+      exact ContinuousDualEquiv.normalizedEquiv_symm_norm_le_one E0
+    _ = ‖B v‖ := one_mul _
+    _ ≤ ‖B‖ * ‖v‖ := ContinuousLinearMap.le_opNorm B v
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Postcomposing a continuous multilinear map with the Gram construction does
-not increase its norm. -/
+
+
+omit [CoerciveBilinInverse E0] in
 private theorem gram_comp_norm_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
     [CompleteSpace E0] {n : Nat}
@@ -386,9 +456,9 @@ private theorem gram_comp_norm_le
   change ‖gramCLM (T v)‖ ≤ ‖T‖ * ∏ i, ‖v i‖
   exact (gram_apply_norm_le (T v)).trans (T.le_opNorm v)
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Applying the Gram construction to a smooth bilinear-form field does not
-increase any iterated derivative norm. -/
+
+
+omit [CoerciveBilinInverse E0] in
 private theorem gram_deriv_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
     [CompleteSpace E0]
@@ -407,8 +477,8 @@ private theorem gram_deriv_le
   rw [hderiv]
   exact gram_comp_norm_le _
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Local Leibniz bound for an endomorphism field applied to a vector field. -/
+
+omit [ContinuousDualEquiv E0] [CoerciveBilinInverse E0] in
 private theorem norm_clm_apply_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
     (A : P → E0 →L[Real] E0) (V : P → E0) (x : P) (m : Nat)
@@ -438,8 +508,7 @@ private theorem norm_clm_apply_le
       (f := V) _ hs_open hxs] at h
   exact h
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Local Leibniz bound for a fixed continuous bilinear operation. -/
+
 private theorem norm_bilinAt_le
     {P X Y Z : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -474,9 +543,8 @@ private theorem norm_bilinAt_le
       (f := g) _ hs_open hxs] at h
   exact h
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- Local Faà-di-Bruno bound obtained by shrinking the two `ContDiffAt`
-neighborhoods to open sets on which the inner map lands in the outer domain. -/
+
+
 private theorem norm_compAt_le
     {P X Y : Type*}
     [NormedAddCommGroup P] [NormedSpace Real P]
@@ -521,11 +589,8 @@ private theorem norm_compAt_le
   rw [iteratedFDerivWithin_of_isOpen m hs_open hxs] at hcomp
   simpa only [Function.comp_apply] using hcomp
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- Uniform H6 coercivity and metric-jet bounds give explicit arbitrary-order
-bounds for the inverse Gram field. -/
+
+
 private theorem gram_inv_deriv_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
     [CompleteSpace E0]
@@ -538,7 +603,8 @@ private theorem gram_inv_deriv_le
     ‖iteratedFDeriv Real m
         (fun y => Ring.inverse (gramCLM (B y))) x‖ ≤
       (m.factorial : Real) *
-        ((m.factorial : Real) * 2 ^ (m + 1)) * D ^ m := by
+        ((m.factorial : Real) *
+          gramInvBound (E0 := E0) ^ (m + 1)) * D ^ m := by
   have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
     filter_upwards [hlower] with y hy
     apply gram_isUnit
@@ -548,25 +614,24 @@ private theorem gram_inv_deriv_le
   let hco : IsCoercive (B x) :=
     ⟨(1 / 2 : Real), by norm_num, fun v => by
       simpa only [pow_two, mul_assoc] using hlowerx v⟩
-  have hinv : ‖Ring.inverse (gramCLM (B x))‖ ≤ 2 :=
+  have hinv : ‖Ring.inverse (gramCLM (B x))‖ ≤
+      gramInvBound (E0 := E0) :=
     gram_inv_norm_le hco hlowerx
   have hgram : ∀ i, 1 ≤ i → i ≤ m →
       ‖iteratedFDeriv Real i (fun y => gramCLM (B y)) x‖ ≤ D ^ i := by
     intro i hi him
     exact (gram_deriv_le B x hB him).trans (hD i hi him)
   have h := norm_iteratedFDeriv_invComp_le
-    (E := E0) (A := fun y => gramCLM (B y)) x m 2 D
+    (E := E0) (A := fun y => gramCLM (B y)) x m
+    (gramInvBound (E0 := E0)) D
     (by
       simpa only [Function.comp_apply] using
         (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hB)
     hunit hinv hgram
-  simpa only [max_eq_left (by norm_num : (1 : Real) ≤ 2)] using h
+  simpa only [max_eq_left (one_le_gramInvBound (E0 := E0))] using h
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- The inverse Gram field applied to a smooth vector field satisfies an
-explicit all-order Leibniz bound. -/
+
+
 private theorem gram_apply_deriv_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
     [CompleteSpace E0]
@@ -582,7 +647,8 @@ private theorem gram_apply_deriv_le
         (fun y => Ring.inverse (gramCLM (B y)) (V y)) x‖ ≤
       ∑ i ∈ Finset.range (m + 1), (m.choose i : Real) *
         ((i.factorial : Real) *
-          ((i.factorial : Real) * 2 ^ (i + 1)) * D ^ i) *
+          ((i.factorial : Real) *
+            gramInvBound (E0 := E0) ^ (i + 1)) * D ^ i) *
         ‖iteratedFDeriv Real (m - i) V x‖ := by
   have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
     filter_upwards [hlower] with y hy
@@ -612,55 +678,63 @@ private theorem gram_apply_deriv_le
     (fun j hj hji => hD j hj (hji.trans him))
   gcongr
 
-/-- The fixed-slot Koszul covector, followed by Riesz representation, as a
-bounded linear map of the metric three-tensor. -/
-private noncomputable def koszulRieszCLM [CompleteSpace E0] (u v : E0) :
+
+
+private noncomputable def koszulRieszCLM (u v : E0) :
     (E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) →L[Real] E0 :=
-  (InnerProductSpace.toDual Real E0).symm.toContinuousLinearEquiv.toContinuousLinearMap.comp
+  (ContinuousDualEquiv.normalizedEquiv E0).symm.toContinuousLinearMap.comp
     ((ContinuousLinearMap.apply Real (E0 →L[Real] Real) v).comp
       ((ContinuousLinearMap.apply Real (E0 →L[Real] E0 →L[Real] Real) u).comp
         MetricKoszul.koszulCovCLM))
 
-@[simp] private theorem koszulRieszCLM_apply [CompleteSpace E0] (u v : E0)
+omit [CoerciveBilinInverse E0] in
+@[simp] private theorem koszulRieszCLM_apply (u v : E0)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) :
     koszulRieszCLM u v D =
-      (InnerProductSpace.toDual Real E0).symm (MetricKoszul.koszulCov D u v) := by
+      (ContinuousDualEquiv.normalizedEquiv E0).symm
+        (MetricKoszul.koszulCov D u v) := by
   simp [koszulRieszCLM]
 
-/-- The proof-independent raised Koszul vector obtained from ring inversion of
-the metric Gram operator. -/
+
+
 private noncomputable def raisedKoszul [CompleteSpace E0]
     (B : E0 →L[Real] E0 →L[Real] Real)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) (u v : E0) : E0 :=
   Ring.inverse (gramCLM B) (koszulRieszCLM u v D)
 
-/-- On a coercive metric, the proof-independent raised Koszul vector agrees
-with the Lax--Milgram construction. -/
+
+
 private theorem raisedKoszul_eq [CompleteSpace E0]
     {B : E0 →L[Real] E0 →L[Real] Real} (hB : IsCoercive B)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) (u v : E0) :
     raisedKoszul B D u v = MetricKoszul.koszulVec hB D u v := by
-  rw [raisedKoszul, gram_inv_eq hB, koszulRieszCLM_apply]
-  rfl
+  rw [raisedKoszul, gram_inv_eq hB, koszulRieszCLM_apply,
+    ContinuousLinearMap.comp_apply, hB.sharpCLM_apply]
+  change hB.sharp
+      (ContinuousDualEquiv.normalizedEquiv E0
+        ((ContinuousDualEquiv.normalizedEquiv E0).symm
+          (MetricKoszul.koszulCov D u v))) =
+    hB.sharp (MetricKoszul.koszulCov D u v)
+  rw [(ContinuousDualEquiv.normalizedEquiv E0).apply_symm_apply]
 
-/-- The Koszul covector followed by Riesz representation, retaining both
-vector slots as a bounded bilinear operator. -/
-private noncomputable def koszulRieszOpCLM [CompleteSpace E0] :
+
+
+private noncomputable def koszulRieszOpCLM :
     (E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) →L[Real]
       (E0 →L[Real] E0 →L[Real] E0) :=
   (ContinuousLinearMap.compL Real E0
       (E0 →L[Real] E0 →L[Real] Real) (E0 →L[Real] E0)
       (ContinuousLinearMap.compL Real E0 (E0 →L[Real] Real) E0
-        (InnerProductSpace.toDual Real E0).symm.toContinuousLinearEquiv.toContinuousLinearMap)).comp
+        (ContinuousDualEquiv.normalizedEquiv E0).symm.toContinuousLinearMap)).comp
     MetricKoszul.koszulCovCLM
 
-@[simp] private theorem koszulRieszOpCLM_apply [CompleteSpace E0]
+omit [CoerciveBilinInverse E0] in
+@[simp] private theorem koszulRieszOpCLM_apply
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) (u v : E0) :
     koszulRieszOpCLM D u v = koszulRieszCLM u v D := by
   simp [koszulRieszOpCLM, koszulRieszCLM]
-  rfl
 
-/-- Continuous bilinear postcomposition on vector-valued bilinear maps. -/
+
 private noncomputable def postBilinCLM :
     (E0 →L[Real] E0) →L[Real]
       (E0 →L[Real] E0 →L[Real] E0) →L[Real]
@@ -668,14 +742,14 @@ private noncomputable def postBilinCLM :
   (ContinuousLinearMap.compL Real E0 (E0 →L[Real] E0) (E0 →L[Real] E0)).comp
     (ContinuousLinearMap.compL Real E0 E0 E0)
 
-/-- Continuous bilinear precomposition in the first vector slot. -/
+
 private noncomputable def preLeftCLM :
     (E0 →L[Real] E0 →L[Real] E0) →L[Real]
       (E0 →L[Real] E0) →L[Real]
         (E0 →L[Real] E0 →L[Real] E0) :=
   ContinuousLinearMap.compL Real E0 E0 (E0 →L[Real] E0)
 
-/-- Continuous bilinear precomposition in the second vector slot. -/
+
 private noncomputable def preRightCLM :
     (E0 →L[Real] E0 →L[Real] E0) →L[Real]
       (E0 →L[Real] E0) →L[Real]
@@ -683,49 +757,52 @@ private noncomputable def preRightCLM :
   ((ContinuousLinearMap.compL Real E0 (E0 →L[Real] E0) (E0 →L[Real] E0)).comp
     (ContinuousLinearMap.compL Real E0 E0 E0).flip).flip
 
-/-- Postcompose the output of a bounded bilinear map by a bounded linear map. -/
+
 private noncomputable def postBilin
     (A : E0 →L[Real] E0) (K : E0 →L[Real] E0 →L[Real] E0) :
     E0 →L[Real] E0 →L[Real] E0 :=
   postBilinCLM A K
 
+omit [ContinuousDualEquiv E0] [CoerciveBilinInverse E0] in
 @[simp] private theorem postBilin_apply
     (A : E0 →L[Real] E0) (K : E0 →L[Real] E0 →L[Real] E0) (u v : E0) :
     postBilin A K u v = A (K u v) := by
   rfl
 
-/-- Precompose both inputs of a bounded bilinear map by the same bounded
-linear map. -/
+
+
 private noncomputable def preBilin
     (K : E0 →L[Real] E0 →L[Real] E0) (A : E0 →L[Real] E0) :
     E0 →L[Real] E0 →L[Real] E0 :=
   preRightCLM (preLeftCLM K A) A
 
+omit [ContinuousDualEquiv E0] [CoerciveBilinInverse E0] in
 @[simp] private theorem preBilin_apply
     (K : E0 →L[Real] E0 →L[Real] E0) (A : E0 →L[Real] E0) (u v : E0) :
     preBilin K A u v = K (A u) (A v) := by
   rfl
 
-/-- The proof-independent raised Koszul bilinear operator. -/
+
 private noncomputable def raisedKoszulOp [CompleteSpace E0]
     (B : E0 →L[Real] E0 →L[Real] Real)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) :
     E0 →L[Real] E0 →L[Real] E0 :=
   postBilin (Ring.inverse (gramCLM B)) (koszulRieszOpCLM D)
 
+omit [CoerciveBilinInverse E0] in
 @[simp] private theorem raisedKoszulOp_apply [CompleteSpace E0]
     (B : E0 →L[Real] E0 →L[Real] Real)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) (u v : E0) :
     raisedKoszulOp B D u v = raisedKoszul B D u v := by
   rfl
 
-/-- The fixed-slot Koszul--Riesz operation has the expected `3 / 2` bound. -/
-private theorem koszulRieszCLM_le [CompleteSpace E0] (u v : E0) :
+
+omit [CoerciveBilinInverse E0] in
+private theorem koszulRieszCLM_le (u v : E0) :
     ‖koszulRieszCLM u v‖ ≤ (3 / 2 : Real) * ‖u‖ * ‖v‖ := by
   refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) ?_
   intro D
-  rw [koszulRieszCLM_apply,
-    (InnerProductSpace.toDual Real E0).symm.norm_map]
+  rw [koszulRieszCLM_apply]
   have hD : ∀ a b c : E0,
       ‖D a b c‖ ≤ ‖D‖ * ‖a‖ * ‖b‖ * ‖c‖ := by
     intro a b c
@@ -735,16 +812,26 @@ private theorem koszulRieszCLM_le [CompleteSpace E0] (u v : E0) :
         gcongr
         exact D.le_opNorm a
   calc
-    ‖MetricKoszul.koszulCov D u v‖ ≤
+    ‖(ContinuousDualEquiv.normalizedEquiv E0).symm
+        (MetricKoszul.koszulCov D u v)‖ ≤
+        ‖((ContinuousDualEquiv.normalizedEquiv E0).symm :
+          (E0 →L[Real] Real) →L[Real] E0)‖ *
+          ‖MetricKoszul.koszulCov D u v‖ :=
+      ContinuousLinearMap.le_opNorm
+        ((ContinuousDualEquiv.normalizedEquiv E0).symm :
+          (E0 →L[Real] Real) →L[Real] E0)
+        (MetricKoszul.koszulCov D u v)
+    _ ≤ 1 * ‖MetricKoszul.koszulCov D u v‖ := by
+      gcongr
+      exact ContinuousDualEquiv.normalizedEquiv_symm_norm_le_one E0
+    _ = ‖MetricKoszul.koszulCov D u v‖ := one_mul _
+    _ ≤
         (3 / 2 : Real) * ‖D‖ * ‖u‖ * ‖v‖ :=
       MetricKoszul.koszulCov_norm_le D (norm_nonneg D) hD u v
     _ = ((3 / 2 : Real) * ‖u‖ * ‖v‖) * ‖D‖ := by ring
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- Metric jets through order `m + 1` bound the order-`m` derivative of the
-fixed-slot raised Koszul field. -/
+
+
 private theorem raised_deriv_le
     [CompleteSpace E0]
     (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0)
@@ -759,7 +846,8 @@ private theorem raised_deriv_le
           (koszulRieszCLM u v (fderiv Real B y))) x‖ ≤
       ∑ i ∈ Finset.range (m + 1), (m.choose i : Real) *
         ((i.factorial : Real) *
-          ((i.factorial : Real) * 2 ^ (i + 1)) * D ^ i) *
+          ((i.factorial : Real) *
+            gramInvBound (E0 := E0) ^ (i + 1)) * D ^ i) *
         (((3 / 2 : Real) * ‖u‖ * ‖v‖) * D ^ (m - i + 1)) := by
   have hm_top : (m : WithTop ℕ∞) ≤ ((m + 1 : Nat) : WithTop ℕ∞) := by
     exact_mod_cast Nat.le_succ m
@@ -804,31 +892,34 @@ private theorem raised_deriv_le
         gcongr
         exact koszulRieszCLM_le u v
   apply mul_le_mul_of_nonneg_left hVbound
+  have hG : 0 ≤ gramInvBound (E0 := E0) :=
+    gramInvBound_nonneg (E0 := E0)
   positivity
 
-/-- Explicit budget for one derivative order of the raised Koszul operator. -/
+
 private noncomputable def raisedBudget [CompleteSpace E0]
     (D : Real) (m : Nat) : Real :=
   ‖postBilinCLM (E0 := E0)‖ *
     ∑ i ∈ Finset.range (m + 1), (m.choose i : Real) *
       ((i.factorial : Real) *
-        ((i.factorial : Real) * 2 ^ (i + 1)) * D ^ i) *
+        ((i.factorial : Real) *
+          gramInvBound (E0 := E0) ^ (i + 1)) * D ^ i) *
       (‖koszulRieszOpCLM (E0 := E0)‖ * D ^ (m - i + 1))
 
-/-- Finite envelope controlling every raised-Koszul derivative through order
-`m`. -/
+
+
 private noncomputable def raisedEnvelope [CompleteSpace E0]
     (D : Real) (m : Nat) : Real :=
   ∑ i ∈ Finset.range (m + 1), raisedBudget (E0 := E0) D i
 
-/-- Budget for the target raised-Koszul field after composition with a map
-whose derivatives are controlled by the power budget `P`. -/
+
+
 private noncomputable def raisedCompBudget [CompleteSpace E0]
     (D P : Real) (m : Nat) : Real :=
   (m.factorial : Real) * raisedEnvelope (E0 := E0) D m * P ^ m
 
-/-- One-step H6 budget: derivatives through order `m + 1` of the map control
-its derivative of order `m + 2`. -/
+
+
 private noncomputable def isomNextBudget [CompleteSpace E0]
     (D P : Real) (m : Nat) : Real :=
   ‖postBilinCLM (E0 := E0)‖ *
@@ -841,7 +932,7 @@ private noncomputable def isomNextBudget [CompleteSpace E0]
             raisedCompBudget (E0 := E0) D P j * P ^ (i - j + 1)) *
         P ^ (m - i + 1)
 
-/-- Recursive pair `(current order budget, envelope through this order)`. -/
+
 private noncomputable def isomBudgetState [CompleteSpace E0]
     (D : Real) : Nat → Real × Real
   | 0 => (0, 1)
@@ -852,40 +943,46 @@ private noncomputable def isomBudgetState [CompleteSpace E0]
         | k + 1 => isomNextBudget (E0 := E0) D prev.2 k
       (next, max prev.2 next)
 
-/-- Recursive H6 bound for one positive derivative order. -/
+
 private noncomputable def isomBudget [CompleteSpace E0]
     (D : Real) (n : Nat) : Real :=
   (isomBudgetState (E0 := E0) D n).1
 
-/-- Envelope containing every recursive H6 budget through order `n`. -/
+
 private noncomputable def isomEnvelope [CompleteSpace E0]
     (D : Real) (n : Nat) : Real :=
   (isomBudgetState (E0 := E0) D n).2
 
+omit [CoerciveBilinInverse E0] in
 @[simp] private theorem isomBudget_zero [CompleteSpace E0] (D : Real) :
     isomBudget (E0 := E0) D 0 = 0 := by
   rfl
 
+omit [CoerciveBilinInverse E0] in
 @[simp] private theorem isomBudget_one [CompleteSpace E0] (D : Real) :
     isomBudget (E0 := E0) D 1 = 2 := by
   rfl
 
+omit [CoerciveBilinInverse E0] in
 @[simp] private theorem isomEnvelope_zero [CompleteSpace E0] (D : Real) :
     isomEnvelope (E0 := E0) D 0 = 1 := by
   rfl
 
+omit [CoerciveBilinInverse E0] in
 private theorem isomBudget_succ [CompleteSpace E0] (D : Real) (n : Nat) :
     isomBudget (E0 := E0) D (Nat.succ (Nat.succ n)) =
       isomNextBudget (E0 := E0) D
         (isomEnvelope (E0 := E0) D (Nat.succ n)) n := by
   rfl
 
+omit [CoerciveBilinInverse E0] in
 private theorem isomEnvelope_succ [CompleteSpace E0] (D : Real) (n : Nat) :
     isomEnvelope (E0 := E0) D (Nat.succ n) =
       max (isomEnvelope (E0 := E0) D n)
         (isomBudget (E0 := E0) D (Nat.succ n)) := by
   cases n <;> rfl
 
+omit [CoerciveBilinInverse E0] in
 private theorem isomBudget_le_env [CompleteSpace E0] (D : Real) (n : Nat) :
     isomBudget (E0 := E0) D n ≤ isomEnvelope (E0 := E0) D n := by
   cases n with
@@ -894,6 +991,7 @@ private theorem isomBudget_le_env [CompleteSpace E0] (D : Real) (n : Nat) :
       rw [isomEnvelope_succ]
       exact le_max_right _ _
 
+omit [CoerciveBilinInverse E0] in
 private theorem one_le_isomEnv [CompleteSpace E0] (D : Real) (n : Nat) :
     1 ≤ isomEnvelope (E0 := E0) D n := by
   induction n with
@@ -902,29 +1000,36 @@ private theorem one_le_isomEnv [CompleteSpace E0] (D : Real) (n : Nat) :
       rw [isomEnvelope_succ]
       exact ih.trans (le_max_left _ _)
 
+omit [CoerciveBilinInverse E0] in
 private theorem isomEnv_le_succ [CompleteSpace E0] (D : Real) (n : Nat) :
     isomEnvelope (E0 := E0) D n ≤
       isomEnvelope (E0 := E0) D (Nat.succ n) := by
   rw [isomEnvelope_succ]
   exact le_max_left _ _
 
+omit [CoerciveBilinInverse E0] in
 private theorem isomBudget_le_of_le [CompleteSpace E0] (D : Real)
     {i n : Nat} (hin : i ≤ n) :
     isomBudget (E0 := E0) D i ≤ isomEnvelope (E0 := E0) D n :=
   (isomBudget_le_env (E0 := E0) D i).trans
     ((monotone_nat_of_le_succ (isomEnv_le_succ (E0 := E0) D)) hin)
 
+omit [CoerciveBilinInverse E0] in
 private theorem raisedBudget_nonneg [CompleteSpace E0]
     {D : Real} (hD : 0 ≤ D) (m : Nat) :
     0 ≤ raisedBudget (E0 := E0) D m := by
   unfold raisedBudget
+  have hG : 0 ≤ gramInvBound (E0 := E0) :=
+    gramInvBound_nonneg (E0 := E0)
   positivity
 
+omit [CoerciveBilinInverse E0] in
 private theorem raisedEnvelope_nonneg [CompleteSpace E0]
     {D : Real} (hD : 0 ≤ D) (m : Nat) :
     0 ≤ raisedEnvelope (E0 := E0) D m := by
   exact Finset.sum_nonneg fun i _ => raisedBudget_nonneg (E0 := E0) hD i
 
+omit [CoerciveBilinInverse E0] in
 private theorem raisedComp_nonneg [CompleteSpace E0]
     {D P : Real} (hD : 0 ≤ D) (hP : 0 ≤ P) (m : Nat) :
     0 ≤ raisedCompBudget (E0 := E0) D P m := by
@@ -933,65 +1038,27 @@ private theorem raisedComp_nonneg [CompleteSpace E0]
     (mul_nonneg (Nat.cast_nonneg _) (raisedEnvelope_nonneg (E0 := E0) hD m))
     (pow_nonneg hP _)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- Metric jets through order `m + 1` bound the order-`m` derivative of the
-full raised Koszul bilinear-operator field. -/
-private theorem raisedOp_deriv_le
+private theorem raisedOp_deriv_summand_le
     [CompleteSpace E0]
     (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0)
-    (m : Nat) (D : Real)
-    (hB : ContDiffAt Real ((m + 1 : Nat) : WithTop ℕ∞) B x)
+    (m i : Nat) (D : Real)
+    (hBm : ContDiffAt Real (m : WithTop ℕ∞) B x)
+    (hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x)
     (hlower : ∀ᶠ y in nhds x, ∀ q : E0,
       (1 / 2 : Real) * ‖q‖ ^ 2 ≤ B y q q)
-    (hD : ∀ i, 1 ≤ i → i ≤ m + 1 →
-      ‖iteratedFDeriv Real i B x‖ ≤ D ^ i) :
-    ‖iteratedFDeriv Real m
-        (fun y => raisedKoszulOp (B y) (fderiv Real B y)) x‖ ≤
-      raisedBudget (E0 := E0) D m := by
-  unfold raisedBudget
-  have hm_top : (m : WithTop ℕ∞) ≤ ((m + 1 : Nat) : WithTop ℕ∞) := by
-    exact_mod_cast Nat.le_succ m
-  have hBm : ContDiffAt Real (m : WithTop ℕ∞) B x := hB.of_le hm_top
-  have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
-    exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
-  have hK : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => koszulRieszOpCLM (fderiv Real B y)) x := by
-    simpa only [Function.comp_apply] using
-      (koszulRieszOpCLM (E0 := E0)).contDiff.comp_contDiffAt x hfB
-  have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
-    filter_upwards [hlower] with y hy
-    apply gram_isUnit
-    exact ⟨(1 / 2 : Real), by norm_num, fun q => by
-      simpa only [pow_two, mul_assoc] using hy q⟩
-  obtain ⟨w, hw⟩ := hunit.self_of_nhds
-  have hgram : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => gramCLM (B y)) x := by
-    simpa only [Function.comp_apply] using
-      (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hBm
-  have hinv : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => Ring.inverse (gramCLM (B y))) x := by
-    have hout : ContDiffAt Real (m : WithTop ℕ∞) Ring.inverse
-        (gramCLM (B x)) := by
-      rw [← hw]
-      exact contDiffAt_ringInverse Real w
-    simpa only [Function.comp_apply] using hout.comp x hgram
-  have hD_nonneg : 0 ≤ D := by
-    have h := hD 1 (by omega) (by omega)
-    simpa only [pow_one] using
-      (norm_nonneg (iteratedFDeriv Real 1 B x)).trans h
-  change ‖iteratedFDeriv Real m
-      (fun y => postBilinCLM (Ring.inverse (gramCLM (B y)))
-        (koszulRieszOpCLM (fderiv Real B y))) x‖ ≤ _
-  refine (norm_bilinAt_le (postBilinCLM (E0 := E0))
-    (fun y => Ring.inverse (gramCLM (B y)))
-    (fun y => koszulRieszOpCLM (fderiv Real B y))
-    x m hinv hK).trans ?_
-  refine mul_le_mul_of_nonneg_left ?_
-    (norm_nonneg (postBilinCLM (E0 := E0)))
-  refine Finset.sum_le_sum fun i hi_mem => ?_
-  have him : i ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi_mem)
+    (hD : ∀ j, 1 ≤ j → j ≤ m + 1 →
+      ‖iteratedFDeriv Real j B x‖ ≤ D ^ j)
+    (hD_nonneg : 0 ≤ D) (him : i ≤ m) :
+    (m.choose i : Real) *
+        ‖iteratedFDeriv Real i
+          (fun y => Ring.inverse (gramCLM (B y))) x‖ *
+        ‖iteratedFDeriv Real (m - i)
+          (fun y => koszulRieszOpCLM (fderiv Real B y)) x‖ ≤
+      (m.choose i : Real) *
+        ((i.factorial : Real) *
+          ((i.factorial : Real) *
+            gramInvBound (E0 := E0) ^ (i + 1)) * D ^ i) *
+        (‖koszulRieszOpCLM (E0 := E0)‖ * D ^ (m - i + 1)) := by
   have hi_top : (i : WithTop ℕ∞) ≤ (m : WithTop ℕ∞) := by
     exact_mod_cast him
   have hBi : ContDiffAt Real (i : WithTop ℕ∞) B x := hBm.of_le hi_top
@@ -1011,13 +1078,106 @@ private theorem raisedOp_deriv_le
           (fun y => koszulRieszOpCLM (fderiv Real B y)) x‖ ≤
         ‖koszulRieszOpCLM (E0 := E0)‖ * D ^ (m - i + 1) :=
     hKderiv.trans (mul_le_mul_of_nonneg_left hmetric (norm_nonneg _))
-  gcongr
+  have hinv_rhs_nn : 0 ≤
+      (i.factorial : Real) *
+          ((i.factorial : Real) *
+            gramInvBound (E0 := E0) ^ (i + 1)) * D ^ i :=
+    by
+      have hG : 0 ≤ gramInvBound (E0 := E0) :=
+        gramInvBound_nonneg (E0 := E0)
+      positivity
+  exact mul_le_mul
+    (mul_le_mul_of_nonneg_left hinv_i (Nat.cast_nonneg _)) hKbound
+    (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg _) hinv_rhs_nn)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- Smoothness of the proof-independent raised Koszul operator follows from
-smooth ring inversion on the uniformly coercive Gram neighborhood. -/
+private theorem gramInverse_contDiffAt_of_lower
+    [CompleteSpace E0]
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat)
+    (hB : ContDiffAt Real (m : WithTop ℕ∞) B x)
+    (hlower : ∀ᶠ y in nhds x, ∀ q : E0,
+      (1 / 2 : Real) * ‖q‖ ^ 2 ≤ B y q q) :
+    ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => Ring.inverse (gramCLM (B y))) x := by
+  have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
+    filter_upwards [hlower] with y hy
+    apply gram_isUnit
+    exact ⟨(1 / 2 : Real), by norm_num, fun q => by
+      simpa only [pow_two, mul_assoc] using hy q⟩
+  obtain ⟨w, hw⟩ := hunit.self_of_nhds
+  have hgram : ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => gramCLM (B y)) x := by
+    simpa only [Function.comp_apply] using
+      (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hB
+  have hout : ContDiffAt Real (m : WithTop ℕ∞) Ring.inverse
+      (gramCLM (B x)) := by
+    rw [← hw]
+    exact contDiffAt_ringInverse Real w
+  simpa only [Function.comp_apply] using hout.comp x hgram
+
+omit [CoerciveBilinInverse E0] in
+private theorem koszulRieszFderiv_contDiffAt
+    [CompleteSpace E0]
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat)
+    (hB : ContDiffAt Real ((m + 1 : Nat) : WithTop ℕ∞) B x) :
+    ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => koszulRieszOpCLM (fderiv Real B y)) x := by
+  have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
+    exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
+  simpa only [Function.comp_apply] using
+    (koszulRieszOpCLM (E0 := E0)).contDiff.comp_contDiffAt x hfB
+
+omit [ContinuousDualEquiv E0] [CoerciveBilinInverse E0] in
+private lemma nonneg_of_first_iteratedFDeriv_bound
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat) (D : Real)
+    (hD : ∀ i, 1 ≤ i → i ≤ m + 1 →
+      ‖iteratedFDeriv Real i B x‖ ≤ D ^ i) :
+    0 ≤ D := by
+  have h := hD 1 (by omega) (by omega)
+  simpa only [pow_one] using
+    (norm_nonneg (iteratedFDeriv Real 1 B x)).trans h
+
+
+private theorem raisedOp_deriv_le
+    [CompleteSpace E0]
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0)
+    (m : Nat) (D : Real)
+    (hB : ContDiffAt Real ((m + 1 : Nat) : WithTop ℕ∞) B x)
+    (hlower : ∀ᶠ y in nhds x, ∀ q : E0,
+      (1 / 2 : Real) * ‖q‖ ^ 2 ≤ B y q q)
+    (hD : ∀ i, 1 ≤ i → i ≤ m + 1 →
+      ‖iteratedFDeriv Real i B x‖ ≤ D ^ i) :
+    ‖iteratedFDeriv Real m
+        (fun y => raisedKoszulOp (B y) (fderiv Real B y)) x‖ ≤
+      raisedBudget (E0 := E0) D m := by
+  unfold raisedBudget
+  have hm_top : (m : WithTop ℕ∞) ≤ ((m + 1 : Nat) : WithTop ℕ∞) := by
+    exact_mod_cast Nat.le_succ m
+  have hBm : ContDiffAt Real (m : WithTop ℕ∞) B x := hB.of_le hm_top
+  have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
+    exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
+  have hK : ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => koszulRieszOpCLM (fderiv Real B y)) x :=
+    koszulRieszFderiv_contDiffAt B x m hB
+  have hinv : ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => Ring.inverse (gramCLM (B y))) x :=
+    gramInverse_contDiffAt_of_lower B x m hBm hlower
+  have hD_nonneg : 0 ≤ D :=
+    nonneg_of_first_iteratedFDeriv_bound B x m D hD
+  change ‖iteratedFDeriv Real m
+      (fun y => postBilinCLM (Ring.inverse (gramCLM (B y)))
+        (koszulRieszOpCLM (fderiv Real B y))) x‖ ≤ _
+  refine (norm_bilinAt_le (postBilinCLM (E0 := E0))
+    (fun y => Ring.inverse (gramCLM (B y)))
+    (fun y => koszulRieszOpCLM (fderiv Real B y))
+    x m hinv hK).trans ?_
+  refine mul_le_mul_of_nonneg_left ?_
+    (norm_nonneg (postBilinCLM (E0 := E0)))
+  refine Finset.sum_le_sum fun i hi_mem => ?_
+  have him : i ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi_mem)
+  exact raisedOp_deriv_summand_le B x m i D hBm hfB hlower hD hD_nonneg him
+
+
+
 private theorem raisedOp_contDiffAt
     [CompleteSpace E0]
     (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat)
@@ -1029,37 +1189,17 @@ private theorem raisedOp_contDiffAt
   have hm_top : (m : WithTop ℕ∞) ≤ ((m + 1 : Nat) : WithTop ℕ∞) := by
     exact_mod_cast Nat.le_succ m
   have hBm : ContDiffAt Real (m : WithTop ℕ∞) B x := hB.of_le hm_top
-  have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
-    exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
   have hK : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => koszulRieszOpCLM (fderiv Real B y)) x := by
-    simpa only [Function.comp_apply] using
-      (koszulRieszOpCLM (E0 := E0)).contDiff.comp_contDiffAt x hfB
-  have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
-    filter_upwards [hlower] with y hy
-    apply gram_isUnit
-    exact ⟨(1 / 2 : Real), by norm_num, fun q => by
-      simpa only [pow_two, mul_assoc] using hy q⟩
-  obtain ⟨w, hw⟩ := hunit.self_of_nhds
-  have hgram : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => gramCLM (B y)) x := by
-    simpa only [Function.comp_apply] using
-      (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hBm
+      (fun y => koszulRieszOpCLM (fderiv Real B y)) x :=
+    koszulRieszFderiv_contDiffAt B x m hB
   have hinv : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => Ring.inverse (gramCLM (B y))) x := by
-    have hout : ContDiffAt Real (m : WithTop ℕ∞) Ring.inverse
-        (gramCLM (B x)) := by
-      rw [← hw]
-      exact contDiffAt_ringInverse Real w
-    simpa only [Function.comp_apply] using hout.comp x hgram
+      (fun y => Ring.inverse (gramCLM (B y))) x :=
+    gramInverse_contDiffAt_of_lower B x m hBm hlower
   simpa only [raisedKoszulOp, postBilin] using
     (postBilinCLM (E0 := E0)).isBoundedBilinearMap.contDiff.comp₂_contDiffAt hinv hK
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- Composing a target raised-Koszul field with the isometry map is controlled
-by the finite raised-Koszul envelope and the lower map-jet budget. -/
+
+
 private theorem raisedComp_deriv_le
     [CompleteSpace E0]
     (C : E0 → E0 →L[Real] E0 →L[Real] Real)
@@ -1101,12 +1241,10 @@ private theorem raisedComp_deriv_le
   simpa only [K] using norm_compAt_le K Phi x m
     (raisedEnvelope (E0 := E0) D m) A hK hPhi hKbound hA
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-/-- Algebraic all-order recurrence for the exact isometry second-derivative
-field.  The right side contains only the first derivative and the two raised
-Koszul fields. -/
+
+
+
+omit [ContinuousDualEquiv E0] [CoerciveBilinInverse E0] in
 private theorem isom_rec_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
     (Q : P → E0 →L[Real] E0 →L[Real] E0)
@@ -1171,10 +1309,7 @@ private theorem isom_rec_le
   rw [iteratedFDeriv_sub_apply hpost hpre]
   exact (norm_sub_le _ _).trans (add_le_add hpost_bound hpre_bound)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
-/-- One quantitative induction step for the H6 isometry derivative recursion. -/
+
 private theorem isom_next_le
     [CompleteSpace E0]
     (B C : E0 → E0 →L[Real] E0 →L[Real] Real)
@@ -1356,10 +1491,7 @@ private theorem isom_next_le
                     raisedCompBudget (E0 := E0) D P j * P ^ (i - j + 1)) *
                 P ^ (m - i + 1) := by ring)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
-/-- A fixed positive derivative order only uses metric jets through that order. -/
+
 private theorem isom_deriv_le
     [CompleteSpace E0]
     (B C : E0 → E0 →L[Real] E0 →L[Real] Real)
@@ -1419,11 +1551,8 @@ private theorem isom_deriv_le
       hPjets heq
     simpa only [P, isomBudget_succ, Nat.succ_eq_add_one] using hstep
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
-/-- All positive derivative orders of an exact H6 metric isometry are bounded
-by the recursive budget determined solely by the metric jet budget. -/
+
+
 private theorem isom_pos_deriv_le
     [CompleteSpace E0]
     (B C : E0 → E0 →L[Real] E0 →L[Real] Real)
@@ -1455,9 +1584,8 @@ private theorem isom_pos_deriv_le
 
 end Gram
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- The cyclic combination of `isom_jet_one` is the lowered Koszul
-transformation law for the second derivative of an isometry. -/
+
+
 theorem isom_koszul
     (B : E0 -> E0 →L[Real] E0 →L[Real] Real)
     (C : F0 -> F0 →L[Real] F0 →L[Real] Real)
@@ -1486,10 +1614,11 @@ theorem isom_koszul
   linear_combination -(1 / 2 : Real) * h1 - (1 / 2 : Real) * h2 +
     (1 / 2 : Real) * h3
 
-/-- A metric isometry turns the lowered Koszul identity into the exact
-second-derivative transformation law. -/
+
+
 theorem second_eq_koszul
     [CompleteSpace E0] [CompleteSpace F0]
+    [CoerciveBilinInverse E0] [CoerciveBilinInverse F0]
     (B : E0 →L[Real] E0 →L[Real] Real)
     (C : F0 →L[Real] F0 →L[Real] Real)
     (e : E0 ≃L[Real] F0)
@@ -1522,10 +1651,11 @@ theorem second_eq_koszul
       exact hpair u v w
     _ = e sourceKoszul - targetKoszul := hCco.sharp_apply _
 
-/-- Under the H6 half/two metric comparison, the exact Koszul transformation
-law gives an explicit bound for the second derivative. -/
+
+
 theorem second_norm_le
     [CompleteSpace E0] [CompleteSpace F0]
+    [CoerciveBilinInverse E0] [CoerciveBilinInverse F0]
     (B : E0 →L[Real] E0 →L[Real] Real)
     (C : F0 →L[Real] F0 →L[Real] Real)
     (e : E0 ≃L[Real] F0)
@@ -1593,10 +1723,11 @@ theorem second_norm_le
         3 * CC * (2 * ‖u‖) * (2 * ‖v‖) := by gcongr
     _ = (6 * CB + 12 * CC) * ‖u‖ * ‖v‖ := by ring
 
-/-- The second derivative of a smooth local metric isometry is the source
-Koszul vector pushed forward minus the target Koszul vector. -/
+
+
 theorem isom_second_eq
     [CompleteSpace E0] [CompleteSpace F0]
+    [CoerciveBilinInverse E0] [CoerciveBilinInverse F0]
     (B : E0 -> E0 →L[Real] E0 →L[Real] Real)
     (C : F0 -> F0 →L[Real] F0 →L[Real] Real)
     (Phi : E0 -> F0) (A : E0 -> E0 →L[Real] F0) {x : E0}
@@ -1624,11 +1755,13 @@ theorem isom_second_eq
       (e : E0 →L[Real] F0) DA hB hC hPhi hA hiso hAx hCsymm
       hDAsymm a b c
 
-/-- The exact isometry second-derivative identity written with
-proof-independent inverse Gram operators, so that both raised Koszul terms can
-be differentiated as ordinary smooth fields. -/
+
+
+
 private theorem isom_second_inv
     [CompleteSpace E0] [CompleteSpace F0]
+    [ContinuousDualEquiv E0] [ContinuousDualEquiv F0]
+    [CoerciveBilinInverse E0] [CoerciveBilinInverse F0]
     (B : E0 -> E0 →L[Real] E0 →L[Real] Real)
     (C : F0 -> F0 →L[Real] F0 →L[Real] Real)
     (Phi : E0 -> F0) (A : E0 -> E0 →L[Real] F0) {x : E0}
@@ -1652,8 +1785,8 @@ private theorem isom_second_inv
   exact isom_second_eq B C Phi A DB DC e DA hB hC hPhi hA hiso hAx
     hCsymm hDAsymm hBco hCco u v
 
-/-- Pointwise field form of the exact second-derivative identity.  Its result
-contains only ordinary functions of the metric and map jets. -/
+
+
 private theorem isom_second_field
     [FiniteDimensional Real E0] [CompleteSpace E0]
     (B C : E0 -> E0 →L[Real] E0 →L[Real] Real)
@@ -1712,8 +1845,8 @@ private theorem isom_second_field
       (by simp only [e, L, ContinuousLinearEquiv.coe_ofBijective])
       hCsymm hAsymm hBco hCco u v
 
-/-- Operator-valued form of `isom_second_field`, ready for arbitrary iterated
-derivatives in the base variable. -/
+
+
 private theorem isom_second_op
     [FiniteDimensional Real E0] [CompleteSpace E0]
     (B C : E0 -> E0 →L[Real] E0 →L[Real] Real)
@@ -1740,9 +1873,9 @@ private theorem isom_second_op
   exact isom_second_field B C Phi hBsm hCsm hPhi hiso hCsymm
     hBlower hClower u v
 
-/-- The proof-independent second-derivative operator identity holds throughout
-any open source domain on which the map is an exact metric isometry into the
-open target domain. -/
+
+
+
 private theorem isom_second_on
     [FiniteDimensional Real E0] [CompleteSpace E0]
     (B C : E0 -> E0 →L[Real] E0 →L[Real] Real)
@@ -1783,11 +1916,9 @@ section IsomBounds
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
-/-- Positive derivatives of an exact metric isometry on open H6-controlled
-domains are bounded using only the metric jets through the requested order. -/
+
+
+-- Iterated derivatives of bilinear-form fields require deep instance synthesis.
 theorem isom_deriv_on
     [FiniteDimensional Real E0] [CompleteSpace E0]
     (B C : E0 → E0 →L[Real] E0 →L[Real] Real)
@@ -1844,12 +1975,10 @@ theorem isom_deriv_on
     heq r hr (fun i hi hir => hDB i hi hir x hx)
       (fun i hi hir => hDC i hi hir (Phi x) hPhiV)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
-/-- Exact isometries between uniformly H6-controlled metric sequences have
-uniform derivative bounds on compacts of the source open set.  Order zero is
-supplied by the explicit uniform norm bound on the target domain. -/
+
+
+
+-- The uniform family packages Pi-valued iterated derivatives of bilinear forms.
 theorem isom_bounds_on
     [FiniteDimensional Real E0] [CompleteSpace E0]
     (B C : Nat → E0 → E0 →L[Real] E0 →L[Real] Real)
@@ -1926,8 +2055,8 @@ theorem isom_bounds_on
 
 end IsomBounds
 
-/-- A `C²` local isometry between H6-controlled metrics has the explicit
-second-derivative operator bound `6 * CB + 12 * CC`. -/
+
+
 theorem isom_second_bound
     [FiniteDimensional Real E0] [CompleteSpace E0]
     (B C : E0 -> E0 →L[Real] E0 →L[Real] Real)
@@ -2012,15 +2141,14 @@ noncomputable section
 universe u uE uH
 
 variable {E' : Type uE} [NormedAddCommGroup E']
-  [InnerProductSpace Real E'] [FiniteDimensional Real E']
+  [NormedSpace Real E'] [FiniteDimensional Real E']
   [NeZero (Module.finrank Real E')] [CompleteSpace E']
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E' H} [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A normal-coordinate transition preserves the two pulled-back coordinate
-metrics wherever both selected exponential partial diffeomorphisms are valid. -/
+omit [NeZero (Module.finrank Real E')] in
 theorem normalTrans_isom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -2028,78 +2156,79 @@ theorem normalTrans_isom
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     forall {z : E'},
-      z ∈ (framedExpDiffeo (I := I) Y.metric x).source ->
-      framedExpDiffeo (I := I) Y.metric x z ∈
-        (framedChartAt (I := I) Y.metric y).source ->
+      z ∈ (expMapDiffeo (I := I) Y.metric x).source ->
+      expMapDiffeo (I := I) Y.metric x z ∈
+        (normalChartAt (I := I) Y.metric y).source ->
       forall u v : E',
         normalCoordMetric (I := I) Y y
-            (framedTransition (I := I) Y.metric x y z)
-            (fderiv Real (framedTransition (I := I) Y.metric x y) z u)
-            (fderiv Real (framedTransition (I := I) Y.metric x y) z v) =
+            (normalTransition (I := I) Y x y z)
+            (fderiv Real (normalTransition (I := I) Y x y) z u)
+            (fderiv Real (normalTransition (I := I) Y x y) z v) =
           normalCoordMetric (I := I) Y x z u v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   intro z hzx hzy u v
-  have hw : framedTransition (I := I) Y.metric x y z ∈
-      (framedExpDiffeo (I := I) Y.metric y).source := by
-    change framedChartAt (I := I) Y.metric y
-      (framedExpDiffeo (I := I) Y.metric x z) ∈
-        (framedChartAt (I := I) Y.metric y).target
-    exact (framedChartAt (I := I) Y.metric y).map_source hzy
+  have hw : normalTransition (I := I) Y x y z ∈
+      (expMapDiffeo (I := I) Y.metric y).source := by
+    rw [← normalChartAt_target_eq (I := I)]
+    change normalChartAt (I := I) Y.metric y
+      (expMapDiffeo (I := I) Y.metric x z) ∈
+        (normalChartAt (I := I) Y.metric y).target
+    exact (normalChartAt (I := I) Y.metric y).map_source hzy
   have hbase :
-      framedExpDiffeo (I := I) Y.metric y
-          (framedTransition (I := I) Y.metric x y z) =
-        framedExpDiffeo (I := I) Y.metric x z := by
-    change (framedChartAt (I := I) Y.metric y).symm
-        (framedChartAt (I := I) Y.metric y
-          (framedExpDiffeo (I := I) Y.metric x z)) =
-      framedExpDiffeo (I := I) Y.metric x z
-    exact (framedChartAt (I := I) Y.metric y).left_inv hzy
+      expMapDiffeo (I := I) Y.metric y
+          (normalTransition (I := I) Y x y z) =
+        expMapDiffeo (I := I) Y.metric x z := by
+    change (normalChartAt (I := I) Y.metric y).symm
+        (normalChartAt (I := I) Y.metric y
+          (expMapDiffeo (I := I) Y.metric x z)) =
+      expMapDiffeo (I := I) Y.metric x z
+    exact (normalChartAt (I := I) Y.metric y).left_inv hzy
   have hdx : MDifferentiableAt 𝓘(Real, E') I
-      (framedExpDiffeo (I := I) Y.metric x) z :=
-    ((framedExpDiffeo (I := I) Y.metric x).contMDiffOn_toFun.mdifferentiableOn
+      (expMapDiffeo (I := I) Y.metric x) z :=
+    ((expMapDiffeo (I := I) Y.metric x).contMDiffOn_toFun.mdifferentiableOn
       one_ne_zero z hzx).mdifferentiableAt
-        ((framedExpDiffeo (I := I) Y.metric x).open_source.mem_nhds hzx)
+        ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hzx)
   have hcy : MDifferentiableAt I 𝓘(Real, E')
-      (framedChartAt (I := I) Y.metric y)
-      (framedExpDiffeo (I := I) Y.metric x z) :=
-    ((framedChartAt (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
+      (normalChartAt (I := I) Y.metric y)
+      (expMapDiffeo (I := I) Y.metric x z) :=
+    ((normalChartAt (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
       one_ne_zero _ hzy).mdifferentiableAt
-        ((framedChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
+        ((normalChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
   have hT : MDifferentiableAt 𝓘(Real, E') 𝓘(Real, E')
-      (framedTransition (I := I) Y.metric x y) z := by
-    simpa only [framedTransition, Function.comp_apply] using hcy.comp z hdx
+      (normalTransition (I := I) Y x y) z := by
+    simpa only [normalTransition, Function.comp_apply] using hcy.comp z hdx
   have hdy : MDifferentiableAt 𝓘(Real, E') I
-      (framedExpDiffeo (I := I) Y.metric y)
-      (framedTransition (I := I) Y.metric x y z) :=
-    ((framedExpDiffeo (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
+      (expMapDiffeo (I := I) Y.metric y)
+      (normalTransition (I := I) Y x y z) :=
+    ((expMapDiffeo (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
       one_ne_zero _ hw).mdifferentiableAt
-        ((framedExpDiffeo (I := I) Y.metric y).open_source.mem_nhds hw)
+        ((expMapDiffeo (I := I) Y.metric y).open_source.mem_nhds hw)
   have hnear : ∀ᶠ q in nhds z,
-      framedExpDiffeo (I := I) Y.metric x q ∈
-        (framedChartAt (I := I) Y.metric y).source :=
+      expMapDiffeo (I := I) Y.metric x q ∈
+        (normalChartAt (I := I) Y.metric y).source :=
     hdx.continuousAt.eventually
-      ((framedChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
+      ((normalChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
   have heq :
-      (framedExpDiffeo (I := I) Y.metric y) ∘
-          (framedTransition (I := I) Y.metric x y) =ᶠ[nhds z]
-        framedExpDiffeo (I := I) Y.metric x := by
+      (expMapDiffeo (I := I) Y.metric y) ∘
+          (normalTransition (I := I) Y x y) =ᶠ[nhds z]
+        expMapDiffeo (I := I) Y.metric x := by
     filter_upwards [hnear] with q hq
-    change (framedChartAt (I := I) Y.metric y).symm
-        (framedChartAt (I := I) Y.metric y
-          (framedExpDiffeo (I := I) Y.metric x q)) =
-      framedExpDiffeo (I := I) Y.metric x q
-    exact (framedChartAt (I := I) Y.metric y).left_inv hq
+    change (normalChartAt (I := I) Y.metric y).symm
+        (normalChartAt (I := I) Y.metric y
+          (expMapDiffeo (I := I) Y.metric x q)) =
+      expMapDiffeo (I := I) Y.metric x q
+    exact (normalChartAt (I := I) Y.metric y).left_inv hq
   have hcomp :
       (mfderiv 𝓘(Real, E') I
-          (fun q : E' => framedExpDiffeo (I := I) Y.metric y q)
-          (framedTransition (I := I) Y.metric x y z)).comp
+          (fun q : E' => expMapDiffeo (I := I) Y.metric y q)
+          (normalTransition (I := I) Y x y z)).comp
           (mfderiv 𝓘(Real, E') 𝓘(Real, E')
-            (framedTransition (I := I) Y.metric x y) z) =
+            (normalTransition (I := I) Y x y) z) =
         mfderiv 𝓘(Real, E') I
-          (fun q : E' => framedExpDiffeo (I := I) Y.metric x q) z := by
+          (fun q : E' => expMapDiffeo (I := I) Y.metric x q) z := by
     have hderiv := Filter.EventuallyEq.mfderiv_eq
       (I := 𝓘(Real, E')) (I' := I) heq
     rw [mfderiv_comp z hdy hT] at hderiv
@@ -2108,24 +2237,25 @@ theorem normalTrans_isom
   have hu := DFunLike.congr_fun hcomp u
   have hv := DFunLike.congr_fun hcomp v
   rw [mfderiv_eq_fderiv (𝕜 := Real) (E := E') (E' := E')
-    (f := framedTransition (I := I) Y.metric x y) (x := z)] at hu hv
+    (f := normalTransition (I := I) Y x y) (x := z)] at hu hv
   change (mfderiv 𝓘(Real, E') I
-      (fun q : E' => framedExpDiffeo (I := I) Y.metric y q)
-      (framedTransition (I := I) Y.metric x y z))
-        (fderiv Real (framedTransition (I := I) Y.metric x y) z u) =
+      (fun q : E' => expMapDiffeo (I := I) Y.metric y q)
+      (normalTransition (I := I) Y x y z))
+        (fderiv Real (normalTransition (I := I) Y x y) z u) =
       mfderiv 𝓘(Real, E') I
-        (fun q : E' => framedExpDiffeo (I := I) Y.metric x q) z u at hu
+        (fun q : E' => expMapDiffeo (I := I) Y.metric x q) z u at hu
   change (mfderiv 𝓘(Real, E') I
-      (fun q : E' => framedExpDiffeo (I := I) Y.metric y q)
-      (framedTransition (I := I) Y.metric x y z))
-        (fderiv Real (framedTransition (I := I) Y.metric x y) z v) =
+      (fun q : E' => expMapDiffeo (I := I) Y.metric y q)
+      (normalTransition (I := I) Y x y z))
+        (fderiv Real (normalTransition (I := I) Y x y) z v) =
       mfderiv 𝓘(Real, E') I
-        (fun q : E' => framedExpDiffeo (I := I) Y.metric x q) z v at hv
+        (fun q : E' => expMapDiffeo (I := I) Y.metric x q) z v at hv
   exact congrArg₂
-    (fun a b => Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z) a b) hu hv
+    (fun a b => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z) a b) hu hv
 
-/-- On a controlled overlap, the derivative of a normal-coordinate
-transition is a linear bijection. -/
+
+
+omit [NeZero (Module.finrank Real E')] in
 theorem normal_fderiv_bij
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U : Set E'} (hx : NormalCoordMetricEquivOn (I := I) Y x U) :
@@ -2134,30 +2264,31 @@ theorem normal_fderiv_bij
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     forall {z : E'},
-      z ∈ (framedExpDiffeo (I := I) Y.metric x).source ->
-      framedExpDiffeo (I := I) Y.metric x z ∈
-        (framedChartAt (I := I) Y.metric y).source ->
+      z ∈ (expMapDiffeo (I := I) Y.metric x).source ->
+      expMapDiffeo (I := I) Y.metric x z ∈
+        (normalChartAt (I := I) Y.metric y).source ->
       z ∈ U ->
       Function.Bijective
-        (fderiv Real (framedTransition (I := I) Y.metric x y) z) := by
+        (fderiv Real (normalTransition (I := I) Y x y) z) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   intro z hzx hzy hzU
   have hinj : Function.Injective
-      (fderiv Real (framedTransition (I := I) Y.metric x y) z) :=
+      (fderiv Real (normalTransition (I := I) Y x y) z) :=
     isom_injective
       (normalCoordMetric (I := I) Y x z)
       (normalCoordMetric (I := I) Y y
-        (framedTransition (I := I) Y.metric x y z))
-      (fderiv Real (framedTransition (I := I) Y.metric x y) z)
+        (normalTransition (I := I) Y x y z))
+      (fderiv Real (normalTransition (I := I) Y x y) z)
       (fun v => (hx z hzU v).1)
       (fun v => normalTrans_isom Y x y hzx hzy v v)
   exact ⟨hinj, LinearMap.surjective_of_injective hinj⟩
 
-/-- On source and target regions with the H6 metric comparison, the first
-derivative of a normal-coordinate transition has operator norm at most `2`. -/
+
+
+omit [NeZero (Module.finrank Real E')] in
 theorem normal_fderiv_le_two
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U V : Set E'}
@@ -2168,12 +2299,12 @@ theorem normal_fderiv_le_two
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     forall {z : E'},
-      z ∈ (framedExpDiffeo (I := I) Y.metric x).source ->
-      framedExpDiffeo (I := I) Y.metric x z ∈
-        (framedChartAt (I := I) Y.metric y).source ->
+      z ∈ (expMapDiffeo (I := I) Y.metric x).source ->
+      expMapDiffeo (I := I) Y.metric x z ∈
+        (normalChartAt (I := I) Y.metric y).source ->
       z ∈ U ->
-      framedTransition (I := I) Y.metric x y z ∈ V ->
-      ‖fderiv Real (framedTransition (I := I) Y.metric x y) z‖ <= 2 := by
+      normalTransition (I := I) Y x y z ∈ V ->
+      ‖fderiv Real (normalTransition (I := I) Y x y) z‖ <= 2 := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -2182,10 +2313,10 @@ theorem normal_fderiv_le_two
   exact opNorm_le_two
     (normalCoordMetric (I := I) Y x z)
     (normalCoordMetric (I := I) Y y
-      (framedTransition (I := I) Y.metric x y z))
-    (fderiv Real (framedTransition (I := I) Y.metric x y) z)
+      (normalTransition (I := I) Y x y z))
+    (fderiv Real (normalTransition (I := I) Y x y) z)
     (fun v => (hx z hzU v).2)
-    (fun w => (hy (framedTransition (I := I) Y.metric x y z) hzV w).1)
+    (fun w => (hy (normalTransition (I := I) Y x y z) hzV w).1)
     (fun v => normalTrans_isom Y x y hzx hzy v v)
 
 section NormalBounds
@@ -2193,11 +2324,8 @@ section NormalBounds
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
-/-- H6 normal-coordinate metric bounds produce localized uniform derivative
-bounds for a sequence of smooth normal-coordinate transitions. -/
+
+
 theorem normal_bounds_on
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -2215,7 +2343,7 @@ theorem normal_bounds_on
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       U ⊆ Metric.ball (0 : E')
-        (expRadiusGp (I := I) (X.obj k).metric (x k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (x k)))
     (hVexp : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -2223,7 +2351,7 @@ theorem normal_bounds_on
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       V ⊆ Metric.ball (0 : E')
-        (expRadiusGp (I := I) (X.obj k).metric (y k)))
+        (expMapC2Radius (I := I) (X.obj k).metric (y k)))
     (hPhi : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x k) (y k)) U)
     (hovl : ∀ k,
@@ -2233,9 +2361,9 @@ theorem normal_bounds_on
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       ∀ z ∈ U,
-        z ∈ (framedExpDiffeo (I := I) (X.obj k).metric (x k)).source ∧
-          framedExpDiffeo (I := I) (X.obj k).metric (x k) z ∈
-            (framedChartAt (I := I) (X.obj k).metric (y k)).source)
+        z ∈ (expMapDiffeo (I := I) (X.obj k).metric (x k)).source ∧
+          expMapDiffeo (I := I) (X.obj k).metric (x k) z ∈
+            (normalChartAt (I := I) (X.obj k).metric (y k)).source)
     (hmap : ∀ k, Set.MapsTo
       (normalTransition (I := I) (X.obj k) (x k) (y k)) U V) :
     IsometryDerivBoundsOn U

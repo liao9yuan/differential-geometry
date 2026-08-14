@@ -3,28 +3,26 @@ import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# General-rank metric-trace / covariant-derivative commutation (formalism A)
 
-This file generalises the fixed-rank `nablaTrace02` / `nablaTrace04`
-(`MetricTrace/NablaTrace02.lean`, `MetricTrace/Higher.lean`) to the
-**general-rank** metric trace of the first two slots,
-`metricTraceFirstTwo0S : (0, s+2) → (0, s)`, needed for the rough Laplacian of
-`∇ᵏRm` in the all-`k` BBS `StarSum2` route
-(`Geometry/Flow/RicciFlow/Evolution/BBSAllKBundledRoute.md`).
 
-The pointwise tail-freeze `freezeFirstTwo0S` (`Geometry/Operator/RoughLaplacian.lean`)
-is already rank-uniform; the only missing piece is the **smooth-field** wrapper.
-`freezeTailField` is the rank-`s` generalisation of `freezeTail04Field`
-(`MetricTrace/NablaTrace02.lean`): freeze the last `s` slots of a smooth
-`(0, s+2)` field against `s` smooth sections, leaving the first two free as a
-smooth `(0, 2)` field.  Its output is always `(0, 2)`, so the bundle-trivialisation
-part of the smoothness proof is identical to the `s = 2` case; only the input slot
-tuple `Fin (s+2)` generalises.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -35,15 +33,15 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `Fin (s+2)` slot tuple for freezing the last `s` slots: the two free slots
-carry the coordinate-frame fields `σ 0, σ 1`, the last `s` carry the frozen
-sections `Y`.  This is `metricTraceInput` with the trace pair as the coordinate
-frame and the tail as `Y`. -/
+
+
+
+
 private def freezeTailSlots {s : ℕ}
     (x₀ : M) (σ : Fin 2 → CoordinateIdx (𝕜 := Real) E)
     (Y : Fin s → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -55,9 +53,9 @@ private def freezeTailSlots {s : ℕ}
     (fun b : Fin s => Y b y) q
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Freeze the last `s` slots of a smooth `(0, s+2)` tensor field** against `s`
-smooth tangent sections, leaving a smooth `(0, 2)` tensor field in the first two
-slots.  Rank-`s` generalisation of `freezeTail04Field`. -/
+
+
+
 noncomputable def freezeTailField {s : ℕ}
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -90,8 +88,7 @@ noncomputable def freezeTailField {s : ℕ}
             TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y (v q y)) x₀ := by
       intro q
       refine Fin.cases ?_ (fun i => ?_) q
-      · -- slot 0: the first free slot, coordinate frame `σ 0`
-        have hframe :
+      · have hframe :
             ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
               (fun y : M =>
                 TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y
@@ -103,8 +100,7 @@ noncomputable def freezeTailField {s : ℕ}
         filter_upwards with y
         simp [v, freezeTailSlots, metricTraceInput]
       · refine Fin.cases ?_ (fun c => ?_) i
-        · -- slot 1: the second free slot, coordinate frame `σ 1`
-          have hframe :
+        · have hframe :
               ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
                 (fun y : M =>
                   TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y
@@ -116,8 +112,7 @@ noncomputable def freezeTailField {s : ℕ}
           filter_upwards with y
           simp only [v, freezeTailSlots, metricTraceInput, Fin.cases_succ,
             Fin.cases_zero]
-        · -- slot `succ (succ c)`: the frozen section `Y c`
-          have hYc := (Y c).contMDiff x₀
+        · have hYc := (Y c).contMDiff x₀
           refine hYc.congr_of_eventuallyEq ?_
           filter_upwards with y
           simp [v, freezeTailSlots, metricTraceInput]
@@ -185,11 +180,11 @@ noncomputable def freezeTailField {s : ℕ}
       freezeFirstTwo0S (I := I) (A x) (fun b : Fin s => Y b x) := by
   rfl
 
-/-- **The covariant derivative of the tail-frozen field equals `∇A` on the
-assembled slots.**  Rank-`s` generalisation of `tailFreezeNabla` (`Higher.lean`):
-for tail sections `Y` parallel-at-`x` along `X`, the total covariant derivative of
-`freezeTailField A Y` along `X`, evaluated on the two free slots `(U, V)`, equals
-`∇A` on the new derivative slot `X` followed by `(U, V)` and the frozen tail. -/
+
+
+
+
+
 private theorem tailFreezeNablaGen {s : ℕ}
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -308,10 +303,10 @@ private theorem tailFreezeNablaGen {s : ℕ}
           (metricTraceInput (I := I) U V (fun b : Fin s => Y b x))) :=
         hAtot.symm
 
-/-! ## The general-rank metric-trace field `metricTraceFirstTwoField` -/
 
-/-- The `Fin (s+2)` coordinate-index tuple for the first-two metric trace: `i, j`
-in the two trace slots, `σ` in the `s`-slot tail. -/
+
+
+
 private def traceFirstTwoIdx {s : ℕ}
     (i j : CoordinateIdx (𝕜 := Real) E)
     (σ : Fin s -> CoordinateIdx (𝕜 := Real) E) :
@@ -398,9 +393,9 @@ private theorem metricTraceFirstTwoCoeff {s : ℕ}
     (metricTraceFirstTwoEvent (I := I) g A x₀ σ)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Smooth `(0,s)` field obtained by the metric trace of the first two slots of a
-smooth `(0, s+2)` tensor field.**  Rank-`s` generalisation of `trace04Field`
-(`Trace04.lean`), tracing slots `0, 1` directly (no `domDomCongr`). -/
+
+
+
 def metricTraceFirstTwoField {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -462,8 +457,8 @@ def metricTraceFirstTwoField {s : ℕ}
       metricTraceFirstTwo0STensor (I := I) g (A x) := by
   rfl
 
-/-- The first-two metric trace of a `(0, s+2)` tensor equals the scalar pair trace
-of the tail-frozen `(0,2)` tensor.  Both expand to `Σᵢⱼ gⁱʲ T(eᵢ, eⱼ, tail)`. -/
+
+
 private theorem metricTraceFirstTwo0STensor_eq_pair_freeze {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -488,19 +483,19 @@ private theorem metricTraceFirstTwo0STensor_eq_pair_freeze {s : ℕ}
   congr 1
   rw [freezeFirstTwo0S_apply]
 
-/-- **The general-rank metric-trace / covariant-derivative commutation (formalism A).**
-For a smooth `(0, s+2)` tensor field `A`, covariant differentiation along `X`
-commutes with the first-two metric trace, with the new derivative slot prepended
-and the trace pair shifted to slots `1, 2`:
 
-`∇(metricTraceFirstTwoField g A)(X :: tail)
-  = Σᵢⱼ gⁱʲ · ∇A (X :: eᵢ :: eⱼ :: tail)`.
 
-The trace itself commutes with `∇` cleanly (no curvature term); the curvature
-correction appears only later, when comparing this slot-shifted trace to the
-standard rough-Laplacian trace.  Rank-`s` generalisation of `nablaTrace04`,
-assembled from `freezeTailField`, `tailFreezeNablaGen`, `metricTraceFirstTwoField`,
-and the scalar `nablaTrace02`. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem nabla_metricTraceFirstTwo0S {s : ℕ}
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -595,10 +590,11 @@ theorem nabla_metricTraceFirstTwo0S {s : ℕ}
   rw [← hXsec, show tail = (fun b : Fin s => Vtail b x) from (funext hVtailx).symm]
   exact hfreeze
 
-/-- **Value characterization of `metricTraceInput`**: the trace input puts `X, Y` in
-the two leading slots and the tail in the rest, read off by index value.  Lets `finCongr`/
-`castAdd`/`natAdd`-reindexed evaluations reduce by `.val` arithmetic instead of `Fin.cases`
-(which does not fire on cast indices). -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
     (tail : Fin s -> TangentSpace I x) (i : Fin (s + 2)) :
     metricTraceInput (I := I) X Y tail i =
@@ -617,8 +613,8 @@ theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
       apply Fin.ext
       simp [Fin.val_succ]
 
-/-- Pointwise coordinate formula for the first-two metric trace field, with the
-canonical centred chart inverse metric. -/
+
+
 theorem metricTraceFirstTwoField_eq_sum {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -638,12 +634,12 @@ theorem metricTraceFirstTwoField_eq_sum {s : ℕ}
       (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
         DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
           (I := I) g x k l (extChartAt I x x))
-      (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) g x)
       (A x) tail]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The first-two metric trace field is additive.** -/
+
 theorem metricTraceFirstTwoField_add {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -669,7 +665,7 @@ theorem metricTraceFirstTwoField_add {s : ℕ}
   simp only [Tensor0SSpace.add_apply, mul_add, Finset.sum_add_distrib]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The first-two metric trace field is homogeneous.** -/
+
 theorem metricTraceFirstTwoField_smul {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (c : Real)
@@ -693,9 +689,9 @@ theorem metricTraceFirstTwoField_smul {s : ℕ}
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The first-two metric trace commutes with tail reindexing**: tracing the two
-leading slots of `A · (frontExtendEquiv (frontExtendEquiv e))` (which fixes those two
-slots and permutes the tail by `e`) is the `e`-reindexing of the trace of `A`. -/
+
+
+
 theorem metricTraceFirstTwoField_domDomCongr_gen {s s' : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -733,9 +729,9 @@ theorem metricTraceFirstTwoField_domDomCongr_gen {s s' : ℕ}
   rw [Tensor0SSpace.domDomCongr_apply]
   exact congrArg (A x) (hcompat x _ _ tail)
 
-/-- **First-two metric trace commutes with tail reindexing** (the `frontExtendEquiv²`
-case): tracing the two leading slots of `A · frontExt(frontExt e)` is the `e`-reindex of
-the trace of `A`.  Special case of `_gen`. -/
+
+
+
 theorem metricTraceFirstTwoField_domDomCongr {s s' : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (e : Fin s ≃ Fin s')
@@ -762,10 +758,10 @@ theorem metricTraceFirstTwoField_domDomCongr {s s' : ℕ}
         metricTraceInput, Fin.cases_succ]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **First-two metric trace of a front-factor product**: `trace₁₂((A ⊗ B)·finCongr) =
-(trace₁₂ A) ⊗ B`.  The two trace slots live inside the first factor `A`, so the trace
-acts on `A` alone and `B` rides along unchanged.  The `finCongr h` recasts the product's
-rank `(k+2)+q` to the `(k+q)+2` shape the trace expects (value-preserving). -/
+
+
+
+
 theorem metricTraceFirstTwoField_product {k q : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -836,14 +832,14 @@ theorem metricTraceFirstTwoField_product {k q : ℕ}
   rw [Tensor0SSpace.domDomCongr_apply, tensor0SField_product_apply, fact1, fact2]
   ring
 
-/-! ### Zero laws for the trace-step composition
 
-`MultilinearSection.product`/`domDomCongr` zero laws genuinely belong at the Multilinear
-layer; they are stated here only because the diffusion-split composition consumes them and
-no lower-layer versions exist yet. -/
+
+
+
+
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The metric trace of the zero field is zero. -/
+
 theorem metricTraceFirstTwoField_zero {s : ℕ}
     [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) :
@@ -859,20 +855,20 @@ theorem metricTraceFirstTwoField_zero {s : ℕ}
   unfold metricTrace0S2InBasis
   simp [ContMDiffSection.coe_zero]
 
--- NOTE: generic `domDomCongr e 0 = 0` and `product A 0 = 0` at the MultilinearSection
--- layer fail `OfNat 0` synthesis at statement time (the bundle topology/`Zero` instance
--- is only pinned once a concrete-rank function fixes it).  They are handled inline at the
--- concrete witness ranks in the producer composition instead.
 
-/-! ## `∇` through the first-two metric trace, field (realizer) level
 
-`nabla_metricTraceFirstTwo0S` is the *evaluated* commutation; here it is lifted to a
-field-level `TotalNabla0SRealizes` statement (the form `StarSum2.nabla` consumes).  `∇`
-prepends a derivative slot at position `0`; tracing the (shifted) original first-two slots
-requires moving that new slot past the pair, encoded by `traceNablaShuffle`. -/
 
-/-- The slot shuffle for `∇` through `metricTraceFirstTwoField`: the 3-cycle
-`0 ↦ 2, 1 ↦ 0, 2 ↦ 1` on `Fin (s+3)` (identity on the tail). -/
+
+
+
+
+
+
+
+
+
+
+
 def traceNablaShuffle (s : ℕ) : Equiv.Perm (Fin (s + 2 + 1)) :=
   (Equiv.swap 0 2).trans (Equiv.swap 0 1)
 
@@ -902,7 +898,7 @@ theorem traceNablaShuffle_val_ge (s : ℕ) (p : Fin (s + 2 + 1)) (hp : 3 ≤ (p 
   simp only [traceNablaShuffle, Equiv.trans_apply,
     Equiv.swap_apply_of_ne_of_ne hp0 hp2, Equiv.swap_apply_of_ne_of_ne hp0 hp1]
 
-/-- Full `val` description of the shuffle. -/
+
 theorem traceNablaShuffle_val (s : ℕ) (p : Fin (s + 2 + 1)) :
     ((traceNablaShuffle s p : Fin (s + 2 + 1)) : ℕ) =
       if (p : ℕ) = 0 then 2 else if (p : ℕ) = 1 then 0 else if (p : ℕ) = 2 then 1
@@ -918,16 +914,17 @@ theorem traceNablaShuffle_val (s : ℕ) (p : Fin (s + 2 + 1)) :
           tns_c2, if_neg (by omega), if_neg (by omega), if_pos rfl]
       · rw [traceNablaShuffle_val_ge s p (by omega), if_neg h0, if_neg h1, if_neg h2]
 
-/-- Hypothesis-form single-`Fin.cons` evaluator with explicit constant motive (bare `Fin.cons`'s
-dependent motive is not inferred in `rw` position). -/
+
+
 private theorem consPredVal {V : Type*} {n : ℕ} (c : V) (f : Fin n → V) (q : Fin (n + 1))
     (hq : q ≠ 0) : @Fin.cons n (fun _ => V) c f q = f (q.pred hq) := by
   have h := Fin.cons_succ (α := fun _ => V) c f (q.pred hq)
   rw [Fin.succ_pred] at h
   exact h
 
-/-- **The slot identity for the `∇`–trace shuffle**: precomposing the trace-input tuple
-`[a, b, Z, tail…]` with the shuffle yields `[Z, a, b, tail…]`. -/
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
     (a b Z : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
     metricTraceInput (I := I) a b (Fin.cons Z tail) ∘ traceNablaShuffle s =
@@ -954,7 +951,8 @@ theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
     rcases eq_or_ne (p : ℕ) 1 with h1 | h1
     · rw [show traceNablaShuffle s p = 0 from
         Fin.ext (by rw [Fin.val_zero, hv, if_neg h0, if_pos h1]), Fin.cons_zero]
-      rw [show p.pred hp0 = 0 from Fin.ext (by rw [Fin.val_zero, Fin.val_pred]; omega), Fin.cons_zero]
+      rw [show p.pred hp0 = 0 from Fin.ext (by rw [Fin.val_zero, Fin.val_pred]; omega),
+        Fin.cons_zero]
     · rcases eq_or_ne (p : ℕ) 2 with h2 | h2
       · have hs : traceNablaShuffle s p ≠ 0 := by
           rw [Ne, Fin.ext_iff, Fin.val_zero, hv, if_neg h0, if_neg h1, if_pos h2]; omega
@@ -989,11 +987,11 @@ theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
         simp only [Fin.val_pred, hval]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Field-level `∇`–trace commutation (realizer form).**  If `nablaA` realizes the total
-covariant derivative of `A`, then `metricTraceFirstTwoField g (domDomCongr (traceNablaShuffle s)
-nablaA)` realizes the total covariant derivative of `metricTraceFirstTwoField g A` — the
-field-level lift of `nabla_metricTraceFirstTwo0S` (uses metric compatibility so `∇` passes
-through the trace, up to the `traceNablaShuffle` slot move).  Consumed by `StarSum2.nabla`. -/
+
+
+
+
+
 theorem nablaRealizes_metricTraceFirstTwo {s : ℕ}
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -1021,7 +1019,7 @@ theorem nablaRealizes_metricTraceFirstTwo {s : ℕ}
     (fun k l => DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
       (I := I) g x k l (extChartAt I x x)) with hgInv
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x
   rw [← totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         s cov X (metricTraceFirstTwoField (I := I) (M := M) g A) x slots,

@@ -4,67 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInter
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.CrossTermIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Polymorphic-in-`K` regularity propagator for the per-step effective source
-
-This module discharges the per-step `MemWkp K 2` regularity propagator for
-`fChartEffStep`: given chart-`H^{m+2+K}` regularity of the canonical chart-
-pushed POU representative of `u_h.coeFn` and `MemWkp (K+1) 2` regularity of
-the previous-level effective source (which is ae-zero outside the chart-pulled
-POU support), the level-`(m+1)` effective source `fChartEffStep` lies in
-`MemWkp K 2` on the chart target.
-
-## Strategy
-
-`fChartEffStep g α u_h m dirs prev_fChartEff l` is, by definition,
-`Set.indicator (chartImagePOUTsupport α) (numerator / densityOnEuclid g α)`,
-where `numerator = fChartEffStepNumerator g α u_h m dirs prev_fChartEff l`
-unfolds into a sum of five layers (A, B, -C, D, E).
-
-The key observation is that *each layer's structural factor* vanishes a.e.
-on `chartTargetEuclid α \ chartImagePOUTsupport α`:
-
-* Layers A, B, C involve `chosenMthMixedPartialChartPushedU` at various
-  levels, each ae-zero off `chartImagePOUTsupport α` (from the chart-pushed
-  representative's vanishing outside the POU support and the iterated
-  weak-partial propagation).
-* Layers D, E involve `prev_fChartEff` and its weak `l`-partial, both
-  ae-zero off `chartImagePOUTsupport α` (D directly, E by weak-partial
-  propagation from D).
-
-Hence `numerator =ᵃᵉ 0` on `chartTargetEuclid α \ chartImagePOUTsupport α`,
-which together with the strict positivity of the density on the chart target
-gives `Set.indicator (chartImagePOUTsupport α) (numerator / density)
-   =ᵃᵉ numerator / density` on `chartTargetEuclid α`.
-
-For the `MemWkp K 2` regularity of `numerator / density`, we exploit:
-
-* Each layer's smooth coefficient (`weightedInvGramDerivOnEuclid`, its
-  `∂_j`, `densityDerivOnEuclid`, `densityOnEuclid`, `1/densityOnEuclid`)
-  is `C^∞` on the open chart target. We extend each globally via
-  `exists_smooth_global_extension`: the extension is `C^∞` on `EuclN` and
-  agrees with the original on a closed thickening of
-  `chartImagePOUTsupport α`. The structural factor is ae-zero outside the
-  POU support, so multiplying the original or its extension produces the
-  same function modulo ae-equality on the chart target.
-* The globally smooth extensions are bounded (compact-support multiplication)
-  with bounded iterated derivatives up to any order, by
-  `exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport`.
-* Multiplication by a smooth, bounded function preserves `MemWkp K 2` via
-  `MemWkp.smul_smooth_bounded`.
-
-After handling each layer as `MemWkp K 2`, sum them up via `MemWkp.add`
-/ `MemWkp.sub`, then divide by the density via the cutoff-extension of
-`1 / densityOnEuclid g α`.
-
-## Main theorem
-
-* `fChartEffStep_memWkp_K_two` — the headline regularity propagator.
-
-The corollary at `K = 0` recovers the existing weighted `L²` regularity;
-the corollary at `K = 1` discharges the per-step `MemW1p 2` propagator
-`FChartEffStepW1pHyp` used by the canonical iterated chart-bilinear data.
--/
 
 noncomputable section
 
@@ -77,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedFChartEffStepRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -103,35 +42,33 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The chart-pulled POU support, a compact subset of the open chart target. -/
 private abbrev Kα (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
-/-- The open chart target. -/
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_compact (α : M) :
     IsCompact (Kα (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_meas (α : M) :
     MeasurableSet (Kα (I := I) (M := M) α) :=
   (Kα_compact (I := I) (M := M) α).isClosed.measurableSet
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
-/-- The canonical chart-pushed representative of `u_h.coeFn` vanishes ae on the
-volume restricted to `chartTargetEuclid α \ chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_u_h_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -149,7 +86,7 @@ private lemma chartPushed_u_h_ae_zero_off_Kα
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chosenWeakPartial'_ae_zero_on_open_sub_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -209,9 +146,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_sub_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
-/-- Polymorphic propagation: assuming chart-`H^m` of the canonical chart-
-pushed parent, the level-`m` chosen mixed weak partial vanishes ae on
-`chartTargetEuclid α \ chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chosenMthMixed_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -281,6 +216,7 @@ private structure SmoothExt (α : M) (f : EuclN → ℝ) where
   ext_eq_on_cthick : ∀ y ∈ Metric.cthickening δ (Kα (I := I) (M := M) α),
     ext y = f y
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothExt_of_contDiffOn (α : M) {f : EuclN → ℝ}
     (hf : ContDiffOn ℝ (⊤ : ℕ∞) f (Ωα (I := I) (M := M) α)) :
     Nonempty (SmoothExt (I := I) (M := M) α f) := by
@@ -290,8 +226,6 @@ private lemma smoothExt_of_contDiffOn (α : M) {f : EuclN → ℝ}
       (Kα_subset_Ωα (I := I) (M := M) α)
   exact ⟨⟨δ, fExt, hδ_pos, hδ_in, hExt_smooth, hExt_eq⟩⟩
 
-/-- Globally smooth, compactly supported "cutoff" that is `1` on a neighborhood
-of `Kα` and vanishes outside the chart target. -/
 private structure ChartCutoff (α : M) where
   δ : ℝ
   η : EuclN → ℝ
@@ -303,6 +237,7 @@ private structure ChartCutoff (α : M) where
   η_one_on_cthick : ∀ y ∈ Metric.cthickening δ (Kα (I := I) (M := M) α), η y = 1
   η_tsupp_in_target : tsupport η ⊆ Ωα (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_chartCutoff_nonempty (α : M) :
     Nonempty (ChartCutoff (I := I) (M := M) α) := by
   obtain ⟨δ, η, hδ_pos, hδ_in, hη_smooth, hη_cs, _hη_range, hη_one, hη_tsupp⟩ :=
@@ -312,6 +247,8 @@ private lemma exists_chartCutoff_nonempty (α : M) :
       (Kα_subset_Ωα (I := I) (M := M) α)
   exact ⟨⟨δ, η, hδ_pos, hδ_in, hη_smooth, hη_cs, hη_one, hη_tsupp⟩⟩
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum_univ
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -340,6 +277,7 @@ private lemma memWkp_finset_sum_univ
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_coef_mul_factor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -452,6 +390,7 @@ private lemma memWkp_coef_mul_factor
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α) h_ae_eq).mp
     h_prod_memWkp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_A_pair_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -521,6 +460,7 @@ private lemma layer_A_pair_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_A_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -568,6 +508,7 @@ private lemma layer_A_memWkp
           (I := I) (M := M) g α u_h (m + 1) (Fin.cons i dirs) y)
     (fun i _hi => h_inner_sum i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_B_pair_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -624,6 +565,7 @@ private lemma layer_B_pair_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_B_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -671,6 +613,7 @@ private lemma layer_B_memWkp
           (Fin.cons i (Fin.snoc dirs j)) y)
     (fun i _hi => h_inner_sum i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_C_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -721,6 +664,7 @@ private lemma layer_C_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_D_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (K : ℕ)
@@ -742,6 +686,7 @@ private lemma layer_D_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_prev_memWkp_K h_prev_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_E_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (K : ℕ)
@@ -795,6 +740,7 @@ private lemma layer_E_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -855,6 +801,7 @@ private lemma fChartEffStepNumerator_memWkp
   unfold fChartEffStepNumerator
   convert h_step4 using 2 with y
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -1039,7 +986,8 @@ private lemma fChartEffStepNumerator_ae_zero_off_Kα
           (Ωα (I := I) (M := M) α) y) = 0
   rw [hA, hB, hC, hD, hE]; ring
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -1055,6 +1003,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
       (Ωα (I := I) (M := M) α) := contDiffOn_const
   exact h_const.div h_dens_smooth h_ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_div_density_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -1110,22 +1059,7 @@ private lemma fChartEffStepNumerator_div_density_memWkp
     (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_num_memWkp h_num_ae_zero
 
-/-- **Polymorphic `MemWkp K 2` regularity of the per-step effective source.**
-Given:
-
-* `MemWkp (K + 1) 2` regularity of the previous-level effective source
-  `prev_fChartEff` on the chart target;
-* ae-vanishing of `prev_fChartEff` on `chartTargetEuclid α \
-  chartImagePOUTsupport α`;
-* chart-`H^{m + 2 + K}` regularity of the canonical chart-pushed
-  representative of `u_h.coeFn`,
-
-the level-`(m+1)` effective source `fChartEffStep` lies in `MemWkp K 2` on
-`chartTargetEuclid α`.
-
-This discharges the per-step regularity propagator at every `K ≥ 0`,
-upgrading the existing weighted-`L²` regularity to arbitrary chart-Sobolev
-regularity. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_memWkp_K_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -1237,17 +1171,7 @@ theorem fChartEffStep_memWkp_K_two
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α)
     h_fStep_ae_eq_Q).mpr hQ_memWkp
 
-/-- **`K = 1` corollary.** At `K = 1`, the headline regularity propagator
-gives `MemWkp 1 2 (fChartEffStep) = MemW1p 2 (fChartEffStep)`. This is the
-form consumed by `FChartEffStepW1pHyp` in the canonical iterated chart-
-bilinear data: the propagator is now unconditional, given chart-`H^{m+3}`
-regularity of the parent and `MemW1p 2` (= chart-`H^1`) regularity of the
-previous-level source (plus its ae-vanishing).
-
-The next-source `MemW1p 2` follows from chart-`H¹` of the previous source
-via `chosenWeakPartial_mem` together with chart-`H^{m+3}` of the parent.
-This is exactly the hypothesis pattern needed by the canonical iterated
-data bundle. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

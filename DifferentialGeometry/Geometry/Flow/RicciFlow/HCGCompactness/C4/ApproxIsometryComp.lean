@@ -1,30 +1,28 @@
--- NOTE: deliberately imports `AllTimesBounds` (the home of `MetricUniformEquivalentOn`)
--- and not `ApproximateIsometry`, which is currently stale-broken against the in-flight
--- tensor-layer refactor (`Tensor0SBundle.normRS` relocation).
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+
+
+
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Bundle.ClmSectionSmooth
 import DifferentialGeometry.Geometry.Metric.MetricExistence
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Composition of approximate isometries (MSM135 F5/F6, metric layer)
 
-The unconditional (`C⁰`) layer of MSM135 "Composition of approximate isometries, I/II"
-(`lbl371`/`lbl372`) in the same-domain supplied-pullback formulation: uniform metric
-equivalences compose with multiplicative constants (`metricEquiv_trans`), the constant
-converts to the book's additive `ε`-form (`metricEquiv_comp_eps`,
-`(1+ε₀)(1+ε₁) ≤ 1 + 3(ε₀+ε₁)` for `ε ≤ 1`), and the `lbl372` accumulation of `ε`'s
-over a chain of compositions is the scalar fold `compEpsAccum`.
 
-The derivative (`C^p`) part of F5/F6 is the Lemma 4.5 consumer (the book applies
-Corollary `lbl370` to `T := Φ₁^*g₂ − g₁`); it is gated on the one-step interface of
-`lemma45Double` and is wired when the contraction-Leibniz engine lands.
--/
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -42,7 +40,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
-/-- The quadratic form of a smooth Riemannian metric is nonnegative. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInner_nonneg
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -51,7 +50,8 @@ theorem metricInner_nonneg
   · simp [hv]
   · exact (g.pos x v hv).le
 
-/-- Uniform metric equivalence is monotone in the constant. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_mono
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C C' : Real}
@@ -72,8 +72,9 @@ theorem metricEquiv_mono
   · calc h.inner x v v ≤ C * g.inner x v v := hup
       _ ≤ C' * g.inner x v v := mul_le_mul_of_nonneg_right hCC' hg0
 
-/-- MSM135 `lbl371` (`C⁰` part): uniform metric equivalences compose with the
-product of the constants. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_trans
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {K : Set M} {g h k : SmoothRiemannianMetric I M} {C₁ C₂ : Real}
@@ -101,8 +102,9 @@ theorem metricEquiv_trans
           mul_le_mul_of_nonneg_left hup₁ hC₂0
       _ = C₁ * C₂ * g.inner x v v := by ring
 
-/-- MSM135 `lbl371` in the book's additive `ε`-form: composing `(1+ε₀)`- and
-`(1+ε₁)`-equivalences yields a `(1+3(ε₀+ε₁))`-equivalence when `ε᎐ ≤ 1`. -/
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_comp_eps
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {K : Set M} {g h k : SmoothRiemannianMetric I M} {eps₀ eps₁ : Real}
@@ -115,9 +117,9 @@ theorem metricEquiv_comp_eps
     nlinarith [mul_le_of_le_one_left heps₁ heps₀1]
   exact metricEquiv_mono hC (metricEquiv_trans hgh hhk)
 
-/-- MSM135 `lbl372` accumulation (scalar core of "Composition of approximate
-isometries, II"): if each composition step costs at most `C` times the new `ε`,
-the `n`-fold composite is controlled by `C` times the sum of the `ε`'s. -/
+
+
+
 theorem compEpsAccum {C : Real} {e δ : Nat → Real}
     (h0 : e 0 ≤ C * δ 0)
     (hstep : ∀ k : Nat, e (k + 1) ≤ e k + C * δ (k + 1)) :
@@ -131,10 +133,11 @@ theorem compEpsAccum {C : Real} {e δ : Nat → Real}
         conv_rhs => rw [Finset.sum_range_succ, mul_add]
       linarith [hstep n, ih]
 
-/-- **Smooth bump `χ ≡ 1` on a compact set inside an open set** (Step D1a component): on a
-σ-compact Hausdorff finite-dimensional manifold, a compact `K` inside an open `U` admits a
-smooth `[0,1]`-valued `χ` equal to `1` on `K` with `tsupport χ ⊆ U`.  Shrink `K ⊆ V ⊆ V̄ ⊆ U`
-(regularity) and apply `exists_contMDiffMap_one_nhds_of_subset_interior` to `(K, V̄)`. -/
+
+
+
+
+omit [CompleteSpace E] in
 theorem exists_bump_one_on {K U : Set M} (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U) :
     ∃ χ : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 K ∧
       tsupport χ ⊆ U ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
@@ -160,12 +163,13 @@ open Bundle
 
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 
-/-- **Bumped pullback of a metric's inner family along a partial diffeomorphism (D1a-(i)).**
-Given a compact `K` inside `Φ.source`, there is a globally smooth family of bilinear forms on `M`
-agreeing on `K` with the pointwise pullback `(v, w) ↦ h.inner (Φ x) (dΦ v) (dΦ w)`.  The family is
-`χ • (conjugation form)` for a bump `χ ≡ 1` on `K` supported in `Φ.source`; smoothness is the
-test-section engine with a per-point split (`x ∈ Φ.source` — the composed `clm_bundle` assembly
-with `tangentMapWithin`; `x ∉ tsupport χ` — locally zero). -/
+
+
+
+
+
+
+omit [CompleteSpace E] in
 theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)) {K : Set M}
     (hK : IsCompact K) (hKs : K ⊆ Φ.source) (h : SmoothRiemannianMetric I N) :
     ∃ (χ : M → ℝ) (P : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ),
@@ -180,13 +184,11 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
   classical
   obtain ⟨χ, hχ, hχK, hχsupp, hχ01⟩ :=
     exists_bump_one_on (I := I) hK Φ.open_source hKs
-  -- the conjugation form (junk off the source)
   set Q : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ := fun x =>
     (ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)).comp
       ((h.inner (Φ x)).comp (mfderiv I I Φ x)) with hQ
   refine ⟨χ, fun x => χ x • Q x, ?_, hχ, hχK, hχsupp, hχ01, fun x => rfl⟩
-  · -- global smoothness by the test-section engine
-    apply cotangentCov_clmSection_smooth_aux
+  · apply cotangentCov_clmSection_smooth_aux
       (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
       (φ := fun x => χ x • Q x)
     intro Y
@@ -203,8 +205,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
     have hstage : ContMDiffAt I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         (fun x => (χ x • Q x) (Y x) (W x)) x₀ := by
       by_cases hx₀ : x₀ ∈ Φ.source
-      · -- the pullback scalar is smooth on the source; multiply by `χ`
-        have hφ : ContMDiffAt I I (∞ : WithTop ℕ∞) (Φ : M → N) x₀ :=
+      · have hφ : ContMDiffAt I I (∞ : WithTop ℕ∞) (Φ : M → N) x₀ :=
           Φ.contMDiffOn_toFun.contMDiffAt (Φ.open_source.mem_nhds hx₀)
         have hg' : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (∞ : WithTop ℕ∞)
             (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
@@ -235,7 +236,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
           have hcomp := (htm.contMDiffAt (hpre_open.mem_nhds hmem)).comp x₀ hYs
           refine hcomp.congr_of_eventuallyEq ?_
           filter_upwards [Φ.open_source.mem_nhds hx₀] with x hx
-          show TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
+          change TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
               ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x (Y' x))
             = TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
               ((Φ : M → N) x)
@@ -262,8 +263,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
         refine hmul.congr_of_eventuallyEq ?_
         filter_upwards with x
         exact hval x
-      · -- off the support of `χ` the scalar vanishes locally
-        have hx₀' : x₀ ∉ tsupport χ := fun hmem => hx₀ (hχsupp hmem)
+      · have hx₀' : x₀ ∉ tsupport χ := fun hmem => hx₀ (hχsupp hmem)
         have hev : (fun x => (χ x • Q x) (Y x) (W x)) =ᶠ[nhds x₀] (fun _ => (0 : ℝ)) := by
           filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx₀'] with x hx
           rw [hval x, image_eq_zero_of_notMem_tsupport hx, zero_mul]
@@ -272,17 +272,18 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
     filter_upwards with y
     rfl
 
-/-- **Positivity of the pullback form on the source (D1a-(i))**: on `Φ.source` the derivative
-of a partial diffeomorphism is a linear equivalence (`isLocalDiffeomorphAt` +
-`mfderivToContinuousLinearEquiv`), so the pulled-back quadratic form of a metric is positive
-definite there. -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 theorem pullInner_pos (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {x : M} (hx : x ∈ Φ.source) (h : SmoothRiemannianMetric I N)
     (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < h.inner ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x v)
         (mfderiv I I (Φ : M → N) x v) := by
   refine h.pos _ _ (fun h0 => hv ?_)
-  -- `Φ.symm ∘ Φ = id` near `x`, so the derivative composition is the identity
   have hfg : (Φ.symm : N → M) ∘ (Φ : M → N) =ᶠ[nhds x] id := by
     filter_upwards [Φ.open_source.mem_nhds hx] with y hy
     exact Φ.left_inv' hy

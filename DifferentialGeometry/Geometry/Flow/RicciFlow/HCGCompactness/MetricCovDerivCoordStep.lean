@@ -2,21 +2,19 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.CoordFrameStep
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Coordinate-frame component recursion for the metric covariant tower (P3 Gap B)
 
-The `a → a+1` step of the background covariant tower, written in the coordinate
-frame.  Combines the tower unfolding (`metricCovDeriv_succ` +
-`metricCovDerivStep_apply` + `totalNabla0SFun_apply_section`) with the
-rank-general coordinate covariant-step component formula
-`nabla0SFun_eval_coordFrame` (producer 2).  This is the algebraic heart of the
-single-`φ` induction: a covariant component of order `a+1` is the coordinate
-directional derivative of the order-`a` component minus a fixed
-`gRef`-Christoffel sum of order-`a` components.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,17 +27,18 @@ open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- General-`a` unfolding of one `metricCovDeriv` step against a smooth section
-in the leading slot: it is the directional covariant derivative `nabla0SFun` of
-the order-`a` tower tensor. -/
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_apply_section
     (h gRef : SmoothRiemannianMetric I M) (a : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -50,13 +49,15 @@ theorem metricCovDeriv_succ_apply_section
         (metricCovDeriv (I := I) h gRef a) x slots := by
   rw [metricCovDeriv_succ, metricCovDerivStep_apply, totalNabla0SFun_apply_section]
 
-/-- **Smooth-slots recursion for the metric covariant tower.**  General-`a`
-analogue of `metricCovDeriv_one_eval_smooth_slots`: one tower step evaluated on a
-leading section `X` and smooth section slots `V` is the directional derivative of
-the order-`a` slot scalar minus the `gRef`-connection corrections.  This is the
-form the section-based Gap-B convergence induction consumes (directional term →
-B2, corrections → frame expansion + mulLeft + IH), with NO coordinate-frame /
-germ-localisation detour. -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_eval_smooth_slots
     (h gRef : SmoothRiemannianMetric I M) (a : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -77,13 +78,16 @@ theorem metricCovDeriv_succ_eval_smooth_slots
   exact nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (leviCivitaConnectionOfMetric (I := I) gRef) X V (metricCovDeriv (I := I) h gRef a) x
 
-/-- **Coordinate-frame component recursion for the metric covariant tower.**
-The order-`a+1` covariant component in the coordinate frame is the coordinate
-directional derivative of the order-`a` component (leading slot the derivative
-direction) minus the fixed `gRef`-Christoffel correction sum over the remaining
-slots.  This is producer (2) (`nabla0SFun_eval_coordFrame`) specialised to
-`α = metricCovDeriv h gRef a`, with the leading derivative slot realised by a
-local section of the coordinate frame. -/
+
+
+
+
+
+
+
+omit [IsManifold I 1 M] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_component_coordFrame
     (h gRef : SmoothRiemannianMetric I M) (a : Nat) (x : M)
     (I0 : Fin (a + 3) → CoordinateIdx (𝕜 := Real) E) :

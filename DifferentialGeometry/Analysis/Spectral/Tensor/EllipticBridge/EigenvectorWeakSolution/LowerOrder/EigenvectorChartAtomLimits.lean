@@ -1,32 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.LowerOrderCoeffFactors
 
-/-!
-# The two eigenvector chart-component atoms and their `L²`-limit summands
-
-With `wₙ := eigenvectorSmoothApprox g r s i n` and resolvent eigenvalue
-`μ := i.fst.val`, this file builds the two `T`-dependent chart atoms of the
-partition-of-unity-weighted approximant as `L²` classes over `chartL2Measure α`
-and identifies their `n → ∞` limits:
-
-* the bare chart component `approxComponentLp`, with limit `componentLpLimit`
-  and convergence `approxComponentLp_tendsto`;
-* its chart-Euclidean partial `approxPartialLp`, with limit `partialLpLimit` and
-  convergence `approxPartialLp_tendsto`.
-
-Multiplying either atom by a `C^∞`-on-the-chart-target factor — bounded on the
-partition-of-unity kernel, off which the atom vanishes — keeps it `L²`
-(`memLp_factor_mul_componentAtom`, `memLp_factor_mul_partialAtom`) and preserves
-`L²`-convergence to the kernel-indicator-cut factor against the atom's limit
-(`tendsto_componentSummand`, `tendsto_partialSummand`). These are the per-summand
-limit theorems assembled by the lower-order coefficient headlines.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix ENNReal NNReal
@@ -45,7 +22,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -58,7 +35,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of `approxComponentLp`. -/
 def approxComponentLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -72,7 +48,6 @@ def approxComponentLp
         g r s i n).toCcTensor α P.1 P.2)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `componentLpLimit`. -/
 def componentLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -86,7 +61,7 @@ def componentLpLimit
       α P
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `approxComponentLp_tendsto`. -/
+omit [CompleteSpace E] in
 lemma approxComponentLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -121,7 +96,6 @@ lemma approxComponentLp_tendsto
         g r s i α P n) from funext h_term] at h_tendsto
   exact h_tendsto
 
-/-- Chart-locality-free twin of `approxPartialLp`. -/
 def approxPartialLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -137,7 +111,6 @@ def approxPartialLp
           g r s i n).toCcTensor α P.1 P.2)
       (chartTargetEuclid (I := I) (M := M) α))
 
-/-- Chart-locality-free twin of `partialLpLimit`. -/
 def partialLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -147,7 +120,7 @@ def partialLpLimit
   i.fst.val •
     eigenvectorChartPartialLp (I := I) (M := M) g r s i α P k
 
-/-- Chart-locality-free twin of `approxPartialLp_tendsto`. -/
+omit [CompleteSpace E] in
 lemma approxPartialLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -184,7 +157,7 @@ lemma approxPartialLp_tendsto
         g r s i α P k n) from funext h_term] at h_tendsto
   exact h_tendsto
 
-/-- Chart-locality-free twin of `tendsto_componentSummand`. -/
+omit [CompleteSpace E] in
 lemma tendsto_componentSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -255,7 +228,7 @@ lemma tendsto_componentSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
-/-- Chart-locality-free twin of `tendsto_partialSummand`. -/
+omit [CompleteSpace E] in
 lemma tendsto_partialSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -332,8 +305,7 @@ lemma tendsto_partialSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
-/-- Chart-locality-free twin of
-`euclidPartial_tensorChartComponent_approx_memLp`. -/
+omit [CompleteSpace E] in
 lemma euclidPartial_tensorChartComponent_approx_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -353,7 +325,7 @@ lemma euclidPartial_tensorChartComponent_approx_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
       α P.1 P.2 k)
 
-/-- Chart-locality-free twin of `memLp_factor_mul_componentAtom`. -/
+omit [CompleteSpace E] in
 lemma memLp_factor_mul_componentAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -396,7 +368,7 @@ lemma memLp_factor_mul_componentAtom
       (eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor α P.1 P.2)
 
-/-- Chart-locality-free twin of `memLp_factor_mul_partialAtom`. -/
+omit [CompleteSpace E] in
 lemma memLp_factor_mul_partialAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -5,15 +5,14 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Family
 import Mathlib.Analysis.Calculus.MeanValue
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Conjugate heat equation along Ricci flow
 
-This file begins the analytic producer chain used by Perelman's entropy proof.
-Its first endpoint is conservation of the total mass of a smooth solution of
-the conjugate heat equation under the moving Riemannian volume measure.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -28,16 +27,16 @@ open scoped Manifold ContDiff
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-/-! ## Reversing the terminal-value equation -/
 
-/-- The realized metric family obtained by reading `G` backwards from time
-`T`.  Forward time `s` for this family corresponds to original time `T - s`. -/
+
+
+
 def reverseFamily
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -48,6 +47,7 @@ def reverseFamily
   connection := fun s => G.connection (T - s)
   metricCompatible := fun s => G.metricCompatible (T - s)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem reverse_metric
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -123,12 +123,14 @@ theorem heat_pot_add
 def reverseHeat (T : Real) (u : Real → M → Real) : Real → M → Real :=
   fun s x => u (T - s) x
 
+omit [TopologicalSpace M] in
 @[simp] theorem reverse_heat_apply
     (T : Real) (u : Real → M → Real) (s : Real) (x : M) :
     reverseHeat T u s x = u (T - s) x := by
   rfl
 
-/-- Time reversal changes the sign of the pointwise time derivative. -/
+
+omit [TopologicalSpace M] in
 theorem reverse_deriv
     (T : Real) (u : Real → M → Real) (s : Real) (x : M)
     (hu : DifferentiableAt Real (fun t : Real => u t x) (T - s)) :
@@ -140,8 +142,8 @@ theorem reverse_deriv
   have hcomp := hu.hasDerivAt.comp s hsub
   simpa [reverseHeat] using hcomp.deriv
 
-/-- A backward conjugate-heat equation becomes a forward heat equation with
-reaction coefficient `-scalar` after reversing time. -/
+
+
 theorem conj_heat_forward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -165,8 +167,8 @@ theorem conj_heat_forward
         scalar (T - s) x * u (T - s) x
   ring
 
-/-- A forward solution for the reversed metric family pulls back to a backward
-conjugate-heat solution for the original family. -/
+
+
 theorem conj_heat_backward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -190,7 +192,8 @@ theorem conj_heat_backward
   rw [show T - (T - t) = t by ring]
   ring
 
-/-- Reversing a field twice around the same terminal time recovers it. -/
+
+omit [TopologicalSpace M] in
 @[simp] theorem reverse_heat_reverse
     (T : Real) (u : Real → M → Real) :
     reverseHeat T (reverseHeat T u) = u := by
@@ -198,8 +201,8 @@ theorem conj_heat_backward
   change u (T - (T - s)) x = u s x
   rw [show T - (T - s) = s by ring]
 
-/-- The interval-local conjugate-heat predicate, expressed as the genuine
-forward heat-potential problem after reversing from terminal time `T`. -/
+
+
 def IsConjHeatOn
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -208,8 +211,8 @@ def IsConjHeatOn
   DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D (reverseFamily G T)
     (fun s x => -scalar (T - s) x) (reverseHeat T u)
 
-/-- A forward heat-potential solution for the reversed metric gives the
-corresponding interval-local conjugate-heat solution. -/
+
+
 theorem conj_heat_of_pot
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -220,8 +223,8 @@ theorem conj_heat_of_pot
     IsConjHeatOn D G scalar (reverseHeat T v) T := by
   simpa only [IsConjHeatOn, reverse_heat_reverse] using h
 
-/-- The heat-potential equation on the reversed family yields the original
-backward conjugate-heat equation at each reflected regular time. -/
+
+
 theorem heat_pot_to_conj
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -248,12 +251,12 @@ theorem heat_pot_to_conj
   rw [show T - (T - t) = t by ring]
   ring
 
-/-- A smooth solution of the conjugate heat equation has stationary total mass
-under the moving Riemannian volume of a Ricci-flow metric family.
 
-The metric input is expressed by its trace evolution, while `hconj` is the
-actual pointwise equation `∂ₜu = -Δu + Ru`.  This is the normalization
-producer needed before coupling Perelman's `W` functional to conjugate heat. -/
+
+
+
+
+
 theorem conj_heat_mass_deriv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -298,8 +301,8 @@ theorem conj_heat_mass_deriv
       _ = 0 := by rw [integral_neg, hlap, neg_zero]
   exact hvariation.congr_deriv hmass
 
-/-- Total mass of a smooth conjugate-heat solution is constant on a closed
-time interval.  This is the interval form of `conj_heat_mass_deriv`. -/
+
+
 theorem conj_heat_mass_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -338,8 +341,8 @@ theorem conj_heat_mass_eq
       (hderiv t ⟨ht.1, le_of_lt ht.2⟩).hasDerivWithinAt)
   simpa only [mass] using hconst b (Set.right_mem_Icc.mpr hab)
 
-/-- Unit terminal mass propagates to every earlier time of a smooth
-conjugate-heat solution. -/
+
+
 theorem conj_heat_mass_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

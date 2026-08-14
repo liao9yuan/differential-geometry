@@ -27,6 +27,8 @@ variable {V F : Type*}
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
+omit [MeasurableSpace V]
+  [BorelSpace V] in
 /-- Every heat shell has the canonical heat-scale cover with the cardinality
 used by the global shell estimate. -/
 theorem fluxShell_cover {t : ℝ} (ht : 0 < t) (x : V) (k : ℕ) :

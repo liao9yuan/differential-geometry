@@ -2,15 +2,14 @@ import DifferentialGeometry.Analysis.Integration.Measure.ParamEvaluation
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Normal-chart volume evaluation
 
-This file starts Stage V1 of the volume-comparison lane by specializing the
-Integration-layer parametrized volume formula to the exponential partial
-diffeomorphism that defines normal coordinates.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +27,8 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -43,27 +42,31 @@ section NormalChart
 variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
-/-- The normal-coordinate density is the parametrized density of the exponential
-partial diffeomorphism.
 
-Mathematically this is `sqrt(det g_ij)` in normal coordinates.  The definition is
-valid on the whole model space, while the volume formula only consumes it on
-sets inside `(expMapDiffeo g p).source`.  V1b will identify this same density
-with the Gram determinant of Jacobi fields along radial geodesics. -/
+
+
+
+
+
+
 def normalChartDensity (g : SmoothRiemannianMetric I M) (p : M) : E → ℝ :=
   paramDensity (I := I) g (expMapDiffeo (I := I) g p)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalChartDensity_apply
     (g : SmoothRiemannianMetric I M) (p : M) (w : E) :
     normalChartDensity (I := I) g p w =
       paramDensity (I := I) g (expMapDiffeo (I := I) g p) w := rfl
 
-/-- The normal-coordinate Gram matrix is the parametrized Gram matrix of the
-exponential-side partial diffeomorphism. -/
+
+
 def normalGramMatrix (g : SmoothRiemannianMetric I M) (p : M) :
     E → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   paramGramMatrix (I := I) g (expMapDiffeo (I := I) g p)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalGram_apply
     (g : SmoothRiemannianMetric I M) (p : M) (w : E)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -73,15 +76,17 @@ def normalGramMatrix (g : SmoothRiemannianMetric I M) (p : M) :
         (mfderiv 𝓘(ℝ, E) I (expMapDiffeo (I := I) g p) w ((chartModelBasis E) j)) :=
   rfl
 
-/-- The normal-coordinate density is the square root of the determinant of the
-normal-coordinate Gram matrix. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalDensity_det
     (g : SmoothRiemannianMetric I M) (p : M) (w : E) :
     normalChartDensity (I := I) g p w =
       Real.sqrt (normalGramMatrix (I := I) g p w).det :=
   rfl
 
-omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 /-- The normal-coordinate Gram matrix is continuous at the chart centre. -/
 lemma normalGram_contAt
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -107,10 +112,7 @@ lemma normalGram_contAt
         Set.inter_subset_left (fun w hw => hw.2)
   exact hcont.continuousAt (hUopen.mem_nhds hzeroU)
 
-/-- The radial variation field along the geodesic launched by `x`.
-
-At `t = 1`, this is the vector-slot derivative of the exponential map; see
-`radialJacobi_one`. -/
+/-- The radial variation field along the geodesic launched by `x`. -/
 def radialJacobiField (g : SmoothRiemannianMetric I M) (p : M)
     (x w : E) (t : ℝ) :
     TangentSpace I
@@ -119,14 +121,18 @@ def radialJacobiField (g : SmoothRiemannianMetric I M) (p : M)
     (expMap (I := I) g p
       (show TangentSpace I p from (t • (x + s • w))) : M)) 0 (1 : ℝ)
 
-/-- The packaged radial Jacobi field vanishes at the centre. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma radialJacobi_zero
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) :
     radialJacobiField (I := I) g p x w 0 = 0 := by
   simpa [radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.radial_jacobi_zero (I := I) g p x w
 
-/-- Radius form of the Jacobi equation for the packaged radial Jacobi field. -/
+
+omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_radius
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ t₀ ∈ Set.Ioo (0 : ℝ) 1,
@@ -138,8 +144,6 @@ theorem exists_radialJacobi_radius
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radius form of the endpoint Jacobi equation for the packaged radial Jacobi
-field. -/
 theorem exists_radialJacobi_zero_radius
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -155,8 +159,10 @@ theorem exists_radialJacobi_zero_radius
   simpa [radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.exists_jacobi_zero (I := I) g hEnorm p
 
-/-- Radius form of the second initial condition for the packaged radial Jacobi
-field. -/
+
+
+omit [T2Space M] in
+omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_deriv_radius
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -166,8 +172,8 @@ theorem exists_radialJacobi_deriv_radius
   simpa [radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.exists_radial_jacobi_deriv_radius (I := I) g p
 
-/-- The Gram matrix of the endpoint radial Jacobi fields generated by the fixed
-model basis. -/
+
+
 def radialJacobiGram (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i j =>
@@ -175,6 +181,8 @@ def radialJacobiGram (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
       (radialJacobiField (I := I) g p x ((chartModelBasis E) i) 1)
       (radialJacobiField (I := I) g p x ((chartModelBasis E) j) 1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 @[simp] lemma radialJacobiGram_apply
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -184,7 +192,8 @@ def radialJacobiGram (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
         (radialJacobiField (I := I) g p x ((chartModelBasis E) j) 1) :=
   rfl
 
-/-- Endpoint identification of the packaged radial Jacobi field. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobi_one
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -194,6 +203,8 @@ lemma radialJacobi_one
   simpa [radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.radial_jacobi_one (I := I) g p x w hx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 /-- Radial time scaling can be transferred to both launch vectors and then
 evaluated at time one.  This is an algebraic identity of the defining
 exponential variations, valid at every scale; the radial Gram comparison uses
@@ -215,6 +226,7 @@ lemma radialJacobi_scale
   rw [hfun]
   rfl
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- At any radial time in the local `C²` range, the radial Jacobi field is the
 exponential differential applied to the scaled variation direction. -/
 lemma radialJacobi_at
@@ -227,6 +239,7 @@ lemma radialJacobi_at
   rw [radialJacobi_scale (I := I) g p x w t,
     radialJacobi_one (I := I) g p (t • x) (t • w) htx]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Radial Jacobi fields preserve finite linear combinations at every time in
 the local `C²` range. -/
 lemma radialJacobi_sum_at
@@ -261,6 +274,7 @@ lemma radialJacobi_sum_at
         _ = c i • radialJacobiField (I := I) g p x (w i) t := by
           rw [radialJacobi_at (I := I) g p x (w i) t htx]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields are linear in the variation direction. -/
 lemma radialJacobi_one_smul
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (a : ℝ)
@@ -272,6 +286,7 @@ lemma radialJacobi_one_smul
   exact (mfderiv 𝓘(ℝ, E) I
     (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) x).map_smul a w
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields preserve arbitrary finite linear
 combinations of variation directions. -/
 lemma radialJacobi_sum
@@ -293,6 +308,7 @@ lemma radialJacobi_sum
   rw [radialJacobi_one (I := I) g p x (w i) hx]
   exact L.map_smul (c i) (w i)
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields are linear over finite combinations of
 variation directions. -/
 lemma radialJacobi_one_sum
@@ -304,8 +320,10 @@ lemma radialJacobi_one_sum
       ∑ i, c i • radialJacobiField (I := I) g p x ((chartModelBasis E) i) 1 := by
   exact radialJacobi_sum (I := I) g p x (chartModelBasis E) c hx
 
-/-- On the source of the exponential partial diffeomorphism, its derivative is
-the derivative of the actual exponential map. -/
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma expDiffeo_mfderiv
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : x ∈ (expMapDiffeo (I := I) g p).source) :
@@ -321,9 +339,10 @@ lemma expDiffeo_mfderiv
     exact expMapDiffeo_apply_eq (I := I) g p hy
   exact hagree.mfderiv_eq
 
-/-- The normal-coordinate Gram matrix is the Gram matrix of the radial Jacobi
-fields at parameter `1`, for points where both the normal chart and the local
-Jacobi construction apply. -/
+
+
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalGram_radial
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (expMapDiffeo (I := I) g p).source)
@@ -352,7 +371,8 @@ lemma normalGram_radial
   rw [← radialJacobi_one (I := I) g p x ((chartModelBasis E) i) hxrad]
   rw [← radialJacobi_one (I := I) g p x ((chartModelBasis E) j) hxrad]
 
-/-- Matrix form of the normal-Gram/radial-Jacobi identification. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalGram_radialMat
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (expMapDiffeo (I := I) g p).source)
@@ -361,7 +381,8 @@ lemma normalGram_radialMat
   ext i j
   exact normalGram_radial (I := I) g p hxsrc hxrad i j
 
-/-- Density form of the normal-Gram/radial-Jacobi identification. -/
+
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_radial
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (expMapDiffeo (I := I) g p).source)
@@ -370,15 +391,16 @@ lemma normalDensity_radial
       Real.sqrt (radialJacobiGram (I := I) g p x).det := by
   rw [normalDensity_det, normalGram_radialMat (I := I) g p hxsrc hxrad]
 
-/-- V1a normal-chart volume evaluation.
 
-If a measurable manifold set `A` lies in the source of the normal chart at `p`,
-then its Riemannian volume is the model Haar integral over its normal-coordinate
-image, with density `normalChartDensity`.  This is true because
-`normalChartAt g p` is the inverse of the exponential-side partial
-diffeomorphism `expMapDiffeo g p`, so the Integration-layer V0 theorem applies
-directly.  V1b consumes this statement by replacing `normalChartDensity` with
-the Jacobi-field Gram determinant. -/
+
+
+
+
+
+
+
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChart_volume_eq
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -393,8 +415,8 @@ theorem normalChart_volume_eq
     riemannianVolumeMeasure_param_target_eq (I := I) (M := M) g
       (expMapDiffeo (I := I) g p) hA_meas hA_target
 
-/-- V1b normal-chart volume evaluation with the density expressed by endpoint
-radial Jacobi fields. -/
+
+
 theorem normalChart_volume_radial
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)

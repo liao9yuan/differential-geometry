@@ -4,14 +4,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAvera
 
 set_option autoImplicit false
 
-/-!
-# Finite-hat readout on the selected normal branch
 
-This file joins the sequence tail of selected minimizing branches to the
-pair-index tail of the finite average.  It retains the compatibility entrypoint
-with explicit strict-convexity data and also supplies the intrinsic minimizing
-join directly, without an endpoint radius hypothesis.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,8 +35,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- A finite-hat configuration has a selected live branch whose readout
-vanishes at its center of mass. -/
+
+
 def HasHatCmEqn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -126,16 +126,16 @@ def HasHatCmEqn
         let c := centerOfMass (I := I) (X.obj (L.φ n)).metric
           mu pts join x rad hcm
         let xi : Fin (pb.A r) → E := fun i =>
-          NormalCoordinates.framedChartAt
+          NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0 (pts i)
         chartCmEqnB (I := I) (X.obj (L.φ n)).metric
           (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
-          (NormalCoordinates.framedChartAt
+          (NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0 c)
           (mu, xi) = 0
 
-/-- A finite-hat configuration retains the invertible center derivative and
-strict local implicit solution on one prescribed live source branch. -/
+
+
 def HasHatCmStrictAt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -224,12 +224,12 @@ def HasHatCmStrictAt
           (hcomplete.complete (L.φ n)) (hconn (L.φ n)) x0 hq he
         let c := centerOfMass (I := I) (X.obj (L.φ n)).metric
           mu pts join x rad hcm
-        let z := NormalCoordinates.framedChartAt
+        let z := NormalCoordinates.normalChartAt
           (I := I) (X.obj (L.φ n)).metric x0 c
         let xi : Fin (pb.A r) → E := fun i =>
-          NormalCoordinates.framedChartAt
+          NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0 (pts i)
-        c ∈ (NormalCoordinates.framedChartAt
+        c ∈ (NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0).source ∧
           (∀ i, (z, xi i) ∈ e.target) ∧
             z ∈ normalBall (I := I) (X.obj (L.φ n)) x0 ∧
@@ -256,8 +256,8 @@ def HasHatCmStrictAt
                           zp.1 zp.2 = 0 →
                           zp.1 = f zp.2)
 
-/-- Compatibility wrapper that forgets which live source branch supplied the
-strict finite-hat readout. -/
+
+
 def HasHatCmStrict
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -308,12 +308,12 @@ def HasHatCmStrict
     HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn q δ alpha
       mu pts join x rad hcm
 
-/-- Select one minimizing scale before `D`, then join the sequence tail of its
-live branches with the pair-index tail of the actual finite-hat POU average.
 
-The final `StrictDistInput` is deliberately a continuation parameter: it is
-the independent Hessian/convexity frontier, whereas every radius and branch
-condition in this statement is produced internally. -/
+
+
+
+
+
 theorem exists_hat_cm_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -588,8 +588,8 @@ theorem exists_hat_cm_tail
       (radSeq a b x) hcm hdata.2 (hN a ha b hbN x hx)
     simpa only [HasHatCmEqn] using hout
 
-/-- Select the finite-hat readout on an arbitrary source patch using explicit
-normalized weights and convergence only on their nonzero support. -/
+
+
 theorem exists_hat_cm_tail_support
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -772,9 +772,9 @@ theorem exists_hat_cm_tail_support
         (hN a ha b hbN x hx alpha)
       simpa only [HasHatCmStrictAt] using hout
 
-/-- The support-local finite-hat readout with the intrinsic minimizing join.
-The selected branch now produces `StrictDistInput` directly on the same common
-pair-index tail used by the center equation. -/
+
+
+
 theorem exists_hat_cm_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -903,13 +903,8 @@ theorem exists_hat_cm_min
                         ∃ hcm : CenterInput (I := I)
                             (X.obj (L.φ n)).metric (mu x) pts join x
                             (radSeq a b x),
-                          HasChartCmSol (I := I) (X.obj (L.φ n))
-                            (hcomplete.complete (L.φ n)) (hconn (L.φ n))
-                            (seqCenterD hd P L n (alpha.1 : Nat))
-                            (legacyBallChart (I := I) (X.obj (L.φ n))
-                              (seqCenterD hd P L n (alpha.1 : Nat)))
-                            (q := q alpha) (delta := δ alpha)
-                            (mu x) pts join x (radSeq a b x) hcm := by
+                          HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn
+                            q δ alpha (mu x) pts join x (radSeq a b x) hcm := by
   classical
   obtain ⟨aMin, haMin, hmin⟩ :=
     exists_slot_min (I := I) hprof hre hcomplete hconn
@@ -1071,10 +1066,10 @@ theorem exists_hat_cm_min
         apply (ENNReal.ofReal_le_ofReal ?_).trans_lt hcage6
         nlinarith [hpos a b x]
       refine ⟨hcm, ?_⟩
-      have hout := exists_hat_cmC_at (I := I) hd P hre L pb r n
+      have hout := exists_hat_cm_sol_at (I := I) hd P hre L pb r n
         hcomplete hconn q δ hqdata hn alpha (mu x) pts join x
         (radSeq a b x) hcm (hmu.sum_one x hx) (hs hx) hradCage
-      simpa only [pts, join] using hout
+      simpa only [HasHatCmStrictAt, pts, join] using hout
 
 end HCGCompactness
 end DifferentialGeometry

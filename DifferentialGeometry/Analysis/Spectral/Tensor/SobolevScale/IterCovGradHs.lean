@@ -1,13 +1,14 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 
-/-!
-# Completed iterated covariant derivatives
 
-This file completes fixed-background iterated covariant differentiation between
-the natural generic spectral Sobolev spaces.  The construction loses exactly
-the number of derivatives applied.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +25,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -40,8 +41,8 @@ private noncomputable def iterCovGradCcLin
   map_add' := iteratedCovGrad_add (I := I) (M := M) g 0 s j
   map_smul' := iteratedCovGrad_smul (I := I) (M := M) g 0 s j
 
-/-- Fixed-background `j`-fold covariant differentiation as a bounded map from
-`H^(k+j)` covariant tensors to `H^k` tensors with `j` extra lower slots. -/
+
+
 noncomputable def iterCovGradHs
     (g : SmoothRiemannianMetric I M) (s j k : ℕ) :
     tensorHs (I := I) (M := M) g 0 s ((k : ℝ) + (j : ℝ)) →L[ℝ]
@@ -50,8 +51,8 @@ noncomputable def iterCovGradHs
       (iterCovGradCcLin (I := I) (M := M) g s j)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g s ((k : ℝ) + (j : ℝ)))
 
-/-- The completed iterated covariant derivative agrees with the smooth tensor
-operation on the canonical dense embedding. -/
+
+
 theorem iterCovGradHs_core
     (g : SmoothRiemannianMetric I M) (s j k : ℕ)
     (W : SmoothCcTensor g 0 s) :

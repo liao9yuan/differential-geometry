@@ -4,52 +4,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-/-!
-# Leibniz rule for `Δ_g` and the `fHLeibniz`/`(pouScalar α v).oneSubLap` bridge
-
-This file proves two infrastructure results that connect the existing
-chart-bilinear smooth-case variational identity from
-`LaplacianDomainVariationalLimit` to the corrected
-`f_chart`-via-`fHLeibniz` formulation.
-
-## Main results
-
-* **`Δ_g_smul_eq`** — the Leibniz product rule for the variational
-  Laplacian: for any two smooth scalar functions `φ`, `v` on a closed
-  Riemannian manifold,
-  ```
-  Δ_g (φ · v) x = φ x · Δ_g v x + 2 · g(grad φ x, grad v x) + v x · Δ_g φ x.
-  ```
-  The proof composes the gradient Leibniz rule
-  (`gradFun_mul_pointwise`) with the divergence Leibniz rule
-  (`divergence_g_smoothSmul`).
-
-* **`pouScalar_oneSubLapClassical_pointwise_leibniz`** — for a smooth
-  scalar `v` and chart point `α`, the smooth function
-  `(pouScalar α v).oneSubLapClassical.toFun = ρα·v - Δ_g(ρα·v)`
-  expands at every point to the pointwise Leibniz combination
-  ```
-  ρα · v.oneSubLapClassical.toFun
-    - 2 · g(grad ρα, grad v)
-    - v · Δρα.
-  ```
-
-* **`pouScalar_oneSubLap_aeEq_fHLeibniz_smooth`** — the smooth function
-  `(pouScalar α v).oneSubLapClassical.toFun` agrees a.e.-`μ_g` with the
-  `M → ℝ` representative of `fHLeibniz (smoothToH1Compl v) _ : Lp _`.
-  This identification factors through the smooth-case `Lp` arithmetic
-  formula `fHLeibniz_smoothToH1Compl` and the pointwise Leibniz
-  expansion.
-
-These results are the natural prerequisites for the headline
-chart-bilinear identity for `u_h ∈ laplacianDomain g` in the
-no-ρα `f_chart` form. They reformulate the existing smooth-case
-RHS — written via the explicit smooth function
-`(pouScalar α v).oneSubLapClassical` — in terms of the abstract
-`Lp` class `fHLeibniz u_h`, providing the smooth-case
-ingredient for any limit-passage argument that builds the general
-identity.
--/
 
 noncomputable section
 
@@ -62,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainVariationalLimitGeneral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -83,9 +37,8 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- Pointwise gradient Leibniz rule, in the smooth-witness form: for
-smooth `φ` and `v`,
-`grad_g (φ · v) x = φ x • grad_g v x + v x • grad_g φ x`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 theorem gradFun_smul_smooth_eq_pointwise
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -150,9 +103,7 @@ theorem gradFun_smul_smooth_eq_pointwise
     rw [hd_φ_def]
     exact inner_gradFun (I := I) g φ x w]
 
-/-- The smooth tangent section `grad_g (φ · v)` equals
-`smoothSmul φ (grad_g v) + smoothSmul v (grad_g φ)` as smooth tangent
-sections. -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma grad_g_smul_smooth_section_eq
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -177,8 +128,7 @@ private lemma grad_g_smul_smooth_section_eq
   rw [grad_g_apply, grad_g_apply]
   exact gradFun_smul_smooth_eq_pointwise (I := I) (M := M) g hφ hv x
 
-/-- For smooth `φ`, `v`, the tangent action of `grad_g v` on `φ` equals the
-metric inner product `g(grad_g φ, grad_g v)`. -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma tangentSectionAction_grad_g_eq_inner_grad
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -194,12 +144,7 @@ private lemma tangentSectionAction_grad_g_eq_inner_grad
         gradFun (I := I) g v x from grad_g_apply (I := I) g hv x]
   exact (inner_gradFun (I := I) g φ x _).symm
 
-/-- **Leibniz rule for `Δ_g` on a product of smooth scalars.** For smooth
-`φ`, `v` on a closed Riemannian manifold,
-```
-Δ_g (φ · v) x = φ x · Δ_g v x + 2 · g(grad_g φ x, grad_g v x) + v x · Δ_g φ x.
-```
--/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] in
 theorem Δ_g_smul_eq
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -227,15 +172,7 @@ theorem Δ_g_smul_eq
   rw [h_symm]
   ring
 
-/-- Pointwise expression of `(pouScalar α v).oneSubLapClassical.toFun`
-via the Leibniz expansion: for any `x : M`,
-```
-(pouScalar α v).oneSubLapClassical.toFun x =
-  ρα x · v.oneSubLapClassical.toFun x
-    - 2 · g(grad ρα x, grad v x)
-    - v.toFun x · Δρα x.
-```
--/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem pouScalar_oneSubLapClassical_pointwise_leibniz
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (x : M) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun x =
@@ -282,16 +219,10 @@ theorem pouScalar_oneSubLapClassical_pointwise_leibniz
   rw [h_lap_v_eq]
   ring
 
-/-- The `M → ℝ` representative of `fHLeibniz (smoothToH1Compl v) _` is
-a.e.-`riemannianVolumeMeasure g` equal to the smooth pointwise Leibniz
-combination
-```
-ρα · v.oneSubLapClassical.toFun - 2 g(grad ρα, grad v) - v · Δρα.
-```
--/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fHLeibniz_smoothCase_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    ((fHLeibniz (I := I) (M := M) g α
+    ((leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
           : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -391,14 +322,12 @@ private lemma fHLeibniz_smoothCase_coeFn_aeEq
   rw [smul_eq_mul]
   ring
 
-/-- For smooth `v`, the smooth function `(pouScalar α v).oneSubLapClassical.toFun`
-agrees a.e.-`riemannianVolumeMeasure g` with the `M → ℝ` representative of
-`fHLeibniz (smoothToH1Compl v) _`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pouScalar_oneSubLap_aeEq_fHLeibniz_smooth
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
-      ((fHLeibniz (I := I) (M := M) g α
+      ((leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
           : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

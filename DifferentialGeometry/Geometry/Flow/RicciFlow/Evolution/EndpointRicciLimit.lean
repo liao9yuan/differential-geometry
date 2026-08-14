@@ -5,16 +5,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFromJets
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import Mathlib.Order.Filter.AtTopBot.CountablyGenerated
 
-/-!
-# Ricci convergence at a finite flow endpoint
 
-This module upgrades a smooth endpoint metric with full chart-Gram left limits
-to left convergence of its Ricci tensor.  The proof is sequential: every time
-sequence approaching the endpoint has a shifted subsequence to which fixed-time
-metric precompactness applies through order two.  The chart-Gram limits identify
-the extracted metric with the prescribed endpoint, and `ricciConv_of_dnConv`
-then transfers the two-jet convergence to Ricci convergence.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,20 +27,19 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
     [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M]
 
-/-- A bounded-curvature dimension-three Ricci flow whose metric has a smooth
-full left limit also has pointwise Ricci convergence to the Ricci tensor of
-that endpoint metric. -/
+
+
+
 theorem ricci_tendsto_left
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     (S : SolutionOn (I := I) (M := M)

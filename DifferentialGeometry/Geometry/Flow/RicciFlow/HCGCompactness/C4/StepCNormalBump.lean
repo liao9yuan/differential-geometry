@@ -2,18 +2,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCParti
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4: normal-coordinate bump functions
 
-This file pulls a fixed Euclidean `ContDiffBump` back through a normal chart and
-extends it by zero off the chart source.  A compact-support argument keeps the
-topological support away from the chart boundary, so the result is globally
-smooth.  These functions are the raw numerator atoms for the explicit Step-C
-partition of unity.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,20 +26,22 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [T2Space M] [T2Space (TangentBundle I M)]
 
-/-- Pull a Euclidean bump back through a normal chart and extend it by zero off
-the chart source. -/
+
+
 noncomputable def normalBump (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) : M → Real :=
   (normalChartAt (I := I) g p).source.indicator
     (fun q => f (normalChartAt (I := I) g p q))
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalBump_of_mem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source) :
@@ -49,6 +49,8 @@ noncomputable def normalBump (g : SmoothRiemannianMetric I M) (p : M)
   unfold normalBump
   exact indicator_of_mem hq _
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalBump_of_notMem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) {q : M}
     (hq : q ∉ (normalChartAt (I := I) g p).source) :
@@ -56,7 +58,9 @@ noncomputable def normalBump (g : SmoothRiemannianMetric I M) (p : M)
   unfold normalBump
   exact indicator_of_notMem hq _
 
-/-- A normal-coordinate bump takes values in `[0, 1]`. -/
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalBump_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) (q : M) : normalBump g p f q ∈ Set.Icc (0 : Real) 1 := by
   by_cases hq : q ∈ (normalChartAt (I := I) g p).source
@@ -65,8 +69,10 @@ theorem normalBump_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
   · rw [normalBump_of_notMem g p f hq]
     exact ⟨le_rfl, zero_le_one⟩
 
-/-- On the normal-chart preimage of the bump's inner closed ball, the pulled
-back bump is one. -/
+
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalBump_one (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source)
@@ -75,9 +81,9 @@ theorem normalBump_one (g : SmoothRiemannianMetric I M) (p : M)
   rw [normalBump_of_mem g p f hq]
   exact f.one_of_mem_closedBall hinner
 
-/-- If the bump's outer radius is below the normal-coordinate smoothness
-radius, the topological support of its pullback lies in the inverse image of
-the corresponding closed Euclidean ball. -/
+
+
+
 theorem normalBump_tsupport (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E))
     (hr : f.rOut < expMapC2Radius (I := I) g p) :
@@ -115,7 +121,7 @@ theorem normalBump_tsupport (g : SmoothRiemannianMetric I M) (p : M)
   refine ⟨ψ q, hvball, ?_⟩
   exact ψ.toPartialEquiv.left_inv hqsrc
 
-/-- The pulled-back bump's topological support lies in the normal-chart source. -/
+
 theorem normalBump_src (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E))
     (hr : f.rOut < expMapC2Radius (I := I) g p) :
@@ -127,8 +133,8 @@ theorem normalBump_src (g : SmoothRiemannianMetric I M) (p : M)
   rw [Metric.mem_closedBall, dist_zero_right] at hv
   exact ball_subset_normalChartAt_target (I := I) g p (hv.trans_lt hr)
 
-/-- A normal-coordinate bump whose outer support stays below the normal-chart
-smoothness radius is globally smooth after extension by zero. -/
+
+
 theorem normalBump_contMDiff (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E))
     (hr : f.rOut < expMapC2Radius (I := I) g p) :
@@ -158,18 +164,20 @@ theorem normalBump_contMDiff (g : SmoothRiemannianMetric I M) (p : M)
   rw [← hqexp] at hchart
   exact f.contDiffAt.contMDiffAt.comp q hchart
 
-/-! ## Bumps in the intrinsic quadratic radius -/
 
-/-- Pull a scalar bump back through the quadratic radius
-`v ↦ g_p(v, v)` in the normal chart at `p`, and extend it by zero off the
-chart source.  Unlike `normalBump`, this construction does not identify the
-model norm with the metric norm. -/
+
+
+
+
+
 noncomputable def quadNormal (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) : M → Real :=
   (normalChartAt (I := I) g p).source.indicator fun q =>
     f (g.inner p (normalChartAt (I := I) g p q)
       (normalChartAt (I := I) g p q))
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem quadNormal_of_mem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source) :
@@ -179,6 +187,8 @@ noncomputable def quadNormal (g : SmoothRiemannianMetric I M) (p : M)
   unfold quadNormal
   exact indicator_of_mem hq _
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem quadNormal_of_notMem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) {q : M}
     (hq : q ∉ (normalChartAt (I := I) g p).source) :
@@ -186,7 +196,9 @@ noncomputable def quadNormal (g : SmoothRiemannianMetric I M) (p : M)
   unfold quadNormal
   exact indicator_of_notMem hq _
 
-/-- A quadratic-radius normal bump takes values in `[0, 1]`. -/
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem quadNormal_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) (q : M) :
     quadNormal g p f q ∈ Set.Icc (0 : Real) 1 := by
@@ -196,8 +208,10 @@ theorem quadNormal_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
   · rw [quadNormal_of_notMem g p f hq]
     exact ⟨le_rfl, zero_le_one⟩
 
-/-- A quadratic-radius normal bump is one wherever its chart quadratic value
-lies in the scalar bump's inner closed ball. -/
+
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem quadNormal_one (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source)
@@ -207,9 +221,9 @@ theorem quadNormal_one (g : SmoothRiemannianMetric I M) (p : M)
   rw [quadNormal_of_mem g p f hq]
   exact f.one_of_mem_closedBall hinner
 
-/-- If the scalar outer radius lies below the intrinsic normal radius, the
-topological support of the quadratic-radius pullback lies in the normal-chart
-image of the corresponding closed metric ellipsoid. -/
+
+
+
 theorem quadNormal_tsupport (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real))
     (hr : Real.sqrt f.rOut < expRadiusGp (I := I) g p) :
@@ -267,8 +281,8 @@ theorem quadNormal_tsupport (g : SmoothRiemannianMetric I M) (p : M)
   refine ⟨ψ q, hvK, ?_⟩
   exact ψ.toPartialEquiv.left_inv hqsrc
 
-/-- A quadratic-radius normal bump whose scalar support stays below the
-intrinsic normal radius is globally smooth after extension by zero. -/
+
+
 theorem quadNormal_contMDiff (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real))
     (hr : Real.sqrt f.rOut < expRadiusGp (I := I) g p) :
@@ -308,24 +322,28 @@ section NormalRaw
 
 variable {ι : Type*} [DecidableEq ι]
 
-/-- The global raw numerator family used by the basepoint-preserving Step-C
-partition.  The base slot is an ordinary chart bump; every other slot is
-multiplied by `1 - normalBump cut`, which vanishes near the base center. -/
+
+
+
 noncomputable def normalRaw (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 i : ι) (q : M) : Real :=
   if i = i0 then normalBump g (p i0) (f i0) q
   else (1 - normalBump g (p i0) cut q) * normalBump g (p i) (f i) q
 
-/-- The base raw numerator is the ordinary normal-coordinate bump. -/
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalRaw_same (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E)) (i0 : ι) :
     normalRaw g p cut f i0 i0 = normalBump g (p i0) (f i0) := by
   funext q
   rw [normalRaw, if_pos rfl]
 
-/-- Away from the base slot, the raw numerator is the product of the base
-kill factor and the slot's own normal-coordinate bump. -/
+
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_of_ne (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E)) (i0 i : ι)
     (hi : i ≠ i0) :
@@ -334,8 +352,8 @@ theorem normalRaw_of_ne (g : SmoothRiemannianMetric I M) (p : ι → M)
   funext q
   rw [normalRaw, if_neg hi]
 
-/-- Every raw normal-coordinate numerator is globally smooth when all of its
-bump supports stay below their normal-chart smoothness radii. -/
+
+
 theorem normalRaw_contMDiff (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E)) (i0 i : ι)
     (hcut : cut.rOut < expMapC2Radius (I := I) g (p i0))
@@ -349,7 +367,9 @@ theorem normalRaw_contMDiff (g : SmoothRiemannianMetric I M) (p : ι → M)
     exact (contMDiff_const.sub (normalBump_contMDiff g (p i0) cut hcut)).mul
       (normalBump_contMDiff g (p i) (f i) (hf i))
 
-/-- Every raw normal-coordinate numerator is nonnegative. -/
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_nonneg (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 i : ι) (q : M) : 0 ≤ normalRaw g p cut f i0 i q := by
@@ -360,8 +380,10 @@ theorem normalRaw_nonneg (g : SmoothRiemannianMetric I M) (p : ι → M)
     exact mul_nonneg (sub_nonneg.mpr (normalBump_mem_Icc g (p i0) cut q).2)
       (normalBump_mem_Icc g (p i) (f i) q).1
 
-/-- The raw numerator in slot `i` has no more topological support than its own
-normal-coordinate bump. -/
+
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_tsupport (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 i : ι) :
@@ -375,9 +397,11 @@ theorem normalRaw_tsupport (g : SmoothRiemannianMetric I M) (p : ι → M)
         (1 - normalBump g (p i0) cut q) * normalBump g (p i) (f i) q) ⊆
       tsupport (normalBump g (p i) (f i)))
 
-/-- In a `β` normal chart, the global raw numerator is exactly the book's
-`if`-formula in the transition readouts `J_i = normalChart_i ∘ normalChart_β⁻¹`.
-This is the representation bridge later rewritten to `bumpNum`. -/
+
+
+
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_readout (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 β i : ι) {z : E}

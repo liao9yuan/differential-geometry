@@ -1,28 +1,26 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAll
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Pointwise form of the all-compacts window preconvergence
 
-`windowGInfAll` delivers the window convergence through the raw supremum
-`metricDerivNormSupOn`, a bare `Real.sSup`.  Consumers that need PER-POINT
-smallness cannot extract it from `sSup < ε` alone: without a `BddAbove`
-witness the supremum could be the junk value `0`.  This file provides the
-pointwise companion `windowGInfAll_pt`, discharging `BddAbove` from the
-theorem's own data instead of a (missing) continuity API:
 
-* on singleton compacts the sup set is a finite image of `Set.Iic p`, so the
-  sup smallness from `windowGInfAll` is genuinely pointwise
-  (`derivNorm_le_sup_sing`);
-* the difference seminorm splits through a singleton-tail comparison metric
-  `gSeq (φ m0) t` by the triangle inequality, and the two one-metric terms are
-  bounded by the `hbdd` hypothesis instantiated along `φ`
-  (`derivNorm_le_cov_add`), giving the `BddAbove` witness on any compact `K`;
-* `le_csSup` then converts each sup smallness to the pointwise statement.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,20 +35,24 @@ open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-/-- The metric-difference seminorm is bounded by the sum of the two one-metric
-covariant-derivative norms: `|∇^a(g - h)|_gRef ≤ |∇^a g|_gRef + |∇^a h|_gRef`. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem derivNorm_le_cov_add
+    [Module.Finite ℝ E]
     (a : Nat) (g h gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) a g h gRef x <=
       metricCovDerivNorm (I := I) a g gRef x + metricCovDerivNorm (I := I) a h gRef x := by
@@ -67,10 +69,15 @@ theorem derivNorm_le_cov_add
   refine le_trans (sqrtNormSq0S_add_le (I := I) gRef x (a + 2) _ _) ?_
   rw [hneg]
 
-/-- On a singleton compact the defining set of `metricDerivNormSupOn` is a
-finite image of `Set.Iic p`, so each order `a ≤ p` is bounded by the supremum
-(no continuity input needed). -/
+
+
+
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem derivNorm_le_sup_sing
+    [Module.Finite ℝ E]
     (p : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) (z : M)
     (a : Nat) (ha : a <= p) :
     metricDerivNorm (I := I) a gk gInf gRef z <=
@@ -92,12 +99,14 @@ theorem derivNorm_le_sup_sing
     exact ((Set.finite_Iic p).image _).bddAbove
   exact le_csSup hbdd ⟨a, ha, z, Set.mem_singleton z, rfl⟩
 
-/-- **Pointwise all-compacts, all-orders window preconvergence.**  The
-companion of `windowGInfAll` with the window smallness delivered PER POINT
-(each order `a ≤ p`, each `x ∈ K`) instead of through the raw supremum
-`metricDerivNormSupOn`.  Same hypotheses, same single subsequence `φ` and
-single limit family `gInf`. -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem windowGInfAll_pt
+    [Module.Finite ℝ E]
     [WeaklyLocallyCompactSpace M]
     (hne : Nonempty M)
     (beta psiT : Real)
@@ -131,10 +140,7 @@ theorem windowGInfAll_pt
   intro K hK p eps heps
   obtain ⟨k0, hk0⟩ := hsup K hK p eps heps
   refine ⟨k0, fun k hk t ht a hap x hx => ?_⟩
-  -- uniform covariant-derivative bounds along `phi` at time `t`, per order
   choose Cf hCf using fun q : Nat => hbdd phi hphi t ht q K hK
-  -- `BddAbove` for the `(K, p)` sup set at `(k, t)`: split through a
-  -- singleton-tail comparison index `m0` at each base point
   have hbddAbove : BddAbove {r : Real | exists b : Nat, b <= p ∧ exists z : M, z ∈ K ∧
       metricDerivNorm (I := I) b (gSeq (phi k) t) (gInf t) gRef z = r} := by
     refine ⟨(Finset.range (p + 1)).sup' ⟨0, Finset.mem_range.2 (Nat.succ_pos p)⟩

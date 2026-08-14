@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-! # Existence of the time-reversed flow
 
-The flow of the negated field `-X`, the reverse companion used to invert the
-forward time-dependent flow. -/
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -17,6 +17,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem time_reversed_flow_exists
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (h : ∃ T : ℝ, 0 < T ∧

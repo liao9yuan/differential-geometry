@@ -1,68 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ParabolicInteriorSmoothing
 
-/-!
-# The every-time spectral-coordinate representation of the Duhamel solution
-
-For the affine Duhamel map `u = maxRegDuhamelMap a hT hT1 0 gforce` (initial datum
-`0`), this file upgrades the *a.e.-in-time* per-mode coordinate identity of
-`LocallyLipschitzExistence` to an **every-time** identity on `[0,T]`, and packages
-the result as a single existential carrying a continuous, all-order-summable,
-per-mode forcing coordinate family.
-
-## The representation
-
-The carrier solution `u ∈ H¹([0,T]; Hᵃ)` (with `u(0) = 0`) has, mode by mode, the
-Duhamel-convolution coordinate
-
-  `tensorL2Coeff (tensorHsToL2 … (u.toFun t)) i = perModeConv λᵢ φᵢ t`,
-
-where `λᵢ = TensorEigenIdx.lambda i` and `φᵢ` is a continuous representative of the
-`i`-th forcing coordinate `t ↦ (gforce t).coeff i`.  The on-disk identity
-(`recentredCarrier_toFun_coeff` for the every-`t` integral form, plus
-`solModeCoeff_eq_integral` and `perModeConvL2_coeFn` for the convolution) holds only
-*a.e.*; both sides are continuous on `[0,T]` (the left via
-`timeH1.continuousOn_toFun` and the continuous coordinate functional `coeffCLM`, the
-right via `continuous_perModeConv`), so the a.e. identity upgrades to **every**
-`t ∈ [0,T]` by `MeasureTheory.Measure.eqOn_of_ae_eq` (Lebesgue measure is positive
-on the interior `(0,T)`, which is dense in `[0,T]`).
-
-## The continuous forcing coordinate
-
-The convolution `perModeConv` depends on the forcing only through its `L²` class on
-`[0,t]`, and the every-`t` upgrade needs only that each eigen-coordinate of the forcing
-is continuous in time.  The forcing field is therefore supplied here through an
-everywhere representative `F : ℝ → Hᵃ` with `gforce =ᵐ F` together with the
-**per-eigenmode coordinate continuity** `hcoord : ∀ i, ContinuousOn (t ↦ (F t).coeff i)
-[0,T]` — strictly weaker than full `Hᵃ`-continuity of `F`.  This is exactly the
-structure the Ricci–DeTurck consumer can provide: the forcing is `N ∘ (solution
-field)`, whose order-`(a+2)` solution field has a continuous representative only into
-the *lower* scale `H^{a+1}` (the Lions–Magenes parabolic trace), and the genuinely
-second-order Nemytskii lowers the order further, so the forcing representative is
-continuous only into a scale strictly below `Hᵃ` — but its `L²` eigen-coordinates
-`t ↦ (F t).coeff i` are continuous (they factor through the `L²` coordinate functional,
-which is bounded at every scale).  The per-mode coordinate `φᵢ` is obtained from
-`t ↦ (F t).coeff i` by clamping the argument into `[0,T]` (`Set.IccExtend`), making it
-**globally continuous** while preserving its values on `[0,T]`; the every-time identity
-then reads `= perModeConv λᵢ φᵢ t` with a genuinely continuous `φᵢ`.
-
-## All-order summability
-
-The weighted mass `tensorSobolevWeight i c · ∫₀ᵗ (φᵢ)²` is dominated, for every
-`t ∈ [0,T]`, by the **forcing mass** `forcingMass gforce c i` (the integral over
-`[0,t]` is at most the integral over `[0,T]`, which is `‖timeModeCoeff gforce i‖²`).
-Hence the all-order summability of the weighted forcing-coordinate masses follows
-from the all-order summability of `forcingMass gforce c` by comparison — the same
-hypothesis the parabolic interior-smoothing bootstrap consumes and discharges from
-the first-order coupling of the nonlinearity.
-
-## Main result
-
-* `maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv` — the every-time
-  spectral-coordinate representation with a continuous, all-order-summable per-mode
-  forcing coordinate family.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter intervalIntegral
@@ -74,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -96,8 +34,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-- The homogeneous-flow coordinate of the zero initial datum vanishes:
-`homModeCoeff 0 i = 0`.  Its squared `L²` norm is bounded by `T · 0² = 0`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem homModeCoeff_zero (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     homModeCoeff (I := I) (M := M) (a := a) (T := T)
@@ -111,8 +49,8 @@ private theorem homModeCoeff_zero (hT : 0 ≤ T)
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) i), hsq]
   exact norm_eq_zero.mp hnorm
 
-/-- The homogeneous-flow time-derivative coordinate of the zero initial datum
-vanishes: `homDerivModeCoeff 0 i = 0`, since it is `−λᵢ • homModeCoeff 0 i`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem homDerivModeCoeff_zero (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     homDerivModeCoeff (I := I) (M := M) (a := a) (T := T)
@@ -120,9 +58,8 @@ private theorem homDerivModeCoeff_zero (hT : 0 ≤ T)
   rw [homDerivModeCoeff_eq_smul (I := I) (M := M) (a := a) (T := T),
     homModeCoeff_zero (I := I) (M := M) (a := a) (T := T) hT i, smul_zero]
 
-/-- The carrier `u = maxRegDuhamelMap a hT hT1 0 gforce` agrees with the recentred
-carrier `recentredCarrier hT hT1 0 gforce`: both have initial value `0` (the
-inclusion of `0`) and the same `L²` time derivative. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem maxRegDuhamelMap_zero_eq_recentredCarrier (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     maxRegDuhamelMap (I := I) (M := M) a hT hT1
@@ -134,11 +71,8 @@ private theorem maxRegDuhamelMap_zero_eq_recentredCarrier (hT : 0 < T) (hT1 : T 
       recentredCarrier, TimeSobolev.timeH1.init_mk]
   · rw [recentredCarrier, TimeSobolev.timeH1.deriv_mk]
 
-/-- **The a.e. carrier coordinate identity.**  For a.e. `t`, the `i`-th coordinate
-of the carrier value `u.toFun t` (with `u = maxRegDuhamelMap a hT hT1 0 gforce`) is
-the per-mode Duhamel convolution of the forcing's time-mode coordinate:
-
-  `(u.toFun t).coeff i =ᵐ perModeConv λᵢ (timeModeCoeff gforce i) t`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem carrier_coeff_ae_perModeConv (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -194,10 +128,8 @@ private theorem carrier_coeff_ae_perModeConv (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hτD hτmem, hτH hτmem, zero_add]
   rw [hLHS, hint_eq, ← htsol, hsoldef, htconv]
 
-/-- **The every-time carrier coordinate identity** (with a globally-continuous
-forcing coordinate).  For every `t ∈ [0,T]`, the `i`-th coordinate of the carrier
-value `u.toFun t` equals `perModeConv λᵢ φᵢ t`, where `φᵢ` is the `Set.IccExtend` of
-the `i`-th forcing coordinate of a time-continuous representative `F`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -225,7 +157,8 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
     have hcomp : ContinuousOn
         (fun t => (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i)
           (u.toFun t)) (Set.Icc (0 : ℝ) T) :=
-      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
+      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a)
+        i).continuous.comp_continuousOn
         u.continuousOn_toFun
     simpa only [coeffCLM_apply] using hcomp
   have hRHS_cont : ContinuousOn (fun t => perModeConv lam φi t) (Set.Icc (0 : ℝ) T) :=
@@ -264,6 +197,8 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
     MeasureTheory.Measure.eqOn_of_ae_eq hae_full hLHS_cont hRHS_cont hsub_clo
   exact heqOn ht
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict (hT : 0 < T) (hT1 : T ≤ 1)
     {d₂ : ℝ} (hd₂_pos : 0 < d₂) (hd₂_le : d₂ ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
@@ -292,7 +227,8 @@ theorem carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict (hT : 0 < T) (hT1 
     have hcomp : ContinuousOn
         (fun t => (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i)
           (u.toFun t)) (Set.Icc (0 : ℝ) d₂) :=
-      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
+      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a)
+        i).continuous.comp_continuousOn
         (u.continuousOn_toFun.mono (Set.Icc_subset_Icc le_rfl hd₂_le))
     simpa only [coeffCLM_apply] using hcomp
   have hRHS_cont : ContinuousOn (fun t => perModeConv lam φi t) (Set.Icc (0 : ℝ) d₂) :=
@@ -335,6 +271,8 @@ theorem carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict (hT : 0 < T) (hT1 
     MeasureTheory.Measure.eqOn_of_ae_eq hae_full hLHS_cont hRHS_cont hsub_clo
   exact heqOn ht
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv_id_restrict (hT : 0 < T) (hT1 : T ≤ 1)
     (ha : 0 ≤ a) {d₂ : ℝ} (hd₂_pos : 0 < d₂) (hd₂_le : d₂ ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
@@ -361,6 +299,8 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv_id_restrict (hT : 0 < T
     exact carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 hd₂_pos hd₂_le gforce hcoord hF_rep i ht
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem timeModeCoeff_eq_perModeConv_forcing (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -392,29 +332,8 @@ theorem timeModeCoeff_eq_perModeConv_forcing (hT : 0 < T) (hT1 : T ≤ 1)
     rw [tensorHs.zero_coeff]
   rw [htfield, hzero, zero_add, ← hcarr_int, htcarr]
 
-/-- **The every-time spectral-coordinate representation of the Duhamel solution.**
-Let `u = maxRegDuhamelMap a hT hT1 0 gforce` be the affine Duhamel map with zero
-initial datum, and let `F : ℝ → Hᵃ` be an everywhere representative of the forcing
-`gforce` (`gforce =ᵐ F`) whose per-eigenmode `L²` coordinates `t ↦ (F t).coeff i` are
-continuous on `[0,T]` (`hcoord` — strictly weaker than `Hᵃ`-continuity of `F`, which
-the genuinely second-order Ricci–DeTurck forcing does NOT have: its continuous
-representative ceilings below `Hᵃ`) and whose forcing masses are summable at every
-order (`hsum`).  Then there is a per-mode forcing-coordinate family
-`φ : TensorEigenIdx → ℝ → ℝ` with
-
-* **(continuity)** each `φ i` is continuous;
-* **(all-order summability)** for every `c ≥ 0` and every `t ∈ [0,T]`,
-  `i ↦ tensorSobolevWeight i c · ∫₀ᵗ (φ i s)² ds` is summable;
-* **(every-time coordinate identity)** for every `t ∈ [0,T]` and every `i`,
-  `tensorL2Coeff … (tensorHsToL2 … (u.toFun t)) i = perModeConv λᵢ (φ i) t`.
-
-This is the shared spectral-coordinate foundation of the interior-regularity
-conjuncts: the every-time (not merely a.e.) coordinate identity is what lets the
-downstream consumers read off pointwise-in-time spectral data.  (The summability is
-stated on the horizon `[0,T]`, where the convolution coordinates of the solution
-live and where every consumer reads them; on `t > T` it would require all-order
-summability of the forcing's boundary values, which is not part of the
-maximal-regularity data.) -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T ≤ 1)
     (ha : 0 ≤ a)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
@@ -438,19 +357,15 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T �
             (Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) => (F p.1).coeff i)) t) := by
   refine ⟨fun i => Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) => (F p.1).coeff i),
     ?_, ?_, ?_⟩
-  · -- continuity of each φ i
-    intro i
+  · intro i
     refine Continuous.Icc_extend' ?_
     exact (hcoord i).restrict
-  · -- all-order summability by comparison with forcingMass
-    intro c hc t ht
+  · intro c hc t ht
     refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) (hsum c hc)
-    · -- nonneg of the weighted integral
-      refine mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) ?_
+    · refine mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) ?_
       refine intervalIntegral.integral_nonneg ht.1 ?_
       intro x _; positivity
-    · -- weighted integral ≤ forcingMass
-      set φi : ℝ → ℝ :=
+    · set φi : ℝ → ℝ :=
         Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) => (F p.1).coeff i) with hφi_def
       have hφi_cont : Continuous φi := by
         refine Continuous.Icc_extend' ?_
@@ -488,12 +403,13 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T �
         · exact HasSubset.Subset.eventuallyLE (Set.Icc_subset_Icc le_rfl ht.2)
       rw [hforcing, hIcc_eq]
       exact mul_le_mul_of_nonneg_left htint (tensorSobolevWeight_nonneg (I := I) (M := M) i c)
-  · -- the every-time coordinate identity
-    intro t ht i
+  · intro t ht i
     rw [tensorHsToL2_tensorL2Coeff ha]
     exact carrier_toFun_coeff_eq_perModeConv_IccExtend (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 gforce hcoord hF_rep i ht
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv_id (hT : 0 < T) (hT1 : T ≤ 1)
     (ha : 0 ≤ a)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))

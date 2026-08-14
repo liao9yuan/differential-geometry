@@ -171,6 +171,8 @@ private lemma fullCoeff_self
     intro v
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM,
       ContinuousLinearMap.id_apply]
+  change metricComparisonEndo (I := I) g g x =
+    ContinuousLinearMap.id ℝ (TangentSpace I x) at hid
   rw [hid, slotInsertFib_id, ContinuousLinearMap.id_comp]
 
 private lemma fullH2_self
@@ -436,8 +438,14 @@ theorem lowRegPrincipal_core
               (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ W) := by
                     congr 1
                     rw [deTurckPrincipalCometricArm,
-                      deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo,
-                      appCc_assoc]
+                      deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo]
+                    change operatorFieldApply (I := I) (M := M) g₀ 4 2
+                        (cometricDoubleTraceField (I := I) g₀ 2)
+                        (operatorFieldApply (I := I) (M := M) g₀ 4 4
+                          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
+                            (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+                          (iteratedCovGrad (I := I) g₀ 0 2 2 W)) = _
+                    exact appCc_assoc (I := I) (M := M) g₀ 4 4 2 _ _ _
         _ = principalOpH2 (I := I) (M := M) g₀ g₁
               (ccTensorToHs (I := I) (M := M) g₀ 2 (4 : ℝ) W) := by
                     exact

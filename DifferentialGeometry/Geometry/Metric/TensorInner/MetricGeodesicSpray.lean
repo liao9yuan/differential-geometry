@@ -4,21 +4,19 @@ import Mathlib.Analysis.Calculus.FDeriv.Basic
 
 set_option autoImplicit false
 
-/-!
-# The coordinate geodesic spray of a metric field
 
-This file packages the geodesic spray as a total, proof-independent expression.
-Ring inversion makes the definition total; coercivity is used only to identify
-it with the usual Lax--Milgram raised Koszul vector.
--/
+
+
+
+
+
+
 
 noncomputable section
 
 namespace MetricKoszul
-
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [CompleteSpace E] [FiniteDimensional Real E]
-
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [ContinuousDualEquiv E]
 noncomputable local instance sprayDualNormedGroup :
     NormedAddCommGroup (E →L[Real] Real) :=
   ContinuousLinearMap.toNormedAddCommGroup
@@ -82,25 +80,24 @@ noncomputable local instance sprayTriFiniteDim
     FiniteDimensional Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
   ContinuousLinearMap.finiteDimensional
 
-/-- The Koszul covector followed by Riesz representation, with both vector
-slots retained as a bounded bilinear operator. -/
+
+
 private noncomputable def koszulRieszOp :
     (E →L[Real] E →L[Real] E →L[Real] Real) →L[Real]
       (E →L[Real] E →L[Real] E) :=
   (ContinuousLinearMap.compL Real E
       (E →L[Real] E →L[Real] Real) (E →L[Real] E)
       (ContinuousLinearMap.compL Real E (E →L[Real] Real) E
-        (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap)).comp
+        (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap)).comp
     koszulCovCLM
 
 @[simp] private theorem koszulRieszOp_apply
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
     koszulRieszOp D u v =
-      (InnerProductSpace.toDual Real E).symm (koszulCov D u v) := by
+      (ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v) := by
   simp [koszulRieszOp]
-  rfl
 
-/-- Continuous bilinear postcomposition on vector-valued bilinear maps. -/
+
 private noncomputable def postBilin :
     (E →L[Real] E) →L[Real]
       (E →L[Real] E →L[Real] E) →L[Real]
@@ -108,59 +105,85 @@ private noncomputable def postBilin :
   (ContinuousLinearMap.compL Real E (E →L[Real] E) (E →L[Real] E)).comp
     (ContinuousLinearMap.compL Real E E E)
 
-/-- The canonical Gram construction, regarded as a bounded linear operation on
-bilinear forms. -/
+
+
 private noncomputable def gramCLM :
     (E →L[Real] E →L[Real] Real) →L[Real] (E →L[Real] E) :=
   ContinuousLinearMap.compL Real E (E →L[Real] Real) E
-    (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap
+    (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap
 
 @[simp] private theorem gramCLM_apply
     (B : E →L[Real] E →L[Real] Real) :
-    gramCLM B = InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B := by
+    gramCLM B =
+      (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap.comp B := by
   rfl
 
 private theorem gramCLM_isUnit
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hB : IsCoercive B) :
     IsUnit (gramCLM B) := by
-  rw [gramCLM_apply]
-  exact ⟨hB.continuousLinearEquivOfBilin.toUnit, rfl⟩
+  let eB : E ≃L[Real] (E →L[Real] Real) :=
+    ContinuousLinearEquiv.ofBijective B
+      (LinearMap.ker_eq_bot.mpr hB.bilin_injective)
+      (LinearMap.range_eq_top.mpr (CoerciveBilinInverse.surjective hB))
+  let e : E ≃L[Real] E := eB.trans (ContinuousDualEquiv.equiv (E := E)).symm
+  refine ⟨e.toUnit, ?_⟩
+  change (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap.comp B =
+    gramCLM B
+  rfl
 
-/-- The proof-independent raised Koszul bilinear operator. -/
+
 noncomputable def raisedKoszulOp
     (B : E →L[Real] E →L[Real] Real)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) :
     E →L[Real] E →L[Real] E :=
   postBilin
-    (Ring.inverse (InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B))
+    (Ring.inverse (gramCLM B))
     (koszulRieszOp D)
 
 @[simp] theorem raisedKoszulOp_apply
     (B : E →L[Real] E →L[Real] Real)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
     raisedKoszulOp B D u v =
-      Ring.inverse (InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B)
-        ((InnerProductSpace.toDual Real E).symm (koszulCov D u v)) := by
+      Ring.inverse (gramCLM B)
+        ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v)) := by
   rfl
 
-/-- On a coercive metric, the proof-independent operator is the usual raised
-Koszul vector. -/
+
+
 theorem raisedKoszulOp_eq
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hB : IsCoercive B)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
     raisedKoszulOp B D u v = koszulVec hB D u v := by
-  rw [raisedKoszulOp_apply, ← hB.sharp_eq_inverse]
-  rfl
+  rw [raisedKoszulOp_apply]
+  let eB : E ≃L[Real] (E →L[Real] Real) :=
+    ContinuousLinearEquiv.ofBijective B
+      (LinearMap.ker_eq_bot.mpr hB.bilin_injective)
+      (LinearMap.range_eq_top.mpr (CoerciveBilinInverse.surjective hB))
+  let e : E ≃L[Real] E := eB.trans (ContinuousDualEquiv.equiv (E := E)).symm
+  change Ring.inverse (↑e.toUnit : E →L[Real] E)
+      ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v)) = _
+  rw [Ring.inverse_unit]
+  apply hB.bilin_injective
+  rw [apply_koszulVec]
+  have he := e.apply_symm_apply
+    ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v))
+  change (ContinuousDualEquiv.equiv (E := E)).symm
+      (B (e.symm ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v)))) =
+    (ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v) at he
+  exact (ContinuousDualEquiv.equiv (E := E)).symm.injective he
 
-/-- The total coordinate geodesic spray associated to a metric-coefficient
-field. The second component is minus the raised Koszul contraction. -/
+
+
 noncomputable def metricSpray
     (g : E → E →L[Real] E →L[Real] Real) (z : E × E) : E × E :=
   (z.2, -raisedKoszulOp (g z.1) (fderiv Real g z.1) z.2 z.2)
 
-/-- On the coercive locus, `metricSpray` has the geometric Lax--Milgram
-formula. -/
+
+
 theorem metricSpray_eq
+    [CompleteSpace E] [CoerciveBilinInverse E]
     (g : E → E →L[Real] E →L[Real] Real) (z : E × E)
     (hg : IsCoercive (g z.1)) :
     metricSpray g z =
@@ -185,7 +208,6 @@ private theorem invGram_smooth
     (contDiffOn_ringInverse (R := E →L[Real] E) (𝕜 := Real)
       (∞ : WithTop ℕ∞)) hgram (fun x hx => gramCLM_isUnit (hg_co x hx))
 
-set_option maxHeartbeats 500000 in
 private theorem invGram_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -226,7 +248,6 @@ private theorem koszulRiesz_smooth
     (hg_cd.fderiv_of_isOpen hU
       (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl]))
 
-set_option maxHeartbeats 500000 in
 private theorem koszulRiesz_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -265,9 +286,6 @@ theorem raisedOp_smooth
     (postBilin (E := E)).isBoundedBilinearMap.contDiff.comp₂_contDiffOn
       (invGram_smooth hg_cd hg_co) (koszulRiesz_smooth hU hg_cd)
 
-set_option maxHeartbeats 700000 in
-/-- Compact-open `C∞` convergence of metrics gives convergence of their
-proof-independent raised Koszul operators. -/
 theorem raisedKoszulOp_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -304,8 +322,7 @@ theorem raisedKoszulOp_conv
       (fun _ => hpost.contDiffOn) hpost.contDiffOn
       (fun _ _ => Set.mem_univ _) (fun _ _ _ => Set.mem_univ _))
 
-set_option maxHeartbeats 700000 in
-omit [CompleteSpace E] in
+omit [ContinuousDualEquiv E] in
 private theorem raisedDiag_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -353,8 +370,8 @@ private theorem raisedDiag_conv
       (fun _ => hdiag.contDiffOn) hdiag.contDiffOn
       (fun _ _ => Set.mem_univ _) (fun _ _ _ => Set.mem_univ _))
 
-/-- A smooth coercive metric-coefficient field has a smooth total geodesic
-spray on the corresponding phase domain. -/
+
+
 theorem metricSpray_contDiffOn
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -372,9 +389,6 @@ theorem metricSpray_contDiffOn
       contDiffOn_snd).clm_apply contDiffOn_snd)
   simpa only [metricSpray, R] using contDiffOn_snd.prodMk hdiag.neg
 
-set_option maxHeartbeats 500000 in
-/-- Smooth convergence of metric coefficients on an open coordinate domain
-gives compact-open `C∞` convergence of their total geodesic sprays. -/
 theorem metricSpray_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)

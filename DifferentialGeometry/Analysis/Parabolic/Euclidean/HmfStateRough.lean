@@ -13,7 +13,8 @@ by the domain metric, corresponding to the specialization `L = 0` here.
 -/
 
 noncomputable section
-
+open MeasureTheory Set
+open scoped ENNReal
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
@@ -34,6 +35,12 @@ structure HmfStateCoeff (eps L : ℝ)
   base : ∀ z, ‖A z 0‖ ≤ eps
   state_lip : ∀ z y₁ y₂, ‖A z y₁ - A z y₂‖ ≤ L * ‖y₁ - y₂‖
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [NormedSpace ℝ Y] in
 /-- On a radius-`R` state ball the full principal coefficient has size at
 most `eps + L R`. -/
 theorem stateCoeff_bound {eps L R : ℝ}
@@ -44,14 +51,19 @@ theorem stateCoeff_bound {eps L R : ℝ}
   calc
     ‖A z y‖ ≤ ‖A z 0‖ + ‖A z y - A z 0‖ := by
       have hs : A z y = A z 0 + (A z y - A z 0) := by abel
-      rw [hs]
-      exact norm_add_le _ _
+      calc
+        ‖A z y‖ = ‖A z 0 + (A z y - A z 0)‖ := congrArg norm hs
+        _ ≤ _ := norm_add_le _ _
     _ ≤ eps + L * ‖y - 0‖ := add_le_add (h.base z) (h.state_lip z y 0)
     _ = eps + L * ‖y‖ := by rw [sub_zero]
-    _ ≤ eps + L * R := add_le_add_left
-      (mul_le_mul_of_nonneg_left hy h.L0) eps
-
-/-- Difference form of the state-coefficient bound. -/
+    _ ≤ eps + L * R :=
+      add_le_add le_rfl (mul_le_mul_of_nonneg_left hy h.L0)
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [NormedSpace ℝ Y] in
 theorem stateCoeff_sub {eps L D : ℝ}
     {A : ℝ × V → Y → G →L[ℝ] F}
     (h : HmfStateCoeff eps L A) {z : ℝ × V} {y₁ y₂ : Y}
@@ -66,6 +78,13 @@ def hmfStateFlux
     (p : ℝ × V → Y) (d : ℝ × V → G) (z : ℝ × V) : F :=
   A z (p z) (d z)
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [NormedAddCommGroup Y]
+  [NormedSpace ℝ Y] in
 /-- Exact two-arm difference split for a state-dependent principal flux.
 The first arm moves the gradient, while the second moves the coefficient and
 retains the partner gradient. -/
@@ -78,6 +97,12 @@ theorem hmfStateFlux_sub
   simp only [hmfStateFlux, map_sub, ContinuousLinearMap.sub_apply]
   abel
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [NormedSpace ℝ Y] in
 /-- Weighted critical estimate for the repaired state-dependent HMF
 principal flux.  Besides the prescribed smallness `eps`, the contraction
 coefficient contains only state-ball quantities `L R` and `L Dp`; no false
@@ -105,6 +130,9 @@ theorem hmfStateFluxWt
   have hcoef : 0 ≤ eps + L * R :=
     add_nonneg h.eps0 (mul_nonneg h.L0 hR)
   have hcoefD : 0 ≤ L * Dp := mul_nonneg h.L0 hDp
+  change Real.sqrt t *
+      ‖hmfStateFlux A p₁ d₁ z - hmfStateFlux A p₂ d₂ z‖ ≤
+        (eps + L * R) * Dg + L * Dp * Rg
   rw [hmfStateFlux_sub]
   calc
     Real.sqrt t *
@@ -135,6 +163,11 @@ The coefficient bounds needed for a Carleson cylinder are only required on
 `0 < t ≤ T`.  This localized variant avoids extending a state-ball bound to
 irrelevant negative or late times. -/
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V] in
 /-- A coefficient bounded on the positive time slab preserves the weighted
 gradient class. -/
 theorem linWtOn
@@ -176,7 +209,7 @@ theorem linCarlOn
       ENNReal.ofReal (‖B z (d z)‖ ^ 2) ≤
         ENNReal.ofReal (K ^ 2) * ENNReal.ofReal (‖d z‖ ^ 2) := by
     filter_upwards [ae_restrict_mem
-      (measurableSet_Ioc.prod Metric.measurableSet_ball)] with z hz
+      (measurableSet_Ioc.prod measurableSet_ball)] with z hz
     have hzT : z.1 ≤ T := hz.1.2.trans hRT
     have hlin : ‖B z (d z)‖ ≤ K * ‖d z‖ :=
       (B z).le_opNorm (d z) |>.trans
@@ -206,6 +239,12 @@ theorem linCarlOn
     _ = (ENNReal.ofReal (K ^ 2) * C) *
           ENNReal.ofReal (R ^ Module.finrank ℝ V) := by ring
 
+omit [NormedAddCommGroup V]
+  [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [NormedSpace ℝ Y] in
 /-- Separate weighted estimates for the two state-principal difference
 arms. -/
 theorem hmfStateFluxWt2
@@ -233,6 +272,7 @@ theorem hmfStateFluxWt2
       (fun t x ht hT ↦ stateCoeff_sub h (hpΔ t x ht hT))
       hcoefD hd₂
 
+omit [NormedSpace ℝ Y] in
 /-- The two state-dependent principal difference arms have separate
 Carleson estimates.  This is the form consumed by two applications of the
 linear heat-flux bound. -/

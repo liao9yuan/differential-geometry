@@ -1,25 +1,22 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalFrameField
+import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 
-/-!
-# Cometric trace retagging
 
-This file proves the fibrewise metric/cometric naturality identity needed to
-factor a scalar moving-Laplacian coefficient through a covector endomorphism.
-The statement is scalarized at covariant rank zero; it does not compare whole
-dependent Hom bundles.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry
 namespace PDE
@@ -30,19 +27,38 @@ namespace DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- Retagging one covariant slot by `q♭ ∘ h♯` changes the `q`-trace into the `h`-trace. -/
+private local instance traceRetagTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance traceRetagTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance traceRetagTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance traceRetagTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
+
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     cometricDoubleTraceFib (I := I) h 0 x D =
       cometricDoubleTraceFib (I := I) q 0 x
-        (slotExtendFib (I := I) (M := M) q 1 1 x
+        (slotExtendPointwise (I := I) (M := M) q 1 1 x
           ((g0FlatCLM (I := I) q x).comp (inverseMetricSharpFib (I := I) h x)) D) := by
   classical
   apply Tensor0SSpace.toModel_injective
@@ -59,11 +75,11 @@ theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
   rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) q x
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (Tensor0SSpace.toModel
-      (slotExtendFib (I := I) (M := M) q 1 1 x
+      (slotExtendPointwise (I := I) (M := M) q 1 1 x
         ((g0FlatCLM (I := I) q x).comp (inverseMetricSharpFib (I := I) h x)) D)) mm]
   have hslot : ∀ a : Fin (Module.finrank ℝ E),
       Tensor0SSpace.toModel
-          (slotExtendFib (I := I) (M := M) q 1 1 x
+          (slotExtendPointwise (I := I) (M := M) q 1 1 x
             ((g0FlatCLM (I := I) q x).comp (inverseMetricSharpFib (I := I) h x)) D)
           (Fin.cons ((smoothOrthoFrame (I := I) q x a x : TangentSpace I x) : E)
             (Fin.cons ((smoothOrthoFrame (I := I) q x a x : TangentSpace I x) : E) mm)) =
@@ -189,7 +205,8 @@ theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
                     (smoothOrthoFrame (I := I) h x c x) *
                   Tensor0SSpace.toModel D
                     (Fin.cons ((smoothOrthoFrame (I := I) q x a x : TangentSpace I x) : E)
-                      (Fin.cons ((smoothOrthoFrame (I := I) h x c x : TangentSpace I x) : E) mm)) := by
+                      (Fin.cons ((smoothOrthoFrame (I := I) h x c x : TangentSpace I x) : E)
+                        mm)) := by
           change ((Tensor0SSpace.toModel D).curryLeft
               (∑ a : Fin (Module.finrank ℝ E),
                 q.inner x (smoothOrthoFrame (I := I) q x a x)

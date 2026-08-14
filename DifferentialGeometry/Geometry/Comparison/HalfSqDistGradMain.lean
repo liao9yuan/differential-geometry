@@ -2,19 +2,18 @@ import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradVar
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 
-/-!
-# One-summand distance-squared gradient: first-variation assembly
 
-The first-variation (arc-length) side of the comparison: along the central geodesic
-`γ = intrinsicGeodesic g q u` (unit speed, `γ L = pt`), the half-squared arc length of a
-fixed-endpoint variation has derivative `L · (-⟨∂_s f(·,0)|₀, γ'(0)⟩)` at `s = 0`
-(`halfArcLengthSq_deriv`).  Combined (next) with the distance ≤ arc-length comparison
-this yields the half-squared-distance derivative, hence the gradient covector.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Set Function Filter Manifold Bundle
 open scoped Manifold Topology ContDiff ENNReal
@@ -29,7 +28,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,10 +37,8 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **First variation of half-squared arc length.**  For the central unit-speed geodesic
-`γ = intrinsicGeodesic g q u` (`g_q u u = 1`) with `γ L = pt`, and any fixed-endpoint
-smooth variation `f` with central curve `γ`, the derivative of `s ↦ ½ (arcLength (f s ·))²`
-at `s = 0` is `L · (-⟨∂_s f(·,0)|₀, u⟩)`. -/
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem halfArcLengthSq_deriv
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -68,14 +65,11 @@ theorem halfArcLengthSq_deriv
   have hfixL' : ∀ s : ℝ, f s L = γ L := fun s => (hfixL s).trans (hγ ▸ hgL).symm
   have hArc := first_variation_geodesic_fixed_end (I := I) g γ f L hf hL hγ_geoOn hfc hfixL' hUnit
   have hγ0 : γ 0 = q := intrinsicGeodesic_zero (I := I) g hEnorm q u
-  -- arc length of the central curve is `L`
   have harc0 : arcLength (I := I) g (fun t : ℝ => f 0 t) 0 L = L := by
     have hfγ : (fun t : ℝ => f 0 t) = γ := funext hfc
     rw [hfγ, hγ, arcLength_radial (I := I) g hEnorm q u 0 L, hguu, Real.sqrt_one]
     ring
-  -- chain `½ (·)²`
   have hA := (hArc.pow 2).const_mul (1 / 2 : ℝ)
-  -- simplify the derivative value
   have hval : (1 / 2 : ℝ) * (2 * arcLength (I := I) g (fun t : ℝ => f 0 t) 0 L ^ (2 - 1) *
         (- g.inner (γ 0) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u 0) 0 (1 : ℝ))
           (mfderiv (𝓘(ℝ, ℝ)) I γ 0 (1 : ℝ))))
@@ -89,9 +83,8 @@ theorem halfArcLengthSq_deriv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **D-side chain rule.**  The half-squared distance along the base curve `s ↦ f s 0`
-has, at `s = 0`, derivative `mfderiv (halfSqDist pt) q (∂ₛ f(·,0)|₀)` — the manifold chain
-rule for `halfSqDist pt ∘ (f · 0)`, given `f 0 0 = q` and differentiability of `halfSqDist`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem halfSqDist_curve_hasDerivAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -119,8 +112,9 @@ theorem halfSqDist_curve_hasDerivAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Arc length is nonnegative on `[a, b]` with `a ≤ b` (the speed integrand is a
-square root). -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 theorem arcLength_nonneg
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b) :
     0 ≤ arcLength (I := I) g γ a b := by
@@ -129,11 +123,8 @@ theorem arcLength_nonneg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Distance bounded by arc length (real form).**  In the proper Riemannian
-metric realization, the distance between the endpoints of a `C¹` curve whose
-pointwise velocity `g`-norm is identified with the model enorm is at most its arc
-length.  Real-valued opaque consequence of `riemannianEDist_le_arcLength` +
-`riemMetric_dist_eq`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem dist_le_arcLength
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -158,11 +149,7 @@ theorem dist_le_arcLength
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **One-summand half-squared-distance directional derivative.**  For the central
-unit-speed geodesic `γ = intrinsicGeodesic g q u` (`γ L = pt`, `dist q pt = L`) and
-the fixed-endpoint variation `f` realising base direction `∂ₛ f(·,0)|₀`, the
-directional derivative of `halfSqDist pt` at `q` equals `L · (-⟨∂ₛf(·,0)|₀, γ'(0)⟩)`.
-Touching-graphs comparison `½ d² ≤ ½ (arc length)²` with equality along `γ`. -/
+omit [T2Space (TangentBundle I M)] in
 theorem halfSqDist_dir_deriv
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -222,9 +209,6 @@ theorem halfSqDist_dir_deriv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The gradient of half the squared distance along any minimizing intrinsic
-exponential tangent.  Unlike `grad_halfSqDist`, this statement does not require
-the tangent to come from the fixed normal chart at the base point. -/
 theorem grad_halfSqDist_min
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -310,11 +294,6 @@ theorem grad_halfSqDist_min
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **One-summand distance-squared gradient covector identity (`lbl411`).**  For
-`pt` in a small normal ball of `q` with `pt ≠ q`, the differential of
-`halfSqDist pt = ½ d²(·, pt)` at `q` is the metric flat of `-exp_q⁻¹(pt)`:
-`(mfderiv (halfSqDist pt) q).toLinearMap = ♭(-(normalChartAt g q pt))`.  This
-discharges the `hflat` hypothesis of `CenterOfMass.grad_halfSqDist_of_flat`. -/
 theorem halfSqDist_flat
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -353,7 +332,7 @@ theorem halfSqDist_flat
       (show TangentSpace I q from NormalCoordinates.normalChartAt (I := I) g q pt) w
       = L * g.inner q u w := by
     rw [← hLu, (g.inner q).map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
-  show mfderiv I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q w
+  change mfderiv I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q w
       = g.inner q
           (-(show TangentSpace I q from NormalCoordinates.normalChartAt (I := I) g q pt)) w
   rw [hval, (g.inner q).map_neg, ContinuousLinearMap.neg_apply, hnc, g.symm q w u,
@@ -361,10 +340,6 @@ theorem halfSqDist_flat
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **One-summand distance-squared gradient (`lbl411`).**  For `pt` in a small
-normal ball of `q` with `pt ≠ q`, the `g`-gradient of `halfSqDist pt = ½ d²(·, pt)`
-at `q` is `-exp_q⁻¹(pt) = -(normalChartAt g q pt)`.  Unconditional consequence of
-the covector identity `halfSqDist_flat` via `gradientFun_eq_of_flat`. -/
 theorem grad_halfSqDist
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

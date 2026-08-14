@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDiffJoint
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSZeroRefold
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsBackgroundDifferenceRefold
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBoundCoeffFieldOrderZeroIdentities
 
 /-!
 # Field identity for the order-zero Ricci refold
@@ -128,7 +130,7 @@ private theorem halfRiem_refold
         (ricciArmOrder0RiemannCoeff (I := I) (M := M) g g1 -
           ricciArmOrder0RiemannCoeff (I := I) (M := M) g g) =
       ricciArmOrder0AACommCoeffField (I := I) (M := M) g g1 +
-        bgRDiffRefoldRemainderField (I := I) (M := M) g g1 +
+        backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g g1 +
         refoldKernelContractionField (I := I) (M := M) g g1
           (iteratedCovGrad (I := I) g 0 2 2 P)
           (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
@@ -138,11 +140,12 @@ private theorem halfRiem_refold
   rw [hP]
   refine cc22_ext_app (I := I) (M := M) g _ _ (fun W => ?_)
   have hprim :=
-    ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
+    ricciArmOrder0RiemannHalfBgDiff_appCc_eq_residualFieldSum_add_refoldKernelSecondGrad
       (I := I) (M := M) g g1 P htie hPsymm W
   rw [hP] at hprim
   simpa only [appCc_smul_left, appCc_sub_left, appCc_add_left,
-    bgRDiffRefoldRemainderField, appCc_refoldKernelContractionField] using hprim
+    backgroundRicciCommutatorDiffRefoldRemainderField,
+    appCc_refoldKernelContractionField] using hprim
 
 /-- The Ricci part of the order-zero refold is exactly the connection
 difference coefficient plus one explicit Palatini kernel.  In particular, the
@@ -178,13 +181,13 @@ theorem ricciRefold_eq
   rw [edgeRicciHalf, ricciRefold0]
   rw [show
       appCcRS (I := I) (M := M) g 2 2 2
-          (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g g1 -
-            ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g g)
+          (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g g1 -
+            ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g g)
           (ccSlotSwapField (I := I) (M := M) g) +
         (1 / 2 : Real) •
           ricciArmSharpGradKoszulResidualField (I := I) (M := M) g g1 P -
         ricciArmRicciFoldRemainderField (I := I) (M := M) g g1 P =
-      bgRDiffRefoldRemainderField (I := I) (M := M) g g1 by
+      backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g g1 by
         rw [hP]
         rfl]
   rw [htwice]
@@ -216,7 +219,7 @@ theorem rhsRefold_eq
             (iteratedCovGrad (I := I) g 0 2 2 (s • T))
             (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
             (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 +
-        deTurckLieDLaCoeffField (I := I) (M := M) g
+        deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g
           (realizedFam (I := I) g T 0 hdelta hdeltaZ s) g_bg +
         deTurckLieDLbCoeffField (I := I) (M := M) g
           (realizedFam (I := I) g T 0 hdelta hdeltaZ s) g_bg +
@@ -247,7 +250,7 @@ theorem rhsRefold_eq
   have hlie :
       deTurckLieCovDerivArmField (I := I) (M := M) g g1 g_bg +
           deTurckLieEndoArmField (I := I) (M := M) g g1 g_bg =
-        deTurckLieDLaCoeffField (I := I) (M := M) g g1 g_bg +
+        deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g g1 g_bg +
           deTurckLieDLbCoeffField (I := I) (M := M) g g1 g_bg := by
     rw [← deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
       deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
@@ -274,7 +277,7 @@ theorem rhsRefold_eq
             (iteratedCovGrad (I := I) g 0 2 2 P)
             (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
             (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 +
-        deTurckLieDLaCoeffField (I := I) (M := M) g g1 g_bg +
+        deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g g1 g_bg +
         deTurckLieDLbCoeffField (I := I) (M := M) g g1 g_bg +
         lieCorr0Field (I := I) (M := M) g g1 g_bg -
         edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ

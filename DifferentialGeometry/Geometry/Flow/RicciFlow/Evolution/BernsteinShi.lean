@@ -2,41 +2,39 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Bernstein–Bando–Shi First Derivative Estimate (parametric core)
 
-This file formalizes the `m = 1` case of the global Bernstein–Bando–Shi
-derivative estimate (MSM144 Theorem 14.5) on a closed manifold, following the
-maximum-principle proof of Section 2.1.  The geometric production of the two
-curvature-norm heat inequalities is deliberately kept as a separate frontier:
-here the curvature norm `|Rm|^2` and the gradient norm `|nabla Rm|^2` are given
-scalar fields, and the two heat inequalities are taken as hypotheses.
 
-The mathematics is the standard one.  Writing `u = |nabla Rm|^2`,
-`v = |Rm|^2`, one has on `M x [0,T]`:
 
-* `(partial_t - Delta) u <= C(n) |Rm| u`  (eq 14.17, dropping `-2|nabla^2 Rm|^2`);
-* `(partial_t - Delta) v = -2 u + reaction`, with `|reaction| <= 16 |Rm|^3`
-  (eq 14.16).
 
-With `v <= K^2` and `t <= alpha / K`, set `F = t u + beta v` with
-`beta = 1 + C(n) alpha`.  Then `(partial_t - Delta) F <= C(n) beta K^3` because the
-`u`-terms cancel, and the upper-bound maximum principle gives
-`F <= beta K^2 (1 + C(n) alpha) = C(n, alpha) K^2`, hence `u <= C(n, alpha) K^2 / t`.
 
-## Main results
 
-* `scalar_subsolution_affine_bound` — Part A, the upper-bound scalar maximum
-  principle: a closed-manifold subsolution `(partial_t - Delta) F <= b` with
-  `F(0, .) <= a` satisfies `F(t, x) <= a + b t`.
-* `NablaRm04NormHeatBoundOn` — the `|nabla Rm|^2` heat-inequality predicate.
-* `bernstein_first_derivative_estimate` — Part B, the parametric Bernstein
-  lemma: under the two heat inequalities and `|Rm| <= K`, `t <= alpha / K`,
-  one gets `u(t, x) <= C(n, alpha) K^2 / t` for `t in (0, T]`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -52,14 +50,15 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Part A — affine-barrier upper-bound scalar maximum principle -/
 
-/-- Operator linearity for the affine barrier `(a + b t) - F`.
 
-This generalizes `parabolic_const_sub` to a spatially-constant additive term
-that is affine in time.  The proof differentiates the affine time term and uses
-that the spatial heat operator is insensitive to spatially-constant shifts and
-scales by `-1`. -/
+
+
+
+
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem parabolicOperatorWithDrift_affine_sub
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -74,9 +73,9 @@ theorem parabolicOperatorWithDrift_affine_sub
       DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) x) :
     DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X
         (fun s y => (a + b * s) - F s y) t x =
-      b - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x := by
+      b - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t
+        x := by
   unfold DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift
-  -- time derivative of the affine barrier
   have hbarrier_const : DifferentiableWithinAt Real
       (fun s : Real => a + b * s) (Set.Icc 0 T) t := by
     have hlin : DifferentiableWithinAt Real (fun s : Real => b * s) (Set.Icc 0 T) t := by
@@ -104,7 +103,6 @@ theorem parabolicOperatorWithDrift_affine_sub
       derivWithin (fun s : Real => (a + b * s) - F s x) (Set.Icc 0 T) t =
         b - derivWithin (fun s : Real => F s x) (Set.Icc 0 T) t := by
     rw [derivWithin_fun_sub hbarrier_const hF_time, hbarrier_deriv]
-  -- the spatial subtracted function and its gradient regularity
   have hsub_grad : MDiffAt (T% fun y : M =>
       DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
         (fun z : M => F t z - (a + b * t)) y) x := by
@@ -140,7 +138,6 @@ theorem parabolicOperatorWithDrift_affine_sub
       MDifferentiableAt I 𝓘(Real, Real) (fun z : M => F t z - (a + b * t)) y := by
     intro y
     exact (hF_space y).sub mdifferentiableAt_const
-  -- heat operator: insensitive to constant shift, scales by -1
   have hheat_sub :
       DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
           (fun y : M => F t y - (a + b * t)) x =
@@ -153,12 +150,14 @@ theorem parabolicOperatorWithDrift_affine_sub
         (-1 : Real) *
           DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
             (fun y : M => F t y - (a + b * t)) x :=
-    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_const_smul (I := I) G t (X t) (-1)
+    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_const_smul (I := I) G t (X t)
+      (-1)
       (f := fun y : M => F t y - (a + b * t)) hsub_space hsub_grad
   have hheat :
       DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
           (fun y : M => (a + b * t) - F t y) x =
-        - DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t) (F t) x := by
+        - DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t) (F t)
+          x := by
     have hfun :
         (fun y : M => (a + b * t) - F t y) =
           ((-1 : Real) • fun y : M => F t y - (a + b * t)) := by
@@ -169,8 +168,9 @@ theorem parabolicOperatorWithDrift_affine_sub
   rw [htime, hheat]
   ring
 
-/-- The realized Laplacian is linear over the affine combination
-`c1 f + c2 g`. -/
+
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem laplacianAt_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -185,7 +185,6 @@ theorem laplacianAt_linear_combo
         (fun z : M => c1 * f z + c2 * g z) x =
       c1 * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t f x +
         c2 * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t g x := by
-  -- gradient of the combination is `c1 • grad f + c2 • grad g`
   have hgrad_eq :
       DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
           (fun z : M => c1 * f z + c2 * g z) =
@@ -205,17 +204,22 @@ theorem laplacianAt_linear_combo
             (fun z : M => c1 * f z) y +
           DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
             (fun z : M => c2 * g z) y := by
-          exact DifferentialGeometry.Integral.Connection.gradientFun_add (I := I) (G.metric t) hc1 hc2
+          exact DifferentialGeometry.Integral.Connection.gradientFun_add (I := I) (G.metric t) hc1
+            hc2
       _ = c1 • DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f y +
-            c2 • DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) g y := by
+            c2 • DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) g
+              y := by
           rw [show (fun z : M => c1 * f z) = (c1 • f) by funext z; simp [smul_eq_mul]]
           rw [show (fun z : M => c2 * g z) = (c2 • g) by funext z; simp [smul_eq_mul]]
-          rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I) (G.metric t) c1 (hf y)]
-          rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I) (G.metric t) c2 (hg y)]
+          rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I) (G.metric t)
+            c1 (hf y)]
+          rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I) (G.metric t)
+            c2 (hg y)]
       _ = (c1 • fun y : M =>
               DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f y) y +
             (c2 • fun y : M =>
-              DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) g y) y := by
+              DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) g y)
+                y := by
           rfl
   rw [DifferentialGeometry.Integral.Connection.laplacianAt_eq,
     DifferentialGeometry.Integral.Connection.laplacianAt_eq,
@@ -223,11 +227,15 @@ theorem laplacianAt_linear_combo
   unfold DifferentialGeometry.Integral.Connection.laplacian
   rw [hgrad_eq]
   rw [DifferentialGeometry.Integral.Connection.divergence_add (I := I) (G.connection t)
+      inferInstance
       (hgradf.smul_const_section (a := c1)) (hgradg.smul_const_section (a := c2))]
-  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I) (G.connection t) c1 hgradf]
-  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I) (G.connection t) c2 hgradg]
+  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I)
+    (G.connection t) inferInstance c1 hgradf]
+  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I)
+    (G.connection t) inferInstance c2 hgradg]
 
-/-- The zero-drift heat operator of `c1 f + c2 g` splits linearly. -/
+
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem heatOperator_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -252,17 +260,17 @@ theorem heatOperator_linear_combo
     DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt]
   exact laplacianAt_linear_combo (I := I) G t f g c1 c2 x hf hg hgradf hgradg
 
-/-- **Part A.** Upper-bound scalar maximum principle for affine barriers.
 
-On a closed manifold, a scalar subsolution `(partial_t - Delta_{g(t)}) F <= b`
-(with constant `b`) on the positive times of `[0,T]`, with `F(0, .) <= a`,
-satisfies `F(t, x) <= a + b t` on the whole slab.
 
-The proof applies the existing strict-barrier nonnegativity theorem to the
-affine barrier `w = (a + b t) - F` and uses
-`parabolicOperatorWithDrift_affine_sub` for the operator linearity.  The
-subsolution inequality is only needed at positive times, mirroring
-`scalar_sub_const_posReg`. -/
+
+
+
+
+
+
+
+
+
 theorem scalar_subsolution_affine_bound
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -283,7 +291,8 @@ theorem scalar_subsolution_affine_bound
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) x)
     (hinit : forall x : M, F 0 x <= a)
     (hsub : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <= b) :
+      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <=
+        b) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, F t x <= a + b * t := by
   let w : Real -> M -> Real := fun t x => (a + b * t) - F t x
   have hw0 : forall x : M, 0 <= w 0 x := by
@@ -312,12 +321,12 @@ theorem scalar_subsolution_affine_bound
       forall x : M, MDiffAt (T% fun y : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (w t) y) x := by
     intro t ht htpos x
-    -- gradient of `(a + b t) - F t = (-1) • (F t - (a + b t))`, same as gradient of `F t`
     have hplain :
         (fun y : M =>
           DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (w t) y) =
         (fun y : M =>
-          - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) := by
+          - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t)
+            y) := by
       funext y
       have hwt : w t = (fun z : M => (a + b * t) - F t z) := rfl
       rw [hwt]
@@ -329,18 +338,19 @@ theorem scalar_subsolution_affine_bound
             DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y := by
             exact DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I) (G.metric t)
               mdifferentiableAt_const (hF_space t ht htpos y)
-        _ = - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y := by
+        _ = - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t)
+          y := by
             rw [DifferentialGeometry.Integral.Connection.gradientFun_const]
             simp
     have hsection :
         (T% fun y : M =>
           DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (w t) y) =
         (T% fun y : M =>
-          - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) := by
+          - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t)
+            y) := by
       funext y
       simpa using congrFun hplain y
     rw [hsection]
-    -- `- grad = (-1) • grad`; differentiability of the negated section
     have hneg :
         (T% fun y : M =>
           - DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) =
@@ -352,13 +362,15 @@ theorem scalar_subsolution_affine_bound
     exact (hF_grad t ht htpos x).smul_const_section (a := (-1 : Real))
   have hnegative : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, w t x < 0 ->
-        0 <= DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X w t x := by
+        0 <= DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X w t
+          x := by
     intro t ht htpos x _hwneg
     have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
       (uniqueDiffOn_Icc (lt_of_lt_of_le htpos ht.2)).uniqueDiffWithinAt ht
     have hident :
         DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X w t x =
-          b - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x := by
+          b - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t
+            x := by
       simpa [w] using
         parabolicOperatorWithDrift_affine_sub (I := I) G T X F a b t x huniq
           (hF_time t ht htpos x) (hF_space t ht htpos) (hF_grad t ht htpos x)
@@ -374,16 +386,16 @@ theorem scalar_subsolution_affine_bound
   simp only [w] at this
   linarith
 
-/-! ## Part B — the parametric Bernstein lemma -/
 
-/-- Heat-inequality predicate for `|nabla Rm|^2`, mirroring
-`Rm04NormHeatEquationOn`.
 
-This states the differential inequality `(partial_t - Delta) u <= cReact * v^{1/2} * u`
-in `HasDerivWithinAt` form: the time derivative of `u` is bounded above by
-`uLap + cReact * sqrt v * u`, where `uLap` realizes `Delta u`.  This is eq 14.17
-with the favourable `-2|nabla^2 Rm|^2` term dropped; the reaction coefficient
-`cReact` packages the dimensional constant `C(n)`. -/
+
+
+
+
+
+
+
+
 def NablaRm04NormHeatBoundOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (nablaRmNormSq nablaRmNormLap rmNormSq : Real -> M -> Real) (cReact : Real) : Prop :=
@@ -397,25 +409,25 @@ def NablaRm04NormHeatBoundOn
       d <= nablaRmNormLap (t : Real) x +
         cReact * Real.sqrt (rmNormSq (t : Real) x) * nablaRmNormSq (t : Real) x
 
-/-- The explicit constant `C(n, alpha) = (1 + cReact * alpha) * (1 + 16 * alpha)`
-appearing in the first-derivative estimate.  It is `beta * (1 + 16 alpha)` with
-`beta = 1 + cReact * alpha`. -/
+
+
+
 def bernsteinConstant (cReact alpha : Real) : Real :=
   (1 + cReact * alpha) * (1 + 16 * alpha)
 
-/-- **Part B.** Parametric Bernstein–Bando–Shi first derivative estimate.
 
-Given the gradient norm `u = |nabla Rm|^2 >= 0`, the curvature norm
-`v = |Rm|^2 >= 0`, the two curvature heat inequalities, the curvature bound
-`v <= K^2` and the time bound `T <= alpha / K`, the gradient norm satisfies the
-on-diagonal bound `u(t, x) <= C(n, alpha) K^2 / t` for `t in (0, T]`.
 
-The proof forms `F = t u + beta v` with `beta = 1 + cReact alpha` and runs the
-upper-bound maximum principle `scalar_subsolution_affine_bound`.  The barrier
-data `a = beta K^2`, `b = beta * 16 K^3` come from the heat inequalities once the
-`u`-terms cancel.  The various regularity inputs the maximum principle needs are
-threaded through as hypotheses, in the same style as the scalar lower-bound
-endpoint. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem bernstein_first_derivative_estimate
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -425,28 +437,22 @@ theorem bernstein_first_derivative_estimate
     (u v uLap vLap reaction : Real -> M -> Real)
     (cReact K alpha : Real)
     (hcReact : 0 <= cReact) (hK : 0 < K) (halpha : 0 <= alpha)
-    -- the spacetime slab lies in the carrier, with positive times regular
     (hslab : Set.Icc 0 T ⊆ D.carrier)
     (hregular : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> t ∈ D.regular)
-    -- nonnegativity and the two curvature norm bounds
     (hu_nonneg : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M, 0 <= u t x)
     (hv_nonneg : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M, 0 <= v t x)
     (hv_bound : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M, v t x <= K ^ 2)
     (hTK : T <= alpha / K)
-    -- the gradient-norm heat inequality (eq 14.17)
     (hu_heat : NablaRm04NormHeatBoundOn (D := D) u uLap v cReact)
-    -- the curvature-norm heat equation (eq 14.16) and its reaction bound
     (hv_heat : Rm04NormHeatEquationOn (D := D) v vLap u reaction)
     (hreaction : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       |reaction t x| <= 16 * (v t x) ^ ((3 : Real) / 2))
-    -- the Laplacian realizations as the driftless heat operator
     (huLap : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (u t) x = uLap t x)
     (hvLap : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (v t) x = vLap t x)
-    -- spatial regularity of the two curvature norms (used for the heat split)
     (hu_space : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ y : M,
       MDifferentiableAt I 𝓘(Real, Real) (u t) y)
     (hu_grad : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
@@ -457,7 +463,6 @@ theorem bernstein_first_derivative_estimate
     (hv_grad : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       MDiffAt (T% fun y : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (v t) y) x)
-    -- regularity of `F = t u + beta v` consumed by Part A
     (hF_cont : ContinuousOn
       (fun p : Real × M =>
         ((1 + cReact * alpha) * K ^ 2 + ((1 + cReact * alpha) * (16 * K ^ 3)) * p.1) -
@@ -480,13 +485,10 @@ theorem bernstein_first_derivative_estimate
   have hβ_pos : 0 < β := by
     have : 0 <= cReact * alpha := mul_nonneg hcReact halpha
     simp only [hβdef]; linarith
-  -- The combined field `F = t u + β v`, with driftless heat operator.
   let F : Real -> M -> Real := fun s y => s * u s y + β * v s y
   let X : Real -> (x : M) -> TangentSpace I x := fun _t x => (0 : TangentSpace I x)
-  -- The barrier constants.
   set a : Real := β * K ^ 2 with hadef
   set b : Real := β * (16 * K ^ 3) with hbdef
-  -- bound `t * sqrt v <= alpha` on the slab
   have hK2 : (0 : Real) <= K ^ 2 := by positivity
   have hsqrt_v_le : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       Real.sqrt (v t x) <= K := by
@@ -506,21 +508,17 @@ theorem bernstein_first_derivative_estimate
     calc t * Real.sqrt (v t x) <= t * K :=
           mul_le_mul_of_nonneg_left (hsqrt_v_le t ht x) ht.1
       _ <= alpha := htK
-  -- Part A's subsolution inequality: `(∂ₜ - Δ) F ≤ b` at positive times.
   have hsub : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <= b := by
+      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <=
+        b := by
     intro t ht htpos x
-    -- regular-time wrapper for the carrier derivative interfaces
     let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D :=
       ⟨t, hregular t ht htpos⟩
-    -- derivative of `u` from the heat inequality
     obtain ⟨du, hdu_deriv, hdu_le⟩ := hu_heat τ x
-    -- derivative of `v` from the heat equation
     have hdv_deriv :
         HasDerivWithinAt (fun s : Real => v s x)
           (vLap t x + (-2 * u t x + reaction t x)) D.carrier (t : Real) :=
       hv_heat τ x
-    -- restrict both to the test slab `[0,T] ⊆ D.carrier`
     have hdu_slab :
         HasDerivWithinAt (fun s : Real => u s x) du (Set.Icc 0 T) t := by
       simpa [τ] using hdu_deriv.mono hslab
@@ -530,7 +528,6 @@ theorem bernstein_first_derivative_estimate
       simpa [τ] using hdv_deriv.mono hslab
     have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
       (uniqueDiffOn_Icc hT).uniqueDiffWithinAt ht
-    -- time derivative of `F` at `t`
     have hFtime :
         HasDerivWithinAt (fun s : Real => F s x)
           ((u t x + t * du) + β * (vLap t x + (-2 * u t x + reaction t x)))
@@ -551,7 +548,6 @@ theorem bernstein_first_derivative_estimate
         derivWithin (fun s : Real => F s x) (Set.Icc 0 T) t =
           (u t x + t * du) + β * (vLap t x + (-2 * u t x + reaction t x)) :=
       hFtime.derivWithin huniq
-    -- heat operator of `F t`: linear combination of those of `u t`, `v t`
     have hheatF :
         DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
             (fun _y : M => (0 : TangentSpace I _y)) (F t) x =
@@ -569,7 +565,6 @@ theorem bernstein_first_derivative_estimate
           (hu_grad t ht htpos x) (hv_grad t ht htpos x)
       have hFt : F t = (fun z : M => t * u t z + β * v t z) := rfl
       rw [hFt, hcombo, huLap t ht htpos x, hvLap t ht htpos x]
-    -- assemble the parabolic operator value
     have hParab :
         DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x =
           u t x + (t * (du - uLap t x) + β * (-2 * u t x + reaction t x)) := by
@@ -577,16 +572,13 @@ theorem bernstein_first_derivative_estimate
       rw [DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift_eq, hderivWithin, hXt,
         hheatF]
       ring
-    -- now estimate using the two heat inequalities
     rw [hParab]
-    -- `du - uLap ≤ cReact * sqrt v * u`
     have hdu_diff : du - uLap t x <= cReact * Real.sqrt (v t x) * u t x := by
       have := hdu_le
       simp only [τ] at this
       linarith
     have hu_nn : 0 <= u t x := hu_nonneg t ht x
     have hv_nn : 0 <= v t x := hv_nonneg t ht x
-    -- `t * (du - uLap) ≤ t * cReact * sqrt v * u ≤ cReact * alpha * u`
     have hterm_u :
         t * (du - uLap t x) <= (cReact * alpha) * u t x := by
       have h1 : t * (du - uLap t x) <= t * (cReact * Real.sqrt (v t x) * u t x) :=
@@ -599,7 +591,6 @@ theorem bernstein_first_derivative_estimate
           mul_le_mul_of_nonneg_left (ht_sqrt_v_le t ht x) hcReact
         exact mul_le_mul_of_nonneg_right hca hu_nn
       linarith [h1, h2.le, h2.ge, h3]
-    -- reaction bound: `reaction ≤ 16 v^{3/2} ≤ 16 K^3`
     have hreact_le : reaction t x <= 16 * K ^ 3 := by
       have habs : |reaction t x| <= 16 * (v t x) ^ ((3 : Real) / 2) := hreaction t ht x
       have hle1 : reaction t x <= 16 * (v t x) ^ ((3 : Real) / 2) :=
@@ -617,10 +608,8 @@ theorem bernstein_first_derivative_estimate
       calc reaction t x <= 16 * (v t x) ^ ((3 : Real) / 2) := hle1
         _ <= 16 * K ^ 3 := by
             exact mul_le_mul_of_nonneg_left hpow (by norm_num)
-    -- combine: the `u`-terms cancel against `+u - 2β u`, leaving `≤ β·16 K^3 = b`
     have hβ_react' : β * reaction t x <= β * (16 * K ^ 3) :=
       mul_le_mul_of_nonneg_left hreact_le (le_of_lt hβ_pos)
-    -- The full `u`-coefficient is `1 + cReact α - 2β = -(1 + cReact α) ≤ 0`.
     have hu_cancel :
         u t x + (cReact * alpha) * u t x + β * (-2 * u t x) <= 0 := by
       have heq : u t x + (cReact * alpha) * u t x + β * (-2 * u t x)
@@ -641,7 +630,6 @@ theorem bernstein_first_derivative_estimate
       _ <= 0 + β * (16 * K ^ 3) := by
             linarith [hβ_react', hu_cancel]
       _ = β * (16 * K ^ 3) := by ring
-  -- F(0) ≤ a
   have hinitF : ∀ x : M, F 0 x <= a := by
     intro x
     have h0mem : (0 : Real) ∈ Set.Icc 0 T := ⟨le_rfl, le_of_lt hT⟩
@@ -652,7 +640,6 @@ theorem bernstein_first_derivative_estimate
       mul_le_mul_of_nonneg_left hv0 (le_of_lt hβ_pos)
     simp only [zero_mul, zero_add]
     exact hbv
-  -- Apply Part A.
   have hPartA :
       ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M, F t x <= a + b * t := by
     apply scalar_subsolution_affine_bound (I := I) G T (le_of_lt hT) X F a b
@@ -662,7 +649,6 @@ theorem bernstein_first_derivative_estimate
     · intro t ht htpos x; simpa only [F] using hF_grad t ht htpos x
     · exact hinitF
     · exact hsub
-  -- Convert `F ≤ a + b t` into `u ≤ C(n,α) K²/t`.
   intro t ht htpos x
   have hFle : F t x <= a + b * t := hPartA t ht x
   have hv_nn : 0 <= v t x := hv_nonneg t ht x
@@ -670,16 +656,13 @@ theorem bernstein_first_derivative_estimate
     have hβv : 0 <= β * v t x := mul_nonneg (le_of_lt hβ_pos) hv_nn
     have : t * u t x + β * v t x <= a + b * t := hFle
     linarith
-  -- `a + b t = β K² + β·16K³·t ≤ β K²(1 + 16 α) = C(n,α) K²`
   have hbt_le : a + b * t <= bernsteinConstant cReact alpha * K ^ 2 := by
     rw [hadef, hbdef, bernsteinConstant, hβdef]
-    -- need: β K² + β·16K³·t ≤ β K² (1 + 16 α), i.e. 16 K³ t ≤ 16 K² α.
     have htK : t * K <= alpha := by
       have htle : t <= alpha / K := le_trans ht.2 hTK
       calc t * K <= (alpha / K) * K := mul_le_mul_of_nonneg_right htle (le_of_lt hK)
         _ = alpha := by field_simp
     have hβpos' : 0 < (1 + cReact * alpha) := hβ_pos
-    -- (1+cReact α)*K² + (1+cReact α)*(16 K³)*t ≤ (1+cReact α)*(1+16α)*K²
     have hexpand : (1 + cReact * alpha) * (1 + 16 * alpha) * K ^ 2
         = (1 + cReact * alpha) * K ^ 2 + (1 + cReact * alpha) * (16 * K ^ 2 * alpha) := by
       ring
@@ -698,7 +681,6 @@ theorem bernstein_first_derivative_estimate
     linarith [hfactor]
   have htu_le' : t * u t x <= bernsteinConstant cReact alpha * K ^ 2 :=
     le_trans htu_le hbt_le
-  -- divide by `t > 0`
   rw [le_div_iff₀ htpos]
   calc u t x * t = t * u t x := by ring
     _ <= bernsteinConstant cReact alpha * K ^ 2 := htu_le'

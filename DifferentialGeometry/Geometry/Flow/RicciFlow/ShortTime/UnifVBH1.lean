@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH22
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InteriorProductJetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0VBRefold
 
 /-!
 # Class-first vector--bilinear H1 bound
@@ -232,7 +235,8 @@ theorem vb_h1_unif
       _ = 0 := by
         apply Finset.sum_eq_zero
         intro j hj
-        have hz := iteratedCovGrad_smul_real (I := I) (M := M) g₀ 0 2 j
+        have hz := DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real
+          (I := I) (M := M) g₀ 0 2 j
           (0 : ℝ) (0 : SmoothCcTensor g₀ 0 2)
         have hzero : iteratedCovGrad (I := I) g₀ 0 2 j
             (0 : SmoothCcTensor g₀ 0 2) = 0 := by
@@ -306,7 +310,8 @@ theorem vb_h1_unif
     rw [Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro j hj
-    rw [iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+    rw [DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real,
+      norm_smul, Real.norm_eq_abs]
     rw [mul_pow]
     norm_num
   rw [show lc0VBFormRF (I := I) (M := M) g₀ g₁ =

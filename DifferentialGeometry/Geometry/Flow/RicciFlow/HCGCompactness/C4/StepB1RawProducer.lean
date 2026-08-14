@@ -359,3 +359,4 @@ theorem MetricCompactBase.exists_b1_raw_h6
 
 end HCGCompactness
 end DifferentialGeometry
+

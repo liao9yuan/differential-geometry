@@ -3,20 +3,13 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-!
-# Pushforward of a vector field along a diffeomorphism
-
-Defines `Diffeomorph.pushforward`, the pushforward of a tangent vector field through a
-diffeomorphism, used throughout the pullback-naturality development.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
 open scoped Manifold ContDiff
 
 noncomputable def Diffeomorph.pushforward
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -30,7 +23,7 @@ noncomputable def Diffeomorph.pushforward
 derivative of the diffeomorphism applied to the field at `x`.  This is the
 transport-free form used by time-dependent gauge equations. -/
 theorem Diffeomorph.pushforward_image
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -52,7 +45,7 @@ theorem Diffeomorph.pushforward_image
 /-- The derivative of a diffeomorphism followed by the derivative of its
 inverse is the identity, in the order acting on a source tangent vector. -/
 theorem Diffeomorph.mfderiv_symm_self
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -79,7 +72,7 @@ theorem Diffeomorph.mfderiv_symm_self
 the original diffeomorphism is the identity, in the order acting on a target
 tangent vector. -/
 theorem Diffeomorph.mfderiv_self_symm
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -111,7 +104,7 @@ theorem Diffeomorph.mfderiv_self_symm
 
 /-- Pushforward by the identity diffeomorphism fixes every vector field. -/
 @[simp] theorem Diffeomorph.pushforward_refl
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]

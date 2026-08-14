@@ -25,7 +25,7 @@ namespace Sobolev
 namespace Chart
 
 variable {E H : Type*}
-  [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -140,9 +140,10 @@ lemma chartErr_ae_zero
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β
         (wkpChartFun (f n)) y -
       chartLimit (I := I) (M := M) hp_one hp_top h_cauchy β y = 0
-    rw [hy_push, hy_lim, sub_zero]
+    simp only [hy_push, hy_lim, Pi.zero_apply, sub_zero]
   simpa only [KβE, Kβ] using h_err
 
+omit [IsManifold I ∞ M] in
 /-- Measurable pullback is additive with respect to subtraction. -/
 lemma pullback_sub (β : M) (v w : EuclN → ℝ) :
     pullbackToManifold (I := I) β (fun y => v y - w y) =
@@ -198,7 +199,6 @@ lemma limitFun_decomp
   rw [← pullback_eq_chart (I := I) (M := M)]
   unfold chartErr
   rw [pullback_sub]
-  rfl
 
 /-- The original Cauchy sequence converges in `wkpNormChart` to the finite POU
 assembly of its chosen Euclidean chart limits. -/
@@ -241,12 +241,12 @@ theorem limitFun_tendsto
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M) ρ γ (chartPullback I β v))
           (chartTargetEuclid (I := I) (M := M) γ) ∧
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M) ρ γ (chartPullback I β v))
           (chartTargetEuclid (I := I) (M := M) γ) ≤
         ENNReal.ofReal (C γ β) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p v
             (chartTargetEuclid (I := I) (M := M) β) := by
     intro γ β v
@@ -268,14 +268,14 @@ theorem limitFun_tendsto
             (chartPullback I β
               (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)))
           (chartTargetEuclid (I := I) (M := M) γ) ∧
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M) ρ γ
             (chartPullback I β
               (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)))
           (chartTargetEuclid (I := I) (M := M) γ) ≤
         ENNReal.ofReal (C γ β) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)
             (chartTargetEuclid (I := I) (M := M) β) := by
@@ -297,7 +297,7 @@ theorem limitFun_tendsto
             manifoldLimitFun (I := I) (M := M) hp_one hp_top h_cauchy x) ≤
         ∑ β ∈ S, ∑ γ ∈ S,
           ENNReal.ofReal (C γ β) *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k p
               (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)
               (chartTargetEuclid (I := I) (M := M) β) := by
@@ -312,14 +312,14 @@ theorem limitFun_tendsto
   have h_pair : ∀ β ∈ S, ∀ γ ∈ S,
       Tendsto
         (fun n => ENNReal.ofReal (C γ β) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)
             (chartTargetEuclid (I := I) (M := M) β))
         atTop (𝓝 0) := by
     intro β _ γ _
     have h_err_tendsto : Tendsto
-        (fun n => DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        (fun n => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)
           (chartTargetEuclid (I := I) (M := M) β))
@@ -337,7 +337,7 @@ theorem limitFun_tendsto
       Tendsto
         (fun n => ∑ γ ∈ S,
           ENNReal.ofReal (C γ β) *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k p
               (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)
               (chartTargetEuclid (I := I) (M := M) β))
@@ -347,7 +347,7 @@ theorem limitFun_tendsto
   have h_rhs : Tendsto
       (fun n => ∑ β ∈ S, ∑ γ ∈ S,
         ENNReal.ofReal (C γ β) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartErr (I := I) (M := M) hp_one hp_top h_cauchy n β)
             (chartTargetEuclid (I := I) (M := M) β))

@@ -43,7 +43,7 @@ theorem klFluxPiece_int {T R : ℝ} {A₂ Aₚ : ℝ≥0}
       (klFluxPiece_mem (V := V) h c hR hRT hS)
   letI : ENNReal.HolderConjugate
       (ENNReal.ofReal (klPDual V)) (ENNReal.ofReal (klPReal V)) :=
-    (klP_holder (V := V)).ennrealOfReal
+    (klPDual_holder (V := V)).ennrealOfReal
   exact memLp_one_iff_integrable.mp (hf.smul hk)
 
 omit [CompleteSpace F] in

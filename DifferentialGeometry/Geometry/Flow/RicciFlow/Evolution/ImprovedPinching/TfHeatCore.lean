@@ -1,14 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Definitions
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching TfHeatCore
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.ImprovedPinching`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -18,22 +16,23 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- The scalar Laplacian expected for the square of scalar curvature:
-`Δ(R²) = 2 R ΔR + 2 |∇R|²`. -/
+
+
 def scalarSqLap
     (scalar scalarLap gradScalarNormSq : Real -> M -> Real) :
     Real -> M -> Real :=
   fun t x => 2 * scalar t x * scalarLap t x + 2 * gradScalarNormSq t x
 
-/-- Spatial scalar-square Laplacian product rule at one time. -/
+
+omit [Module.Finite ℝ E] in
 theorem sqLap_at
+    [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (t : Real) {f : M -> Real} {x : M}
@@ -52,7 +51,8 @@ theorem sqLap_at
     DifferentialGeometry.Integral.Connection.half_laplacian_mul_self
       (I := I) (G.connection t) (G.metric t) (f := f) (x := x)
       hf_all hf_x hgrad hfg
-  unfold DifferentialGeometry.Integral.Connection.laplacianAt DifferentialGeometry.Integral.Connection.gradientAt
+  unfold DifferentialGeometry.Integral.Connection.laplacianAt
+    DifferentialGeometry.Integral.Connection.gradientAt
   have hpow :
       (fun y : M => f y ^ 2) = fun y : M => f y * f y := by
     funext y
@@ -61,7 +61,8 @@ theorem sqLap_at
   have hmain :
       DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t) (G.metric t)
           (fun y : M => f y * f y) x =
-        2 * (f x * DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t) (G.metric t) f x +
+        2 * (f x * DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t)
+          (G.metric t) f x +
           (G.metric t).inner x
             (DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f x)
             (DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f x)) := by
@@ -69,9 +70,11 @@ theorem sqLap_at
   rw [hmain]
   ring
 
-/-- The scalar-square Laplacian expression realizes the heat operator when the
-scalar Laplacian and gradient-square inputs are the canonical ones. -/
+
+
+omit [Module.Finite ℝ E] in
 theorem sqLap_realizes
+    [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (scalar scalarLap gradScalarNormSq : Real -> M -> Real)
@@ -89,21 +92,24 @@ theorem sqLap_realizes
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y) x)
     (hfg : forall t x,
       MDiffAt (T% ((scalar t) • fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y)) x) :
+        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y))
+          x) :
     ScalarLaplacianRealizesHeatOperatorOn
       (I := I) G T
       (fun t x => scalar t x ^ 2)
       (scalarSqLap scalar scalarLap gradScalarNormSq) := by
   intro t ht x
   have hlap :
-      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t) x := by
+      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t)
+        x := by
     simpa [DifferentialGeometry.Integral.Connection.heatOperator] using hscalarLap t ht x
   have hsq :=
     sqLap_at (I := I) G t (f := scalar t) (x := x)
       (hdf t) (hdf t x) (hgrad t x) (hfg t x)
   calc
     scalarSqLap scalar scalarLap gradScalarNormSq t x =
-        2 * scalar t x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t) x +
+        2 * scalar t x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
+          (scalar t) x +
           2 * (G.metric t).inner x
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x)
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x) := by
@@ -114,14 +120,14 @@ theorem sqLap_realizes
     _ = DifferentialGeometry.Integral.Connection.heatOperator (I := I) G t
           (fun y : M => scalar t y ^ 2) x := rfl
 
-/-- The scalar Laplacian expected for `|Ric°|² = |Ric|² - R² / 3`. -/
+
 def tfLap
     (scalar scalarLap gradScalarNormSq ricciNormLap : Real -> M -> Real) :
     Real -> M -> Real :=
   fun t x => ricciNormLap t x -
     scalarSqLap scalar scalarLap gradScalarNormSq t x / 3
 
-/-- Product-rule input for the heat operator applied to `R²`. -/
+
 def scalarSqHeatOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarSqLap gradScalarNormSq ricciNormSq : Real -> M -> Real) :
@@ -135,8 +141,9 @@ def scalarSqHeatOn
       D.carrier
       (t : Real)
 
-/-- The time-product-rule part of the `R²` heat equation, assuming the supplied
-`scalarSqLap` is the usual Laplacian product-rule expression. -/
+
+
+omit [TopologicalSpace M] in
 theorem sqHeat_of_scalar
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap gradScalarNormSq ricciNormSq : Real -> M -> Real)
@@ -154,7 +161,7 @@ theorem sqHeat_of_scalar
   · simp [scalarSqLap]
     ring
 
-/-- Book-facing heat-equation form of Lemma 10.4. -/
+
 def tfRicHeatOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (tfNormSq tfLap nablaRicNormSq gradScalarNormSq
@@ -171,8 +178,9 @@ def tfRicHeatOn
       D.carrier
       (t : Real)
 
-/-- Algebraic assembly of Lemma 10.4 from Lemma 6.7, the scalar-square product
-rule, and the cubic reaction relation. -/
+
+
+omit [TopologicalSpace M] in
 theorem tfRicHeat_alg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar ricciNormSq ricciNormLap scalarSqLap tfLap
@@ -236,9 +244,10 @@ theorem tfRicHeat_alg
   rw [hValue] at hDeriv
   exact hDeriv
 
-/-- Lemma 10.4 assembly after the scalar-square product rule is expanded from
-the scalar curvature evolution equation.  The remaining geometric input is the
-reaction relation `tfRicReactRel`. -/
+
+
+
+omit [TopologicalSpace M] in
 theorem tfHeat_base
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap

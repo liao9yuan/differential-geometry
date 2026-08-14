@@ -8,20 +8,20 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Scalar
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 import DifferentialGeometry.Geometry.Connection.ChartBridge.MetricInverse
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.BareSlot0CurryParseval
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinStrong
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjugateHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 
-/-!
-# Classical scalar reconstruction inputs for the conjugate-heat limit
 
-This file starts the classical assembly above the strong Galerkin limit.  It
-keeps the local Weyl input out of the strong-limit module and first packages
-compact-interior, time-uniform spectral majorants for every scalar time jet.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -41,7 +41,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -53,7 +53,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- Reverse-time chart Gram entries inherit joint smoothness from the solution metric. -/
 private theorem rev_gram_smooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -100,7 +99,6 @@ private theorem rev_gram_smooth
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The reversed Ricci-flow metric has volume trace `2 R`. -/
 private theorem rev_trace_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -447,6 +445,7 @@ the prescribed smooth initial tensor in that same Sobolev scale. -/
   rw [galLimExt_coeff hτ hlim m ⟨le_rfl, hτ⟩,
     ccTensorToHs_coeff, hlim.lim_init i]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The first covariant derivative of a smooth rank-zero tensor, after full
 evaluation, is the differential of its scalar readout. -/
 private theorem covGrad0_apply
@@ -624,9 +623,9 @@ theorem galLim_jet_mass
   intro i t ht
   simpa only [jet] using hB_le i t ht
 
-/-- On the full compact Galerkin interval, the undifferentiated limiting
-coefficients admit a summable spectral majorant at every natural Sobolev
-order. -/
+
+
+
 theorem galLim_mass0
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -725,7 +724,7 @@ theorem galLim_slice_cc
       (g := S.family.metric (T : Real)) (r := 0) (s := 0) hm
     refine ⟨J (galLimExt hτ hlim m t), ?_⟩
     let b :=
-      _root_.DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
+      Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
         (I := I) (M := M) hc
     apply b.repr.injective
     ext i
@@ -783,8 +782,8 @@ theorem galLim_slice_cc
         simpa only [hc] using scalarSpec_cc (I := I) (M := M)
           (S.family.metric (T : Real)) U
 
-/-- At backward time zero, the scalar Galerkin limit is the scalar readout of
-the prescribed smooth initial tensor. -/
+
+
 theorem galLim_initial
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1320,9 +1319,9 @@ theorem galLim_joint_cont
   exact (scalar_path_recon (I := I) (M := M) q htail hτ 0
     (fun i t => ulim t i) isOpen_univ (Set.subset_univ _) hc hmass).continuousOn
 
-/-- On one positive interior interval, the scalar eigen-series of the strong
-Galerkin limit is jointly smooth to every finite order on compact spacetime
-slabs. -/
+
+
+
 theorem galLim_joint_smooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1377,8 +1376,8 @@ theorem galLim_joint_smooth
     intro i t ht
     exact hB_le i t (Ioo_subset_Icc_self (hinner ht))
 
-/-- The scalar eigen-series of the Galerkin limit is jointly smooth on one
-full positive-time interior. -/
+
+
 theorem galLim_joint_top
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1554,8 +1553,8 @@ theorem galLim_slice_pos
     exact ⟨ht, Set.mem_univ x⟩
   exact contMDiffOn_univ.mp (htop.comp harg hmaps)
 
-/-- On one positive backward-time interval, the scalar Galerkin series solves
-the original-time conjugate heat equation pointwise. -/
+
+
 theorem galLim_pde
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1844,8 +1843,8 @@ theorem galLim_pde
   rw [hlap]
   simpa only [zeta] using hWscalar
 
-/-- The strong Galerkin limit yields a genuine classical heat potential for
-the reversed Ricci-flow family on a nontrivial closed time interval. -/
+
+
 theorem heatpot_of_gallim
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1930,9 +1929,9 @@ theorem heatpot_of_gallim
       ⟨hs.1, hs.2.trans htau'P⟩
     simpa only [reverseFamily] using hpde s hsP x
 
-/-- Every smooth scalar initial tensor generates a classical heat potential on
-a nontrivial reversed-time interval, with its prescribed scalar initial
-trace. -/
+
+
+
 theorem heatpot_exists
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1959,9 +1958,9 @@ theorem heatpot_exists
   · simpa only [u] using hpot
   · simpa only [u] using galLim_initial (I := I) (M := M) hlim
 
-/-- Every smooth terminal scalar tensor generates a classical solution of the
-conjugate heat equation on a nontrivial reversed-time interval, with the
-prescribed terminal trace. -/
+
+
+
 theorem conj_heat_exists
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1992,8 +1991,8 @@ theorem conj_heat_exists
       TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) u0.toSection
     simpa only [sub_self] using hv0
 
-/-- A nonnegative smooth scalar initial tensor generates a nonnegative
-classical heat potential on a nontrivial reversed-time interval. -/
+
+
 theorem gallim_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -2053,8 +2052,8 @@ theorem gallim_nonneg
       u hu' C hV huinit
   exact ⟨tau', htau', htau'_one, u, hu', hu0, hnonneg⟩
 
-/-- A strictly positive smooth scalar initial tensor generates a strictly
-positive classical heat potential on a nontrivial reversed-time interval. -/
+
+
 theorem gallim_pos
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -2113,7 +2112,7 @@ theorem gallim_pos
       u hu' C hV huinit
   exact ⟨tau', htau', htau'_one, u, hu', hu0, hpos⟩
 
-/-- Unless the manifold is empty, there is a positive reversed heat potential of unit mass. -/
+
 theorem gallim_unit_pos
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

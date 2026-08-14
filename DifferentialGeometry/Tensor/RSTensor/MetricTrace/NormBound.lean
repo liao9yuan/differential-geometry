@@ -3,12 +3,12 @@ import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
 
 set_option autoImplicit false
 
-/-!
-# Norm bounds for metric traces
 
-This file supplies dimension-explicit Hilbert--Schmidt bounds for the tensor
-obtained by tracing the first two slots of a covariant tensor.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -25,8 +25,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-/-- A component in an orthonormal basis is bounded by the square root of the
-intrinsic squared norm. -/
+
+
 theorem component_le_sqrt
     (g : SmoothMetric_gen I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -43,8 +43,8 @@ theorem component_le_sqrt
     (fun slots' _ => sq_nonneg (component0S (I := I) basis A slots'))
     (Finset.mem_univ slots)
 
-/-- The first-two metric trace has squared norm bounded by an explicit finite
-dimensional multiple of the source squared norm. -/
+
+
 theorem trace_normSq_le
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -120,8 +120,8 @@ theorem trace_normSq_le
     _ = (Fintype.card (Fin s -> Idx) : Real) * (Fintype.card Idx : Real) ^ 2 *
         normSq0S (I := I) g x (s + 2) T := rfl
 
-/-- Intrinsic finite-dimensional form of `trace_normSq_le`: tracing two slots
-costs at most `dim(E)^(s+2)` in squared norm. -/
+
+
 theorem trace_normSq_rank_le
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {s : Nat} (T : Tensor0SSpace (s + 2) I x) :

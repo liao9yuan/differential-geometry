@@ -22,13 +22,14 @@ open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Non-circular coefficient preparation on a fixed chart carrier.  First a
 positive coordinate collar radius `r₀` is chosen using only compactness and the
 chart target.  Then one constant is obtained on the resulting fixed compact
@@ -57,12 +58,14 @@ theorem bufferGram3_bnd
                     (I := I) (gSeq k) α i j) (extChartAt I α y)‖ ≤ C := by
   classical
   obtain ⟨r₀, hr₀, hcollar, hbufferCpt, hbufferSrc⟩ :=
-    exists_chartBuffer (I := I) (extChartAt I α) hK hKsrc
+    exists_chartBuffer_of_continuousOn (extChartAt I α)
+      (continuousOn_extChartAt α) (continuousOn_extChartAt_symm α)
+      (isOpen_extChartAt_target α) hK hKsrc
   have hbufferChart :
       chartBuffer (extChartAt I α) K r₀ ⊆ (chartAt H α).source := by
     intro y hy
     have hy' : y ∈ (extChartAt I α).source := hbufferSrc hy
-    simpa only [extChartAt_source_eq_chartAt_source] using hy'
+    simpa only [extChartAt_source] using hy'
   choose Cq hCq hbound using fun q : Fin 4 =>
     chartGram_of_orders (I := I) gRef gSeq α hbufferCpt hbufferChart q.val B
       (fun k m hm y _hy => hbdd k m (by omega) y (Set.mem_univ y))
@@ -76,6 +79,7 @@ theorem bufferGram3_bnd
   exact (hbound q' k y hy i j).trans
     (Finset.single_le_sum (fun m _ => hCq m) (Finset.mem_univ q'))
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Uniform order-`r` raw chart-Gram bound on a finite family of refined outer
 closed balls.  The outer-ball hypothesis is purely chart geometry; the metric
 bound itself is obtained by restricting the supplied `Set.univ` covariant
@@ -112,14 +116,15 @@ theorem fineGram_of_orders
     let Kc : Set M := chartClosedBall (extChartAt I α)
       ((extChartAt I α) (z.1 : K)) (2 * ε)
     have hKc : IsCompact Kc :=
-      chartClosedBall_cpt (extChartAt I α)
-        ((extChartAt I α) (z.1 : K)) (2 * ε) (houter z)
+      chartClosedBall_cpt_of_continuousOn (extChartAt I α)
+        ((extChartAt I α) (z.1 : K)) (2 * ε)
+        (continuousOn_extChartAt_symm α) (houter z)
     have hKsrc : Kc ⊆ (chartAt H α).source := by
       intro y hy
       have hy' : y ∈ (extChartAt I α).source :=
         chartClosedBall_src (extChartAt I α)
           ((extChartAt I α) (z.1 : K)) (2 * ε) (houter z) hy
-      simpa only [extChartAt_source_eq_chartAt_source] using hy'
+      simpa only [extChartAt_source] using hy'
     exact chartGram_of_orders (I := I) gRef gSeq α hKc hKsrc r B
       (fun k q hq y _hy => hbdd k q hq y (Set.mem_univ y))
   choose Cz hCz hbound using hper
@@ -132,6 +137,7 @@ theorem fineGram_of_orders
   exact (hbound z k y hy i j).trans
     (Finset.single_le_sum (fun w _ => hCz w) (Finset.mem_univ z))
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- One family-uniform constant controls every raw chart-Gram jet of order at
 most three on every finite refined outer closed ball. -/
 theorem fineGram3_bnd

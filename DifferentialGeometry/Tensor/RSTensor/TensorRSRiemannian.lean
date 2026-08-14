@@ -7,22 +7,20 @@ import Mathlib.LinearAlgebra.Trace
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSMetric
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Mixed Tensor Fibers
 
-`TensorRSSpace r s I x` is modeled as
-`Tensor0SSpace r I x ->L Tensor0SSpace s I x`.  Once the metric-induced inner
-products on the covariant tensor fibers are supplied, a mixed tensor gets its
-inner product by the Hilbert-Schmidt formula
 
-`<A, B> = tr(A^† B)`.
 
-The construction below is fiberwise and metric-bound.  It uses the covariant
-tensor metrics constructed recursively from the Riemannian metric.
--/
+
+
+
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -45,8 +43,8 @@ def componentL2SqRS
   ∑ upper : Fin r -> Idx, ∑ lower : Fin s -> Idx,
     (componentRS_gen (I := I) basis A upper lower) ^ 2
 
-/-- In an orthonormal-coordinate basis, the Hilbert-Schmidt squared norm of a
-mixed tensor is the sum of squares of its components. -/
+
+
 theorem normSqRS_identity_eq_componentL2SqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) (r s : Nat)
@@ -89,8 +87,8 @@ theorem normSqRS_identity_eq_componentL2SqRS
       (componentRS_gen (I := I) basis A upper lower) ^ 2
   ring
 
-/-- The `(1,2)` specialization of
-`normSqRS_identity_eq_componentL2SqRS`, written as a three-index sum. -/
+
+
 theorem normSqRS_one_two_identity_eq_sum
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -109,8 +107,8 @@ theorem normSqRS_one_two_identity_eq_sum
   intro k _
   rw [sum_fin_two_fun]
 
-/-- A single mixed-tensor component is bounded by the full component `l^2`
-sum in the same basis. -/
+
+
 theorem componentRS_sq_le_componentL2SqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} {r s : Nat}
@@ -142,8 +140,8 @@ theorem componentRS_sq_le_componentL2SqRS
       (by simp)
   exact h_lower.trans h_upper
 
-/-- In an orthonormal-coordinate basis, the absolute value of a single
-mixed-tensor component is bounded by the metric-induced tensor norm. -/
+
+
 theorem abs_componentRS_le_sqrt_normSqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) (r s : Nat)
@@ -182,9 +180,9 @@ theorem abs_componentRS_le_sqrt_normSqRS
     simpa [sq_abs] using hsq
   exact abs_le_of_sq_le_sq hsq_no_abs (Real.sqrt_nonneg _)
 
-/-- The Hilbert--Schmidt norm of a mixed tensor controls its value on one
-covariant input.  This is the fiberwise operator-norm estimate for the Hom
-model `Tensor0SSpace r ->L Tensor0SSpace s`. -/
+
+
+
 theorem sqrt_normSqRS_apply
     (g : SmoothMetric_gen I M) {x : M} {r s : Nat}
     (A : TensorRSSpace r s I x) (input : Tensor0SSpace r I x) :

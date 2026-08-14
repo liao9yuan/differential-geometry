@@ -4,19 +4,17 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Discharging Lemma 3.11's metric-equivalence inputs from a Ricci flow (P1)
 
-MSM135 Lemma 3.11, equation (3.3) consumes a `MetricLogDerivativeInput`. Its
-`metric_deriv` field is exactly the Ricci-flow metric-variation equation
-`d/dt g(t)(v,v) = -2 Ric(t)(v,v)`. This file discharges that field from the
-actual flow predicate `IsSolutionOn`, turning the honest-input package into a
-producer. The within-derivative on the time carrier is upgraded to a full
-derivative at regular times via `RealTimeInterval.regular_mem_nhds`.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,16 +26,17 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-/-- **Lemma 3.11 `metric_deriv` content.** Along a Ricci-flow solution, the time
-derivative of the metric quadratic form at a regular time `t` is
-`-2 Ric(t)(v,v)`. This upgrades the carrier-local within-derivative recorded by
-`IsSolutionOn.equation` to a full `HasDerivAt`. -/
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem ricciFlow_metric_hasDerivAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -51,11 +50,13 @@ theorem ricciFlow_metric_hasDerivAt
   have hwithin := hS.equation ⟨t, ht⟩ x v v
   exact hwithin.hasDerivAt (D.regular_mem_nhds ht)
 
-/-- **quad_bound from the unit-sphere (operator-norm) bound.** The whole-window
-quadratic bound `|T(v,v)| ≤ A·g(v,v)` reduces — via the general-dimension
-geometric Rayleigh bound `tensor02_quadForm_abs_le_of_unit_bound` — to bounding
-`|T(u,u)| ≤ A` on `g`-unit vectors `u`, i.e. to the operator norm `‖T‖_op ≤ A`.
-No spectral theorem, eigenbasis, or `dim = 3` hypothesis is needed. -/
+
+
+
+
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 theorem twoTensorQuadBound_of_unit_bound
     (K : Set M) (β ψ A : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -72,12 +73,13 @@ theorem twoTensorQuadBound_of_unit_bound
     DifferentialGeometry.Integral.Connection.tensor02_quadForm_abs_le_of_unit_bound
       (gSeq i t) (T i t x) (fun u hu => hunit i t ht x hx u hu) v⟩
 
-/-- **Multiplicative-difference ⟹ uniform equivalence.** If the quadratic forms
-of `h` and `g` differ by at most a fraction `δ < 1` of `g` on `K`, then `g` and
-`h` are uniformly equivalent on `K` with constant `(1-δ)⁻¹`. This is the
-algebraic core that converts a `C⁰` closeness bound (supplied by Cheeger–Gromov
-convergence, after the operator-norm machinery turns the tensor norm of `h-g`
-into a quadratic-form bound) into `MetricUniformEquivalentOn`. -/
+
+
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_quadFormDiff
     {K : Set M} {g h : SmoothRiemannianMetric I M} {δ : Real}
     (hδ0 : 0 <= δ) (hδ1 : δ < 1)
@@ -102,12 +104,13 @@ theorem metricUniformEquivalentOn_of_quadFormDiff
       calc h.inner x v v <= (1 + δ) * g.inner x v v := hub
         _ <= (1 - δ)⁻¹ * g.inner x v v := mul_le_mul_of_nonneg_right hfac hg0
 
-/-- **②-connector.** The pointwise quadratic-form difference of two metrics is
-controlled by the MSM135 Definition-3.1 `C⁰` norm `metricDerivNorm 0` (the
-`gRef`-norm of `gk - gInf`), via the general-dimension operator-norm bound
-`tensor02_quadForm_abs_le_normSq0S`. Feeding this (with `gRef = gInf`) into
-`metricUniformEquivalentOn_of_quadFormDiff` turns Cheeger–Gromov `C⁰`
-convergence into `MetricUniformEquivalentOn`. -/
+
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricQuadFormDiff_le_metricDerivNorm
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     |gk.inner x v v - gInf.inner x v v|
@@ -151,7 +154,8 @@ theorem metricQuadFormDiff_le_metricDerivNorm
   rw [metricDerivNorm]
   exact hbound
 
-/-- Metric bilinear expansion on a sum: `g(a+b,a+b) = g(a,a)+2g(a,b)+g(b,b)`. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metric_add_self (g : SmoothRiemannianMetric I M) (x : M)
     (a b : TangentSpace I x) :
     g.inner x (a + b) (a + b)
@@ -165,8 +169,9 @@ theorem metric_add_self (g : SmoothRiemannianMetric I M) (x : M)
     rw [(g.inner x b).map_add]
   rw [hs1, hs2a, hs2b, g.symm x b a]; ring
 
-/-- General evaluation of the order-0 metric difference tensor:
-`D(vec2 a b) = gk(a,b) - gInf(a,b)`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_zero_apply
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
@@ -200,8 +205,9 @@ theorem metricDiffCovDerivAt_zero_apply
       Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
     _ = gk.inner x a b - gInf.inner x a b := by rw [hk, hI]
 
-/-- The order-zero metric-difference norm controls every bilinear evaluation,
-with the tangent-vector norms measured by the reference metric. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricDiff_abs_le
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -221,9 +227,10 @@ theorem metricDiff_abs_le
   rw [Fin.prod_univ_two]
   simp [DifferentialGeometry.Integral.Connection.vec2, mul_assoc]
 
-/-- Polarization: an off-diagonal component of the metric difference in a
-`gInf`-orthonormal frame is bounded by `4(C-1)` when `gInf ≃ gk` with constant
-`C`. -/
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricDiff_comp_le
     (gk gInf : SmoothRiemannianMetric I M) {C : Real} (hCge : (1 : Real) ≤ C)
     (y : M) {n : ℕ} (basis : Module.Basis (Fin n) Real (TangentSpace I y))
@@ -266,8 +273,9 @@ theorem metricDiff_comp_le
   · rw [div_le_iff₀ (by norm_num : (0:Real) < 2)]
     nlinarith [hqij.1, hqij.2, hqi.1, hqi.2, hqj.1, hqj.2, hprod, hC1]
 
-/-- Per-point metric-difference norm bound from a uniform equivalence:
-`|gk-gInf|_{gInf} ≤ 4n(C-1)`. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_le_of_equiv
     (gk gInf : SmoothRiemannianMetric I M) {C : Real} (hCge : (1 : Real) ≤ C)
     (hbounds : ∀ (y : M) (v : TangentSpace I y),
@@ -341,11 +349,12 @@ theorem metricDerivNorm_le_of_equiv
         rw [show (nE : Real) ^ 2 * (4 * (C - 1)) ^ 2 = (4 * (nE : Real) * (C - 1)) ^ 2 from by ring,
           Real.sqrt_sq hbnn]
 
-/-- **②-core.** A `C⁰` smallness bound `n·|gk-gInf|_{gInf} ≤ δ < 1` on `K`
-yields `MetricUniformEquivalentOn K gInf gk (1-δ)⁻¹`. This is the per-`k` metric
-equivalence extracted from a single `metricDerivNorm` bound; the sequence
-`hequiv0` then follows by applying it for each `k` with a uniform `δ` taken from
-Cheeger–Gromov convergence (tail) plus the finite head. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_metricDerivNorm
     {K : Set M} (gk gInf : SmoothRiemannianMetric I M) {δ : Real}
     (hδ0 : 0 <= δ) (hδ1 : δ < 1)
@@ -366,6 +375,7 @@ theorem metricUniformEquivalentOn_of_metricDerivNorm
     _ <= δ * gInf.inner x v v :=
         mul_le_mul_of_nonneg_right (hsmall x hx) hgnn
 
+omit [CompleteSpace E] in
 /-- Two smooth Riemannian metrics are uniformly equivalent on a compact set. -/
 theorem equivOn_compact
     {K : Set M} (hK : IsCompact K)
@@ -402,6 +412,7 @@ theorem equivOn_compact
     calc h.inner x v v <= c'⁻¹ * gRef.inner x v v := hub
       _ <= C * gRef.inner x v v := mul_le_mul_of_nonneg_right hc'_inv_le_C hgnn
 
+omit [CompleteSpace E] in
 /-- **(A): two metrics on a closed manifold are uniformly equivalent.** -/
 theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
     (gRef h : SmoothRiemannianMetric I M) :
@@ -427,13 +438,13 @@ theorem metricDerivNorm_le_metricDerivNormSupOn [CompactSpace M]
     exact hper z
   exact le_csSup hbdd ⟨0, le_refl 0, x, Set.mem_univ x, rfl⟩
 
-/-- **②-bookkeeping (hequiv0).** From `C⁰` Cheeger–Gromov convergence
-`gSeq k → gInf` on a closed manifold, a UNIFORM equivalence constant `C` with
-`gInf ≃ gSeq k` for ALL `k`. Tail (`k ≥ k0`) uses the `metricDerivNorm` core
-(constant `2`); the finitely many head terms use the per-pair `(A)` equivalence,
-bounded by `2 + Σ Cfun`. The per-point bound `hle` (`metricDerivNorm x ≤
-metricDerivNormSupOn`) is the `BddAbove` content (continuity of `metricDerivNorm`
-on the compact base + `le_csSup`). -/
+
+
+
+
+
+
+
 theorem exists_uniform_equiv_of_metricCPConv [CompactSpace M]
     (gSeq : Nat -> SmoothRiemannianMetric I M) (gInf : SmoothRiemannianMetric I M)
     (hconv : MetricCPConvOn (I := I) Set.univ isCompact_univ 0 gSeq gInf gInf) :
@@ -479,8 +490,9 @@ theorem exists_uniform_equiv_of_metricCPConv [CompactSpace M]
       Finset.single_le_sum (fun j _ => hCfun_nonneg j) (Finset.mem_range.mpr hk)
     linarith
 
-/-- **`log_integrable` discharge.** Along a Ricci-flow solution the
-log-derivative integrand `(-2 Ric(v,v))/g(v,v)` is interval-integrable. -/
+
+
+omit [SigmaCompactSpace M] in
 theorem log_integrable_of_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -502,19 +514,22 @@ theorem log_integrable_of_sol
         (-2 : Real) * S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
       (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
-    have hev := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have hev :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := hS.ricciCont) (P := {s : Real // s ∈ Set.uIcc t0 t})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
       (fun p => hsub p.2) continuous_const (v := fun _ _ => v) (fun _ => continuous_const)
     refine continuous_const.mul ?_
     refine hev.congr ?_
     intro p
-    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v from by
+    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v
+      from by
       funext i; fin_cases i <;> rfl]
     simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt]
   have hden : ContinuousOn (fun s : Real => (S.family.metric s).inner x v v) (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
-    have hev := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have hev :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := DifferentialGeometry.Integral.Connection.metricTensor_cont_of_metricFamilySmoothOn
         S.family hS.smoothMetric)
       (P := {s : Real // s ∈ Set.uIcc t0 t})
@@ -530,13 +545,15 @@ section FixedDomain
 
 variable [SigmaCompactSpace M]
 
-/-- **Lemma 3.11, eq (3.3) producer.** A sequence of Ricci-flow solutions on a
-common source domain `M`, with a Ricci quadratic bound `|Ric(v,v)| ≤ A·g(v,v)`
-on a regular time window and the textbook log-derivative integrability, yields a
-genuine `MetricLogDerivativeInput`. The `metric_deriv` field is discharged from
-the flow equation (`ricciFlow_metric_hasDerivAt`); `quad_bound` is the book's
-curvature hypothesis and `log_integrable` is the regularity input. -/
+
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricLogDerivativeInput_of_solutions
+    [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
@@ -565,10 +582,12 @@ theorem metricLogDerivativeInput_of_solutions
     ricciFlow_metric_hasDerivAt (S i) (hS i) (hwin ht) x v
   log_integrable := fun i x hx v hv t ht => hint i x hx v hv t ht
 
-/-- **Lemma 3.11, eq (3.3) for a Ricci-flow sequence.** Whole-window metric
-equivalence `g_i(t) ≃ gRef` with factor `C·exp(2A|t-t0|)`, from time-`t0`
-equivalence plus the flow and the Ricci bound. -/
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions
+    [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
@@ -603,12 +622,14 @@ theorem metricUniformEquivalentOnWindow_of_solutions
     ht0 hC hequiv0
     (metricLogDerivativeInput_of_solutions (I := I) S hS K β ψ t0 A hwin hA hquad hint)
 
-/-- **Lemma 3.11, eq (3.3) — fully discharged producer.** Same as
-`metricUniformEquivalentOnWindow_of_solutions` but with the `log_integrable`
-(`hint`) hypothesis discharged from the flow via `log_integrable_of_sol`. The
-remaining inputs (`hequiv0` from convergence ②, `hquad` from the curvature ①)
-are the genuine geometric content. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions'
+    [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))

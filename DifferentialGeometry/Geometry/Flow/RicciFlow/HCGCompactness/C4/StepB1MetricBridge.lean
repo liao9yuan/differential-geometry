@@ -3,17 +3,17 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Chart-coefficient bridge for Step B1
 
-The finite-stage pullback metric in a fixed source chart has two moving
-ingredients: the target metric is evaluated at the moving chart map, and its
-two slots are contracted with the derivative of that chart map.  This file
-first packages that analytic operation at the `MapCInfConvOnCompacts` level.
-The project-specific stage-map consumer is kept separate from the generic
-calculus statement so that no new compactness input or radius hypothesis is
-hidden in the bridge.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,10 +31,10 @@ open DifferentialGeometry.Geometry.Riemannian
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-/-- Pulling a varying bilinear-form field back along a varying map preserves
-compact-open `C^infty` convergence.  This combines moving evaluation of the
-form, convergence of the full Frechet derivative, and the fixed polynomial
-`pullbackForm` contraction. -/
+
+
+
+
 theorem MapCInfConvOnCompacts.pullbackAlong
     {V W : Type*}
     [NormedAddCommGroup V] [NormedSpace Real V]
@@ -85,9 +85,8 @@ theorem MapCInfConvOnCompacts.pullbackAlong
       (m := (∞ : WithTop ℕ∞)) (by simp)).contDiffWithinAt
   exact hBA.pullbackForm hU hDA hBAc hBAinfC hDAc hDAinfC
 
-set_option synthInstance.maxHeartbeats 800000 in
-/-- The operator norm of a pulled-back bilinear form differs from a reference
-form by the usual derivative perturbation plus the coefficient perturbation. -/
+
+
 theorem pullback_sub_norm
     {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     (B₀ B₁ : V →L[Real] V →L[Real] Real) (A : V →L[Real] V) :
@@ -106,11 +105,9 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 800000 in
-/-- On every strictly smaller source ball, the chart coefficients of the
-actual finite-stage pullback metric converge uniformly to the source-stage
-normal-coordinate metric, with one common tail in the two stage indices. -/
+
+
+
 theorem HasStageJetData.coeff_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -146,8 +143,8 @@ theorem HasStageJetData.coeff_tail
         letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
         let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
         let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-        let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+        let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
         let Fkl := fun w ↦
           chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm w))
         z ∈ interior (C0 alpha) →
@@ -226,8 +223,8 @@ theorem HasStageJetData.coeff_tail
   letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   let Fkl := fun w ↦
     chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm w))
   intro hzInt hxR
@@ -401,9 +398,9 @@ theorem HasStageJetData.coeff_tail
       have htau_sq : tau ^ 2 ≤ tau := by nlinarith [sq_nonneg tau]
       nlinarith
 
-/-- Along any two cofinal stage sequences, the actual stage-map chart readout
-converges in `C^infty` on a fixed coordinate set whose source-chart preimages
-eventually stay in the prescribed smaller source ball. -/
+
+
+
 theorem HasStageJetData.chart_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -434,7 +431,7 @@ theorem HasStageJetData.chart_conv
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       Set.MapsTo
-        (NormalCoordinates.framedChartAt (I := I) Yk.metric
+        (NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         V (Lphi.hatSourceBall inp.decay P R (kn n))) :
     MapCInfConvOnCompacts V
@@ -452,9 +449,9 @@ theorem HasStageJetData.chart_conv
         letI : IsManifold I ∞ Yl.M := Yl.smooth
         letI : T2Space Yl.M := Yl.t2
         letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))
-        let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+        let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
           (seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat))
         chiL (stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
           (chiK.symm z))) id := by
@@ -478,10 +475,10 @@ theorem HasStageJetData.chart_conv
   have hsrc := hNs n hnS hzV
   exact (hjet hzInt hsrc).2.2 j hj
 
-/-- On a compactly nested coordinate patch, the actual target-stage metric
-pulled back by the actual stage chart map converges in `C^infty` to the retained
-limit metric.  The larger patch supplies the source-ball and finite-prefix
-buffer needed by the moving composition theorem. -/
+
+
+
+
 theorem HasStageJetData.pb_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -513,7 +510,7 @@ theorem HasStageJetData.pb_conv
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       Set.MapsTo
-        (NormalCoordinates.framedChartAt (I := I) Yk.metric
+        (NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P R (kn n))) :
     let Lphi := L.subseq hphi
@@ -530,9 +527,9 @@ theorem HasStageJetData.pb_conv
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))
-      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat))
       chiL (stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
         (chiK.symm z))
@@ -567,9 +564,9 @@ theorem HasStageJetData.pb_conv
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))
-    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat))
     chiL (stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
       (chiK.symm z))
@@ -649,12 +646,12 @@ theorem HasStageJetData.pb_conv
       let cl := seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat)
       have hquarter := inp.normalRadius.phaseRadius_exp hcenter.le
       have hDexp : D ⊆ Metric.ball (0 : E)
-          (expRadiusGp (I := I) Yl.metric cl) := by
+          (expMapC2Radius (I := I) Yl.metric cl) := by
         have hquarter' : D ⊆ Metric.ball (0 : E)
-            (expRadiusGp (I := I) Yl.metric cl / 4) := by
+            (expMapC2Radius (I := I) Yl.metric cl / 4) := by
           simpa only [D, Ralpha, Yl, cl, Lphi] using hquarter
         exact hquarter'.trans (Metric.ball_subset_ball (by
-          nlinarith [expRadiusGp_pos (I := I) Yl.metric cl]))
+          nlinarith [expMapC2Radius_pos (I := I) Yl.metric cl]))
       simpa only [B, Yl, cl, Lphi] using
         (normalCoordMetric_contDiffOn_expBall (I := I) Yl cl).mono hDexp
     exact ⟨hAcd, hAmap, hBcd⟩
@@ -710,9 +707,9 @@ theorem HasStageJetData.pb_conv
     ext v w
     rfl
 
-/-- A rectangular source-membership tail turns the cofinal-sequence pullback
-convergence into one common two-stage tail through any prescribed finite jet
-order on a compact coordinate core. -/
+
+
+
 theorem HasStageJetData.pb_jet_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -744,7 +741,7 @@ theorem HasStageJetData.pb_jet_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       Set.MapsTo
-        (NormalCoordinates.framedChartAt (I := I) Yk.metric
+        (NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P R k))
     (p : Nat) (eps : Real) (heps : 0 < eps) :
@@ -762,9 +759,9 @@ theorem HasStageJetData.pb_jet_tail
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
       chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
     let B : Nat → E → (E →L[Real] E →L[Real] Real) := fun l ↦
@@ -790,9 +787,9 @@ theorem HasStageJetData.pb_jet_tail
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
     chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
   let B : Nat → E → (E →L[Real] E →L[Real] Real) := fun l ↦
@@ -815,7 +812,7 @@ theorem HasStageJetData.pb_jet_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       Set.MapsTo
-        (NormalCoordinates.framedChartAt (I := I) Yk.metric
+        (NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P R (kn n)) := by
     filter_upwards [hkn.eventually_ge_atTop Ns] with n hn

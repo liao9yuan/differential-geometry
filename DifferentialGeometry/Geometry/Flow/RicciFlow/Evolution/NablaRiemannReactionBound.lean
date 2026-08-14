@@ -5,21 +5,17 @@ import DifferentialGeometry.Geometry.Operator.CotangentSharpSmooth
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# The `k = 1` quantitative reaction bound `|nablaLapCommReactionTerm| ≤ C·|Rm|·|∇Rm|`
 
-This file assembles the **`T₁` quantitative bound** (route 2, piece (3)) and combines
-it with the already-proved `T₂` bound (`Evolution/NablaRiemannT2Bound.lean`) to give
-the full `k = 1` curvature reaction bound, then discharges the `k = 1` heat producer.
 
-All prerequisites are banked, sorry-free and axiom-clean (see
-`Evolution/IteratedNablaRmTower.md`, follow-ups 5–9).
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,15 +27,16 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- The solution connection is metric-compatible (Levi-Civita). -/
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem solution_isMetricCompatible
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -48,26 +45,19 @@ theorem solution_isMetricCompatible
   simpa [SolutionFamily.connection, metricCov] using
     leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (S.base.metric t)
 
-/-! ## The sharp field of a frozen one-form of `Rm04` and its smoothness
 
-The route-2 K-Leibniz differentiates `K = -Σ_q rm04(…, g♯ βq)` with
-`βq = oneFormAtSlot0S Rm04 slots q` the slot-frozen one-form
-(`RmRaisingBridge.curvatureAction0SAt_eq_rm04_raise`).  The raised vector field
-`y ↦ g♯ (βq y)` enters as the moving fourth slot of the outer `Rm04`.  We package
-it as a bundled smooth tangent section so `nabla0SFun_eval_smooth_slots` applies. -/
+
+
+
+
+
+
 
 open DifferentialGeometry.Integral.DivergenceTheorem
   DifferentialGeometry.Integral.Measure in
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of the frozen-one-form chart-basis components: the frozen one-form
-field `rmFrozenSlotField S t q Y` evaluated on a chart-basis frame vector is `C^∞`
-on each chart source.  This discharges the `hβ` hypothesis of
-`cotangentSharp_gen_mdiffAt` / `cotangentSharp_gen_contMDiff_total`.
-
-The `set_option backward.isDefEq.respectTransparency false` is required (as in the
-`freezeAllBut04Field` definition itself) so the `Tensor0SModel` model-fibre
-`NormedSpace`/`NormedAddCommGroup` instances unify when the bundled field's
-smoothness `(...).contMDiff` is fed to `contMDiffAt_section_apply_gen`. -/
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem rmFrozenSlot_chartBasis_contMDiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -79,9 +69,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
         rmFrozenSlotField (I := I) S t q Y b
           (fun _ : Fin 1 => chartBasisVecFiber (I := I) α j b))
       (chartAt H α).source := by
-  -- The chart-basis component is `Rm04(b)(update (Y · b) q (chartBasisVec))`, the
-  -- evaluation of the smooth `(0,1)` field `freezeAllBut04Field Rm04 q Y` on a
-  -- smooth chart-basis section, hence smooth on the chart source.
   have hval : ∀ b : M,
       rmFrozenSlotField (I := I) S t q Y b
           (fun _ : Fin 1 => chartBasisVecFiber (I := I) α j b) =
@@ -91,7 +78,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
   simp only [hval]
   intro x₀ hx₀
   refine ContMDiffAt.contMDiffWithinAt ?_
-  -- The chart-basis vector section is smooth at `x₀ ∈ chart source`.
   have hv_at :
       ContMDiffAt I (I.prod 𝓘(Real, E)) ∞
         (fun b : M =>
@@ -102,8 +88,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
         (by
           rw [trivializationAt_baseSet_eq_chartAt_source (I := I) (M := M)]
           exact hx₀))
-  -- Pass the bundled field's smoothness inline so the expected type pins the
-  -- `Tensor0SModel` model-fibre instances.
   have h_eval := TensorMultilinear.contMDiffAt_section_apply_gen
     (𝕜 := Real) (I := I) (M := M) (n := 1) (x₀ := x₀)
     (T := fun b : M => (freezeAllBut04Field (I := I) (M := M) (S.base.rm04 t) q Y) b)
@@ -113,11 +97,11 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using h_eval
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **`MDiffAt` of the raised frozen one-form field.**  The sharp field
-`y ↦ g♯ (βq y)` of the frozen one-form `βq = rmFrozenSlotField S t q Y` is
-`MDifferentiableAt` everywhere.  This discharges the `hSharp` hypothesis of the
-sharp-parallelism `cotangentSharp_cov_eq_sharp_curry_of_mdiffAt`. -/
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem rmFrozenSlotSharp_mdiffAt
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -132,10 +116,6 @@ theorem rmFrozenSlotSharp_mdiffAt
     (fun α j => rmFrozenSlot_chartBasis_contMDiffOn (I := I) S t q Y α j) x
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- The raised frozen one-form field `y ↦ g♯ (βq y)`, bundled as a smooth tangent
-section.  This is the moving fourth slot fed to the outer `Rm04` in the raise-form
-curvature action.  Smoothness is `cotangentSharp_gen_contMDiff_total` via
-`rmFrozenSlot_chartBasis_contMDiffOn`. -/
 def rmFrozenSlotSharpSection
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -150,7 +130,10 @@ def rmFrozenSlotSharpSection
       (β := fun y : M => rmFrozenSlotField (I := I) S t q Y y)
       (fun α j => rmFrozenSlot_chartBasis_contMDiffOn (I := I) S t q Y α j))
 
-@[simp] theorem rmFrozenSlotSharpSection_apply
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+@[simp] theorem rmFrozenSlotSharpSection_apply [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -161,19 +144,19 @@ def rmFrozenSlotSharpSection
         (rmFrozenSlotField (I := I) S t q Y y) :=
   rfl
 
-/-! ## The per-`q` contraction Leibniz
 
-The single `q`-th summand of the raise-form curvature action is
-`Rm04(Vb, Vc, Vm_q, g♯βq)`, the outer `Rm04` contracted against the raised frozen
-one-form `g♯βq` in its last slot.  We differentiate the scalar field
-`y ↦ Rm04(y)(Vb y, Vc y, Vm_q y, g♯βq(y))` covariantly via
-`nabla0SFun_eval_smooth_slots`, choosing the `Vb, Vc, Vm` slot sections covariantly
-constant at `x₀` so their corrections vanish, leaving only the moving sharp-slot
-correction, which the sharp-parallelism rewrites as `Rm04(…, g♯ ∇βq)`. -/
 
-/-- The four outer-`Rm04` slot sections for the `q`-th raise-form summand: the two
-derivative directions `Vb, Vc`, the `q`-th `Rm`-slot `Vm q`, and the raised frozen
-one-form `g♯βq`. -/
+
+
+
+
+
+
+
+
+
+
+
 def rmRaiseSlotSections
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -183,22 +166,24 @@ def rmRaiseSlotSections
     Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
   ![Vb, Vc, Vm q, rmFrozenSlotSharpSection (I := I) S t q Vm]
 
-/-- **The per-`q` contraction Leibniz (covariant derivative of one raise-form
-summand).**  At the chart centre `x₀`, for a Ricci-flow solution at a regular time,
-with derivative section `X` and slot sections `Vb, Vc, Vm` chosen covariantly
-constant at `x₀` along `X`, the directional derivative of the `q`-th raise-form
-scalar `y ↦ Rm04(y)(Vb y, Vc y, Vm_q y, g♯βq(y))` equals
 
-`(∇Rm04)(X x₀, Vb x₀, Vc x₀, Vm_q x₀, g♯βq x₀) + Rm04 x₀ (Vb x₀, Vc x₀, Vm_q x₀, g♯(∇_X βq))`,
 
-the two `Rm04 ∗ ∇Rm04` raise contractions: the first differentiates the outer
-`Rm04`, the second differentiates the raised frozen one-form `g♯βq` (sharp-parallelism
-`cotangentSharp_cov_eq_sharp_curry_of_mdiffAt`, `∇βq` given by
-`nablaRmFrozenSlot_eval`). -/
+
+
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem rmRaise_summand_covDeriv
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
     (x₀ : M) (q : Fin 4)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -227,19 +212,15 @@ theorem rmRaise_summand_covDeriv
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)))) := by
   classical
   set cov := S.family.connection (t : Real) with hcov_def
-  -- The four outer-`Rm04` slot sections.
   set W : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _) :=
     rmRaiseSlotSections (I := I) S (t : Real) q Vb Vc Vm with hW_def
-  -- The slot sections at `x₀`.
   have hW0 : W 0 = Vb := rfl
   have hW1 : W 1 = Vc := rfl
   have hW2 : W 2 = Vm q := rfl
   have hW3 : W 3 = rmFrozenSlotSharpSection (I := I) S (t : Real) q Vm := rfl
-  -- `eval_smooth_slots` for `Rm04` on the four slots `W`.
   have heval :=
     (nablaRm04Field_realizes (I := I) S (t : Real)).eval_smooth_slots X W x₀
-  -- The scalar field `y ↦ Rm04(y)(W·y)` is the raise-form summand.
   have hscalar :
       (fun y : M => S.base.rm04 (t : Real) y (fun a : Fin 4 => W a y)) =
         fun y : M =>
@@ -253,7 +234,6 @@ theorem rmRaise_summand_covDeriv
     fin_cases a <;>
       simp [hW_def, rmRaiseSlotSections, vec4, rmFrozenSlotSharpSection_apply,
         Matrix.cons_val_zero, Matrix.cons_val_one]
-  -- The `Fin.cons (X x₀) (W·x₀)` tuple is `vec5`.
   have hcons :
       (Fin.cons (X x₀) (fun a : Fin 4 => W a x₀) : Fin 5 → TangentSpace I x₀) =
         vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -266,7 +246,6 @@ theorem rmRaise_summand_covDeriv
       fin_cases j <;>
         simp [hW_def, rmRaiseSlotSections, vec5, rmFrozenSlotSharpSection_apply,
           Matrix.cons_val_zero, Matrix.cons_val_one]
-  -- The correction sum: only the moving sharp slot (`a = 3`) survives.
   have hcorr :
       (∑ a : Fin 4,
           S.base.rm04 (t : Real) x₀
@@ -278,11 +257,9 @@ theorem rmRaise_summand_covDeriv
               (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)))) := by
     rw [Fin.sum_univ_four]
-    -- Slots 0,1,2 are covariantly constant at `x₀`, killing their corrections.
     have hc0 : (cov (fun p : M => W 0 p) x₀) (X x₀) = 0 := by rw [hW0]; exact hVb
     have hc1 : (cov (fun p : M => W 1 p) x₀) (X x₀) = 0 := by rw [hW1]; exact hVc
     have hc2 : (cov (fun p : M => W 2 p) x₀) (X x₀) = 0 := by rw [hW2]; exact hVm q
-    -- The `a = 3` correction: sharp-parallelism turns `cov(g♯βq)` into `g♯(∇βq)`.
     have hc3 :
         (cov (fun p : M => W 3 p) x₀) (X x₀) =
           cotangentSharp_gen (I := I) (S.base.metric (t : Real)) x₀
@@ -298,11 +275,8 @@ theorem rmRaise_summand_covDeriv
           X x₀
           (rmFrozenSlotSharp_mdiffAt (I := I) S (t : Real) q Vm x₀)
       rw [hW3]
-      -- `W 3 = rmFrozenSlotSharpSection`, whose value is `g♯βq`.
       simpa [rmFrozenSlotSharpSection_apply] using hsharp
-    -- Drop the three vanishing corrections, keep the sharp one.
     rw [hc0, hc1, hc2, hc3]
-    -- The three zero-corrected terms vanish by multilinearity (zero in a slot).
     rw [show
         S.base.rm04 (t : Real) x₀
             (Function.update (fun b : Fin 4 => W b x₀) 0 (0 : TangentSpace I x₀)) = 0 from
@@ -316,31 +290,26 @@ theorem rmRaise_summand_covDeriv
             (Function.update (fun b : Fin 4 => W b x₀) 2 (0 : TangentSpace I x₀)) = 0 from
       (S.base.rm04 (t : Real) x₀).map_update_zero _ 2]
     simp only [zero_add, add_zero]
-    -- The surviving `a = 3` term: rewrite `update W 3 c` to `vec4`.
     congr 1
     funext b
     fin_cases b <;>
-      simp [hW_def, rmRaiseSlotSections, vec4, Function.update,
-        rmFrozenSlotSharpSection_apply]
-  -- Assemble: `extDerivFun(scalar) = nabla + corrections`.
+      simp [hW_def, rmRaiseSlotSections, vec4, Function.update]
   rw [← hscalar]
-  -- `heval : nabla (cons X W) = extDerivFun(scalar') - Σcorr`, so
-  -- `extDerivFun(scalar') = nabla (cons X W) + Σcorr`.
   rw [hcons] at heval
   rw [hcorr] at heval
   linarith [heval]
 
-/-! ## The generic-frame `T₁` reduction on covariantly-constant sections
 
-The producer consumes `T₁` in a **genuine orthonormal frame** (`exists_orthoBasisFrameAt`),
-whose vectors are only pointwise-defined at `x₀`.  Since `T₁ = ∇³Rm(a,b,c) − ∇³Rm(a,c,b)`
-is a tensor value at `x₀`, we realise the frame vectors by sections covariantly
-constant at `x₀` (`exists_cov_zero_at_apply`), where the `eval_smooth_slots`
-Christoffel corrections vanish, and reduce `T₁` to the directional derivative
-`∇_X K` of the curvature-action field `K = [∇_b,∇_c]Rm = curvatureAction(rm13)(Rm04)`. -/
 
-/-- The six `∇²Rm` slot sections `(Vb, Vc, Vm 0, …, Vm 3)` assembled as a
-`metricTraceInput`-shaped tuple of sections. -/
+
+
+
+
+
+
+
+
+
 def nabla2SlotSections
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -348,8 +317,10 @@ def nabla2SlotSections
     Fin 6 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
   Fin.cons Vb (Fin.cons Vc Vm)
 
-/-- The six slot sections evaluated at a point form the `metricTraceInput` of the
-two derivative directions and the four `Rm`-slots. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nabla2SlotSections_apply
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -364,18 +335,22 @@ theorem nabla2SlotSections_apply
     · rfl
     · rfl
 
-/-- **The generic-frame `T₁` reduction on cov-constant sections.**  At `x₀`, for a
-Ricci-flow solution at a regular time, with sections `X` (derivative), `Vb`, `Vc`,
-`Vm` covariantly constant at `x₀` along `X`, the `∇³Rm` antisymmetrization
 
-`nabla3(X x₀, Vb x₀, Vc x₀, Vm·x₀) − nabla3(X x₀, Vc x₀, Vb x₀, Vm·x₀)`
 
-equals the directional derivative `∇_X K` of the curvature-action field
-`K(y) = curvatureAction0SAt (rm13)(Rm04 y)(Vb y)(Vc y)(Vm·y)`, in the corrections-free
-form (the cov-constant slots kill every `eval_smooth_slots` Christoffel correction):
 
-`= extDerivFun (y ↦ curvatureAction0SAt (rm13)(Rm04 y)(Vb y)(Vc y)(Vm·y)) x₀ (X x₀)`. -/
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -402,10 +377,8 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
         x₀ (X x₀) := by
   classical
   set cov := S.family.connection (t : Real) with hcov_def
-  -- The six `∇²Rm` slot sections, in both `(b,c)` and `(c,b)` orders.
   set Wbc := nabla2SlotSections (I := I) Vb Vc Vm with hWbc_def
   set Wcb := nabla2SlotSections (I := I) Vc Vb Vm with hWcb_def
-  -- The six slots are covariantly constant at `x₀`.
   have hWbc_cov : ∀ a : Fin 6, (cov (fun p : M => Wbc a p) x₀) (X x₀) = 0 := by
     intro a
     refine Fin.cases ?_ (fun j => ?_) a
@@ -420,12 +393,10 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
     · refine Fin.cases ?_ (fun k => ?_) j
       · simpa [hWcb_def, nabla2SlotSections] using hVb
       · simpa [hWcb_def, nabla2SlotSections] using hVm k
-  -- `nabla3 = ∇(nabla2)`, evaluated via `eval_smooth_slots`; corrections vanish.
   have hbc :=
     (nabla3Rm04Field_realizes (I := I) S (t : Real)).eval_smooth_slots X Wbc x₀
   have hcb :=
     (nabla3Rm04Field_realizes (I := I) S (t : Real)).eval_smooth_slots X Wcb x₀
-  -- Kill the correction sums (all slots cov-constant).
   have hbc_corr :
       (∑ a : Fin 6,
           nabla2Rm04Field (I := I) S (t : Real) x₀
@@ -442,7 +413,6 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
     refine Finset.sum_eq_zero fun a _ => ?_
     rw [hWcb_cov a]
     exact (nabla2Rm04Field (I := I) S (t : Real) x₀).map_update_zero _ a
-  -- Rewrite the slot tuples at `x₀` as the `metricTraceInput`.
   have hWbc_x : (fun a : Fin 6 => Wbc a x₀) =
       metricTraceInput (I := I) (Vb x₀) (Vc x₀) (fun i : Fin 4 => Vm i x₀) :=
     nabla2SlotSections_apply (I := I) Vb Vc Vm x₀
@@ -453,9 +423,7 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
   rw [hcb_corr, sub_zero] at hcb
   rw [hWbc_x] at hbc
   rw [hWcb_x] at hcb
-  -- `T₁ = extDerivFun(nabla2 bc) − extDerivFun(nabla2 cb) = extDerivFun(difference)`.
   rw [hbc, hcb]
-  -- The two `nabla2` scalar fields (in slot-section form), `MDifferentiableAt`.
   have hmdiff_bc :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun p : M =>
@@ -471,7 +439,6 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (nabla2Rm04Field (I := I) S (t : Real)) Wcb x₀).mdifferentiableAt (by simp)
   rw [← extDerivFun_sub_at (I := I) (X x₀) hmdiff_bc hmdiff_cb]
-  -- The difference field equals the curvature-action field, pointwise.
   have hfield :
       (fun y : M =>
           nabla2Rm04Field (I := I) S (t : Real) y (fun a : Fin 6 => Wbc a y) -
@@ -486,31 +453,33 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
       (Vb y) (Vc y) (fun i : Fin 4 => Vm i y)
   rw [hfield]
 
-/-! ## The assembled K-Leibniz
 
-Combining the generic-frame `T₁` reduction (`T₁ = ∇_X K = extDerivFun(K)` on
-cov-constant sections) with the raise-form of `K`
-(`curvatureAction0SAt_eq_rm04_raise`, `K = -Σ_q rm04(…, g♯βq)`) and the per-`q`
-contraction Leibniz (`rmRaise_summand_covDeriv`), the `T₁` summand is the sum of the
-two `Rm04 ∗ ∇Rm04` raise contractions. -/
 
-/-- **The K-Leibniz for the `T₁` summand (on covariantly-constant sections).**
 
-At `x₀`, for a Ricci-flow solution at a regular time, with sections `X` (derivative),
-`Vb`, `Vc`, `Vm` covariantly constant at `x₀` along `X`, the `∇³Rm` antisymmetrization
 
-`nabla3(X x₀, Vb x₀, Vc x₀, Vm·x₀) − nabla3(X x₀, Vc x₀, Vb x₀, Vm·x₀) = ∇_X([∇_b,∇_c]Rm)`
 
-equals the negated sum of the two `Rm04 ∗ ∇Rm04` raise contractions
 
-`= -Σ_q [ (∇Rm04)(X, Vb, Vc, Vm_q, g♯βq) + Rm04(Vb, Vc, Vm_q, g♯(∇_X βq)) ]`,
 
-`βq = oneFormAtSlot0S Rm04 (Vm slots) q = rmFrozenSlotField S t q Vm`, the slot-frozen
-one-form of `Rm04`.  This is the covariant Leibniz `∇(Rm ∗ Rm) = ∇Rm ∗ Rm + Rm ∗ ∇Rm`
-for the curvature action `K = [∇_b,∇_c]Rm`, derived through the metric-raising form
-(no `∇rm13`): the first contraction differentiates the outer `Rm04`, the second the
-raised frozen one-form `g♯βq` via the sharp-parallelism. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem nablaLapComm_T1_eq_rm04_raise_leibniz
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -541,11 +510,8 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
                 (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                   (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀))))) := by
   classical
-  -- Step 1: `T₁ = extDerivFun(K)`.
   rw [nabla3_antisym_eq_covDeriv_curvatureAction_covConst (I := I) S hS t x₀
     X Vb Vc Vm hVb hVc hVm]
-  -- Step 2: rewrite `K` pointwise via the raise form
-  -- `K(y) = -Σ_q rm04(y)(Vb,Vc,Vm_q, g♯βq(y))`.
   have hKfield :
       (fun y : M =>
           curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
@@ -561,17 +527,13 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
       (S.base.rm13 (t : Real)) (S.base.rm04 (t : Real) y)
       (solution_rm04LowersRm13At (I := I) S (t : Real) y)
       (S.base.rm04 (t : Real) y) (Vb y) (Vc y) (fun i : Fin 4 => Vm i y)]
-    -- The frozen one-form `oneFormAtSlot0S Rm04 (Vm·y) q` is `rmFrozenSlotField`
-    -- (definitionally), so both sides agree.
     rfl
   rw [hKfield]
-  -- The `q`-th raise-form summand field.
   set g : Fin 4 → M → Real := fun q y =>
     S.base.rm04 (t : Real) y
       (vec4 (I := I) (Vb y) (Vc y) (Vm q y)
         (cotangentSharp_gen (I := I) (S.base.metric (t : Real)) y
           (rmFrozenSlotField (I := I) S (t : Real) q Vm y))) with hg_def
-  -- `MDifferentiableAt` of each `q`-th summand field (smooth `Rm04` on smooth slots).
   have hmdiff_q : ∀ q : Fin 4,
       MDifferentiableAt I 𝓘(Real, Real) (g q) x₀ := by
     intro q
@@ -588,7 +550,6 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
     fin_cases a <;>
       simp [rmRaiseSlotSections, vec4, rmFrozenSlotSharpSection_apply,
         Matrix.cons_val_zero, Matrix.cons_val_one]
-  -- Step 3: `extDerivFun(-Σ_q g q) = -Σ_q extDerivFun(g q)`.
   have hstep3 :
       extDerivFun (I := I) (fun y : M => -∑ q : Fin 4, g q y) x₀ (X x₀) =
         -∑ q : Fin 4, extDerivFun (I := I) (g q) x₀ (X x₀) := by
@@ -607,27 +568,28 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
     rw [DifferentialGeometry.Tensor.Coordinates.extDerivFun_finset_sum_real (I := I)
       (t := (Finset.univ : Finset (Fin 4))) g (X x₀) (fun q _ => hmdiff_q q)]
   rw [hstep3]
-  -- Each `q`-th `extDerivFun(g q)` is the per-`q` contraction Leibniz.
   congr 1
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [hg_def]
-  exact rmRaise_summand_covDeriv (I := I) S hS t x₀ q X Vb Vc Vm hVb hVc (fun i => hVm i)
+  exact rmRaise_summand_covDeriv (I := I) S t x₀ q X Vb Vc Vm hVb hVc (fun i => hVm i)
 
-/-! ## The `T₁` quantitative bound in a `g`-orthonormal basis
 
-Each summand of the K-Leibniz is a `Rm04 ∗ ∇Rm04` raise contraction.  In a
-`g`-orthonormal basis the raised covector `g♯β` reconstructs as `∑_e (β e_e) • e_e`
-(`cotangentSharp_eq_sum_inv_gen` with `gᵃᵇ = δ`), so the contraction becomes a plain
-frame-index double sum, and Cauchy–Schwarz bounds it by `card·√|Rm|·√|∇Rm|` per slot,
-exactly as B's `abs_curvatureAction0SAt_orthoBasis_le`. -/
+
+
+
+
+
+
 
 section T1Bound
 
 variable {n : ℕ}
 
-/-- In a `g`-orthonormal basis the raised covector reconstructs as the orthonormal
-expansion `g♯ β = ∑_e (β e_e) • e_e`.  (Re-derivation of B's private
-`cotangentSharp_orthoBasis_expand` of `Evolution/NablaRiemannT2Bound.lean`.) -/
+
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem cotangentSharp_orthoBasis_expand'
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
@@ -660,7 +622,9 @@ theorem cotangentSharp_orthoBasis_expand'
   · intro j _ hj; rw [hoff i j (fun h => hj h.symm), zero_mul]
   · intro h; exact absurd (Finset.mem_univ i) h
 
-/-- Multilinearity of a `(0,5)` tensor `T` in its **last** slot, `vec5`-shaped. -/
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor05_vec5_sum_last
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -688,7 +652,9 @@ theorem tensor05_vec5_sum_last
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
-/-- Multilinearity of a `(0,4)` tensor `T` in its **last** slot, `vec4`-shaped. -/
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor04_vec4_sum_last'
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
@@ -716,14 +682,18 @@ theorem tensor04_vec4_sum_last'
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
-/-- **Cauchy–Schwarz on a last-slot raise contraction (rank-5 tensor).**  For a
-`g`-orthonormal basis, a `(0,5)` tensor `T`, fixed slots `A,B,C,D`, and a one-form
-`β`, the contraction `T(A,B,C,D, g♯β)` is bounded by
 
-`|T(A,B,C,D, g♯β)| ≤ card · √(∑_e T(A,B,C,D,e_e)²) · √(∑_e (β e_e)²)`.
 
-(Last-slot multilinearity + the orthonormal `g♯` expansion + Cauchy–Schwarz.) -/
+
+
+
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem abs_tensor05_sharp_last_le
+    [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
     (horth : ∀ i j : Fin n,
@@ -762,9 +732,13 @@ theorem abs_tensor05_sharp_last_le
     exact mul_le_mul hTbnd hβbnd (abs_nonneg _) hNTnn
   · rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
-/-- **Cauchy–Schwarz on a last-slot raise contraction (rank-4 tensor).**  The
-rank-4 analogue of `abs_tensor05_sharp_last_le`. -/
+
+
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem abs_tensor04_sharp_last_le
+    [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
     (horth : ∀ i j : Fin n,
@@ -803,10 +777,12 @@ theorem abs_tensor04_sharp_last_le
     exact mul_le_mul hTbnd hβbnd (abs_nonneg _) hNTnn
   · rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
-/-- **Slot-uniform partial-sum domination.**  For a `(0, r)` tensor `T`, a multi-index
-`idx`, and a slot `q`, summing the squared component over the `q`-th slot is dominated
-by the full `compNormSqMulti` (the map `e ↦ update idx q e` is injective, so the partial
-sum is a sub-sum of all multi-index components). -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sum_sq_update_le_compNormSqMulti {r : ℕ}
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x)
@@ -834,18 +810,20 @@ theorem sum_sq_update_le_compNormSqMulti {r : ℕ}
 
 end T1Bound
 
-/-! ## The solution-facing `T₁` bound
 
-We instantiate the K-Leibniz and the abstract Cauchy–Schwarz bounds at the solution
-in a genuine `g`-orthonormal basis (`exists_orthoBasisFrameAt`), realizing the basis
-vectors as covariantly-constant sections (`exists_cov_zero_at_apply`). -/
+
+
+
+
 
 section SolutionT1Bound
 
 variable {n : ℕ}
 
-/-- The `q`-th frozen one-form of `Rm04` on a basis vector is a plain `Rm04`
-component (slot `q` carries the basis vector). -/
+
+
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem rmFrozenSlot_basis_component
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -857,17 +835,9 @@ theorem rmFrozenSlot_basis_component
   rmFrozenSlotField_apply_vec (I := I) S t q Vm x₀ e
 
 open TensorLieDeriv in
-/-- **The `T₁` summand quantitative bound on covariantly-constant sections.**
-
-At `x₀`, for a Ricci-flow solution at a regular time, in a `g`-orthonormal basis
-realised by sections `X, Vb, Vc, Vm` covariantly constant at `x₀` (with values the
-basis vectors), the `T₁` summand `∇³Rm(X,Vb,Vc,Vm) − ∇³Rm(X,Vc,Vb,Vm)` is bounded by
-
-`|T₁| ≤ 8 · card · √(compNormSqMulti of basis ∇Rm) · √(compNormSqMulti of basis Rm)`,
-
-i.e. `|T₁| ≤ C(card)·|∇Rm|·|Rm|`, via the K-Leibniz and the orthonormal Cauchy–Schwarz
-on the two `Rm04 ∗ ∇Rm04` raise contractions. -/
+omit [Module.Finite ℝ E] in
 theorem abs_nablaLapComm_T1_covConst_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -884,7 +854,6 @@ theorem abs_nablaLapComm_T1_covConst_le
     (a b c : Fin n) (m : Fin 4 → Fin n)
     (hXa : X x₀ = basis a) (hVb : Vb x₀ = basis b) (hVc : Vc x₀ = basis c)
     (hVm : ∀ i : Fin 4, Vm i x₀ = basis (m i))
-    (hXcov : ((S.family.connection (t : Real) (fun p : M => X p) x₀) (X x₀)) = 0)
     (hVbcov : ((S.family.connection (t : Real) (fun p : M => Vb p) x₀) (X x₀)) = 0)
     (hVccov : ((S.family.connection (t : Real) (fun p : M => Vc p) x₀) (X x₀)) = 0)
     (hVmcov : ∀ i : Fin 4,
@@ -909,13 +878,10 @@ theorem abs_nablaLapComm_T1_covConst_le
   have hNnabnn : 0 ≤ Nnab := Real.sqrt_nonneg _
   have hNRmnn : 0 ≤ NRm := Real.sqrt_nonneg _
   have hcardnn : (0 : Real) ≤ (Fintype.card (Fin n) : Real) := by positivity
-  -- The K-Leibniz: `T₁ = -Σ_q (T₁a_q + T₁b_q)`.
   rw [nablaLapComm_T1_eq_rm04_raise_leibniz (I := I) S hS t x₀ X Vb Vc Vm
     hVbcov hVccov hVmcov]
   rw [abs_neg]
-  -- Triangle inequality over the `q`-sum and the two summand types.
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
-  -- Per-`q`: `|T₁a_q + T₁b_q| ≤ |T₁a_q| + |T₁b_q| ≤ 2·card·Nnab·NRm`.
   have hper : ∀ q : Fin 4,
       |nablaRm04Field (I := I) S (t : Real) x₀
             (vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -929,7 +895,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         (2 : Real) * (Fintype.card (Fin n) : Real) * (Nnab * NRm) := by
     intro q
     refine le_trans (abs_add_le _ _) ?_
-    -- Bound `T₁a_q`.
     have hT1a :
         |nablaRm04Field (I := I) S (t : Real) x₀
             (vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -941,7 +906,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
         (rmFrozenSlotField (I := I) S (t : Real) q Vm x₀)
       refine le_trans hCS ?_
-      -- Factor 1: `√(Σ_e ∇Rm04(vec5 a b c m_q e)²) ≤ Nnab`.
       have hf1 :
           Real.sqrt (∑ e : Fin n,
               (nablaRm04Field (I := I) S (t : Real) x₀
@@ -956,7 +920,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         simp only [hidx]
         exact sum_sq_update_le_compNormSqMulti (I := I)
           (nablaRm04Field (I := I) S (t : Real) x₀) basis ![a, b, c, m q, a] 4
-      -- Factor 2: `√(Σ_e βq(e)²) ≤ NRm`.
       have hf2 :
           Real.sqrt (∑ e : Fin n,
               (rmFrozenSlotField (I := I) S (t : Real) q Vm x₀
@@ -980,7 +943,6 @@ theorem abs_nablaLapComm_T1_covConst_le
           (S.base.rm04 (t : Real) x₀) basis m q
       exact mul_le_mul_of_nonneg_left
         (mul_le_mul hf1 hf2 (Real.sqrt_nonneg _) hNnabnn) hcardnn
-    -- Bound `T₁b_q`.
     have hT1b :
         |S.base.rm04 (t : Real) x₀
             (vec4 (I := I) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -994,7 +956,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
           (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀))
       refine le_trans hCS ?_
-      -- Factor 1: `√(Σ_e Rm04(vec4 b c m_q e)²) ≤ NRm`.
       have hf1 :
           Real.sqrt (∑ e : Fin n,
               (S.base.rm04 (t : Real) x₀
@@ -1009,13 +970,11 @@ theorem abs_nablaLapComm_T1_covConst_le
         simp only [hidx]
         exact sum_sq_update_le_compNormSqMulti (I := I)
           (S.base.rm04 (t : Real) x₀) basis ![b, c, m q, b] 3
-      -- Factor 2: `√(Σ_e (∇βq)(e)²) ≤ Nnab`, via `nablaRmFrozenSlot_eval`.
       have hf2 :
           Real.sqrt (∑ e : Fin n,
               (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)
                 (fun _ : Fin 1 => basis e)) ^ 2) ≤ Nnab := by
-        -- Each summand: `(∇βq e)² = (∇Rm04 (basis∘update(cons a m) q.succ e))²`.
         have hcomb : ∀ e : Fin n,
             (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)
@@ -1053,7 +1012,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         rw [Finset.sum_congr rfl (fun e (_ : e ∈ (Finset.univ : Finset (Fin n))) => hcomb e)]
         exact sum_sq_update_le_compNormSqMulti (I := I)
           (nablaRm04Field (I := I) S (t : Real) x₀) basis (Fin.cons a m) q.succ
-      -- Combine: `card·(√·√) ≤ card·(NRm·Nnab) = card·(Nnab·NRm)`.
       refine le_trans (mul_le_mul_of_nonneg_left
         (mul_le_mul hf1 hf2 (Real.sqrt_nonneg _) hNRmnn) hcardnn) ?_
       rw [mul_comm NRm Nnab]
@@ -1077,15 +1035,9 @@ theorem abs_nablaLapComm_T1_covConst_le
   rfl
 
 open TensorLieDeriv in
-/-- **The `T₁` summand quantitative bound in the genuine orthonormal frame.**
-
-At `x₀`, for a Ricci-flow solution at a regular time, in the `g`-orthonormal frame of
-`exists_orthoBasisFrameAt`, the `T₁` summand of `nablaLapCommReactionTermF` is bounded
-by `8·card·√(compNormSqMulti ∇Rm)·√(compNormSqMulti Rm)`.  The frame vectors are
-realised by covariantly-constant sections (`exists_cov_zero_at_apply`); the `∇³Rm`
-antisymmetrization is a tensor value at `x₀`, so its value on the (constant) frame
-vectors equals its value on the cov-constant realisations. -/
+omit [Module.Finite ℝ E] in
 theorem abs_nablaLapComm_T1_orthoBasis_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -1109,57 +1061,53 @@ theorem abs_nablaLapComm_T1_orthoBasis_le
             S.base.rm04 (t : Real) x₀ (fun p => basis (idx p))))) := by
   classical
   have hconn := connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
-  -- Realise each basis vector by a covariantly-constant section at `x₀`.
-  obtain ⟨Xa, hXa, hXacov⟩ := exists_cov_zero_at_apply (I := I)
+  obtain ⟨Xa, hXa, _⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis a)
   obtain ⟨Vb, hVb, hVbcov⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis b)
   obtain ⟨Vc, hVc, hVccov⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis c)
-  -- The four `Rm`-slot sections.
   choose Vm hVm hVmcov using fun i : Fin 4 =>
     exists_cov_zero_at_apply (I := I)
       (S.family.connection (t : Real)) hconn x₀ (basis (m i))
-  -- The frame-tuple values at `x₀` coincide with the cov-constant section values.
-  -- The frame-tuple values at `x₀` coincide with the cov-constant section values.
   have hmtail : frameTuple (I := I) frame x₀ m = (fun i : Fin 4 => Vm i x₀) := by
     funext i
-    show frame (m i) x₀ = Vm i x₀
+    change frame (m i) x₀ = Vm i x₀
     rw [hframe (m i), hVm i]
   have htuple_a :
       nabla3FrameTupleF (I := I) frame x₀ a b c m =
         Fin.cons (Xa x₀)
           (metricTraceInput (I := I) (Vb x₀) (Vc x₀) (fun i : Fin 4 => Vm i x₀)) := by
-    simp only [nabla3FrameTupleF, nabla3InnerSlotsF, metricTraceInput]
+    simp only [nabla3FrameTupleF, nabla3InnerSlotsF]
     rw [hframe a, hframe b, hframe c, hXa, hVb, hVc, hmtail]
     rfl
   have htuple_acb :
       nabla3FrameTupleF (I := I) frame x₀ a c b m =
         Fin.cons (Xa x₀)
           (metricTraceInput (I := I) (Vc x₀) (Vb x₀) (fun i : Fin 4 => Vm i x₀)) := by
-    simp only [nabla3FrameTupleF, nabla3InnerSlotsF, metricTraceInput]
+    simp only [nabla3FrameTupleF, nabla3InnerSlotsF]
     rw [hframe a, hframe c, hframe b, hXa, hVc, hVb, hmtail]
     rfl
   rw [htuple_a, htuple_acb]
   exact abs_nablaLapComm_T1_covConst_le (I := I) S hS t x₀ basis horth Xa Vb Vc Vm
     a b c m hXa hVb hVc hVm
-    (hXacov Xa) (hVbcov Xa) (hVccov Xa) (fun i => hVmcov i Xa)
+    (hVbcov Xa) (hVccov Xa) (fun i => hVmcov i Xa)
 
 end SolutionT1Bound
 
-/-! ## The full `k = 1` reaction bound and the producer connection
 
-Combining the `T₁` bound (`abs_nablaLapComm_T1_orthoBasis_le`) with the `T₂` bound
-(`abs_nablaLapComm_T2_orthoBasis_le`, `Evolution/NablaRiemannT2Bound.lean`) gives the
-full reaction `nablaLapCommReactionTermF = T₁ + T₂` bounded by `C(card)·|Rm|·|∇Rm|`,
-which the producer consumes through the diagonal trace of `nablaLapComm_orthoFrame`. -/
+
+
+
+
+
 
 section ReactionBound
 
 variable {n : ℕ}
 
-/-- One-step decomposition of a function-space sum over `Fin (k+1) → Idx` (local copy
-of the private helper of `Evolution/NablaRiemannT2Bound.lean`). -/
+
+
 private theorem sum_pi_fin_succ {Idx : Type*} [Fintype Idx] {k : ℕ}
     (f : (Fin (k + 1) → Idx) → Real) :
     (∑ idx : Fin (k + 1) → Idx, f idx) =
@@ -1169,8 +1117,10 @@ private theorem sum_pi_fin_succ {Idx : Type*} [Fintype Idx] {k : ℕ}
   rw [Fintype.sum_prod_type]
   rfl
 
-/-- Rank-4 reindexing: `∑_{idx : Fin 4 → Idx} (A idx)² = compNormSq4` of the
-basis-component array. -/
+
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem compNormSqMulti_eq_compNormSq4_basis
     {x₀ : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x₀)
@@ -1195,7 +1145,7 @@ theorem compNormSqMulti_eq_compNormSq4_basis
           (Fin.cons l (default : Fin 0 → Fin n)))) : Fin 4 → Fin n) =
           ![i, j, k, l] := by
       funext p; fin_cases p <;> rfl
-    show (A (Fin.cons i (Fin.cons j (Fin.cons k (Fin.cons l (default : Fin 0 → Fin n)))))) ^ 2 = _
+    change (A (Fin.cons i (Fin.cons j (Fin.cons k (Fin.cons l (default : Fin 0 → Fin n)))))) ^ 2 = _
     rw [htuple, hA]
     dsimp only
     have hvec : (fun p : Fin 4 => basis ((![i, j, k, l] : Fin 4 → Fin n) p)) =
@@ -1205,17 +1155,19 @@ theorem compNormSqMulti_eq_compNormSq4_basis
   · intro y _ hy; exact absurd (Subsingleton.elim y default) hy
   · intro h; exact absurd (Finset.mem_univ _) h
 
-/-- **The single-term `k = 1` reaction bound in a `g`-orthonormal basis.**
 
-At `x₀`, in the orthonormal frame, every reaction term `nablaLapCommReactionTermF
-frame a b c m = T₁ + T₂` is bounded by
 
-`|reaction a b c m| ≤ 13·card·√(|Rm|²)·√(|∇Rm|²)`,
 
-i.e. `C(card)·|Rm|·|∇Rm|`.  This is the literal `|T₁ + T₂| ≤ C·|Rm|·|∇Rm|`: the `T₁`
-half is `abs_nablaLapComm_T1_orthoBasis_le`, the `T₂` half B's
-`abs_nablaLapComm_T2_orthoBasis_le`. -/
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_nablaLapCommReactionTermF_orthoBasis_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -1249,18 +1201,20 @@ theorem abs_nablaLapCommReactionTermF_orthoBasis_le
   refine le_trans hsum (le_of_eq ?_)
   ring
 
-/-- **The full `k = 1` reaction bound in a `g`-orthonormal basis (diagonal trace).**
 
-At `x₀`, for a Ricci-flow solution at a regular time, in the orthonormal frame, the
-diagonal-trace reaction `∑_a nablaLapCommReactionTermF frame a a c m` is bounded by
 
-`|∑_a reaction a a c m| ≤ 13·card²·√(|Rm|²)·√(|∇Rm|²)`,
 
-i.e. `C(card)·|Rm|·|∇Rm|`, with `|Rm|² = compNormSq4` of the frame `Rm04` and
-`|∇Rm|² = compNormSqMulti` of the frame `∇Rm`.  The constant `13·card²` is `8·card²`
-(`T₁`) `+ 5·card²` (`T₂`).  Sums the single-term bound
-`abs_nablaLapCommReactionTermF_orthoBasis_le`. -/
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -1285,7 +1239,6 @@ theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
     with hNRm
   set Nnab : Real := Real.sqrt (compNormSqMulti (fun idx : Fin 5 → Fin n =>
       nablaRm04Field (I := I) S (t : Real) x₀ (fun p => basis (idx p)))) with hNnab
-  -- Per-`a` bound: the single-term reaction bound.
   have hper : ∀ a : Fin n,
       |nablaLapCommReactionTermF (I := I) S (t : Real) x₀ frame a a c m| ≤
         (13 : Real) * (Fintype.card (Fin n) : Real) * (NRm * Nnab) := by
@@ -1300,30 +1253,32 @@ theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
   apply le_of_eq
   ring
 
-/-- **The spatial Laplacian–covariant commutator bound for `∇Rm` in a genuine
-orthonormal frame.**
 
-At `x₀`, for a Ricci-flow solution at a regular time, there exist a `g`-orthonormal
-frame `frame` (centre values a `Module.Basis`) and the Kronecker-delta inverse metric
-with `InverseMetricOrthonormalAt` holding **genuinely**, such that the spatial commutator
-`[Δ, ∇_c] Rm = Δ(∇Rm)(c) − ∇(ΔRm)(c)` is bounded by
 
-`|Δ(∇Rm)(c) − ∇(ΔRm)(c)| ≤ 13·card²·√(rm04NormSqInFrame)·√(nablaRm04NormSqInFrame)`,
 
-i.e. `C(card)·|Rm|·|∇Rm|`, in the producer's component-norm convention
-(`rm04NormSqInFrame`/`nablaRm04NormSqInFrame` of `Evolution/RiemannNorm.lean`).
 
-This assembles the spatial-commutator identity (`nablaLapCommF_orthonormalTrace`,
-the diagonal trace of `nablaLapComm_orthoFrame`) with the full reaction bound
-`abs_nablaLapCommReactionTerm_diag_orthoBasis_le`, in the genuine orthonormal frame of
-`exists_orthoBasisFrameAt`.  Both `T₁` and `T₂` are bounded; `nablaLapCommReactionTerm`
-is **fully bounded** by `C(card)·|Rm|·|∇Rm|`.
 
-This is the spatial half of the `k = 1` Bernstein–Bando–Shi producer; the full
-`NablaRm04NormHeatEquationOn` additionally needs the **time-derivative** assembly
-(`iteratedRmComp_one_hasDerivWithinAt` with `hrm`/`hchr`/`hswap` instantiated from the
-solution — `Evolution/NablaRiemannTimeDeriv.lean`), a separate frontier deferred there. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+omit [Module.Finite ℝ E] in
 theorem abs_spatialCommNablaRm_orthoFrame_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -1353,13 +1308,10 @@ theorem abs_spatialCommNablaRm_orthoFrame_le
   refine ⟨n, frame, ?_, deltaInvMetric_orthonormal (M := M) (t : Real) x₀, ?_⟩
   · intro i j; rw [hframe i, hframe j]; exact horth i j
   intro c m
-  -- The commutator collapses to the diagonal reaction trace.
   rw [nablaLapCommF_orthonormalTrace (I := I) S hS t x₀ frame
     (deltaInvMetric (M := M) (Idx := Fin n) (t : Real) x₀) (fun i j => rfl) c m]
-  -- The diagonal reaction trace is bounded by the full reaction bound.
   have hbnd := abs_nablaLapCommReactionTerm_diag_orthoBasis_le (I := I) S hS t x₀
     frame basis hframe horth c m
-  -- Convert the basis component norms to the producer's frame component norms.
   have hRm :
       compNormSq4 (fun i j k l : Fin n =>
           S.base.rm04 (t : Real) x₀ (vec4 (I := I) (basis i) (basis j) (basis k) (basis l))) =

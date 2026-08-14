@@ -217,7 +217,7 @@ noncomputable def positiveBallRepresentative
 omit [NeZero d] in
 theorem positiveBallRepresentative_ae_eq
     {x₀ : E} {R δ : ℝ} {u : E → ℝ}
-    (hpos : ∀ᵐ x ∂ ballMeasure x₀ R, 0 < u x) :
+    (hpos : ∀ᵐ x ∂ballMeasure x₀ R, 0 < u x) :
     positiveBallRepresentative u x₀ R δ =ᵐ[ballMeasure x₀ R] u := by
   filter_upwards [hpos] with x hx
   by_cases hball : x ∈ Metric.ball x₀ R
@@ -240,7 +240,7 @@ theorem harnack_on_ball_ae_pos
     {x₀ : E} {R : ℝ} (hR : 0 < R)
     (A : NormalizedEllipticCoeff d (Metric.ball x₀ R))
     {u : E → ℝ}
-    (hu_pos : ∀ᵐ x ∂ ballMeasure x₀ R, 0 < u x)
+    (hu_pos : ∀ᵐ x ∂ballMeasure x₀ R, 0 < u x)
     (hsol : IsSolution A.1 u) :
     essSup u (ballMeasure x₀ (R / 2 : ℝ)) ≤
       Real.exp (C_harnack d * A.1.Λ ^ ((1 : ℝ) / 2)) *

@@ -2,13 +2,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Master radius diagonal for finite-stage comparison maps
 
-This file iterates the radius-independent stage seed over integer construction
-radii.  The final diagonal is factored through each fixed-radius extraction
-only after discarding a finite prefix.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,8 +32,8 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- A tower of strict subsequences, with the successor obtained by composing
-the current selector with one new strict refinement. -/
+
+
 structure NestedSubseq where
   sigma : Nat → Nat → Nat
   tau : Nat → Nat → Nat
@@ -44,20 +44,20 @@ structure NestedSubseq where
 
 namespace NestedSubseq
 
-/-- The diagonal selector of a nested strict-subsequence tower. -/
+
 def diag (T : NestedSubseq) (m : Nat) : Nat := T.sigma (m + 1) m
 
-/-- The refinement from level `q + 1` through level `q + n + 1`. -/
+
 def tailComp (T : NestedSubseq) (q : Nat) : Nat → (Nat → Nat)
   | 0 => id
   | n + 1 => T.tailComp q n ∘ T.tau (q + 1 + n)
 
-/-- The cofinal selector which factors the tail of the diagonal through the
-fixed tower level `q + 1`. -/
+
+
 def tailFactor (T : NestedSubseq) (q n : Nat) : Nat :=
   T.tailComp q n (q + n)
 
-/-- Every accumulated tail composition is strict. -/
+
 theorem tailComp_strict (T : NestedSubseq) (q : Nat) :
     ∀ n, StrictMono (T.tailComp q n) := by
   intro n
@@ -66,8 +66,8 @@ theorem tailComp_strict (T : NestedSubseq) (q : Nat) :
   | succ n ih =>
       exact ih.comp (T.tau_strict (q + 1 + n))
 
-/-- The tower selector at a later level factors through any fixed earlier
-level. -/
+
+
 theorem sigma_factor (T : NestedSubseq) (q n : Nat) :
     T.sigma (q + n + 1) = T.sigma (q + 1) ∘ T.tailComp q n := by
   induction n with
@@ -80,7 +80,7 @@ theorem sigma_factor (T : NestedSubseq) (q n : Nat) :
       simp only [tailComp, Function.comp_apply]
       rw [show q + n + 1 = q + 1 + n by omega]
 
-/-- The tail factor itself is a strict reindexing. -/
+
 theorem tailFactor_strict (T : NestedSubseq) (q : Nat) :
     StrictMono (T.tailFactor q) := by
   apply strictMono_nat_of_lt_succ
@@ -93,7 +93,7 @@ theorem tailFactor_strict (T : NestedSubseq) (q : Nat) :
   have hle := (T.tau_strict (q + 1 + n)).id_le (q + (n + 1))
   exact hlt.trans_le hle
 
-/-- The master diagonal is strictly increasing. -/
+
 theorem diag_strict (T : NestedSubseq) : StrictMono T.diag := by
   apply strictMono_nat_of_lt_succ
   intro n
@@ -103,8 +103,8 @@ theorem diag_strict (T : NestedSubseq) : StrictMono T.diag := by
   have hle := (T.tau_strict (n + 1)).id_le (n + 1)
   exact (Nat.lt_succ_self n).trans_le hle
 
-/-- After removing the first `q` diagonal terms, the remainder factors through
-the refinement selected at radius `q`. -/
+
+
 theorem diag_step_factor (T : NestedSubseq) (q n : Nat) :
     T.diag (q + n) =
       T.sigma q (T.tau q (T.tailFactor q n)) := by
@@ -114,7 +114,7 @@ theorem diag_step_factor (T : NestedSubseq) (q n : Nat) :
 
 end NestedSubseq
 
-/-- The dependent chart and convergence data selected at one radius step. -/
+
 structure StagePayload
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -139,7 +139,7 @@ structure StagePayload
   data : HasStageJetData inp P L hr phi phi_strict hconn U C0 C1
     aInf Jinf Jbarinf gInf
 
-/-- A radius refinement has a selected dependent payload. -/
+
 theorem HasStageRefine.payload_nonempty
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -152,6 +152,7 @@ theorem HasStageRefine.payload_nonempty
     Nonempty (StagePayload inp P L hconn r hr) := by
   rcases h with ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, gInf, hdata⟩
   exact ⟨⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, gInf, hdata⟩⟩
+
 
 /-- The dependent provider-native chart and convergence data selected at one
 radius step. -/
@@ -198,13 +199,12 @@ theorem HasStageRefineOn.payload_nonempty
   exact
     ⟨⟨phi, hphi, V, U, C0, C1, aInf, Jinf, Jbarinf, gInf, hdata⟩⟩
 
-/-- A strict selector for the current net in the radius tower. -/
 structure StageState where
   sigma : Nat → Nat
   sigma_strict : StrictMono sigma
 
-/-- Select the dependent payload supplied by the stage seed at one state and
-integer radius. -/
+
+
 noncomputable def choosePayload
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -222,7 +222,7 @@ noncomputable def choosePayload
         (NetLimitData.stable_subseq inp.decay P L0 S.sigma_strict hseed.1)
         (m : Real) (Nat.cast_nonneg m)
 
-/-- Advance one radius-tower state by its selected strict refinement. -/
+
 noncomputable def nextState
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -235,7 +235,7 @@ noncomputable def nextState
   let d := choosePayload inp P L0 hconn hseed S m
   ⟨S.sigma ∘ d.phi, S.sigma_strict.comp d.phi_strict⟩
 
-/-- The recursively nested sequence selectors for all integer radii. -/
+
 noncomputable def stageStates
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -248,7 +248,7 @@ noncomputable def stageStates
   | m + 1 => nextState inp P L0 hconn hseed
       (stageStates inp P L0 hconn hseed m) m
 
-/-- The selected dependent stage payload at radius `m`. -/
+
 noncomputable def radiusPayload
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -260,7 +260,7 @@ noncomputable def radiusPayload
   choosePayload inp P L0 hconn hseed
     (stageStates inp P L0 hconn hseed m) m
 
-/-- The radius tower as a generic nested-subsequence datum. -/
+
 noncomputable def stageNested
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -278,8 +278,8 @@ noncomputable def stageNested
     rw [stageStates]
     rfl
 
-/-- At a fixed integer radius, a tail of the master selector is represented by
-one further strict refinement of that radius's dependent stage payload. -/
+
+
 def HasRadiusTail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -299,9 +299,9 @@ def HasRadiusTail
       (Nat.cast_nonneg q) (d.phi ∘ rho) (d.phi_strict.comp hrho)
       hconn d.U d.C0 d.C1 d.aInf d.Jinf d.Jbarinf d.gInf
 
-/-- The nested integer-radius construction has one strict master subsequence,
-and every fixed radius's stage data persists on a tail of that master
-subsequence. -/
+
+
+
 theorem HasStageSeed.exists_radius_diag
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -336,6 +336,8 @@ theorem HasStageSeed.exists_radius_diag
   · exact d.data.subseq inp P (L0.subseq S.sigma_strict)
       (Nat.cast_nonneg q) d.phi_strict hconn d.U d.C0 d.C1 d.aInf
       d.Jinf d.Jbarinf d.gInf hrho
+
+
 
 /-- Select the provider-native payload supplied by a stage seed at one state
 and integer radius. -/
@@ -481,8 +483,6 @@ theorem HasStageSeedOn.exists_radius_diag
       (Nat.cast_nonneg q) d.phi_strict hconn chart d.V d.U d.C0 d.C1
       d.aInf d.Jinf d.Jbarinf d.gInf hrho
 
-/-- Choose the radius-independent seed and its strict master diagonal in one
-base-level package. -/
 theorem MetricCompactBase.exists_stage_diag
     (b : MetricCompactBase (I := I) X)
     (hcomplete : SeqMetricComplete (I := I) X)

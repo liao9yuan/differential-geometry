@@ -1,11 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -21,15 +19,15 @@ open DifferentialGeometry.PDE.RicciFlow
 open TensorMultilinear
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
-variable [CompleteSpace E]
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_iteratedCovGrad_rs_toModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)
@@ -64,8 +62,7 @@ theorem exists_iteratedCovGrad_rs_toModel_domDomCongr
       (iteratedCovGrad (I := I) g r s i Φ) (iteratedCovGrad (I := I) g r s i Φ')
       hτ x d v
 
-set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
+theorem riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)
     (hrel : ∀ (y : M) (d : Tensor0SSpace r I y),
@@ -83,7 +80,7 @@ theorem rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
   obtain ⟨τ, hτ⟩ :=
     exists_iteratedCovGrad_rs_toModel_domDomCongr (I := I) (M := M) g r s σ Φ Φ' hrel i
   have hsec : (iteratedCovGrad (I := I) g r s i Φ').toSection x =
-      rsDomDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x) := by
+      tensorRS_domDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x) := by
     apply ContinuousLinearMap.ext
     intro d
     apply Tensor0SSpace.toModel_injective
@@ -92,14 +89,18 @@ theorem rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
           (iteratedCovGrad (I := I) g r s i Φ').toSection x) d) =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + i) I x from
-          rsDomDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x)) d)
+          tensorRS_domDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x)) d)
     rw [toModel_rsDomDomCongr_apply]
     exact hτ x d
   rw [hsec]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g r (s + i) x τ _
 
-set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_reindexCoeffGen_eq
+/-- Compatibility name for covariant-slot permutation invariance along all jets. -/
+alias rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr :=
+  riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g r s) (σ' : Equiv.Perm (Fin r)) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
@@ -112,6 +113,10 @@ theorem rfns_iteratedCovGrad_reindexCoeffGen_eq
         (I := I) (M := M) g r s R σ' i,
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.reindexCoeffGen_toSection,
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen]
+
+/-- Compatibility name for source-slot reindexing invariance along all jets. -/
+alias rfns_iteratedCovGrad_reindexCoeffGen_eq :=
+  riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
 
 end Connection
 end Integral

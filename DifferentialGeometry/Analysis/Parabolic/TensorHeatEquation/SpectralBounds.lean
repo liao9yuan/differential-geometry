@@ -3,28 +3,6 @@ import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-/-!
-# Pointwise spectral bounds for the tensor heat-power weights
-
-For a closed Riemannian manifold `(M, g)`, this file collects the
-predicate-free pointwise estimate underlying the spectral-power
-construction `(-Δ_∇)^k ∘ e^{t Δ_∇}` on `TensorL2 r s g`: the eigenvalue
-weight `λ^k · exp(-λ t)` is bounded uniformly in `λ ≥ 0` by its global
-maximum `(k/t)^k · e^{-k}` (for `k ≥ 1`, `t > 0`), with the trivial
-`k = 0` case folded in.
-
-## Main results
-
-* `tensorHeatPowerCoeffBound` — the constant `(k/t)^k · e^{-k}`.
-* `tensor_lambda_pow_mul_exp_le` — `λ^k · exp(-λ t) ≤ (k/t)^k · e^{-k}`.
-* `tensor_lambda_pow_mul_exp_sq_le` — the squared form of the bound.
-
-## Sign convention
-
-Geometer convention `Δ_∇ = -∇* ∇`, spectrum `⊆ (-∞, 0]`. `(-Δ_∇)` is
-non-negative; the basis coefficient `λ_i^k · exp(-λ_i · t) ≥ 0`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -51,8 +29,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The constant `(k/t)^k · exp(-k)`, the global max of `λ ↦ λ^k e^{-λt}` on
-`[0, ∞)` for `k ≥ 1` and `t > 0`. -/
 private noncomputable def tensorHeatPowerCoeffBound (k : ℕ) (t : ℝ) : ℝ :=
   (k / t : ℝ) ^ k * Real.exp (-(k : ℝ))
 
@@ -63,7 +39,6 @@ private lemma tensorHeatPowerCoeffBound_nonneg (k : ℕ) {t : ℝ} (ht : 0 < t) 
   · exact pow_nonneg (div_nonneg (Nat.cast_nonneg _) ht.le) k
   · exact (Real.exp_pos _).le
 
-/-- For `λ ≥ 0`, `t > 0` and any `k ≥ 0`, `λ^k · exp(-λt) ≤ (k/t)^k · exp(-k)`. -/
 private lemma tensor_lambda_pow_mul_exp_le
     (k : ℕ) {t : ℝ} (ht : 0 < t) {lam : ℝ} (hlam : 0 ≤ lam) :
     lam ^ k * Real.exp (-(lam * t)) ≤ tensorHeatPowerCoeffBound k t := by
@@ -126,7 +101,6 @@ private lemma tensor_lambda_pow_mul_exp_le
   rw [h_rhs_eq] at h_pow_le
   exact h_pow_le
 
-/-- Squared version of `tensor_lambda_pow_mul_exp_le`. -/
 private lemma tensor_lambda_pow_mul_exp_sq_le
     (k : ℕ) {t : ℝ} (ht : 0 < t) {lam : ℝ} (hlam : 0 ≤ lam) :
     (lam ^ k * Real.exp (-(lam * t))) ^ 2 ≤

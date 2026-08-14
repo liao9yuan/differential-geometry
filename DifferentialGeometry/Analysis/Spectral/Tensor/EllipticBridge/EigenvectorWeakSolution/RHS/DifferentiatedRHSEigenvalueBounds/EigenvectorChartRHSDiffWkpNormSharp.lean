@@ -4,56 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedCarrier
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorArbitraryKRegularity
 
-/-!
-# Sharp chain-length-aware `wkpNorm`-graded bound for the differentiated chart-RHS
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis chart
-center `α : M`, a component multi-index `P₀`, a level `m`, a regularity order
-`K`, and a direction multi-index `l : Fin m → Fin n`, the level-`m`
-differentiated chart-RHS `eigenvectorChartRHSDiff g r s i α P₀ m l` is
-the chart-Euclidean source of the level-`m` carrier; level `0` is the
-seven-summand chart RHS, while each successive level is an indicator of the
-partition-of-unity kernel applied to the chart-density-divided differentiated
-numerator (`eigenvectorChartRHSDiff_succ`).
-
-This file records the chain-length-aware **sharp** order-`K` `wkpNorm` bound:
-given seven *per-`K`-family* quantitative `wkpNorm K'`-bounds — one per source
-atom of the level-`0` chart RHS, indexed by `K' ∈ ℕ` so the recursion can
-invoke the same hypotheses at chains `K, K+1, …` as it deepens — together with
-the structural `MemWkp` regularity of the resolvent chart components on every
-order (the partition-of-unity input threaded through `eigenvectorChartRHSDiff_memWkp`),
-there is a single nonnegative constant `C : ℝ` and exponent `e : ℕ` such that,
-for *every* eigenbasis index `i`,
-
-```
-wkpNorm K 2 (eigenvectorChartRHSDiff … m l) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal (C · (i.fst.val)⁻¹^e) ·
-      ENNReal.ofReal ‖tensorResolventEigenbasisVec … i‖.
-```
-
-## Proof strategy
-
-We prove the bound by `Nat.rec` on `m` with `K` *generalised*: each step
-invokes the inductive hypothesis at *both* chain `K` (Layer D of the
-numerator) *and* chain `K + 1` (Layer E, which peels a chosen weak partial of
-the previous-level data). The five-layer sharp numerator
-`eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp` and the sharp
-polymorphic bridge
-`eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp` package the per-layer
-atoms; the indicator-stripping ae-equality and the smooth reciprocal-density
-coefficient bound transport the bound across the recursion step.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`.
-The resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -64,7 +16,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -89,11 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
-/-- A factor-uniform smooth-coefficient `wkpNorm K 2` Leibniz bound for any
-smooth coefficient on the chart target and a factor that ae-vanishes off the
-compact partition-of-unity kernel. Mirrors the `sharp_wkpNorm_coef_mul_factor_le_uniform`
-helper of `EigenvectorChartRHSDiffNumeratorWkpNormSharp` but is local to this
-file. -/
 lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -108,11 +55,11 @@ lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
       MemWkp (d := Module.finrank ℝ E) K 2
           (fun y => coef y * factor y)
           (chartTargetEuclid (I := I) (M := M) α) ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => coef y * factor y)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
@@ -234,9 +181,9 @@ lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
     (MemWkp_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
   refine ⟨h_memWkp, ?_⟩
-  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_norm_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => coef y * factor y) (chartTargetEuclid (I := I) (M := M) α) =
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => (χ y * coef y) * factor y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     (wkpNorm_congr_ae (d := Module.finrank ℝ E)
@@ -245,18 +192,17 @@ lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] in
-/-- `wkpNorm K of indicator_{chartPouKernel α} Q = wkpNorm K of Q` on the open
-chart target, when `Q` ae-vanishes off the kernel. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpDiff_wkpNorm_indicator_eq
     (α : M) (K : ℕ) {Q : EuclN → ℝ}
     (hQ_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \
           chartPouKernel (I := I) (M := M) α)]
       (fun _ : EuclN => (0 : ℝ))) :
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (Set.indicator (chartPouKernel (I := I) (M := M) α) Q)
         (chartTargetEuclid (I := I) (M := M) α)
-      = wkpNorm (d := Module.finrank ℝ E) K 2 Q
+      = iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 Q
         (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -303,7 +249,7 @@ lemma sharpDiff_wkpNorm_indicator_eq
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_indicator_ae_eq_Q
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiff_eigen_inv_one_le`. -/
+omit [CompleteSpace E] in
 lemma sharpDiff_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -327,7 +273,7 @@ lemma sharpDiff_eigen_inv_one_le
         exact one_ne_zero h_norm.symm)
   exact (one_le_inv₀ hμ_unit.1).mpr hμ_unit.2
 
-/-- Chart-locality-free twin of `sharpDiff_eigen_inv_nn`. -/
+omit [CompleteSpace E] in
 lemma sharpDiff_eigen_inv_nn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -335,7 +281,7 @@ lemma sharpDiff_eigen_inv_nn
   le_trans zero_le_one
     (sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i)
 
-/-- Chart-locality-free twin of `sharpDiff_pow_eigen_inv_mono`. -/
+omit [CompleteSpace E] in
 lemma sharpDiff_pow_eigen_inv_mono
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {a b : ℕ} (hab : a ≤ b) :
@@ -343,7 +289,7 @@ lemma sharpDiff_pow_eigen_inv_mono
   pow_le_pow_right₀
     (sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i) hab
 
-/-- Chart-locality-free twin of `sharpDiff_ofReal_const_pow_eigen_inv_le`. -/
+omit [CompleteSpace E] in
 lemma sharpDiff_ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -355,8 +301,7 @@ lemma sharpDiff_ofReal_const_pow_eigen_inv_le
   exact sharpDiff_pow_eigen_inv_mono (I := I) (M := M) g r s i hke
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiffPerK`. -/
-structure sharpDiffPerK
+structure eigenvectorChartRHSDiffSharpWkpBounds
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) where
 
@@ -374,7 +319,7 @@ structure sharpDiffPerK
   eEig : ℕ → ℕ
   hCeig_nn : ∀ K', 0 ≤ Ceig K'
   hCeig_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α)
@@ -389,7 +334,7 @@ structure sharpDiffPerK
   hCresH_nn : ∀ K', 0 ≤ CresH K'
   hCresH_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (β : M) (Q : TensorCompIdx (E := E) r s) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K' + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
               (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -407,7 +352,7 @@ structure sharpDiffPerK
   hCresL_nn : ∀ K', 0 ≤ CresL K'
   hCresL_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (β : M) (Q : TensorCompIdx (E := E) r s) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
               (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -425,7 +370,7 @@ structure sharpDiffPerK
   hCpar_nn : ∀ K', 0 ≤ Cpar K'
   hCpar_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (P : TensorCompIdx (E := E) r s) (k : Fin (Module.finrank ℝ E)) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((partialLpLimit (I := I) (M := M)
             g r s i α P k :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -442,7 +387,7 @@ structure sharpDiffPerK
   hCcom_nn : ∀ K', 0 ≤ Ccom K'
   hCcom_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (p : TensorCompIdx (E := E) r s) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((componentLpLimit (I := I) (M := M)
             g r s i α p :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -459,7 +404,7 @@ structure sharpDiffPerK
   hCcR_nn : ∀ K', 0 ≤ CcR K'
   hCcR_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (P : TensorCompIdx (E := E) r s) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((crossRightLimitComponent (I := I) (M := M)
             g r s i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -476,7 +421,7 @@ structure sharpDiffPerK
   hCcut_nn : ∀ K', 0 ≤ Ccut K'
   hCcut_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (P : TensorCompIdx (E := E) r s) (l : Fin (Module.finrank ℝ E)) (K' : ℕ),
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
             g r s i α P l :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -489,11 +434,11 @@ structure sharpDiffPerK
               g r s) i‖
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiff_diff_memWkp`. -/
+omit [CompleteSpace E] in
 private lemma sharpDiff_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (H : sharpDiffPerK (I := I) (M := M) g r s α P₀)
+    (H : eigenvectorChartRHSDiffSharpWkpBounds (I := I) (M := M) g r s α P₀)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (m K' : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)) :
     MemWkp (d := Module.finrank ℝ E) K' 2
@@ -504,14 +449,14 @@ private lemma sharpDiff_diff_memWkp
     (fun β Q => H.h_pou_resolv i (m + 1 + K') β Q)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiff_level_zero_wkpNorm`. -/
+omit [CompleteSpace E] in
 private lemma sharpDiff_level_zero_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
-    (H : sharpDiffPerK (I := I) (M := M) g r s α P₀) :
+    (H : eigenvectorChartRHSDiffSharpWkpBounds (I := I) (M := M) g r s α P₀) :
     ∃ (C : ℝ) (e : ℕ), 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal (C * (i.fst.val)⁻¹ ^ e) *
@@ -548,7 +493,7 @@ private lemma sharpDiff_level_zero_wkpNorm
     pow_nonneg hμ_inv_nn _
   have hCmu_aux := hCmu_bd i
   have hCagg_aux := hCagg_bd i
-  change wkpNorm (d := Module.finrank ℝ E) K 2
+  change iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * Cmu) *
@@ -572,17 +517,16 @@ private lemma sharpDiff_level_zero_wkpNorm
   ring_nf
   exact le_refl _
 
-set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiff_recursion`. -/
+omit [CompleteSpace E] in
 private lemma sharpDiff_recursion
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (H : sharpDiffPerK (I := I) (M := M) g r s α P₀) :
+    (H : eigenvectorChartRHSDiffSharpWkpBounds (I := I) (M := M) g r s α P₀) :
     ∀ (m : ℕ) (K : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)),
       ∃ (C : ℝ) (e : ℕ), 0 ≤ C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartRHSDiff (I := I) (M := M)
                 g r s i α P₀ m l)
               (chartTargetEuclid (I := I) (M := M) α)
@@ -629,7 +573,7 @@ private lemma sharpDiff_recursion
             (I := I) (M := M) g r s i α P₀ m (Fin.init l)
       have hAtomA_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (a : Fin (Module.finrank ℝ E)),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
                 g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
               (chartTargetEuclid (I := I) (M := M) α)
@@ -660,7 +604,7 @@ private lemma sharpDiff_recursion
         exact h_eig
       have hAtomB_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (a b : Fin (Module.finrank ℝ E)),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
                 (d := Module.finrank ℝ E) 2 b
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -699,7 +643,7 @@ private lemma sharpDiff_recursion
         rw [h_arith]
         exact h_eig
       have hAtomC_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
                 g r s i α P₀ m (Fin.init l))
               (chartTargetEuclid (I := I) (M := M) α)
@@ -726,7 +670,7 @@ private lemma sharpDiff_recursion
         refine le_trans h_bridge ?_
         exact H.hCeig_bd i (K + m)
       have hAtomD_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartRHSDiff (I := I) (M := M)
                 g r s i α P₀ m (Fin.init l))
               (chartTargetEuclid (I := I) (M := M) α)
@@ -737,7 +681,7 @@ private lemma sharpDiff_recursion
                   (tensorResolventL2_isCompactOperator
                     (I := I) (M := M) g r s) i‖ := hC_K_bd
       have hAtomE_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
                 (d := Module.finrank ℝ E) 2 (l (Fin.last m))
                 (eigenvectorChartRHSDiff (I := I) (M := M)
@@ -807,10 +751,10 @@ private lemma sharpDiff_recursion
         exact eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
           (I := I) (M := M) g r s i α P₀ m l (h_prev_ae_zero i)
       have h_Q_props := hCden_bd numFun h_num_memWkp h_num_ae_zero
-      have h_Q_bd : wkpNorm (d := Module.finrank ℝ E) K 2 Q
+      have h_Q_bd : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 Q
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal Cden *
-            wkpNorm (d := Module.finrank ℝ E) K 2 numFun
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 numFun
               (chartTargetEuclid (I := I) (M := M) α) := h_Q_props.2
       have h_Q_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
@@ -834,7 +778,7 @@ private lemma sharpDiff_recursion
       have h_strip := sharpDiff_wkpNorm_indicator_eq (I := I) (M := M) α K
         (Q := Q) h_Q_ae_zero
       rw [h_strip]
-      have hCnum_bd_i : wkpNorm (d := Module.finrank ℝ E) K 2 numFun
+      have hCnum_bd_i : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 numFun
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal (Cnum * (i.fst.val)⁻¹ ^ eNum) *
             ENNReal.ofReal
@@ -860,16 +804,15 @@ private lemma sharpDiff_recursion
       exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp`. -/
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
     (l : Fin m → Fin (Module.finrank ℝ E))
-    (H : sharpDiffPerK (I := I) (M := M) g r s α P₀) :
+    (H : eigenvectorChartRHSDiffSharpWkpBounds (I := I) (M := M) g r s α P₀) :
     ∃ (C : ℝ) (e : ℕ), 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (eigenvectorChartRHSDiff (I := I) (M := M)
               g r s i α P₀ m l)
             (chartTargetEuclid (I := I) (M := M) α)

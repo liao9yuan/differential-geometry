@@ -1,10 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -21,16 +17,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Local-frame curvature component wrappers
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
+
+
+
+
 
 section LocalFrame
 
 variable {u : Set M}
 
+omit [Fintype Idx] [DecidableEq Idx] in
 theorem ricciCompAt_eq_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -43,6 +40,7 @@ theorem ricciCompAt_eq_frame
   funext a
   fin_cases a <;> simp [IsLocalFrameOn.toBasisAt_coe]
 
+omit [Fintype Idx] [DecidableEq Idx] in
 theorem rm04CompAt_eq_frame
     (Rm04 : Tensor04Section (I := I) (M := M))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -55,6 +53,7 @@ theorem rm04CompAt_eq_frame
   funext a
   fin_cases a <;> simp [IsLocalFrameOn.toBasisAt_coe]
 
+omit [DecidableEq Idx] in
 theorem ricciTraceAt_of_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -69,8 +68,8 @@ theorem ricciTraceAt_of_frame
   simpa [RicciTensorRealizesRm04TraceInFrame, tensor02ToField, tensor04ToField,
     IsLocalFrameOn.toBasisAt_coe] using hRic x X Y
 
-/-- Convention-correct frame Ricci trace in standard slots:
-`Ric_ij = g^{kl} Rm04(e_k,e_i,e_j,e_l)`. -/
+
+
 def RicciTensorRealizesRm04FirstTraceInFrame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -81,8 +80,9 @@ def RicciTensorRealizesRm04FirstTraceInFrame
       ∑ k : Idx, ∑ l : Idx,
         gInv x k l * Rm04 x (vec4 (frame k x) (frame i x) (frame j x) (frame l x))
 
-/-- A local frame turns the convention-correct frame trace into the pointwise
-basis trace. -/
+
+
+omit [DecidableEq Idx] in
 theorem ricciFirstTraceAt_of_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -97,7 +97,8 @@ theorem ricciFirstTraceAt_of_frame
   simpa [RicciTensorRealizesRm04FirstTraceInFrame, IsLocalFrameOn.toBasisAt_coe]
     using hRic x i j
 
-/-- Component form of the convention-correct frame Ricci trace. -/
+
+omit [DecidableEq Idx] in
 theorem ricciComp_eq_firstTrace_rm04_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -116,6 +117,7 @@ theorem ricciComp_eq_firstTrace_rm04_frame
   simp_rw [rm04CompAt_apply]
   exact hAt i j
 
+omit [DecidableEq Idx] in
 theorem scalarTraceAt_of_frame
     (scalar : M -> Real)
     (Ric : Tensor02Section (I := I) (M := M))
@@ -129,6 +131,7 @@ theorem scalarTraceAt_of_frame
   simpa [ScalarRealizesRicciTraceAt, ScalarSectionRealizesRicciTraceInFrame,
     tensor02ToField, IsLocalFrameOn.toBasisAt_coe] using hScalar x
 
+omit [DecidableEq Idx] in
 theorem ricciComp_eq_trace_rm04_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -144,6 +147,7 @@ theorem ricciComp_eq_trace_rm04_frame
   exact ricciComp_eq_trace_rm04 (I := I) (hframe.toBasisAt hx) (Ric x) (Rm04 x)
     (gInv x) (ricciTraceAt_of_frame (I := I) Ric Rm04 gInv frame hframe hRic hx) i j
 
+omit [DecidableEq Idx] in
 theorem scalar_eq_trace_ricci_frame
     (scalar : M -> Real)
     (Ric : Tensor02Section (I := I) (M := M))

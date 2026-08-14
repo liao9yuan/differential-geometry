@@ -2,18 +2,17 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
-/-!
-# Metric lower bound on a compact manifold (the per-pair "(A)" fact)
 
-On a compact manifold, any smooth Riemannian metric `h` is bounded below by a
-positive multiple of any other metric `gRef`: `∃ c > 0, c·gRef(v,v) ≤ h(v,v)`.
-The proof takes the minimum of the `h`-quadratic form over the (compact) `gRef`
-unit tangent bundle — reusing `metricUnit_compact` and `metricUnit_quadCont` —
-and rescales by homogeneity. This is the "head term" input for extracting
-`MetricUniformEquivalentOn` from Cheeger–Gromov convergence.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 

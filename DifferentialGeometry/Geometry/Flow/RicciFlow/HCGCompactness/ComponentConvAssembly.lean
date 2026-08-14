@@ -2,28 +2,26 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvBridge
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# P3 final assembly — Gap B → `metricPreconvInf` (MSM135 Ch3 `lbl351`)
 
-This file assembles the covariant-tower component convergence into the spatial P3
-endpoint `metricPreconvInf`.  It consumes (does NOT edit):
 
-* `bumpTowerCarrier_all`, `hbase_of_framePairs`, `exists_frameData`,
-  `exists_chart_engineInput_family` (`ComponentConvTower.lean`) — the all-orders
-  bump-carrier convergence induction and its frame/base inputs;
-* `metricPreconv_gInf`, `exists_engine_frameCInfConv(_eq_gm)`,
-  `componentConv_covDeriv_zero`, `exists_diag_subseq` (`MetricPreconvDiag.lean`) —
-  the limit metric `gInf` and the engine frame-component convergence;
-* `metricDerivNorm_le_compSq_uniform`, `metricCInfConvOnCompacts_of_normConv`
-  (`MetricPreconvBridge.lean`) — the norm bridge and the spatial endpoint.
 
-The four assembly steps (ComponentConvTower.md "REMAINING"): (1) diagonal → one `φ`;
-(2) limit-pinning; (3) feed `hbase_of_framePairs` → `bumpTowerCarrier_all`;
-(4) finite-cover extraction → `componentConv_covDeriv_of_chartCInf` → `metricPreconvInf`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,20 +34,20 @@ open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- **Finite-family `C∞`-on-compacts diagonal.**  Given a finite family of Euclidean
-section sequences, each `ContDiff ⊤` with uniform iterated-derivative bounds on every
-compact, one subsequence `φ` makes every member converge `C∞`-on-compacts (each to its
-own limit).  Finite fold of `exists_cInf_subseq`, keeping earlier members convergent
-under the further refinement via `MapCInfConvOnCompacts.comp_subseq`. -/
+
+
+
+
+
+omit [CompleteSpace E] in
 theorem exists_cInf_subseq_finiteFamily
     {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [FiniteDimensional Real F]
     {ι : Type*} (s : Finset ι) (Φ : ι → ℕ → E → F)
@@ -80,13 +78,13 @@ theorem exists_cInf_subseq_finiteFamily
     · obtain ⟨Φinf, hΦinf⟩ := hconv p hps
       exact ⟨Φinf, hΦinf.comp_subseq hψ⟩
 
-/-- **Step 1 — the `n²`-frame-pair diagonal (shared `χ`, one subsequence).**  For a
-chart center `x₀`, a compact `K₀ ⊆ source`, and the chart-constant frame `frame`,
-the `n²` order-0 frame-pair carriers `![frameᵢ, frameⱼ]` (built against the metric
-sequence `gSeq ∘ φ`) share ONE bump `χ` (via `exists_chart_engineInput_family`) and,
-via `exists_cInf_subseq_finiteFamily`, ONE further subsequence `ψ` along which every
-pair converges `C∞`-on-compacts to some limit.  This is the `hpairs` precursor; the
-limit is pinned to the `gInf` carrier in `framePairs_pinned`. -/
+
+
+
+
+
+
+
 theorem exists_framePairs_diag
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -104,7 +102,8 @@ theorem exists_framePairs_diag
           (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
             (fun w : M => (covDerivOfField (I := I) gRef
               (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
-                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) Φinf := by
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+                  Φinf := by
   classical
   set Vfam : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) →
       Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
@@ -130,7 +129,7 @@ theorem exists_framePairs_diag
   obtain ⟨Φinf, hΦinf⟩ := hconv (i, j) (Finset.mem_univ _)
   exact ⟨Φinf, hΦinf⟩
 
-/-- Shared-bump frame-pair extraction with an order-dependent family of references. -/
+
 theorem exists_pairs_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -150,7 +149,8 @@ theorem exists_pairs_refs
           (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
             (fun w : M => (covDerivOfField (I := I) gBase
               (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
-                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) Φinf := by
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+                  Φinf := by
   classical
   set Vfam : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) →
       Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
@@ -179,11 +179,11 @@ theorem exists_pairs_refs
   obtain ⟨Φinf, hΦinf⟩ := hconv (i, j) (Finset.mem_univ _)
   exact ⟨Φinf, hΦinf⟩
 
-/-- **Step 2 — limit pinning ⇒ `hpairs`.**  The per-pair `C∞`-on-compacts limit of
-`exists_framePairs_diag` is pinned to the `gInf` frame-pair carrier by pointwise-limit
-uniqueness (`tendsto_of_cInf` + `metricPreconv_gInf`'s `hconv` + `tendsto_nhds_unique`),
-yielding the `hpairs` input to `hbase_of_framePairs`.  `A0Seq k = metricTensorField
-(gSeq (φ (ψ k)))`, `A0inf = metricTensorField gInf`. -/
+
+
+
+
+
 theorem framePairs_pinned
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -213,13 +213,12 @@ theorem framePairs_pinned
     exists_framePairs_diag (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart frame φ
   refine ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, fun i j => ?_⟩
   obtain ⟨Φinf, hΦinf⟩ := hpairs0 i j
-  -- carrier value at a point, for any metric `g`
   have hinner : ∀ (g : SmoothRiemannianMetric I M) (w : M),
       (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) 0) w
           (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
         = g.inner w (frame i w) (frame j w) := by
     intro g w
-    show (Tensor0SBundle.metricTensorField (I := I) g) w
+    change (Tensor0SBundle.metricTensorField (I := I) g) w
         (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
       = g.inner w (frame i w) (frame j w)
     rw [Tensor0SBundle.metricTensorField_apply]
@@ -264,7 +263,7 @@ theorem framePairs_pinned
   rw [hpin] at hΦinf
   exact hΦinf
 
-/-- Pin the order-dependent-reference frame-pair limits to the pointwise metric limit. -/
+
 theorem pairs_pinned_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -301,7 +300,7 @@ theorem pairs_pinned_refs
           (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
         = g.inner w (frame i w) (frame j w) := by
     intro g w
-    show (Tensor0SBundle.metricTensorField (I := I) g) w
+    change (Tensor0SBundle.metricTensorField (I := I) g) w
         (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
       = g.inner w (frame i w) (frame j w)
     rw [Tensor0SBundle.metricTensorField_apply]
@@ -346,11 +345,11 @@ theorem pairs_pinned_refs
   rw [hpin] at hΦinf
   exact hΦinf
 
-/-- **Step 3 — feed `hpairs` into the tower induction.**  Combines `exists_frameData`
-(frame), `framePairs_pinned` (`hpairs`), and `bumpTowerCarrier_all` (via
-`hbase_of_framePairs`) to produce, along one subsequence `ψ`, the all-orders
-`C∞`-on-compacts convergence of the bump tower carriers on the open patch
-`U = target ∩ symm⁻¹(interior K₀)` — for EVERY covariant order `a` and section tuple. -/
+
+
+
+
+
 theorem exists_tower_conv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -377,7 +376,6 @@ theorem exists_tower_conv
   obtain ⟨frame, vbasis, hframeσ, hspan⟩ := exists_frameData (I := I) x₀ hK₀ hK₀chart
   obtain ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, hpairs⟩ :=
     framePairs_pinned (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart frame φ gInf hconv
-  -- the open patch `U = target ∩ symm⁻¹(interior K₀)`
   set U : Set E := (extChartAt I x₀).target ∩
     (extChartAt I x₀).symm ⁻¹' interior K₀ with hUdef
   have hUopen : IsOpen U :=
@@ -397,7 +395,6 @@ theorem exists_tower_conv
     exact ⟨(extChartAt I x₀).map_source hysrc, by
       rw [Set.mem_preimage, (extChartAt I x₀).left_inv hysrc]; exact hy⟩
   refine ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, fun a V => ?_⟩
-  -- restrict `hpairs` from `univ` to `U`
   have hpairsU : ∀ (i j : Fin (Module.finrank Real E)),
       MapCInfConvOnCompacts U
         (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -418,7 +415,7 @@ theorem exists_tower_conv
       (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
       hUKc Finset.univ frame hspan hpairsU V) a V
 
-/-- All-order chart tower convergence after per-order-reference extraction. -/
+
 theorem exists_tower_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -490,15 +487,15 @@ theorem exists_tower_refs
       (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
       hUKc Finset.univ frame hspan hpairsU V) a V
 
-/-- **Step 4a — pointwise covariant-tower component convergence (general order
-`a`).**  The `a ≥ 1` analogue of `componentConv_covDeriv_zero`: along a further
-subsequence `ψ`, the order-`a` covariant-tower component in ANY fibre basis `b`
-converges at the fixed point `x`.  POINTWISE (the norm bridge's component basis is
-point-dependent, so a uniform statement is ill-typed — planner ruling).  Proof:
-chart at `x`, `exists_tower_conv`, `tendsto_of_cInf` at `extChartAt x x`; the section
-`V_q` with `V_q x = b (I0 q)` is `ContMDiffSection.exists_eq_at_gen`, and the carrier
-value equals `component0S b (metricCovDeriv g gRef a x) I0` (`component0S_apply` +
-`metricCovDeriv_eq_covDerivOfField`, both `rfl`). -/
+
+
+
+
+
+
+
+
+
 theorem componentConv_covDeriv_of_chartCInf
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -542,11 +539,13 @@ theorem componentConv_covDeriv_of_chartCInf
   rw [hcar gInf] at htend
   exact htend.congr (fun k => hcar (gSeq (φ (ψ k))))
 
-/-- **Constant-`M` expansion (4b-ii algebraic core).**  A chart-constant frame vector
-for the basis `basisE` of `E` is a CONSTANT-coefficient (`z`-independent) linear combo
-of the chart-constant frame vectors for the model basis `finBasis`, the coefficients
-being the `basisE`-in-`finBasis` change of basis.  Both sides are `(trivAt x₀).symmL p`
-(linear) applied to a fixed `E`-vector, so this is `Basis.sum_repr` + `map_sum`/`map_smul`. -/
+
+
+
+
+
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] in
 theorem tangentConst_basis_expand (x₀ : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (i : Fin (Module.finrank Real E)) (p : M) :
@@ -560,10 +559,12 @@ theorem tangentConst_basis_expand (x₀ : M)
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul]
 
-/-- **The norm-bridge basis `bz` IS the chart-constant frame (4b-ii).**  The basis
-`metricDerivNorm_le_compSq_uniform` uses at `z`, `(trivAt x).localFrame(basisE).toBasisAt hz`,
-equals the chart-constant frame `tangentConstInChart x (basisE i) z`
-(`IsLocalFrameOn.toBasisAt_coe` + `localFrame_apply_of_mem_baseSet`). -/
+
+
+
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 theorem bz_eq_tangentConst (x : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (i : Fin (Module.finrank Real E)) {z : M}
@@ -575,12 +576,14 @@ theorem bz_eq_tangentConst (x : M)
   rw [IsLocalFrameOn.toBasisAt_coe, e.localFrame_apply_of_mem_baseSet basisE hz]
   simp [Bundle.Trivialization.basisAt, tangentConstInChart_apply, he]
 
-/-- **(4b-ii a) `component0S bz` IS a coordinate-frame tower value.**  The good-frame
-component of the covariant tower equals the tower evaluated on the constant-coefficient
-section combo `V^{I0}_q = Σ_j (finBasis.repr (basisE (I0 q)) j) • frame_j` (whose value at
-`z` is `bz (I0 q)`), for `z ∈ baseSet ∩ Kc` (where the chart-constant frame bridge holds).
-Combines `component0S_apply`, `bz_eq_tangentConst`, `tangentConst_basis_expand`, the
-section-sum eval, and `hframeσ`. -/
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem componentBz_eq_covDeriv
     (gRef : SmoothRiemannianMetric I M) (x : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
@@ -601,8 +604,9 @@ theorem componentBz_eq_covDeriv
           (fun q => (∑ j : Fin (Module.finrank Real E),
             (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j) z) := by
   rw [Tensor0SBundle.component0S_apply]
-  show (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
-      (fun q => (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+  change (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
+      (fun q => (((trivializationAt E (TangentSpace I : M → Type _)
+        x).isLocalFrameOn_localFrame_baseSet
           I 1 basisE).toBasisAt hzbase) (I0 q))
     = (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
       (fun q => (∑ j : Fin (Module.finrank Real E),
@@ -636,12 +640,13 @@ private def TowerExtractor
                 (Tensor0SBundle.metricTensorField (I := I) gInf) a) w
                   (fun a => V a w)) z)
 
-/-- **(4b-ii b) per-patch uniform `metricDerivNorm` convergence.**  Around any `x`, there
-is an open `W ∋ x` with compact closure `C` such that, refining any subsequence `ρ`, the
-metric derivative norms converge UNIFORMLY on `C`.  The good-frame components are the
-coordinate-frame tower carriers (`componentBz_eq_covDeriv`), which converge uniformly on
-compacts (`exists_tower_conv`); the `exists_goodFrame_compBound` reverse bound + the
-`ε' = ε/(2·Cu·(√card+1))` finite-sum estimate make `metricDerivNorm` uniformly small. -/
+
+
+
+
+
+
+omit [I.Boundaryless] in
 private theorem exists_patch_core
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hTower : TowerExtractor (I := I) gRef gSeq)
@@ -670,7 +675,6 @@ private theorem exists_patch_core
   obtain ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, htower⟩ :=
     hTower x K₀ hK₀cpt hK₀src (φ₀ ∘ ρ) gInf hconv'
   refine ⟨ψ, hψ, fun p ε hε => ?_⟩
-  -- domain facts
   have hCu' : C ⊆ u' := fun z hz => (hCsub hz).1
   have hCK₀ : C ⊆ interior K₀ := fun z hz => (hCsub hz).2
   have hCbase : C ⊆ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet :=
@@ -681,12 +685,10 @@ private theorem exists_patch_core
     hCcpt.image_of_continuousOn ((continuousOn_extChartAt (I := I) x).mono hCsrc)
   have hEcCU : extChartAt I x '' C ⊆ U := by
     rintro w ⟨z, hz, rfl⟩; exact hImg ⟨z, hCK₀ hz, rfl⟩
-  -- the `V^{I0}` section combo (depends on a, I0)
   set Vfun : (a : ℕ) → (Fin (a + 2) → Fin (Module.finrank Real E)) →
       Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
     fun a I0 q => ∑ j : Fin (Module.finrank Real E),
       (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j with hVfun
-  -- the carrier value at `extChartAt z` equals `component0S bz`
   have hcarval : ∀ (a : ℕ) (I0 : Fin (a + 2) → Fin (Module.finrank Real E))
       (g : SmoothRiemannianMetric I M) {z : M} (hz : z ∈ C),
       χ (extChartAt I x z) * writtenInExtChartAt I 𝓘(Real, Real) x
@@ -701,7 +703,6 @@ private theorem exists_patch_core
       (extChartAt I x).left_inv (hCsrc hz)]
     exact (componentBz_eq_covDeriv (I := I) gRef x basisE frame hframeσ a I0 g
       (hCbase hz) (interior_subset (hCK₀ hz))).symm
-  -- per order `a`, a uniform threshold (vacuous for `a > p`)
   have key : ∀ a : ℕ, ∃ k0a : ℕ, a ≤ p → ∀ k : ℕ, k0a ≤ k → ∀ z ∈ C,
       metricDerivNorm (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z < ε := by
     intro a
@@ -709,7 +710,8 @@ private theorem exists_patch_core
     · set cardI : ℕ := Fintype.card (Fin (a + 2) → Fin (Module.finrank Real E)) with hcardI
       set Cgf : Real :=
         ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) with hCgf
-      have hcard0 : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) := Nat.cast_nonneg _
+      have hcard0 : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
+        Nat.cast_nonneg _
       have hCgf1 : (1 : Real) ≤ Cgf := one_le_pow₀ (by nlinarith)
       have hCgf0 : (0 : Real) < Cgf := lt_of_lt_of_le one_pos hCgf1
       have hsqc : (0 : Real) ≤ Real.sqrt (cardI : Real) := Real.sqrt_nonneg _
@@ -719,7 +721,8 @@ private theorem exists_patch_core
       have perI0 : ∀ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
           ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ z : M, ∀ hz : z ∈ C,
             |Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt (hCbase hz))
                 (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0| ≤ ε' := by
         intro I0
@@ -735,13 +738,15 @@ private theorem exists_patch_core
       rw [metricDerivNorm]
       have hsumle : (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
             Tensor0SBundle.component0S (I := I)
-              (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+              (((trivializationAt E (TangentSpace I : M → Type _)
+                x).isLocalFrameOn_localFrame_baseSet
                   I 1 basisE).toBasisAt (hCbase hz))
               (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0 ^ 2)
           ≤ (cardI : Real) * ε' ^ 2 := by
         calc (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt (hCbase hz))
                 (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0 ^ 2)
             ≤ ∑ _I0 : Fin (a + 2) → Fin (Module.finrank Real E), ε' ^ 2 :=
@@ -752,7 +757,8 @@ private theorem exists_patch_core
           _ = (cardI : Real) * ε' ^ 2 := by
               rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hcardI]
       have hnormle : Tensor0SBundle.normSq0S (I := I) gRef z (a + 2)
-          (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) ≤ Cgf * ((cardI : Real) * ε' ^ 2) :=
+          (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) ≤ Cgf *
+            ((cardI : Real) * ε' ^ 2) :=
         le_trans (hrev z (hCbase hz) (hCu' hz) (a + 2) _) (by gcongr)
       have hCgfsq : Cgf ≤ Cgf ^ 2 := le_self_pow₀ hCgf1 (by norm_num)
       have hsqCgf : Real.sqrt Cgf ≤ Cgf :=
@@ -773,7 +779,7 @@ private theorem exists_patch_core
   refine ⟨(Finset.range (p + 1)).sup k0fn, fun k hk a ha z hz => ?_⟩
   exact hk0fn a ha k (le_trans (Finset.le_sup (Finset.mem_range.2 (Nat.lt_succ_of_le ha))) hk) z hz
 
-/-- Local uniform metric-derivative convergence from fixed-reference derivative bounds. -/
+
 theorem exists_uniform_patch
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -790,7 +796,7 @@ theorem exists_uniform_patch
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_conv (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
 
-/-- Local uniform convergence after extracting with order-dependent reference metrics. -/
+
 theorem exists_patch_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -809,13 +815,12 @@ theorem exists_patch_refs
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
 
-set_option maxHeartbeats 800000 in
-/-- **P3 spatial endpoint (MSM135 Ch3 `lbl351`).**  A sequence of metrics with uniform
-local covariant-derivative bounds (`hbdd`) and a uniform lower bound (`hlow`) has a
-subsequence converging `C^∞`-on-compacts to a smooth limit metric `gInf`.  Assembles the
-limit metric (`metricPreconv_gInf`), the per-patch uniform convergence (`exists_uniform_patch`)
-diagonalised over a countable Lindelöf cover (`exists_diag_subseq`), and the finite good-frame
-cover `hnorm` fed to `metricCInfConvOnCompacts_of_normConv`. -/
+
+
+
+
+
+
 theorem metricPreconvInf (hne : Nonempty M)
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -874,8 +879,7 @@ theorem metricPreconvInf (hne : Nonempty M)
     hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
       (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-set_option maxHeartbeats 800000 in
-/-- Spatial `C^∞` precompactness with an order-dependent family of bound references. -/
+
 theorem metricCInf_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)

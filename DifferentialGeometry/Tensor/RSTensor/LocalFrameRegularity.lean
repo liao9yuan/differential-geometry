@@ -2,16 +2,15 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 
-/-!
-# Local-frame regularity for tensor sections
 
-This module contains tensor-section smoothness utilities that do not depend on
-nabla: chart-constant tensor sections, fixed-chart model representatives, and
-smooth evaluation of tensor and Hom sections on locally smooth slots.
--/
+
+
+
+
+
+
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 
@@ -20,13 +19,11 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ∞ M]
 set_option backward.isDefEq.respectTransparency false in
 theorem tensor0SConstInChart_contMDiffAt_of_mem {r : ℕ}
     (x₀ : M) (β : Tensor0SModel r 𝕜 E) {x : M}
@@ -190,11 +187,11 @@ theorem tensorRS_eval_contMDiffAt {r s : ℕ}
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of a `(0,s)` tensor field evaluated on the chart-constant
-tangent fields from `trivializationAt E (TangentSpace I) x₀`.
 
-This is the tensor-layer replacement for the coordinate-frame coefficient
-smoothness lemma. -/
+
+
+
+
 theorem tensor0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

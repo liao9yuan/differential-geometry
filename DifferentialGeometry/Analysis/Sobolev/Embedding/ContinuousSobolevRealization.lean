@@ -4,61 +4,9 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Module.Completion
 
-/-!
-# The continuous Sobolev embedding as a continuous linear map
-
-For a closed Riemannian manifold `(M, g)` and a supercritical order
-`2 * k > dim M`, the intrinsic order-`2k` Sobolev space of `(r, s)`-tensor
-sections embeds continuously into the sup-norm space of bounded continuous
-tensor sections.  The pointwise bound
-
-  `‖T.toSection x‖_g ≤ C * ‖T.toHs (2k)‖`
-
-(proved on the dense smooth subspace by `tensorPouSobolevHilbert_embedding_Ck`,
-in the genuine Riemannian fibre norm) is here promoted from the dense subspace
-of smooth compactly-supported sections to a genuine **continuous linear map** on
-the whole Sobolev Hilbert space `TensorPouSobolevHilbert g r s (2k)`.
-
-## The sup-norm target Banach space
-
-The model fibre norm of the tensor bundle is chart-dependent and has unbounded
-operator norm on compact multi-chart manifolds (the chart-transition Jacobian
-blows up), so the target cannot be the model-norm bounded-continuous-functions
-space.  Instead the target is built from the **Riemannian fibre norm**: the
-seminorm
-
-  `‖T‖_{C⁰} = ⨆ x, ‖T.toSection x‖_g`
-
-on smooth compactly-supported sections (finite by the embedding bound at
-supercritical order), realized as a `SeminormedAddCommGroup` and completed to a
-genuine Banach space `CSupBanach`.  The completion is the abstract
-chart-locality-free `C⁰` space of `(r, s)`-tensor sections.
-
-## Main definitions
-
-* `gSupSeminorm g r s k` — the `C⁰` Riemannian-fibre sup-seminorm on
-  `SmoothCcTensorHs g r s (2k)` (packaged as an `AddGroupSeminorm`), with its
-  induced `SeminormedAddCommGroup` / `NormedSpace ℝ` structure on the wrapper
-  `CSupTensor g r s k`.
-* `CSupBanach g r s k` — the completion of `CSupTensor g r s k`, a real Banach
-  space (the abstract sup-norm `C⁰` tensor-section space).
-* `tensorHsToC0 g r s k h_super` — the **continuous linear map**
-  `TensorPouSobolevHilbert g r s (2k) →L[ℝ] CSupBanach g r s k`, the unique
-  bounded linear extension of `T ↦ T.toSection` from the dense smooth subspace.
-
-## Main results
-
-* `tensorHsToC0_apply_coe` — `tensorHsToC0` agrees with the canonical sup-norm
-  inclusion of a smooth section on the dense subspace.
-* `tensorHsToC0_opNorm_le` — the operator-norm bound
-  `‖tensorHsToC0 …‖ ≤ C`, the embedding constant.
-* `tensorHsToC0_norm_apply_le` — the pointwise norm bound
-  `‖tensorHsToC0 … u‖ ≤ C * ‖u‖` for every `u : H^{2k}`.
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle Topology Metric
@@ -70,6 +18,54 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+lemma smoothCcTensor_toSection_add_apply
+    (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (S T : SmoothCcTensor g r s) (x : M) :
+    (S + T).toSection x = S.toSection x + T.toSection x := by
+  rw [SmoothCcTensor.toSection_add]; rfl
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+lemma smoothCcTensor_toSection_smul_apply
+    (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (c : ℝ) (T : SmoothCcTensor g r s) (x : M) :
+    (c • T).toSection x = c • (T.toSection x) := by
+  rw [SmoothCcTensor.toSection_smul]; rfl
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+lemma smoothCcTensor_toSection_neg_apply
+    (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (T : SmoothCcTensor g r s) (x : M) :
+    (-T).toSection x = -(T.toSection x) := by
+  rw [SmoothCcTensor.toSection_neg]; rfl
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+lemma smoothCcTensor_toSection_zero_apply
+    (g : SmoothRiemannianMetric I M) {r s : ℕ} (x : M) :
+    (0 : SmoothCcTensor g r s).toSection x = 0 := by
+  rw [SmoothCcTensor.toSection_zero]; rfl
+
+end NormedSpaceModel
+
+section InnerProductSpaceModel
+
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -77,56 +73,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
-/-- The fibre value of a sum of sections is the sum of the fibre values. -/
-lemma smoothCcTensor_toSection_add_apply
-    (g : SmoothRiemannianMetric I M) {r s : ℕ}
-    (S T : SmoothCcTensor g r s) (x : M) :
-    (S + T).toSection x = S.toSection x + T.toSection x := by
-  rw [SmoothCcTensor.toSection_add]; rfl
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
-set_option linter.unusedSectionVars false in
-/-- The fibre value of a scalar multiple of a section is the scalar multiple of
-the fibre value. -/
-lemma smoothCcTensor_toSection_smul_apply
-    (g : SmoothRiemannianMetric I M) {r s : ℕ}
-    (c : ℝ) (T : SmoothCcTensor g r s) (x : M) :
-    (c • T).toSection x = c • (T.toSection x) := by
-  rw [SmoothCcTensor.toSection_smul]; rfl
-
-set_option linter.unusedSectionVars false in
-/-- The fibre value of the negation of a section is the negation of the fibre
-value. -/
-lemma smoothCcTensor_toSection_neg_apply
-    (g : SmoothRiemannianMetric I M) {r s : ℕ}
-    (T : SmoothCcTensor g r s) (x : M) :
-    (-T).toSection x = -(T.toSection x) := by
-  rw [SmoothCcTensor.toSection_neg]; rfl
-
-set_option linter.unusedSectionVars false in
-/-- The fibre value of the zero section is zero. -/
-lemma smoothCcTensor_toSection_zero_apply
-    (g : SmoothRiemannianMetric I M) {r s : ℕ} (x : M) :
-    (0 : SmoothCcTensor g r s).toSection x = 0 := by
-  rw [SmoothCcTensor.toSection_zero]; rfl
-
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- The `C⁰` Riemannian-fibre sup value of a smooth section:
-`⨆ x, ‖T.toSection x‖_g`, in the genuine `g`-fibre norm. -/
 def gSupVal (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) : ℝ :=
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
   ⨆ x : M, ‖T.toSection x‖
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- At supercritical order `2k > dim M`, the fibre-norm range of a smooth
-section is bounded above, with explicit bound `C * ‖T.toHs (2k)‖` provided by
-the proven Sobolev embedding `tensorPouSobolevHilbert_embedding_Ck`. -/
+omit [BoundarylessManifold I M] in
 lemma bddAbove_section_norm_range
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (T : SmoothCcTensor g r s) :
@@ -140,11 +103,10 @@ lemma bddAbove_section_norm_range
   exact ⟨C * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖,
     by rintro _ ⟨x, rfl⟩; exact hC T x⟩
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The `C⁰` sup value is nonnegative. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma gSupVal_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) : 0 ≤ gSupVal (I := I) (M := M) g r s T := by
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -153,11 +115,10 @@ lemma gSupVal_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
   · rw [gSupVal, Real.iSup_of_isEmpty]
   · rw [gSupVal]; exact Real.iSup_nonneg (fun x => norm_nonneg _)
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The `C⁰` sup value of the zero section is zero. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma gSupVal_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     gSupVal (I := I) (M := M) g r s 0 = 0 := by
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -171,11 +132,10 @@ lemma gSupVal_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   · rw [Real.iSup_of_isEmpty]
   · rw [ciSup_const]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The `C⁰` sup value is invariant under negation. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma gSupVal_neg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
     gSupVal (I := I) (M := M) g r s (-T) = gSupVal (I := I) (M := M) g r s T := by
@@ -185,12 +145,9 @@ lemma gSupVal_neg (g : SmoothRiemannianMetric I M) (r s : ℕ)
   congr 1; funext x
   rw [smoothCcTensor_toSection_neg_apply, norm_neg]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- Subadditivity of the `C⁰` sup value (at supercritical order, where the
-ranges are bounded above). -/
+omit [BoundarylessManifold I M] in
 lemma gSupVal_add_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (S T : SmoothCcTensor g r s) :
     gSupVal (I := I) (M := M) g r s (S + T) ≤
@@ -210,11 +167,9 @@ lemma gSupVal_add_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
       rw [smoothCcTensor_toSection_add_apply]; exact norm_add_le _ _
     exact le_trans hpt (add_le_add (le_ciSup hbS x) (le_ciSup hbT x))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- Absolute homogeneity of the `C⁰` sup value (at supercritical order). -/
+omit [BoundarylessManifold I M] in
 lemma gSupVal_smul_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (c : ℝ) (T : SmoothCcTensor g r s) :
     gSupVal (I := I) (M := M) g r s (c • T) ≤
@@ -233,14 +188,9 @@ lemma gSupVal_smul_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     rw [hpt]
     exact mul_le_mul_of_nonneg_left (le_ciSup hbT x) (abs_nonneg c)
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- Absolute homogeneity (equality) of the `C⁰` sup value at supercritical
-order.  At supercritical order all fibre-norm ranges are bounded above, so the
-suprema are genuine; the reverse inequality to `gSupVal_smul_le` is recovered by
-applying `gSupVal_smul_le` to `c⁻¹ • (c • T)`. -/
+omit [BoundarylessManifold I M] in
 lemma gSupVal_smul (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (c : ℝ) (T : SmoothCcTensor g r s) :
     gSupVal (I := I) (M := M) g r s (c • T) =
@@ -258,10 +208,6 @@ lemma gSupVal_smul (g : SmoothRiemannianMetric I M) (r s k : ℕ)
       mul_le_mul_of_nonneg_left hstep (le_of_lt hcpos)
     rwa [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hcpos), one_mul] at h2
 
-/-- A fresh Lean wrapper around the order-`2k` smooth pre-Hilbert sections,
-carrying the `C⁰` Riemannian-fibre sup-seminorm (instead of the `H^{2k}`
-Sobolev norm).  Used as the pre-completion type of the abstract `C⁰` Banach
-space. -/
 structure CSupTensor (g : SmoothRiemannianMetric I M) (r s k : ℕ) where
 
   toHsTensor : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)
@@ -270,12 +216,14 @@ namespace CSupTensor
 
 variable {g : SmoothRiemannianMetric I M} {r s k : ℕ}
 
-/-- Two `CSupTensor` are equal iff their underlying section wrappers agree. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[ext] theorem ext {S T : CSupTensor g r s k}
     (h : S.toHsTensor = T.toHsTensor) : S = T := by
   cases S; cases T; congr
 
-/-- `toHsTensor` is injective. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma toHsTensor_injective :
     Function.Injective
       (fun S : CSupTensor g r s k => S.toHsTensor) := by
@@ -290,20 +238,31 @@ instance : Sub (CSupTensor g r s k) :=
 instance : SMul ℝ (CSupTensor g r s k) :=
   ⟨fun c S => ⟨c • S.toHsTensor⟩⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_zero :
     (0 : CSupTensor g r s k).toHsTensor = 0 := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_add (S T : CSupTensor g r s k) :
     (S + T).toHsTensor = S.toHsTensor + T.toHsTensor := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_neg (S : CSupTensor g r s k) :
     (-S).toHsTensor = -S.toHsTensor := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_sub (S T : CSupTensor g r s k) :
     (S - T).toHsTensor = S.toHsTensor - T.toHsTensor := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_smul (c : ℝ) (S : CSupTensor g r s k) :
     (c • S).toHsTensor = c • S.toHsTensor := rfl
 
 instance : SMul ℕ (CSupTensor g r s k) := ⟨nsmulRec⟩
 instance : SMul ℤ (CSupTensor g r s k) := ⟨zsmulRec⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 @[simp] lemma toHsTensor_nsmul (S : CSupTensor g r s k) (n : ℕ) :
     (n • S).toHsTensor = n • S.toHsTensor := by
   induction n with
@@ -316,6 +275,7 @@ instance : SMul ℤ (CSupTensor g r s k) := ⟨zsmulRec⟩
       have hn : (nsmulRec n S).toHsTensor = n • S.toHsTensor := ih
       rw [toHsTensor_add, hn, succ_nsmul]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 @[simp] lemma toHsTensor_zsmul (S : CSupTensor g r s k) (z : ℤ) :
     (z • S).toHsTensor = z • S.toHsTensor := by
   rcases z with n | n
@@ -337,7 +297,6 @@ instance : AddCommGroup (CSupTensor g r s k) :=
     toHsTensor_nsmul
     toHsTensor_zsmul
 
-/-- Additive-monoid hom to the underlying order-`2k` section wrapper. -/
 def toHsTensorAddHom :
     CSupTensor g r s k →+ IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) where
   toFun := fun S => S.toHsTensor
@@ -347,37 +306,39 @@ def toHsTensorAddHom :
 instance : Module ℝ (CSupTensor g r s k) :=
   toHsTensor_injective.module ℝ toHsTensorAddHom toHsTensor_smul
 
-/-- The wrapping `SmoothCcTensorHs g r s (2k) → CSupTensor g r s k` as an
-`ℝ`-linear map (it reuses the underlying additive / module structure). -/
 def ofHs :
     IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) →ₗ[ℝ] CSupTensor g r s k where
   toFun := fun S => ⟨S⟩
   map_add' := fun _ _ => rfl
   map_smul' := fun _ _ => rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 @[simp] lemma ofHs_apply
     (S : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
     (ofHs (g := g) (r := r) (s := s) (k := k) S).toHsTensor = S := rfl
 
-/-- The underlying raw smooth section of a `CSupTensor`. -/
 def toCc (S : CSupTensor g r s k) : SmoothCcTensor g r s :=
   S.toHsTensor.toCcTensor
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCc_zero : (0 : CSupTensor g r s k).toCc = 0 := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCc_add (S T : CSupTensor g r s k) :
     (S + T).toCc = S.toCc + T.toCc := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCc_neg (S : CSupTensor g r s k) : (-S).toCc = -S.toCc := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCc_smul (c : ℝ) (S : CSupTensor g r s k) :
     (c • S).toCc = c • S.toCc := rfl
 
 end CSupTensor
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The `C⁰` Riemannian-fibre sup-seminorm packaged as an `AddGroupSeminorm` on
-`CSupTensor g r s k`, valid at supercritical order `2k > dim M`. -/
 def gSupAddGroupSeminorm (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
     AddGroupSeminorm (CSupTensor g r s k) where
@@ -396,12 +357,8 @@ def gSupAddGroupSeminorm (g : SmoothRiemannianMetric I M) (r s k : ℕ)
       gSupVal (I := I) (M := M) g r s S.toCc
     rw [CSupTensor.toCc_neg, gSupVal_neg]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The `SeminormedAddCommGroup` structure on `CSupTensor g r s k` induced by the
-`C⁰` sup-seminorm, valid at supercritical order. -/
 @[reducible] noncomputable def csupSeminormedAddCommGroup
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -409,24 +366,17 @@ set_option linter.unusedSectionVars false in
   AddGroupSeminorm.toSeminormedAddCommGroup
     (gSupAddGroupSeminorm (I := I) (M := M) g r s k hk)
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The norm on `CSupTensor g r s k` (with the sup-seminorm structure) is exactly
-the `C⁰` sup value of the underlying section. -/
+omit [BoundarylessManifold I M] in
 lemma csupSeminormedAddCommGroup_norm
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (S : CSupTensor g r s k) :
     @norm _ (csupSeminormedAddCommGroup (I := I) (M := M) g r s k hk).toNorm S =
       gSupVal (I := I) (M := M) g r s S.toCc := rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The `NormedSpace ℝ` structure on `CSupTensor g r s k` for the sup-seminorm,
-valid at supercritical order. -/
 @[reducible] noncomputable def csupNormedSpace
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -441,9 +391,6 @@ valid at supercritical order. -/
     rw [h1, h2, CSupTensor.toCc_smul,
       gSupVal_smul (I := I) (M := M) g r s k hk c S.toCc, Real.norm_eq_abs]
 
-/-- The abstract `C⁰` tensor-section Banach space: the completion of
-`CSupTensor g r s k` in the `C⁰` sup-seminorm.  This is a genuine real Banach
-space (complete, `NormedAddCommGroup`, `NormedSpace ℝ`), chart-locality-free. -/
 noncomputable def CSupBanach (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) : Type _ :=
   letI := csupSeminormedAddCommGroup (I := I) (M := M) g r s k hk
@@ -474,13 +421,8 @@ instance instCSupBanachCompleteSpace
   (inferInstance :
     CompleteSpace (UniformSpace.Completion (CSupTensor g r s k)))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The smooth-level `C⁰` inclusion: a linear map sending a smooth section
-(viewed at order `2k`) to its image in the abstract `C⁰` Banach space.  It is
-the composite of `CSupTensor.ofHs` with the completion coercion `toComplL`. -/
 noncomputable def smoothToC0Lin
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -493,12 +435,9 @@ noncomputable def smoothToC0Lin
       UniformSpace.Completion (CSupTensor g r s k)).toLinearMap.comp
     (CSupTensor.ofHs (g := g) (r := r) (s := s) (k := k))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The norm of the smooth-level `C⁰` inclusion of a section equals the `C⁰`
-sup value of the underlying raw section. -/
+omit [BoundarylessManifold I M] in
 lemma norm_smoothToC0Lin
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E)
@@ -518,12 +457,9 @@ lemma norm_smoothToC0Lin
   rw [hval, csupSeminormedAddCommGroup_norm (I := I) (M := M) g r s k hk]
   rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The norm of the canonical inclusion of `S` into the source Sobolev Hilbert
-space equals the `H^{2k}` norm of the underlying section. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma norm_coe_toCompl_eq_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (S : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
@@ -536,15 +472,9 @@ lemma norm_coe_toCompl_eq_toHs
     cases S; rfl
   rw [hrhs, hS]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The smooth-level `C⁰` inclusion is bounded by the embedding constant times
-the `H^{2k}` inclusion: this is the proven Sobolev embedding bound, repackaged
-on the dense subspace.  Output: there is `0 < C` such that for every smooth
-section `S`,
-`‖smoothToC0Lin S‖_{C⁰} ≤ C * ‖(S : H^{2k})‖`. -/
+omit [BoundarylessManifold I M] in
 lemma exists_smoothToC0Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -567,18 +497,8 @@ lemma exists_smoothToC0Lin_norm_le
       (mul_nonneg (le_of_lt hCpos) (norm_nonneg _))
     exact hC S.toCcTensor x
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- **The continuous Sobolev embedding as a continuous linear map.**
-
-At supercritical order `2k > dim M`, the intrinsic order-`2k` Sobolev Hilbert
-space of `(r, s)`-tensor sections embeds **continuously and linearly** into the
-abstract `C⁰` Banach space `CSupBanach g r s k hk` (bounded continuous sections
-in the Riemannian fibre sup-norm).  It is the unique bounded linear extension of
-the smooth-level inclusion `smoothToC0Lin` along the dense linear coercion into
-the completion, produced by `LinearMap.extendOfNorm`. -/
 noncomputable def tensorHsToC0
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -589,12 +509,9 @@ noncomputable def tensorHsToC0
       IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) →L[ℝ]
         TensorPouSobolevHilbert g r s (2 * k)).toLinearMap
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- The dense linear coercion `SmoothCcTensorHs g r s (2k) → H^{2k}` has dense
-range. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma denseRange_toComplL_toLinearMap
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     DenseRange
@@ -610,13 +527,9 @@ lemma denseRange_toComplL_toLinearMap
   rw [hcoe]
   exact UniformSpace.Completion.denseRange_coe
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- **Agreement on the dense smooth subspace.**  On a smooth section `S`, the
-continuous linear embedding `tensorHsToC0` agrees with the smooth-level
-inclusion `smoothToC0Lin S` (the canonical `C⁰` image of `S`). -/
+omit [BoundarylessManifold I M] in
 theorem tensorHsToC0_coe
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E)
@@ -634,13 +547,9 @@ theorem tensorHsToC0_coe
     ⟨C, hC⟩ S
   exact h
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- **The pointwise norm bound.**  For every Sobolev element `u : H^{2k}`,
-`‖tensorHsToC0 u‖_{C⁰} ≤ C * ‖u‖_{H^{2k}}`, where `C` is the embedding constant.
-This is the headline continuous embedding `H^{2k} ↪ C⁰`. -/
+omit [BoundarylessManifold I M] in
 theorem tensorHsToC0_norm_apply_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -652,12 +561,9 @@ theorem tensorHsToC0_norm_apply_le
   exact LinearMap.norm_extendOfNorm_apply_le
     (denseRange_toComplL_toLinearMap (I := I) (M := M) g r s k) C hC u
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- **The operator-norm bound.**  The operator norm of the continuous Sobolev
-embedding `tensorHsToC0` is bounded by the embedding constant `C`. -/
+omit [BoundarylessManifold I M] in
 theorem tensorHsToC0_opNorm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -668,16 +574,9 @@ theorem tensorHsToC0_opNorm_le
     (denseRange_toComplL_toLinearMap (I := I) (M := M) g r s k)
     (le_of_lt hCpos) hC
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
-/-- **The eigenfunction sup bound (unit-element form).**  For a Sobolev element
-`u` of unit `H^{2k}` norm, its `C⁰` (Riemannian-fibre sup) norm is bounded by
-the embedding constant `C`.  Applied to an `H^{2k}`-normalised eigentensor of
-the resolvent `(1 - Δ)`, this is exactly the per-eigenfunction sup bound used by
-the spectral counting argument: if `‖b‖_{H^{2k}} ≤ (1 + λ)^k` then
-`‖tensorHsToC0 b‖_{C⁰} ≤ C (1 + λ)^k`. -/
+omit [BoundarylessManifold I M] in
 theorem tensorHsToC0_norm_le_of_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -688,6 +587,8 @@ theorem tensorHsToC0_norm_le_of_norm_le
   refine ⟨C, hCpos, fun u B hB => ?_⟩
   calc ‖tensorHsToC0 (I := I) (M := M) g r s k hk u‖ ≤ C * ‖u‖ := hC u
     _ ≤ C * B := mul_le_mul_of_nonneg_left hB (le_of_lt hCpos)
+
+end InnerProductSpaceModel
 
 end DifferentialGeometry.PDE.RicciFlow
 

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifH1L6RS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifLp63
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 
 /-!
 # Class-first mixed H1-H2 application estimate

@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffTime
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
-/-!
-# The moving scalar Laplacian as an H2-to-H0 operator
 
-This file postcomposes the genuine fixed-`L2` moving Laplacian difference with
-the canonical isometric identification `TensorL2 0 0 gT ≃ H0(gT)`.  The
-postcomposition preserves the operator norm exactly.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -49,8 +49,8 @@ private noncomputable def scalarL2ToH0
     (tensorResolventL2_isCompactOperator
       (I := I) (M := M) g 0 0)).symm.toLinearIsometry
 
-/-- The genuine moving scalar Laplacian perturbation on the fixed spectral
-scale, with its `L²(gT)` output identified isometrically with `H⁰(gT)`. -/
+
+
 noncomputable def lapDiffA20
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -61,7 +61,7 @@ noncomputable def lapDiffA20
     (G.metric (T : Real))).toContinuousLinearMap.comp
       (lapDiffA2 (I := I) (M := M) G T s)
 
-/-- Evaluation of the `H²(gT) → H⁰(gT)` moving Laplacian perturbation. -/
+
 @[simp] theorem lapDiffA20_apply
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -74,8 +74,8 @@ noncomputable def lapDiffA20
         (lapDiffA2 (I := I) (M := M) G T s v) :=
   rfl
 
-/-- The order-zero identification preserves the moving perturbation's
-operator norm. -/
+
+
 theorem lapDiffA20_norm
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -86,8 +86,8 @@ theorem lapDiffA20_norm
   exact (scalarL2ToH0 (I := I) (M := M)
     (G.metric (T : Real))).norm_toContinuousLinearMap_comp
 
-/-- Continuity of the fixed-`L²` operator family transfers through the
-canonical isometric `L² ≃ H⁰` output identification. -/
+
+
 theorem lapDiffA20_cont_of
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -114,8 +114,8 @@ theorem lapDiffA20_cont_of
         (G.metric (T : Real))).toContinuousLinearMap
   exact post.continuous.comp_continuousOn hcont
 
-/-- On the finite spectral core, the order-zero operator realizes the genuine
-smooth Laplacian difference after applying the canonical `H⁰ ≃ L²` map. -/
+
+
 theorem lapDiffA20_core
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -133,8 +133,8 @@ theorem lapDiffA20_core
   intro v
   rw [lapDiffA20_apply, LinearIsometryEquiv.apply_symm_apply, hs v]
 
-/-- The applied `H² → H⁰` moving-Laplacian graph lies in the norm closure of
-its genuine smooth finite-core graph. -/
+
+
 theorem lapDiffA20_graph
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -193,8 +193,8 @@ theorem lapDiffA20_graph
   refine ⟨v, Prod.ext rfl ?_⟩
   exact (hs v).symm
 
-/-- Testing the applied moving-Laplacian difference against a finite spectral
-vector lies in the scalar image of the genuine smooth-core graph closure. -/
+
+
 theorem lapDiffA20_test
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -273,8 +273,8 @@ theorem lapDiffA20_test
     (lapDiffCore_pair (I := I) (M := M)
       (G.metric (T : Real)) (G.metric ((T : Real) - s)) v w).symm
 
-/-- The support-independent finite-core modulus is unchanged by the
-isometric `L² ≃ H⁰` output identification. -/
+
+
 theorem lapDiffA20_bound
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -296,8 +296,8 @@ theorem lapDiffA20_bound
   simpa only [lapDiffA20_apply,
     LinearIsometryEquiv.norm_map] using hs v hv
 
-/-- The genuine moving scalar Laplacian perturbation tends to zero in the
-consumer's `H²(gT) → H⁰(gT)` operator norm. -/
+
+
 theorem lapDiffA20_zero
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

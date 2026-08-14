@@ -28,7 +28,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -36,7 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)] in
@@ -69,6 +69,7 @@ private theorem curveVel_affine
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
 private theorem tailCurve_eq
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -119,7 +120,7 @@ private theorem tailCurve_eq
       have h := congrFun hcontinue ((1 - s₀) * t)
       simpa only [γ, intrinsicVelocityLift] using h.symm
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem tailVel_one
@@ -160,6 +161,7 @@ private theorem tailVel_one
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
 /-- Every initial segment of a finite-distance minimizing intrinsic radial
 geodesic has the expected fraction of the total endpoint distance. -/
 theorem minSeg_edist
@@ -225,7 +227,7 @@ theorem minSeg_edist
   exact le_antisymm hleft
     ((ENNReal.add_le_add_iff_right ENNReal.ofReal_ne_top).mp hsum)
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem minTail_edist

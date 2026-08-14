@@ -2,22 +2,21 @@ import DifferentialGeometry.Geometry.Metric.SmoothVectorFieldExtGlobal
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
-/-!
-# Gradient variation: the fixed-endpoint variation realising a base direction
 
-`exists_gradVariation`: along the central geodesic `γ = intrinsicGeodesic g q u` from `q`
-to `pt = γ L`, and for any base direction `w : TangentSpace I q`, there is a smooth
-fixed-endpoint variation `f` with central curve `γ`, fixed final endpoint `pt`, and base
-velocity `w` (`mfderiv (f · 0) 0 1 = w`).
 
-The launch field is the faded global vector field `(1 - t/L) • (X (γ t))`, where `X` is a
-global smooth vector field with `X q = w` (`exists_contMDiff_vectorField_eq`), and the
-variation is produced by `exists_expVar_fixEnd`.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Set Function Filter Manifold Bundle
 open scoped Manifold Topology ContDiff ENNReal
@@ -31,7 +30,7 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,7 +39,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The fixed-endpoint variation realising base direction `w` along the central geodesic. -/
+omit [ConnectedSpace M] in
 theorem exists_gradVariation
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

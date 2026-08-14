@@ -25,7 +25,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -36,6 +36,8 @@ section Radial
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Before the first selected normal-coordinate boundary, a linearly
 independent family of variation directions gives linearly independent radial
 Jacobi fields at every nonzero time.  Time scaling reduces the claim to the
@@ -221,6 +223,8 @@ private noncomputable def endpointGram
       (radialJacobiField (I := I) g p x (v i) 1)
       (radialJacobiField (I := I) g p x (v j) 1)
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma endpoint_det_basis
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (B : Module.Basis (Option ι) ℝ E)
@@ -284,6 +288,8 @@ private lemma bilin_smul_both
   simp only [smul_eq_mul, pow_two]
   ring
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma endpoint_det_split
     (g : SmoothRiemannianMetric I M) (p : M) (u : E)
     (B : Module.Basis (Option ι) ℝ E)
@@ -382,6 +388,8 @@ private lemma endpoint_det_split
   simpa only [mul_comm] using hdet
 
 omit [Fintype ι] [DecidableEq ι] in
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma curveGram_end
     (g : SmoothRiemannianMetric I M) (p : M) (u : E)
     (B : Module.Basis (Option ι) ℝ E) {r : ℝ}
@@ -413,6 +421,7 @@ private lemma curveGram_end
     (radialJacobiField (I := I) g p (r • u) (B (some i)) 1)
     (radialJacobiField (I := I) g p (r • u) (B (some j)) 1)
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma curveGram_det_scale
     (g : SmoothRiemannianMetric I M) (p : M) (u : E)
     (B : Module.Basis (Option ι) ℝ E) {r : ℝ}
@@ -424,12 +433,13 @@ private lemma curveGram_det_scale
   rw [curveGram_end (I := I) g p u B hrad, Matrix.det_smul]
   rw [← pow_mul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma model_det_ne
     (B : Module.Basis (Option ι) ℝ E) :
     (modelBasisFor B).det B ≠ 0 :=
   ((modelBasisFor B).isUnit_det B).ne_zero
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma density_det_eq
     (g : SmoothRiemannianMetric I M) (p : M) (u : E)
     (B : Module.Basis (Option ι) ℝ E)
@@ -462,6 +472,7 @@ private lemma density_det_eq
           (fun i => radialJacobiField (I := I) g p u (B (some i))) r).det := by
       rw [hcurve]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Polar decomposition of the normal-coordinate density.
 
 `B none` is the radial direction and `B (some i)` are transverse at the

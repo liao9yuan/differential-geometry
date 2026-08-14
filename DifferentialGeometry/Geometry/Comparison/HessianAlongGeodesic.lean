@@ -4,14 +4,14 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import Mathlib.Analysis.Convex.Deriv
 
-/-!
-# Hessians along geodesics
 
-This file identifies the ordinary second derivative of a scalar function along
-a smooth geodesic with its Riemannian Hessian evaluated on the geodesic
-velocity.  A local-smoothness form then feeds the standard one-dimensional
-positive-second-derivative criterion for strict convexity.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,6 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private theorem chartRep_sec_diff
     {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (X : ∀ x : M, TangentSpace I x)
@@ -57,6 +58,7 @@ private theorem chartRep_sec_diff
   exact (contMDiffAt_iff_contDiffAt.mp hcomp).differentiableAt (by simp)
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem deriv_comp_grad
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -78,9 +80,11 @@ private theorem deriv_comp_grad
   exact (gradFun_metricDual (I := I) g f (γ t)
     ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)).symm
 
-/-- At a point where a smooth curve satisfies the geodesic equation, the
-ordinary second derivative of a globally smooth scalar function is its
-Riemannian Hessian evaluated twice on the curve velocity. -/
+
+
+
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv2_comp_geo_at
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -134,9 +138,10 @@ theorem deriv2_comp_geo_at
       simpa only [W, gradient_eq_gradFun] using
         (hessFun_eq_cov_grad (I := I) g hf (γ t) (W t) (W t)).symm
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Along a smooth geodesic, the ordinary second derivative of a globally
-smooth scalar function is its Riemannian Hessian evaluated twice on the
-geodesic velocity. -/
+smooth scalar function is its Riemannian Hessian on the geodesic velocity. -/
 theorem deriv2_comp_geo
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -148,8 +153,10 @@ theorem deriv2_comp_geo
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
   deriv2_comp_geo_at (I := I) g hf hγ (hgeo t)
 
-/-- Local-smoothness form of `deriv2_comp_geo`.  Only a smooth germ of the
-scalar function at the point on the geodesic is needed. -/
+
+
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv2_geo_on_at
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
@@ -175,8 +182,9 @@ theorem deriv2_geo_on_at
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) := by
       rw [hessFun_congr (I := I) g hFf]
 
-/-- Local-smoothness form of `deriv2_comp_geo`.  Only a smooth germ of the
-scalar function at the point on the geodesic is needed. -/
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+/-- Local-smoothness form along a globally geodesic curve. -/
 theorem deriv2_comp_geo_on
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
@@ -188,9 +196,10 @@ theorem deriv2_comp_geo_on
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
   deriv2_geo_on_at (I := I) g hU hf hγ (hgeo t) ht
 
-/-- Positive Hessian along a smooth geodesic implies strict convexity of the
-restricted scalar function.  Only the geodesic equation on the interior of the
-convex parameter set is required. -/
+
+
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem strictConvex_geo_on
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
@@ -210,6 +219,8 @@ theorem strictConvex_geo_on
   rw [deriv2_geo_on_at (I := I) g hU hf hγ (hgeo t ht) (hmem ht)]
   exact hpos t ht
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Positive Hessian along a smooth geodesic implies strict convexity of the
 restricted scalar function. -/
 theorem strictConvex_geo

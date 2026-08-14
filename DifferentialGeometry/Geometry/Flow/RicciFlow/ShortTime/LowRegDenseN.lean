@@ -20,15 +20,15 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
-open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -41,7 +41,8 @@ theorem smoothHs_inj (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     Function.Injective (smoothCcToTensorHs (I := I) (M := M) g σ) := by
   intro S T hST
   apply ccToHs_injective (I := I) (M := M) g 2 σ
-  ext i
+  apply tensorHs.ext
+  funext i
   have hi := congrArg (fun u => u.coeff i) hST
   simpa only [ccTensorToHs_coeff, smoothCcToTensorHs_coeff] using hi
 
@@ -53,15 +54,15 @@ theorem smoothN_wd
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T') δ')
     (hTT' : smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T =
       smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T') :
-    deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ =
-      deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ' := by
+    deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a T hδ_lt hδ =
+      deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ' := by
   have hT : T = T' :=
     smoothHs_inj (I := I) (M := M) g₀ ((a : ℝ) + 2) hTT'
   subst T'
@@ -73,17 +74,18 @@ theorem smoothN_wd
     rw [tensorSectionRealizeMetric_inner, tensorSectionRealizeMetric_inner]
   have hrem :
       deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ =
-      deTurckSmoothRemainder (I := I) g₀ g_bg T hδ'_lt hδ' := by
+        deTurckSmoothRemainder (I := I) g₀ g_bg T hδ'_lt hδ' := by
     apply SmoothCcTensor.ext
     change
       (deTurckRHSSection (I := I) g_bg
           (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection -
-            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T).toSection =
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 T).toSection =
         (deTurckRHSSection (I := I) g_bg
           (tensorSectionRealizeMetric (I := I) g₀ T hδ'_lt hδ')).toSection -
-            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T).toSection
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 T).toSection
     rw [hg]
-  ext i
+  apply tensorHs.ext
+  funext i
   rw [deTurckSmoothN_coeff, deTurckSmoothN_coeff, hrem]
 
 /-- Smooth spectral rank-two tensors which remain in the lower `H2` state
@@ -91,8 +93,7 @@ ball, viewed as a subset of that state-ball subtype. -/
 def smoothCore (g₀ : SmoothRiemannianMetric I M) (R : ℝ) :
     Set (lowerState (I := I) (M := M) g₀ 1 R) :=
   lowerCore
-    (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀
-      (((1 : ℕ) : ℝ) + 2)))
+    (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)))
     (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
       (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)) R
 
@@ -101,8 +102,7 @@ strong `H3` topology of the state subtype. -/
 theorem smoothCore_dense (g₀ : SmoothRiemannianMetric I M)
     {R : ℝ} (hR : 0 < R) : Dense (smoothCore (I := I) (M := M) g₀ R) := by
   exact dense_lowerCore
-    (smoothCcToTensorHs_denseRange (I := I) (M := M) g₀
-      (((1 : ℕ) : ℝ) + 2))
+    (smoothCcToTensorHs_denseRange (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2))
     (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
       (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)) hR
 
@@ -122,7 +122,7 @@ lower `H2` radius. -/
 theorem coreSymm_h2 (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
     (x : smoothCore (I := I) (M := M) g₀ R) :
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
-      (symmS (I := I) (M := M) g₀ (coreRep g₀ x))‖ ≤ R := by
+      (ccTensor02Symm (I := I) (M := M) g₀ (coreRep g₀ x))‖ ≤ R := by
   have hsymm := norm_smoothCcToTensorHs_symmS_le
     (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) (coreRep g₀ x)
   have hincl := tensorHsInclusion_smoothCcToTensorHs
@@ -134,7 +134,7 @@ theorem coreSymm_h2 (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
     x.1.2
   calc
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
-        (symmS (I := I) (M := M) g₀ (coreRep g₀ x))‖ ≤
+        (ccTensor02Symm (I := I) (M := M) g₀ (coreRep g₀ x))‖ ≤
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
           (coreRep g₀ x)‖ := hsymm
     _ = ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -152,12 +152,12 @@ lower state ball, with realization supplied exactly from that lower ball. -/
 def coreN (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ} (hδ : δ < 1)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
-        gFibreOpBound (I := I) (M := M) g₀
+        metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ) :
     smoothCore (I := I) (M := M) g₀ R →
       tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ) :=
-  fun x => deTurckSmoothN (I := I) (M := M) g₀ g_bg 1
-    (symmS (I := I) (M := M) g₀ (coreRep g₀ x)) hδ
+  fun x => deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg (1 : ℕ)
+    (ccTensor02Symm (I := I) (M := M) g₀ (coreRep g₀ x)) hδ
     (hreal _ (coreSymm_h2 (I := I) (M := M) g₀ x))
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

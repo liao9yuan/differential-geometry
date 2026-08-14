@@ -11,59 +11,8 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppi
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.PouCutoffComponentBridge
 
-/-!
-# `C^∞`/`Cᵏ`-Banach completeness of the smooth-tensor space
-
-This file isolates the **`Cᵏ`-Banach completeness keystone** of the smooth,
-compactly-supported tensor space: a sequence of smooth tensors that is Cauchy in
-*every* spectral order `H^{2k}` (i.e. `SmoothCcTensor.toHs (2k)`) and converges in
-`L²` to an abstract limit `u : TensorL2 r s g` has its `L²` limit `u` *realised by a
-genuine smooth section*.
-
-```
-theorem smoothCcTensor_limit_of_allOrders_toHs_cauchy
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
-    (F : ℕ → SmoothCcTensor g r s)
-    (hF_cauchy : ∀ k : ℕ, CauchySeq (fun n => SmoothCcTensor.toHs (2*k) (F n)))
-    (hF_L2 : Tendsto (fun n => (F n : TensorL2 r s g)) atTop (𝓝 u)) :
-    ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u
-```
-
-This is the precise `Cᵏ`-Banach-completeness content of the all-orders spectral
-Sobolev embedding `⋂_σ Hˢ ⊆ C^∞`. The smooth inclusion `SmoothCcTensor ↪ TensorL2`
-is only `DenseRange` (not a closed embedding), so this is a genuine theorem, not a
-formality: the abstract `L²` limit `u` lives in the completion, and the keystone
-exhibits an honest smooth representative.
-
-## The argument
-
-For each chart center `α : M` and component multi-index `P : TensorCompIdx r s`, the
-chart-pushed raw scalar components
-`u_n := chartPushedRaw I α (tensorChartComponentRaw g r s (F n) α P.1 P.2) : EuclN → ℝ`
-are uniformly Cauchy in *every* `Cᵐ` on the open Euclidean chart target
-(`chartComponentScalar_chartPushed_allOrder_uniformCauchy`): one combines the
-pointwise reverse-Christoffel order-peeling
-(`iteratedFDeriv` of a chart component is controlled, up to uniform
-Christoffel-coefficient corrections, by the order-`0` content of the iterated
-covariant gradients `∇^i (F n)`) with the unconditional `Cᵐ` tensor Sobolev
-embedding (`∑_{j≤m} ‖(∇^j T).toSection x‖ ≤ C·‖T.toHs(2k)‖`, `2k > finrank + 2m`),
-so that the `toHs(2k)`-Cauchy hypothesis pushes down to per-chart `Cᵐ`-Cauchy of
-the components.
-
-The Euclidean uniform-limit-of-derivatives machinery
-(`EuclideanMorrey.cauchyLimitFun` / `iteratedFDeriv_cauchyLimitFun_eq`) then produces
-a common `C^∞` pointwise limit `u_∞,α,P : EuclN → ℝ`, compactly supported strictly
-inside the chart target. Assembling these via
-`tensorBundleSectionOfChartComponents` and summing against the chart-atlas partition
-of unity yields a global `SmoothCcTensor`, whose `L²` chart components agree a.e.
-with those of `u`; by `tensorL2_eq_of_chartComponent_eq` its `L²` class is `u`.
--/
 
 noncomputable section
-
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Topology Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -81,7 +30,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Analysis.Sobolev.EuclideanMorrey
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -95,27 +44,17 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The order-`0` reverse fibre bound (the converse of
-`riemannianFiberNormSq_le_raw_components_on_pouTsupport`).**
-
-For a chart base point `α` and tensor ranks `(r, s)`, there is a non-negative
-constant `C` such that for every smooth compactly-supported section `S` and every
-point `b` in the closed support of the chart-atlas partition-of-unity weight at
-`α`, the order-`0` raw content `zeroContentR g r s S α y` (the sum of magnitudes
-of the chart-`α` raw scalar components), read at the chart-target image `y` of
-`b`, is bounded by `C` times the intrinsic Riemannian fibre norm
-`‖S.toSection b‖`.
-
-The chart-`α` trivialisation is a continuous-linear iso on the chart source whose
-operator norm is, by
-`tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional`, uniformly
-bounded on the compact partition-of-unity kernel; composing with the fixed
-component projections `tensorChartComponentProjection` gives the bound. This is
-the missing converse that converts the pointwise raw content produced by the
-reverse-Christoffel order-peeling into the intrinsic fibre norms controlled by the
-`Cᵐ` tensor Sobolev embedding. -/
+omit [BoundarylessManifold I M] in
+omit [I.Boundaryless] in
 theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -123,28 +62,24 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s) {y : EuclN},
         y ∈ chartPouKernel (I := I) (M := M) α →
-        zeroContentR (I := I) (M := M) g r s S α y ≤
+        tensorComponentAbsSum (I := I) (M := M) g r s S α y ≤
           C * ‖S.toSection
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖ := by
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-
   set Tα : Set M := tsupport
     (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hTα_def
   have hTα_src : Tα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
-
   obtain ⟨Craw, hCraw_nn, hCraw⟩ :=
     tensorChartComponentRaw_sq_le_const_mul_tensorInner (I := I) (M := M) g r s α
-
   set Npair : ℝ := (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
     (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hNpair_def
   have hNpair_nn : 0 ≤ Npair := by positivity
   refine ⟨Npair * Real.sqrt Craw, by positivity, ?_⟩
   intro S y hy
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-
   have hb_supp : b ∈ Tα := by
     obtain ⟨z, ⟨x, hx_supp, hxz⟩, hzy⟩ := hy
     have hx_chart : x ∈ (chartAt H α).source := hTα_src hx_supp
@@ -153,7 +88,6 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
       exact (extChartAt I α).left_inv
         (by rw [extChartAt_source (I := I)]; exact hx_chart)
     rw [hb_eq]; exact hx_supp
-
   have hfib_eq : ‖S.toSection b‖ =
       Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s b
         (S.toFun b) (S.toFun b)) := by
@@ -164,17 +98,15 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
       (S.toFun b) (S.toFun b) :=
     tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
   have hfib_nn : 0 ≤ ‖S.toSection b‖ := norm_nonneg _
-
   have h_raw_eq : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-      rawPullR (I := I) (M := M) g r s S α Idx Jdx y =
+      tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx y =
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := by
     intro Idx Jdx
-    rw [rawPullR, Function.comp_apply, Function.comp_apply, ← hb_def]
-
+    rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, ← hb_def]
   have h_each : ∀ (q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E))),
-      |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y| ≤
+      |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| ≤
         Real.sqrt Craw * ‖S.toSection b‖ := by
     intro q
     rw [h_raw_eq q.1 q.2]
@@ -188,10 +120,10 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     rw [Real.sqrt_sq_eq_abs] at hroot
     refine hroot.trans (le_of_eq ?_)
     rw [Real.sqrt_mul hCraw_nn, hfib_eq]
-  calc zeroContentR (I := I) (M := M) g r s S α y
+  calc tensorComponentAbsSum (I := I) (M := M) g r s S α y
       = ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
-          |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y| := rfl
+          |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| := rfl
     _ ≤ ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
           Real.sqrt Craw * ‖S.toSection b‖ :=
@@ -199,19 +131,9 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     _ = Npair * Real.sqrt Craw * ‖S.toSection b‖ := by
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hNpair_def]; ring
 
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-chart, per-order constant for the chart-component derivative bound.**
-For a chart `α`, component multi-index `P`, and Fréchet order `j`, there is a
-non-negative constant `C` such that for every smooth compactly-supported
-difference section `D`, the order-`j` Fréchet derivative operator norm of the
-Euclidean chart component `tensorChartComponent g r s D α P.1 P.2`, at every point
-`y`, is bounded by `C` times the sum over `i ≤ j` of the intrinsic Riemannian
-fibre norms of the iterated covariant gradients `‖(∇^i D).toSection x‖`. Off the
-chart-target it vanishes; on the partition-of-unity kernel the bound combines the
-partition-of-unity Leibniz expansion of `chartComponent = ρ_α · rawPullR` with the
-reverse-Christoffel order-peeling and the order-`0` reverse fibre bound. -/
+omit [BoundarylessManifold I M] in
 private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : TensorCompIdx (E := E) r s) (j : ℕ) :
@@ -225,7 +147,6 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
             ‖(iteratedCovGrad g r s i D).toSection
               ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖) := by
   classical
-
   obtain ⟨Cpou, hCpou_nn, hCpou⟩ :=
     exists_iteratedFDeriv_norm_bound_on_compactR
       (chartPushedRaw_chartAtlasPOU_contDiffOn
@@ -233,15 +154,13 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       (chartImagePOUTsupport_isCompact (I := I) (M := M) α)
       (chartImagePOUTsupport_subset_target (I := I) (M := M) α) j
-
   obtain ⟨Cpeel, hCpeel_nn, hCpeel⟩ :=
     iteratedFDeriv_rawPullR_le_zeroContent_sum (I := I) (M := M) g r s α j j (le_refl j)
-
   have h_fib : ∀ i : ℕ,
       ∃ Ci : ℝ, 0 ≤ Ci ∧
       ∀ (T : SmoothCcTensor g r (s + i)) {z : EuclN},
         z ∈ chartPouKernel (I := I) (M := M) α →
-        zeroContentR (I := I) (M := M) g r (s + i) T α z ≤
+        tensorComponentAbsSum (I := I) (M := M) g r (s + i) T α z ≤
           Ci * (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + i) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r (s + i)
             ‖T.toSection ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))‖) :=
@@ -264,21 +183,18 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r (s + i)
     exact norm_nonneg _
   by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) α
-  · -- On the kernel: Leibniz expansion + reverse-peeling + fibre bound.
-    have hyT : y ∈ chartTargetEuclid (I := I) (M := M) α :=
+  · have hyT : y ∈ chartTargetEuclid (I := I) (M := M) α :=
       chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α hyK
     set ρ : EuclN → ℝ :=
       chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hρ_def
     set raw : EuclN → ℝ :=
       chartPushedRaw I α (tensorChartComponentRaw (I := I) (M := M) g r s D α P.1 P.2)
       with hraw_def
-
     have h_evEq : tensorChartComponent (I := I) (M := M) g r s D α P.1 P.2 =ᶠ[nhds y]
         (fun z => ρ z * raw z) :=
       tensorChartComponent_eventuallyEq_chartPushedRaw_pou_mul_chartPushedRaw_raw
         (I := I) (M := M) g r s D α P.1 P.2 hyT
     rw [(Filter.EventuallyEq.iteratedFDeriv ℝ h_evEq j).self_of_nhds]
-
     have hO_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
     have hρ_cdOn : ContDiffOn ℝ ∞ ρ (chartTargetEuclid (I := I) (M := M) α) :=
@@ -287,13 +203,11 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
     have hraw_cdOn : ContDiffOn ℝ ∞ raw (chartTargetEuclid (I := I) (M := M) α) := by
       refine (rawPullR_contDiffOn (I := I) (M := M) g r s D α P.1 P.2).congr (fun z hz => ?_)
       rw [hraw_def, chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]; rfl
-
     have hLeib := norm_iteratedFDerivWithin_mul_le
       (𝕜 := ℝ) (f := ρ) (g := raw) (n := j) hρ_cdOn hraw_cdOn
       hO_open.uniqueDiffOn hyT (by exact_mod_cast le_top)
     rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := fun z => ρ z * raw z) j hO_open hyT] at hLeib
     refine le_trans hLeib ?_
-
     have hbound_term : ∀ l ∈ Finset.range (j + 1),
         (j.choose l : ℝ) *
             ‖iteratedFDerivWithin ℝ l ρ (chartTargetEuclid (I := I) (M := M) α) y‖ *
@@ -302,43 +216,36 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
           (j.choose l : ℝ) * Cpou * (Cpeel * Cfibmax * fibSum) := by
       intro l hl
       have hlj : l ≤ j := by have := Finset.mem_range.mp hl; omega
-
       have hρ_l : ‖iteratedFDerivWithin ℝ l ρ
           (chartTargetEuclid (I := I) (M := M) α) y‖ ≤ Cpou := by
         rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := ρ) l hO_open hyT]
         exact hCpou l hlj y hyK
-
       have hraw_l : ‖iteratedFDerivWithin ℝ (j - l) raw
           (chartTargetEuclid (I := I) (M := M) α) y‖ ≤ Cpeel * Cfibmax * fibSum := by
         rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := raw) (j - l) hO_open hyT]
-
         have hraw_evEq : raw =ᶠ[nhds y]
-            rawPullR (I := I) (M := M) g r s D α P.1 P.2 := by
+            tensorComponentEuclideanChart (I := I) (M := M) g r s D α P.1 P.2 := by
           filter_upwards [hO_open.mem_nhds hyT] with z hz
           rw [hraw_def, chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]; rfl
         rw [(Filter.EventuallyEq.iteratedFDeriv ℝ hraw_evEq (j - l)).self_of_nhds]
-
         have hpeel := hCpeel D (j - l) (Nat.sub_le j l) 0 (by omega) P.1 P.2 y hyK
         have h0eq : (iteratedCovGrad g r s 0 D) = D :=
           DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_zero (I := I) (M := M) g r s D
         rw [h0eq] at hpeel
-
         have hreindex : (∑ i ∈ Finset.range ((j - l) + 1),
-              zeroContentR (I := I) (M := M) g r (s + (0 + i))
+              tensorComponentAbsSum (I := I) (M := M) g r (s + (0 + i))
                 (iteratedCovGrad g r s (0 + i) D) α y) =
             ∑ i ∈ Finset.range ((j - l) + 1),
-              zeroContentR (I := I) (M := M) g r (s + i)
+              tensorComponentAbsSum (I := I) (M := M) g r (s + i)
                 (iteratedCovGrad g r s i D) α y := by
           refine Finset.sum_congr rfl (fun i _ => ?_)
           congr 1 <;> rw [Nat.zero_add]
         rw [hreindex] at hpeel
-
         refine le_trans hpeel ?_
         rw [mul_assoc]
         refine mul_le_mul_of_nonneg_left ?_ hCpeel_nn
-
         have hstep : ∀ i ∈ Finset.range ((j - l) + 1),
-            zeroContentR (I := I) (M := M) g r (s + i)
+            tensorComponentAbsSum (I := I) (M := M) g r (s + i)
               (iteratedCovGrad g r s i D) α y ≤
               Cfibmax *
                 (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + i) I b) :=
@@ -355,7 +262,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
           exact mul_le_mul_of_nonneg_right
             (Finset.le_sup' Cfib (Finset.mem_range.mpr (by omega))) (norm_nonneg _)
         calc (∑ i ∈ Finset.range ((j - l) + 1),
-              zeroContentR (I := I) (M := M) g r (s + i)
+              tensorComponentAbsSum (I := I) (M := M) g r (s + i)
                 (iteratedCovGrad g r s i D) α y)
             ≤ ∑ i ∈ Finset.range ((j - l) + 1),
                 Cfibmax *
@@ -381,7 +288,6 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
               · letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + i) I b) :=
                   Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r (s + i)
                 exact norm_nonneg _
-
       have hchoose_nn : 0 ≤ (j.choose l : ℝ) := by positivity
       have hraw_l_nn : 0 ≤ ‖iteratedFDerivWithin ℝ (j - l) raw
           (chartTargetEuclid (I := I) (M := M) α) y‖ := norm_nonneg _
@@ -413,9 +319,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
       Finset.sum_le_sum hbound_term
     refine hstep_sum.trans (le_of_eq ?_)
     rw [← Finset.sum_mul, ← Finset.sum_mul, hsum_choose]; ring
-  · -- Off the kernel: the chart component vanishes in a neighbourhood, so the
-    -- derivative is zero.
-    have h_evZero : tensorChartComponent (I := I) (M := M) g r s D α P.1 P.2 =ᶠ[nhds y]
+  · have h_evZero : tensorChartComponent (I := I) (M := M) g r s D α P.1 P.2 =ᶠ[nhds y]
         (fun _ => (0 : ℝ)) := by
       have hKclosed : IsClosed (chartPouKernel (I := I) (M := M) α) :=
         (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
@@ -429,24 +333,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-chart all-order uniform Cauchy property of the canonical Euclidean chart
-components.**
-
-Let `F n : SmoothCcTensor g r s` be a sequence whose spectral norms `‖(F n).toHs(2k)‖`
-are Cauchy in every order `k`. Then for each chart center `α : M` and each component
-multi-index `P : TensorCompIdx r s`, the canonical Euclidean chart components
-`tensorChartComponent g r s (F n) α P.1 P.2 : EuclN → ℝ`
-(the partition-of-unity-weighted chart-frame scalar component pushed to the Euclidean
-chart target) are uniformly Cauchy in `Cᵐ` for every order `m`, over all of `EuclN`.
-
-This is the genuine analytic core of the keystone: it combines the pointwise
-reverse-Christoffel order-peeling bound (the `iteratedFDeriv` of a chart-pushed
-component is bounded, up to uniform Christoffel corrections, by the order-`0` content
-of the iterated covariant gradients on the compact partition-of-unity kernel) with the
-unconditional `Cᵐ` tensor Sobolev embedding that converts the per-order spectral
-Cauchy hypothesis into pointwise `Cᵐ`-Cauchy data of the components. Off the compact
-kernel every component vanishes together with all its derivatives, so the bound is
-global on `EuclN`. -/
+omit [BoundarylessManifold I M] in
 theorem tensorChartComponent_allOrder_uniformCauchy
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -461,26 +348,20 @@ theorem tensorChartComponent_allOrder_uniformCauchy
           iteratedFDeriv ℝ j
             (tensorChartComponent (I := I) (M := M) g r s (F n') α P.1 P.2) y‖ ≤ ε := by
   classical
-
   set n : ℕ := Module.finrank ℝ E with hn_def
   set k : ℕ := n + 2 * j + 1 with hk_def
   have h_super : 2 * k > n + 2 * j := by rw [hk_def]; omega
-
   obtain ⟨Cder, hCder_nn, hCder⟩ :=
     exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum (I := I) (M := M) g r s α P j
-
   obtain ⟨Cemb, hCemb_pos, hCemb⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_toSobolev_embedding_Cm_unconditional
+    DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
       (I := I) (M := M) g r s k j h_super
-
   have hF_cauchy_k := Metric.cauchySeq_iff.mp (hF_cauchy k)
   set δ : ℝ := ε / (Cder * Cemb + 1) with hδ_def
   have hδ_pos : 0 < δ := by rw [hδ_def]; positivity
   obtain ⟨N, hN⟩ := hF_cauchy_k δ hδ_pos
   refine ⟨N, fun n' n'' hn' hn'' y => ?_⟩
-
   set D : SmoothCcTensor g r s := F n' - F n'' with hD_def
-
   have h_comp_sub :
       (tensorChartComponent (I := I) (M := M) g r s (F n') α P.1 P.2 -
           tensorChartComponent (I := I) (M := M) g r s (F n'') α P.1 P.2) =
@@ -492,7 +373,6 @@ theorem tensorChartComponent_allOrder_uniformCauchy
     funext z
     simp only [Pi.add_apply, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
     ring
-
   have h_iter_sub :
       iteratedFDeriv ℝ j
           (tensorChartComponent (I := I) (M := M) g r s (F n') α P.1 P.2) y -
@@ -509,13 +389,10 @@ theorem tensorChartComponent_allOrder_uniformCauchy
         (by exact_mod_cast le_top)
     rw [← iteratedFDeriv_sub_apply (hcd1.contDiffAt) (hcd2.contDiffAt), h_comp_sub]
   rw [h_iter_sub]
-
   refine le_trans (hCder D y) ?_
-
   have hemb := hCemb D ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
   set N2k : ℝ := ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) D‖ with hN2k_def
   have hN2k_nn : 0 ≤ N2k := norm_nonneg _
-
   have hD_small : N2k < δ := by
     rw [hN2k_def, hD_def,
       DifferentialGeometry.PDE.RicciFlow.SmoothCcTensor.toHs_sub (g := g) (2 * k) (F n') (F n'')]
@@ -546,16 +423,7 @@ theorem tensorChartComponent_allOrder_uniformCauchy
         have hCC_nn : 0 ≤ Cder * Cemb := by positivity
         nlinarith [mul_nonneg hCC_nn hε.le]
 
-/-- **The per-chart common `C^∞` limit of the chart-pushed scalar components,
-compactly supported strictly inside the chart target.**
-
-From the all-order uniform-Cauchy property
-`chartComponentScalar_chartPushed_allOrder_uniformCauchy`, the Euclidean
-uniform-limit-of-derivatives machinery produces, for each chart center `α` and
-component multi-index `P`, a function `u_∞ : EuclN → ℝ` that is `C^∞` on `EuclN`,
-compactly supported with topological support strictly inside the open chart target,
-and is the pointwise `Cᵐ` limit (every order) of the chart-pushed raw components of
-`F n`. -/
+omit [BoundarylessManifold I M] in
 theorem exists_chartComponent_limit_smooth_compactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -571,17 +439,14 @@ theorem exists_chartComponent_limit_smooth_compactSupport
           (fun n => tensorChartComponent (I := I) (M := M) g r s (F n) α P.1 P.2 y)
           Filter.atTop (𝓝 (u P y))) := by
   classical
-
   set gseq : TensorCompIdx (E := E) r s → ℕ → EuclN → ℝ :=
     fun P n => tensorChartComponent (I := I) (M := M) g r s (F n) α P.1 P.2 with hgseq_def
-
   have hcauchy : ∀ (P : TensorCompIdx (E := E) r s) (j : ℕ),
       ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ y : EuclN,
         ‖iteratedFDeriv ℝ j (gseq P n) y - iteratedFDeriv ℝ j (gseq P n') y‖ ≤ ε := by
     intro P j ε hε
     exact tensorChartComponent_allOrder_uniformCauchy
       (I := I) (M := M) g r s F hF_cauchy α P j ε hε
-
   have hcauchy0 : ∀ (P : TensorCompIdx (E := E) r s),
       ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ y : EuclN,
         ‖gseq P n y - gseq P n' y‖ ≤ ε := by
@@ -593,31 +458,25 @@ theorem exists_chartComponent_limit_smooth_compactSupport
       Function.comp_apply, Function.comp_apply, ← map_sub,
       LinearIsometryEquiv.norm_map] at hraw
     exact hraw
-
   have hsmooth : ∀ (P : TensorCompIdx (E := E) r s) (n : ℕ),
       ContDiff ℝ (⊤ : ℕ∞) (gseq P n) := by
     intro P n
     exact tensorChartComponent_contDiff' (I := I) (M := M) g r s (F n) α P.1 P.2
-
   set u : TensorCompIdx (E := E) r s → EuclN → ℝ :=
     fun P => cauchyLimitFun (d := Module.finrank ℝ E)
       (gseq P) (hcauchy0 P) with hu_def
   refine ⟨u, ?_, ?_, ?_⟩
-  · -- `C^∞` on the chart target, in fact globally `C^∞`.
-    intro P
+  · intro P
     have hcontDiff : ContDiff ℝ (⊤ : ℕ∞) (u P) := by
       rw [contDiff_infty]
       intro m
       exact (iteratedFDeriv_cauchyLimitFun_eq (d := Module.finrank ℝ E)
         m (hsmooth P) (hcauchy0 P) (fun j _ => hcauchy P j)).1
     exact hcontDiff.contDiffOn
-  · -- Compact support inside the chart target: the limit vanishes off the
-    -- compact partition-of-unity kernel, hence so does its closure-support.
-    intro P
+  · intro P
     have hsupp_subset : Function.support (u P) ⊆ chartPouKernel (I := I) (M := M) α := by
       intro z hz
       by_contra hzk
-
       have hzero : ∀ n, gseq P n z = 0 := by
         intro n
         have hsub := tensorChartComponent_tsupport_subset_chartPouKernel
@@ -636,13 +495,9 @@ theorem exists_chartComponent_limit_smooth_compactSupport
       (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)⟩
     exact HasCompactSupport.of_support_subset_isCompact
       (chartPouKernel_isCompact (I := I) (M := M) α) hsupp_subset
-  · -- The pointwise limit identification of the chart components.
-    intro P y
+  · intro P y
     exact cauchyLimitFun_tendsto (d := Module.finrank ℝ E) (hcauchy0 P) y
 
-
-/-- **The per-chart assembled smooth section** built from the common `C^∞` limits of
-the chart-pushed components, supported in the chart-`α` source. -/
 def chartLimitSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -657,16 +512,6 @@ def chartLimitSection
     (exists_chartComponent_limit_smooth_compactSupport
       (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1
 
-/-- **The global smooth limit section.**
-
-The chart-atlas assembly of the per-chart smooth limit sections: the finite sum
-over the chart-atlas partition-of-unity index of the per-chart assembled sections.
-The partition-of-unity weight is already carried inside each per-chart component
-limit `u_∞,α,P` (the canonical chart component `tensorChartComponent` is the
-partition-of-unity-weighted chart-frame projection), so the assembled sections are
-summed directly — exactly as the eigenvector smooth representative `eigenvectorSmooth`
-sums its per-chart pieces. This is the smooth representative whose `L²` class is the
-abstract limit `u`. -/
 def globalLimitSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -676,8 +521,6 @@ def globalLimitSection
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
     chartLimitSection (I := I) (M := M) g r s F hF_cauchy α
 
-/-- The chosen per-chart common `C^∞` limit functions of the chart-pushed
-components. -/
 private def chartLimitComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -687,6 +530,7 @@ private def chartLimitComp
   (exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -698,6 +542,7 @@ private lemma chartLimitComp_tsupport
   ((exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 P).2
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -710,12 +555,7 @@ private lemma chartLimitComp_tendsto
   (exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.2 P y
 
-/-- **Uniform convergence of the chart components to the chosen limit.** The
-order-`0` all-order uniform-Cauchy bound plus the pointwise limit promote the
-pointwise convergence `tensorChartComponent (F n) α P → chartLimitComp α P` to a
-*uniform* convergence over all of `EuclN`: for every `ε > 0` there is an `N` such
-that `‖tensorChartComponent (F n) α P y - chartLimitComp α P y‖ ≤ ε` for all
-`n ≥ N` and all `y`. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -728,7 +568,6 @@ private lemma chartLimitComp_uniform
   obtain ⟨N, hN⟩ := tensorChartComponent_allOrder_uniformCauchy
     (I := I) (M := M) g r s F hF_cauchy α P 0 (ε / 2) (half_pos hε)
   refine ⟨N, fun n hn y => ?_⟩
-
   have hcauchy0 : ∀ n', N ≤ n' →
       ‖tensorChartComponent (I := I) (M := M) g r s (F n) α P.1 P.2 y -
         tensorChartComponent (I := I) (M := M) g r s (F n') α P.1 P.2 y‖ ≤ ε / 2 := by
@@ -737,7 +576,6 @@ private lemma chartLimitComp_uniform
     rwa [iteratedFDeriv_zero_eq_comp, iteratedFDeriv_zero_eq_comp,
       Function.comp_apply, Function.comp_apply, ← map_sub,
       LinearIsometryEquiv.norm_map] at hraw
-
   have htends :
       Tendsto (fun n' =>
         ‖tensorChartComponent (I := I) (M := M) g r s (F n) α P.1 P.2 y -
@@ -753,8 +591,7 @@ private lemma chartLimitComp_uniform
       (Filter.eventually_atTop.mpr ⟨N, fun n' hn' => hcauchy0 n' hn'⟩)
   linarith
 
-/-- The chosen limit function is continuous: it is `C^∞` on the open chart target
-and supported strictly inside it. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -774,7 +611,7 @@ private lemma chartLimitComp_continuous
     chartLimitComp_tsupport (I := I) (M := M) g r s F hF_cauchy α P hx
   exact ((hcdOn.contDiffAt (hO.mem_nhds hxO)).continuousAt)
 
-/-- The chosen limit function has compact support. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -785,8 +622,7 @@ private lemma chartLimitComp_hasCompactSupport
   ((exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 P).1
 
-/-- The chosen limit function is `MemLp 2` of the chart-`L²` reference measure: it
-is continuous with compact support. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -801,11 +637,7 @@ private lemma chartLimitComp_memLp
     (chartLimitComp_continuous (I := I) (M := M) g r s F hF_cauchy α P)
     (chartLimitComp_hasCompactSupport (I := I) (M := M) g r s F hF_cauchy α P)
 
-/-- **`L²` convergence of the chart components to the chosen limit.** The
-chart-pushed components `tensorChartComponent (F n) α P`, which converge uniformly
-to the chosen limit `chartLimitComp α P` and share the common compact support
-`chartPouKernel α ∪ tsupport(chartLimitComp α P)`, converge to it as `L²` classes
-in `Lp ℝ 2 (chartL2Measure α)`. -/
+omit [BoundarylessManifold I M] in
 private lemma chartComponent_toLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -821,7 +653,6 @@ private lemma chartComponent_toLp_tendsto
   haveI : IsFiniteMeasureOnCompacts (chartL2Measure (I := I) (M := M) α) := by
     rw [chartL2Measure]; infer_instance
   set μ : Measure EuclN := chartL2Measure (I := I) (M := M) α with hμ_def
-
   set K : Set EuclN := chartPouKernel (I := I) (M := M) α ∪
     tsupport (chartLimitComp (I := I) (M := M) g r s F hF_cauchy α P) with hK_def
   have hK_compact : IsCompact K :=
@@ -834,7 +665,6 @@ private lemma chartComponent_toLp_tendsto
   have hc_lt : c < ⊤ := by
     rw [hc_def]
     exact ENNReal.rpow_lt_top_of_nonneg (by norm_num) hμK_lt.ne
-
   set dseq : ℕ → EuclN → ℝ := fun n =>
     tensorChartComponent (I := I) (M := M) g r s (F n) α P.1 P.2 -
       chartLimitComp (I := I) (M := M) g r s F hF_cauchy α P with hdseq_def
@@ -850,13 +680,11 @@ private lemma chartComponent_toLp_tendsto
         (tensorChartComponent_tsupport_subset_chartPouKernel
           (I := I) (M := M) g r s (F n) α P.1 P.2 hmem)),
       image_eq_zero_of_notMem_tsupport hzK.2, sub_zero]
-
   have heLp_le : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n, N ≤ n →
       eLpNorm (dseq n) 2 μ ≤ c * ENNReal.ofReal ε := by
     intro ε hε
     obtain ⟨N, hN⟩ := chartLimitComp_uniform (I := I) (M := M) g r s F hF_cauchy α P ε hε
     refine ⟨N, fun n hn => ?_⟩
-
     have hrestrict : eLpNorm (dseq n) 2 (μ.restrict K) = eLpNorm (dseq n) 2 μ :=
       eLpNorm_restrict_eq_of_support_subset (hdsupp n)
     have hbound_ae : ∀ᵐ z ∂(μ.restrict K), ‖dseq n z‖ ≤ ε := by
@@ -867,22 +695,18 @@ private lemma chartComponent_toLp_tendsto
     rw [hrestrict] at hle
     refine hle.trans ?_
     rw [hc_def, Measure.restrict_apply_univ]
-
   have htendsto_eLp : Tendsto (fun n => eLpNorm (dseq n) 2 μ) atTop (𝓝 0) := by
     rw [ENNReal.tendsto_atTop_zero]
     intro ε hε
     rcases eq_or_ne ε ⊤ with hεtop | hεtop
-    · -- `ε = ⊤`: trivial.
-      obtain ⟨N, hN⟩ := heLp_le 1 one_pos
+    · obtain ⟨N, hN⟩ := heLp_le 1 one_pos
       exact ⟨N, fun n hn => hεtop ▸ le_top⟩
     rcases eq_or_lt_of_le (zero_le c) with hc0 | hc0
-    · -- `c = 0`: the bound is `0`.
-      obtain ⟨N, hN⟩ := heLp_le 1 one_pos
+    · obtain ⟨N, hN⟩ := heLp_le 1 one_pos
       refine ⟨N, fun n hn => le_trans (hN n hn) ?_⟩
       rw [← hc0, zero_mul]
       exact zero_le _
-    · -- `c > 0`: pick a real `δ` with `c · ofReal δ ≤ ε`.
-      have hc_ne : c ≠ ⊤ := hc_lt.ne
+    · have hc_ne : c ≠ ⊤ := hc_lt.ne
       have hdiv_ne_top : ε / c ≠ ⊤ := by
         rw [Ne, ENNReal.div_eq_top]; push Not
         exact ⟨fun _ => hc0.ne', fun h => absurd h hεtop⟩
@@ -891,7 +715,6 @@ private lemma chartComponent_toLp_tendsto
       obtain ⟨N, hN⟩ := heLp_le ((ε / c).toReal) hδ_pos
       refine ⟨N, fun n hn => le_trans (hN n hn) ?_⟩
       rw [ENNReal.ofReal_toReal hdiv_ne_top, ENNReal.mul_div_cancel hc0.ne' hc_ne]
-
   rw [tendsto_iff_edist_tendsto_0]
   have hedist_eq : ∀ n,
       edist ((tensorChartComponent_memLp (I := I) (M := M) g r s (F n) α P.1 P.2).toLp
@@ -904,14 +727,7 @@ private lemma chartComponent_toLp_tendsto
   simp only [hedist_eq]
   exact htendsto_eLp
 
-/-- **The abstract limit's chart component is the chosen limit (Lemma K).** For
-every chart center `α` and component multi-index `P`, the canonical chart-`α`
-`P`-component of the abstract `L²` limit `u` agrees almost everywhere (for the
-chart-`α` `L²` reference measure) with the chosen per-chart `C^∞` limit
-`chartLimitComp α P`. Both are the `L²` limit of the chart components
-`tensorChartComponent (F n) α P`: the abstract side by continuity of
-`tensorL2ChartComponentCLM` along `hF_L2`, the chosen side by the uniform
-(hence `L²`) convergence of the chart components. -/
+omit [BoundarylessManifold I M] in
 private lemma tensorL2ChartComponent_eq_chartLimitComp_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -924,13 +740,11 @@ private lemma tensorL2ChartComponent_eq_chartLimitComp_aeEq
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       chartLimitComp (I := I) (M := M) g r s F hF_cauchy α P := by
   classical
-
   have h_chartEq : ∀ n,
       tensorL2ChartComponent (I := I) (M := M) g r s (F n : TensorL2 r s g) α P =
         (tensorChartComponent_memLp (I := I) (M := M) g r s (F n) α P.1 P.2).toLp
           (tensorChartComponent (I := I) (M := M) g r s (F n) α P.1 P.2) :=
     fun n => tensorL2ChartComponent_smoothToTensorL2_eq (I := I) (M := M) g r s (F n) α P
-
   have h_lim_chosen :
       Tendsto (fun n => tensorL2ChartComponent (I := I) (M := M) g r s
           (F n : TensorL2 r s g) α P)
@@ -938,14 +752,12 @@ private lemma tensorL2ChartComponent_eq_chartLimitComp_aeEq
           (chartLimitComp (I := I) (M := M) g r s F hF_cauchy α P))) := by
     simp only [h_chartEq]
     exact chartComponent_toLp_tendsto (I := I) (M := M) g r s F hF_cauchy α P
-
   have h_lim_abstract :
       Tendsto (fun n => tensorL2ChartComponent (I := I) (M := M) g r s
           (F n : TensorL2 r s g) α P)
         atTop (𝓝 (tensorL2ChartComponent (I := I) (M := M) g r s u α P)) := by
     have hcont := continuous_tensorL2ChartComponent (I := I) (M := M) g r s α P
     exact (hcont.tendsto u).comp hF_L2
-
   have h_eq :
       tensorL2ChartComponent (I := I) (M := M) g r s u α P =
         (chartLimitComp_memLp (I := I) (M := M) g r s F hF_cauchy α P).toLp
@@ -954,8 +766,7 @@ private lemma tensorL2ChartComponent_eq_chartLimitComp_aeEq
   rw [h_eq]
   exact MemLp.coeFn_toLp _
 
-/-- The raw chart-`α` frame component of `chartLimitSection α`, read at the chart
-preimage of a chart-target point `y`, is the chosen limit `chartLimitComp α P`. -/
+omit [BoundarylessManifold I M] in
 private lemma tensorChartComponentRaw_chartLimitSection_self
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -976,8 +787,7 @@ private lemma tensorChartComponentRaw_chartLimitSection_self
     (exists_chartComponent_limit_smooth_compactSupport
       (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 P hy
 
-/-- The underlying section of `chartLimitSection α` vanishes off the chart-`α`
-source. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_toSection_eq_zero_off_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -994,8 +804,7 @@ private lemma chartLimitSection_toSection_eq_zero_off_source
     (exists_chartComponent_limit_smooth_compactSupport
       (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 hx
 
-/-- The raw chart-`β` frame component of `chartLimitSection α` vanishes off the
-chart-`α` source. -/
+omit [BoundarylessManifold I M] in
 private lemma tensorChartComponentRaw_chartLimitSection_eq_zero_off_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1013,12 +822,11 @@ private lemma tensorChartComponentRaw_chartLimitSection_eq_zero_off_source
   have hsec : (chartLimitSection (I := I) (M := M) g r s F hF_cauchy α).toSection x = 0 :=
     chartLimitSection_toSection_eq_zero_off_source (I := I) (M := M) g r s F hF_cauchy α hx
   rw [tensorChartComponentRaw_def, tensorTrivProj, hsec,
-    ContinuousLinearMap.map_zero, map_zero]
+    ContinuousLinearMap.map_zero]
+  exact map_zero (tensorChartComponentProjection (E := E) r s P.1 P.2)
 
 open Classical in
-/-- For a chart-`β`-source point `x`, the raw chart-`β` frame component of
-`chartLimitSection α` is the `(r, s)`-tensor transformation-law sum when `x` lies in
-the chart-`α` source, and `0` otherwise. -/
+omit [BoundarylessManifold I M] in
 private lemma raw_chartLimitSection_eq_ite
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1048,10 +856,7 @@ private lemma raw_chartLimitSection_eq_ite
       (I := I) (M := M) g r s F hF_cauchy α β P₀ hxα
 
 open Classical in
-/-- **The canonical Euclidean chart-`β` component of `chartLimitSection α`.** As a
-function on the chart target of `β`, it equals almost everywhere the chart-pushed
-partition-of-unity weight of `β` times the chart-`β` push of the function which is
-the transformation-law sum on the chart-`α` source and `0` off it. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_tensorL2ChartComponent_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1103,9 +908,6 @@ private lemma chartLimitSection_tensorL2ChartComponent_coeFn_aeEq
   exact raw_chartLimitSection_eq_ite (I := I) (M := M) g r s F hF_cauchy
     α β P₀ (symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) β hy)
 
-/-- If two functions agree almost everywhere with respect to `μ.restrict t` and
-agree everywhere off the measurable set `t`, then they agree almost everywhere
-with respect to `μ` itself. -/
 private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
     {X : Type*} [MeasurableSpace X] {μ : Measure X}
     {f h : X → ℝ} {t : Set X} (ht : MeasurableSet t)
@@ -1124,8 +926,7 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact ht.nullMeasurableSet
 
-/-- Every transport chart centre of `β` belongs to the partition-of-unity
-support set. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
     transportChartCenters (I := I) (M := M) β ⊆
       chartAtlasPOU_finset (I := I) (M := M) := by
@@ -1134,9 +935,7 @@ private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
   rw [chartAtlasPOU_finset_mem]
   exact hγ.mono Set.inter_subset_left
 
-/-- The chart-pushed partition-of-unity weight of `α`, read at the chart-`α`
-Euclidean image of a chart-`α` source point `z`, recovers the partition-of-unity
-weight `chartAtlasPOU α` at `z`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartPushedPouWeight_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartPushedPouWeight (I := I) (M := M) α
@@ -1147,12 +946,12 @@ private lemma chartPushedPouWeight_toEuclidean_extChartAt'
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) α hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) α hz]
 
-/-- The chart-`α` kernel cutoff, pushed to the Euclidean chart target of `α`. -/
 private def chartKernelCutoffPushed' (α : M) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) α
     (fun x => ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
-/-- On the partition-of-unity kernel the pushed chart-`α` kernel cutoff is `1`. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel'
     (α : M) {y : EuclN} (hy : y ∈ chartPouKernel (I := I) (M := M) α) :
     chartKernelCutoffPushed' (I := I) (M := M) α y = 1 := by
@@ -1173,8 +972,7 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel'
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) α hw_supp
 
-/-- For a chart-`α` source point `z`, the pushed chart-`α` kernel cutoff read at
-the chart-`α` Euclidean image of `z` recovers `chartKernelCutoff α z`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartKernelCutoffPushed' (I := I) (M := M) α
@@ -1185,12 +983,8 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt'
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) α hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) α hz]
 
-/-- **The abstract chart-component absorbs the pushed kernel cutoff.** For an
-arbitrary abstract `L²` element `u`, the canonical chart-`α` `Q`-component of `u`
-agrees, almost everywhere on the chart-`α` `L²` measure, with the pushed chart-`α`
-kernel cutoff times itself: on the partition-of-unity kernel the pushed cutoff is
-`1`, and off the kernel the component is a.e. `0`
-(`tensorL2ChartComponent_ae_zero_off_chartPouKernel`). -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponentU_ae_eq_chartKernelCutoffPushed_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (Q : TensorCompIdx (E := E) r s) :
@@ -1209,11 +1003,8 @@ private lemma tensorL2ChartComponentU_ae_eq_chartKernelCutoffPushed_mul
       one_mul]
   · rw [hy hk, mul_zero]
 
-/-- **The abstract chart-component is `0` a.e. where the pushed POU weight is `0`.**
-For an arbitrary abstract `L²` element `u`, the canonical chart-`α` `Q`-component of
-`u` vanishes a.e. on the chart-`α` `L²` measure wherever the chart-pushed
-partition-of-unity weight is `0`; both factor through the POU↔cutoff bridge
-`tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff`. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponentU_ae_zero_where_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (Q : TensorCompIdx (E := E) r s) :
@@ -1230,26 +1021,7 @@ private lemma tensorL2ChartComponentU_ae_zero_where_chartPushedPouWeight_zero
   rw [hy, hy_zero, zero_mul]
 
 open Classical in
-/-- **Single transport-term reconciliation of the assembled limit section.**
-
-For chart centres `β` and `α` and component multi-indices `(P₀, Q)`, the per-`α`
-term of the assembled-section side — the chart-`β` pushforward of the `(r, s)`-tensor
-transformation-law expression `transitionCoeff α β P₀ Q · (raw chart-`α` component
-of `chartLimitSection α`)`, cut off to the chart-`α` source — equals, almost
-everywhere on the chart-`β` `L²` measure and after the common pushed
-partition-of-unity weight of `β`, the chart-transition transport
-`chartTransitionTransportCLM α β P₀ Q` applied to the abstract chart-`α`
-`Q`-component of `u`.
-
-The transport operator unfolds via `chartTransitionTransportCLM_coeFn_aeEq` into
-the chart-`β` pushforward of the transport coefficient times the chart-transition
-precomposition of the abstract component; the abstract component agrees almost
-everywhere with the chosen smooth limit `chartLimitComp α Q` by Lemma K
-(`tensorL2ChartComponent_eq_chartLimitComp_aeEq`), which the raw component of
-`chartLimitSection α` recovers via `tensorChartComponentRaw_chartLimitSection_self`.
-The two chart-kernel cutoffs in the transport coefficient are redundant almost
-everywhere, against the common pushed partition-of-unity weight (chart-`β` cutoff)
-and the off-source vanishing of the chosen limit (chart-`α` cutoff). -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_transport_term_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1319,7 +1091,6 @@ private lemma chartLimitSection_transport_term_aeEq
           (chartOverlapEuclid (I := I) (M := M) β α)),
           y ∈ chartOverlapEuclid (I := I) (M := M) β α :=
         ae_restrict_mem hΩ_meas
-
       have h_K_overlap :
           ((tensorL2ChartComponent (I := I) (M := M) g r s u α Q :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
@@ -1333,7 +1104,6 @@ private lemma chartLimitSection_transport_term_aeEq
           (chartOverlapEuclid_subset_chartTarget (I := I) (M := M) α β)) h_K
       have h_cc := chartTransitionEuclid_comp_ae_eq_restrict
         (I := I) (M := M) β α h_K_overlap
-
       have h_kc_overlap :
           ((tensorL2ChartComponent (I := I) (M := M) g r s u α Q :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
@@ -1370,7 +1140,6 @@ private lemma chartLimitSection_transport_term_aeEq
       have hT_eq : chartTransitionEuclid (I := I) (M := M) β α y = zα := by
         rw [← hy_eq, hzα_def]
         exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) β α hz_srcβ
-
       have hA_y : A y =
           transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q z *
             chartLimitComp (I := I) (M := M) g r s F hF_cauchy α Q zα := by
@@ -1398,7 +1167,6 @@ private lemma chartLimitSection_transport_term_aeEq
           ← hz_def, transportCoeffManifold_apply, hT_eq, ← hUα_def]
         ring
       rw [hT_eq] at hy_cc hy_kc
-
       have h_cutα_push : chartKernelCutoffPushed' (I := I) (M := M) α zα =
           ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) z := by
         rw [hzα_def]
@@ -1406,7 +1174,6 @@ private lemma chartLimitSection_transport_term_aeEq
           (I := I) (M := M) α hz_srcα
       rw [h_cutα_push, ← hUα_def] at hy_kc
       rw [← hUα_def] at hy_cc
-
       rw [hA_y, hRHS_y, ← hy_cc]
       by_cases hWy : W y = 0
       · rw [hWy, zero_mul, zero_mul]
@@ -1425,7 +1192,6 @@ private lemma chartLimitSection_transport_term_aeEq
         have h_cutβ : ((chartKernelCutoff (I := I) (M := M) β :
             C^∞⟮I, M; ℝ⟯) : M → ℝ) z = 1 :=
           chartKernelCutoff_eqOn_one (I := I) (M := M) β hz_pou
-
         rw [h_cutβ]
         have h_key : ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) :
               M → ℝ) z * 1 *
@@ -1478,11 +1244,7 @@ private lemma chartLimitSection_transport_term_aeEq
   exact (Filter.EventuallyEq.refl _ W).mul hB_eq.symm
 
 open Classical in
-/-- The canonical chart-`β` `P₀`-component of the per-chart assembled limit
-section `chartLimitSection α` equals, almost everywhere on the chart-`β` `L²`
-measure, the chart-pushed partition-of-unity weight of `β` times the finite sum,
-over component multi-indices `Q`, of the chart-transition transport of `u`'s
-chart-`α` `Q`-components. -/
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_tensorL2ChartComponent_eq_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1574,9 +1336,7 @@ private lemma chartLimitSection_tensorL2ChartComponent_eq_transport_sum
   funext y
   rw [Finset.mul_sum]
 
-/-- For a chart centre `α` outside the transport set of `β`, the finite sum, over
-component multi-indices `Q`, of the chart-transition transport of `u`'s chart-`α`
-`Q`-components vanishes almost everywhere on the chart-`β` `L²` measure. -/
+omit [BoundarylessManifold I M] in
 private lemma transportSum_u_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (α β : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -1609,7 +1369,6 @@ private lemma transportSum_u_ae_zero_of_notMem
       rw [chartL2Measure, Measure.restrict_restrict hΩ_meas,
         Set.inter_eq_left.mpr
           (chartOverlapEuclid_subset_chartTarget (I := I) (M := M) β α)]
-
     have h_on_overlap :
         (fun y => chartPushedRaw (I := I) (M := M) β
             (transportCoeffManifold (I := I) (M := M) g r s α β P₀ Q) y *
@@ -1620,7 +1379,6 @@ private lemma transportSum_u_ae_zero_of_notMem
               (chartOverlapEuclid (I := I) (M := M) β α)]
         (fun _ : EuclN => (0 : ℝ)) := by
       rw [h_restrict_eq]
-
       have h_gate_target :=
         tensorL2ChartComponentU_ae_zero_where_chartPushedPouWeight_zero
           (I := I) (M := M) g r s u α Q
@@ -1682,10 +1440,7 @@ private lemma transportSum_u_ae_zero_of_notMem
           C^∞⟮I, M; ℝ⟯) : M → ℝ) z = 0
       · rw [h_coeff, transportCoeffManifold_apply, hχβ]
         ring
-      · -- `cutβ(z) ≠ 0`.  Since `α ∉ transportChartCenters β`, `POU_α(z) = 0`, so
-        -- the pushed POU weight at the chart-`α` image is `0` and the component
-        -- vanishes a.e.
-        have hρα : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) z = 0 := by
+      · have hρα : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) z = 0 := by
           by_contra hρα_ne
           exact hα (mem_transportChartCenters_of_pou_cutoff_ne
             (I := I) (M := M) β α hρα_ne hχβ)
@@ -1737,22 +1492,7 @@ private lemma transportSum_u_ae_zero_of_notMem
   funext y
   rw [Finset.sum_const_zero]
 
-/-- **The `L²` class of the global limit section equals the abstract limit `u`.**
-
-By `tensorL2_eq_of_chartComponent_eq`, it suffices to check that the canonical
-`L²` chart components of the assembled global section agree, in every chart `β` and
-every component direction `P₀`, with those of `u`. The assembled section is the
-finite partition-of-unity sum of the per-chart limit sections; the canonical chart
-component is continuous-linear in the abstract `L²` argument, so its chart-`β`
-`P₀`-component is the finite sum, over the partition-of-unity index `α`, of the
-per-chart components, each reconciled — via
-`chartLimitSection_tensorL2ChartComponent_eq_transport_sum` and **Lemma K** — with a
-finite sum of chart-transition transports of `u`'s chart-`α` components. The
-component of `u` is governed by the abstract partition-of-unity transport law
-`tensorL2ChartComponent_ae_eq_pou_transport_sum`. The two finite double sums match:
-the transport chart centres are a subset of the partition-of-unity support set, and
-for a chart centre outside the transport set the corresponding transport term
-vanishes almost everywhere. -/
+omit [BoundarylessManifold I M] in
 theorem globalLimitSection_toL2_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1764,7 +1504,6 @@ theorem globalLimitSection_toL2_eq
   refine tensorL2_eq_of_chartComponent_eq (I := I) (M := M) g r s _ u
     (fun β P₀ => ?_)
   apply Lp.ext
-
   have h_coe_sum :
       (globalLimitSection (I := I) (M := M) g r s F hF_cauchy : TensorL2 r s g) =
         ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -1792,7 +1531,6 @@ theorem globalLimitSection_toL2_eq
     (fun α => tensorL2ChartComponent (I := I) (M := M) g r s
       (chartLimitSection (I := I) (M := M) g r s F hF_cauchy α :
         TensorL2 r s g) β P₀)).trans ?_
-
   have h_lhs_terms :
       (fun y => ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -1813,7 +1551,6 @@ theorem globalLimitSection_toL2_eq
       (fun α _ => chartLimitSection_tensorL2ChartComponent_eq_transport_sum
         (I := I) (M := M) g r s u F hF_cauchy hF_L2 α β P₀)
   refine h_lhs_terms.trans ?_
-
   refine Filter.EventuallyEq.symm
     ((tensorL2ChartComponent_ae_eq_pou_transport_sum (I := I) (M := M)
       g r s u β P₀).trans ?_)
@@ -1892,16 +1629,7 @@ theorem globalLimitSection_toL2_eq
         transportChartCenters (I := I) (M := M) β, G α y) = 0 from hy,
     add_zero]
 
-/-- **`Cᵏ`-Banach completeness keystone of the smooth-tensor space.**
-
-A sequence of smooth compactly-supported tensors that is Cauchy in *every* spectral
-order `H^{2k}` (`SmoothCcTensor.toHs (2k)`) and converges in `L²` to an abstract limit
-`u : TensorL2 r s g` has its `L²` limit `u` realised by a genuine smooth section
-`T : SmoothCcTensor g r s` with `↑T = u`.
-
-The smooth inclusion `SmoothCcTensor ↪ TensorL2` is only `DenseRange`, so the limit
-`u` is a priori only an abstract `L²` element; the keystone exhibits an honest smooth
-representative. -/
+omit [BoundarylessManifold I M] in
 theorem smoothCcTensor_limit_of_allOrders_toHs_cauchy
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)

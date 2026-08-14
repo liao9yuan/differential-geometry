@@ -2,12 +2,12 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.BalancedPairing
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricAppCcJetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricScalarSmulJet
 
-/-!
-# Parametric balanced pairings
 
-This file turns compact-slab coefficient jet bounds into time-uniform balanced
-connection-Laplacian pairing constants.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,9 +35,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
-/-- A jointly smooth first-order coefficient family has one balanced pairing
-constant on a compact time slab. -/
+
+
 theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (Φ : ℝ → SmoothCcTensor g (s + 1) s) {S K : Set ℝ}
     (hK : IsCompact K) (hKS : K ⊆ S)
@@ -50,7 +49,7 @@ theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t, t ∈ K → ∀ U : SmoothCcTensor g 0 s,
       |tensorL2Inner (I := I) (M := M) g 0 s
           (oneMinusConnLapSmoothIter (I := I) g 0 s n U).toFun
-          (appCc (I := I) (M := M) g (s + 1) s (Φ t)
+          (operatorFieldApply (I := I) (M := M) g (s + 1) s (Φ t)
             (covGrad (I := I) (M := M) g 0 s U)).toFun| ≤
         C * ((∑ j ∈ Finset.range (n + 1),
             ‖iteratedCovGrad (I := I) g 0 s j U‖) *
@@ -60,9 +59,9 @@ theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
     param_app_jet (I := I) (M := M) g (s + 1) s Φ hK hKS hjoint
   exact iterL_pair_jet_of (I := I) (M := M) g s n Φ K CG hCG_nn hCG
 
-/-- A jointly smooth scalar multiplier has one balanced `L^n` pairing
-constant on a compact time slab.  The estimate uses the adjacent jet windows
-of orders `n + 1` and `n`. -/
+
+
+
 theorem iterL_smul_unif (g : SmoothRiemannianMetric I M) (n : ℕ)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S K : Set ℝ}
     (hK : IsCompact K) (hKS : K ⊆ S)

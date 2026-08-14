@@ -6,29 +6,28 @@ import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityLocal
 import DifferentialGeometry.Geometry.Curvature.Sphere.ConstCurvature
 
-/-!
-# Descent of the round metric through a finite free isometric quotient
 
-Given a finite group `Γ` acting on the round sphere `S = sphere (0:E) 1` by ambient
-orthogonal maps (`ρ : Γ →* (E ≃ₗᵢ[ℝ] E)`) freely, with orbit quotient `Q` carrying a
-smooth structure making `π : S → Q` a smooth covering (packaged as `RoundQuotientData`),
-the Γ-invariant round metric descends to a smooth Riemannian metric `gQuot` on `Q` of
-constant positive sectional curvature (`c = 1`).
 
-The construction: on a covering local section `s : W ≃ₘ V` (open `W ⊆ Q`, `V ⊆ S`),
-`gQuot` is the pullback of the round metric; well-definedness across sections is round's
-Γ-invariance (`pullbackMetric_round_eq`), and constant curvature is
-`metricRm04StdAt_pullback_localDiffeo` (Step C) + `roundMetric_sec_value`.
 
-## Status
 
-Complete and sorry-free: interface (`RoundQuotientData`, `SectionWitness`) + `gm` definition +
-`gQuot` + both former frontiers, the local-frame smoothness `gm_coeff` (well-definedness via
-round's Γ-invariance) and the curvature assembly `gQuot_constPosSec` (`c = 1`).  See
-`QuotientDescent.md`.
--/
 
-set_option synthInstance.maxHeartbeats 400000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -42,10 +41,10 @@ namespace Geometry
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
 variable {n : ℕ} [Fact (finrank ℝ E = n + 1)] [NeZero n]
 
-/-- A covering local section of `π : S → Q` through the point `x`: an open `W ∋ x` in `Q`,
-an open `V` in the sphere, and a diffeomorphism `s : W ≃ₘ V` right-inverse to `π`, bundled
-with the manifold instances on the open submanifolds `W`, `V` (which are not automatic and
-are genuine witness data of the covering). -/
+
+
+
+
 structure SectionWitness (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (n : ℕ) [Fact (finrank ℝ E = n + 1)] [NeZero n]
     (Q : Type*) [TopologicalSpace Q] [ChartedSpace (EuclideanSpace ℝ (Fin n)) Q]
@@ -67,10 +66,10 @@ structure SectionWitness (E : Type*) [NormedAddCommGroup E] [InnerProductSpace �
   mem : x ∈ W
   isSec : ∀ r : W, proj ((s r : V) : sphere (0 : E) 1) = (r : Q)
 
-/-- **Witness data for the round-sphere quotient descent.**  A finite group `Γ` acting on
-the round sphere by ambient orthogonal maps (via `ρ`) freely, together with the smooth
-orbit-quotient structure and covering local sections.  This is the geometric/topological
-data the metric descent consumes; the metric itself is constructed, not assumed. -/
+
+
+
+
 structure RoundQuotientData (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (n : ℕ) [Fact (finrank ℝ E = n + 1)] [NeZero n] where
   Q : Type*
@@ -102,11 +101,11 @@ attribute [instance] RoundQuotientData.topos RoundQuotientData.charted RoundQuot
   SectionWitness.mtW SectionWitness.scV SectionWitness.t2V SectionWitness.bV
   SectionWitness.m1V SectionWitness.mtV
 
-/-- **Extensionality for smooth Riemannian metrics.**  Two smooth Riemannian metrics that
-agree fiberwise (as `inner` bilinear forms at every point) are equal.  Only the `inner` field
-is data; `symm`/`pos`/`isVonNBounded`/`contMDiff` are propositions, closed by proof
-irrelevance once the inner products coincide.  (Canonical home: `Geometry/Metric/Basic.lean`;
-kept local here to avoid a full-tree rebuild — see `QuotientDescent.md`.) -/
+
+
+
+
+
 theorem SmoothRiemannianMetric.ext'
     {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
     {H' : Type*} [TopologicalSpace H'] {I' : ModelWithCorners ℝ E' H'}
@@ -179,8 +178,8 @@ theorem toSphere_contMDiff : ContMDiff (𝓡 n) (𝓡 n) ∞ S.toSphere := by
     (contMDiff_subtype_val (I := 𝓡 n)).comp S.s.contMDiff
   exact h
 
-/-- The section differential equals the diffeomorphism differential under the tangent-fibre
-identification `mfderiv (val) = id` on the open subtype `V ⊆ S`. -/
+
+
 theorem mfderiv_toSphere_apply (r : S.W) (v : TangentSpace (𝓡 n) r) :
     mfderiv (𝓡 n) (𝓡 n) S.toSphere r v = mfderiv (𝓡 n) (𝓡 n) S.s r v := by
   have hval : MDifferentiableAt (𝓡 n) (𝓡 n)
@@ -191,8 +190,8 @@ theorem mfderiv_toSphere_apply (r : S.W) (v : TangentSpace (𝓡 n) r) :
   have hcomp : S.toSphere = (Subtype.val : S.V → sphere (0 : E) 1) ∘ (S.s : S.W → S.V) := rfl
   rw [hcomp, mfderiv_comp_apply r hval hs v, mfderiv_subtype_val_apply]
 
-/-- The pulled-back restricted round metric evaluates as the round inner product at the lift,
-of the section-transported vectors. -/
+
+
 theorem pullback_inner_eval {x : Q} (hx : x ∈ S.W) (v w : TangentSpace (𝓡 n) x) :
     (Diffeomorph.pullbackMetric
         ((roundMetric (E := E) (n := n)).restrictOpen S.V) S.s).inner ⟨x, hx⟩ v w
@@ -203,7 +202,7 @@ theorem pullback_inner_eval {x : Q} (hx : x ∈ S.W) (v w : TangentSpace (𝓡 n
     mfderiv_toSphere_apply, mfderiv_toSphere_apply]
   rfl
 
-/-- The section is a right inverse of `π` at the level of differentials: `dπ ∘ ds = id`. -/
+
 theorem dproj_sec (hproj : ContMDiff (𝓡 n) (𝓡 n) ∞ proj) (r : S.W) :
     (mfderiv (𝓡 n) (𝓡 n) proj (S.toSphere r)).comp (mfderiv (𝓡 n) (𝓡 n) S.toSphere r)
       = ContinuousLinearMap.id ℝ (TangentSpace (𝓡 n) r) := by
@@ -220,7 +219,7 @@ theorem dproj_sec (hproj : ContMDiff (𝓡 n) (𝓡 n) ∞ proj) (r : S.W) :
   rw [← e1]
   exact mfderiv_subtype_val (I := 𝓡 n) S.W r
 
-/-- `dπ` at the lift is injective (finite-dimensional endomorphism with a right inverse). -/
+
 theorem dproj_inj (hproj : ContMDiff (𝓡 n) (𝓡 n) ∞ proj) (r : S.W) :
     Function.Injective (mfderiv (𝓡 n) (𝓡 n) proj (S.toSphere r)) := by
   have hcomp := S.dproj_sec hproj r
@@ -243,9 +242,9 @@ namespace RoundQuotientData
 
 variable (D : RoundQuotientData E n)
 
-/-- The descended fiberwise inner product at `x`: the round metric pulled back along the
-chosen covering local section.  Well-defined (independent of the section) by round's
-Γ-invariance — see `gm_coeff`. -/
+
+
+
 def gm (x : D.Q) : TangentSpace (𝓡 n) x →L[ℝ] TangentSpace (𝓡 n) x →L[ℝ] ℝ :=
   (Diffeomorph.pullbackMetric
     ((roundMetric (E := E) (n := n)).restrictOpen (D.section_at x).V)
@@ -261,11 +260,11 @@ theorem gm_pos (x : D.Q) (v : TangentSpace (𝓡 n) x) (hv : v ≠ 0) : 0 < D.gm
     ((roundMetric (E := E) (n := n)).restrictOpen (D.section_at x).V)
     (D.section_at x).s).pos _ _ hv
 
-/-- **The pointwise section-differential intertwining.**  At a common point `x` of two covering
-sections (through `x₁` and through `x`), the two lifts differ by an element `γ` of the group, and
-the section differentials are conjugate by `dγ`: `ds₁ = d(γ·) ∘ dsₓ`.  `γ` may depend on `x`; this
-uses only orbit-injectivity (`proj_eq_imp`) and `proj ∘ (γ·) = proj` (`proj_smul`), no covering-space
-unique lifting or connectedness. -/
+
+
+
+
+
 theorem sections_agree {x₁ x : D.Q} (hx : x ∈ (D.section_at x₁).W) :
     ∃ γ : D.Γ,
       (D.section_at x₁).toSphere ⟨x, hx⟩
@@ -309,9 +308,9 @@ theorem sections_agree {x₁ x : D.Q} (hx : x ∈ (D.section_at x₁).W) :
     exact hsx
   exact hA1.trans hA2.symm
 
-/-- **`gm` is section-independent** (the well-definedness): near `x₁`, `gm` agrees with the
-pullback of the round metric along the fixed section through `x₁`.  Proof: evaluate both via
-`pullback_inner_eval`, then `sections_agree` + round's `sphereDiffeo`-invariance. -/
+
+
+
 theorem gm_locallyEq {x₁ x : D.Q} (hx : x ∈ (D.section_at x₁).W)
     (v w : TangentSpace (𝓡 n) x) :
     D.gm x v w = (Diffeomorph.pullbackMetric
@@ -325,11 +324,11 @@ theorem gm_locallyEq {x₁ x : D.Q} (hx : x ∈ (D.section_at x₁).W)
   obtain ⟨γ, hq₁, hd⟩ := D.sections_agree hx
   rw [hd v, hd w, hq₁, roundInner_sphereDiffeo]
 
-/-- **Frontier 1 (well-definedness/smoothness):** the local-frame components of `gm` are
-smooth on each trivialization base set.  Near `x`, `gm` agrees with the pullback of the
-round metric along a fixed local section (a genuine `SmoothRiemannianMetric`); the agreement
-is round's Γ-invariance via the pointwise relation `ds' = dγ ∘ ds` between two section
-differentials (from differentiating `π ∘ γ = π`, no covering-space unique-lifting). -/
+
+
+
+
+
 theorem gm_coeff (x₀ : D.Q) (i j : Fin (Module.finrank ℝ (EuclideanSpace ℝ (Fin n)))) :
     ContMDiffOn (𝓡 n) 𝓘(ℝ) ∞
       (fun x => D.gm x (frameVec (I := 𝓡 n) x₀ i x) (frameVec (I := 𝓡 n) x₀ j x))
@@ -356,8 +355,8 @@ theorem gm_coeff (x₀ : D.Q) (i j : Fin (Module.finrank ℝ (EuclideanSpace ℝ
     (frameVec_sub_cmdiffAt (I := 𝓡 n) (D.section_at x₁).W x₀ j hx₁ (D.section_at x₁).mem)
     (le_refl _)
 
-/-- The descended round metric on the quotient `Q`, of constant positive sectional
-curvature (see `gQuot_constPosSec`). -/
+
+
 def gQuot : SmoothRiemannianMetric (𝓡 n) D.Q :=
   (smoothMetric_of_localCoeff (I := 𝓡 n) D.gm D.gm_symm D.gm_pos D.gm_coeff).choose
 
@@ -365,10 +364,10 @@ theorem gQuot_inner (x : D.Q) (v w : TangentSpace (𝓡 n) x) :
     D.gQuot.inner x v w = D.gm x v w :=
   (smoothMetric_of_localCoeff (I := 𝓡 n) D.gm D.gm_symm D.gm_pos D.gm_coeff).choose_spec x v w
 
-/-- **Frontier 2 (curvature assembly):** the descended metric has constant positive
-sectional curvature `c = 1`.  At each `x`, `gQuot` germ-equals the pullback of round along
-a local section, so `metricRm04StdAt gQuot = metricRm04StdAt round` at the lift (Steps B+C),
-and `roundMetric_sec_value` gives the Gram determinant. -/
+
+
+
+
 theorem gQuot_constPosSec :
     ∃ c : ℝ, 0 < c ∧ ∀ (x : D.Q) (X Y : TangentSpace (𝓡 n) x),
       metricRm04StdAt (I := 𝓡 n) D.gQuot x X Y Y X =
@@ -378,11 +377,9 @@ theorem gQuot_constPosSec :
   haveI : NeZero (finrank ℝ (EuclideanSpace ℝ (Fin n))) := by
     rw [finrank_euclideanSpace_fin]; infer_instance
   set S := D.section_at x with hS
-  -- Step B (germ-locality): the curvature of `gQuot` at `x` is computed on the open set `S.W`.
   have hB : metricRm04StdAt (I := 𝓡 n) D.gQuot x X Y Y X
       = metricRm04StdAt (I := 𝓡 n) (D.gQuot.restrictOpen S.W) ⟨x, S.mem⟩ X Y Y X :=
     (metricRm04StdAt_restrictOpen (I := 𝓡 n) D.gQuot S.W ⟨x, S.mem⟩ X Y Y X).symm
-  -- On `S.W`, `gQuot` restricted equals the pullback of round along the section (well-definedness).
   have hmetric : D.gQuot.restrictOpen S.W
       = Diffeomorph.pullbackMetric
           ((roundMetric (E := E) (n := n)).restrictOpen S.V) S.s := by
@@ -390,7 +387,6 @@ theorem gQuot_constPosSec :
     intro r v w
     rw [SmoothRiemannianMetric.restrictOpen_inner, D.gQuot_inner]
     exact D.gm_locallyEq (x₁ := x) r.2 v w
-  -- Step C (pullback naturality of the (0,4) tensor), rephrased in the `toSphere` lift.
   have hC : metricRm04StdAt (I := 𝓡 n)
         (Diffeomorph.pullbackMetric
           ((roundMetric (E := E) (n := n)).restrictOpen S.V) S.s) ⟨x, S.mem⟩ X Y Y X
@@ -403,7 +399,6 @@ theorem gQuot_constPosSec :
         S.V S.W S.s ⟨x, S.mem⟩ X Y Y X,
       S.mfderiv_toSphere_apply ⟨x, S.mem⟩ X, S.mfderiv_toSphere_apply ⟨x, S.mem⟩ Y]
     rfl
-  -- Transport each round Gram entry (at the lift) back to a `gQuot` Gram entry (at `x`).
   have hbridge : ∀ v w : TangentSpace (𝓡 n) x,
       (roundMetric (E := E) (n := n)).inner (S.toSphere ⟨x, S.mem⟩)
           (mfderiv (𝓡 n) (𝓡 n) S.toSphere ⟨x, S.mem⟩ v)

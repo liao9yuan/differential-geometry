@@ -2,14 +2,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Target-ball and return control for the finite-stage comparison maps
 
-This file turns the source-local chart tail for the actual global stage map
-into target-ball control and, downstream, an approximate return estimate.  The
-construction-radius margin remains explicit; no endpoint-radius hypothesis is
-introduced.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -41,7 +41,7 @@ private theorem legacy_hom_eq
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     (legacyBallChart (I := I) Y x).hom z =
-      (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z := by
+      (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z := by
   rfl
 
 private theorem legacy_restrict_eq
@@ -55,9 +55,9 @@ private theorem legacy_restrict_eq
       (normalExpPD (I := I) Y x).target := by
   rfl
 
-/-- On one rectangular pair tail, every stabilized live center in the target
-stage is no farther from its basepoint than the corresponding source-stage
-center, up to an arbitrary positive error. -/
+
+
+
 theorem liveCenters_radial
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -93,9 +93,9 @@ theorem liveCenters_radial
   have hl' := abs_lt.mp (hN l hl alpha)
   linarith
 
-/-- With an explicit construction-radius room inequality, the actual global
-stage comparison maps send a smaller retained source ball into a larger
-retained target ball on one rectangular pair tail. -/
+
+
+
 theorem HasStageJetData.mapsTo_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -190,8 +190,8 @@ theorem HasStageJetData.mapsTo_tail
     hC1U alpha (interior_subset (hC01 alpha hzC0))
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   have hxEq : chiK.symm z = x := by
     simpa only [chiK, ck, Yk, Lphi] using hzx
   have hxLegacy : (legacyBallChart (I := I) Yk ck).hom z = x := by
@@ -241,13 +241,11 @@ theorem HasStageJetData.mapsTo_tail
   have hUtgt : U alpha ⊆ chiL.target := by
     intro q hq
     have hqBall := hExpL hq
-    rw [Metric.mem_ball, dist_zero_right] at hqBall
-    change q ∈ (NormalCoordinates.framedExpDiffeo
-      (I := I) Yl.metric cl).source
-    rw [NormalCoordinates.framedExp_source]
-    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yl.metric cl
-    simpa only [NormalCoordinates.normalFrame_sqrt] using hqBall
+    have hqNorm : ‖q‖ < expMapC2Radius (I := I) Yl.metric cl := by
+      simpa only [Metric.mem_ball, dist_zero_right] using hqBall
+    simpa only [chiL] using
+      Geometry.Riemannian.ball_subset_normalChartAt_target
+        (I := I) Yl.metric cl hqNorm
   have hman := NormalCoordMetricEquivOn.symm_dist_le
     (I := I) Yl (P (Lphi.φ l)) hEquiv hUtgt hseg
   have hFw : chiL.symm w = F x := by
@@ -260,7 +258,7 @@ theorem HasStageJetData.mapsTo_tail
     exact (normalExpPD (I := I) Yl cl).right_inv htarget
   have hzeroL : chiL.symm (0 : E) = cl := by
     simpa only [chiL] using
-      NormalCoordinates.framedExp_zero (I := I) Yl.metric cl
+      NormalCoordinates.normalChartAt_symm_zero (I := I) Yl.metric cl
   rw [hFw, hzeroL] at hman
   have hzNorm : ‖z‖ < 8 * L.lamInf (alpha.1 : Nat) := by
     simpa only [Metric.mem_ball, dist_zero_right] using hU8 alpha hzU
@@ -321,9 +319,9 @@ theorem HasStageJetData.mapsTo_tail
   change dist (F x) Yl.basepoint ≤ R1
   exact hfinal.le
 
-/-- On the same explicit construction-radius budget, the independently
-constructed reverse-stage comparison map is an approximate return map for the
-forward comparison map, uniformly on the smaller source ball. -/
+
+
+
 theorem HasStageJetData.return_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -424,8 +422,8 @@ theorem HasStageJetData.return_tail
   have hzC0 : z ∈ C0 alpha := interior_subset hzInt
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   have hxEq : chiK.symm z = x := by
     simpa only [chiK, ck, Yk, Lphi] using hzx
   have hxLegacy : (legacyBallChart (I := I) Yk ck).hom z = x := by
@@ -450,8 +448,7 @@ theorem HasStageJetData.return_tail
     simpa only [mapDerivNorm, norm_iteratedFDeriv_zero, id_eq, dist_eq_norm,
       legacyChartFamily, legacyInv_eq, legacyTarget_eq,
       normalExpPD, MetricCompactnessInputs.toCore, w, Fkl, chiK, chiL, ck, cl,
-      Yk, Yl, Lphi,
-      hxLegacy] using
+      Yk, Yl, Lphi, hxLegacy] using
         hforward.2.2 0 le_rfl
   have hdeltaEta : delta alpha ≤ eta alpha / 4 := min_le_left _ _
   have hquarterEta : eta alpha / 4 ≤ eta alpha := by
@@ -513,13 +510,11 @@ theorem HasStageJetData.return_tail
   have hUtgt : U alpha ⊆ chiK.target := by
     intro q hq
     have hqBall := hExpK hq
-    rw [Metric.mem_ball, dist_zero_right] at hqBall
-    change q ∈ (NormalCoordinates.framedExpDiffeo
-      (I := I) Yk.metric ck).source
-    rw [NormalCoordinates.framedExp_source]
-    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
-    simpa only [NormalCoordinates.normalFrame_sqrt] using hqBall
+    have hqNorm : ‖q‖ < expMapC2Radius (I := I) Yk.metric ck := by
+      simpa only [Metric.mem_ball, dist_zero_right] using hqBall
+    simpa only [chiK] using
+      Geometry.Riemannian.ball_subset_normalChartAt_target
+        (I := I) Yk.metric ck hqNorm
   have hman := NormalCoordMetricEquivOn.symm_dist_le
     (I := I) Yk (P (Lphi.φ k)) hEquiv hUtgt hseg
   have hHu : chiK.symm u = Flk (Fkl x) := by

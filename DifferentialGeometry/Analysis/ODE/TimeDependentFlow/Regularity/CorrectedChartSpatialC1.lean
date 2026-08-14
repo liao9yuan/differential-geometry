@@ -3,27 +3,27 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.MetricSpace.Lipschitz
 
-/-!
-# Spatial `C¹`-Lipschitz regularity of the corrected chart field
 
-At a base chart `α`, the *corrected* chart field `y ↦ chartTrivRepr α (X t) y` (the
-trivialised representation, the geometrically correct chart velocity) is jointly continuous
-in `(t, y)` and uniformly-in-time Lipschitz on a ball around the chart centre.  This is
-derived from the joint continuity of `X`, the continuity of the raw chart gradient, and the
-joint `C∞`-smoothness of the field as a section of the tangent bundle on the interior
-`(0, T) ×ˢ univ` (`hint`), via the convention bridge
-`chartTrivRepr = chartMovingTriv · ∘ chartRawRepr` and the product rule for its Fréchet
-derivative.
 
-For `t > 0` the field is `C∞` (hence differentiable) on the chart-image of the trivialization
-base set by the `t`-slice of `hint`; the mean value inequality on the convex ball then bounds
-its Lipschitz constant by the supremum of `‖fderiv‖` over the compact box
-`Icc 0 L ×ˢ closedBall`, which is finite because the gradient is jointly continuous (`hgrad`,
-read through the chart).  At the endpoint `t = 0` no smoothness hypothesis is available, but the
-field is the pointwise limit (as `t → 0⁺`, via the joint continuity of `X`) of the uniformly
-Lipschitz fields at positive times, and a pointwise limit of `K`-Lipschitz maps is `K`-Lipschitz;
-this gives both the closed-ball continuity and the open-ball Lipschitz bound at `t = 0`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -40,10 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
   [IsManifold I ∞ M] [ChartedSpace H M] in
-/-- A pointwise limit of `K`-Lipschitz maps is `K`-Lipschitz: if along a (`NeBot`) filter `l`
-the family `g · ` is eventually `K`-Lipschitz on `S` and converges pointwise on `S` to `g0`,
-then `g0` is `K`-Lipschitz on `S`.  The Lipschitz inequality `dist (g0 x) (g0 y) ≤ K · dist x y`
-is the limit of the corresponding inequalities for the `g t`. -/
 private lemma lipschitzOnWith_of_tendsto_aux
     {β : Type*} [PseudoMetricSpace β] (g : ℝ → E → β) (g0 : E → β) (K : ℝ≥0)
     (S : Set E) (l : Filter ℝ) [l.NeBot]
@@ -62,11 +58,7 @@ private lemma lipschitzOnWith_of_tendsto_aux
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
   [SigmaCompactSpace M] in
-/-- For a fixed time `t`, if the section `x ↦ X t x` is globally `C∞` as a tangent-bundle
-section, then its trivialised chart representation `chartTrivRepr α (X t)` is differentiable at
-every interior point of the chart target.  This is the chart pull-back `ContDiffOn` of the
-section (`contDiffOn_chartE_pullback_of_contMDiff_section`), upgraded to `DifferentiableAt` via
-the neighbourhood `interior target ⊆` (image of source ∩ base set) ∩ target. -/
+omit [FiniteDimensional ℝ E] in
 private lemma differentiableAt_chartTrivRepr_of_contMDiff_section
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ)
     (hCM : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -98,10 +90,6 @@ private lemma differentiableAt_chartTrivRepr_of_contMDiff_section
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Joint continuity of `(t, z) ↦ fderiv ℝ (chartTrivRepr α (X t)) z` on `univ ×ˢ target`,
-obtained from the chart-gradient continuity hypothesis `hgrad` by composing with the
-(continuous) inverse chart `z ↦ (extChartAt I α).symm z` and using `extChartAt ∘ symm = id` on
-the target. -/
 private lemma continuousOn_fderiv_chartTrivRepr
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hgrad : ContinuousOn (fun q : ℝ × M =>
@@ -124,10 +112,6 @@ private lemma continuousOn_fderiv_chartTrivRepr
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- As `t → 0⁺` (within `Ioo 0 L`), the corrected chart field value `chartTrivRepr α (X t) z`
-converges to its `t = 0` value, for each fixed `z`.  This is continuity in `t` of the raw fibre
-value `t ↦ X t (φ.symm z)` (a `t`-slice of the joint continuity `hcont`) followed by the fixed
-trivialization linear map `trivToE α (φ.symm z)`. -/
 private lemma pointwise_tendsto_chartTrivRepr
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (L : ℝ)
     (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
@@ -151,20 +135,22 @@ private lemma pointwise_tendsto_chartTrivRepr
   exact hclm.mono_left nhdsWithin_le_nhds
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- At base chart `α`, the corrected chart field `y ↦ chartTrivRepr α (X t) y` is jointly
-continuous and uniformly-in-time `K`-Lipschitz on a ball around the chart centre, from the
-continuity + chart-gradient data of `X` and the joint `C∞`-smoothness of the field as a
-tangent-bundle section on the interior `(0, T) ×ˢ univ` (`hint`). -/
 theorem corrected_chart_field_lipschitz_of_data
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ) (hT : 0 < T)
-    (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hgrad : ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
-    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+    (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.univ : Set (ℝ × M)))
+    (hgrad : ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z)
+      (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ L K r : ℝ, 0 < L ∧ 0 < r ∧ 0 ≤ K ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,
-        ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
+        ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y)
+          (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,
-        LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r)) ∧
+        LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y)
+          (Metric.ball (I ((chartAt H α) α)) r)) ∧
       Metric.closedBall (I ((chartAt H α) α)) r ⊆ (extChartAt I α).target := by
   classical
   set center : E := extChartAt I α α with hcenter
@@ -187,7 +173,8 @@ theorem corrected_chart_field_lipschitz_of_data
   have hbox_sub : (Set.Icc (0:ℝ) L) ×ˢ (Metric.closedBall center r) ⊆
       (Set.univ : Set ℝ) ×ˢ (extChartAt I α).target := fun p hp =>
     ⟨Set.mem_univ _, interior_subset (hcball_sub hp.2)⟩
-  have hjoint : ContinuousOn (fun p : ℝ × E => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X p.1) z) p.2)
+  have hjoint : ContinuousOn
+    (fun p : ℝ × E => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X p.1) z) p.2)
       ((Set.Icc (0:ℝ) L) ×ˢ (Metric.closedBall center r)) := hjoint_full.mono hbox_sub
   have hcompact : IsCompact ((Set.Icc (0:ℝ) L) ×ˢ (Metric.closedBall center r)) :=
     isCompact_Icc.prod (isCompact_closedBall center r)
@@ -198,11 +185,13 @@ theorem corrected_chart_field_lipschitz_of_data
       ‖fderiv ℝ (fun z => chartTrivRepr (I := I) α (X t) z) z‖ ≤ C := fun t ht z hz =>
     (hC₀ (t, z) ⟨ht, hz⟩).trans (le_max_left _ _)
   have hLipPos : ∀ t ∈ Set.Ioc (0:ℝ) L,
-      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall center r) := by
+      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y)
+        (Metric.closedBall center r) := by
     intro t ht
     have htT : t ∈ Set.Ioo (0:ℝ) T := ⟨ht.1, lt_of_le_of_lt ht.2 hL_lt⟩
     have htIcc : t ∈ Set.Icc (0:ℝ) L := ⟨le_of_lt ht.1, ht.2⟩
-    have hCM : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun x : M => (TotalSpace.mk' E x (X t x) : TangentBundle I M)) := by
+    have hCM : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => (TotalSpace.mk' E x (X t x) : TangentBundle I M)) := by
       have hslice : ContMDiff I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => (t, x)) :=
         (contMDiff_const (c := t)).prodMk contMDiff_id
       exact hint.comp_contMDiff hslice (fun x => ⟨htT, Set.mem_univ x⟩)
@@ -213,7 +202,8 @@ theorem corrected_chart_field_lipschitz_of_data
       rw [Real.le_toNNReal_iff_coe_le hC_nonneg]
       exact hbound t htIcc z hz
   have hLipAll : ∀ t ∈ Set.Icc (0:ℝ) L,
-      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall center r) := by
+      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y)
+        (Metric.closedBall center r) := by
     intro t ht
     rcases eq_or_lt_of_le ht.1 with h0 | h0
     · subst h0

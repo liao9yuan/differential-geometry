@@ -1,6 +1,6 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
@@ -11,18 +11,6 @@ import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-/-!
-# Elementary Covectors
-
-This file defines the elementary k-covectors of a vector space, given a basis of the
-continuous dual.
-
-## Main Definitions
-
-* `ContinuousAlternatingMap.elementaryCovector b ι` : given a basis `b` of the continuous
-  dual `E →L[𝕜] 𝕜` and a multi-index `ι : Fin k → Fin n`, the elementary k-covector
-  mapping `(v 0, ..., v (k-1))` to `det (fun i j => b (ι i) (v j))`.
--/
 
 noncomputable section
 
@@ -35,33 +23,22 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {n k : ℕ}
 
-/-- The elementary k-covector associated to a basis `b` of the continuous dual `E →L[𝕜] 𝕜`
-and a multi-index `ι : Fin k → Fin n`. Given vectors `v 0, ..., v (k-1)` in `E`, this map
-returns the determinant of the k×k matrix whose `(i, j)` entry is `b (ι i) (v j)`.
-
-Concretely, this is the continuous alternating map
-  `v ↦ det (fun i j => b (ι i) (v j))`.
-It is alternating in `v` because the determinant is alternating in its columns. -/
 noncomputable def elementaryCovector
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
     (ι : Fin k → Fin n) :
     E [⋀^Fin k]→L[𝕜] 𝕜 :=
-
   let φ : E →ₗ[𝕜] (Fin k → 𝕜) := LinearMap.pi (fun i => (b (ι i)).toLinearMap)
   (Matrix.detRowAlternating.compLinearMap φ).mkContinuous
     ((k.factorial : ℝ) * ∏ i : Fin k, ‖b (ι i)‖)
     (fun v => by
-
       change ‖Matrix.detRowAlternating (R := 𝕜) (n := Fin k)
             (fun r c => b (ι c) (v r))‖ ≤
           ((k.factorial : ℝ) * ∏ i : Fin k, ‖b (ι i)‖) * ∏ i : Fin k, ‖v i‖
-
       rw [show Matrix.detRowAlternating (R := 𝕜) (n := Fin k) (fun r c => b (ι c) (v r)) =
             Matrix.det (fun i j : Fin k => b (ι i) (v j)) from by
           change Matrix.det (fun r c : Fin k => b (ι c) (v r)) =
             Matrix.det (fun i j : Fin k => b (ι i) (v j))
           rw [← Matrix.det_transpose]; rfl]
-
       rw [Matrix.det_apply]
       calc ‖∑ σ : Equiv.Perm (Fin k),
                 Equiv.Perm.sign σ • ∏ i : Fin k, b (ι (σ i)) (v i)‖
@@ -97,13 +74,10 @@ theorem elementaryCovector_apply
     (ι : Fin k → Fin n)
     (v : Fin k → E) :
     elementaryCovector b ι v = Matrix.det (fun i j => b (ι i) (v j)) := by
-
   change Matrix.det (fun r c : Fin k => b (ι c) (v r)) =
     Matrix.det (fun i j : Fin k => b (ι i) (v j))
   rw [← Matrix.det_transpose]; rfl
 
-/-- Cofactor expansion: the interior product `curryFin (elementaryCovector b I) x` expands as a
-sum over deleted row indices, via Laplace expansion of the determinant along the first column. -/
 theorem curryFin_elementaryCovector
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
     (I : Fin (k + 1) → Fin n) (x : E) :
@@ -117,9 +91,6 @@ theorem curryFin_elementaryCovector
   simp only [Fin.cons_zero]
   congr 1; rw [elementaryCovector_apply]; congr 1
 
-/-- Evaluating an elementary covector on basis vectors gives the generalized
-Kronecker delta. Given a dual basis pair `(B, b)` with `b i (B j) = δ_{ij}`,
-we have `elementaryCovector b I (B ∘ J) = multiKroneckerDelta I J`. -/
 theorem elementaryCovector_basis_eval
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -132,8 +103,6 @@ theorem elementaryCovector_basis_eval
   ext i j
   exact dual (I i) (J j)
 
-/-- If `J` is injective and `I = J ∘ σ`, then evaluating the elementary covector
-`elementaryCovector b I` on `(B (J 0), ..., B (J (k-1)))` gives `sign σ`. -/
 theorem elementaryCovector_basis_eval_comp_perm
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -144,8 +113,6 @@ theorem elementaryCovector_basis_eval_comp_perm
   rw [elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_comp_perm hJ]
 
-/-- If no permutation `σ` satisfies `I = J ∘ σ`, then evaluating the elementary
-covector `elementaryCovector b I` on `(B (J 0), ..., B (J (k-1)))` gives `0`. -/
 theorem elementaryCovector_basis_eval_eq_zero
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -156,8 +123,6 @@ theorem elementaryCovector_basis_eval_eq_zero
   rw [elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_eq_zero h]
 
-/-- If `I` is not injective (has a repeated index), then evaluating the elementary
-covector `elementaryCovector b I` on any basis vectors gives `0`. -/
 theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_left
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -168,8 +133,6 @@ theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_left
   rw [elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_eq_zero_of_not_injective_left hI]
 
-/-- If `J` is not injective (has a repeated index), then evaluating the elementary
-covector on `(B (J 0), ..., B (J (k-1)))` gives `0`. -/
 theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_right
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -180,9 +143,6 @@ theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_right
   rw [elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_eq_zero_of_not_injective_right hJ]
 
-/-- If `I = J ∘ σ` for a permutation `σ`, then
-`elementaryCovector b I = sign(σ) • elementaryCovector b J`.
-This follows from `multiKroneckerDelta_comp_perm_left`. -/
 theorem elementaryCovector_comp_perm
     [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -199,17 +159,12 @@ theorem elementaryCovector_comp_perm
     elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_comp_perm_left, smul_eq_mul]
 
-/-!
-## Basis of elementary covectors
--/
-
 section ElementaryCovectorBasis
 
 variable
   [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E]
 
-/-- The elementary covectors indexed by strictly increasing
-multi-indices are linearly independent. -/
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem elementaryCovector_linearIndependent
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -226,7 +181,6 @@ theorem elementaryCovector_linearIndependent
   simp only [ContinuousAlternatingMap.sum_apply,
     ContinuousAlternatingMap.smul_apply,
     elementaryCovector_basis_eval B b dual] at heval
-
   have hkron : ∀ ι : Fin k ↪o Fin n,
       Fin.multiKroneckerDelta (⇑ι) (⇑J) =
         if ι = J then (1 : 𝕜) else 0 := fun ι => by
@@ -242,8 +196,7 @@ theorem elementaryCovector_linearIndependent
     ite_true] at heval
   rwa [smul_eq_mul, mul_one] at heval
 
-/-- Every continuous alternating map is in the span of the
-elementary covectors. -/
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem elementaryCovector_span
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -257,14 +210,12 @@ theorem elementaryCovector_span
   apply ContinuousAlternatingMap.toAlternatingMap_injective
   apply B.ext_alternating
   intro v hv
-
   have key : ∀ g : E [⋀^Fin k]→L[𝕜] 𝕜,
       g.toAlternatingMap (fun i => B (v i)) =
         g (B ∘ v) := fun _ => rfl
   simp only [key, ContinuousAlternatingMap.sum_apply,
     ContinuousAlternatingMap.smul_apply, smul_eq_mul,
     elementaryCovector_basis_eval B b dual]
-
   set s := Finset.image v Finset.univ
   have hs_card : s.card = k := by
     rw [Finset.card_image_of_injective _ hv,
@@ -272,7 +223,6 @@ theorem elementaryCovector_span
   set ι₀ := s.orderEmbOfFin hs_card
   have hv_mem : ∀ i, v i ∈ s := fun i =>
     Finset.mem_image.mpr ⟨i, Finset.mem_univ _, rfl⟩
-
   let f : Fin k → Fin k := fun i =>
     (s.orderIsoOfFin hs_card).symm ⟨v i, hv_mem i⟩
   have hf_inj : Function.Injective f := fun a b h => by
@@ -291,7 +241,6 @@ theorem elementaryCovector_span
       ext j; rfl
     rw [this, Function.comp_apply,
       OrderIso.apply_symm_apply]
-
   have hvanish : ∀ ι : Fin k ↪o Fin n, ι ≠ ι₀ →
       Fin.multiKroneckerDelta (R := 𝕜) (⇑ι) v = 0 := by
     intro ι hne
@@ -301,13 +250,11 @@ theorem elementaryCovector_span
     have := congr_arg Set.range h
     simp [Set.range_comp] at this
     exact this.symm
-
   have hι₀_term :
       Fin.multiKroneckerDelta (R := 𝕜) (⇑ι₀) v =
         (Equiv.Perm.sign σ : 𝕜) := by
     rw [hσ, Fin.multiKroneckerDelta_symm (R := 𝕜),
       Fin.multiKroneckerDelta_comp_perm ι₀.injective]
-
   have hF_perm : F (B ∘ v) =
       (Equiv.Perm.sign σ : 𝕜) * F (B ∘ ι₀) := by
     conv_lhs => rw [hσ]
@@ -317,16 +264,11 @@ theorem elementaryCovector_span
       ContinuousAlternatingMap.coe_toAlternatingMap]
       at this
     rw [this, Units.smul_def, zsmul_eq_mul]
-
   symm; rw [hF_perm, Finset.sum_eq_single ι₀]
   · rw [hι₀_term, mul_comm]
   · intro ι _ hne; rw [hvanish ι hne, mul_zero]
   · intro h; exact absurd (Finset.mem_univ ι₀) h
 
-/-- The elementary covectors indexed by strictly increasing multi-indices
-`Fin k ↪o Fin n` form a basis for the space of continuous alternating `k`-forms
-`E [⋀^Fin k]→L[𝕜] 𝕜`. The covectors are built from `B.cDualBasis`, the continuous
-dual basis induced by `B`. -/
 noncomputable def elementaryCovectorBasis
     (B : Module.Basis (Fin n) 𝕜 E) :
     Module.Basis (Fin k ↪o Fin n) 𝕜
@@ -342,7 +284,6 @@ theorem elementaryCovectorBasis_apply
       elementaryCovector B.cDualBasis ↑I := by
   rw [elementaryCovectorBasis, Module.Basis.mk_apply]
 
-/-- The dimension of `E [⋀^Fin k]→L[𝕜] 𝕜` is `(finrank 𝕜 E).choose k`. -/
 theorem finrank_continuousAlternatingMap :
     Module.finrank 𝕜 (E [⋀^Fin k]→L[𝕜] 𝕜) =
       (Module.finrank 𝕜 E).choose k := by
@@ -350,7 +291,6 @@ theorem finrank_continuousAlternatingMap :
   let B : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
   rw [Module.finrank_eq_card_basis
       (elementaryCovectorBasis (k := k) B)]
-
   rw [Fintype.card_congr
     (Set.powersetCard.ofFinEmbEquiv
       (I := Fin d) (n := k))]

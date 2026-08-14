@@ -2,25 +2,23 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Metric.PullbackCross
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Cross-model pullback naturality for metric curvature
 
-Cross-model companion of
-`DifferentialGeometry.Geometry.Curvature.PullbackNaturality`.  There the
-diffeomorphism `Φ : M ≃ₘ⟮I,I⟯ N` is between two manifolds on the *same* model `I`;
-here `Φ : M ≃ₘ⟮I,J⟯ N` is between manifolds on *different* models: `M` over `I`
-(fiber `E`) and `N` over `J` (fiber `F`).
 
-The chain transports the metric `(0,4)` Riemann tensor along `Φ`, ending at
-`metricRm04Std_pullbackCross`.  Each step mirrors the same-model template with the
-N-side model `I` replaced by `J`, the N-side derivative `mfderiv I I Φ` replaced by
-`mfderiv I J Φ`, the N-side fiber `E` replaced by `F`, and the pullback metric
-`Diffeomorph.pullbackMetric` replaced by the cross-model
-`Diffeomorph.pullbackMetricCross`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,9 +27,9 @@ namespace DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G}
@@ -41,6 +39,8 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N
 private lemma infty_ne_zeroC : (∞ : WithTop ℕ∞) ≠ 0 := by
   decide
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 private theorem mfderiv_eq_cle_applyCross
     (Phi : M ≃ₘ⟮I, J⟯ N) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zeroC x v =
@@ -49,6 +49,8 @@ private theorem mfderiv_eq_cle_applyCross
     Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zeroC
   exact congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace J (Phi x) => f v) h
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 theorem mpullback_symm_applyCross
     (Phi : M ≃ₘ⟮I, J⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     VectorField.mpullback J I (Phi.symm : N -> M) X (Phi x) =
@@ -88,20 +90,22 @@ theorem mpullback_symm_applyCross
     IsLocalDiffeomorphAt.mfderivToContinuousLinearEquiv, hlocal.mfderiv_eq]
   rfl
 
-/-- Push a tangent field on `M` forward to `N` along a cross-model diffeomorphism,
-written as Mathlib's pullback along the inverse diffeomorphism. -/
+
+
 private abbrev pushFwdFieldCross
     (Phi : M ≃ₘ⟮I, J⟯ N) (X : (p : M) -> TangentSpace I p) :
     (q : N) -> TangentSpace J q :=
   VectorField.mpullback J I (Phi.symm : N -> M) X
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 @[simp] private theorem pushFwdFieldCross_apply_at_image
     (Phi : M ≃ₘ⟮I, J⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     pushFwdFieldCross (I := I) (J := J) Phi X (Phi x) =
       mfderiv I J (Phi : M -> N) x (X x) :=
   mpullback_symm_applyCross (I := I) (J := J) Phi X x
 
-/-- Smooth pushed-forward tangent section along a cross-model diffeomorphism. -/
+
 noncomputable def pushFwdSectionCross
     [IsManifold I 1 M] [IsManifold J 1 N]
     (Phi : M ≃ₘ⟮I, J⟯ N)
@@ -120,6 +124,8 @@ noncomputable def pushFwdSectionCross
       exact ContinuousLinearMap.isInvertible_equiv
     · simp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 @[simp] theorem pushFwdSectionCross_apply_at_image
     [IsManifold I 1 M] [IsManifold J 1 N]
     (Phi : M ≃ₘ⟮I, J⟯ N)
@@ -129,18 +135,20 @@ noncomputable def pushFwdSectionCross
       mfderiv I J (Phi : M -> N) x (X x) := by
   simp [pushFwdSectionCross]
 
-/-- Naturality of a single Koszul directional-derivative term under the cross-model
-pullback metric. -/
+
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] in
 theorem directionalDeriv_pullbackCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold J N]
     [IsManifold I 1 M] [IsManifold J 1 N]
     (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N)
     (A P Q : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
-    DifferentialGeometry.Integral.Connection.directionalDeriv (I := I) (fun p : M => A p)
+    DifferentialGeometry.Integral.Connection.directionalDerivAlong (I := I) (fun p : M => A p)
         (fun y : M =>
           (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi).inner y (P y) (Q y)) x =
-      DifferentialGeometry.Integral.Connection.directionalDeriv (I := J)
+      DifferentialGeometry.Integral.Connection.directionalDerivAlong (I := J)
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi A q)
         (fun q : N =>
           g.inner q (pushFwdSectionCross (I := I) (J := J) Phi P q)
@@ -156,7 +164,7 @@ theorem directionalDeriv_pullbackCross
     rw [Diffeomorph.pullbackMetricCross_inner]
     simp only [pushFwdSectionCross_apply_at_image]
   rw [hfun]
-  unfold DifferentialGeometry.Integral.Connection.directionalDeriv
+  unfold DifferentialGeometry.Integral.Connection.directionalDerivAlong
   dsimp only
   rw [pushFwdSectionCross_apply_at_image]
   rw [extDerivFun_real_eq_mfderiv, extDerivFun_real_eq_mfderiv]
@@ -165,7 +173,8 @@ theorem directionalDeriv_pullbackCross
         (fun q : N =>
           g.inner q (pushFwdSectionCross (I := I) (J := J) Phi P q)
             (pushFwdSectionCross (I := I) (J := J) Phi Q q)) (Phi x) :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := J) (M := N) g
+    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := J)
+      (M := N) g
       (pushFwdSectionCross (I := I) (J := J) Phi P).contMDiff.contMDiffAt
       (pushFwdSectionCross (I := I) (J := J) Phi Q).contMDiff.contMDiffAt
       (by simp)).mdifferentiableAt (by simp)
@@ -179,7 +188,9 @@ theorem directionalDeriv_pullbackCross
       (f := (Phi : M -> N)) (x := x) hG_diff hPhi_diff (A x)
   simpa [Function.comp_def] using hcomp
 
-/-- Naturality of a single Koszul bracket term under the cross-model pullback metric. -/
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] in
 private theorem inner_bracket_pullback_pushFwdCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold J N]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -225,7 +236,9 @@ private theorem inner_bracket_pullback_pushFwdCross
   rw [Diffeomorph.pullbackMetricCross_inner]
   rw [pushFwdSectionCross_apply_at_image]
 
-/-- Naturality of the full Koszul scalar under the cross-model pullback metric. -/
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] in
 private theorem koszulScalar_pullback_pushFwdCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold J N]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -248,7 +261,8 @@ private theorem koszulScalar_pullback_pushFwdCross
     inner_bracket_pullback_pushFwdCross (I := I) (J := J) g Phi B C A x,
     inner_bracket_pullback_pushFwdCross (I := I) (J := J) g Phi C A B x]
 
-/-- Smooth-input Levi-Civita connection naturality for the cross-model pullback metric. -/
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem metricCov_pullbackCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
@@ -280,7 +294,8 @@ theorem metricCov_pullbackCross
       (n := (⊤ : ℕ∞)) x w
   have hu : pushFwdSectionCross (I := I) (J := J) Phi Zw (Phi x) = u := by
     rw [pushFwdSectionCross_apply_at_image, hZw]; exact hdw
-  have hv : pushFwdSectionCross (I := I) (J := J) Phi Xv (Phi x) = mfderiv I J (Phi : M -> N) x v := by
+  have hv : pushFwdSectionCross (I := I) (J := J) Phi Xv (Phi x) = mfderiv I J (Phi : M -> N) x
+    v := by
     rw [pushFwdSectionCross_apply_at_image, hXv]
   have hkoszul_h :
       g.inner (Phi x)
@@ -292,7 +307,8 @@ theorem metricCov_pullbackCross
               (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
               (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x := by
     rw [← hdw, ← Diffeomorph.pullbackMetricCross_inner, ← hXv, ← hZw]
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    exact
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := I) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
       (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x
       (Xv.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
@@ -309,18 +325,23 @@ theorem metricCov_pullbackCross
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Zw q) (Phi x) := by
     rw [← hu, ← hv]
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    exact
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := J) g
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Xv q)
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Zw q) (Phi x)
-      ((pushFwdSectionCross (I := I) (J := J) Phi Xv).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
-      ((pushFwdSectionCross (I := I) (J := J) Phi Y).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
-      ((pushFwdSectionCross (I := I) (J := J) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+      ((pushFwdSectionCross (I := I) (J := J) Phi Xv).contMDiff.contMDiffAt.mdifferentiableAt
+        (by simp))
+      ((pushFwdSectionCross (I := I) (J := J) Phi Y).contMDiff.contMDiffAt.mdifferentiableAt
+        (by simp))
+      ((pushFwdSectionCross (I := I) (J := J) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt
+        (by simp))
   rw [hkoszul_h, hkoszul_g, koszulScalar_pullback_pushFwdCross (I := I) (J := J) g Phi Xv Y Zw x]
 
-/-- Smooth-field curvature naturality for the Levi-Civita connection of a cross-model
-pullback metric. -/
+
+
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
@@ -347,11 +368,13 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
     metricCov (I := J) (M := N) g
   let ZYh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (Y p),
-      fun p => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      fun p
+        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) Y Z p⟩
   let ZXh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (X p),
-      fun p => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      fun p
+        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) X Z p⟩
   have hZY :
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi ZYh q) =
@@ -478,6 +501,7 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
   rw [hZY, hZX, hbr]
   simp [covg]
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem metricRm04Std_pullbackCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]

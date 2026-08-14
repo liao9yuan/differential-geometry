@@ -5,56 +5,9 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Algebra.Order.Chebyshev
 
-/-!
-# Intrinsic fibre-norm bound for tangent-endomorphism slot substitution
-
-For a `(0, s)`-tensor value `A` at a point `x` of a closed smooth Riemannian manifold and a
-tangent endomorphism `W : T_x M →L[ℝ] T_x M`, the **slot substitution**
-
-```
-slotSub(A, W) := − ∑ₖ A(Function.update · k (W ·)),
-```
-
-obtained by substituting `W` into each of the `s` covariant tensor slots and summing, has its
-intrinsic Riemannian fibre norm controlled by the `g`-operator size of `W`:
-
-```
-riemannianFiberNormSq g 0 s x (slotSub(A, W)) ≤ (s² · Kw) · riemannianFiberNormSq g 0 s x A,
-```
-
-where `Kw ≥ 0` bounds `W` in the `g`-quadratic form, `g(W u, W u) ≤ Kw · g(u, u)` (equivalently
-`‖W‖²_g ≤ Kw`). This is a purely tensor-algebraic, curvature-agnostic primitive: `A` is any
-`(0, s)`-tensor value and `W` any tangent continuous-linear endomorphism.
-
-## Why `Kw = ‖W‖²_g`, not a frame-Cauchy–Schwarz constant
-
-The factor in the bound is genuinely the operator-norm-squared `‖W‖²_g`, not the (lossy)
-`finrank`-weighted constant that a direct frame Cauchy–Schwarz against Parseval would yield. The
-tight per-slot constant requires the `g`-adjoint of `W`: writing `W'` for the adjoint of `W`
-relative to the locally-installed `g`-inner-product structure on `T_x M`,
-
-```
-∑ₘ g(v, W eₘ)² = ∑ₘ g(W' v, eₘ)² = g(W' v, W' v) ≤ ‖W'‖² g(v, v) = ‖W‖² g(v, v) ≤ Kw · g(v, v)
-```
-
-(Parseval for the orthonormal frame `e`, the adjoint isometry `‖W'‖ = ‖W‖`, and `‖W‖² ≤ Kw`). The
-frame-only route only controls column norms and loses a factor `n = finrank`; the adjoint isometry
-recovers the tight operator-norm constant.
-
-## Main results
-
-* `gFrame_adjoint_parseval_le` — the adjoint-Parseval core inequality
-  `∑ₘ g(v, W eₘ)² ≤ Kw · g(v, v)` on the local `g`-inner-product structure.
-* `toModel_tensorSlotSubstCLM_apply` — the slot-substitution CLM acts as `Function.update`.
-* `riemannianFiberNormSq_slotSub_le` — the headline intrinsic fibre-norm bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
@@ -67,21 +20,15 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Adjoint–Parseval core inequality.** For a `g`-orthonormal frame `e` at `x` (with Parseval
-`∑ᵢ g(eᵢ, u)² = g(u, u)`) and a tangent endomorphism `W` with `g(W u, W u) ≤ Kw · g(u, u)`, the sum
-over the frame of the squared pairings `g(v, W eₘ)²` is bounded by `Kw · g(v, v)`. The proof installs
-the local `g`-inner-product structure on `T_x M`, takes the adjoint `W'` of `W` (the local structure
-is finite-dimensional hence complete), and uses Parseval together with the adjoint isometry
-`‖W'‖ = ‖W‖` and the operator bound `‖W‖² ≤ Kw`. -/
 lemma gFrame_adjoint_parseval_le
     (g : SmoothRiemannianMetric I M) (x : M)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x) (Kw : ℝ) (hKw : 0 ≤ Kw)
@@ -150,14 +97,12 @@ lemma gFrame_adjoint_parseval_le
     _ = ‖W‖ ^ 2 * ‖v‖ ^ 2 := by rw [hnorm]; ring
     _ ≤ Kw * ‖v‖ ^ 2 := mul_le_mul_of_nonneg_right hWsq_le (sq_nonneg _)
 
-/-- **Embedding a `(0, s)`-tensor value as an `(0; 0, s)`-tensor.** Sends `A0 : Tensor0SSpace s I x`
-to the continuous linear map `c ↦ (scalar c) • A0`, an element of `TensorRSSpace 0 s I x`, so that the
-intrinsic fibre norm `riemannianFiberNormSq g 0 s x` applies to `(0, s)`-tensor values. -/
 def embedRS (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) : TensorRSSpace 0 s I x :=
   ContinuousLinearMap.smulRight (Tensor0SBundle.tensor0SSpace_evalScalar (𝕜 := ℝ) (I := I) x) A0
 
 omit [CompleteSpace E] in
-/-- The embedding `embedRS A0`, applied to the unit `(0, 0)`-tensor, recovers `A0`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from embedRS (I := I) (M := M) x s A0)
       (unitZeroSec (I := I) (M := M) x) = A0 := by
@@ -170,10 +115,7 @@ lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
   rw [he, one_smul]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- **The slot-substitution CLM acts as `Function.update`.** For a `(0, s)`-tensor value `A0` and a
-tangent endomorphism `W`, the `k`-th slot substitution `tensorSlotSubstCLM s x (tangentSlotCLM s k W)`
-sends `A0` to the value whose model evaluation on a tuple `m` is `A0` evaluated on `m` with slot `k`
-replaced by `W (m k)`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x)
     (A0 : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x) :
@@ -195,9 +137,8 @@ lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
   rfl
 
 omit [CompleteSpace E] in
-/-- **Frame-component of the embedded `(0, s)`-tensor.** For a `g`-orthonormal frame `e`, the
-`(K₀, J)`-frame component of the embedded value `embedRS A0` is the model evaluation of `A0` on the
-frame tuple `e ∘ J`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma fiberNormSqComponent_embedRS
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n) :
@@ -225,10 +166,8 @@ lemma fiberNormSqComponent_embedRS
   rw [hscal, embedRS_unitZeroSec_apply]
   rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Slot-`k` multilinear expansion.** Evaluating the model `(0, s)`-tensor `B` with slot `k` set to a
-finite linear combination `∑ⱼ aⱼ • eⱼ` distributes the combination out of the slot. -/
 lemma toModel_update_sum_slot (s : ℕ) (x : M) (A0 : Tensor0SSpace s I x) (k : Fin s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a : Fin n → ℝ) (m : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel A0 (Function.update m k (∑ j, a j • e j)) =
@@ -242,10 +181,8 @@ lemma toModel_update_sum_slot (s : ℕ) (x : M) (A0 : Tensor0SSpace s I x) (k : 
   rw [← smul_eq_mul]
   exact (Tensor0SSpace.toModel A0).map_update_smul m k (a j) (e j)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Orthonormal-frame Gram identity.** For a `g`-orthonormal frame `e`, the `g`-square of a frame
-combination `∑ⱼ dⱼ • eⱼ` is the coefficient sum of squares `∑ⱼ dⱼ²`. -/
 private lemma gFrame_gram_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (d : Fin n → ℝ)
     (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) :
@@ -267,19 +204,8 @@ private lemma gFrame_gram_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
   · intro l _ hl; rw [horth j l, if_neg (fun h => hl h.symm), mul_zero]
   · intro h; exact absurd (Finset.mem_univ j) h
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Per-slot fibre bound.** For a single tensor slot `k`, the frame double sum of the squared model
-evaluations of `A0` with slot `k` substituted by `W` is bounded by `Kw` times the frame double sum of
-the unsubstituted model evaluations:
-```
-∑_J (A0(update (e∘J) k (W e_{Jk})))² ≤ Kw · ∑_J (A0(e∘J))².
-```
-Both sides are frame components of the intrinsic fibre norm (at slot-substituted and at base `A0`). The
-slot-`k` multilinear expansion turns the left summand into `g(v_J, W e_{Jk})` for a frame-coefficient
-vector `v_J` depending only on the off-`k` part of `J`; grouping the frame multi-indices by their
-`k`-coordinate (`Equiv.funSplitAt`) and applying the adjoint–Parseval core
-`gFrame_adjoint_parseval_le` per off-`k` pattern, with the orthonormal Gram identity, closes the bound. -/
 private lemma frame_double_sum_slotSub_le
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (A0 : Tensor0SSpace s I x) (k : Fin s)
@@ -367,16 +293,15 @@ private lemma frame_double_sum_slotSub_le
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- **Model evaluation of the slot-substitution value.** The negated summed slot-substitution value
-`Q = − ∑ₖ tensorSlotSubstCLM s x (tangentSlotCLM s k W) A0`, evaluated on a frame tuple `e ∘ J`, is the
-negated sum over slots of `A0` evaluated with slot `k` replaced by `W e_{Jk}`. -/
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_slotSub_apply (x : M) (s : ℕ)
     (A0 : Tensor0SSpace s I x) (W : TangentSpace I x →L[ℝ] TangentSpace I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin s → Fin n) :
     Tensor0SSpace.toModel
       (- ∑ k : Fin s, tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) A0)
       (fun i => e (J i)) =
-    - ∑ k : Fin s, Tensor0SSpace.toModel A0 (Function.update (fun i => e (J i)) k (W (e (J k)))) := by
+    - ∑ k : Fin s, Tensor0SSpace.toModel A0
+      (Function.update (fun i => e (J i)) k (W (e (J k)))) := by
   rw [Tensor0SSpace.toModel_neg]
   rw [show Tensor0SSpace.toModel (∑ k : Fin s, tensorSlotSubstCLM (I := I) s x
         (tangentSlotCLM (I := I) s k W) A0)
@@ -390,25 +315,9 @@ private lemma toModel_slotSub_apply (x : M) (s : ℕ)
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [toModel_tensorSlotSubstCLM_apply]
 
-/-- **Intrinsic fibre-norm bound for tangent-endomorphism slot substitution.** For a `(0, s)`-tensor
-value `A0` at `x`, a tangent endomorphism `W` with `g(W u, W u) ≤ Kw · g(u, u)` (`0 ≤ Kw`), the
-slot-substitution value
-
-```
-slotSub(A0, W) := − ∑ₖ tensorSlotSubstCLM s x (tangentSlotCLM s k W) A0,
-```
-
-obtained by substituting `W` into each of the `s` covariant slots and summing, has its intrinsic
-Riemannian fibre norm bounded by
-
-```
-riemannianFiberNormSq g 0 s x (embedRS slotSub(A0, W)) ≤ (s² · Kw) · riemannianFiberNormSq g 0 s x (embedRS A0).
-```
-
-The fibre norms are computed in a `g`-orthonormal frame `e` (`tangent_orthonormalBasisS_witness`):
-each frame component of `slotSub(A0, W)` is `− ∑ₖ A0(update (e∘J) k (W e_{Jk}))`; the Cauchy–Schwarz
-inequality over the `s` slots (`sq_sum_le_card_mul_sum_sq`) gives the factor `s`, and the per-slot fibre
-bound `frame_double_sum_slotSub_le` (adjoint–Parseval, factor `Kw`) the remaining `s · Kw`. -/
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_slotSub_le
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x) (Kw : ℝ) (hKw : 0 ≤ Kw)
@@ -456,12 +365,14 @@ theorem riemannianFiberNormSq_slotSub_le
       ∑ J : Fin s → Fin n,
         (Tensor0SSpace.toModel A0 (Function.update (fun i => e (J i)) k (W (e (J k))))) ^ 2 ≤
       Kw * ∑ J : Fin s → Fin n, (Tensor0SSpace.toModel A0 (fun i => e (J i))) ^ 2 :=
-    fun k => frame_double_sum_slotSub_le (I := I) (M := M) g x s A0 k W Kw hKw hW e horth hpars hexpand
+    fun k => frame_double_sum_slotSub_le (I := I) (M := M) g x s A0 k W Kw hKw hW e horth hpars
+               hexpand
   calc (s : ℝ) * ∑ k : Fin s, ∑ J : Fin s → Fin n,
           (Tensor0SSpace.toModel A0 (Function.update (fun i => e (J i)) k (W (e (J k))))) ^ 2
       ≤ (s : ℝ) * ∑ _k : Fin s,
           Kw * ∑ J : Fin s → Fin n, (Tensor0SSpace.toModel A0 (fun i => e (J i))) ^ 2 := by
-        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun k _ => hslot k)) (Nat.cast_nonneg _)
+        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun k _ => hslot k))
+          (Nat.cast_nonneg _)
     _ = (s ^ 2 * Kw) * ∑ J : Fin s → Fin n, (Tensor0SSpace.toModel A0 (fun i => e (J i))) ^ 2 := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring

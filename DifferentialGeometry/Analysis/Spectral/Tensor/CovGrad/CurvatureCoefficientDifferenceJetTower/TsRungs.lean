@@ -33,7 +33,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -386,6 +386,7 @@ theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_ricEndoBackgroundDifferenceFi
           rw [← hDelta_def, ← hDg_def, hBmix]
       _ = Delta + (appCcRS (I := I) (M := M) g₀ 1 1 1 Delta Dg +
             appCcRS (I := I) (M := M) g₀ 1 1 1 B0f Dg) := by
+          simp only [appCcRS]
           rw [appCcRS_add_left_cc (I := I) (M := M) g₀ 1 1 1 Delta B0f Dg]
       _ = Delta + ((appCcRS (I := I) (M := M) g₀ 1 1 1 Delta sF - Delta) +
             appCcRS (I := I) (M := M) g₀ 1 1 1 B0f Dg) := by
@@ -1675,9 +1676,11 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
     rw [hL1, hL0]
     rw [show (pairTraceOp (I := I) (M := M) g₀ g₁) = Dpt + phiDt from by
       rw [hDpt_def, hphiDt_def]; abel]
+    simp only [appCcRS]
     rw [appCcRS_add_left_cc (I := I) (M := M) g₀ 2 6 2 Dpt phiDt]
     rw [← hWBig_def, ← hRLCfix_def, hWfix_sub]
-    rw [appCcRS_sub_right_cc (I := I) (M := M) g₀ 2 6 2 phiDt WBig WVd]
+    rw [← hphiDt_def]
+    rw [appCcRS_sub_right (I := I) (M := M) g₀ 2 6 2 phiDt WBig WVd]
     rw [smul_add, smul_sub]
     abel
   obtain ⟨HW1c, h1c_head, h1c_res⟩ := tsExists_slotExtend_headTransport (I := I) (M := M)

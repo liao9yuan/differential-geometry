@@ -2,12 +2,12 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautUnif
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 
-/-!
-# Conjugate-heat critical tame estimate
 
-This file combines the time-uniform moving-Laplacian estimate with the
-time-reversed scalar-curvature multiplier estimate on one common interval.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -32,10 +32,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- On one terminal-time interval, the moving scalar conjugate-heat
-perturbation has a support-independent finite-core energy bound at every
-Sobolev order.  Its top coefficient is `23 / 12`, strictly below the heat
-dissipation coefficient `2`. -/
+
+
+
+
 theorem scalar_crit_tame
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

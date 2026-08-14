@@ -3,26 +3,24 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Int
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Corollary II endpoint (`lemma45_corII`, F4)
 
-The book-facing F4 endpoint: Corollary II *with the intrinsic Lemma I discharged*
-from the approximate-isometry data, so consumers (F5/F6, Step B) need no `hF3`
-hypothesis.  Same-domain formulation: `g`, `gRef` two metrics on a common domain,
-`T` a `(0,q₂)` tensor; for an `(ε,p)`-approximate isometry `g ≈ gRef`,
-`|∇_g^r T|_g ≤ √((1+ε)^{q₂+r})·(|∇_gRef^r T|_gRef + ε·Cc·Σ_{k<r}|∇_gRef^k T|_gRef)`.
 
-## Proof status — complete
 
-The proof uses the explicit data-independent Claim-1 constant from
-`Lemma45Engine.lean`, absorbs the good-frame and metric-comparison losses into
-`4^(2+p)`, applies the component Lemma I on `u' ∩ u`, lifts at the centre through
-`hF3_term`, and finishes with `lemma45_cor_II_of_intrinsic`.  Both the ordinary
-and constant-first uniform endpoints are sorry-free.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 universe u
 
@@ -37,15 +35,15 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-/-- The data-independent Corollary II constant produced by the component
-Lemma 4.5 engine after the good-frame losses are absorbed. -/
+
+
 noncomputable def lemma45CorConst (q₂ p : ℕ) : Real :=
   lemma45Const
     (fun c => claim1MulConst
@@ -54,14 +52,17 @@ noncomputable def lemma45CorConst (q₂ p : ℕ) : Real :=
       (4 ^ (2 + p)) c)
     p q₂
 
-/-- The Corollary II constant is nonnegative. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem corConst_nonneg (q₂ p : ℕ) : 0 ≤ lemma45CorConst (E := E) q₂ p := by
   apply lemma45Const_nonneg
   intro c
   exact claim1MulConst_nonneg (by positivity : (0 : Real) ≤ 4 ^ (2 + p)) c
 
-/-- Exact-constant form of MSM135 Corollary II.  The displayed constant depends
-only on the model dimension and the tensor/derivative orders. -/
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_corII_bound
     {q₂ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
@@ -161,15 +162,17 @@ theorem lemma45_corII_bound
     (by linarith) (hequiv x hx) eps (lemma45CorConst (E := E) q₂ p) heps0
     (corConst_nonneg (E := E) q₂ p) hF3 r hr0 hrp
 
-/-- **MSM135 Corollary II (`lbl370`), book-facing endpoint.**  On an open set `u`
-where `g` is uniformly `(1+ε)`-equivalent to `gRef` and the `gRef`-derivatives of
-`g` are `ε`-small up to order `p` (the `(ε,p)`-approximate-isometry data), every
-`(0,q₂)` tensor field `T` satisfies, for `0 < r ≤ p`,
-`|∇_g^r T|_g ≤ √((1+ε)^{q₂+r})·(|∇_gRef^r T|_gRef + ε·Cc·Σ_{k<r}|∇_gRef^k T|_gRef)`
-at every `x ∈ u`, with `Cc` uniform over `u`.
 
-The intrinsic lift and good-frame assembly are internalized by
-`lemma45_corII_bound`. -/
+
+
+
+
+
+
+
+
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_corII
     {q₂ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
@@ -194,13 +197,14 @@ theorem lemma45_corII
   refine ⟨lemma45CorConst (E := E) q₂ p, corConst_nonneg (E := E) q₂ p, ?_⟩
   exact lemma45_corII_bound hu g gRef T p eps heps0 heps1 hequiv hgK
 
-/-- **Uniform-constant variant of `lemma45_corII` (the D1b-facing form).**  The book's
-Corollary II constant depends only on the dimension and the orders `(q₂, p)` — NOT on the
-metrics, the tensor, the set, or `ε` (chapter4.tex, lbl370; the geometry-free algebra is
-`Lemma45Constants.lemma45Const`).  The `∃ Cc` therefore commutes past the manifold and all
-data quantifiers.  The lbl406 recursion (D1b `exists_directedApproxSystem`) NEEDS this
-order of quantifiers: it budgets `C_r Σ C_i⁻¹ 2⁻ⁱ ≤ 2^{1-r}` with the constants chosen
-BEFORE the maps (STEPD_PLAN coda 37). -/
+
+
+
+
+
+
+
+omit [I.Boundaryless] in
 theorem lemma45_corII_unif (q₂ p : ℕ) :
     ∃ Cc : Real, 0 ≤ Cc ∧
       ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']

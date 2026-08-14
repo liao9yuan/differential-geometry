@@ -1,19 +1,16 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 
-/-!
-# Linear raw connection Laplacian on smooth tensor sections
 
-This file packages the bundled raw connection Laplacian as a linear map on
-smooth compactly-supported tensor sections.  It is the section-level producer
-used before any `L²` realization or unbounded-operator construction.
--/
+
+
+
+
+
+
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators ENNReal NNReal
@@ -26,7 +23,7 @@ open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,9 +32,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
-/-- The raw connection Laplacian as a linear endomorphism of smooth,
-compactly-supported `(r, s)`-tensor sections. -/
+
+
 noncomputable def rawConnLapLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →ₗ[ℝ] SmoothCcTensor g r s where
@@ -115,8 +111,8 @@ noncomputable def rawConnLapLin
     rw [hLHS, hsmul_section, hRHS]
     exact hsmul
 
-set_option linter.unusedSectionVars false in
-/-- Evaluating `rawConnLapLin` gives the bundled raw connection Laplacian. -/
+
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem rawConnLapLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawConnLapLin (I := I) g r s T =

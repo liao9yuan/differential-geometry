@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitUpgr
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 /-!
@@ -24,7 +22,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -34,6 +32,8 @@ namespace StepDCanonData
 
 variable {X : PointedFlowSeq.{u, uE, uH} (I := I)}
 
+omit [I.Boundaryless]
+  [NeZero (Module.finrank ℝ E)] in
 /-- Canonical Step-D compact-open convergence, expressed in the flow-side
 source-domain notation consumed by `conv0_of_cp`. -/
 theorem canon_cp
@@ -74,6 +74,8 @@ theorem canon_cp
   simpa only [MetricSourceData.derivNormSupOn, StepDCanonData.canonDomain,
     StepDCanonData.canonRef] using hk'
 
+omit [I.Boundaryless]
+  [NeZero (Module.finrank ℝ E)] in
 /-- The canonical time-zero source metric is uniformly equivalent to the
 restricted limit metric, with one constant chosen before the source index. -/
 theorem canon_rel
@@ -108,6 +110,8 @@ theorem canon_rel
   rw [D.domain_eq k] at hk
   simpa only [StepDCanonData.canonDomain, StepDCanonData.canonRef] using hk
 
+omit [I.Boundaryless]
+  [NeZero (Module.finrank ℝ E)] in
 /-- The canonical Step-D initial covariant envelope, in the exact source-flow
 form consumed by `srcCovLip_of_soln`. -/
 theorem canon_init

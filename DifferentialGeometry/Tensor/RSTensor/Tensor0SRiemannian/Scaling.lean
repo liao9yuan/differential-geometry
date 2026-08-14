@@ -2,16 +2,14 @@ import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
-/-!
-# Constant scaling of tensor norms
 
-This file contains tensor-fiber metric scaling facts used by parabolic
-rescaling.  A constant metric scaling by `c` scales each inverse metric factor
-by `c⁻¹`.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -26,7 +24,8 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Inverse-metric components in a basis scale by `c⁻¹` under `g ↦ c g`. -/
+
+omit [FiniteDimensional ℝ E] in
 theorem metricInvBasis_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -57,7 +56,7 @@ theorem metricInvBasis_scale
             field_simp [hc0]
       _ = if i = k then 1 else 0 := (hinv i k).2
 
-/-- Squared covariant-tensor norms are quadratic in the tensor argument. -/
+
 theorem normSq0S_smul
     (g : SmoothRiemannianMetric I M) {x : M} {s : Nat}
     (c : Real) (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -72,8 +71,8 @@ theorem normSq0S_smul
     _ = c * (c * D.flat A A) := by rw [(D.flat A).map_smul]; rfl
     _ = c ^ 2 * D.flat A A := by ring
 
-/-- A covariant `s`-tensor squared norm gains one inverse scaling factor per
-covariant slot under `g ↦ c g`. -/
+
+
 theorem normSq0S_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     {x : M} (s : Nat) (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -90,7 +89,7 @@ theorem normSq0S_scale
       DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
         (I := I) g x k l (extChartAt I x x)
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x
   have hinvScale :
       MetricInverseInBasis_gen (I := I) (scaleMetric (I := I) c hc g) x basis
@@ -108,8 +107,8 @@ theorem normSq0S_scale
   intro j _hj
   ring
 
-/-- A `(0,2)` squared norm scales by two inverse-metric factors under
-`g ↦ c g`. -/
+
+
 theorem normSq0S_two_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     {x : M} (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -126,7 +125,7 @@ theorem normSq0S_two_scale
       DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
         (I := I) g x k l (extChartAt I x x)
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x
   have hinvScale :
       MetricInverseInBasis_gen (I := I) (scaleMetric (I := I) c hc g) x basis

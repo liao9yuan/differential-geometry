@@ -26,7 +26,7 @@ open Geometry.Riemannian.Variation
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E]
   [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -107,8 +107,6 @@ theorem jetCap_step_le
   rw [jetCap]
   exact le_max_right _ _
 
-omit [InnerProductSpace Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
 /-- The affine launch speed stays below the prescribed tube speed. -/
 private theorem launch_speed_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))

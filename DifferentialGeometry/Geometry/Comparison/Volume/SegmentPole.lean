@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicRatio
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Sharp pole limit of the intrinsic transverse Jacobi density
@@ -47,8 +46,8 @@ open BonnetMyers
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -92,6 +91,7 @@ private lemma hypDensity_div_tendsto (q : Real) (d : ℕ) :
   rw [hfun]
   exact hpow
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 /-- **Geodesic side of the sharp pole limit.**  For a `gₓ`-orthonormal transverse
 frame `v`, the transverse intrinsic-Jacobi density along `γ = intrinsicGeodesic p u`
 normalized by `t^(n-1)` tends to `1` at the pole. -/
@@ -314,6 +314,7 @@ theorem curveDensity_pole
     Real.sqrt_sq_eq_abs, abs_of_pos htpow,
     mul_div_cancel_left₀ _ htpow.ne']
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 /-- **The sharp pole limit (deliverable 2).**  For a `gₓ`-orthonormal transverse
 frame `v` perpendicular to `u`, the transverse Jacobi density ratio to the
 speed-scaled hyperbolic model tends to `1` at the pole.  Sharpens `intrPoleCap`
@@ -345,6 +346,7 @@ theorem poleLimit
   simp only [Pi.div_apply]
   field_simp [hpow.ne', hmdpos.ne']
 
+omit [CompleteSpace E] in
 /-- **Step-(c) corollary consumed by the L6 assembly (deliverable 3).**  On the
 conjugate-free window `Ioo 0 b`, under a Ricci lower bound `Ric ≥ -(n-1)q²`, the
 transverse intrinsic-Jacobi density along `γ` is bounded by the speed-scaled
@@ -396,6 +398,7 @@ theorem transDens_le_hyp
     exact ge_of_tendsto hlim hev
   rwa [div_le_one hpos] at hRatioLE
 
+omit [CompleteSpace E] in
 /-- The sharp transverse density comparison extends to the endpoint of a
 conjugate-free open radial segment by continuity from the left. -/
 theorem transDens_le_one

@@ -14,16 +14,12 @@ import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
-/-!
-# Connection variation components
 
-Fixed-frame component definitions and metric-covariant derivative variation producers.
--/
+
+
+
+
 
 noncomputable section
 
@@ -37,7 +33,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -45,29 +41,29 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- Lowered Ricci-flow Christoffel variation term:
-`-nabla_i Ric_jl - nabla_j Ric_il + nabla_l Ric_ij`. -/
+
+
 def christoffelVariationLoweredRHSInFrame
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j l : Idx) : Real :=
   -nablaRic t x i j l - nablaRic t x j i l + nablaRic t x l i j
 
-/-- `g^{kl} (nabla_i Ric)_{jl}`. -/
+
 def nablaRicLastRaisedInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv t x k l * nablaRic t x i j l
 
-/-- `g^{kl} (nabla_l Ric)_{ij}`. -/
+
 def nablaRicDirectionRaisedInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv t x k l * nablaRic t x l i j
 
-/-- Raised Ricci-flow Christoffel RHS in the convention of
-`DifferentialGeometry.Tensor.Coordinates.ricciFlowChristoffelEvolutionRHSInFrame`. -/
+
+
 def christoffelEvolutionRHSInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -75,9 +71,10 @@ def christoffelEvolutionRHSInFrame
   ∑ l : Idx,
     gInv t x k l * christoffelVariationLoweredRHSInFrame nablaRic t x i j l
 
-/-- In a frame where the inverse metric components are the identity, the
-raised Ricci-flow Christoffel RHS is the book's component formula
-`-nabla_i Ric_jk - nabla_j Ric_ik + nabla_k Ric_ij`. -/
+
+
+
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelRHS_id
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -99,14 +96,15 @@ theorem christoffelRHS_id
           nablaRic t x k i j := by
           rfl
 
-/-- Raise an arbitrary lowered connection-variation RHS to Christoffel
-components using the inverse metric in the chosen frame. -/
+
+
 def christoffelVariationRHSFromLoweredInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (loweredRHS : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv t x k l * loweredRHS t x i j l
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem christoffelEvolutionRHSInFrame_eq_coordinates_rhs
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -132,10 +130,10 @@ theorem christoffelEvolutionRHSInFrame_eq_coordinates_rhs
     _ = - (∑ l : Idx, A l) - (∑ l : Idx, B l) + ∑ l : Idx, C l := by
             simp [sub_eq_add_neg, Finset.sum_add_distrib, Finset.sum_neg_distrib]
 
-/-- A component family realizes the covariant derivative of Ricci in a frame
-when it is obtained by evaluating a supplied `(0,3)` tensor section on the
-frame vectors.  The geometric statement that the supplied tensor section is
-actually `∇ Ric` is intentionally separate. -/
+
+
+
+
 def NablaRicciTensorComponentsInFrameOn
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRicTensor : Real ->
@@ -147,8 +145,8 @@ def NablaRicciTensorComponentsInFrameOn
       nablaRicTensor t x
         (DifferentialGeometry.Integral.Connection.vec3 (frame i x) (frame j x) (frame l x))
 
-/-- Difference of two time-slice connections evaluated on the local frame:
-`(nabla^var_i e_j - nabla^base_i e_j)(x)`. -/
+
+
 def connectionDiffVectorInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -157,9 +155,9 @@ def connectionDiffVectorInFrame
   (S.family.connection var (frame j) x) (frame i x) -
     (S.family.connection base (frame j) x) (frame i x)
 
-/-- Lowered connection-difference component with an explicitly chosen metric
-time.  The finite-difference Koszul formula uses `metricTime = var`; the time
-derivative target uses `metricTime = base`. -/
+
+
+
 def connectionDiffLoweredInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -169,6 +167,8 @@ def connectionDiffLoweredInFrame
     (connectionDiffVectorInFrame (I := I) S frame base var x i j)
     (frame l x)
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem connectionDiffVectorInFrame_self
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -177,6 +177,8 @@ def connectionDiffLoweredInFrame
     connectionDiffVectorInFrame (I := I) S frame base base x i j = 0 := by
   simp [connectionDiffVectorInFrame]
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem connectionDiffLoweredInFrame_self
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -185,9 +187,9 @@ def connectionDiffLoweredInFrame
     connectionDiffLoweredInFrame (I := I) S frame metricTime base base x i j l = 0 := by
   simp [connectionDiffLoweredInFrame]
 
-/-- Covariant derivative of the metric at time `var`, using the connection at
-time `base`, in the chosen frame:
-`(nabla^base_d g_var)_{ab}`. -/
+
+
+
 def metricCovDerivCompInFrameAtBase
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -201,9 +203,9 @@ def metricCovDerivCompInFrameAtBase
     (S.family.metric var).inner x (frame a x)
       ((S.family.connection base (frame b) x) (frame d x))
 
-/-- Finite-difference Koszul RHS:
-`(nabla^base_i g_var)_{jl} + (nabla^base_j g_var)_{il}
-  - (nabla^base_l g_var)_{ij}`. -/
+
+
+
 def finiteDifferenceKoszulRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -213,6 +215,8 @@ def finiteDifferenceKoszulRHSInFrame
     metricCovDerivCompInFrameAtBase (I := I) S frame base var x j i l -
       metricCovDerivCompInFrameAtBase (I := I) S frame base var x l i j
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [Fintype Idx] [DecidableEq Idx] in
 private theorem localFrame_mdiffAt
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -220,6 +224,8 @@ private theorem localFrame_mdiffAt
     MDiffAt (T% (frame i)) x :=
   (hframe.contMDiffAt hu hx i).mdifferentiableAt one_ne_zero
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 private theorem connectionDiffVectorInFrame_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -263,6 +269,8 @@ private theorem connectionDiffVectorInFrame_symm
     _ = 0 := by
         rw [hdiff, sub_self]
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 private theorem connectionDiffLoweredInFrame_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -278,9 +286,11 @@ private theorem connectionDiffLoweredInFrame_symm
   rw [connectionDiffVectorInFrame_symm
     (I := I) S hS frame hframe hu hx hbase hvar i j]
 
-/-- Metric compatibility rewrites `(nabla^base_d g_var)_{ab}` as the two
-connection-difference terms produced by changing the Levi-Civita connection
-from `base` to `var`. -/
+
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -319,8 +329,10 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
   simp
   ring
 
-/-- Finite-difference Koszul formula for two Levi-Civita connections in the
-same local frame. -/
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem finiteDifferenceKoszulInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -355,17 +367,18 @@ theorem finiteDifferenceKoszulInFrame
   rw [hji, hli, hlj, hsym1]
   ring
 
-/-- The raw lowered connection-pairing time derivative
-`∂t g_t(e_l, ∇^s_i e_j)|_{s=t}` with the metric frozen at `t`.
 
-This is the regularity side of Lemma 6.2, before identifying the derivative
-with the Ricci-flow Koszul expression. -/
+
+
+
+
 def ConnectionPairingDerivativeInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (pairDt : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j l : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j l : Idx),
     HasDerivWithinAt
       (fun s : Real =>
         (S.family.metric (t : Real)).inner x (frame l x)
@@ -374,15 +387,16 @@ def ConnectionPairingDerivativeInFrameOn
       D.carrier
       (t : Real)
 
-/-- Local version of `ConnectionPairingDerivativeInFrameOn`, restricted to
-the base set where the chosen local frame is known to be differentiable. -/
+
+
 def ConnectionPairingDerivativeInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (pairDt : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j l : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -392,17 +406,18 @@ def ConnectionPairingDerivativeInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- Time derivative of the variable-metric finite connection difference
-`g_s((nabla^s - nabla^t)_i e_j, e_l)`.  This records the product-rule fact
-that the derivative agrees with the frozen pairing derivative because the
-connection difference vanishes at `s = t`. -/
+
+
+
+
 def VariableMetricConnectionDiffDerivativeInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (pairDt : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j l : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -411,15 +426,16 @@ def VariableMetricConnectionDiffDerivativeInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- Time derivative of the fixed-base covariant metric derivative
-`(nabla^t g_s)_{ij}`. -/
+
+
 def MetricCovDerivDerivativeComponentsInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall d a b : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -428,8 +444,8 @@ def MetricCovDerivDerivativeComponentsInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- General first variation RHS for the lowered connection pairing:
-`1/2 (nabla_i h_jl + nabla_j h_il - nabla_l h_ij)`. -/
+
+
 def connectionVariationLoweredRHSFromMetricVariationInFrame
     (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j l : Idx) : Real :=
@@ -437,8 +453,8 @@ def connectionVariationLoweredRHSFromMetricVariationInFrame
     (metricCovDerivDt t x i j l + metricCovDerivDt t x j i l -
       metricCovDerivDt t x l i j)
 
-/-- General metric-variation Christoffel RHS:
-`1/2 g^{kl} (nabla_i h_jl + nabla_j h_il - nabla_l h_ij)`. -/
+
+
 def christoffelVariationRHSFromMetricVariationInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -447,17 +463,17 @@ def christoffelVariationRHSFromMetricVariationInFrame
     (connectionVariationLoweredRHSFromMetricVariationInFrame metricCovDerivDt)
     t x i j k
 
-/-- The metric-variation components are the covariant derivative of
-`h = partial_t g = -2 Ric`. -/
+
+
 def MetricCovDerivDerivativeIsRicciFlowInFrame
     (metricCovDerivDt nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) :
     Prop :=
   forall t x i j l,
     metricCovDerivDt t x i j l = (-2 : Real) * nablaRic t x i j l
 
-/-- Fixed-frame components of the covariant derivative of the Ricci tensor,
-computed from the connection at the same time:
-`(∇_d Ric)_{ab} = d(Ric_ab)(e_d) - Ric(∇_d e_a,e_b) - Ric(e_a,∇_d e_b)`. -/
+
+
+
 def ricciCovDerivCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -475,8 +491,8 @@ def ricciCovDerivCompInFrame
         (frame a x)
         ((S.family.connection t (frame b) x) (frame d x)))
 
-/-- A supplied component family is the covariant derivative of Ricci in the
-chosen local frame. -/
+
+
 def NablaRicciComponentsByConnectionInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -488,11 +504,11 @@ def NablaRicciComponentsByConnectionInFrameOn
       nablaRic t x d a b =
         ricciCovDerivCompInFrame (I := I) S frame t x d a b
 
-/-- Regular component package for fixed-frame components of `∇ Ric`.
 
-The raw predicate `NablaRicciComponentsByConnectionInFrameOn` is intentionally
-pointwise-only.  This package is for coordinate calculus that differentiates
-the supplied component functions. -/
+
+
+
+
 structure NablaRicciComponentsRegularInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -508,10 +524,10 @@ structure NablaRicciComponentsRegularInFrameOnLocal
         MDifferentiableAt I 𝓘(Real, Real)
           (fun y : M => nablaRic t y d i j) x
 
-/-- Fixed-frame components of the second covariant derivative of the Ricci
-tensor, computed from supplied first covariant derivative components.
 
-The slot order is `(nabla_d nabla_a Ric)_{ij}`. -/
+
+
+
 def ricciSecondCovDerivCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -534,8 +550,8 @@ def ricciSecondCovDerivCompInFrame
           (S.family.connection t) frame hframe x d j p *
         nablaRic t x a i p)
 
-/-- A supplied component family is the second covariant derivative of Ricci in
-the chosen local frame. -/
+
+
 def Nabla2RicciComponentsByConnectionInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -550,10 +566,10 @@ def Nabla2RicciComponentsByConnectionInFrameOn
         ricciSecondCovDerivCompInFrame
           (I := I) S frame hframe nablaRic t x d a i j
 
-/-- Regular component package for fixed-frame components of `∇² Ric`.
 
-This bundles the regular first-derivative component package with the existing
-pointwise second-derivative realization. -/
+
+
+
 structure Nabla2RicciComponentsRegularInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -569,6 +585,7 @@ structure Nabla2RicciComponentsRegularInFrameOnLocal
     Nabla2RicciComponentsByConnectionInFrameOn
       (I := I) S frame u hframe nablaRic nabla2Ric
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) :
     MetricCovDerivDerivativeIsRicciFlowInFrame
@@ -577,8 +594,11 @@ theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
   intro t x i j l
   rfl
 
-/-- Differentiate the fixed-base covariant metric derivative from the exact
-mixed-derivative producer, without using the legacy metric-frame package. -/
+
+
+omit [DecidableEq Idx] in
+omit [Fintype Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivOfMix
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -707,12 +727,13 @@ theorem metricCovDerivOfMix
     simp [Ca, Cb]
     ring
 
-/-- Differentiate the fixed-base metric covariant derivative along Ricci flow.
 
-This is the coordinate statement
-`∂s (∇^t_d g_s)_{ab}|_{s=t} = -2 (∇^t_d Ric_t)_{ab}`.  The spatial
-connection is frozen at `t`, so the only mixed-derivative input is the scalar
-fixed-base exterior derivative of the frame metric components. -/
+
+
+
+
+
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivDerivativeComponents_of_ricciFlow
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -807,10 +828,12 @@ theorem metricCovDerivDerivativeComponents_of_ricciFlow
     simp [Ca, Cb]
     ring
 
-/-- The only analytic frontier for the Christoffel variation: if time
-differentiation commutes with the fixed-base covariant derivative of the metric,
-then the finite-difference Koszul identity gives the variable-metric connection
-difference derivative. -/
+
+
+
+
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem variableMetricConnectionDiffDerivative_of_metricCovDeriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

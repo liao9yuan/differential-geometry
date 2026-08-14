@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFromJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuous
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Local Ricci-flow equation for the bump-extended comparison metrics
@@ -27,8 +25,23 @@ open DifferentialGeometry.PDE.RicciFlow (metric_derivWithin_eq_neg_two_ricci)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+private theorem function_le_max_zero_one_two
+    (C : Nat → Real) {a : Nat} (ha : a ≤ 2) :
+    C a ≤ max (C 0) (max (C 1) (C 2)) := by
+  interval_cases a <;> simp only [le_max_iff] <;> aesop
+
+private theorem le_max_zero_add_one_of_le_add
+    {target err source Cmax : Real}
+    (htri : target ≤ source + err) (herr : err < 1)
+    (hsource : source ≤ Cmax) :
+    target ≤ max 0 (Cmax + 1) := by
+  calc
+    target ≤ source + err := htri
+    _ ≤ Cmax + 1 := add_le_add hsource herr.le
+    _ ≤ max 0 (Cmax + 1) := le_max_right _ _
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
@@ -37,6 +50,7 @@ variable {P : PointedRiemannianManifold (I := I)}
 variable {subseq : Nat → Nat}
 variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem ricNorm_restrict
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
@@ -56,6 +70,7 @@ private theorem ricNorm_restrict
     exact metricRicci_restrictOpen_eval (I := I) g U x slots
   rw [normSq0S_restrictOpen_apply (I := I) g U 2 x, hsec]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the Ricci tensor of `gSeqExt` is the Ricci tensor
 of the genuine pulled-back source flow. -/
 theorem gSeqExt_ricci
@@ -164,15 +179,15 @@ theorem gSeqExt_ricci
   haveI sourceSigmaInst : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↥(sourceOpen (I := I) Φ k) := sourceT2
   have hricAmbient :=
-    @ricciTensor_restrictOpen E _ _ _ _ _ _ H _ I _ P.M
+    @ricciTensor_restrictOpen E _ _ _ _ H _ I P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
-      (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
+      (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
       sourceSigma sourceT2 (by infer_instance) (by infer_instance) (by infer_instance)
       xsrc v w
   exact hricAmbient.symm.trans hricSource.symm
 
-set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the scalar curvature of `gSeqExt` is the scalar
 curvature of the original sequence flow at the comparison-map image. -/
 theorem gSeqExt_scalar
@@ -313,9 +328,9 @@ theorem gSeqExt_scalar
   haveI sourceSigmaInst : SigmaCompactSpace ↑(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↑(sourceOpen (I := I) Φ k) := sourceT2
   have hscalarAmbient :=
-    @metricScalarAt_restrictOpen E _ _ _ _ _ _ H _ I _ P.M
+    @metricScalarAt_restrictOpen E _ _ _ _ H _ I P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
-      (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
+      (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
       sourceSigma sourceT2 (by infer_instance) (by infer_instance) (by infer_instance)
       xsrc
@@ -340,7 +355,7 @@ theorem gSeqExt_scalar
     _ = (X.term (subseq k)).S.scalar t (Φ.map k x) := by
       rw [sourceTargetDiff_apply]
 
-set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the intrinsic squared Ricci norm of `gSeqExt`
 equals the squared Ricci norm of the original sequence flow at the
 comparison-map image. -/
@@ -499,7 +514,7 @@ theorem gSeqExt_ricNorm
   haveI sourceSigmaInst : SigmaCompactSpace ↑(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↑(sourceOpen (I := I) Φ k) := sourceT2
   have hnormAmbient :=
-    @ricNorm_restrict E _ _ _ _ _ _ H _ I _ P.M
+    @ricNorm_restrict E _ _ _ H _ I P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
       (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
@@ -533,7 +548,7 @@ theorem gSeqExt_ricNorm
           (X.term (subseq k)).S t (Φ.map k x) := by
       rw [sourceTargetDiff_apply]
 
-set_option maxHeartbeats 800000 in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a regular time window, `gSeqExt` satisfies the scalar Ricci-flow metric
 equation at every point of its agreement region. -/
 theorem gSeqExt_pde
@@ -612,7 +627,6 @@ theorem gSeqExt_pde
   have hric := gSeqExt_ricci (I := I) Φ R bf hsrc htgt k t x hx v w
   exact hder.congr_deriv (congrArg (fun q : Real => (-2 : Real) * q) hric.symm)
 
-set_option maxHeartbeats 1600000 in
 /-- The Arzelà–Ascoli limit of the bump-extended sequence satisfies the
 Ricci-flow metric equation on its closed regular-time window. -/
 theorem ConvOut.gInf_pde
@@ -717,7 +731,7 @@ theorem ConvOut.gInf_pde
     exact le_max_left _ _
   have hCmax : ∀ a : Nat, a ≤ 2 → C a ≤ Cmax := by
     intro a ha
-    interval_cases a <;> simp only [Cmax, le_max_iff] <;> aesop
+    exact function_le_max_zero_one_two C ha
   have hbddSeqC : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
@@ -727,7 +741,8 @@ theorem ConvOut.gInf_pde
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
     exact le_trans (hbddSeqC k u hu a ha)
-      (le_trans (hCmax a ha) (le_trans (by linarith) (le_max_right _ _)))
+      (le_trans (hCmax a ha)
+        (le_trans (le_add_of_nonneg_right zero_le_one) (le_max_right _ _)))
   have hbddInf : ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (co.gInf u) R x ≤ B0 := by
     intro u hu a ha
@@ -737,8 +752,7 @@ theorem ConvOut.gInf_pde
     rw [metricDerivNorm_symm (I := I) a (co.gInf u) (gTail k0 u) R x] at htri
     have hseq := hbddSeqC k0 u hu a ha
     have hCa := hCmax a ha
-    have hCB : Cmax + 1 ≤ B0 := le_max_right _ _
-    linarith
+    exact le_max_zero_add_one_of_le_add htri hd (le_trans hseq hCa)
   have hRicConv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
       ∀ u ∈ Set.Icc β ψ,
         |ricciTensor (I := I) (gTail k u) x v w -
@@ -752,80 +766,6 @@ theorem ConvOut.gInf_pde
     gSeqExt_pde (I := I) Φ R bf hsrc htgt (co.φ (k + kgrow)) β ψ u hwin hu x
       (hxgrow k) v w
 
-set_option maxHeartbeats 1600000 in
-/-- The fixed-window limit satisfies the Ricci-flow equation at every regular
-source time.  The proof restricts to a local closed window contained in the
-regular set, so the ambient convergence window may retain nonregular
-endpoints. -/
-theorem ConvOut.gInf_pde_reg
-    (R : letI : TopologicalSpace P.M := P.topology
-      letI : ChartedSpace H P.M := P.charted
-      letI : IsManifold I ∞ P.M := P.smooth
-      SmoothRiemannianMetric I P.M)
-    (bf : BumpFamily (I := I) Φ) (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
-    (β ψ : Real) (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
-    (cLow : Real) (hcLow : 0 < cLow)
-    (hbound : letI : TopologicalSpace P.M := P.topology
-        letI : ChartedSpace H P.M := P.charted
-        letI : IsManifold I ∞ P.M := P.smooth
-      ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
-        ∀ (y : SourceDomain (I := I) Φ k)
-          (v : letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
-              sourceDomTop (I := I) Φ k
-            letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
-              sourceDomCharted (I := I) Φ k
-            TangentSpace I y),
-          cLow * R.inner (y : P.M) v v ≤
-            letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
-              sourceDomTop (I := I) Φ k
-            letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
-              sourceDomCharted (I := I) Φ k
-            letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
-              sourceDomSmooth (I := I) Φ k
-            (srcMetric (I := I) Φ hsrc htgt k t).inner y v v)
-    (hcovTail : letI : TopologicalSpace P.M := P.topology
-        letI : ChartedSpace H P.M := P.charted
-        letI : T2Space P.M := P.t2
-        letI : IsManifold I ∞ P.M := P.smooth
-        letI : SigmaCompactSpace P.M := P.sigmaCompact
-      ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
-        ∀ z : P.M, z ∈ bf.grow k →
-          metricCovDerivNorm (I := I) q
-            (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z ≤ C)
-    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
-    (x : P.M)
-    (v w : letI : TopologicalSpace P.M := P.topology
-      letI : ChartedSpace H P.M := P.charted
-      TangentSpace I x)
-    {t : Real} (ht : t ∈ X.D.regular) :
-    letI : TopologicalSpace P.M := P.topology
-    letI : ChartedSpace H P.M := P.charted
-    letI : T2Space P.M := P.t2
-    letI : IsManifold I ∞ P.M := P.smooth
-    letI : SigmaCompactSpace P.M := P.sigmaCompact
-    HasDerivAt (fun s : Real ↦ (co.gInf s).inner x v w)
-      ((-2 : Real) * ricciTensor (I := I) (co.gInf t) x v w) t := by
-  letI : TopologicalSpace P.M := P.topology
-  letI : ChartedSpace H P.M := P.charted
-  letI : T2Space P.M := P.t2
-  letI : IsManifold I ∞ P.M := P.smooth
-  letI : SigmaCompactSpace P.M := P.sigmaCompact
-  obtain ⟨a, b, htLocal, hwin⟩ := X.D.exists_Icc_regular ht
-  have hsub : Set.Icc a b ⊆ Set.Icc β ψ :=
-    hwin.trans (X.D.regular_subset.trans hcarrier)
-  have hpde :=
-    ConvOut.gInf_pde (I := I) (Φ := Φ) R bf hsrc htgt a b hwin
-      cLow hcLow
-      (fun k s hs => hbound k s (hsub hs))
-      (fun q => by
-        obtain ⟨C, hC⟩ := hcovTail q
-        exact ⟨C, fun k s hs => hC k s (hsub hs)⟩)
-      (ConvOut.restrict (Φ := Φ) co hsub) x v w
-      (Set.Ioo_subset_Icc_self htLocal)
-  simpa only [ConvOut.restrict] using
-    hpde.hasDerivAt (Icc_mem_nhds_iff.mpr htLocal)
-
-set_option maxHeartbeats 1600000 in
 /-- Scalar curvature of the reindexed source flow converges at one time in the
 closed convergence window.  This is the local analytic producer behind the
 carrier-wide compatibility theorem in `ConvFieldEndgame`. -/
@@ -940,7 +880,7 @@ theorem ConvOut.scalar_conv_at
   have hB0 : 0 ≤ B0 := le_max_left _ _
   have hCmax : ∀ a : Nat, a ≤ 2 → C a ≤ Cmax := by
     intro a ha
-    interval_cases a <;> simp only [Cmax, le_max_iff] <;> aesop
+    exact function_le_max_zero_one_two C ha
   have hbddSeqC : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
@@ -950,7 +890,8 @@ theorem ConvOut.scalar_conv_at
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
     exact le_trans (hbddSeqC k u hu a ha)
-      (le_trans (hCmax a ha) (le_trans (by linarith) (le_max_right _ _)))
+      (le_trans (hCmax a ha)
+        (le_trans (le_add_of_nonneg_right zero_le_one) (le_max_right _ _)))
   have hbddInf : ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (co.gInf u) R x ≤ B0 := by
     intro u hu a ha
@@ -960,8 +901,7 @@ theorem ConvOut.scalar_conv_at
     rw [metricDerivNorm_symm (I := I) a (co.gInf u) (gTail k0 u) R x] at htri
     have hseq := hbddSeqC k0 u hu a ha
     have hCa := hCmax a ha
-    have hCB : Cmax + 1 ≤ B0 := le_max_right _ _
-    linarith
+    exact le_max_zero_add_one_of_le_add htri hd (le_trans hseq hCa)
   have hScalarConv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
       ∀ u ∈ Set.Icc β ψ,
         |metricScalarAt (I := I) (gTail k u) x -
@@ -983,7 +923,6 @@ theorem ConvOut.scalar_conv_at
   simpa only [gTail, Function.comp_apply] using
     gSeqExt_scalar (I := I) Φ R bf hsrc htgt (co.φ (k + kgrow)) t x (hxgrow k)
 
-set_option maxHeartbeats 1600000 in
 /-- The intrinsic squared Ricci norm of the reindexed source flow converges at
 one time in the closed convergence window. -/
 theorem ConvOut.ricNorm_conv_at
@@ -1100,7 +1039,7 @@ theorem ConvOut.ricNorm_conv_at
   have hB0 : 0 ≤ B0 := le_max_left _ _
   have hCmax : ∀ a : Nat, a ≤ 2 → C a ≤ Cmax := by
     intro a ha
-    interval_cases a <;> simp only [Cmax, le_max_iff] <;> aesop
+    exact function_le_max_zero_one_two C ha
   have hbddSeqC : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
@@ -1110,7 +1049,8 @@ theorem ConvOut.ricNorm_conv_at
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
     exact le_trans (hbddSeqC k u hu a ha)
-      (le_trans (hCmax a ha) (le_trans (by linarith) (le_max_right _ _)))
+      (le_trans (hCmax a ha)
+        (le_trans (le_add_of_nonneg_right zero_le_one) (le_max_right _ _)))
   have hbddInf : ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (co.gInf u) R x ≤ B0 := by
     intro u hu a ha
@@ -1120,8 +1060,7 @@ theorem ConvOut.ricNorm_conv_at
     rw [metricDerivNorm_symm (I := I) a (co.gInf u) (gTail k0 u) R x] at htri
     have hseq := hbddSeqC k0 u hu a ha
     have hCa := hCmax a ha
-    have hCB : Cmax + 1 ≤ B0 := le_max_right _ _
-    linarith
+    exact le_max_zero_add_one_of_le_add htri hd (le_trans hseq hCa)
   have hRicNormConv : ∀ ε : Real, 0 < ε →
       ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k → ∀ u ∈ Set.Icc β ψ,
         |normSq0S (I := I) (gTail k u) x 2

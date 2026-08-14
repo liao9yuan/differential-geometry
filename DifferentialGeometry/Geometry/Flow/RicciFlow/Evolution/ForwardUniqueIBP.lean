@@ -256,13 +256,13 @@ theorem covDivLift_unit (g : SmoothRiemannianMetric I M)
   have hraw : (covDivergence (I := I) (M := M) g s (ccLift0S (I := I) g V)).toSection x =
       ∑ i : Fin (Module.finrank Real E),
         (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace s I x from
-          codiffPsi (I := I) (M := M) g s (ccLift0S (I := I) g V) x
+          covDivergenceBilinear (I := I) (M := M) g s (ccLift0S (I := I) g V) x
             (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x)) := rfl
   rw [hraw, ContinuousLinearMap.sum_apply]
   refine DFunLike.ext _ _ fun slots => ?_
   have hterm : ∀ i : Fin (Module.finrank Real E),
       (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace s I x from
-        codiffPsi (I := I) (M := M) g s (ccLift0S (I := I) g V) x
+        covDivergenceBilinear (I := I) (M := M) g s (ccLift0S (I := I) g V) x
           (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x))
         (unitZeroSec (I := I) (M := M) x) slots =
       metricNabla0S (I := I) g V x
@@ -292,7 +292,7 @@ theorem covDivLift_unit (g : SmoothRiemannianMetric I M)
   rw [tensor0SSum_apply (I := I) (M := M) Finset.univ
     (fun i : Fin (Module.finrank Real E) =>
       (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace s I x from
-        codiffPsi (I := I) (M := M) g s (ccLift0S (I := I) g V) x
+        covDivergenceBilinear (I := I) (M := M) g s (ccLift0S (I := I) g V) x
           (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x))
         (unitZeroSec (I := I) (M := M) x)) slots]
   rw [Finset.sum_congr rfl (fun i _ => hterm i)]

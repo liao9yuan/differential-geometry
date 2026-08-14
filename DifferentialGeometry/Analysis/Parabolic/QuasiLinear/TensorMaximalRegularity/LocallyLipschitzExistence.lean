@@ -2,62 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
 
-/-!
-# Unconditional small-time strong existence for a locally Lipschitz nonlinearity
-
-The locally-Lipschitz small-time cutoff
-`de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent`
-(`MaxRegLocalLipschitz`) carries the analytic residual `hstay`: the constructed
-`H^{a+1}`-view solution field is assumed to stay, for a.e. time, in the closed
-ball `closedBall (ι u₀) R` on which the nonlinearity `N` is Lipschitz.  This
-file **discharges** that residual unconditionally and produces a variant of the
-engine that carries no `hstay`.
-
-## The discharge
-
-The truncated globally-Lipschitz engine
-`quasilinear_strong_existence_truncated_smallTime_ofCompact` already produces,
-for every short horizon, the fixed-point forcing `gStar` together with a strong
-solution of the **truncated** equation `∂_t u = Δ_∇ u + Ñ_R(u)`.  On the event
-that the `H^{a+1}`-view field stays in `closedBall (ι u₀) R` the truncated
-nonlinearity `Ñ_R` coincides with `N`, so the truncated solution is a genuine
-solution of `∂_t u = Δ_∇ u + N(u)`.
-
-The single missing ingredient is that the field *does* stay in the ball on a
-short enough interval.  We obtain it from the **sharp Lions–Magenes parabolic
-trace estimate** of the cross-scale field machinery
-(`CrossScaleField.normSq_repr_le_init_add_integral`), applied to the
-**recentred** field `field − ι u₀`:
-
-* The recentred field is packaged as a `CrossScaleField` with top-scale datum
-  `hiL2 = (maxRegDuhamelSolField) − const u₀ ∈ L²([0,T]; H^{a+2})`, lower-scale
-  carrier `lo = mk 0 (carrier.deriv) ∈ H¹([0,T]; Hᵃ)` (initial value `0`), and
-  the a.e. cross-scale link reducing to the structural identity
-  `ι(maxRegDuhamelSolField t) = (carrier).toFun t` (the maximal-regularity
-  solution field is the indefinite `Hᵃ`-integral of the carrier's time
-  derivative, started at `ι u₀`).
-* Its produced representative is `repr t = field t − ι u₀` with `repr 0 = 0`, so
-  the energy estimate degenerates to
-
-    `‖field t − ι u₀‖²_{H^{a+1}} ≤ ∫₀ᵗ 2‖hiL2 s‖_{H^{a+2}}·‖carrier.deriv s‖_{Hᵃ}`.
-
-* Cauchy–Schwarz in time bounds the right-hand side by
-  `2√T·‖hiL2‖_{L²(H^{a+2})}·‖carrier.deriv‖_{L²(Hᵃ)}`, which vanishes as
-  `T → 0`.  Choosing the horizon so this is `≤ R²` makes the field stay in the
-  ball, for **every** `t ∈ [0,T]`.
-
-The per-mode solution-field identity used below is supplied by the lower
-`SolutionFieldLink` module.
-
-## Main results
-
-* `maxRegRecentredCrossScaleField` — the recentred cross-scale field.
-* `quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact`
-  — the **fully unconditional cutoff**: no `hstay`.  For a locally-Lipschitz `N`
-  there is a horizon `T₀ > 0` such that for every `0 < T ≤ T₀` there is a strong
-  solution of `∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter intervalIntegral
@@ -69,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -90,8 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-- The lower-scale carrier of the recentred field: the time-`H¹` element with
-initial value `0` and time derivative the carrier's derivative. -/
 def recentredCarrier (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
@@ -99,18 +41,15 @@ def recentredCarrier (hT : 0 < T) (hT1 : T ≤ 1)
   TimeSobolev.timeH1.mk (0 : tensorHs (I := I) (M := M) g r s a)
     (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv
 
-/-- The top-scale datum of the recentred field: the `H^{a+2}` Duhamel solution
-field minus the constant-in-time field `t ↦ u₀`. -/
-def recentredHi (hT : 0 < T) (hT1 : T ≤ 1)
+def recentredHiL2 (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T :=
   maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce -
     TimeSobolev.const T u₀
 
-/-- The carrier of the recentred field pushes the coordinate functional through
-the indefinite integral: `(lo.toFun t).coeff i = ∫₀ᵗ (lo.deriv s).coeff i` for
-`t ∈ [0,T]`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentredCarrier_toFun_coeff (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -137,10 +76,8 @@ theorem recentredCarrier_toFun_coeff (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hlo_def, recentredCarrier, TimeSobolev.timeH1.init_mk]
   rw [hinit, map_zero, zero_add]
 
-/-- **The cross-scale link of the recentred field.**  For a.e. `t`, the `Hᵃ` view
-of the recentred top-scale value `hiL2 t = (field t − u₀)` is the indefinite
-`Hᵃ`-integral `lo.toFun t` of the recentred carrier's derivative.  This reduces,
-mode by mode, to the structural identity `maxRegDuhamelSolField_coeff_ae`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -148,14 +85,14 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
     ∀ᵐ t ∂(timeMeasure T),
       tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           (show a ≤ a + 2 by linarith)
-          (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t) =
+          (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce t) =
         (recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).toFun t := by
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
     MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
       (g := g) (r := r) (s := s) h_compact
   have hper : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       ∀ᵐ t ∂(timeMeasure T),
-        (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
+        (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
           ((recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).toFun t).coeff i := by
     intro i
     have hsub := Lp.coeFn_sub
@@ -167,10 +104,10 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
       (h_compact := h_compact) (a := a) hT hT1 u₀ gforce i
     filter_upwards [hsub, hconst, hstruct,
       ae_restrict_mem (μ := volume) measurableSet_Icc] with t htsub htconst htstruct htmem
-    have hlhs : (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
+    have hlhs : (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
         (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce t).coeff i -
           u₀.coeff i := by
-      rw [recentredHi, htsub, Pi.sub_apply, htconst]
+      rw [recentredHiL2, htsub, Pi.sub_apply, htconst]
       simp only [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
     rw [hlhs, htstruct,
       recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1 u₀ gforce i htmem]
@@ -182,20 +119,17 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
   rw [tensorHsInclusion_coeff_apply]
   exact ht i
 
-/-- **The recentred cross-scale field.**  Packages the recentred Duhamel solution
-`field − ι u₀` as a `CrossScaleField`, with top-scale datum `recentredHi`,
-carrier `recentredCarrier`, and link `recentred_link`. -/
 def maxRegRecentredCrossScaleField (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     CrossScaleField (I := I) (M := M) g r s a T where
-  hiL2 := recentredHi (I := I) (M := M) hT hT1 u₀ gforce
+  hiL2 := recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce
   lo := recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce
   link := recentred_link (I := I) (M := M) (h_compact := h_compact) hT hT1 u₀ gforce
 
-/-- The representative of the recentred field vanishes at `t = 0`: its
-coordinates are the carrier coordinates at `0`, which are `lo.init.coeff i = 0`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentred_repr_zero (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -213,10 +147,8 @@ theorem recentred_repr_zero (hT : 0 < T) (hT1 : T ≤ 1)
   change (recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).init.coeff i = 0
   rw [recentredCarrier, TimeSobolev.timeH1.init_mk, tensorHs.zero_coeff]
 
-/-- The representative of the recentred field is, a.e. in time, the recentred
-`H^{a+1}`-view solution field `field t − ι u₀`.  Mode by mode the representative
-coordinate is `∫₀ᵗ (carrier.deriv).coeff i`, which by the structural identity is
-`(field t).coeff i − u₀.coeff i`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -302,8 +234,8 @@ theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [← sub_eq_add_neg]
   exact hti
 
-/-- The `i`-th time-mode coordinate of the constant field `const T c` (top scale)
-is the constant scalar field `const T (c.coeff i)`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem timeModeCoeff_const_top
     (c : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -317,7 +249,8 @@ theorem timeModeCoeff_const_top
   filter_upwards [hlhs, hconst, hrhs] with t htlhs htconst htrhs
   rw [htlhs, htconst, htrhs]
 
-/-- `‖timeModeCoeff (const T c) i‖² = T · (c.coeff i)²`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_timeModeCoeff_const_top_sq
     (c : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) (hT : 0 ≤ T) :
@@ -326,8 +259,8 @@ theorem norm_timeModeCoeff_const_top_sq
   rw [timeModeCoeff_const_top, TimeSobolev.norm_const, mul_pow, Real.sq_sqrt hT,
     Real.norm_eq_abs, sq_abs]
 
-/-- **The homogeneous-flow field `H^{a+2}` `L²`-bound (carries `√T`).**
-`‖maxRegHomogeneousSolField … u₀‖_{L²(H^{a+2})} ≤ √T·‖u₀‖_{H^{a+2}}`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegHomogeneousSolField_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T) :
@@ -342,8 +275,8 @@ theorem maxRegHomogeneousSolField_norm_le
     mul_left_comm]
   exact weighted_homModeCoeff_le (I := I) (M := M) (a := a) (T := T) hT u₀ i
 
-/-- **The homogeneous-flow time-derivative field `Hᵃ` `L²`-bound (carries `√T`).**
-`‖maxRegHomogeneousDerivField … u₀‖_{L²(Hᵃ)} ≤ √T·‖u₀‖_{H^{a+2}}`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegHomogeneousDerivField_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T) :
@@ -358,8 +291,8 @@ theorem maxRegHomogeneousDerivField_norm_le
     mul_left_comm]
   exact weighted_homDerivModeCoeff_le (I := I) (M := M) (a := a) (T := T) hT u₀ i
 
-/-- **The Duhamel solution field `H^{a+2}` `L²`-bound (two-derivative gain).**
-`‖maximalRegularitySolField … f‖_{L²(H^{a+2})} ≤ (1 + T)·‖f‖_{L²(Hᵃ)}`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maximalRegularitySolField_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (hT : 0 ≤ T) (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
@@ -371,8 +304,8 @@ theorem maximalRegularitySolField_norm_le
     (h_compact := h_compact) (a := a) hT f i]
   exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
-/-- **The Duhamel time-derivative field `Hᵃ` `L²`-bound.**
-`‖maximalRegularityDerivField … f‖_{L²(Hᵃ)} ≤ 2·‖f‖_{L²(Hᵃ)}`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maximalRegularityDerivField_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (hT : 0 ≤ T) (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
@@ -383,10 +316,8 @@ theorem maximalRegularityDerivField_norm_le
     (h_compact := h_compact) (a := a) hT f i]
   exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
-/-- A time-`L²` element with a pointwise-a.e. norm bound `C` has `L²` norm at most
-`√T·C`. -/
 theorem timeL2_norm_le_of_ae_bound
-    {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (f : timeL2 X T) {C : ℝ} (hC : 0 ≤ C)
     (hbound : ∀ᵐ s ∂(timeMeasure T), ‖f s‖ ≤ C) :
     ‖f‖ ≤ Real.sqrt T * C := by
@@ -401,8 +332,8 @@ theorem timeL2_norm_le_of_ae_bound
       show ((2 : ℝ≥0∞).toReal)⁻¹ = (1 / 2 : ℝ) by norm_num,
       TimeSobolev.toReal_ofReal_rpow_half, ENNReal.toReal_ofReal hC]
 
-/-- The truncated nonlinearity is uniformly bounded:
-`‖truncatedNonlin N (ι u₀) R v‖ ≤ ‖N (ι u₀)‖ + L_R·R` for every `v`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem truncatedNonlin_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}
@@ -426,9 +357,8 @@ theorem truncatedNonlin_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
     _ ≤ (L_R : ℝ) * R + ‖N u₀'‖ := by linarith [hlip]
     _ = ‖N u₀'‖ + (L_R : ℝ) * R := by ring
 
-/-- The truncated forcing `gStar = nemytskiiHa1 Ñ_R (field)` is `√T`-small in
-`L²([0,T]; Hᵃ)`: `‖gStar‖ ≤ √T·(‖N(ι u₀)‖ + L_R·R)`, because `Ñ_R` is uniformly
-bounded. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nemytskiiHa1_truncated_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}
@@ -446,13 +376,8 @@ theorem nemytskiiHa1_truncated_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
   rw [ht]
   exact truncatedNonlin_norm_le (I := I) (M := M) hR hN (field t)
 
-/-- **The pointwise recentred-field squared bound.**  For `t ∈ [0,T]`,
-
-  `‖repr t‖²_{H^{a+1}} ≤ √T·‖hiL2‖²_{L²(H^{a+2})} + (1/√T)·‖lo.deriv‖²_{L²(Hᵃ)}`,
-
-where `repr t = field t − ι u₀`.  This is the energy estimate
-`normSq_repr_le_init_add_integral` (with `repr 0 = 0`) followed by Young's
-inequality on the integrand `2ab ≤ √T·a² + (1/√T)·b²`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -461,7 +386,7 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
     ‖(maxRegRecentredCrossScaleField (I := I) (M := M)
         (h_compact := h_compact) hT hT1 u₀ gforce).repr t‖ ^ 2 ≤
       Real.sqrt T *
-          ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 +
+          ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 +
         (Real.sqrt T)⁻¹ *
           ‖(maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv‖ ^ 2 := by
   set u := maxRegRecentredCrossScaleField (I := I) (M := M)
@@ -513,7 +438,7 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
   rw [MeasureTheory.integral_add (hhi_sq.const_mul (Real.sqrt T))
       (hlo_sq.const_mul (Real.sqrt T)⁻¹),
     MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul]
-  have hhi_norm : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 =
+  have hhi_norm : ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 =
       ∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ ^ 2 :=
     TimeSobolev.norm_sq_eq_integral _
   have hlo_norm : ‖(maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv‖ ^ 2 =
@@ -521,15 +446,15 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
     TimeSobolev.norm_sq_eq_integral _
   rw [hhi_norm, hlo_norm]
 
-/-- The recentred top-scale datum is bounded in `L²(H^{a+2})`:
-`‖recentredHi‖ ≤ 2√T‖u₀‖ + (1 + T)‖gforce‖`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentredHi_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
+    ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
       2 * Real.sqrt T * ‖u₀‖ + (1 + T) * ‖gforce‖ := by
-  rw [recentredHi, maxRegDuhamelSolField]
+  rw [recentredHiL2, maxRegDuhamelSolField]
   refine le_trans (norm_sub_le _ _) ?_
   refine le_trans (add_le_add (norm_add_le _ _) (le_refl _)) ?_
   have hhom := maxRegHomogeneousSolField_norm_le (I := I) (M := M)
@@ -542,8 +467,8 @@ theorem recentredHi_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
       2 * Real.sqrt T * ‖u₀‖ + (1 + T) * ‖gforce‖ := by ring
   linarith [hhom, hduh]
 
-/-- The recentred carrier derivative is `√T`-small in `L²(Hᵃ)`:
-`‖carrier.deriv‖ ≤ √T‖u₀‖ + 2‖gforce‖`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentredCarrier_deriv_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -558,15 +483,8 @@ theorem recentredCarrier_deriv_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) hT.le gforce
   linarith [hhom, hduh]
 
-/-- **The recentred-field sup-in-time bound for a `√T`-small forcing.**  If the
-forcing is `√T`-small, `‖gforce‖ ≤ √T·C`, then for every `t ∈ [0,T]` (with
-`0 < T ≤ 1`),
-
-  `‖field_{a+1} t − ι u₀‖²_{H^{a+1}} ≤ √T·K²`,
-
-with `K² = 4(‖u₀‖ + C)² + (‖u₀‖ + 2C)²` independent of `T`.  Combining the
-recentred energy bound `recentred_repr_normSq_le` with the `√T`-decaying carrier
-derivative and the bounded top-scale datum. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -586,7 +504,7 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) hT hT1 u₀ gforce
   have hderiv := recentredCarrier_deriv_norm_le (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce
-  have hhi' : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
+  have hhi' : ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
       2 * Real.sqrt T * (‖u₀‖ + C) := by
     refine le_trans hhi ?_
     have h1 : (1 + T) * ‖gforce‖ ≤ 2 * (Real.sqrt T * C) := by
@@ -598,10 +516,10 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
       Real.sqrt T * (‖u₀‖ + 2 * C) := by
     refine le_trans hderiv ?_
     nlinarith [hgforce, Real.sqrt_nonneg T, norm_nonneg u₀, hC]
-  have hhi_sq : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
+  have hhi_sq : ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
       (2 * Real.sqrt T * (‖u₀‖ + C)) ^ 2 := by
     have hnn : 0 ≤ 2 * Real.sqrt T * (‖u₀‖ + C) := by positivity
-    nlinarith [hhi', norm_nonneg (recentredHi (I := I) (M := M) hT hT1 u₀ gforce), hnn]
+    nlinarith [hhi', norm_nonneg (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce), hnn]
   have hderiv_sq : ‖(maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv‖ ^ 2 ≤
       (Real.sqrt T * (‖u₀‖ + 2 * C)) ^ 2 := by
     have hnn : 0 ≤ Real.sqrt T * (‖u₀‖ + 2 * C) := by positivity
@@ -610,7 +528,7 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
   refine le_trans henergy ?_
   have hssq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
   have hbound1 : Real.sqrt T *
-        ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
+        ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
       Real.sqrt T * (4 * T * (‖u₀‖ + C) ^ 2) := by
     refine mul_le_mul_of_nonneg_left (le_trans hhi_sq (le_of_eq ?_)) hsqrtT_pos.le
     rw [mul_pow, mul_pow, hssq]; ring
@@ -633,10 +551,8 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
   nlinarith [hbound1, hbound2, hTle, hsqrtT_pos.le, sq_nonneg (‖u₀‖ + C),
     sq_nonneg (‖u₀‖ + 2 * C)]
 
-/-- **The stays-in-ball discharge for a `√T`-small forcing.**  If `0 < R`, the
-forcing is `√T`-small (`‖gforce‖ ≤ √T·C`), and the horizon satisfies
-`√T·K² ≤ R²` with `K² = 4(‖u₀‖+C)² + (‖u₀‖+2C)²`, then the `H^{a+1}`-view Duhamel
-field stays a.e. in `closedBall (ι u₀) R`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamelSolFieldHa1_stay (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -660,32 +576,8 @@ theorem maxRegDuhamelSolFieldHa1_stay (hT : 0 < T) (hT1 : T ≤ 1)
   nlinarith [hsq, norm_nonneg ((maxRegRecentredCrossScaleField (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce).repr t), hR]
 
-/-- **Unconditional small-time strong existence for a locally Lipschitz
-nonlinearity — no `hstay`.**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a Sobolev exponent
-`a ≥ 0`, an initial datum `u₀ ∈ H^{a+2}`, a radius `R > 0`, and a nonlinearity
-`N : H^{a+1} → Hᵃ` that is **only locally Lipschitz** — `LipschitzOnWith L_R N`
-on the closed `H^{a+1}`-ball `closedBall (ι u₀) R` around the included initial
-datum — there is a positive horizon `T₀` such that, for **every** short interval
-`(0, T]` with `T ≤ T₀`, there is a strong solution `u ∈ H¹([0,T]; Hᵃ)` of the
-genuine quasi-linear tensor heat equation
-
-  `∂_t u = Δ_∇ u + N(u)`,  `u(0) = u₀`,
-
-with the forcing `gforce` represented a.e. by `t ↦ N(field_{a+1} t)`.
-
-This is the unconditional variant of
-`de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent`: the
-stays-in-ball residual `hstay` is **proved**, not assumed.  The construction runs
-the globally-Lipschitz truncated engine
-`quasilinear_strong_existence_truncated_smallTime_ofCompact` (whose truncated
-nonlinearity `Ñ_R` is globally bounded, so its fixed-point forcing is
-`√T`-small), then shrinks the horizon using the sharp Lions–Magenes parabolic
-trace estimate `maxRegDuhamelSolFieldHa1_stay` so the field stays a.e. in the
-ball, where `Ñ_R = N`.  The final returned conjunct exposes that proven
-stays-in-ball event itself: the `H^{a+1}`-view Duhamel field
-`maxRegDuhamelSolFieldHa1 … u₀ gforce t` lies a.e. in `closedBall (ι u₀) R`. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}

@@ -13,12 +13,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.G
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 
-/-!
-# Interior local flow and chart-cover orbits
 
-Builds the local interior flow of the DeTurck vector field, identifies the chart-cover orbit as a
-bare integral curve, and glues the local pieces into a uniqueness statement for the interior flow.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -47,6 +47,8 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem interior_local_flow_existence
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hCont : ContinuousOn (Function.uncurry (fun t x => X_DT t x))
@@ -66,11 +68,12 @@ theorem interior_local_flow_existence
               (Set.Icc (0 : ℝ) T) t) :=
   time_dependent_vf_chart_local_picard_with_lipschitz (I := I) X_DT α hCont hLip
 
-set_option linter.unusedVariables false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartcover_orbit_is_bare_integral_curve
-    (X : ℝ → ∀ x : M, TangentSpace I x) (hX : AutonomizedFieldJointC1 (I := I) X)
-    (T : ℝ) (hT : 0 < T) (Φcc : ℝ → M → M)
-    (hΦcc0 : ∀ x : M, Φcc 0 x = x)
+    (X : ℝ → ∀ x : M, TangentSpace I x) (_hX : AutonomizedFieldJointC1 (I := I) X)
+    (T : ℝ) (_hT : 0 < T) (Φcc : ℝ → M → M)
+    (_hΦcc0 : ∀ x : M, Φcc 0 x = x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
     (hTle : ∀ α : M, T ≤ (hper α).T)
     (hrepr : ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧ ∀ s : ℝ, Φcc s x =
@@ -118,14 +121,14 @@ theorem chartcover_orbit_is_bare_integral_curve
   rw [hcurve, hvel]
   exact hbridge
 
-/-- **Chart-flow input bundle for the manifold flow-family engine.**
 
-The chart-overlap forward/reverse agreement and per-chart bijectivity data consumed
-by `manifoldFlowFamily_exists_chartRepr` / `time_dependent_vf_flow_diffeomorph_on_closed_manifold`.
-Packaged as a private `structure` purely so the (otherwise verbatim-repeated) three
-hypotheses of the engine can be carried as a single signature binder and re-exported to
-the engine.  This is genuine separable chart-flow data (smooth-in-space chart conjugation
-and short-time mutual-inverse property), not a packaging of the conclusion. -/
+
+
+
+
+
+
+
 private structure ChartFlowEngineInputs
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
@@ -168,15 +171,17 @@ private structure ChartFlowEngineInputs
             ∀ s ∈ Set.Ico (0 : ℝ) S_α,
               Ψ s (Φ s x) = x ∧ Φ s (Ψ s x) = x
 
-/-- The chart-cover global flow of a field `Y` (with chart-local Picard data `hperY`),
-together with its initial-condition / `U`-membership chart representation, named via
-`Classical.choose` of `time_dependent_vf_global_flow_glue` so it can be referenced in the
-validity-domain hypotheses of `interior_flow_uniqueness_glue`. -/
+
+
+
+
 private noncomputable def glueFlow
     (Y : ℝ → ∀ x : M, TangentSpace I x)
     (hperY : ∀ α : M, ChartLocalPicardData (I := I) Y α) : ℝ → M → M :=
   (time_dependent_vf_global_flow_glue (I := I) Y hperY).choose_spec.2.choose_spec.2.choose
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem glueFlow_spec
     (Y : ℝ → ∀ x : M, TangentSpace I x)
     (hperY : ∀ α : M, ChartLocalPicardData (I := I) Y α) :
@@ -190,10 +195,10 @@ private theorem glueFlow_spec
   obtain ⟨α, _hαS, hxU, hrepr⟩ := hspec.2 x
   exact ⟨α, hxU, hrepr⟩
 
-/-- The positive short-time **mutual-inverse horizon** of the chart-cover forward/reverse
-flows, from `chart_cover_flow_bijective_two_sided_uniform_horizon`.  Named via
-`Classical.choose` so the validity-domain hypothesis `hThoriz : T ≤ flowBijectiveHorizon …`
-of `interior_flow_uniqueness_glue` can refer to it. -/
+
+
+
+
 private noncomputable def flowBijectiveHorizon
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
@@ -211,17 +216,17 @@ private noncomputable def flowBijectiveHorizon
       (fun x => let ⟨α, _, h⟩ := (glueFlow_spec (I := I) (fun t x => -(X t x)) hperNeg).2 x;
         ⟨α, h⟩)) |>.choose
 
-set_option linter.unusedVariables false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem interior_flow_uniqueness_glue
     (X : ℝ → ∀ x : M, TangentSpace I x) (hX : AutonomizedFieldJointC1 (I := I) X)
     (T : ℝ) (hT : 0 < T)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
     (hperNeg : ∀ α : M, ChartLocalPicardData (I := I) (fun t x => -(X t x)) α)
     (hTle : ∀ α : M, T ≤ (hper α).T)
-    (hTleNeg : ∀ α : M, T ≤ (hperNeg α).T)
-    (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+    (_hTleNeg : ∀ α : M, T ≤ (hperNeg α).T)
+    (_hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       (X t ((chartAt H α).symm (I.symm y)) : E)))
-    (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+    (_hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       ((-X t ((chartAt H α).symm (I.symm y))) : E)))
     (hinputs : ChartFlowEngineInputs (I := I) X hper hperNeg)
     (hThoriz : T ≤ flowBijectiveHorizon (I := I) X hper hperNeg hinputs)

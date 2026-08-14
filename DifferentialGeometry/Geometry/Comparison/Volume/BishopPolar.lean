@@ -25,7 +25,7 @@ open DifferentialGeometry.Integral.Measure
 open MeasureTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [Nontrivial E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -38,7 +38,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [Nontrivial E] in
 private lemma smul_mem_ball
     {R : ℝ} (hR : 0 < R) (u : sphere (0 : E) 1) (r : Ioi (0 : ℝ)) :
@@ -49,6 +49,7 @@ private lemma smul_mem_ball
     mul_one]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The Riemannian volume of a measurable normal-coordinate image is the
 iterated polar integral of the normal-coordinate density. -/
 theorem normalImage_polar
@@ -97,6 +98,7 @@ theorem normalImage_polar
           ∂(modelHaar (E := E)).toSphere := by
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Polar volume formula for a model ball contained in the selected normal
 source. -/
 theorem normalBall_polar

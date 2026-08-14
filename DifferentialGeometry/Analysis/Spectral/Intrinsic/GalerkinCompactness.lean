@@ -5,13 +5,13 @@ import Mathlib.Topology.Order.ProjIcc
 import Mathlib.Topology.Sequences
 import Mathlib.Topology.UniformSpace.UniformConvergence
 
-/-!
-# Compactness primitives for Galerkin limits
 
-This file contains the scalar compactness estimates used before assembling a
-tensor-valued Galerkin limit: a Fatou bound for exhausting finite coordinate
-sets and a Lipschitz estimate from uniformly bounded right derivatives.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -23,8 +23,8 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-/-- Pointwise convergence and uniformly bounded weighted mass on exhausting
-finite sets give summability and the same mass bound for the limit. -/
+
+
 theorem fatou_sq_mass {ι : Type*} (S : ℕ → Finset ι)
     (hS : Tendsto S atTop atTop) (w : ι → ℝ) (hw : ∀ i, 0 ≤ w i)
     (v : ℕ → ι → ℝ) (vlim : ι → ℝ)
@@ -51,8 +51,8 @@ theorem fatou_sq_mass {ι : Type*} (S : ℕ → Finset ι)
     exact le_of_tendsto hlim hev
   exact ⟨summable_of_sum_le hnn hpartial, Real.tsum_le_of_sum_le hnn hpartial⟩
 
-/-- A continuous curve on a compact interval whose right derivatives are
-uniformly bounded is Lipschitz on that interval. -/
+
+
 theorem right_lipschitz {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {f f' : ℝ → F} {a b : ℝ} {K : ℝ≥0}
     (hf : ContinuousOn f (Icc a b))
@@ -88,8 +88,8 @@ theorem right_lipschitz {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     simpa only [dist_eq_norm, Real.norm_eq_abs,
       abs_of_nonneg (sub_nonneg.2 hyx)] using hseg
 
-/-- A countable family of uniformly bounded, modewise equi-Lipschitz scalar
-Galerkin coordinates has one subsequence converging uniformly in every mode. -/
+
+
 theorem galerkin_subseq {ι : Type*} [Countable ι] {τ : ℝ} (hτ : 0 ≤ τ)
     (u : ℕ → ℝ → ι → ℝ) (C : ι → ℝ) (hC : ∀ i, 0 ≤ C i)
     (L : ι → ℝ≥0)

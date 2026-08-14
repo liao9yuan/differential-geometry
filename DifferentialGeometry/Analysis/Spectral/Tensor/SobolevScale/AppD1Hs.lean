@@ -39,7 +39,10 @@ private noncomputable def appD1CcLin
     appCc (I := I) (M := M) g (s + 1) c Φ
       (iteratedCovGrad (I := I) g 0 s 1 U)
   map_add' := fun U V => by
-    rw [iteratedCovGrad_add, appCc_add_right]
+    rw [iteratedCovGrad_add]
+    change operatorFieldApply (I := I) (M := M) g (s + 1) c Φ
+        (iteratedCovGrad (I := I) g 0 s 1 U + iteratedCovGrad (I := I) g 0 s 1 V) = _
+    exact appCc_add_right (I := I) (M := M) g (s + 1) c Φ _ _
   map_smul' := fun a U => by
     simp only [RingHom.id_apply, iteratedCovGrad_smul, appCc_smul_right]
 

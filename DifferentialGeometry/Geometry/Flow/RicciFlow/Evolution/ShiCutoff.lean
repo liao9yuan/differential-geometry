@@ -1,9 +1,10 @@
 import DifferentialGeometry.Analysis.Calculus.CutoffProfile
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.DistanceBarrier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Barrier cutoffs for complete Ricci flows
@@ -20,34 +21,19 @@ universe u uE uH
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Filter Set
+open Bundle Filter Set Tensor0SBundle
+open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Topology Bundle
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [FiniteDimensional Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [SigmaCompactSpace M] [T2Space M]
-
-/-- Quadratic homogeneity of a smooth metric in one tangent vector. -/
-private theorem metric_smul_self
-    (g : SmoothRiemannianMetric I M) (x : M) (c : Real)
-    (v : TangentSpace I x) :
-    g.inner x (c • v) (c • v) = c ^ 2 * g.inner x v v := by
-  have hleft :
-      ∀ w : TangentSpace I x,
-        g.inner x (c • v) w = c * g.inner x v w := by
-    intro w
-    rw [(g.inner x).map_smul c v, ContinuousLinearMap.smul_apply,
-      smul_eq_mul]
-  rw [hleft (c • v), g.symm x v (c • v), hleft v]
-  ring
 
 private theorem cutoff_par_bound
     (a U c Q Cη Ccut E r P ep epp G : Real)
@@ -129,8 +115,6 @@ private theorem cutoff_par_bound
     _ ≤ Ccut * a :=
       mul_le_mul_of_nonneg_right hcut ha0
 
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
 /-- A complete Ricci flow with a uniform curvature bound carries
 point-centered compactly supported barrier cutoffs on every closed forward
 time slab. -/
@@ -181,7 +165,7 @@ theorem shiBarrierCutoff_of_sol
     dsimp only [R]
     positivity
   have hcurv0 : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
-      Tensor0SBundle.normSq0S (I := I) (S.base.metric s) y 4
+      normSq0S (I := I) (S.base.metric s) y 4
         (S.base.rm04 s y) ≤ K := by
     intro s hs y
     simpa only [nablaKRm04NormSqIntrinsic, nablaKRm04Field_zero,
@@ -200,11 +184,6 @@ theorem shiBarrierCutoff_of_sol
       hpde hricQuad
   have hedist :=
     edistCont_Icc (I := I) S hS hT hslab hreg hricQuad O
-  have hed_self :
-      ∀ s : Real,
-        riemannianEDistOf (I := I) (S.base.metric s) O O = 0 := by
-    intro s
-    exact DifferentialGeometry.edistOf_self (I := I) (S.base.metric s) O
   obtain ⟨Csq, hCsq, hsq⟩ :=
     DifferentialGeometry.Analysis.CutoffProfile.exists_deriv_sq
   obtain ⟨Cη, hCη, hη₁, hη₂⟩ :=
@@ -225,9 +204,10 @@ theorem shiBarrierCutoff_of_sol
   have ha_le_one : ∀ n, a n ≤ 1 := by
     intro n
     dsimp only [a]
-    rw [inv_le_one₀ (hR n)]
-    dsimp only [R]
-    norm_num
+    rw [inv_le_one₀]
+    · dsimp only [R]
+      norm_num
+    · exact hR n
   have ha_sq : ∀ n, a n ^ 2 ≤ a n := by
     intro n
     nlinarith [ha_pos n, ha_le_one n]
@@ -267,7 +247,8 @@ theorem shiBarrierCutoff_of_sol
       dsimp only [chi, z]
       apply
         DifferentialGeometry.Analysis.CutoffProfile.evalue_one_of_le
-      simp only [hed_self, mul_zero, zero_le_one]
+      rw [riemannianEDistOf_self]
+      simp only [mul_zero, zero_le_one]
   have hanchor :
       ∀ s ∈ Set.Icc 0 T, ∀ y : M,
         riemannianEDistOf (I := I) (S.base.metric 0) O y ≤
@@ -463,7 +444,8 @@ theorem shiBarrierCutoff_of_sol
       dsimp only [chi, z]
       apply
         DifferentialGeometry.Analysis.CutoffProfile.evalue_one_of_le
-      simp only [hed_self, mul_zero, zero_le_one]
+      rw [riemannianEDistOf_self]
+      simp only [mul_zero, zero_le_one]
     have hz_at :
         ContinuousWithinAt
           (fun p : Real × M => z n p.1 p.2)
@@ -472,7 +454,8 @@ theorem shiBarrierCutoff_of_sol
         (hzcont n (t, O) ⟨ht, Set.mem_univ O⟩)
     have hzlt : z n t O < (1 : ENNReal) := by
       dsimp only [z]
-      simp only [hed_self, mul_zero, zero_lt_one]
+      rw [riemannianEDistOf_self]
+      simpa only [mul_zero] using (zero_lt_one : (0 : ENNReal) < 1)
     have hz_nhds :
         ∀ᶠ p in 𝓝[spacetimeSlab (M := M) T] (t, O),
           z n p.1 p.2 < (1 : ENNReal) :=
@@ -508,9 +491,8 @@ theorem shiBarrierCutoff_of_sol
         exact gradientFun_const
           (I := I) ((flowG (I := I) S).metric t) 1 O
       rw [hgradzero]
-      rw [(((flowG (I := I) S).metric t).inner O).map_zero,
-        ContinuousLinearMap.zero_apply]
-      simpa only [phi, mul_one] using herr_nonneg n
+      dsimp only [phi]
+      simpa only [map_zero, mul_one] using herr_nonneg n
     · have hheat_one :
           heatOperatorWithDrift
               (I := I) (flowG (I := I) S) t
@@ -534,8 +516,9 @@ theorem shiBarrierCutoff_of_sol
               phi t O = 0 := by
         unfold parabolicOperatorWithDrift
         rw [hheat_one]
-        simp only [phi, derivWithin_fun_const, Pi.zero_apply, zero_sub,
-          neg_zero]
+        change derivWithin (Function.const Real (1 : Real)) (Set.Icc 0 T) t - 0 = 0
+        rw [derivWithin_const]
+        simp only [Pi.zero_apply, sub_self]
       rw [hpar]
       exact herr_nonneg n
   · have hdist_fin :
@@ -547,28 +530,27 @@ theorem shiBarrierCutoff_of_sol
         ENNReal.ofReal_ne_zero_iff.mpr
           (div_pos (Real.exp_pos _) (hR n))
       have hz_top : z n t x = ⊤ := by
-        dsimp only [z]
+        change ENNReal.ofReal (Real.exp (Λ * t) / R n) *
+            riemannianEDistOf (I := I) (S.base.metric t) O x = ⊤
         rw [htop, ENNReal.mul_top hcoef0]
       have hchi_zero : chi n t x = 0 := by
         dsimp only [chi]
         rw [hz_top,
           DifferentialGeometry.Analysis.CutoffProfile.evalue_top]
       linarith
-    have hbar :=
+    let hrho_exists :=
       scaledDist_calabiUpperSupport_of_sol
         (I := I) S hS O hT hslab hreg hcomplete hK hcurv
           ht htpos x hdist_fin hOx
-    let rho := Classical.choose hbar
-    have hrho_spec := Classical.choose_spec hbar
-    rcases hrho_spec with
-      ⟨hrho_eq, hrho_upper, hrho_time, hrho_space,
-        hrho_grad, hrho_grad_sq, hrho_par⟩
-    have hrho_eq_rho :
-        rho t x =
-          Real.exp (Λ * t) *
-            (riemannianEDistOf
-              (I := I) (S.base.metric t) O x).toReal := by
-      simpa only [rho, Λ, d] using hrho_eq
+    let rho := Classical.choose hrho_exists
+    have hrho_spec := Classical.choose_spec hrho_exists
+    have hrho_eq := hrho_spec.1
+    have hrho_upper := hrho_spec.2.1
+    have hrho_time := hrho_spec.2.2.1
+    have hrho_space := hrho_spec.2.2.2.1
+    have hrho_grad := hrho_spec.2.2.2.2.1
+    have hrho_grad_sq := hrho_spec.2.2.2.2.2.1
+    have hrho_par := hrho_spec.2.2.2.2.2.2
     let u : Real → M → Real := fun s y => a n * rho s y
     let phi : Real → M → Real := fun s y =>
       DifferentialGeometry.Analysis.CutoffProfile.value (u s y)
@@ -582,16 +564,18 @@ theorem shiBarrierCutoff_of_sol
       filter_upwards [hrho_space] with y hy
       simpa only [u] using hy.const_smul (a n)
     have hlin : Differentiable Real (fun q : Real => a n * q) :=
-      (differentiable_const (a n)).mul differentiable_id
+      fun q => (hasDerivAt_const_mul (x := q) (a n)).differentiableAt
     have hlin' :
         DifferentiableAt Real
           (deriv (fun q : Real => a n * q)) (rho t x) := by
-      have hcd :
-          ContDiff Real (1 + 1) (fun q : Real => a n * q) :=
-        contDiff_const.mul contDiff_id
+      have hderiv :
+          deriv (fun q : Real => a n * q) = fun _ => a n := by
+        funext q
+        exact (hasDerivAt_const_mul (x := q) (a n)).deriv
+      rw [hderiv]
       exact
-        (hcd.deriv' (n := 1)).differentiable
-          (by norm_num) (rho t x)
+        (differentiableAt_const (c := a n) :
+          DifferentiableAt Real (fun _ : Real => a n) (rho t x))
     have hu_grad :
         MDifferentiableAt I (I.prod 𝓘(Real, E))
           (T% fun y : M =>
@@ -611,25 +595,22 @@ theorem shiBarrierCutoff_of_sol
           (deriv
             DifferentialGeometry.Analysis.CutoffProfile.value)
           (u t x) := by
-      have hvalue2 :
+      have hvalueC2 :
           ContDiff Real 2
             DifferentialGeometry.Analysis.CutoffProfile.value :=
-        DifferentialGeometry.Analysis.CutoffProfile.contDiff.of_le
-          (by
-            have h :
-                ((2 : ℕ∞) : WithTop ℕ∞) ≤
-                  (∞ : WithTop ℕ∞) := by
-              exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
-            exact h)
+        DifferentialGeometry.Analysis.CutoffProfile.contDiff.of_le (by
+          have h :
+              ((2 : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+            exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
+          exact h)
       exact
-        (hvalue2.deriv' (n := 1)).differentiable
+        (hvalueC2.deriv' (n := 1)).differentiable
             (by simp) (u t x)
     have hphi_time :
         DifferentiableWithinAt Real
           (fun s => phi s x) (Set.Icc 0 T) t := by
       simpa only [phi, Function.comp_apply] using
-        (hvalue (u t x)).differentiableWithinAt.comp
-          t hu_time (mapsTo_univ _ _)
+        (hvalue (u t x)).comp_differentiableWithinAt t hu_time
     have hphi_space :
         ∀ᶠ y in 𝓝 x,
           MDifferentiableAt I 𝓘(Real, Real) (phi t) y := by
@@ -691,8 +672,8 @@ theorem shiBarrierCutoff_of_sol
             (hchi_real n p.1 p.2 hfin).symm
     have heq : phi t x = chi n t x := by
       rw [hchi_real n t x hdist_fin]
-      dsimp only [phi, u]
-      rw [hrho_eq_rho]
+      dsimp only [phi, u, rho]
+      rw [hrho_eq]
     have hquant :
         ((flowG (I := I) S).metric t).inner x
             (gradientFun
@@ -763,7 +744,7 @@ theorem shiBarrierCutoff_of_sol
                   (u t) x) ≤
               a n ^ 2 * U ^ 2 := by
           rw [hgrad_u,
-            metric_smul_self
+            metric_inner_smul_self
               (I := I) ((flowG (I := I) S).metric t) x]
           exact
             (mul_le_mul_of_nonneg_left hrho_grad_sq
@@ -804,7 +785,7 @@ theorem shiBarrierCutoff_of_sol
                     (I := I) ((flowG (I := I) S).metric t)
                     (u t) x) := by
             rw [hgrad_phi,
-              metric_smul_self
+              metric_inner_smul_self
                 (I := I) ((flowG (I := I) S).metric t) x]
           _ ≤
               (deriv
@@ -956,8 +937,8 @@ theorem shiBarrierCutoff_of_sol
                 (u t) x)
           have hu_gt : 1 < u t x := lt_of_not_ge hsmall
           have hu_eq : u t x = a n * e * r0 := by
-            dsimp only [u, e, r0]
-            rw [hrho_eq_rho]
+            dsimp only [u, e, r0, rho]
+            rw [hrho_eq]
             ring
           have hactive : 1 ≤ a n * e * r0 := by
             rw [← hu_eq]
@@ -998,18 +979,13 @@ theorem shiBarrierCutoff_of_sol
             exact (sq_le_sq₀ (Real.exp_pos _).le hU).2 he_le
           have hG2_nonneg : 0 ≤ G2 := by
             dsimp only [G2]
-            rcases eq_or_ne
-                (gradientFun
-                  (I := I) ((flowG (I := I) S).metric t)
-                  (u t) x) 0 with hzero | hne
-            · rw [hzero, (((flowG (I := I) S).metric t).inner x).map_zero,
-                ContinuousLinearMap.zero_apply]
-            · exact
-                (((flowG (I := I) S).metric t).pos x _ hne).le
+            exact
+              metric_inner_self_nonneg
+                (I := I) (M := M) ((flowG (I := I) S).metric t) x _
           have hG2 : G2 ≤ a n ^ 2 * U ^ 2 := by
             dsimp only [G2]
             rw [hgrad_u,
-              metric_smul_self
+              metric_inner_smul_self
                 (I := I) ((flowG (I := I) S).metric t) x]
             exact
               (mul_le_mul_of_nonneg_left hrho_grad_sq

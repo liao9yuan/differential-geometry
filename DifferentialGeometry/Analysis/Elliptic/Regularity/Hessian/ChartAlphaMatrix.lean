@@ -1,26 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartInvariance
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
-/-!
-# Unconditional discharge of the chart-α matrix identity and swap auxiliary
-
-This module wraps the chart-α matrix identity `chartAlphaMatrixIdentity` (defined
-in `HessianChartInvariance`) and discharges it unconditionally by invoking the
-chart-α matrix identity at general chart-α good-set points
-(`chartAlphaMatrixIdentity_holds`) from `Integral/Connection/ChartBridge/Hessian.lean`.
-
-It also discharges the symmetry-swap auxiliary used in the polarization identity
-for the chart-α Frobenius pairing.
-
-## Main results
-
-* `chartAlphaMatrixIdentity_holds_chartSource` — the chart-α matrix identity
-  in the `chartAlphaMatrixIdentity` Prop form, unconditional on the chart-α
-  source.
-
-* `chartAlpha_swap_aux_holds` — the unconditional symmetry-swap identity for
-  smooth `f, f'` at a chart-α source point.
--/
 
 noncomputable section
 
@@ -33,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianChartAlphaMatrix
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,13 +30,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Discharge of `chartAlphaMatrixIdentity` on the chart-α source.** For a
-smooth scalar `f : M → ℝ`, a chart base point `α : M`, and a manifold point
-`x ∈ (chartAt H α).source`, the chart-α matrix identity Prop holds.
-
-This packages `chartAlphaMatrixIdentity_holds` (from
-`Integral.Connection.ChartBridge.Hessian`) into the `chartAlphaMatrixIdentity`
-Prop form expected by the chart-invariance bridge. -/
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartAlphaMatrixIdentity_holds_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -66,8 +42,8 @@ theorem chartAlphaMatrixIdentity_holds_chartSource
   intro i j
   exact chartAlphaMatrixIdentity_holds (I := I) g α hf hx i j
 
-/-- **The chart-α symmetry-swap auxiliary, unconditional.** For smooth `f, f'`
-and `x ∈ (chartAt H α).source`, the swap identity holds. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartAlpha_swap_aux_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     (f f' : M → ℝ) (x : M) :
@@ -165,7 +141,8 @@ theorem chartAlpha_swap_aux_holds
       (∑ k : Fin n, ∑ l, ∑ i, ∑ j,
         2 * (G i k * G j l * Hf' i j * Hf k l)) := by
     rw [Finset.sum_comm]
-  rw [h_LHS_reorder1, h_LHS_reorder2, h_LHS_reorder3, h_LHS_reorder4, h_LHS_reorder5, h_LHS_reorder6]
+  rw [h_LHS_reorder1, h_LHS_reorder2, h_LHS_reorder3, h_LHS_reorder4, h_LHS_reorder5,
+    h_LHS_reorder6]
   refine Finset.sum_congr rfl ?_
   intro i _
   refine Finset.sum_congr rfl ?_

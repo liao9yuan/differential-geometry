@@ -5,23 +5,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.Calculus.Deriv.Inverse
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
-/-!
-# Pointwise spectral Taylor estimates for the tensor heat family
-
-This file collects the predicate-free, purely scalar spectral estimates
-used in the time-calculus of the tensor heat power family:
-
-* `tensorHeatPowerCoeffBoundCalc` — the constant `(k/t)^k · e^{-k}`.
-* `tensor_lambda_pow_mul_exp_le_calc` — the bound
-  `λ^k · exp(-λt) ≤ (k/t)^k · e^{-k}` for `λ ≥ 0`, `t > 0`.
-* `tensor_exp_neg_taylor_bound` — the uniform spectral Taylor remainder
-  estimate `|λ^k · (exp(-λ(t+h)) - exp(-λt) + λ h · exp(-λt))| ≤ K · h²`
-  with `K = tensorHeatPowerCoeffBoundCalc (k+2) (t/2)`.
-
-These mirror the scalar template in
-`Analysis/Heat/Semigroup/SpectralBounds.lean`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -48,7 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local copy of the constant `(k/t)^k · e^{-k}`. -/
 private noncomputable def tensorHeatPowerCoeffBoundCalc (k : ℕ) (t : ℝ) : ℝ :=
   (k / t : ℝ) ^ k * Real.exp (-(k : ℝ))
 
@@ -59,8 +41,6 @@ private lemma tensorHeatPowerCoeffBoundCalc_nonneg (k : ℕ) {t : ℝ}
   · exact pow_nonneg (div_nonneg (Nat.cast_nonneg _) ht.le) k
   · exact (Real.exp_pos _).le
 
-/-- Local copy of `λ^k · exp(-λt) ≤ (k/t)^k · e^{-k}` for `λ ≥ 0`,
-`t > 0`. -/
 private lemma tensor_lambda_pow_mul_exp_le_calc
     (k : ℕ) {t : ℝ} (ht : 0 < t) {lam : ℝ} (hlam : 0 ≤ lam) :
     lam ^ k * Real.exp (-(lam * t)) ≤ tensorHeatPowerCoeffBoundCalc k t := by
@@ -123,9 +103,6 @@ private lemma tensor_lambda_pow_mul_exp_le_calc
   rw [h_rhs_eq] at h_pow_le
   exact h_pow_le
 
-/-- Uniform spectral Taylor estimate: for `λ ≥ 0`, `0 < t`, `|h| ≤ t/2`
-and `k : ℕ`, `|λ^k · (exp(-λ(t+h)) - exp(-λ t) + λ h · exp(-λ t))| ≤ K ·
-h²` where `K = tensorHeatPowerCoeffBoundCalc (k+2) (t/2)`. -/
 private lemma tensor_exp_neg_taylor_bound
     (k : ℕ) {t : ℝ} (ht : 0 < t) {h : ℝ} (hh : |h| ≤ t / 2)
     {lam : ℝ} (hlam : 0 ≤ lam) :

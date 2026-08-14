@@ -274,7 +274,8 @@ theorem crossover_product_bound_exists :
   have hpow_meas : AEStronglyMeasurable (fun x => |u x| ^ p) μ := by
     exact
       ((Real.continuous_rpow_const hp_nonneg).measurable.comp_aemeasurable
-        ((continuous_abs.measurable).comp_aemeasurable hu_aestrong.aemeasurable)).aestronglyMeasurable
+        ((continuous_abs.measurable).comp_aemeasurable
+          hu_aestrong.aemeasurable)).aestronglyMeasurable
   have hpow_nonneg : ∀ x, 0 ≤ |u x| ^ p := by
     intro x
     exact Real.rpow_nonneg (abs_nonneg _) _

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedFDerivProductDifferenceBound
+import DifferentialGeometry.Analysis.Calculus.IteratedFDerivProductDifferenceBound
 
 /-!
 # Seminorm calculus for the all-order chart-jet estimate

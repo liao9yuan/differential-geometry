@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.MildSolutionExistence
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatDuhamelMildSolution
 
-/-!
-# Quasi-linear tensor heat equation on `L²`: file-local Borel-space setup
-
-For a closed Riemannian manifold `(M, g)`, this file provides the
-file-local Borel-space instances on the model space `E` and the manifold
-`M` used by the tensor-heat-equation development.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -19,7 +11,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

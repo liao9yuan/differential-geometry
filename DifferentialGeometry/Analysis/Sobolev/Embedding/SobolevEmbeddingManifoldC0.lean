@@ -6,45 +6,9 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
-/-!
-# Manifold-side assembly for the tensor Sobolev embedding `H^{2k} ↪ C⁰`
-
-This file carries out the partition-of-unity / Lebesgue-number / integral
-aggregation that converts the two committed analytic building blocks
-
-* the off-centre pointwise tensor-fibre-norm reconstruction on a compact chart
-  subset (`tensorFiberNorm_sq_le_chartAlphaComponents_on_compact`), and
-* the quantitative Euclidean local-ball `L²`-Sobolev pointwise embedding for
-  smooth functions (`smooth_localBall_L2_pointwise_embedding`)
-
-into the global pointwise sup-norm bound
-
-  `‖T.toSection x‖ ≤ C · ‖T.toHs (2k)‖`
-
-for every smooth compactly-supported `(r, s)`-tensor section on a closed
-Riemannian manifold, whenever `2 * k > dim M`.
-
-The route (matching the documented plan):
-
-1. **Per-chart-component → Hs-term.**  Each Euclidean integral
-   `∫_{ball} ρ_α(pull) · |∂ʲ(raw_{α,IJ}∘pull)(basisFun)|²` is one non-negative
-   summand of the `tsum`-over-`M` defining `tensorPouSobolevHsNorm g (2k) T`,
-   hence is `≤ ‖T.toHs (2k)‖²`.
-2. **Op-norm ↦ Hilbert–Schmidt.**  `‖∂ʲf‖²` is bounded by `card · ∑_basis
-   |∂ʲf(basisFun)|²` (Cauchy–Schwarz over the standard basis).
-3. **POU lower bound on a ball.**  On a ball where `ρ_α(pull) ≥ c`, an unweighted
-   `L²` integral is bounded by `c⁻¹` times the `ρ_α`-weighted one.
-4. **Lebesgue number.**  On the compact `K_α = {ρ_α ≥ 1/N}` (chart images) inside
-   the open `{ρ_α(pull) > 1/(2N)}` a uniform ball radius `δ_α` exists.
-5. **Off-centre fibre core + finite POU + finite max** assemble the pointwise
-   bound at every `x ∈ M`.
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
@@ -61,17 +25,22 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The squared Hilbert–Schmidt POU-weighted chart-Sobolev norm equals the
-`tsum` over chart base points of the finite block.  This is `(‖T.toHs k‖)²`. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem hsNorm_sq_toReal_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -79,11 +48,7 @@ private theorem hsNorm_sq_toReal_eq
       ((tensorPouSobolevHsNorm (I := I) (M := M) g k T) ^ 2).toReal := by
   rw [tensorPouSobolevHilbert_norm_eq, ← ENNReal.toReal_pow]
 
-/-- A single `(α₀, IJ, j)` Hilbert–Schmidt block (summed over the basis-index
-tuples) of the `tsum` defining `tensorPouSobolevHsNorm g k T` is bounded above
-by the full squared norm `(tensorPouSobolevHsNorm g k T)²`.  Every summand is
-non-negative, so dropping all the other base points / component pairs / orders
-only decreases the value. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem hsBlock_le_hsNorm_sq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) (α₀ : M)
@@ -163,7 +128,7 @@ theorem hsBlock_le_hsNorm_sq
     rw [hS_def]; exact ENNReal.le_tsum α₀
   exact le_trans h_order (le_trans h_comp h_tsum)
 
-/-- Any coordinate of a Euclidean vector is bounded by its norm. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclN_coord_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     |v i| ≤ ‖v‖ := by
   classical
@@ -176,10 +141,8 @@ private lemma euclN_coord_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     show ‖v‖ = Real.sqrt (‖v‖ ^ 2) from (Real.sqrt_sq hv_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sq
 
-/-- For any continuous multilinear map `A` on `EuclN`, the operator norm is
-bounded by the sum over the standard basis-index tuples of the absolute values
-of its evaluations on the standard basis vectors `EuclideanSpace.single`. -/
-private theorem cmm_norm_le_sum_single
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private theorem continuousMultilinearMap_norm_le_sum_abs_basis_apply
     {j : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin j => EuclN) ℝ) :
     ‖f‖ ≤ ∑ β : Fin j → Fin (Module.finrank ℝ E),
@@ -236,7 +199,8 @@ private theorem cmm_norm_le_sum_single
     rw [abs_mul]
     have h_prod_le : |∏ i : Fin j, m i (β i)| ≤ ∏ i : Fin j, ‖m i‖ := by
       rw [Finset.abs_prod]
-      refine Finset.prod_le_prod (fun i _ => abs_nonneg _) (fun i _ => euclN_coord_le_norm (m i) (β i))
+      refine Finset.prod_le_prod (fun i _ => abs_nonneg _)
+        (fun i _ => euclN_coord_le_norm (m i) (β i))
     exact mul_le_mul_of_nonneg_right h_prod_le (abs_nonneg _)
   refine (Finset.sum_le_sum (fun β _ => h_inner_bound β)).trans ?_
   have h_factor :
@@ -246,10 +210,8 @@ private theorem cmm_norm_le_sum_single
       (∏ i : Fin j, ‖m i‖) * Mb := by rw [← Finset.mul_sum]
   rw [h_factor]; exact le_of_eq (mul_comm _ _)
 
-/-- Operator norm ↦ Hilbert–Schmidt: for a continuous multilinear map `A`,
-`‖A‖² ≤ card · ∑_β |A(basisFun β)|²`, where the sum is over basis-index tuples
-and `card = (finrank E)^j`. -/
-private theorem cmm_norm_sq_le_card_mul_sum_basisFun
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun_sq
     {j : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin j => EuclN) ℝ) :
     ‖f‖ ^ 2 ≤
@@ -258,7 +220,7 @@ private theorem cmm_norm_sq_le_card_mul_sum_basisFun
           |f (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (β i))| ^ 2 := by
   classical
   simp only [EuclideanSpace.basisFun_apply]
-  have h1 := cmm_norm_le_sum_single (E := E) f
+  have h1 := continuousMultilinearMap_norm_le_sum_abs_basis_apply (E := E) f
   have h1' : ‖f‖ ^ 2 ≤
       (∑ β : Fin j → Fin (Module.finrank ℝ E),
         |f (fun i => EuclideanSpace.single (β i) (1 : ℝ))|) ^ 2 := by
@@ -273,12 +235,8 @@ private theorem cmm_norm_sq_le_card_mul_sum_basisFun
   rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin] at hcs
   exact hcs
 
-/-- The raw chart-`α` component pulled back to the chart target,
-`raw_{α,IJ} ∘ pull`, is `ContDiffOn ℝ ∞` on the open `chartTargetEuclid α`.
-
-Proof mirrors `Sobolev.Tensor.tensorChartComponentRawEuclidPull_contDiffOn`:
-compose the chart-source smoothness with `(extChartAt I α).symm` and the linear
-isomorphism `toEuclidean.symm`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem rawPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -323,15 +281,8 @@ private theorem rawPull_contDiffOn
     exact hy
   exact h_raw_pull_contDiffOn.comp h_toEucl_symm_smooth.contDiffOn h_maps
 
-/-- A global-smooth function on `EuclN` agreeing with the pulled-back raw chart
-component `raw_{α,IJ} ∘ pull` on a closed ball contained in `chartTargetEuclid α`.
-
-`ftil := η · (raw ∘ pull)` where `η` is a smooth cutoff equal to `1` on a
-neighbourhood of `closedBall y₀ R` and supported in the open chart target.  On
-the chart target the product is the smooth `η · (raw ∘ pull)`; off the cutoff's
-topological support (an open superset of the complement of the chart target) the
-product is identically zero.  These two opens cover `EuclN`, giving global
-smoothness; agreement on `closedBall y₀ R` follows from `η = 1` there. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_global_smooth_eqOn_ball_of_rawPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -381,8 +332,8 @@ theorem exists_global_smooth_eqOn_ball_of_rawPull
     have hη_y : η y = 1 := hη_one y (Metric.self_subset_cthickening _ hy)
     simp only [hη_y, one_mul, hrp_def]
 
-/-- The real-valued Hs-norm integrand `ρ_α(pull z) · |∂ʲ(raw∘pull) z (basisFun)|²`
-is `ContinuousOn` the open `chartTargetEuclid α`. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem hsIntegrandReal_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -445,15 +396,8 @@ private theorem hsIntegrandReal_continuousOn
     exact h_apply.comp_continuousOn h_iter_contOn
   exact hPOU_pull_cont.mul ((h_eval_contOn.abs).pow 2)
 
-/-- For the pulled-back raw component `f := raw_{α,IJ} ∘ pull`, smooth on the
-chart target, and a ball `B(y₀, R)` on which `ρ_α(pull) ≥ c > 0` and which is
-contained in `chartTargetEuclid α`, the squared `L²(B)` norm of `‖∂ʲf‖` is
-bounded by `(card · c⁻¹)` times the `(α, IJ, j)` Hilbert–Schmidt block of the
-`tsum` defining `tensorPouSobolevHsNorm`.
-
-`card = (finrank E)^j` is the Cauchy–Schwarz cost of replacing the operator norm
-of `∂ʲf` by the sum of squares of its basis evaluations; `c⁻¹` is the cost of
-inserting the partition-of-unity weight, available since `ρ ≥ c` on `B`. -/
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -519,7 +463,8 @@ theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
                         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))) *
                       |(iteratedFDeriv ℝ j f z)
                           (fun i => EuclideanSpace.basisFun
-                            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)) ∂(volume : Measure EuclN) := by
+                            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2))
+                              ∂(volume : Measure EuclN) := by
     refine lintegral_mono_ae ?_
     refine (ae_restrict_iff' hball_meas).2 ?_
     filter_upwards with z hz
@@ -531,7 +476,7 @@ theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := hρ_lb z hz
     have hρz_pos : 0 < (chartAtlasPOU I M α : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := lt_of_lt_of_le hc_pos hρz
-    have h_hs := cmm_norm_sq_le_card_mul_sum_basisFun (E := E)
+    have h_hs := continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun_sq (E := E)
       (iteratedFDeriv ℝ j f z)
     have h_weight :
         (∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
@@ -616,9 +561,7 @@ theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
   refine Finset.sum_le_sum (fun b _ => ?_)
   exact lintegral_mono_set hball_sub
 
-/-- The `eLpNorm` of `‖∂ʲu‖` over a ball is finite for a globally smooth `u`
-(the ball has finite measure, and the integrand is continuous, hence bounded on
-the compact closed ball). -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem smooth_eLpNorm_iteratedFDeriv_ball_ne_top
     {y₀ : EuclN} {R : ℝ} (j : ℕ) {u : EuclN → ℝ}
     (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -645,15 +588,7 @@ theorem smooth_eLpNorm_iteratedFDeriv_ball_ne_top
     rw [norm_one, mul_one]
     exact hMb z hz'
 
-/-- **Per-component pointwise bound (ball-uniform).**
-
-For a chart base point `α`, a component pair `IJ`, and a ball `closedBall y₀ R`
-contained in `chartTargetEuclid α` on which the pulled-back partition-of-unity
-weight is `≥ c > 0`, in the supercritical regime `finrank E < 2 · (2k)`, the
-value of the raw chart component at `pull y` for **every** `y ∈ ball y₀ (R/4)`
-is controlled by `Cα · ‖T.toHs (2k)‖` with the **single** constant `Cα`
-depending only on `(α, R, c, k, E, g)` — uniform in `T` and in the evaluation
-point `y` inside the smaller ball. -/
+omit [BoundarylessManifold I M] in
 private theorem rawPullCenter_le_hsNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k))
@@ -787,19 +722,7 @@ private theorem rawPullCenter_le_hsNorm
         mul_le_mul_of_nonneg_left h_sum_le hCloc_nn
     _ = Cloc * (((2 * (2 * k) + 1 : ℕ) : ℝ) * A) * hsn := by ring
 
-/-- **Uniform per-component bound on a compact chart-image set.**
-
-For a chart base point `α`, a component pair `IJ`, a compact set `Kc` of the
-chart target on which the pulled-back partition-of-unity weight is `> c > 0`
-(captured via an open neighbourhood `O` with `Kc ⊆ O ⊆ chartTargetEuclid α` and
-`ρ ≥ c` on `O`), there is a **single** constant `D` (uniform in `T` and in the
-evaluation point `y ∈ Kc`) with
-
-`|raw_{α,IJ}(pull y)| ≤ D · ‖T.toHs (2k)‖`  for all `y ∈ Kc`.
-
-The uniformity over `Kc` is obtained by a Lebesgue-number radius plus a finite
-sub-cover of `Kc` by small balls; the per-ball constant from
-`rawPullCenter_le_hsNorm` is then maximised over the finite cover. -/
+omit [BoundarylessManifold I M] in
 private theorem uniformRawPull_le_hsNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k))
@@ -817,7 +740,8 @@ private theorem uniformRawPull_le_hsNorm
         ≤ D * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ := by
   classical
   rcases Set.eq_empty_or_nonempty Kc with hKc_empty | hKc_ne
-  · exact ⟨0, le_refl 0, fun T' y hy => by rw [hKc_empty] at hy; exact absurd hy (Set.notMem_empty y)⟩
+  · exact ⟨0, le_refl 0, fun T' y hy => by rw [hKc_empty] at hy; exact absurd hy
+                                             (Set.notMem_empty y)⟩
   obtain ⟨δ, hδ_pos, hδ_ball⟩ :=
     lebesgue_number_lemma_of_metric (s := Kc) (c := fun _ : Unit => O)
       hKc_compact (fun _ => hO_open) (by intro x hx; exact Set.mem_iUnion.mpr ⟨(), hKcO hx⟩)
@@ -878,8 +802,7 @@ private theorem uniformRawPull_le_hsNorm
       ≤ Cfun yi * hsn := h_bound
     _ ≤ Dmax * hsn := mul_le_mul_of_nonneg_right hCyi_le hhsn_nn
 
-/-- For a chart base point `α` and a positive threshold `c`, the super-level set
-`K_α := {x | c ≤ ρ_α x}` is compact and contained in the chart-`α` source. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem superlevel_compact_subset_source
     (α : M) {c : ℝ} (hc_pos : 0 < c) :
     IsCompact {x : M | c ≤ (chartAtlasPOU I M α : M → ℝ) x} ∧
@@ -900,17 +823,7 @@ private theorem superlevel_compact_subset_source
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-chart fibre-norm bound.**
-
-For a chart base point `α` and the super-level set `K_α := {x | 1/(2N) < ρ_α x}`
-captured below via `c₀ ≤ ρ_α` on a compact `K`, the tensor fibre norm of every
-smooth compactly-supported section at every `x ∈ K` is controlled by a single
-constant times `‖T.toHs (2k)‖`.
-
-The fibre norm here is the metric-induced Riemannian bundle norm
-(`tensorRS_riemannianBundle g r s`); the default normed-group instances on the
-tensor fibre are locally removed so that `‖·‖` refers to the Riemannian norm
-used by the off-centre fibre core. -/
+omit [BoundarylessManifold I M] in
 private theorem chartFiberNorm_le_hsNorm_on_superlevel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k))
@@ -1069,20 +982,7 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Tensor Sobolev embedding `H^{2k} ↪ C⁰` (Riemannian fibre norm).**
-
-For a closed Riemannian manifold and `2k > dim M`, the Riemannian bundle-fibre
-norm of every smooth compactly-supported `(r, s)`-tensor section at every point
-is controlled by a single positive constant times its intrinsic `H^{2k}`-norm.
-
-This is the complete manifold-side assembly: a finite atlas-aligned partition of
-unity covers `M` by the super-level sets `K_α = {ρ_α ≥ 1/N}` (`N` = number of
-active charts); on each `K_α` the per-chart fibre-norm bound
-`chartFiberNorm_le_hsNorm_on_superlevel` applies (off-centre fibre core +
-Lebesgue-number localisation + the Euclidean local-ball `L²` embedding +
-op-norm-to-Hilbert-Schmidt + per-term ≤ `tsum`); the global constant is the
-finite maximum over the active charts.  The fibre norm is the Riemannian one
-(`tensorRS_riemannianBundle g r s`). -/
+omit [BoundarylessManifold I M] in
 theorem tensorPouSobolevHilbert_embedding_Ck_gNorm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
