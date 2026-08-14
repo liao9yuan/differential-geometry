@@ -19,7 +19,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 theorem rm04EvolTail_at

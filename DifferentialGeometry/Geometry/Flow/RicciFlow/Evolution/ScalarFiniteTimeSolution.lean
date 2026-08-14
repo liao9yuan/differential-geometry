@@ -16,7 +16,7 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+
 variable [SigmaCompactSpace M] [T2Space M]
 
 theorem scalar_pos_of_ricci

@@ -24,7 +24,7 @@ section PositiveOrder
 
 variable [CompleteSpace E] [I.Boundaryless]
 variable [T2Space M] [SigmaCompactSpace M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+
 
 omit [I.Boundaryless] [SigmaCompactSpace M] in
 theorem metricError_eq_zero
@@ -64,7 +64,7 @@ section Carrier
 
 variable [CompleteSpace E] [I.Boundaryless]
 variable [T2Space M] [SigmaCompactSpace M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
 variable [IsManifold I ∞ N]
 

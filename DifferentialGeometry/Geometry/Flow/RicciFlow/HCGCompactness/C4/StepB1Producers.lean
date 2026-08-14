@@ -1262,7 +1262,7 @@ variable {M'' : Type u} [TopologicalSpace M''] [ChartedSpace H M''] [IsManifold 
   [MetricSpace M''] [Nonempty M'']
 variable {N'' : Type u} [TopologicalSpace N''] [ChartedSpace H N''] [IsManifold I ∞ N'']
   [T2Space N''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N'']
-  [ConnectedSpace N''] [T3Space N''] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N'']
+  [ConnectedSpace N''] [T3Space N'']
 
 theorem stepB1_of_bounds
     (g : SmoothRiemannianMetric I M'') (h : SmoothRiemannianMetric I N'')

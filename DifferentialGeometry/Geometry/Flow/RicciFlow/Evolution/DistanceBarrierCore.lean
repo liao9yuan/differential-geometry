@@ -28,7 +28,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [SigmaCompactSpace M] [T2Space M]
 
 private theorem pathLength_timeDeriv_of_ricciFlow

@@ -21,11 +21,9 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners Real F G}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N]
   [IsManifold J ∞ N] [IsManifold J 1 N]
-  [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
   [T2Space N] [SigmaCompactSpace N] [J.Boundaryless]
 
 theorem rm04_localPull
