@@ -236,7 +236,7 @@ theorem ricciKerAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ :
     rw [ricci1Split (I := I) (M := M) g₀ g₁]
     simp only [hF_def, ← hO_def, ← hA0_def, ← hA1_def, ← hA2_def, ← hA3_def, ← hA4_def]
     exact rfnsNegIcg (I := I) (M := M) g₀ l x (A0 + A1 + A2 + A3 + A4)
-  show F (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁) ≤ _
+  change F (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁) ≤ _
   rw [hker]
   refine hsum.trans ?_
   rw [mul_assoc]

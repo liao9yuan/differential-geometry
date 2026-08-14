@@ -4389,7 +4389,7 @@ private theorem rsperm_sub_lip
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  show rsDomDomCongr σ ((A - B).toSection x) =
+  change rsDomDomCongr σ ((A - B).toSection x) =
     rsDomDomCongr σ (A.toSection x) - rsDomDomCongr σ (B.toSection x)
   rw [show (A - B).toSection x = A.toSection x - B.toSection x from rfl]
   simp only [rsDomDomCongr]
@@ -5419,7 +5419,7 @@ private lemma vbPK_slotExt_lip (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     have hj : Fin.natAdd 1 j = Fin.succ j := by
       apply Fin.ext
       simp [Fin.natAdd, Fin.succ, Nat.add_comm]
-    show Fin.cons (u 0) (Fin.tail u) (Fin.natAdd 1 j) = Fin.tail u j
+    change Fin.cons (u 0) (Fin.tail u) (Fin.natAdd 1 j) = Fin.tail u j
     rw [hj, Fin.cons_succ]
   rw [hcast, hnat]
   rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x

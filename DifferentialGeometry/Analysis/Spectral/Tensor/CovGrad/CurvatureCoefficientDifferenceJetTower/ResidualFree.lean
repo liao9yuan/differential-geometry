@@ -325,7 +325,7 @@ theorem bfGridWinIntRs
       ∑ k ∈ Finset.range (i + 3), Kt k * (1 + ‖iteratedCovGrad (I := I) g₀ r s k P‖ ^ 2) :=
     Finset.sum_le_sum (fun k _ => hint2_k k)
   refine le_trans hstep1 ?_
-  show (∑ k ∈ Finset.range (i + 3),
+  change (∑ k ∈ Finset.range (i + 3),
         Kt k * (1 + ‖iteratedCovGrad (I := I) g₀ r s k P‖ ^ 2)) ≤
       (∑ k ∈ Finset.range (i + 3), Kt k) *
           (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ r s j P‖ ^ 2) +
