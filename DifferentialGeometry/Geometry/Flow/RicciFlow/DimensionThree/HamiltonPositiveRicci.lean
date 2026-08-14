@@ -383,7 +383,7 @@ def LimitRoundAt (L : Ham3CGHLimit (I := I) M) (t : Real) : Prop :=
 
 theorem ham3_short_exists
     {E0 : Type*} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
-    [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
+    [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)]
     {H0 : Type*} [TopologicalSpace H0] {I0 : ModelWithCorners Real E0 H0}
     {M0 : Type u} [TopologicalSpace M0] [ChartedSpace H0 M0] [IsManifold I0 ∞ M0]
     [SigmaCompactSpace M0] [T2Space M0] [BoundarylessManifold I0 M0]
