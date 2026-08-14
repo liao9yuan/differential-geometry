@@ -209,6 +209,7 @@ private def edgeFeedCLM (s : Nat) (x : M) (G : Tensor0SSpace (s + 2) I x)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edgeFeedCLM_apply (s : Nat) (x : M)
     (G : Tensor0SSpace (s + 2) I x) (v : Fin s → E)
     (p q : TangentSpace I x) :
@@ -335,6 +336,7 @@ private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem edgePair_point_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) :

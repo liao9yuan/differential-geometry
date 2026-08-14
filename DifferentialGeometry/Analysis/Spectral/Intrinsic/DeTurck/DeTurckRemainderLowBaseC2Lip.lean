@@ -541,6 +541,7 @@ private noncomputable def monoExtC2
     (LowBaseInternal.monoPerm σ)
     (slotExtendIter (I := I) (M := M) g 0 2 4 S)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem monoExt_sub_c2
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4))
     (S R : SmoothCcTensor g 0 2) :
@@ -677,6 +678,7 @@ private theorem raised_sub_factor
       rw [hRT, hRU, hP]
       noncomm_ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoSlotZero_add_c2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -815,6 +817,7 @@ private theorem perm_icg_norm_c2
       (Filter.Eventually.of_forall hintegrand)
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem symm_icg_norm_c2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 k
@@ -845,6 +848,7 @@ private theorem symm_icg_norm_c2
   rw [hperm]
   linarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 k T)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem symm_jet_c2
     (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
@@ -866,6 +870,7 @@ private theorem unitModel_sub_c2
   simp only [unitModel]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem domperm_sub_c2
     (g : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 2)) (A B : SmoothCcTensor g 0 2) :
@@ -887,6 +892,7 @@ private theorem domperm_sub_c2
     ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem symmS_sub_c2
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
@@ -1043,6 +1049,7 @@ private theorem fullField_decomp_c2
   rw [show gInvRaisedEndo (I := I) g g x v = v from by
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem fullSlot2_decomp
     (g gm : SmoothRiemannianMetric I M) :
     fullSlot2 (I := I) (M := M) g gm =
@@ -3780,6 +3787,7 @@ private theorem pure_eq_trace_c2
   intro x
   rw [ricciArmPrincipalCoeffPure_toSection, pureTrace_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem pcc_pair_eq
     (g gT gU : SmoothRiemannianMetric I M) :
     deTurckPrincipalCometricCoeff (I := I) (M := M) g gT -
@@ -3876,6 +3884,8 @@ private theorem kernel_pair_alg
         (LU + (PU - K) + RU) := by rw [hT, hU]
     _ = (LT - LU) + (PT - PU) + (RT - RU) := by abel
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem phiMet_diff_eq
     (g g_bg gT gU : SmoothRiemannianMetric I M) :
     deTurckPhiMetTotal (I := I) (M := M) g g_bg gT -
@@ -4106,6 +4116,7 @@ private theorem c2Kernel_joint
     (LowBaseInternal.selfTop_joint (I := I) (M := M)
       g T hTδ hZδ)
 
+omit [BoundarylessManifold I M] in
 private theorem c2Kernel_pair_eq
     (g g_bg : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) {δ : ℝ}

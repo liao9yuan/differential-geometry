@@ -888,6 +888,7 @@ private lemma fieldCoord_contDiffAt
     ← chartedSpaceSelf_prod]
   exact hfiber'
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartRep_snd_diff
     (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -957,6 +958,7 @@ private lemma gammaContr_contDiffAt
       (chartCoordCLM (E := E) j).contDiff.contDiffAt.comp q₀ hQ
   exact (hΓ.mul hPi).mul hQj
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem cov_commute_curv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -1218,6 +1220,7 @@ theorem cov_commute_curv
   rw [houterCoordL, houterCoordR]
   exact hfixed
 
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem cov_snd_smooth
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -1431,6 +1434,7 @@ theorem cov_snd_smooth
       ← chartedSpaceSelf_prod] at hfiberCD
     simpa only [F, β] using hfiberCD
 
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem cov_fst_smooth
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -1473,6 +1477,7 @@ theorem cov_fst_smooth
   have hcomp := hsnd.comp hswap
   simpa only [swap, Function.comp_apply] using hcomp
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem cov_commute_smooth
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)

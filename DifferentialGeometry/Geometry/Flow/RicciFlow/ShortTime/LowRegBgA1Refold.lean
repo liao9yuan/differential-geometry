@@ -27,6 +27,7 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zero_fb_refold
     (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 ≤ δ) :
     gFibreOpBound (I := I) (M := M) g

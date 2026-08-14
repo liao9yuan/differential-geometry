@@ -35,6 +35,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma sieSplit (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     slotInsertEndoCc (I := I) (M := M) g₀ s
         (fullRaisedEndoField (I := I) (M := M) g₀ g₁) =
@@ -505,6 +506,7 @@ private theorem pairCap (g₀ : SmoothRiemannianMetric I M)
   exact capCongr (I := I) (M := M) g₀ P hpair
     (capApp (I := I) (M := M) g₀ P _ _ hK2_nn hK4_nn hP2 hP4)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma curvSmul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (t : ℝ) :
     lrCurvF (I := I) (M := M) g₀ (t • T) = t • lrCurvF (I := I) (M := M) g₀ T := by
@@ -1009,6 +1011,7 @@ theorem lrQuadMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   exact le_of_eq (by ring)
 
 open CurvatureCoefficientDifferenceJetTower in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma extSub (g₀ : SmoothRiemannianMetric I M) (X Y : SmoothCcTensor g₀ 0 4) :
     slotExtendIter (I := I) (M := M) g₀ 0 4 2 (X - Y) =
       slotExtendIter (I := I) (M := M) g₀ 0 4 2 X -
@@ -1299,6 +1302,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
 
 set_option backward.isDefEq.respectTransparency false in
 open CurvatureCoefficientDifferenceJetTower in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sieZero (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
     covGrad (I := I) (M := M) g₀ (s + 1) (s + 1)
         (slotInsertEndoCc (I := I) (M := M) g₀ s

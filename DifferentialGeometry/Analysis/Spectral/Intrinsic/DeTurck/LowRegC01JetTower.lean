@@ -486,6 +486,7 @@ private lemma jetFold (g : SmoothRiemannianMetric I M) {r c : ℕ}
   rw [Finset.sum_add_distrib, ← Finset.sum_mul, ← Finset.sum_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma jetTrans (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) (i : ℕ) (A B : ℕ → ℝ)
     (hA : ∀ q, 0 ≤ A q) (hB : ∀ q, 0 ≤ B q)

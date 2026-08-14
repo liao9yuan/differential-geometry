@@ -40,6 +40,7 @@ private lemma l1IcgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma l1RfnsNeg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (x : M)
     (X : SmoothCcTensor g r s) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + l) x
@@ -411,6 +412,7 @@ theorem psiBAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ 
   rw [hdef]
   exact hfold
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fixCdAtgw (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Kfx : ℕ → ℝ, (∀ n, 0 ≤ Kfx n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) (n : ℕ) (x : M),

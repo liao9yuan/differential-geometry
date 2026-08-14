@@ -37,6 +37,7 @@ theorem metricField_totalReg2
       (metricField_totalReg (I := I) g₁ g₂))
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem nablaMetric_combo_extDeriv2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -94,6 +95,7 @@ theorem nablaMetric_combo_extDeriv2
   abel
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_koszul_deriv2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]

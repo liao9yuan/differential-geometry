@@ -75,6 +75,7 @@ private lemma slotExtend_toModel_cons
       Phi.toSection x) D (show E from v0) vs
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma slotExtendTwo_toModel
     (g : SmoothRiemannianMetric I M) (X : SmoothCcTensor g 0 4)
     (x : M) (D : Tensor0SSpace 2 I x) (u : Fin 6 → TangentSpace I x) :
@@ -161,6 +162,7 @@ def mvPairTraceOp (g gm : SmoothRiemannianMetric I M) :
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem mvPairTrace_apply
     (g gm : SmoothRiemannianMetric I M) (X : SmoothCcTensor g 0 4)
     (x : M) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :

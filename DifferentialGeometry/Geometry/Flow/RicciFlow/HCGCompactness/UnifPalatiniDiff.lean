@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -38,6 +39,7 @@ theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
   nablaRm04_apply (I := I) (M := M) g x D X Y Z W
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem curvJet1_normSq_le_of_op
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hop : ∀ (x : M) (D X Y Z : TangentSpace I x),
@@ -153,6 +155,7 @@ theorem covDerivConnDiff_congr
   exact sub_eq_zero.mp hsub
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivConnDiff_eq_ext
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -230,6 +233,7 @@ noncomputable def covDerivPal (gB g₀ : SmoothRiemannianMetric I M)
       (fun p : M => ((LeviCivita (I := I) gB) (fun q : M => Z q) p) (D p)) x
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem curvCovDerivOf_sub_base (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) (x : M) :

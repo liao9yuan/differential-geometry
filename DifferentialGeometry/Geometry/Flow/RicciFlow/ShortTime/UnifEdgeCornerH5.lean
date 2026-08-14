@@ -155,6 +155,7 @@ private theorem iter_three_jet_two_le_five_h5
     norm_nonneg (iteratedCovGrad (I := I) g r s 4 S)]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covgrad_slot_extend_eq_reindex_h5
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :

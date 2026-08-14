@@ -42,6 +42,7 @@ theorem phaseRadius_pos
     0 < d.phaseRadius R := by
   exact div_pos (mul_pos d.ratio_pos (hd.mu_pos R)) (by norm_num)
 
+omit [CompleteSpace E] in
 theorem phaseRadius_metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

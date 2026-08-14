@@ -438,6 +438,7 @@ private theorem traceHessianCoeff_appCc_eq_local
   exact traceHessianCoeff_apply_eq (I := I) (M := M) g₀ g₁ W x v
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem deTurckLieArm2PrincipalCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 0 4) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2

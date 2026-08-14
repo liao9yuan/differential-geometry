@@ -133,6 +133,7 @@ private theorem varSnd_shift
   rw [varSnd, varSnd, hcurve]
   rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartRep_fst_diff
     (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))

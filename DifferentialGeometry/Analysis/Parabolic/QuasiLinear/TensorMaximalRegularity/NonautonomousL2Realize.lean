@@ -61,6 +61,7 @@ private theorem crossRepr_hi_ae
   rw [u.repr_coeff hT ht, tensorHsInclusion_coeff_apply]
   exact hcoeff i
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nonautL2_realize
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2

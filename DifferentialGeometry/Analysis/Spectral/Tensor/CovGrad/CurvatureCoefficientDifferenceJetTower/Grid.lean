@@ -85,6 +85,7 @@ lemma ricEndoBackgroundDifferenceField_apply (g₀ g₁ : SmoothRiemannianMetric
 namespace CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curvCoeffSlot_zero_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 0 -
@@ -120,6 +121,7 @@ lemma curvCoeffSlot_zero_backgroundDifference_eq
   rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.map_update_sub]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curvCoeffSlot_one_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 1 -
@@ -181,6 +183,7 @@ lemma curvCoeffSlot_one_backgroundDifference_eq
 end CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ -
@@ -1045,6 +1048,7 @@ def ricMixedSharpEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
   toFun := fun x : M => ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x
   contMDiff_toFun := ricMixedSharpEndoFib_contMDiff (I := I) (M := M) g₀ g₁
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma ricMixedSharpEndoField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     ricMixedSharpEndoField (I := I) (M := M) g₀ g₁ x =
       ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x := rfl
@@ -1083,6 +1087,7 @@ lemma ricEndoRaisedFib_eq_mixed_add_gInvDiffRaised
 end CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem slotInsertEndoCc_zero_ricEndoBackgroundDifference_telescope
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g₀ 0

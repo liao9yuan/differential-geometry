@@ -169,6 +169,7 @@ theorem coord_mem {p q : M}
   rw [hcoord]
   exact hw
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 theorem map_eq {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -194,6 +195,7 @@ theorem transition_smooth {p q : M}
   simpa only [transition, inv, Function.comp_def] using
     d.smooth_inv.comp hc hmap
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 theorem transition_cancel {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) {U : Set E}
@@ -246,6 +248,7 @@ theorem metric_apply (g : SmoothRiemannianMetric I M) {p : M}
     ContinuousLinearMap.precomp_apply]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem transition_isom (g : SmoothRiemannianMetric I M) {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) {U : Set E}
@@ -347,6 +350,7 @@ private theorem push_smooth {p : M}
   rw [hmf]
 
 set_option synthInstance.maxHeartbeats 800000 in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem metric_contDiffOn (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) {U : Set E}
     (hU : IsOpen U)
@@ -465,6 +469,7 @@ theorem sharp_norm_le (g : SmoothRiemannianMetric I M) {p : M}
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem abs_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) {z : E} (hz : z ∈ U) (v w : E) :
@@ -491,6 +496,7 @@ theorem abs_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     (mul_nonneg (mul_nonneg (by norm_num) (norm_nonneg v)) (norm_nonneg w))
 
 set_option synthInstance.maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem deriv_zero (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) :
@@ -529,6 +535,7 @@ theorem fderiv_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     _ ≤ (h.C 1 * ‖u‖) * ‖v‖ * ‖w‖ := by gcongr
     _ = h.C 1 * ‖u‖ * ‖v‖ * ‖w‖ := rfl
 
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem koszulVec_norm_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {z : E} (hz : z ∈ Metric.ball (0 : E) h.radius) (v w : E) :
@@ -547,6 +554,7 @@ theorem koszulVec_norm_le (g : SmoothRiemannianMetric I M) {p : M}
   ring_nf at hraw ⊢
   exact hraw
 
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem koszulVec_pair_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {z y : E}
@@ -623,6 +631,7 @@ private theorem fderiv_eval3
 
 set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem koszulVec_lip_on (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {r : Real}

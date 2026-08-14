@@ -869,6 +869,7 @@ private theorem jetNeg
     jetSmul (I := I) (M := M) g m (-1 : ℝ) S
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetSub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -2145,6 +2146,7 @@ private noncomputable def aaCapH2
       (permCoeff (I := I) (M := M) g aaP120H2)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem aaCapNnH2 (g : SmoothRiemannianMetric I M) :
     0 ≤ aaCapH2 (I := I) (M := M) g := by
   unfold aaCapH2
@@ -2167,6 +2169,7 @@ private theorem aaCapNnH2 (g : SmoothRiemannianMetric I M) :
   linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem aaCap4H2
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (hpm : pm = aaP3201H2 ∨ pm = aaP2301H2 ∨ pm = aaP3102H2 ∨
@@ -2194,6 +2197,7 @@ private theorem aaCap4H2
   rcases hpm with rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem aaCap3H2
     (g : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 3))
     (hρ : ρ = aaP102H2 ∨ ρ = aaP120H2) :
@@ -2976,6 +2980,7 @@ private theorem pureCoeffEqH2
   intro x
   rw [ricciArmPrincipalCoeffPure_toSection, pureTrace_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fourTraceJetH2
     (g : SmoothRiemannianMetric I M) (F : SmoothCcTensor g 4 2) :
     lowJetSq (I := I) (M := M) g 2
@@ -3170,6 +3175,7 @@ private theorem rspermSubH2
   simp only [rsDomDomCongr]
   rfl
 
+omit [BoundarylessManifold I M] in
 private theorem refoldSubH2
     (g : SmoothRiemannianMetric I M)
     (G H : SmoothCcTensor g 0 4) (σ : Equiv.Perm (Fin 4)) :

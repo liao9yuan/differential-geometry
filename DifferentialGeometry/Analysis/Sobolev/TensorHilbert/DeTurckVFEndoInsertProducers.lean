@@ -956,6 +956,7 @@ private lemma gInvRaisedEndo_self' (g₀ : SmoothRiemannianMetric I M) (x : M) :
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM, ContinuousLinearMap.id_apply]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [CompactSpace M] in
 private lemma fullRaisedEndoField_decomp' (g₀ g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +
@@ -1489,6 +1490,7 @@ private lemma rfns_iCG_connDiffLoweredCc_eq_connDiffSection
           ((iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)).toSection x) := by
         rw [connDiffSection_eq_cometricRaiseSlot0Field']
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_iCG_connDiffLoweredCc_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ =
@@ -1902,6 +1904,7 @@ theorem wOmega_lowOrder_jetL2_succ_generic
       linarith [e1, e2]
     exact Finset.sum_le_sum hterm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rfns_iCG_wCA_eq_connDiffSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
@@ -1926,6 +1929,7 @@ lemma rfns_iCG_wCA_eq_connDiffSection (g₀ g₁ : SmoothRiemannianMetric I M)
           ((iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)).toSection x) :=
         rfns_iCG_connDiffLoweredCc_eq_connDiffSection (I := I) (M := M) g₀ g₁ n x
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_iCG_wCA_eq_connDiffSection (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 2 n (wCA (I := I) (M := M) g₀ g₁)‖ =
       ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)‖ := by
@@ -1962,6 +1966,7 @@ private lemma rfns_iCG_wAlphaA_eq_succ_wOmega (g₀ g₁ g_bg : SmoothRiemannian
         rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 0 1 i
           (wOmega (I := I) (M := M) g₀ g₁ g_bg) x
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_iCG_wAlphaA_eq_succ_wOmega (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaA (I := I) (M := M) g₀ g₁ g_bg)‖ =

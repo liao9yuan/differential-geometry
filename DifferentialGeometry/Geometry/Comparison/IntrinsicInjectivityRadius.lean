@@ -95,6 +95,7 @@ theorem intrInjOn_eball
     (Metric.eball_subset_eball (le_of_lt hr_lt_r'))
 
 omit [ConnectedSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem intrInjOn_ball
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,

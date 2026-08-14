@@ -24,12 +24,14 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Frame
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem innerSelfNonneg (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : 0 ≤ g.inner x v v := by
   rcases eq_or_ne v 0 with hv | hv
   · simp [hv]
   · exact (g.pos x v hv).le
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -53,9 +55,11 @@ private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frankEq (x : M) :
     (Module.finrank Real (TangentSpace I x) : Real) = (Module.finrank Real E : Real) := rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -64,6 +68,7 @@ private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   intro i j
   constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem metricCS (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     |g.inner x u v| ≤ Real.sqrt (g.inner x u u) * Real.sqrt (g.inner x v v) := by
@@ -80,6 +85,7 @@ private theorem metricCS (g : SmoothRiemannianMetric I M) (x : M)
   rw [hαv, hαnorm] at h
   simpa using h
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem onFrame_coord {Idx : Type*} [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -97,6 +103,7 @@ private theorem onFrame_coord {Idx : Type*} [DecidableEq Idx]
     · rw [if_neg h, if_neg (fun hh : j = i => h hh.symm)]
   exact congrArg (fun L : (TangentSpace I x) →ₗ[Real] Real => L v) hlin
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem absBasis_le {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {k : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -113,6 +120,7 @@ private theorem absBasis_le {Idx : Type*} [Finite Idx] [DecidableEq Idx]
   rw [hprod, mul_one] at h
   exact h
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem normSqAdd_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {k : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -139,6 +147,7 @@ section Flux
 
 variable {s : ℕ}
 
+omit [SigmaCompactSpace M] in
 theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -326,6 +335,7 @@ section Trace
 
 variable {s : ℕ}
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem traceNormSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (V : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x) :
     normSq0S (I := I) g x s (metricTraceFirstTwo0STensor (I := I) g V) ≤

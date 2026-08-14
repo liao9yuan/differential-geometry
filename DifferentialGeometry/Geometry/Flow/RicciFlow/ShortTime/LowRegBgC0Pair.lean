@@ -68,6 +68,7 @@ private theorem icgZeroLocal
   | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetZeroLocal
     (g : SmoothRiemannianMetric I M) {r s m : ℕ} :
     lowJetSq (I := I) (M := M) g m
@@ -1927,6 +1928,7 @@ private theorem insEndoOne
   rw [wAlpha, wAlpha, raiseAdd0, raiseAdd0, raiseSub0]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem omegaBgSub
     (g g_bg gT gU : SmoothRiemannianMetric I M) :
     (wOmega (I := I) (M := M) g gT g_bg -
@@ -2015,6 +2017,7 @@ private theorem omegaBgPairH2
       dsimp only [K]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem alphaBgEq
     (g g_bg gm : SmoothRiemannianMetric I M) :
     wAlphaA (I := I) (M := M) g gm g_bg -
@@ -2026,6 +2029,7 @@ private theorem alphaBgEq
   unfold wAlphaA
   rw [← domSubLocal, ← covGrad_sub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem alphaBgSub
     (g g_bg gT gU : SmoothRiemannianMetric I M) :
     (wAlphaA (I := I) (M := M) g gT g_bg -
@@ -2311,6 +2315,7 @@ private theorem symmGradSub
   rw [symmSCovGrad3_def, symmSCovGrad3_def, symmSCovGrad3_def,
     symmS_sub, covGrad_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem koszulSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     koszulCovecCc (I := I) g (T - U) =
@@ -2320,6 +2325,7 @@ private theorem koszulSub
   rw [domSubLocal, domSubLocal, domSubLocal]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem kappaSelfSub
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -2480,6 +2486,7 @@ private noncomputable def kappaBg
   lc0Kappa (I := I) (M := M) g gm g_bg -
     lc0Kappa (I := I) (M := M) g gm g
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem kappaBg_pair
     (g gT gU g_bg : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)

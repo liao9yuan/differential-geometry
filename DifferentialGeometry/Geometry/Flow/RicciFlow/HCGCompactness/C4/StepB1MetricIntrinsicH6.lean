@@ -566,6 +566,7 @@ private noncomputable def flatModelMetricH6 :
   contMDiff := (riemannianMetricVectorSpace E).contMDiff.of_le le_top
 
 omit [NeZero (Module.finrank Real E)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] in
 private theorem chart_pull_coeff
     {Mk Ml : Type u}
     [TopologicalSpace Mk] [ChartedSpace H Mk] [IsManifold I ∞ Mk]

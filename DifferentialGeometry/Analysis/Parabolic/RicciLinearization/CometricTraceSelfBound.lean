@@ -204,6 +204,7 @@ private theorem traceSucc_rfns
   exact rfns_slotExtendFib_eq (I := I) (M := M) g (p + 2) p x
     (cometricDoubleTraceFib (I := I) g p x)
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cometricTrace_rfns_p
     (p : ℕ) (g : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (p + 2) p x
@@ -295,6 +296,7 @@ private lemma combinedTrace42Model_apply_symbolic
   congr 1
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciSelf_twice_eq
     (g : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeff (I := I) (M := M) g g +
@@ -344,6 +346,8 @@ private theorem ricciSelf_twice_eq
     ContinuousMultilinearMap.domDomCongr_apply]
   ring
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciSelf_eq
     (g : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeff (I := I) (M := M) g g =

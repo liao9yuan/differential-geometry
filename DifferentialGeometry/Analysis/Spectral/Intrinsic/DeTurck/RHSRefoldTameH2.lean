@@ -288,6 +288,7 @@ private theorem h2_six_le
     _ <= 8 * (h2 A + h2 B + h2 C + h2 D + h2 F + h2 G) := by
       nlinarith [h2_nonneg F, h2_nonneg G]
 
+omit [BoundarylessManifold I M] in
 private theorem edgeLie_eq_sum
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}

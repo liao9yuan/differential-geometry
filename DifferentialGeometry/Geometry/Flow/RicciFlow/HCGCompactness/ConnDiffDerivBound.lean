@@ -241,6 +241,7 @@ private theorem lcDiff_covOne_le
   exact diff_le_covOne_basis_ref_lc (I := I) h g hx C hEq basis hhinv
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem connDiff_gJet_le
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -513,6 +514,7 @@ theorem covDerivConnDiff_g1_le
     nlinarith [hdiv]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivConnDiff_gJet_le
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)

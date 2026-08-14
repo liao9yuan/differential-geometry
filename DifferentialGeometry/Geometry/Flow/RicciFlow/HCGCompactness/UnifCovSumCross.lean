@@ -778,6 +778,7 @@ theorem covStepDiff_jet_le
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
           (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS) := by ring
 
+omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] in
 theorem covStepDiff_of_jets
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)

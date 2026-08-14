@@ -334,6 +334,7 @@ theorem gradBase_fun (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
   funext j
   rw [gradBase_eq (I := I) (M := M) g₀ P x j, Nat.add_comm 1 j]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem armShift (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     (P : SmoothCcTensor g₀ rb sb) {Λ : ℝ} (hΛ1 : 1 ≤ Λ)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ Λ)

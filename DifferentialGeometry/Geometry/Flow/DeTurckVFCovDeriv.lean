@@ -73,6 +73,7 @@ theorem orthoFrame_expand (g : SmoothRiemannianMetric I M) (x : M)
   rw [hzero] at this
   exact lt_irrefl 0 this
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem frameDiag_indep (g : SmoothRiemannianMetric I M) (x : M)
     (B B' : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -114,6 +115,7 @@ theorem frameDiag_indep (g : SmoothRiemannianMetric I M) (x : M)
   rw [Finset.sum_congr rfl (fun j _ => hinner j)]
   simp
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem deTurckVF_frame_trace (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -127,6 +129,7 @@ theorem deTurckVF_frame_trace (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j) hB
     (connDiff (I := I) g g_bg x)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem skewDiag_zero (g : SmoothRiemannianMetric I M) (x : M)
     (B D : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -167,6 +170,7 @@ private theorem skewDiag_zero (g : SmoothRiemannianMetric I M) (x : M)
   · exact absurd h (by norm_num)
   · exact h
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem frameCorr_vanish (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ∑ i : Fin (Module.finrank ℝ E),

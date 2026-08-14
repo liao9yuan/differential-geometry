@@ -1500,6 +1500,7 @@ theorem slotExtendSmul
     rfl]
   rw [ContinuousLinearMap.smul_comp, map_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slotIterSmul
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (a : ℝ) (X : SmoothCcTensor g r s) :
@@ -1513,6 +1514,7 @@ theorem slotIterSmul
       rw [ih, slotExtendSmul]
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem prod23Smul
     (g : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1523,6 +1525,7 @@ theorem prod23Smul
   rw [appCcRS_smul_right]
   rfl
 
+omit [BoundarylessManifold I M] in
 theorem innerOneSmul
     (g : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1532,6 +1535,7 @@ theorem innerOneSmul
     appRSSmulLeft]
   rfl
 
+omit [BoundarylessManifold I M] in
 theorem innerActSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1584,6 +1588,7 @@ theorem daTransSmul
     curvatureRefoldMonomialCoeffField_unitValue_smul]
   module
 
+omit [BoundarylessManifold I M] in
 theorem ricciDASmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1626,6 +1631,7 @@ theorem raise0Smul
     cometricRaiseSlot0Fib_clm_apply, cometricRaiseSlot0Fib_clm_apply]
   rw [map_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem vbCoreSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1633,6 +1639,7 @@ theorem vbCoreSmul
       a • vbCore (I := I) (M := M) g gm W := by
   simp only [vbCore, raise0Smul, appRSSmulLeft, appCcRS_smul_right]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem vbOneSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :

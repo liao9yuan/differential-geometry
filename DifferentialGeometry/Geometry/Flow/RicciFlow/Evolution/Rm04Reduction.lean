@@ -73,6 +73,7 @@ private theorem quadSumNeg (gInv : ι → ι → Real) (X : ι → ι → ι →
   unfold quadSum
   simp only [mul_neg, Finset.sum_neg_distrib]
 
+omit [DecidableEq ι] in
 private theorem quadSwapPR (gInv : ι → ι → Real) (X : ι → ι → ι → ι → Real) :
     quadSum gInv X = quadSum gInv (fun p q r s => X r s p q) := by
   unfold quadSum
@@ -117,6 +118,7 @@ private theorem bComp_quad (gInv : ι → ι → Real) (Rm : ι → ι → ι �
   Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ =>
     Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
+omit [DecidableEq ι] in
 private theorem quadB (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι → Real) (a b c d : ι) :
     quadSum gInv (fun p q r s => Rm a r b p * Rm c s d q) = bComp gInv Rm a b c d := by
   rw [bComp_quad]
@@ -143,6 +145,7 @@ def rmQ4 (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι → Real) (i 
 def rmQuad (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι → Real) (i j k l : ι) : Real :=
   rmQ1 gInv Rm i j k l - 2 * rmQ2 gInv Rm i j k l + 2 * rmQ4 gInv Rm i j k l
 
+omit [DecidableEq ι] in
 theorem rmQ2_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → Real}
     (hsym : Rm04Symm Rm) (hgi : ∀ a b : ι, gInv a b = gInv b a) (i j k l : ι) :
     rmQ2 gInv Rm i j k l = bComp gInv Rm i k j l := by
@@ -154,6 +157,7 @@ theorem rmQ2_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → 
         quadSwapRS gInv hgi (fun p q r s => Rm i p k s * Rm j q l r)
     _ = bComp gInv Rm i k j l := (bComp_quad gInv Rm i k j l).symm
 
+omit [DecidableEq ι] in
 theorem rmQ4_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → Real}
     (hsym : Rm04Symm Rm) (i j k l : ι) :
     rmQ4 gInv Rm i j k l = bComp gInv Rm i l j k := by
@@ -301,6 +305,7 @@ private theorem contractRm13 (gInv : ι → ι → Real) (Ric Rup : ι → ι �
         rw [hRup e q, Finset.sum_mul]
         exact Finset.sum_congr rfl fun p _ => by rw [hgi q p]; ring
 
+omit [DecidableEq ι] in
 theorem comm_eq_drift (gInv : ι → ι → Real) (Ric Rup : ι → ι → Real)
     (Rm13 Rm : ι → ι → ι → ι → Real) (n2Ric : ι → ι → ι → ι → Real)
     (hsym : Rm04Symm Rm)
@@ -356,6 +361,7 @@ private theorem traceMid (gInv : ι → ι → Real) {Ric : ι → ι → Real}
   rw [← Finset.sum_neg_distrib]
   exact Finset.sum_congr rfl fun q _ => by rw [hsym.swap34 p a q b]; ring
 
+omit [DecidableEq ι] in
 private theorem quadTr (gInv : ι → ι → Real) {Ric : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} (hsym : Rm04Symm Rm)
     (hric : ∀ a b : ι, Ric a b = ∑ p : ι, ∑ q : ι, gInv p q * Rm p a b q)
@@ -374,6 +380,7 @@ private theorem quadTr (gInv : ι → ι → Real) {Ric : ι → ι → Real}
         Finset.sum_congr rfl fun u _ => Finset.sum_congr rfl fun v _ => by
           rw [traceMid gInv hsym hric a v]
 
+omit [DecidableEq ι] in
 private theorem quadTrDrift (gInv : ι → ι → Real) {Ric Rup : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} (hsym : Rm04Symm Rm)
     (hric : ∀ a b : ι, Ric a b = ∑ p : ι, ∑ q : ι, gInv p q * Rm p a b q)
@@ -420,6 +427,7 @@ private def rmW (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι → Re
       Rm p j q v * Rm u i k l + Rm p j i v * Rm q u k l +
         Rm p j k v * Rm q i u l + Rm p j l v * Rm q i k u)
 
+omit [DecidableEq ι] in
 private theorem lapHessW (gInv : ι → ι → Real) {Ric : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} {n2Ric : ι → ι → ι → ι → Real}
     {n2Rm : ι → ι → ι → ι → ι → ι → Real}

@@ -98,6 +98,7 @@ theorem jetNeg (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     norm_num
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem opJetAdd (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (X Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (X + Y) ≤
@@ -107,6 +108,7 @@ theorem opJetAdd (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
   rwa [sub_neg_eq_add, jetNeg (I := I) (M := M) g m Y] at h
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_nnA {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ}
     {X : SmoothCcTensor g r c} (h : IsMoserWin (I := I) (M := M) g T A S X)
@@ -119,6 +121,7 @@ theorem moserWin_nnA {g : SmoothRiemannianMetric I M} {r c : ℕ}
   nlinarith [hle, hX, hpos]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_mono {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A A' : ℕ → ℝ} {S S' : ℝ}
     {X : SmoothCcTensor g r c} (h : IsMoserWin (I := I) (M := M) g T A S X)
@@ -131,6 +134,7 @@ theorem moserWin_mono {g : SmoothRiemannianMetric I M} {r c : ℕ}
     linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_const (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) :
     ∃ (A : ℕ → ℝ) (S : ℝ), ∀ T : SmoothCcTensor g 0 2,
@@ -156,6 +160,7 @@ theorem jetMono (g : SmoothRiemannianMetric I M) {r c m n : ℕ} (hmn : m ≤ n)
     (fun _ _ _ => sq_nonneg _)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_add {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A B : ℕ → ℝ} {S U : ℝ}
     {X Y : SmoothCcTensor g r c}
@@ -176,6 +181,7 @@ theorem moserWin_add {g : SmoothRiemannianMetric I M} {r c : ℕ}
       (by nlinarith [hX.2.2 n, hY.2.2 n])
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_sub {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A B : ℕ → ℝ} {S U : ℝ}
     {X Y : SmoothCcTensor g r c}
@@ -207,6 +213,7 @@ theorem opJetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : �
   rw [iteratedCovGrad_smul, norm_smul, mul_pow, Real.norm_eq_abs, sq_abs]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_smul {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {X : SmoothCcTensor g r c}
     (a : ℝ) (h : IsMoserWin (I := I) (M := M) g T A S X) :
@@ -251,6 +258,7 @@ private theorem l2OfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
   rwa [MeasureTheory.integral_const_mul, hint] at hsq
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetOfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
     (X : SmoothCcTensor g a b) (Y : SmoothCcTensor g a' b') {K : ℝ}
     (h : ∀ (i : ℕ) (x : M),
@@ -354,6 +362,7 @@ theorem moserWin_slot {g : SmoothRiemannianMetric I M} {r c : ℕ}
     nlinarith [hstep, h.2.2 n, hfr, hT]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_dom {g : SmoothRiemannianMetric I M} {a b a' b' : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S Cs : ℝ} {Cj : ℕ → ℝ}
     {X : SmoothCcTensor g a b} {Y : SmoothCcTensor g a' b'}
@@ -395,6 +404,7 @@ theorem moserWin_dom {g : SmoothRiemannianMetric I M} {a b a' b' : ℕ}
       _ = (∑ i ∈ Finset.range (n + 1), Cj i) * A n *
           (1 + lowJetSq (I := I) (M := M) g n T) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_reindex {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {R : SmoothCcTensor g r c}
     (ρ : Equiv.Perm (Fin r)) (h : IsMoserWin (I := I) (M := M) g T A S R) :
@@ -458,6 +468,7 @@ def IsPathPert (g g₁ : SmoothRiemannianMetric I M)
     lowJetSq (I := I) (M := M) g n T)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_self {g : SmoothRiemannianMetric I M}
     {T : SmoothCcTensor g 0 2} {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀)
     (hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -502,6 +513,7 @@ private theorem rfnsSymmS (g : SmoothRiemannianMetric I M)
   nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (2 + j) x
     ((iteratedCovGrad (I := I) g 0 2 j T).toSection x)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem moserWin_symmS (g : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀0 : 0 ≤ δ₀) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -664,6 +676,7 @@ private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
     ContinuousLinearMap.id_apply]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [CompactSpace M] in
 private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g g₁ =
       gInvDiffRaisedEndoField (I := I) g g₁ +

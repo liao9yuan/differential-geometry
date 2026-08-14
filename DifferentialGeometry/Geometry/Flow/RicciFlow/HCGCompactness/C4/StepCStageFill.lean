@@ -180,6 +180,7 @@ theorem stageTotal_conv
   | none => exact mapCInfConv_const (U := U) id
   | some target => exact hpair target
 
+omit [CompleteSpace E] in
 theorem stageTotal_pi_conv
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}

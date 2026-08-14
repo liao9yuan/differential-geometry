@@ -92,6 +92,7 @@ theorem modelCoeffMin_le
   simpa [modelCoeffMin, K, L, hw] using hmin
 
 omit [NeZero (Module.finrank Real E)] [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem param_dens_ge
     (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)

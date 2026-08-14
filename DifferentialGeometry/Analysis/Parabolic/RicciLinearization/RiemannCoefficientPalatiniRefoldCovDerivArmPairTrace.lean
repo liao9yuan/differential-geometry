@@ -3615,6 +3615,7 @@ private theorem lieBg_dom_sub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem lieBgLow_sub
     (g₀ gT gU g_bg : SmoothRiemannianMetric I M) :
     lieBgLow (I := I) (M := M) g₀ gT g_bg -

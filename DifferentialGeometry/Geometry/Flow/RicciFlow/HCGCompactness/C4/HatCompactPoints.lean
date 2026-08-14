@@ -30,6 +30,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 namespace NetLimitData
 
 omit [FiniteDimensional ℝ E] in
+omit [CompleteSpace E] in
 theorem hatPtsOfCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

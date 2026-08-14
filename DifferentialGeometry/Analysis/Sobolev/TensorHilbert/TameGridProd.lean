@@ -40,6 +40,7 @@ private theorem contRfns (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
       (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem intCapMul (g₀ : SmoothRiemannianMetric I M) {r s t : ℕ}
     (A : SmoothCcTensor g₀ r s) (B : SmoothCcTensor g₀ r t) {Λ : ℝ}
     (hA : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x

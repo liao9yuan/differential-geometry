@@ -68,6 +68,7 @@ private lemma gAddNorm_le
   linarith [hcs]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma gSubNorm_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a - b) (a - b)) ≤
@@ -85,6 +86,7 @@ def riemannDiffC (Λ Λ' Λ'' : ℝ) : ℝ :=
 
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem riemannDiff_gJet_le
     {K : Set M} (g₂ g₁ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -285,6 +287,7 @@ theorem riemannDiff_gJet_le
     _ = riemannDiffC Λ Λ' Λ'' ^ 2 *
         g₂.inner x v v * g₂.inner x w w * g₂.inner x u u := by rw [hCd]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem curvSup_of_diff
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),

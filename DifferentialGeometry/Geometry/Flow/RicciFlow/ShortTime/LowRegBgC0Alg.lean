@@ -93,6 +93,7 @@ theorem unit_add
     Pi.add_apply, ContinuousLinearMap.add_apply,
     Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma curry0 (x : M) (D : Tensor0SSpace 1 I x) (v₀ : E) :
     tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x D v₀ =
       Tensor0SSpace.toModel D (fun _ : Fin 1 => v₀) •
@@ -120,6 +121,7 @@ lemma clm_smul (x : M) (s : ℕ)
     A (c • unitTensor (I := I) (M := M) x) =
       c • A (unitTensor (I := I) (M := M) x) := A.map_smul c _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotLift23 (g : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g 0 3) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 5 I x from
@@ -188,6 +190,7 @@ lemma slotLift23 (g : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotLift24 (g : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g 0 4) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
@@ -256,6 +259,7 @@ lemma slotLift24 (g : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotLift22 (g : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g 0 2) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
@@ -561,6 +565,7 @@ noncomputable def mcdOne
     (permCoeff (I := I) (M := M) g (finRotate 3).symm)
     (koszulOne (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mcd_one_app
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),

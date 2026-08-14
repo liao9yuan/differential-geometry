@@ -29,6 +29,7 @@ def rm04TraceSlots : Equiv.Perm (Fin 4) where
   left_inv := by decide
   right_inv := by decide
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceInput_domDomCongr {x : M}
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (X Y : TangentSpace I x) (tail : Fin 2 -> TangentSpace I x) :
@@ -44,6 +45,7 @@ private theorem traceInput_domDomCongr {x : M}
   funext m
   fin_cases m <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem domDomCongr_sub {x : M} {s s' : Nat} (e : Fin s ≃ Fin s')
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     ContinuousMultilinearMap.domDomCongr e (A - B) =
@@ -66,6 +68,7 @@ end TraceSlots
 
 section RicciTrace
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_eq_trace_rm04 (g : SmoothRiemannianMetric I M) {x : M}
     (Rm13 : Tensor13At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -135,6 +138,7 @@ theorem metricRicci_eq_trace_cross (g₁ g₂ : SmoothRiemannianMetric I M) (x :
       CovariantDerivative.riemannCurvature04At_eq_lower_riemannCurvatureAt
         (I := I) g₁ (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) X Y Z W)
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trace_sub (g : SmoothRiemannianMetric I M) {x : M} {s : Nat}
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x) :
     metricTraceFirstTwo0STensor (I := I) g A -
@@ -227,6 +231,7 @@ end RicciTrace
 
 section TraceNorm
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -250,6 +255,7 @@ private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -258,6 +264,7 @@ private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   intro i j
   constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [T2Space M] in
 theorem normSq_ricciTraceRep (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 4
         (ContinuousMultilinearMap.domDomCongr rm04TraceSlots

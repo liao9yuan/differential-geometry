@@ -1506,6 +1506,7 @@ noncomputable def quadCap
       (permCoeff (I := I) (M := M) g lrPermC)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quadCap_nneg (g : SmoothRiemannianMetric I M) :
     0 ≤ quadCap (I := I) (M := M) g := by
   unfold quadCap
@@ -1522,6 +1523,7 @@ theorem quadCap_nneg (g : SmoothRiemannianMetric I M) :
   linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quadCap_le
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (hpm : pm = Equiv.swap (0 : Fin 4) 1 ∨ pm = lrPermA ∨

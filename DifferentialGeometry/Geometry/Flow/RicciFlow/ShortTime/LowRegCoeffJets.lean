@@ -1237,6 +1237,7 @@ theorem symm_grad3_sub
   rw [symmSCovGrad3_def, symmSCovGrad3_def, symmSCovGrad3_def,
     symmS_sub, covGrad_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem koszul_covec_sub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     koszulCovecCc (I := I) g (T - U) =

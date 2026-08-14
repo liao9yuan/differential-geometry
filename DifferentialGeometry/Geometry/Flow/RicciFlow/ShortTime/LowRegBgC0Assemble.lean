@@ -516,6 +516,7 @@ theorem c0DataPairH2
   simpa only [AT, AU, Qt, Q, Q0, Q1] using hop
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem zero_fb_c0
     (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 ≤ δ) :
     gFibreOpBound (I := I) (M := M) g

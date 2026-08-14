@@ -45,6 +45,7 @@ private theorem lc0Kappa_eq_metricConnDiffLoweredCc
       metricConnDiffLoweredCc (I := I) (M := M) g gm gB := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem bgKappa_pair
     (g gT gU gB : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)

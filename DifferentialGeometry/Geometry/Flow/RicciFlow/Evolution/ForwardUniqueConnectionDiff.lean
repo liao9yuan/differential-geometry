@@ -23,6 +23,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
 omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolutionDiffInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S₁ S₂ : SolutionOn (I := I) (M := M) D)
@@ -50,6 +51,7 @@ theorem christoffelEvolutionDiffInFrameOn
   exact (h₁ t x hx i j k).sub (h₂ t x hx i j k)
 
 omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelDiff_coeff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S₁ S₂ : SolutionOn (I := I) (M := M) D)

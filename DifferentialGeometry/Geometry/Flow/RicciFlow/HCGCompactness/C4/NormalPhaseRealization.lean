@@ -174,6 +174,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartPhaseVF_eq (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (a : E) (z : E × E) :
     Geodesic.chartPhaseVF (I := 𝓘(Real, E))
@@ -185,6 +186,7 @@ theorem chartPhaseVF_eq (g : SmoothRiemannianMetric I M) {p : M}
     (z := z.1) (v := z.2) (w := z.2)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartPhase_contDiff (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
     ContDiff Real ∞
@@ -200,6 +202,7 @@ theorem chartPhase_contDiff (g : SmoothRiemannianMetric I M) {p : M}
       interior_univ, Set.univ_prod_univ] using heq
   exact contDiffOn_univ.mp heq'
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartGeoOn_of_phase (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     {Z : Real → E × E} {s : Set Real} (hs : IsOpen s)

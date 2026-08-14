@@ -58,6 +58,7 @@ private theorem fiber_nonneg
     (S : SmoothCcTensor g r s) (x : M) :
     0 ≤ fiberLpFun g r s S x := Real.sqrt_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem inner_fiber_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Q B : SmoothCcTensor g r s)

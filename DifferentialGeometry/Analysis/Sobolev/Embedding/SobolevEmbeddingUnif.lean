@@ -70,6 +70,7 @@ private lemma lowerAllUpper_zero_unit
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns0_eq_normSq0S
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (W : SmoothCcTensor g 0 s) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x (W.toSection x) =
@@ -106,6 +107,7 @@ private lemma rfns0_eq_normSq0S
      simp)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem fibreNormSq_cross_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hequiv : ∀ (x : M) (v : TangentSpace I x),

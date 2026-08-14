@@ -71,6 +71,7 @@ private theorem zeroS_eq_unit (x : M) (D : Tensor0SSpace 0 I x) :
   rw [map_smul, hunit, smul_eq_mul, mul_one]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rs0_apply_eq_smul {s : ℕ} (x : M)
     (Φ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (D : Tensor0SSpace 0 I x) :
     Φ D = (Tensor0SNabla.tensor0Iso I M x D) • Φ (unitZeroSec (I := I) (M := M) x) := by
@@ -79,6 +80,7 @@ private theorem rs0_apply_eq_smul {s : ℕ} (x : M)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 set_option backward.isDefEq.respectTransparency false in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem cc_ext_unit (g : SmoothRiemannianMetric I M) {s : ℕ}
     (W₁ W₂ : SmoothCcTensor g 0 s)
     (h : ∀ x : M, ccUnitField (I := I) g s W₁ x = ccUnitField (I := I) g s W₂ x) :
@@ -94,6 +96,7 @@ theorem cc_ext_unit (g : SmoothRiemannianMetric I M) {s : ℕ}
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W₂.toSection x) D]
   exact congrArg _ (h x)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovGrad_ccOfField (g : SmoothRiemannianMetric I M) (s j : ℕ)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s) :
     iteratedCovGrad (I := I) g 0 s j (ccOfField (I := I) g s A) =
@@ -114,6 +117,7 @@ def rmSection (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 4 :=
   ccOfField (I := I) g 4 (metricRm04 (I := I) (M := M) g)
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] theorem rmSection_unit (g : SmoothRiemannianMetric I M) :
     ccUnitField (I := I) g 4 (rmSection (I := I) (M := M) g) =
       metricRm04 (I := I) (M := M) g :=
@@ -126,6 +130,7 @@ theorem rfns_rmSection_eq (g : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
         (iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) j x) :=
   rfns_ccOfField_eq (I := I) g 4 j (metricRm04 (I := I) (M := M) g) x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovGrad_rmSection (g : SmoothRiemannianMetric I M) (a : ℕ) :
     iteratedCovGrad (I := I) g 0 4 a (rmSection (I := I) (M := M) g) =
       ccOfField (I := I) g (4 + a)

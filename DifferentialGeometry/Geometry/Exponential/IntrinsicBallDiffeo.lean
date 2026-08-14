@@ -127,6 +127,7 @@ theorem intrFrame_localAt
   change intrFrameCLE (I := I) g p z ∈ B.hom.source
   simpa only [intrFrameCLE_apply] using hz
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem intrFrame_localOn
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

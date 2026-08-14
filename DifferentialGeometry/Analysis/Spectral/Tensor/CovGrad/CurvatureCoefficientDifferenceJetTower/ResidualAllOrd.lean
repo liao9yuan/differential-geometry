@@ -377,6 +377,7 @@ theorem rfns_iteratedCovGrad_raisedKoszul_pointwise_le
         ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) T).toSection x) :=
   rfns_iteratedCovGrad_raisedKoszul_pointwise (I := I) (M := M) g₀ g₁ T htie i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem koszul_l2_succ
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (n : ℕ) :

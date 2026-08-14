@@ -37,6 +37,7 @@ theorem spatialProj_coeff (σ : ℝ) (N : ℕ)
   rw [spatialEigenProj_apply, finiteEigenComboHs_coeff]
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 theorem spatialProj_idem (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     spatialEigenProj (I := I) (M := M) g σ N
@@ -55,6 +56,7 @@ theorem spatialProj_lip (σ : ℝ) (N : ℕ) :
   exact norm_spatialEigenProj_apply_le (I := I) (M := M) g σ N (W - W')
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 theorem timeProj_modeCoeff (σ T : ℝ) (N : ℕ)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -81,6 +83,7 @@ theorem timeProj_modeCoeff (σ T : ℝ) (N : ℕ)
     rw [h1, h2, spatialProj_coeff, if_neg hi, h3, Pi.zero_apply]
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 theorem proj_solModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -95,6 +98,7 @@ theorem proj_solModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
   · rw [if_neg hi, if_neg hi, map_zero]
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 theorem proj_derivModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -119,6 +123,7 @@ private lemma homModeCoeFn {a T : ℝ}
   coeFn_ofContinuousOn _
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 theorem proj_homModeCoeff {a T : ℝ} (N : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -175,6 +180,7 @@ theorem proj_derivField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     maximalRegularityDerivField_timeModeCoeff (I := I) (M := M) (a := a) hT
       h_compact f i]
 
+omit [BoundarylessManifold I M] in
 theorem proj_homField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2)) :

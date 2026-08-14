@@ -59,6 +59,7 @@ private lemma unitTensor_model (x : M) (m : Fin 0 → E) :
   rw [unitTensor, Tensor0SSpace.toModel_ofModel]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma curry_zero (x : M) (D : Tensor0SSpace 1 I x) (v₀ : E) :
     tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x D v₀ =
       (Tensor0SSpace.toModel D (fun _ : Fin 1 => v₀)) •
@@ -85,6 +86,7 @@ private lemma clm_unit_smul (x : M) (s : ℕ)
     A (c • unitTensor (I := I) (M := M) x) =
       c • A (unitTensor (I := I) (M := M) x) := A.map_smul c _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma slotLift_23 (g₀ : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g₀ 0 3) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 5 I x from

@@ -51,6 +51,7 @@ theorem reLowerPerm_val (s : ℕ) (k : Fin (s + 1 + 2)) :
       else if (k : ℕ) = s + 1 then ⟨1, by omega⟩ else k : Fin (s + 1 + 2)) : ℕ) = _
   split_ifs <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) (k : Fin (s + 1)) :
     metricTraceInput (I := I) a b tail (reLowerPerm s (Fin.castAdd 2 k)) =
@@ -76,6 +77,7 @@ theorem reLowerPerm_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     simp only [hv]
     rw [dif_pos (trivial : True), hlast, Function.update_self]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) :
     metricTraceInput (I := I) a b tail (reLowerPerm s (Fin.natAdd (s + 1) (0 : Fin 2))) = b := by
@@ -87,6 +89,7 @@ theorem reLowerPerm_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
   simp only [hv]
   rw [dif_neg (by omega : ¬((1 : ℕ) = 0)), dif_pos (trivial : True)]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) :
     metricTraceInput (I := I) a b tail (reLowerPerm s (Fin.natAdd (s + 1) (1 : Fin 2))) =
@@ -104,6 +107,7 @@ end Perm
 
 section ReLower
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem traceField_eq_sum {s : ℕ} (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 2))
@@ -131,6 +135,7 @@ private theorem sum_comm4 {Idx : Type*} [Fintype Idx] (F : Idx -> Idx -> Idx -> 
     _ = ∑ i : Idx, ∑ j : Idx, ∑ a : Idx, ∑ b : Idx, F a b i j :=
         Finset.sum_congr rfl fun i _ => Finset.sum_comm
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem slot_expand {s : ℕ} {Idx : Type*} [Fintype Idx] {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (m : Fin s -> TangentSpace I x) (i : Fin s) (c : Idx -> Real)
@@ -157,6 +162,7 @@ def reLower (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)
         T (metricTensorField (I := I) g₁)))
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -291,6 +297,7 @@ theorem reLowerPerm2_val (s : ℕ) (k : Fin (s + 1 + 3)) :
       else if (k : ℕ) = s + 2 then ⟨1, by omega⟩ else k : Fin (s + 1 + 3)) : ℕ) = _
   split_ifs <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm2_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) (k : Fin (s + 1)) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.castAdd 3 k)) =
@@ -316,6 +323,7 @@ theorem reLowerPerm2_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     simp only [hv]
     rw [dif_pos (trivial : True), hlast, Function.update_self]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm2_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.natAdd (s + 1) (0 : Fin 3))) = u 0 := by
@@ -328,6 +336,7 @@ theorem reLowerPerm2_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
   rw [dif_neg (by omega : ¬((2 : ℕ) = 0)), dif_neg (by omega : ¬((2 : ℕ) = 1))]
   exact congrArg u (Fin.ext (by simp))
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm2_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.natAdd (s + 1) (1 : Fin 3))) = b := by
@@ -340,6 +349,7 @@ theorem reLowerPerm2_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
   simp only [hv]
   rw [dif_neg (by omega : ¬((1 : ℕ) = 0)), dif_pos (trivial : True)]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPerm2_snd2 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.natAdd (s + 1) (2 : Fin 3))) =
@@ -367,6 +377,7 @@ def reLowerPair (g₂ : SmoothRiemannianMetric I M) {s : ℕ}
       (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 3) T K))
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLowerPair_eval (g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -418,6 +429,7 @@ end Pair
 
 section Defect
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLower_eq_trace (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -429,6 +441,7 @@ theorem reLower_eq_trace (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)
             T (metricTensorField (I := I) g₁))) := rfl
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (I := I) (E := E) (M := M) (metricCov (I := I) g) (1 : WithTop ℕ∞) := by
@@ -436,6 +449,7 @@ private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem nablaProd_eval {s q : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -480,6 +494,7 @@ theorem nablaProd_eval {s q : ℕ}
   simp only [hV, hXsec] at h1 h2
   rw [h1, h2]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem update_cons_last {s : ℕ} {x : M} (X : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) (v : TangentSpace I x) :
     Function.update (Fin.cons X tail : Fin (s + 1 + 1) -> TangentSpace I x)
@@ -501,12 +516,14 @@ private theorem update_cons_last {s : ℕ} {x : M} (X : TangentSpace I x)
         exact fun hc => hj (Fin.succ_injective _ hc)
       rw [Function.update_of_ne hne, Function.update_of_ne hj, Fin.cons_succ]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem cons_last {s : ℕ} {x : M} (X : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) :
     (Fin.cons X tail : Fin (s + 1 + 1) -> TangentSpace I x) (Fin.last (s + 1)) =
       tail (Fin.last s) := by
   rw [← Fin.succ_last, Fin.cons_succ]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem cons2_vec3 {x : M} (X Y Z : TangentSpace I x)
     (v : Fin 2 -> TangentSpace I x) (h0 : v 0 = Y) (h1 : v 1 = Z) :
     (Fin.cons X v : Fin 3 -> TangentSpace I x) = vec3 (I := I) X Y Z := by
@@ -678,6 +695,7 @@ def reLowerOp (g₁ g₂ : SmoothRiemannianMetric I M) :
   | 0 => id
   | (_ + 1) => fun T => reLower (I := I) g₁ g₂ T
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 @[simp] theorem reLowerOp_succ (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -705,6 +723,7 @@ theorem lapComm_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
   rw [lapCommFlux_reLower (I := I) g₁ g₂ T] at h
   simpa using h
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem traceInput_last {k : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (k + 1) -> TangentSpace I x) :
     metricTraceInput (I := I) a b tail (Fin.last (k + 2)) = tail (Fin.last k) := by
@@ -714,6 +733,7 @@ private theorem traceInput_last {k : ℕ} {x : M} (a b : TangentSpace I x)
   rw [dif_neg (by omega : ¬(k + 2 = 0)), dif_neg (by omega : ¬(k + 2 = 1))]
   exact congrArg tail (Fin.ext (by simp))
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem traceInput_update_last {k : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (k + 1) -> TangentSpace I x) (v : TangentSpace I x) :
     Function.update (metricTraceInput (I := I) a b tail) (Fin.last (k + 2)) v =

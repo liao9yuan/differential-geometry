@@ -149,6 +149,7 @@ private noncomputable def lc0RiemPassFib (g₀ : SmoothRiemannianMetric I M) (x 
       (tensor0SProdKappaFib (I := I) (p := 2) (q := 4) x
         (lieCorr0RiemLoweredFib (I := I) g₀ x)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 private theorem lc0RiemPassFib_contMDiff (g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 4 ℝ E)
@@ -184,6 +185,7 @@ noncomputable def lc0RiemPass (g₀ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := lc0RiemPassFib_contMDiff (I := I) g₀ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [SigmaCompactSpace M] in
 private lemma lc0RiemPass_sum
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
@@ -468,6 +470,7 @@ theorem lc0RiemPass_refold
     lc0RiemRF_eval]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     lieCorr0RiemFib (I := I) g₀ g₁ x =
       -((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -1072,6 +1075,7 @@ private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   rw [lieCorr0VBFib, lc0RiemLive_fiber]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VB (I := I) (M := M) g₀ g₁ =
       (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -1152,6 +1156,7 @@ private lemma vb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Tensor0SSpace 1 I x) :
     Tensor0SSpace.toModel
@@ -1206,6 +1211,7 @@ private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [hcast, hnat]
   rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x (fun j => Fin.tail u j)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma vbMcdArm_rel (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ (y : M) (d : Tensor0SSpace 1 I y),
       Tensor0SSpace.toModel

@@ -45,6 +45,7 @@ private lemma coframeS_one_eq_g0FlatCLM_pub
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 1 3 I x) (d a b c : TangentSpace I x) :

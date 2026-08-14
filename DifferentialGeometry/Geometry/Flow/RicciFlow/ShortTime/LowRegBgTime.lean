@@ -33,6 +33,7 @@ private abbrev metricH3 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (3 : ℝ)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zero_fibre_bound
     (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 ≤ δ) :
     gFibreOpBound (I := I) (M := M) g

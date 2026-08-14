@@ -88,6 +88,7 @@ theorem flow_to_eq
     P.S.family.metric t = Q.S.family.metric t :=
   flow_to_agree (I := I) (M := M) P Q t ⟨h0, lt_min hT hU⟩
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
 theorem flow_to_extend
     {g0 : SmoothRiemannianMetric I M} {T : Real}
     (P : FlowTo (I := I) (M := M) g0 T)

@@ -71,12 +71,14 @@ theorem bilin_ddc_swap (g : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ddc_swap_swap (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1)
         (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) T) = T := by
   refine ccTensor_ext_bilin (I := I) (M := M) g (fun x u w => ?_)
   rw [bilin_ddc_swap (I := I) (M := M) g, bilin_ddc_swap (I := I) (M := M) g]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ddc_swap_sub (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) :
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) (A - B) =
@@ -93,6 +95,7 @@ theorem symmS_of_swap (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g�
   simp only [symmS, ccTensor02Symm, h, ← two_smul ℝ X, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem swap_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
         (symmS (I := I) (M := M) g₀ T) =
@@ -102,11 +105,13 @@ theorem swap_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 
   simp only [ccTensorBilin_symmS (I := I) (M := M) g₀]
   exact ccTensorBilinSymm_symm (I := I) g₀ T x w u
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem symmS_idem (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     symmS (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T) =
       symmS (I := I) (M := M) g₀ T :=
   symmS_of_swap (I := I) (M := M) g₀ (swap_symmS (I := I) (M := M) g₀ T)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem swap_of_symmS (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g₀ 0 2}
     (h : symmS (I := I) (M := M) g₀ X = X) :
     domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) X = X := by

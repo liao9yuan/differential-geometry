@@ -390,6 +390,7 @@ noncomputable def seqAtomChart
   seqAtomOn (I := I) (legacyChartFamily (I := I) X)
     hd hD P L pb r beta gamma k z
 
+omit [CompleteSpace E] in
 @[simp] theorem seqAtomOn_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)

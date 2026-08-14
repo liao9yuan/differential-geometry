@@ -134,6 +134,7 @@ private lemma symmS_eq_self
     symmS (I := I) (M := M) g S = S := by
   exact foldSymmS_eq_self (I := I) (M := M) g S hS
 
+omit [BoundarylessManifold I M] in
 private lemma ricciRefold2_eq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (v w : TangentSpace I x),

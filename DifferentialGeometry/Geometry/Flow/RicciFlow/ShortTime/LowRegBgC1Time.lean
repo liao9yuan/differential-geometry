@@ -130,6 +130,7 @@ private theorem zeroData_pair
         ((zeroData (I := I) (M := M) g).a1Lo (I := I) (M := M)))
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zero_fb
     (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 ≤ δ) :
     gFibreOpBound (I := I) (M := M) g

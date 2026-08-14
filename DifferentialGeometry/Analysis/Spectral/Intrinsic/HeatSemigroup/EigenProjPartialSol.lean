@@ -282,6 +282,7 @@ theorem forceMap_dist_le
     _ = ((C₁ : ℝ) * R * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
         ring
 
+omit [BoundarylessManifold I M] in
 theorem projFix_dist_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     {L C₁ C₂ : ℝ≥0}
@@ -368,6 +369,7 @@ theorem projFix_dist_le
   rw [inv_mul_eq_div, le_div_iff₀ hpos]
   nlinarith [htri, hcontr, norm_nonneg (fN - fstar)]
 
+omit [BoundarylessManifold I M] in
 theorem projFix_le_two
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     {L C₁ C₂ : ℝ≥0}
@@ -444,6 +446,7 @@ theorem projField_tendsto (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (f N) fstar) ?_
   simpa using hf.const_mul (1 + T)
 
+omit [BoundarylessManifold I M] in
 theorem projForce_fixed (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R T : ℝ}
     (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ a R →

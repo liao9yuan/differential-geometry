@@ -23,6 +23,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 set_option synthInstance.maxHeartbeats 800000 in
 
+omit [CompleteSpace E] in
 theorem exists_h6_metric_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -81,6 +82,7 @@ theorem exists_h6_metric_lim
 
 set_option synthInstance.maxHeartbeats 800000 in
 
+omit [CompleteSpace E] in
 theorem exists_h6_metric_pi
     {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

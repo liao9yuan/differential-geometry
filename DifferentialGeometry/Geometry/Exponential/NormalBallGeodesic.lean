@@ -59,12 +59,14 @@ noncomputable def innerDiffeo {p : M}
   rw [← hrange]
   exact isSigmaCompact_range c.innerDiffeo.continuous
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem innerDiffeo_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : c.inner) :
     ((c.innerDiffeo z : c.innerImage) : M) = c.hom (z : E) := by
   change c.restrictBall (z : E) = c.hom (z : E)
   exact c.restrictBall_apply (z : E)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem innerDiffeo_mfd {p : M}
     (c : NormalBallChart (I := I) p) (z : c.inner) (v : E) :
     mfderiv (modelWithCornersSelf Real E) I

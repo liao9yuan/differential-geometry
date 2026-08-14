@@ -830,6 +830,7 @@ private lemma b4_rank0_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (x : M) (D : Tensor0SSpace 3 I x)
     (u0 u1 u2 u3 u4 : E) :
@@ -1073,6 +1074,7 @@ private lemma b4_unit_read (g₀ : SmoothRiemannianMetric I M)
       unitModel (I := I) (M := M) g₀ 3 W x v := by
   rw [unitModel]
 
+omit [SigmaCompactSpace M] in
 theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

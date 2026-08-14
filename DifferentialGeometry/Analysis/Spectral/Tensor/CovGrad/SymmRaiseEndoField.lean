@@ -75,6 +75,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma inner_symmRaiseEndo (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     g.inner x (symmRaiseEndoFib (I := I) (M := M) g T x v) w =
@@ -84,6 +85,7 @@ lemma inner_symmRaiseEndo (g : SmoothRiemannianMetric I M)
     (ccTensorBilinSymm (I := I) g T x v).toLinearMap w
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem symmRaiseEndo_smooth (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
@@ -147,6 +149,7 @@ noncomputable def symmRaiseEndo (g : SmoothRiemannianMetric I M)
   contMDiff_toFun := symmRaiseEndo_smooth (I := I) (M := M) g T
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] lemma symmRaiseEndo_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     symmRaiseEndo (I := I) (M := M) g T x =
@@ -162,6 +165,7 @@ private lemma ccMultilinear_add (g : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ccModel_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (T + U) x =
@@ -170,6 +174,7 @@ private lemma ccModel_add (g : SmoothRiemannianMetric I M)
   unfold ccTensorModel
   rw [ccMultilinear_add, Tensor0SSpace.toModel_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ccBilinSymm_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) (x : M)
     (v w : TangentSpace I x) :
@@ -204,6 +209,7 @@ lemma symmRaiseEndo_add (g : SmoothRiemannianMetric I M)
   rw [inner_symmRaiseEndo, inner_symmRaiseEndo]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma symmRaiseEndo_smul (g : SmoothRiemannianMetric I M) (a : ℝ)
     (T : SmoothCcTensor g 0 2) :
     symmRaiseEndo (I := I) (M := M) g (a • T) =
@@ -262,6 +268,7 @@ private lemma toModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
   rw [cotangentToDual_apply]
   rfl
 
+omit [BoundarylessManifold I M] in
 lemma insert_symmRaise_eq (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     slotInsertEndoCc (I := I) (M := M) g 0

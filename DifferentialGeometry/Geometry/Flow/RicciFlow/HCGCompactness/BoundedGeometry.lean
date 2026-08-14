@@ -121,6 +121,7 @@ theorem curvZero_apply
   rfl
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [I.Boundaryless] in
 theorem curvOne_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -225,6 +226,7 @@ section PointwiseCurvature
 variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [I.Boundaryless]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem riemannOp_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 0 C) :
@@ -287,6 +289,7 @@ theorem riemannOp_le
     simpa [A, mul_assoc] using hbound
   exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem nablaRiemannOp_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 1 C) :

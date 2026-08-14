@@ -36,11 +36,13 @@ def HasMarkWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         ((iteratedCovGrad (I := I) g₀ r c i X).toSection x) ≤
       K i * Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u i
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma mkWnn (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (u i : ℕ) :
     (0 : ℝ) ≤ Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u i :=
   Combinatorics.markGrid_nn _ (gridBase_nn (I := I) (M := M) g₀ P x) u i
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma mkW1 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (i : ℕ) :
     (1 : ℝ) ≤ Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) 0 i :=
@@ -146,6 +148,7 @@ theorem markFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {S : ℕ → ℝ} (hS : ∀ i, 0 ≤ S i)
     (hX : ∀ (i : ℕ) (x : M),
@@ -157,6 +160,7 @@ theorem mkOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
     (le_mul_of_one_le_right (hS i) (mkW1 (I := I) (M := M) g₀ P x i))
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkOfWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {K : ℕ → ℝ}
     (hX : ∀ (i : ℕ) (x : M),
@@ -167,6 +171,7 @@ theorem mkOfWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
     HasMarkWin (I := I) (M := M) g₀ P X 0 K := hX
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ 1) :
     HasMarkWin (I := I) (M := M) g₀ P P 0 (fun _ => 1) := by
@@ -188,6 +193,7 @@ theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rw [one_mul]
   exact hgoal
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) :
     HasMarkWin (I := I) (M := M) g₀ P (covGrad (I := I) (M := M) g₀ 0 2 P) 1
       (fun _ => 1) := by
@@ -199,6 +205,7 @@ theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rwa [Combinatorics.antidiagonalTupleGrid_zero, mul_one] at h
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {Ktop : ℝ} (hKtop : 0 ≤ Ktop)
     {Kc : ℕ → ℝ} (hKc : ∀ i, 0 ≤ Kc i)
@@ -242,6 +249,7 @@ theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   linarith only [h1, h2, hgoal.le, hgoal.ge]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkOfAtg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ 1)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {K : ℕ → ℝ} (hK : ∀ i, 0 ≤ K i)
@@ -273,6 +281,7 @@ theorem mkApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   intro n x
   exact markFold (I := I) (M := M) g₀ u v Φ W P hKΦ hKW hΦ hW n x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K K' : ℕ → ℝ}
     (hKK : ∀ i, K i ≤ K' i) (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -281,12 +290,14 @@ theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact le_trans (hX i x)
     (mul_le_mul_of_nonneg_right (hKK i) (mkWnn (I := I) (M := M) g₀ P x u i))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (hXY : Y = X)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
     HasMarkWin (I := I) (M := M) g₀ P Y u K := by
   rw [hXY]; exact hX
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -307,6 +318,7 @@ theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h2 := hY i x
   nlinarith [h1, h2, mkWnn (I := I) (M := M) g₀ P x u i]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (t : ℝ)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -340,6 +352,7 @@ theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h := mkAdd (I := I) (M := M) g₀ P hX (mkNeg (I := I) (M := M) g₀ P hY)
   rwa [← sub_eq_add_neg] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (ρ : Equiv.Perm (Fin r))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -360,6 +373,7 @@ theorem mkDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (fun y d => by rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x]
   exact hX i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {c u : ℕ} {X : SmoothCcTensor g₀ 0 c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -685,6 +699,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
               have := hKP_nn m; have := hKG_nn m; simp only [hKmon_def]; linarith
             nlinarith [hKH, hKH_nn m, hKmon_nn, sq_nonneg Λ₁]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma contGB (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (j : ℕ) : Continuous (fun x : M => gridBase (I := I) (M := M) g₀ P x j) := by
   have hc : Continuous (fun x : M =>
@@ -699,6 +714,7 @@ private lemma contGB (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
         (iteratedCovGrad (I := I) g₀ 0 2 j P) x]
   exact hc
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma contGrid (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (k : ℕ) : Continuous (fun x : M =>
       Combinatorics.antidiagonalTupleGrid (gridBase (I := I) (M := M) g₀ P x) k) := by

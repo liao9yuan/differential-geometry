@@ -63,6 +63,7 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [Sig
     (lowerRSField (I := I) (M := M) g r s T) x
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem lowerCc_unit (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + s) I x from
@@ -79,6 +80,7 @@ omit [I.Boundaryless] in
   rw [hunit, one_smul]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem lowerCc_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + s) x
@@ -93,6 +95,7 @@ theorem lowerCc_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
 private def lowerGradPerm (r s : ℕ) : Equiv.Perm (Fin ((r + s) + 1)) :=
   Fin.cycleRange ⟨r, by omega⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lowerCc_grad_rel (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
     ∀ y : M,

@@ -82,6 +82,7 @@ private theorem first_exit
   · rw [frontier, hK.closure_eq]
     exact ⟨htK, htNot⟩
 
+omit [CompleteSpace E] in
 private theorem NormalBallChart.MetricEquivOn.inv_join_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -281,6 +282,7 @@ private theorem NormalBallChart.MetricEquivOn.inv_join_le
   have ht_abs : |t| = t := abs_of_nonneg ht.1
   simpa only [Real.norm_eq_abs, sub_zero, ht_abs, d, mul_assoc] using hmean
 
+omit [CompleteSpace E] in
 theorem NormalBallChart.MetricEquivOn.core_dist
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)

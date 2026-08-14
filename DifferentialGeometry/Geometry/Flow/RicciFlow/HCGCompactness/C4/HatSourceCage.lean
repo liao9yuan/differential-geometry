@@ -193,6 +193,7 @@ noncomputable def hatSourceCage (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         Set (X.obj (L.φ n)).M))
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 @[simp] theorem hatSourceCage_subseq
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -206,6 +207,7 @@ omit [Module.Finite ℝ E] in
   rfl
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatCageData
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -239,6 +241,7 @@ theorem hatCageData
       (subset_closure : S ∩ H ⊆ closure (S ∩ H))
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatCageCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -253,6 +256,7 @@ theorem hatCageCompact
   exact (NetLimitData.hatCageData (I := I) (X := X) hd P L pb r n gamma).1
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatCageSub
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

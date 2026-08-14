@@ -522,6 +522,7 @@ theorem lieCorr0RiemLoweredFib_section_contMDiff
   rw [lieCorr0RiemLoweredFib_toModel]
   rw [hframe' 0, hframe' 1, hframe' 2, hframe' 3]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem lieCorr0RiemFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -563,6 +564,7 @@ noncomputable def lieCorr0TotalFib
   lieCorr0InsertFib (I := I) g₀ g₁ g_bg x + lieCorr0VBFib (I := I) g₀ g₁ x +
     lieCorr0AMixFib (I := I) g₀ g₁ g_bg x + lieCorr0RiemFib (I := I) g₀ g₁ x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0TotalFib_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞

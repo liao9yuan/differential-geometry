@@ -96,6 +96,7 @@ theorem rmDotRem_low
 variable [NeZero (Module.finrank Real E)]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rmDotRemSq_le
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (T₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -181,6 +182,7 @@ section ReLowerRemainder
 
 variable [NeZero (Module.finrank Real E)]
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 private theorem rem_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -204,6 +206,8 @@ private theorem rem_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
+omit [IsManifold I 2 M] [I.Boundaryless] [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem rem_repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -228,6 +232,7 @@ private theorem rem_repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     Finset.mem_univ, if_true]
 
 
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 theorem reLowerDefSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -355,6 +360,8 @@ end ReLowerRemainder
 
 section LowerTriBound
 
+omit [IsManifold I 2 M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricDiffSwap_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {C : Real} (hC : 1 ≤ C)
     (hequiv : ∀ v : TangentSpace I x,
@@ -371,6 +378,7 @@ theorem metricDiffSwap_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
 
 variable [NeZero (Module.finrank Real E)]
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 theorem roughLapSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -387,6 +395,7 @@ private def lowerTriPerm : Equiv.Perm (Fin 6) :=
   Equiv.ofBijective ![2, 3, 4, 0, 1, 5] (by decide)
 
 
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
     {x : M}
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -638,6 +647,7 @@ theorem ownRmDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
             metricDiffSq (I := I) g₁ g₂ x := by ring
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 theorem traceProdSq_le (g : SmoothRiemannianMetric I M) {a b r : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) a)

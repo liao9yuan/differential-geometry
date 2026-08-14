@@ -239,6 +239,7 @@ theorem canNablaRm_apply
       simp only [curvCovDerivOpAt, sub_eq_add_neg, map_add, map_neg]
       ring
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem nablaRm04_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -267,6 +268,7 @@ theorem nablaRm04_apply
   rw [LeviCivita_eq_leviCivitaConnectionOfMetric]
   exact h
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem nablaRiemannOp_eq
     (g : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

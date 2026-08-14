@@ -47,6 +47,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
     extSec (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem covD_congr
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y W' X' Y' : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -90,6 +91,7 @@ private theorem covD_congr
     exact (ne_of_gt (g₁.pos x (a - b) hne)) hzero
   exact sub_eq_zero.mp hsub
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem covD_eq_ext
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)

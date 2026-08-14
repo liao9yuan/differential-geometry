@@ -62,6 +62,7 @@ theorem h6Ratio_mu0_le_half
     _ = r₀ / 2 := by field_simp [ne_of_gt hmu₀]
     _ ≤ 1 / 2 := by linarith
 
+omit [CompleteSpace E] in
 theorem h6Radius_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : 0 < r₀)
     (k : Nat) (x : (X.obj k).M) :
@@ -69,6 +70,7 @@ theorem h6Radius_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
   mul_pos (hd.h6Ratio_pos hr₀)
     (hd.mu_pos (hd.dist k x (X.obj k).basepoint))
 
+omit [CompleteSpace E] in
 theorem h6Radius_lt_r0 {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (hreal : hd.RealizesEdist)
     {r₀ : Real} (hr₀ : 0 < r₀) (k : Nat) (x : (X.obj k).M) :
@@ -86,6 +88,7 @@ theorem h6Radius_lt_r0 {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     _ = r₀ / 2 := by field_simp [ne_of_gt hmu₀]
     _ < r₀ := by linarith
 
+omit [CompleteSpace E] in
 theorem h6Radius_lt_mu {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r₀ : Real)
     (k : Nat) (x : (X.obj k).M) :
@@ -392,6 +395,7 @@ theorem radius_le_global
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem metric_eq_intr
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -775,6 +779,7 @@ noncomputable def H6BallData.toChartData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem H6BallData.normal_equiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

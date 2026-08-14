@@ -563,6 +563,7 @@ private theorem jetAbs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     _ ≤ 2 * (d + b) :=
       mul_le_mul_of_nonneg_left (add_le_add hd hb) (by norm_num)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem pairSplit (g gT gU : SmoothRiemannianMetric I M) :
     lieCovPair (I := I) (M := M) g gT -
         lieCovPair (I := I) (M := M) g gU =

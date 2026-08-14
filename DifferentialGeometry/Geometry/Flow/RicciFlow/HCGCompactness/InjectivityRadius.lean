@@ -88,6 +88,7 @@ theorem HasInjRadiusAt.le_intr
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem HasInjRadiusAt.injOn_ball
     {X : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : X.M}
     {rho r : Real} (h : HasInjRadiusAt (I := I) X x rho)

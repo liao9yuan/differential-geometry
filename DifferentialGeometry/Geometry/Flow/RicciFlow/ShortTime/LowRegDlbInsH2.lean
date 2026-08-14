@@ -301,6 +301,7 @@ private theorem insEndoH2_one
   rw [wAlpha, wAlpha, raise_add0_h2, raise_add0_h2, raise_sub0_h2]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem omega_bg_sub_h2
     (g g_bg gT gU : SmoothRiemannianMetric I M) :
     (wOmega (I := I) (M := M) g gT g_bg -
@@ -433,6 +434,7 @@ private theorem alpha_bg_eq_h2
   unfold wAlphaA
   rw [← domSub, ← covGrad_sub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem alpha_bg_sub_h2
     (g g_bg gT gU : SmoothRiemannianMetric I M) :
     (wAlphaA (I := I) (M := M) g gT g_bg -

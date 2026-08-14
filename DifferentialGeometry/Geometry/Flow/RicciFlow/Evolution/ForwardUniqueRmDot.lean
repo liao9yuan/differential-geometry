@@ -25,6 +25,7 @@ section Lowering
 
 variable {x : M}
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02_add_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (u₁ u₂ Z : TangentSpace I x) :
@@ -44,6 +45,7 @@ private theorem tensor02_add_left
     _ = q (fun a : Fin 2 => if a = 0 then u₁ else Z) +
           q (fun a : Fin 2 => if a = 0 then u₂ else Z) := by rw [hupd, hupd]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02_smul_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (c : Real) (u Z : TangentSpace I x) :
@@ -61,6 +63,7 @@ private theorem tensor02_smul_left
     _ = c • q (Function.update m 0 u) := q.map_update_smul m 0 c u
     _ = c * q (fun a : Fin 2 => if a = 0 then u else Z) := by rw [hupd, smul_eq_mul]
 
+omit [BoundarylessManifold I M] in
 private theorem lowerBilin_add
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A B : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
@@ -74,6 +77,7 @@ private theorem lowerBilin_add
   have hAB : ((A + B) (v 1)) (v 0) = (A (v 1)) (v 0) + (B (v 1)) (v 0) := rfl
   rw [hAB, tensor02_add_left]
 
+omit [BoundarylessManifold I M] in
 private theorem lowerBilin_smul
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (c : Real)
@@ -145,6 +149,7 @@ section RaisedDifference
 
 variable {x : M}
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02_sub_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (u₁ u₂ Z : TangentSpace I x) :
@@ -155,6 +160,7 @@ private theorem tensor02_sub_left
   rw [sub_add_cancel] at h
   exact eq_sub_of_add_eq h.symm
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem metricField_slot0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then u else Z) =
@@ -172,6 +178,7 @@ def rmDiffVec (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
   DifferentialGeometry.Integral.Connection.riemannOp (metricCov (I := I) g₁) x -
     DifferentialGeometry.Integral.Connection.riemannOp (metricCov (I := I) g₂) x
 
+omit [SigmaCompactSpace M] in
 @[simp]
 theorem rmDiffVec_self (g : SmoothRiemannianMetric I M) (x : M) :
     rmDiffVec (I := I) g g x = 0 := by
@@ -370,6 +377,7 @@ def frameVec4 (frame : Idx -> (y : M) -> TangentSpace I y) (x : M) (i j k l : Id
   DifferentialGeometry.Integral.Connection.vec4 (I := I)
     (frame i x) (frame j x) (frame k x) (frame l x)
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem driftDiff_split (Ric₁ Ric₂ : MatrixComp M Idx) (Rm₁ Rm₂ : FourComp M Idx)
     (t : Real) (x : M) (i j k l : Idx) :
     riemann04RicciDriftInFrame Ric₁ Rm₁ t x i j k l -
@@ -399,6 +407,7 @@ section LaplacianAlgebra
 
 variable {s : ℕ}
 
+omit [BoundarylessManifold I M] in
 theorem roughLap0SField_sub (g : SmoothRiemannianMetric I M)
     (T U : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -407,6 +416,7 @@ theorem roughLap0SField_sub (g : SmoothRiemannianMetric I M)
   rw [roughLap0SField, roughLap0SField, roughLap0SField, metricNabla0S_sub,
     covDiv0SField_sub]
 
+omit [BoundarylessManifold I M] in
 theorem roughLapSub_apply (g : SmoothRiemannianMetric I M)
     (T U : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -418,6 +428,7 @@ theorem roughLapSub_apply (g : SmoothRiemannianMetric I M)
   rw [hfield]
   exact Tensor0SSpace.sub_apply (I := I) s x _ _ v
 
+omit [BoundarylessManifold I M] in
 theorem lapDiffFlux_apply_vec (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :

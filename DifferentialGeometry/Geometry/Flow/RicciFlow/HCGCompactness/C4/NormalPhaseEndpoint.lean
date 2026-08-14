@@ -959,6 +959,7 @@ theorem normal_inv_eq
   refine TotalSpace.ext (hproj.trans hbase) ?_
   exact heq_of_eq (hInvChart.symm.trans hTanChart)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chart_launch_mfd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) {x : Y.M}
     (c : NormalChartAt (I := I) Y x) {Z : Real → E × E}

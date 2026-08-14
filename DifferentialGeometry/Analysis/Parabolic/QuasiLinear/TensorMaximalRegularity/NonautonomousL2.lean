@@ -141,6 +141,7 @@ theorem a1L2Term_sub (hT : 0 < T) (hT1 : T ≤ 1)
     hsub_bound hud_bound hsub_ae
   simpa only [a1L2Term, uf, uf', ud] using hsub.trans hcongr
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem a1L2Term_norm (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

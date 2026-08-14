@@ -130,6 +130,7 @@ private theorem symm_eq_self
   unfold ccTensor02Symm
   rw [hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem koszulOp_app
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -186,6 +187,7 @@ private theorem connLower_unit
   rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem connLowerK
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (htie : ∀ (x : M) (u v : TangentSpace I x),
@@ -244,6 +246,7 @@ private theorem connLowerK
     unitModel (I := I) (M := M) g 3
       (connDiffLoweredCc (I := I) g gm) x v
   rw [connLower_unit (I := I) (M := M) g gm x v]
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem connLowOp_app
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -271,6 +274,7 @@ private def daPermB : Equiv.Perm (Fin 4) :=
   ⟨![1, 0, 2, 3], ![1, 0, 2, 3], by decide, by decide⟩
 private def gradRotate : Equiv.Perm (Fin 4) :=
   ⟨![0, 2, 3, 1], ![0, 3, 1, 2], by decide, by decide⟩
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciDAG_perm
     (g gm : SmoothRiemannianMetric I M) :
     ricciDAG (I := I) (M := M) g gm =
@@ -470,6 +474,7 @@ private def daTransMono
       (daWeight (I := I) (M := M) g gm W))
     (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g
       (daWeight (I := I) (M := M) g gm W)) σ
+omit [BoundarylessManifold I M] in
 private theorem daMono_cap
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -555,6 +560,7 @@ private def daTrans
     SmoothCcTensor g 4 2 :=
   daTransMono (I := I) (M := M) g gm W daPermA -
     daTransMono (I := I) (M := M) g gm W daPermB
+omit [BoundarylessManifold I M] in
 private theorem daTrans_cap
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -781,6 +787,7 @@ private theorem mono_trans
     curvatureRefoldMonomialFibFixedFrame_toModel]
   rfl
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem daMono_trans
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g 0 2) :
@@ -792,6 +799,7 @@ private theorem daMono_trans
   exact mono_trans (I := I) (M := M) g G σ
     (daWeight (I := I) (M := M) g gm W)
 
+omit [BoundarylessManifold I M] in
 private theorem daContr_trans
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (W : SmoothCcTensor g 0 2) :
@@ -1202,6 +1210,7 @@ private theorem ccSwap_app
     ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem ccInputSymm_action
     (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2)
     (W : SmoothCcTensor g 0 2) :
@@ -1757,6 +1766,7 @@ private theorem arm_const
   exact joint_const (I := I) (M := M)
     (S := realizedSmallSet (δ := δ) (δ' := δ')) g A
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem arm_comp
     (g : SmoothRiemannianMetric I M) (a b : ℕ)
     (A : ℝ → SmoothCcTensor g b 2) (B : SmoothCcTensor g a b)
@@ -2087,6 +2097,7 @@ private theorem danger_joint
     appCcRS_zero_eq_appCc, appCc_toSection,
     ContinuousLinearMap.comp_apply] using hunit
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem inputSymm_joint
     (g : SmoothRiemannianMetric I M) {δ : ℝ}
     (C : ℝ → SmoothCcTensor g 2 2)
@@ -3493,6 +3504,7 @@ theorem daTrans_cap
   exact IntrinsicSpectral.daTrans_cap
     (I := I) (M := M) g T hT hδ_lt hδ hTδ hδZ s hs x
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem daMono_swap
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g 0 2) :
@@ -3504,6 +3516,7 @@ private theorem daMono_swap
   exact mono_trans (I := I) (M := M) g G σ
     (daWeight (I := I) (M := M) g gm W)
 
+omit [BoundarylessManifold I M] in
 private theorem daContr_swap
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (W : SmoothCcTensor g 0 2) :
@@ -3997,6 +4010,7 @@ private theorem jet_smul
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
     mul_pow, sq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_sub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -4132,6 +4146,7 @@ private def H2Poly
       K * (1 + lowJetSq (I := I) (M := M) g 3 P) ^ n
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hp_const
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s : ℕ} (S : SmoothCcTensor g r s) :
@@ -4140,6 +4155,7 @@ private theorem hp_const
   refine ⟨jet_nonneg (I := I) (M := M) (m := 2) g S, ?_⟩
   rw [pow_zero, mul_one]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem hp_add
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s n : ℕ} {A B : ℝ}
@@ -4165,6 +4181,7 @@ private theorem hp_add
     _ = 2 * (A + B) *
         (1 + lowJetSq (I := I) (M := M) g 3 P) ^ n := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem hp_sub
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s n : ℕ} {A B : ℝ}
@@ -4186,6 +4203,7 @@ private theorem hp_sub
     _ = 2 * (A + B) *
         (1 + lowJetSq (I := I) (M := M) g 3 P) ^ n := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem hp_smul
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s n : ℕ} {A : ℝ} {S : SmoothCcTensor g r s}
@@ -4204,6 +4222,7 @@ private theorem hp_smul
         (1 + lowJetSq (I := I) (M := M) g 3 P) ^ n := by ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hp_raise
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s n m : ℕ} {A : ℝ} {S : SmoothCcTensor g r s}
@@ -4217,6 +4236,7 @@ private theorem hp_raise
   exact mul_le_mul_of_nonneg_left
     (pow_le_pow_right₀ hbase hnm) hS.1
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hp_reindex
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s n : ℕ} {A : ℝ} {S : SmoothCcTensor g r s}
@@ -4276,6 +4296,7 @@ private theorem hp_slot3
     Nat.reduceAdd] using h3
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hp_app_of
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {p r c n m : ℕ} {A B : ℝ}
@@ -5070,6 +5091,7 @@ private theorem grad_l2_sq
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h2_le_h3
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -5085,6 +5107,7 @@ private theorem grad_h2_le_h3
   rw [h0, h1, h2]
   nlinarith [sq_nonneg ‖S‖]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet3_le_grad2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -5874,6 +5897,7 @@ private def H3Poly
       K * (1 + lowJetSq (I := I) (M := M) g 3 P) ^ n
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem h3p_const
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s : ℕ} (S : SmoothCcTensor g r s) :
@@ -5883,6 +5907,7 @@ private theorem h3p_const
   rw [pow_zero, mul_one]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem h3p_app_of
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {p r c n m : ℕ} {A B : ℝ}
@@ -6041,6 +6066,7 @@ theorem dagLow_h2_rf
     hp_app_of (I := I) (M := M) g P C hC (happ _ _) hp hg
   simpa only [K, dagLowOp, Nat.zero_add, H2Poly, pow_one] using hout.2
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradP_hp
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2) :
     H2Poly (I := I) (M := M) g P 1 1
@@ -6111,6 +6137,7 @@ private theorem domperm_l2_sq
   exact riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
     (I := I) (M := M) g σ S i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem domperm_h2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -6152,6 +6179,7 @@ private theorem rsperm_h2
   intro i _
   exact rsperm_l2_sq (I := I) (M := M) g σ S i
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hp_domperm
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {s n : ℕ} {A : ℝ} {S : SmoothCcTensor g 0 s}
@@ -6449,6 +6477,7 @@ private lemma slotIterFour_eval
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem curvMono_pair
     (g g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
@@ -8940,6 +8969,7 @@ def monoPerm (σ : Equiv.Perm (Fin 4)) : Equiv.Perm (Fin 6) :=
   ((finSumFinEquiv (m := 4) (n := 2)).permCongr
     (Equiv.sumCongr σ (Equiv.refl (Fin 2)))).trans lieCovSigma
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvMono_eq
     (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
@@ -8954,6 +8984,7 @@ theorem curvMono_eq
   simpa only [monoPerm] using
     curvMono_pair (I := I) (M := M) g gm S σ
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem pairTrace_eq
     (g gm : SmoothRiemannianMetric I M) :
     lieCovPair (I := I) (M := M) g gm =
@@ -9911,6 +9942,7 @@ private theorem raise0_l2_sq
   exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
     (I := I) (M := M) g 0 W q x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raise0_jet
     (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (m : ℕ) :
@@ -12126,6 +12158,7 @@ private theorem lowC0_h2_rf
   simpa only [lowBaseData, F, Kf, K] using hsum.2
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hp_weaken
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     {r s n : ℕ} {A B : ℝ} {S : SmoothCcTensor g r s}
@@ -12155,6 +12188,7 @@ private theorem raise1_l2_sq
   exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
     (I := I) (M := M) g 1 W q x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raise1_jet
     (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 3) (m : ℕ) :
@@ -12304,6 +12338,7 @@ private theorem permApp_eq_rs
   rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel,
     toModel_rsDomDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem ricci1_split
     (g g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g g₁ =
@@ -13037,6 +13072,7 @@ private theorem grad_jet1
   rw [h0, h1]
   nlinarith [sq_nonneg ‖W‖]
 
+omit [BoundarylessManifold I M] in
 theorem a1_h3_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

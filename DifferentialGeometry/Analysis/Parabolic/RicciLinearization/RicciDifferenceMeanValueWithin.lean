@@ -214,6 +214,7 @@ theorem partChristWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   partialDerivWithin (fun s y => chartChristoffel (I := I) (gfam s) α i j k y) m
     isOpen_interior hs hy (christoffelWithin (I := I) gfam α hG i j k hs hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -239,6 +240,7 @@ theorem riemannWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     ((christoffelWithin (I := I) gfam α hG k m l hs hy).mul
       (christoffelWithin (I := I) gfam α hG i j m hs hy))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -252,6 +254,7 @@ theorem ricciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   rw [heq]
   exact ContDiffWithinAt.sum (fun j _ => riemannWithin (I := I) gfam α hG i j k j hs hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partRiemWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (m i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -282,6 +285,7 @@ theorem christWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn 
   (christoffelWithin (I := I) gfam α hG i j k hs hy).contDiffAt
     ((hS.prod isOpen_interior).mem_nhds ⟨hs, hy⟩)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn (I := I) gfam α S)
     (i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -398,6 +402,7 @@ theorem christWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α
   jointOnMWithin (I := I) α (fun s y => chartChristoffel (I := I) (g s) α i j k y)
     (christoffelWithin (I := I) g α hG i j k ht (chart_mem_interior (I := I) α hx)) hx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i j k l : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -462,6 +467,7 @@ private theorem slabBase_nhdsWithin (x₀ : M) (a c t : ℝ) :
   have := inter_mem_nhdsWithin (Icc a c ×ˢ (univ : Set M)) (a := ((t, x₀) : ℝ × M)) hopen
   rwa [hset] at this
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -498,6 +504,7 @@ theorem riemSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb
   exact ((riemWithinM (I := I) g x₀ hG i j k l (hsub hp).1
     (hsub hp).2).continuousWithinAt).mono hsub
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christSlabContAt (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞

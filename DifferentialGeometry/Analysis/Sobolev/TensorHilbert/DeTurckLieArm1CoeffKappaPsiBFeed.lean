@@ -232,6 +232,7 @@ private lemma metricConnDiffLoweredCc_unitModel_apply
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem metricConnDiffLoweredCc_eq_neg_kappa
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg =

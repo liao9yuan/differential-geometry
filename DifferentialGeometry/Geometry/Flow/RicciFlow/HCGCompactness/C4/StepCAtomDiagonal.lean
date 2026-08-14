@@ -691,6 +691,7 @@ theorem HasAtomWeightLimOn.subseq
     simpa only [seqAtomOn_subseq] using hweightSmooth (ψ k)
   · simpa only [seqAtomOn_subseq] using hweightConv.comp_subseq hψ
 
+omit [CompleteSpace E] in
 theorem HasAtomWeightLimOn.weight_ne_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}

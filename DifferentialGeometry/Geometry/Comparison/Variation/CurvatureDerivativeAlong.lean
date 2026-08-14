@@ -107,6 +107,7 @@ private theorem exists_smooth_exp
   rw [hcs i, hBs i]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem curvDeriv_left_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X X' Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -206,6 +207,7 @@ private theorem curvDeriv_left_at
       (curvDeriv_congr (I := I) g γ hcexp'
         Filter.EventuallyEq.rfl Filter.EventuallyEq.rfl).symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem curvDeriv_mid_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Y' Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -305,6 +307,7 @@ private theorem curvDeriv_mid_at
       (curvDeriv_congr (I := I) g γ Filter.EventuallyEq.rfl hcexp'
         Filter.EventuallyEq.rfl).symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem curvDeriv_right_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z Z' : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -404,6 +407,7 @@ private theorem curvDeriv_right_at
       (curvDeriv_congr (I := I) g γ Filter.EventuallyEq.rfl
         Filter.EventuallyEq.rfl hcexp').symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_congr_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X X' Y Y' Z Z' : ∀ s, TangentSpace I (γ s)) (t : Real)

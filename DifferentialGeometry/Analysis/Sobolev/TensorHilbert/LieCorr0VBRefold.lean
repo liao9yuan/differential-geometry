@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [I.Boundaryless] in
 theorem wXi_self_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g₀ g₁ g₀ =
       connDiffLoweredCc (I := I) g₀ g₁ := by
@@ -65,6 +66,7 @@ theorem trace_app_refold (g₀ g₁ : SmoothRiemannianMetric I M)
         (lc0TraceRF_fiber (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _) x)) Z]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem wOmega_refold (g₀ g₁ : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ g₀ =
       appCcRS (I := I) (M := M) g₀ 0 3 1
@@ -81,6 +83,7 @@ theorem wOmega_refold (g₀ g₁ : SmoothRiemannianMetric I M) :
         (cometricCastG0 (I := I) g₀ g₁) (connDiffLoweredCc (I := I) g₀ g₁)).symm
     _ = _ := trace_app_refold (I := I) (M := M) g₀ g₁ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wOmega_sub_refold (g₀ g₁ gA gB : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ gA -
         wOmega (I := I) (M := M) g₀ g₁ gB =

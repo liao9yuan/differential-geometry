@@ -504,6 +504,7 @@ theorem armPairH2
         (Module.finrank ℝ E : ℝ) * B1 R * D2 +
         (Module.finrank ℝ E : ℝ) * B1 R * A * D2) ^ 2 := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem curvSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     lrCurvF (I := I) (M := M) g T - lrCurvF (I := I) (M := M) g U =
@@ -561,6 +562,7 @@ theorem curvBddH2
           (lrRiemW2 (I := I) (M := M) g)) *
         lowJetSq (I := I) (M := M) g 2 T := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quadSixH2
     (g : SmoothRiemannianMetric I M)
     (X Y : SmoothCcTensor g 0 4) {K : ℝ}

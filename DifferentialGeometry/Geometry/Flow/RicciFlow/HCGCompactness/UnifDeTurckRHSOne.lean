@@ -99,6 +99,7 @@ private theorem centeredBasis
         rw [coe_basisOfLinearIndependentOfCardEqFinrank]]
     exact horth i j
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cometricTrace_eq
     (g : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (D : Tensor0SSpace (p + 2) I x) :
@@ -165,6 +166,7 @@ private theorem exists_trace31
       rw [← MultilinearSection.domDomCongr_trans]
       exact hout
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem trace31_norm_le
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
@@ -976,6 +978,7 @@ private theorem cometricCast_self
   apply SmoothCcTensor.ext
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem wOmega_base_eq
     (gBase g₀ : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₀ gBase =
@@ -1049,6 +1052,7 @@ private theorem rfns_neg
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem rfns_iter_neg
     (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (W : SmoothCcTensor g r s) (x : M) :
@@ -1307,6 +1311,7 @@ private lemma unit_add2
       rfl]
   rw [Tensor0SSpace.toModel_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unit_add2_apply
     (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M)
@@ -1335,6 +1340,7 @@ private lemma unit_smul2
       rfl]
   rw [Tensor0SSpace.toModel_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unit_smul2_apply
     (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M)
@@ -1353,6 +1359,7 @@ private theorem rhs_unit
   rw [unitModel]
   exact deTurckRHSSection_toModel_apply (I := I) gBase g x v
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem ricci_unit
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 → TangentSpace I x) :

@@ -26,6 +26,7 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N]
   [IsManifold J ∞ N] [IsManifold J 1 N]
   [T2Space N] [SigmaCompactSpace N] [J.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem rm04_localPull
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (hf : IsLocalDiffeomorph I J ∞ f)

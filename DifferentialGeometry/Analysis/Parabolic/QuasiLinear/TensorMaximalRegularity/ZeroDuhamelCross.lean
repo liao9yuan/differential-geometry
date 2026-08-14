@@ -106,6 +106,7 @@ private theorem homField_zero (hT : 0 < T)
     (a := a) (T := T) hT.le, homMode_zero (I := I) (M := M) hT i]
   simp only [timeModeCoeff, map_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem duhField_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -118,6 +119,7 @@ private theorem duhField_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maxRegDuhamelSolFieldHa1,
     homField_zero (I := I) (M := M) (a := a) hT h_compact, zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem zeroRepr_sub_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

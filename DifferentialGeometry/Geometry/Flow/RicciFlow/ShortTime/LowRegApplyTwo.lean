@@ -418,6 +418,7 @@ private theorem congrLp_self (g : SmoothRiemannianMetric I M) {a T : ℝ}
   rw [ht, tensorHsCongrL_refl, ContinuousLinearMap.id_apply]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem duhamel_congr (g : SmoothRiemannianMetric I M) {a b : ℝ}
     (h : a = b) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :

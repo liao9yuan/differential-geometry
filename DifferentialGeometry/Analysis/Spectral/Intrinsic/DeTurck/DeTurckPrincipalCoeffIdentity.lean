@@ -50,6 +50,7 @@ private lemma trace42_apply
   congr 1
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricci2_pcc_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
           - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)

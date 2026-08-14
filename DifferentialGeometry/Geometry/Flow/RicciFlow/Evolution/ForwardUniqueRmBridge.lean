@@ -22,12 +22,14 @@ section Raise
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem metField0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun i : Fin 2 => if i = 0 then u else Z) =
       g.inner x u Z := by
   rw [metricTensorField_apply]; simp
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem inner_expand (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) (W Z : TangentSpace I x) :
     g.inner x W Z = ∑ p : Idx, basis.repr W p * g.inner x (basis p) Z := by
@@ -41,11 +43,13 @@ def raiseAt (g : SmoothRiemannianMetric I M) (x : M)
     TangentSpace I x :=
   ∑ p : Idx, (∑ l : Idx, basisInvMetric (I := I) g x basis p l * a l) • basis p
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem raiseAt_eq (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) (a : Idx -> Real) :
     raiseAt (I := I) g x basis a =
       ∑ p : Idx, (∑ l : Idx, basisInvMetric (I := I) g x basis p l * a l) • basis p := rfl
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem raiseAt_lower (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) (V : TangentSpace I x) :
     raiseAt (I := I) g x basis (fun l : Idx => g.inner x V (basis l)) = V := by
@@ -187,6 +191,7 @@ section Curvature
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] in
 theorem metricRm04At_inner (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     metricRm04At (I := I) g x
@@ -343,6 +348,8 @@ end Curvature
 
 section Parallel
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricNabla0S_self (g : SmoothRiemannianMetric I M) :
     metricNabla0S (I := I) g (metricTensorField (I := I) g) =
       (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -371,6 +378,7 @@ theorem metricNabla0S_self (g : SmoothRiemannianMetric I M) :
   rw [hfib]
   rfl
 
+omit [BoundarylessManifold I M] in
 theorem nabla2_metric1 (g₁ g₂ : SmoothRiemannianMetric I M) :
     metricNabla0S (I := I) g₂ (metricTensorField (I := I) g₁) =
       -lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₁) := by
@@ -388,6 +396,7 @@ def sharpFlat (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
   (tangentFlatEquiv_gen (I := I) g₂ x).symm.toLinearMap ∘ₗ
     (tangentFlatEquiv_gen (I := I) g₁ x).toLinearMap
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 theorem sharpFlat_self (g : SmoothRiemannianMetric I M) (x : M) (W : TangentSpace I x) :
     sharpFlat (I := I) g g x W = W := by
@@ -395,6 +404,7 @@ theorem sharpFlat_self (g : SmoothRiemannianMetric I M) (x : M) (W : TangentSpac
     ((tangentFlatEquiv_gen (I := I) g x) W) = W
   exact (tangentFlatEquiv_gen (I := I) g x).symm_apply_apply W
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] in
 theorem mixLow_eq_rm04 (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     metricRm04At (I := I) g₂ x
@@ -451,6 +461,7 @@ def lapCommRem (g : SmoothRiemannianMetric I M)
   covDiv0SField (I := I) g (L (s + 1) (metricNabla0S (I := I) g T)) -
     L s (covDiv0SField (I := I) g (metricNabla0S (I := I) g T))
 
+omit [BoundarylessManifold I M] in
 theorem lapComm_eq_div_flux (g : SmoothRiemannianMetric I M)
     (L : ∀ k : ℕ, Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) k ->
@@ -464,6 +475,7 @@ theorem lapComm_eq_div_flux (g : SmoothRiemannianMetric I M)
   rw [lapCommFlux, covDiv0SField_sub, lapCommRem, roughLap0SField, roughLap0SField]
   abel
 
+omit [BoundarylessManifold I M] in
 theorem lapComm_self (g : SmoothRiemannianMetric I M)
     (L : ∀ k : ℕ, Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) k ->

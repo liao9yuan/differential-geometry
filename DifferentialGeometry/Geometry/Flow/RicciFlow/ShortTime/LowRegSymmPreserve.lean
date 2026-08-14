@@ -108,6 +108,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
     exact ⟨c, rfl⟩
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem lambda_of_mem_eigenBlock
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
     (hj : j ∈ eigenBlock (I := I) (M := M) g i) :

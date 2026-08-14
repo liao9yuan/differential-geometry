@@ -150,6 +150,7 @@ noncomputable def pouOfCutoff {s : Set M} (a : ι → M → Real) (τ : M → Re
     (cutoffWeights_le hτrange hpos)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pouOfCutoff_sub {s : Set M} {U : ι → Set M}
     (a : ι → M → Real) (τ : M → Real)
     (ha : ∀ i, ContMDiff I 𝓘(Real) ∞ (a i))
@@ -214,6 +215,7 @@ theorem innerBall_open (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   · exact Metric.isOpen_ball
   · exact isOpen_empty
 
+omit [CompleteSpace E] in
 theorem innerBall_subset_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -291,6 +293,7 @@ theorem innerBall_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   refine mem_iUnion.mpr ⟨⟨γ, hγ⟩, ?_⟩
   simp [innerBall, hc, Metric.mem_ball, hpc]
 
+omit [CompleteSpace E] in
 theorem hatPOU_of_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -507,6 +510,7 @@ theorem hatPOU_active_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     simpa [Function.mem_support] using hγx
   exact hρ γ (subset_tsupport (ρ γ) hx_support)
 
+omit [CompleteSpace E] in
 theorem binter_of_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -535,6 +539,7 @@ theorem binter_of_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           · rw [Metric.mem_ball] at hβ' ⊢
             nlinarith
 
+omit [CompleteSpace E] in
 theorem binter_of_active (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -577,6 +582,7 @@ theorem binter_of_active (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact L.binter_of_mem_hat hd hD P pb r k hβx
     (L.hatPOU_active_mem hd P pb r k ρ hρ hγx)
 
+omit [CompleteSpace E] in
 theorem hatPOU_weights (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -612,6 +618,7 @@ theorem hatPOU_weights (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     L.hatPOU_pos hd P pb r k ρ hx,
     L.hatPOU_sum_one hd P pb r k ρ hx⟩
 
+omit [CompleteSpace E] in
 theorem hatPOU_active_data (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)

@@ -448,6 +448,7 @@ theorem rhsZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
 noncomputable def ksupZeroC (Λ Kb : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) * rhsZeroC (E := E) Λ Kb
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ksupZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ ksupZeroC (E := E) Λ Kb := by
   exact mul_nonneg (Nat.cast_nonneg _) (rhsZeroC_nonneg (E := E) hΛ)

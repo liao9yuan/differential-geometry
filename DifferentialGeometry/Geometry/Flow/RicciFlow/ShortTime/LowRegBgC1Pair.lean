@@ -90,6 +90,7 @@ private theorem raise_sub
     rfl]
   exact ContinuousLinearMap.map_sub _ _ _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem lieKappa_eq
     (g gT gB : SmoothRiemannianMetric I M) :
     lieArm1LoweredBgKappa (I := I) (M := M) g gT gB =
@@ -656,6 +657,7 @@ private theorem connBg_self
   intro x
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieBgCorr_eq
     (g gm gB : SmoothRiemannianMetric I M) :
     deTurckLieArm1Coeff (I := I) (M := M) g gm gB -

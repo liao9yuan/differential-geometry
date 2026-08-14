@@ -1268,6 +1268,7 @@ theorem lowRadialH3_norm
   exact lowRadialHs_norm (I := I) (M := M) g hρ.le _
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroBound
     (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 ≤ δ) :
     gFibreOpBound (I := I) (M := M) g

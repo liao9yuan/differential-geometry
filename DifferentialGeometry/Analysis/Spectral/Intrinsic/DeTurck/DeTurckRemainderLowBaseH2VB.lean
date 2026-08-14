@@ -653,6 +653,7 @@ theorem jetZero
   rw [icgZero, norm_zero, zero_pow (by norm_num)]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [I.Boundaryless] in
 theorem wXiZero
     (g : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g g g = 0 := by
@@ -956,6 +957,7 @@ lemma vbmcdRel (g₀ g₁ : SmoothRiemannianMetric I M) :
     (ContinuousMultilinearMap.domDomCongr LieCorr0Core.lieCorr0VBPerm)
     (vbPKSlot (I := I) (M := M) g₀ g₁ y d)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem vbmcdPerm
     (g gm : SmoothRiemannianMetric I M) :
     vbMcdArm (I := I) (M := M) g gm =

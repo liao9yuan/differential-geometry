@@ -103,6 +103,7 @@ private lemma sfOne_cov_eval
   simpa only [Fin.sum_univ_one] using
     slotFree_cov_eval (I := I) (M := M) g 1 x d A u w m
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sfOne_comp0_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -158,6 +159,7 @@ private lemma sfOne_comp0_le
         Real.sqrt (C ^ 2) := Real.sqrt_le_sqrt hb
     _ = C := Real.sqrt_sq hC
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sfOne_comp1_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -216,6 +218,7 @@ private lemma sfOne_comp1_le
   simpa only [hunit 0, hunit 1, hunit 2, hm,
     Real.sqrt_one, mul_one] using hb
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem sfOne_rfns_zero
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (v w u : TangentSpace I x),
@@ -254,6 +257,7 @@ theorem sfOne_rfns_zero
       push_cast
       ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sfOne_rfns_one
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (D X Y Z : TangentSpace I x),

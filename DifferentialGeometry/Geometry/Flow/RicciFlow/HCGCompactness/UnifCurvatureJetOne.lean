@@ -60,6 +60,7 @@ noncomputable def curvConnAt
   R X Y (A Z D)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nablaRm_split
     (gBase g₀ : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) :
@@ -241,6 +242,7 @@ theorem nablaRm_split
             rw [hconn, hpal, hB']
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem jet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -513,6 +515,7 @@ private theorem curvConn_le
   · exact curvConn_le_of (I := I) (M := M) gBase g₀ hΛ
       hKb0 hKb hcomp hjet1 hjet2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem fixedRmOpOne_of (g : SmoothRiemannianMetric I M)
     {K : ℝ} (hK0 : 0 ≤ K)
     (hK : ∀ x : M,
@@ -568,6 +571,7 @@ private theorem fixedRmOpOne_of (g : SmoothRiemannianMetric I M)
   have hq := sqrt_cancel (Real.sqrt_nonneg _) hA0 hquad
   simpa [q, A, R] using hq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (x : M) (D X Y Z : TangentSpace I x),
@@ -581,6 +585,7 @@ private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
   obtain ⟨K, hK0, hK⟩ := exists_curvJet_sup (I := I) (M := M) g 1
   exact ⟨K, hK0, fixedRmOpOne_of (I := I) (M := M) g hK0 hK⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem jet1_norm_le
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hop : ∀ (x : M) (D X Y Z : TangentSpace I x),

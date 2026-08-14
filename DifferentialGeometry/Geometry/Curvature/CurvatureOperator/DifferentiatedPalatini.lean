@@ -240,6 +240,7 @@ private theorem diffSec_sub
       diffSec cov₀ cov₁ X S x - diffSec cov₀ cov₁ X T x := by
   simp only [diffSec, map_sub, ContinuousLinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cov_palQuad
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -308,6 +309,7 @@ noncomputable def mixedCurvDeriv (gD gR : SmoothRiemannianMetric I M)
       (fun p : M => X p) (fun p : M => Y p)
       (fun p : M => ((LeviCivita (I := I) gD) (fun q => Z q) p) (D p)) x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem mixed_sub_eq_pal
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -349,6 +351,7 @@ theorem mixed_sub_eq_pal
   simp only [palatiniDiffSec]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivPal_eq
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

@@ -81,6 +81,7 @@ private lemma coframe_update_le
       (abs_nonneg _) zero_le_one).trans_eq (one_mul C)
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gradSlot_comp0_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -147,6 +148,7 @@ private lemma gradSlot_comp0_le
           _ = C := Real.sqrt_sq hC
     _ = 2 * C := by simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gradSlot_comp1_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -217,6 +219,8 @@ private lemma gradSlot_comp1_le
           Real.sqrt_one, mul_one] using hb
     _ = 2 * C := by simp
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSlot_rfns_zero
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (v w u : TangentSpace I x),
@@ -256,6 +260,7 @@ theorem gradSlot_rfns_zero
       push_cast
       ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSlot_rfns_one
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (D X Y Z : TangentSpace I x),

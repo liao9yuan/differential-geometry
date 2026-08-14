@@ -257,6 +257,7 @@ private theorem idSlotJet
   rw [hexp, h1, h2]
   simpa using h0
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem fullSlotSplit (g gm : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g 1
         (fullRaisedEndoField (I := I) (M := M) g gm) =

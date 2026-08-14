@@ -177,6 +177,7 @@ def monoExt (g : SmoothRiemannianMetric I M) (r s w : ℕ)
   rsDomDomCongrSection (I := I) (M := M) g (r + w) (s + w) τ
     (slotExtendIter (I := I) (M := M) g r s w A)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem monoExtSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A B : SmoothCcTensor g r s) :
     monoExt (I := I) (M := M) g r s w τ (A - B) =

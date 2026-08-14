@@ -209,6 +209,7 @@ private lemma lamHalfTame {A B C : ℝ≥0} {R T : ℝ} (hR : 0 ≤ R)
       _ = 1 / 8 := by norm_num
   linarith
 
+omit [BoundarylessManifold I M] in
 theorem projFixTame_dist_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     {A B C : ℝ≥0}
@@ -309,6 +310,7 @@ theorem projFixTame_dist_le
   rw [inv_mul_eq_div, le_div_iff₀ hpos]
   nlinarith [htri, hcontr, norm_nonneg (fN - fstar)]
 
+omit [BoundarylessManifold I M] in
 theorem projFixTame_le_two
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     {A B C : ℝ≥0}

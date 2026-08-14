@@ -1222,6 +1222,7 @@ private theorem jet_zero_lip
   rw [icg_zero_lip, norm_zero, zero_pow (by norm_num)]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [I.Boundaryless] in
 private theorem wXi_zero_lip
     (g : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g g g = 0 := by
@@ -1818,6 +1819,7 @@ private noncomputable def lipOmega
     (domDomCongrSection (I := I) g (finRotate 3)
       (connDiffLoweredCc (I := I) g gm))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lipOmega_tel
     (g gT gU : SmoothRiemannianMetric I M) :
     lipOmega (I := I) (M := M) g gT -
@@ -2446,6 +2448,7 @@ private theorem quadB_tel
   rw [appCcRS_sub_right, appCcRS_sub_left]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem quadA_tel
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQA (I := I) (M := M) g gT -
@@ -3946,6 +3949,7 @@ private theorem hat_bdd_h2
   rw [hat_eq_lip (I := I) (M := M) g gT]
   exact hbdd gT T hT hTtie hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem curvF_zero_lip
     (g : SmoothRiemannianMetric I M) :
     lrCurvF (I := I) (M := M) g (0 : SmoothCcTensor g 0 2) = 0 := by
@@ -5359,6 +5363,7 @@ private lemma vbMcd_unit_lip (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x m
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma vbPK_slotExt_lip (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Tensor0SSpace 1 I x) :
     Tensor0SSpace.toModel
@@ -5420,6 +5425,7 @@ private lemma vbPK_slotExt_lip (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x
     (fun j => Fin.tail u j)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma vbmcd_rel_lip (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ (y : M) (d : Tensor0SSpace 1 I y),
       Tensor0SSpace.toModel
@@ -7595,6 +7601,7 @@ private theorem pureCoeff_eq_lip
   intro x
   rw [ricciArmPrincipalCoeffPure_toSection, pureTrace_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fourtrace_jet_le
     (g : SmoothRiemannianMetric I M) (F : SmoothCcTensor g 4 2) :
     lowJetSq (I := I) (M := M) g 2
@@ -7715,6 +7722,7 @@ private theorem fourtrace_pair_h2
   refine (fourtrace_jet_le (I := I) (M := M) g _).trans ?_
   linarith [hF]
 
+omit [BoundarylessManifold I M] in
 private theorem refold_sub_lip
     (g : SmoothRiemannianMetric I M)
     (G H : SmoothCcTensor g 0 4) (σ : Equiv.Perm (Fin 4)) :
@@ -8060,6 +8068,7 @@ private noncomputable def aaPK (g : SmoothRiemannianMetric I M) : ℝ :=
     lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g aaP120)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem aaPK_nonneg (g : SmoothRiemannianMetric I M) :
     0 ≤ aaPK (I := I) (M := M) g := by
   unfold aaPK
@@ -8090,6 +8099,7 @@ private theorem aaPK_nonneg (g : SmoothRiemannianMetric I M) :
   linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem aaPK_ge4 (g : SmoothRiemannianMetric I M)
     (pm : Equiv.Perm (Fin 4))
     (hpm : pm = aaP3201 ∨ pm = aaP2301 ∨ pm = aaP3102 ∨ pm = aaP1302 ∨
@@ -8124,6 +8134,7 @@ private theorem aaPK_ge4 (g : SmoothRiemannianMetric I M)
   rcases hpm with rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem aaPK_ge3 (g : SmoothRiemannianMetric I M)
     (ρ : Equiv.Perm (Fin 3)) (hρ : ρ = aaP102 ∨ ρ = aaP120) :
     lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g ρ) ≤

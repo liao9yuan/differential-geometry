@@ -88,6 +88,7 @@ lemma tsExists_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric
   intro x
   rw [hσ' x, domDomCongrSection_unitModel]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tsExists_covGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I M)
     {s : ℕ} (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) :
     ∃ σ' : Equiv.Perm (Fin (s + 1)),
@@ -169,6 +170,7 @@ lemma tsDomDomCongrSection_add (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
   intro v
   simp only [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma tsIteratedCovGrad_covGrad_eq_cast (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g₀ r s) (i : ℕ) :
     iteratedCovGrad (I := I) g₀ r (s + 1) i (covGrad (I := I) (M := M) g₀ r s W) =
@@ -306,6 +308,7 @@ def tsMetricCc (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 whe
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsMetricCc_unitModel (g₀ : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (tsMetricCc (I := I) (M := M) g₀) x =
       Tensor0SSpace.toModel (tsMetricCovec (I := I) g₀ x) := by
@@ -330,6 +333,7 @@ lemma tsToModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
   rw [cotangentToDual_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsMetricCovec_curry_eq_flat (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (tsMetricCovec (I := I) g₀ x) v =
@@ -353,6 +357,7 @@ noncomputable def tsLoweredSlot0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   appCc (I := I) (M := M) g₀ 2 (s + 2)
     (slotExtend (I := I) (M := M) g₀ 1 (s + 1) Z) (tsMetricCc (I := I) (M := M) g₀)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsMetricCc_toSection_unit (g₀ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
         (tsMetricCc (I := I) (M := M) g₀).toSection x)
@@ -448,6 +453,7 @@ theorem tsLoweredSlot0_cometricRaise (g₀ : SmoothRiemannianMetric I M) (s : �
   funext k
   refine Fin.cases rfl (fun j => rfl) k
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tsExists_iteratedCovGrad_cometricRaiseSlot0Field (g₀ : SmoothRiemannianMetric I M)
     (s : ℕ) (W : SmoothCcTensor g₀ 0 (s + 2)) (i : ℕ) :
     ∃ σ : Equiv.Perm (Fin ((s + i) + 2)),
@@ -1030,6 +1036,8 @@ lemma tsResSum_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : �
     _ = (j : ℝ) * Combinatorics.boundedFactorGridWindow b j (j + 2) := by
         rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsRfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (P Q : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (P - Q) ≤

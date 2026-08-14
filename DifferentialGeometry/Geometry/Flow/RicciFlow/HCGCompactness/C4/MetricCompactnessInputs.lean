@@ -482,6 +482,7 @@ def withDivisor
   stepA_cap_le := hcap
   realizes := s.realizes
 
+omit [CompleteSpace E] in
 theorem exists_core
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (s : MetricCompactSeed (I := I) X) (c : Real) :

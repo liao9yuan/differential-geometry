@@ -91,6 +91,7 @@ private theorem ipjb_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem ipjb_orthoFrame_expansion (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -140,6 +141,7 @@ private lemma ipjb_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (Tensor0SSpace.toModel D) m
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma ipjb_slotExt2_toModel (g : SmoothRiemannianMetric I M)
     (om : SmoothCcTensor g 0 1) (x : M) (A : Tensor0SSpace 2 I x) (u0 u1 u2 : E) :
     Tensor0SSpace.toModel
@@ -222,6 +224,7 @@ private lemma ipjb_cons_sum_smul {n : ℕ}
 
 end Eval
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ipLowCc_toSec_ip (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g 0 1)
     (x : M) (V : TangentSpace I x)
     (hflat : ∀ z : TangentSpace I x,

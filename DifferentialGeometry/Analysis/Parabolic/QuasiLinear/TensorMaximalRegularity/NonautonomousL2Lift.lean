@@ -100,6 +100,7 @@ private theorem ha1_down
   rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M)]
   simp only [zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem duhamel_down
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2
@@ -179,6 +180,7 @@ private theorem duhamel_mid_down
   rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M)]
   simp only [zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem zeroRepr_down_ae
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2
@@ -291,6 +293,7 @@ private theorem timeOp_down
   have happ := congrArg (fun L => L (u t)) hct
   simpa only [Jout, Jin, ContinuousLinearMap.comp_apply] using happ
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem a1L2_down
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2

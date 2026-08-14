@@ -126,6 +126,7 @@ private lemma lowerAllUpper0_unit (g : SmoothRiemannianMetric I M) (s : ℕ) (x 
   rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem rfns0_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x (W.toSection x) =
@@ -162,6 +163,7 @@ theorem rfns0_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
      apply Fin.ext;
      simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iterCovGrad_eq (g : SmoothRiemannianMetric I M) (s j : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
@@ -264,6 +266,7 @@ private theorem sqrtNormSq0SZero (g : SmoothRiemannianMetric I M) (x : M) (s : �
   · refine Finset.sum_eq_zero (fun slots _ => ?_)
     rw [component0S_apply]; simp
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem towerCrossOne_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

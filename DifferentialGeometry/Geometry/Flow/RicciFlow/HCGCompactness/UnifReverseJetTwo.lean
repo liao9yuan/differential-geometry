@@ -45,6 +45,7 @@ private theorem covStep_zero
   exact add_left_cancel h'
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem iterCov_metric_zero
     (g : SmoothRiemannianMetric I M) (a : ℕ) :
     iterCov (I := I) g 2 (metricTensorField (I := I) g) (a + 1) = 0 := by
@@ -71,6 +72,7 @@ private theorem iterCov_metric_zero
             (iterCov (I := I) g 2 (metricTensorField (I := I) g) (a + 1)) from rfl]
       rw [ih, covStep_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem iterCov_one_eq
     (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     (T : Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -116,6 +118,7 @@ private theorem sqrt_normSq_zero
     rw [component0S_apply]
     simp
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metric_self_sum
     (g : SmoothRiemannianMetric I M) (x : M) (N : ℕ) :
     ∑ k ∈ Finset.range (N + 1),
@@ -151,6 +154,7 @@ noncomputable def revJetTwoC (Λ : ℝ) : ℝ :=
   max 0 (Real.sqrt (Λ ^ 4) *
     (D * Real.sqrt (Module.finrank ℝ E : ℝ)))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem reverseJetOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

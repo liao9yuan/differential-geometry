@@ -134,6 +134,7 @@ private theorem unit_add0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
           (unitTensor (I := I) (M := M) x) from rfl]
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem kappa_bg (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -201,6 +202,7 @@ private theorem ip_toModel (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pbLow_raise (g₀ gB : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -332,6 +334,7 @@ theorem pbLow_raise (g₀ gB : SmoothRiemannianMetric I M)
   rw [hLHS, hLHSval]
   exact hRHS.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pbLow_rfns (g₀ gB : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x

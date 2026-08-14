@@ -1952,6 +1952,7 @@ noncomputable def aaCapOne
       (permCoeff (I := I) (M := M) g ricPerm120)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaCap_nneg (g : SmoothRiemannianMetric I M) :
     0 ≤ aaCapOne (I := I) (M := M) g := by
   unfold aaCapOne
@@ -1974,6 +1975,7 @@ theorem aaCap_nneg (g : SmoothRiemannianMetric I M) :
   linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaCap4
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (hpm : pm = ricPerm3201 ∨ pm = ricPerm2301 ∨ pm = ricPerm3102 ∨
@@ -2001,6 +2003,7 @@ theorem aaCap4
   rcases hpm with rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaCap3
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 3))
     (hpm : pm = ricPerm102 ∨ pm = ricPerm120) :
@@ -2220,6 +2223,7 @@ theorem pureCoeff_eq
   intro x
   rw [ricciArmPrincipalCoeffPure_toSection, pureTrace_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fourTrace_jet
     (g : SmoothRiemannianMetric I M) (F : SmoothCcTensor g 4 2) :
     lowJetSq (I := I) (M := M) g 2

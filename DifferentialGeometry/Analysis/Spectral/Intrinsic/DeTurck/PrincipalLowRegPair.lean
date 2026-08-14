@@ -179,6 +179,7 @@ private theorem perm_icg_norm
       (Filter.Eventually.of_forall hintegrand)
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem symm_icg_norm
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 k
@@ -470,6 +471,7 @@ private theorem pcoeff_add
         perturbCoeff4 (I := I) (M := M) g U := by
   simp only [perturbCoeff4, symmRaiseEndo_add, slotInsertEndoCc_add]
 
+omit [BoundarylessManifold I M] in
 private theorem pcoeff_smul
     (g : SmoothRiemannianMetric I M) (a : ℝ) (T : SmoothCcTensor g 0 2) :
     perturbCoeff4 (I := I) (M := M) g (a • T) =

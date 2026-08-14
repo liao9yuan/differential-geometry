@@ -94,6 +94,7 @@ private lemma raise_eq_diff
   ring
 
 set_option backward.isDefEq.respectTransparency false in
+omit [BoundarylessManifold I M] in
 private lemma perturbCoeff_eq_diff
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -128,6 +129,7 @@ private lemma fullField_decomp
   rw [gInvRaisedEndo_eq_diff_add_id]
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma fullCoeff_decomp
     (g a b : SmoothRiemannianMetric I M) :
     fullCoeff4 (I := I) (M := M) g a b =
@@ -150,6 +152,7 @@ private lemma fullH2_decomp
     (diffCoeff4 (I := I) (M := M) g a b)
     (fullCoeff4 (I := I) (M := M) g g g) U
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma fullCoeff_self
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 4) :
     appCc (I := I) (M := M) g 4 4
@@ -221,6 +224,7 @@ private lemma raised_cancel
     (g0FlatCLM (I := I) g₀ x v)]
   rw [inverseMetricSharpFib_g0FlatCLM (I := I) g₀ x v]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma fullCoeff_cancel
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 4) :

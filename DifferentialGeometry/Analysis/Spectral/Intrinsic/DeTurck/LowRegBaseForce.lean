@@ -34,6 +34,7 @@ theorem ccTensorBilinSymm_zero_apply (g : SmoothRiemannianMetric I M)
   ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem gFibreOpBound_ccTensorBilinSymm_zero
     (g : SmoothRiemannianMetric I M) :
     gFibreOpBound (I := I) (M := M) g

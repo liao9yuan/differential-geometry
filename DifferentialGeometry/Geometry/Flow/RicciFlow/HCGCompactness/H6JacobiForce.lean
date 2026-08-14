@@ -22,6 +22,7 @@ variable {E : Type uE} [NormedAddCommGroup E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem curvAlong_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 0 C) :

@@ -872,6 +872,7 @@ theorem ratio_gt_48
   dsimp only [phaseRadius] at hqRadius
   nlinarith
 
+omit [CompleteSpace E] in
 theorem pair_lam_lt_three
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -978,6 +979,7 @@ theorem pair_lam_lt_three
     (mul_lt_mul_of_pos_right hexp
       (inp.decay.lambda_pos inp.hD (L.rInf alpha)))
 
+omit [CompleteSpace E] in
 theorem stage_radius_gt
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

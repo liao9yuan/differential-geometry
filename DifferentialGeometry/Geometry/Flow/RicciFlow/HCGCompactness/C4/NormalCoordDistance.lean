@@ -94,6 +94,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 omit [NeZero (Module.finrank ℝ F)] in
+omit [CompleteSpace F] [J.Boundaryless] in
 theorem NormalBallChart.MetricEquivOn.hom_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := J))
     (P : ProperMetricOn (I := J) Y) {c : Y.M} :
@@ -201,6 +202,7 @@ theorem NormalBallChart.MetricEquivOn.hom_dist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace F] in
 theorem NormalBallChart.MetricEquivOn.inv_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := J))
     (hcomplete : MetricComplete (I := J) Y)

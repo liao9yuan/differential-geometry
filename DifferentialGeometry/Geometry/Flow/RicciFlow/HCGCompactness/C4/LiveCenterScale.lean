@@ -79,6 +79,7 @@ theorem seqCenterD_some
   | none => simp [hc] at h
   | some c => simp [seqCenterD, hc]
 
+omit [CompleteSpace E] in
 theorem seqCenterD_live
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

@@ -187,6 +187,7 @@ noncomputable def localPullMetric
     filter_upwards with y
     rfl
 
+omit [FiniteDimensional ℝ F] in
 theorem localPullMetric_inner
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (f : M → N)
@@ -196,6 +197,7 @@ theorem localPullMetric_inner
       g.inner (f x) (mfderiv I J f x v) (mfderiv I J f x w) :=
   localPullInner_apply (I := I) (J := J) g f x v w
 
+omit [FiniteDimensional ℝ F] in
 theorem localPull_enorm
     [SigmaCompactSpace M] [T2Space M]
     [RiemannianBundle (fun y : N ↦ TangentSpace J y)]

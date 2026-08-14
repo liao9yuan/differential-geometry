@@ -47,6 +47,7 @@ def bPerm4 : Equiv.Perm (Fin 8) :=
   Equiv.ofBijective ![4, 0, 7, 2, 5, 1, 6, 3] (by decide)
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem bPair_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -105,6 +106,7 @@ theorem bPair_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   ring
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem bPair2_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -163,6 +165,7 @@ theorem bPair2_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   ring
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem bPair3_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -221,6 +224,7 @@ theorem bPair3_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   ring
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem bPair4_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -287,6 +291,7 @@ def bComb (g : SmoothRiemannianMetric I M)
     (bPair (I := I) g bPerm3 A A - bPair (I := I) g bPerm4 A A)
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem bComb_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -331,6 +336,7 @@ theorem bComb_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   simp only [component0S_apply]
   ring
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem quad_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -354,6 +360,7 @@ private theorem quad_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem routeProdSq (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -489,6 +496,8 @@ theorem bCombSq_le (g : SmoothRiemannianMetric I M)
       ring
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] in
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem bPair_sub (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :

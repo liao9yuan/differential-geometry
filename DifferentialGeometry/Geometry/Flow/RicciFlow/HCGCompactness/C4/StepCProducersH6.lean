@@ -55,6 +55,7 @@ def h6Buffer
     (alpha : LiveSlot L pb r) : Real :=
   L.lamInf (alpha.1 : Nat) / 80
 
+omit [CompleteSpace E] in
 theorem h6_core_geom
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -126,6 +127,7 @@ theorem h6_core_geom
     change 0 < L.lamInf (alpha.1 : Nat) / 80
     nlinarith [hlam alpha]
 
+omit [CompleteSpace E] in
 theorem h6_buffer_mem
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -807,6 +809,7 @@ private theorem trans_fin
         · simpa only [Function.comp_apply] using hconv.comp_subseq hphi1
         · simpa only [Function.comp_apply] using hconvbar.comp_subseq hphi1
 
+omit [CompleteSpace E] in
 theorem atomOn_readout
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -944,6 +947,7 @@ theorem atomOn_live_conv
   exact atomOn_readout inp d P L r k alpha.1 gamma.1 hc
     (hreadK z hz)
 
+omit [CompleteSpace E] in
 theorem atomOn_dead_conv
     (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -962,6 +966,7 @@ theorem atomOn_dead_conv
   intro z _hz
   simp [seqAtomOn, seqAtom_none hd hD P L pb r k gamma hk]
 
+omit [CompleteSpace E] in
 theorem atomOn_disjoint_conv
     (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)

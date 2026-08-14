@@ -62,6 +62,7 @@ noncomputable def ballDiffeo {p : M}
   exact isSigmaCompact_range c.ballDiffeo.continuous
 
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 private theorem ballDiffeo_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) :
     ((c.ballDiffeo z : c.image) : M) = c.hom (z : E) := by
@@ -89,6 +90,8 @@ noncomputable def localMetric (g : SmoothRiemannianMetric I M) {p : M}
   exact Diffeomorph.pullbackMetricCross
     (g.restrictOpen (I := I) c.image) c.ballDiffeo
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem localMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) (v w : E) :
     (c.localMetric g).inner z v w = c.metric g z v w := by
@@ -150,6 +153,7 @@ noncomputable def totalMetric (g : SmoothRiemannianMetric I M) {p : M}
   exact (flatMetric (E := E)).bumpExtendOpen c.ball (c.localMetric g)
     (c.cut : E → Real) c.cut_smooth c.cut_range c.cut_support
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem totalMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) (v w : E) :
@@ -229,6 +233,7 @@ noncomputable def accel (g : SmoothRiemannianMetric I M) {p : M}
         (I := modelWithCornersSelf Real E)
         (c.totalMetric g) (fun _ : E => z.2) z.1) z.2)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 @[simp] theorem accel_zero (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
     c.accel g (0 : E × E) = 0 := by
