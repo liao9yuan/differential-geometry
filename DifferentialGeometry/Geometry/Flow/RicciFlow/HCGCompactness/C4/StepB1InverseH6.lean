@@ -27,8 +27,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option maxHeartbeats 3000000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 theorem H6NormalData.inv_chart_conv
     (inp : MetricCompactCore (I := I) X)

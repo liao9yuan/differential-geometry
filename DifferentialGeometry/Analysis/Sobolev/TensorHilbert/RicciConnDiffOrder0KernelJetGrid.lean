@@ -1326,7 +1326,6 @@ theorem rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le
       (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)).toSection x)
   nlinarith [c12, c3, c4, hpure, hpn]
 
-set_option maxHeartbeats 1600000 in
 theorem ricci0_ker_grid_unif {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
       ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

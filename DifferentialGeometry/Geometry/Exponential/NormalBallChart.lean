@@ -349,7 +349,6 @@ private theorem push_smooth {p : M}
   dsimp only [tangentMapWithin]
   rw [hmf]
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem metric_contDiffOn (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) {U : Set E}
@@ -410,7 +409,6 @@ def MetricEquivOn (g : SmoothRiemannianMetric I M) {p : M}
     (1 / 2 : Real) * ‖v‖ ^ 2 ≤ c.metric g z v v ∧
       c.metric g z v v ≤ 2 * ‖v‖ ^ 2
 
-set_option synthInstance.maxHeartbeats 800000 in
 def MetricDerivBound (g : SmoothRiemannianMetric I M) {p₀ : M}
     (c : NormalBallChart (I := I) p₀) (U : Set E)
     (p : Nat) (C : Real) : Prop :=
@@ -418,7 +416,6 @@ def MetricDerivBound (g : SmoothRiemannianMetric I M) {p₀ : M}
 
 namespace MetricDerivBound
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem of_eqOn (g : SmoothRiemannianMetric I M) {p₀ : M}
     {c : NormalBallChart (I := I) p₀} {U : Set E} (hU : IsOpen U)
@@ -495,7 +492,6 @@ theorem abs_apply_le (g : SmoothRiemannianMetric I M) {p : M}
   exact hcs.trans <| le_of_sq_le_sq hprodSq
     (mul_nonneg (mul_nonneg (by norm_num) (norm_nonneg v)) (norm_nonneg w))
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem deriv_zero (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
@@ -510,7 +506,6 @@ end MetricEquivOn
 
 namespace MetricBounds
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem fderiv_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
@@ -601,7 +596,6 @@ theorem koszulVec_pair_le (g : SmoothRiemannianMetric I M) {p : M}
     _ = (6 * (h.C 1) ^ 2 + 3 * h.C 2) *
           ‖z - y‖ * ‖v‖ * ‖w‖ := by ring
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem fderiv_eval3
     {G : E → E →L[Real] E →L[Real] Real} {q : E}
@@ -629,8 +623,6 @@ private theorem fderiv_eval3
   have happ := DFunLike.congr_fun hthird.fderiv d
   simpa using happ
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
 omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem koszulVec_lip_on (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)

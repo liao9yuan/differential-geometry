@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputS
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 noncomputable section
 

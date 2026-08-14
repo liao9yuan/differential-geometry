@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -33,7 +31,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 theorem cometricCastG0_order0sup_jetL2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -389,7 +386,6 @@ private lemma sharpFlatEndoCc_eq_insert_fullRaised_rf (g₀ g₁ : SmoothRiemann
   rw [g₀.symm x w (inverseMetricSharpFib (I := I) g₁ x om)]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -528,7 +524,6 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
           Finset.sum_le_sum hterm
       _ = (∑ q ∈ Finset.range (i + 1), (2 * KW q + 2 * FId q)) * (1 + S) := by rw [Finset.sum_mul]
 
-set_option maxHeartbeats 1600000 in
 theorem connDiffSection_lowOrder_jetL2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1029,7 +1024,6 @@ lemma rfns_iCG_wXi_atgw_rf
     mul_nonneg hCcd_l_nn (le_trans zero_le_one hatgw_one),
     mul_nonneg hSBg_l_nn (le_trans zero_le_one hatgw_one)]
 
-set_option maxHeartbeats 1600000 in
 theorem wOmega_lowOrder_jetL2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1318,7 +1312,6 @@ private lemma exists_rfns_connDiff_topsep_rf
     _ = (2 * Kt0) * b (l + 1) +
           (2 * Kc0 l * (l : ℝ)) * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by ring
 
-set_option maxHeartbeats 1600000 in
 theorem connDiff_L2_topsep_rf
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1577,7 +1570,6 @@ private lemma cometricCastG0_wXi_twoArm_fold_rf
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-set_option maxHeartbeats 1600000 in
 private lemma exists_rfns_wOmega_topsep_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1720,7 +1712,6 @@ private lemma exists_rfns_wOmega_topsep_rf
       ((iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)).toSection x),
     hgrid_nn]
 
-set_option maxHeartbeats 1600000 in
 theorem wOmega_L2_topsep_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1987,7 +1978,6 @@ private lemma wCA_wOmega_twoArm_fold_rf
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun n _ => by rw [Finset.sum_mul])
 
-set_option maxHeartbeats 1600000 in
 lemma wAlphaB_L2_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)

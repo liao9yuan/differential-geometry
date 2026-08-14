@@ -21,7 +21,6 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 omit [CompleteSpace E] in
 theorem exists_h6_metric_lim
@@ -80,7 +79,6 @@ theorem exists_h6_metric_lim
     simpa only [H6NormalData.chartMetric] using
       d.metric_equiv k (c k) z (hrad hz) v
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 omit [CompleteSpace E] in
 theorem exists_h6_metric_pi

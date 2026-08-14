@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
@@ -335,7 +333,6 @@ private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
   rw [hcomp A Fin.elim0 J, hcomp B Fin.elim0 J]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem edgePair_point_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
@@ -758,7 +755,6 @@ theorem edgeTop_point_bi
   simp_rw [tensorInnerPointwise_add_left, tensorInnerPointwise_add_right]
   simp_rw [edgePair_point_bi (I := I) (M := M) g]
 
-set_option maxHeartbeats 12800000 in
 theorem edgeTop_inner_bi
     (g : SmoothRiemannianMetric I M) (T P U V : SmoothCcTensor g 0 2)
     {delta : Real}

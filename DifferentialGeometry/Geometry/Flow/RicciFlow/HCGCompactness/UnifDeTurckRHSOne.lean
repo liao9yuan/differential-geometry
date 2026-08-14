@@ -9,8 +9,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
 
 set_option autoImplicit false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 1600000
 
 noncomputable section
 

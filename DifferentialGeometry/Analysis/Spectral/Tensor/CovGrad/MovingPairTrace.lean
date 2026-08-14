@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputS
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -161,7 +159,6 @@ def mvPairTraceOp (g gm : SmoothRiemannianMetric I M) :
     (mvDoubleTraceField (I := I) (M := M) g gm 4)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem mvPairTrace_apply
     (g gm : SmoothRiemannianMetric I M) (X : SmoothCcTensor g 0 4)

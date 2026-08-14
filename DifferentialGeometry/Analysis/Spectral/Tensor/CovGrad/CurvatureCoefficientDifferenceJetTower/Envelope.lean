@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -595,7 +593,6 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
   rw [← SmoothCcTensor.norm_def]
   exact mul_le_mul_of_nonneg_left hKi (by positivity)
 
-set_option maxHeartbeats 12800000 in
 theorem antidiagonalTupleGrid_integral_ballUniform_tameWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :

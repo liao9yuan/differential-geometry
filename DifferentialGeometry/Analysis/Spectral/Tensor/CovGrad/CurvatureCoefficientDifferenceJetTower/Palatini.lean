@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -118,7 +116,6 @@ lemma covectorExtensionSection_self (g₀ : SmoothRiemannianMetric I M) (x : M)
   exact g0FlatCLM_inverseMetricSharpFib (I := I) g₀ x om
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 theorem riemannLoweredBackgroundDifference_palatini_repr
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
@@ -618,7 +615,6 @@ lemma slotInsert_perturbationSharp_eq_raise_symmS (g₀ : SmoothRiemannianMetric
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T x]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma riemannG1LoweringDifference_slotInsert_repr (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1265,7 +1261,6 @@ lemma toModel_om_eval_lc (x : M) (om : Tensor0SSpace 1 I x) (V : TangentSpace I 
 end CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 theorem slotInsert_ricMixedSharp_sub_ricEndoRaised_eq_raise_doubleTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g₀ 0 (ricMixedSharpEndoField (I := I) (M := M) g₀ g₁) -

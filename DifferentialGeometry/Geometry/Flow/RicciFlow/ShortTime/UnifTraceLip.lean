@@ -263,7 +263,6 @@ private theorem dtJet (g : SmoothRiemannianMetric I M) (p : ℕ) :
   rw [hexp, hsucc 0, hsucc 1]
   simpa using h0
 
-set_option maxHeartbeats 1600000 in
 
 theorem trace24_h2_lip_unif
     (hDim : Module.finrank ℝ E = 3)

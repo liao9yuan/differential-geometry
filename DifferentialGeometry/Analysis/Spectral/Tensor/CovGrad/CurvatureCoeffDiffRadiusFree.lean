@@ -5,7 +5,6 @@ noncomputable section
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
-set_option maxHeartbeats 1600000
 
 namespace DifferentialGeometry
 namespace Integral

@@ -39,8 +39,6 @@ theorem lowA1Core_pair
   intro ρ δ hρ hρ_le hδ0 hδ_le hreal
   exact hpair hρ hρ_le hδ0 hδ_le hreal
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1Lo_ball
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}

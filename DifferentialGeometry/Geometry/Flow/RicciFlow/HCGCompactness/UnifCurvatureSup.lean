@@ -84,7 +84,6 @@ def riemannDiffC (Λ Λ' Λ'' : ℝ) : ℝ :=
   2 * (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)) +
     2 * (3 / 2 * Λ ^ 3 * Λ') ^ 2
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem riemannDiff_gJet_le

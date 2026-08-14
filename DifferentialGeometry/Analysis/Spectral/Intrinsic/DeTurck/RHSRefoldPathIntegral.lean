@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3200000
-set_option synthInstance.maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
 open scoped BigOperators Manifold Topology ContDiff
@@ -459,8 +457,6 @@ def rhsRefoldTopInt
     (rhsRefoldTop_joint (I := I) (M := M) g g_bg T
       hdelta_lt hdelta hdeltaZ)
 
-set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 theorem rhs_sub_zero_refold
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

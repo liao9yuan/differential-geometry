@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSL
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
 open scoped BigOperators Manifold ContDiff

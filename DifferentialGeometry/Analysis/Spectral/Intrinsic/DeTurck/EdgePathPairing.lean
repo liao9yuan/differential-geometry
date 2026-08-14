@@ -6,8 +6,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannianBundle
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
 open scoped BigOperators Manifold Topology ContDiff RealInnerProductSpace

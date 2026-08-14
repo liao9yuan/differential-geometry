@@ -258,8 +258,6 @@ private theorem c0_bg_sub
           g gB T U hδ_lt hδT hδU hδZ := by
       rw [hsame, hbg]
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem bg0_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -444,8 +442,6 @@ theorem bg0_pair_h1
       simpa only [lowJetSq, Nat.reduceAdd] using hpoint s hs)
   simpa only [lowJetSq, bg0PairInt, Φ, S, B, Nat.reduceAdd] using hpath
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem bg0_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -674,8 +670,6 @@ theorem bg0_pair_h2
       simpa only [lowJetSq, Nat.reduceAdd] using hpoint s hs)
   simpa only [lowJetSq, bg0PairInt, Φ, S, B, Nat.reduceAdd] using hpath
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem c0_bg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -737,8 +731,6 @@ theorem c0_bg_pair_h1
   exact (jetAdd (I := I) (M := M) g 1 _ _).trans
     (mul_le_mul_of_nonneg_left (add_le_add hc0 hb0) (by norm_num))
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem c0_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -881,8 +873,6 @@ private theorem c1_bg_sub
     ContMDiffSection.coe_sub, Pi.sub_apply, TensorRSSpace.toModel_sub]
   rw [intervalIntegral.integral_sub hTint hUint]
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem rhs1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1027,8 +1017,6 @@ private theorem rhs1_bg_sub
   simp only [rhsLow1Coeff, smul_sub]
   abel
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem c1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1228,8 +1216,6 @@ theorem c1_bg_pair_h2
   simpa only [lowJetSq, c1BgDiff, Φ, S, N, B, Nat.reduceAdd,
     hδ_lt] using hpath
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem a1Lo_bg_pair
     (hDim : Module.finrank ℝ E = 3)
@@ -1363,8 +1349,6 @@ theorem a1Lo_bg_pair
   have hpair := hop AT AU R0 R1 hR0 hR1 hj0 hj1
   simpa only [AT, AU, R0, E0, R1] using hpair
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem a1Hi_self_pair
     (hDim : Module.finrank ℝ E = 3)
@@ -1499,8 +1483,6 @@ theorem a1Hi_self_pair
   have hpair := (hop AT AU Rt hRt hcoeff).1
   simpa only [AT, AU, Rt, Q, R0, R1] using hpair
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem a1Hi_bg_pair
     (hDim : Module.finrank ℝ E = 3)

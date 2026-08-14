@@ -79,7 +79,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 1600000 in
 theorem c1_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -193,7 +192,6 @@ theorem c1_pair_lip
   · rw [hC1eq]
     exact hM1'
 
-set_option maxHeartbeats 1600000 in
 theorem a1_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -349,7 +347,6 @@ private theorem loPairArith
       simp only [f, p, s]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem a1Lo_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

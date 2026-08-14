@@ -24,8 +24,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace H6NormalData
 
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 theorem trans_bounds_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -156,7 +154,6 @@ theorem trans_bounds_on
     simpa only [H6NormalData.chartMetric] using
       d.metric_deriv k p (y k) z (hVrad' hz)
 
-set_option synthInstance.maxHeartbeats 1200000 in
 
 theorem exists_trans_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

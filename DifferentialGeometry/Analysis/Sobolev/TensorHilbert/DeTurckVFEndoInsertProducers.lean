@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2J
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -613,7 +611,6 @@ private theorem diagonalProductGrid_rfns_integral_ballUniform_succ
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 theorem cometricCastG0_order0sup_jetL2_succ_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

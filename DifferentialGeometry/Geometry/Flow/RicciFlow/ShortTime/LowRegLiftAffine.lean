@@ -106,7 +106,6 @@ abbrev LowA1CorePair (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
 
 variable {g}
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1Lo_core {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
     {hreal : ∀ S : SmoothCcTensor g 0 2,
@@ -128,7 +127,6 @@ theorem lowA1Lo_core {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
       g hρ hδ0 hδ_le hreal)
     hpair S
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1Lo_cont {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
     {hreal : ∀ S : SmoothCcTensor g 0 2,

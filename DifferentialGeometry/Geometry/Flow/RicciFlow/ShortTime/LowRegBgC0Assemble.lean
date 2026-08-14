@@ -102,7 +102,6 @@ theorem refoldC0_h2
     _ = B R ^ 2 := by
       simpa only [B] using (Real.sq_sqrt (hL R hR)).symm
 
-set_option maxHeartbeats 1200000 in
 theorem refoldC1_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -412,7 +411,6 @@ theorem c0Data_self
   rw [hself]
   abel
 
-set_option maxHeartbeats 1600000 in
 theorem c0DataPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

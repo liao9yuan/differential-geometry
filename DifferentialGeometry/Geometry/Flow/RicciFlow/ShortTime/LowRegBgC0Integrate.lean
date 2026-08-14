@@ -31,7 +31,6 @@ variable
 
 namespace LowRegBgC0Core
 
-set_option maxHeartbeats 1200000 in
 theorem lowOneAInt_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

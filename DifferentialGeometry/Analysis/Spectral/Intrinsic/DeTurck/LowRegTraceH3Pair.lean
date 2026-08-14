@@ -96,7 +96,6 @@ private theorem h3_tame_sc
     mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hc2) hfr) hX
   nlinarith only [h0Y, h1Y, h2X]
 
-set_option maxHeartbeats 1600000 in
 theorem app_h3_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -361,7 +360,6 @@ private theorem full_slot_h3
   exact hj.trans (mul_le_mul_of_nonneg_right (le_abs_self (Aw 3))
     hfac)
 
-set_option maxHeartbeats 2400000 in
 theorem inv_slot_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -676,7 +674,6 @@ private theorem insert_succ_jet
 
 namespace LowBaseInternal
 
-set_option maxHeartbeats 2400000 in
 theorem trace1_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

@@ -72,7 +72,6 @@ theorem c0Core_self
       (hreal _ (lowRadial_norm (I := I) (M := M) g hρ T))
       (zero_fb_c0 (I := I) (M := M) g hδ0)
 
-set_option maxHeartbeats 2400000 in
 
 theorem c0CorePair
     (hDim : Module.finrank ℝ E = 3)

@@ -305,7 +305,6 @@ private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
-set_option maxHeartbeats 1600000 in
 
 theorem invCoeff_h2_lip_unif
     (hDim : Module.finrank ℝ E = 3)

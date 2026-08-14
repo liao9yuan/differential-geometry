@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 noncomputable section
 
 set_option autoImplicit false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 800000
 
 open Set Function Bundle
 open scoped Topology Manifold BigOperators ContDiff Matrix

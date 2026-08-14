@@ -42,7 +42,6 @@ private def invJetGrid
         riemannianFiberNormSq (I := I) (M := M) g 0 (2 + e m) x
           ((iteratedCovGrad (I := I) g 0 2 (e m) T).toSection x)
 
-set_option maxHeartbeats 1600000 in
 
 theorem inv_coeff_h2_unif
     (hDim : Module.finrank ℝ E = 3)

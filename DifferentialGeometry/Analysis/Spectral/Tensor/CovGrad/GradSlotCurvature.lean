@@ -112,8 +112,6 @@ theorem gradSlot_cov_eval
       (Fin.cons u (Fin.cons w m)) = _
   exact slotFree_cov_eval (I := I) (M := M) g₀ 2 x d A u w m
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem gradSlotCurv_spec
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
     iteratedCovGrad (I := I) g₀ 0 2 2 S -

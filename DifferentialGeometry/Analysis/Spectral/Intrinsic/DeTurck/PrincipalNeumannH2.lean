@@ -180,7 +180,6 @@ theorem invPerturbH2_norm
       dsimp only [C]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem invPerturbH2_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -32,8 +32,6 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 theorem top_path_dev_unif
     (hDim : Module.finrank ℝ E = 3)

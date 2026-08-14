@@ -596,7 +596,6 @@ theorem readout_mem
 
 end H6ChartData
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 structure H6NormalData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))

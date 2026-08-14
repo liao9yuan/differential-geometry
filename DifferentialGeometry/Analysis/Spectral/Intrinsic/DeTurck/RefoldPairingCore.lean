@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairin
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
 open scoped BigOperators Manifold ContDiff

@@ -42,8 +42,6 @@ def rhsRefoldTop
     deTurckPhiMetTotal (I := I) (M := M) g g_bg
       (realizedFam (I := I) g T 0 hδ hδZ s)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem lieRefold2_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDeriv
 
 set_option autoImplicit false
 
-set_option maxHeartbeats 1000000
-set_option synthInstance.maxHeartbeats 1600000
 
 noncomputable section
 

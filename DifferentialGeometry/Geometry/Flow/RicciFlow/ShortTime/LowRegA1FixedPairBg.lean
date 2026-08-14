@@ -296,8 +296,6 @@ theorem galArmPair4_diag
   simpa only [galArmVecBg, smoothCcToTensorHs_coeff, Nat.reduceAdd,
     T, hT, hZ, A] using hpair
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem galA1FixPair3_le
     (hDim : Module.finrank ℝ E = 3)

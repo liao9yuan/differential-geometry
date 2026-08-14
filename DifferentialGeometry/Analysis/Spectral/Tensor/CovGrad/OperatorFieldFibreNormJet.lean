@@ -932,7 +932,6 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (g : SmoothRiemannia
       nlinarith [mul_le_mul_of_nonneg_left hstep (by positivity : (0:ℝ) ≤ 2 * Gj), hGj_nn',
         hstep]
 
-set_option maxHeartbeats 6400000 in
 omit [CompleteSpace E] in
 theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
     (g : SmoothRiemannianMetric I M) :
