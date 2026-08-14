@@ -2714,14 +2714,7 @@ variable [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-theorem ham3_main
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-    AdmitsConstPosSec (I := I) (M := M) ∧
-      SphericalSpaceForm (I := I) (M := M) :=
-  HCGCompactness.ham3_main_hcg (I := I) (M := M) hM hpos
-
-theorem thm_2_1
+theorem hamilton_positive_ricci
     (hM : Closed3Manifold (I := I) (M := M))
     (hpos : AdmitsPosRicci (I := I) (M := M)) :
     AdmitsConstPosSec (I := I) (M := M) ∧
