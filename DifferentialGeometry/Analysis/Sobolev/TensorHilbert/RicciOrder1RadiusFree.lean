@@ -70,8 +70,7 @@ theorem ricci1Split (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [kernelField_eq_neg_arm_combination (I := I) (M := M) g₀ g₁]
   simp only [permAppEqRs, kInPerm102, kInPerm120]
 
-omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma icgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by

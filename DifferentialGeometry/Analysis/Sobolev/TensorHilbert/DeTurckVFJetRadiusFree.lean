@@ -292,8 +292,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
           Finset.sum_le_sum hterm
       _ = (∑ l ∈ Finset.range (i + 1), (2 * aL l + 2 * kd l)) * (1 + S) := by rw [Finset.sum_mul]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-omit [CompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma gInvRaisedEndo_self_rf (g₀ : SmoothRiemannianMetric I M) (x : M) :
     metricComparisonEndo (I := I) g₀ g₀ x =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -301,8 +300,7 @@ private lemma gInvRaisedEndo_self_rf (g₀ : SmoothRiemannianMetric I M) (x : M)
   intro v
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM, ContinuousLinearMap.id_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma fullRaisedEndoField_decomp_rf (g₀ g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +

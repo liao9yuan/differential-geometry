@@ -28,8 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem wXi_self_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g₀ g₁ g₀ =
       connDiffLoweredCc (I := I) g₀ g₁ := by
@@ -138,6 +137,7 @@ noncomputable def lc0VBFormRF (g₀ g₁ : SmoothRiemannianMetric I M) :
       (ipLowCc (I := I) (M := M) g₀
         (wOmega (I := I) (M := M) g₀ g₁ g₀)))
 
+omit [SigmaCompactSpace M] in
 theorem vb_refold_rf (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VB (I := I) (M := M) g₀ g₁ =
       lc0VBFormRF (I := I) (M := M) g₀ g₁ := by
