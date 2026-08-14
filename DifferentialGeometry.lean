@@ -2608,6 +2608,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitRegu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitUpgrade
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.HamiltonCompactness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.HamiltonPositiveRicciAdapter
+import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicciExamples
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45Constants
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45CovariantAbstract

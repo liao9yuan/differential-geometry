@@ -1,3 +1,4 @@
+import Mathlib.Analysis.Normed.Module.Connected
 import DifferentialGeometry.Geometry.Metric.Sphere.OrthogonalAction
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 import DifferentialGeometry.Geometry.Metric.BumpExtend
@@ -241,6 +242,29 @@ end SectionWitness
 namespace RoundQuotientData
 
 variable (D : RoundQuotientData E n)
+
+theorem proj_surjective : Function.Surjective D.proj := by
+  intro x
+  let S := D.section_at x
+  exact ⟨S.toSphere ⟨x, S.mem⟩, S.toSphere_proj ⟨x, S.mem⟩⟩
+
+theorem compactSpace : CompactSpace D.Q := by
+  letI : CompactSpace (sphere (0 : E) 1) := Metric.sphere.compactSpace _ _
+  refine ⟨?_⟩
+  rw [← D.proj_surjective.range_eq]
+  simpa only [Set.image_univ] using
+    isCompact_univ.image D.proj_smooth.continuous
+
+theorem connectedSpace : ConnectedSpace D.Q := by
+  have hfin : 1 < Module.finrank ℝ E := by
+    have hn : 0 < n := Nat.pos_of_ne_zero (NeZero.ne n)
+    rw [show Module.finrank ℝ E = n + 1 from Fact.out]
+    omega
+  letI : ConnectedSpace (sphere (0 : E) 1) :=
+    Subtype.connectedSpace
+      (isConnected_sphere (Module.one_lt_rank_of_one_lt_finrank hfin)
+        (0 : E) (by norm_num))
+  exact D.proj_surjective.connectedSpace D.proj_smooth.continuous
 
 
 
