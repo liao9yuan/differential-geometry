@@ -249,11 +249,7 @@ def Ham3LimitConnected (L : Ham3CGHLimit (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   ConnectedSpace L.N
 
-def Ham3LimitBoundaryless (L : Ham3CGHLimit (I := I) M) : Prop :=
-  letI : TopologicalSpace L.N := L.topology
-  letI : ChartedSpace H L.N := L.charted
-  letI : IsManifold I ∞ L.N := L.smooth
-  I.Boundaryless
+def Ham3LimitBoundaryless : Prop := I.Boundaryless
 
 def Ham3LimitFlow (L : Ham3CGHLimit (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
@@ -875,7 +871,7 @@ def Ham3CGHLimitExists
       Ham3LimitWindow (I := I) L /\
       Ham3LimitRegWin (I := I) L /\
       Ham3LimitConnected (I := I) L /\
-      Ham3LimitBoundaryless (I := I) L /\
+      Ham3LimitBoundaryless (I := I) /\
       Ham3LimitFlow (I := I) L /\
       Ham3RicNonnegTransfer (I := I) P Q hsel L /\
       Ham3LimitBaseScalarConv (I := I) P Q L /\
@@ -2511,7 +2507,7 @@ theorem limit_ric_nonneg
       Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitBoundaryless (I := I) /\
         Ham3LimitFlow (I := I) L) :
     LimitRicNonneg (I := I) L := by
   exact htransfer hreal hric
@@ -2628,7 +2624,7 @@ theorem limit_inherit
       Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitBoundaryless (I := I) /\
         Ham3LimitFlow (I := I) L /\
         Ham3RicNonnegTransfer (I := I) P Q hsel L /\
         Ham3PinchTransfer (I := I) P Q hsel L /\
@@ -2643,7 +2639,7 @@ theorem limit_inherit
       Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitBoundaryless (I := I) /\
         Ham3LimitFlow (I := I) L :=
     ⟨hsubseq, hwindow, hregwin, hconn, hbdry, hflow⟩
   have hnonneg : LimitRicNonneg (I := I) L :=
@@ -2669,7 +2665,7 @@ theorem limit_tracefree_decay
       Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitBoundaryless (I := I) /\
         Ham3LimitFlow (I := I) L)
     (hscalarPos : LimitScalarPos (I := I) L) :
     LimitTracefreeDecay (I := I) L := by
@@ -2739,7 +2735,7 @@ theorem limit_tracefree_zero
       Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitBoundaryless (I := I) /\
         Ham3LimitFlow (I := I) L)
     (_hscalarPos : LimitScalarPos (I := I) L) :
     LimitTracefreeZero (I := I) L := by
@@ -2863,7 +2859,7 @@ theorem limit_round_base
     {L : Ham3CGHLimit (I := I) M}
     (hdim : Module.finrank Real E = 3)
     (hconn : Ham3LimitConnected (I := I) L)
-    (hbdry : Ham3LimitBoundaryless (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I))
     {t0 : Real}
     (hbase :
       letI : TopologicalSpace L.N := L.topology
@@ -2995,7 +2991,7 @@ theorem limit_round_of_ein
     {L : Ham3CGHLimit (I := I) M}
     (hdim : Module.finrank Real E = 3)
     (hconn : Ham3LimitConnected (I := I) L)
-    (hbdry : Ham3LimitBoundaryless (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I))
     {t0 : Real}
     (hscalar : LimitScalarPosAt (I := I) L t0)
     (heinstein : LimitEinsteinAt (I := I) L t0) :
@@ -3009,7 +3005,7 @@ theorem limit_const_sec_of_einstein
     {L : Ham3CGHLimit (I := I) M}
     (hdim : Module.finrank Real E = 3)
     (hconn : Ham3LimitConnected (I := I) L)
-    (hbdry : Ham3LimitBoundaryless (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I))
     {t0 : Real}
     (hscalar : LimitScalarPosAt (I := I) L t0)
     (heinstein : LimitEinsteinAt (I := I) L t0) :
@@ -3030,7 +3026,7 @@ theorem const_pos_of_tf0
     {L : Ham3CGHLimit (I := I) M}
     (hdim : Module.finrank Real E = 3)
     (hconn : Ham3LimitConnected (I := I) L)
-    (hbdry : Ham3LimitBoundaryless (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I))
     {t0 : Real}
     (hscalar : LimitScalarPosAt (I := I) L t0)
     (htf : LimitTracefreeZeroAt (I := I) L t0) :
@@ -3047,7 +3043,7 @@ theorem limit_const_pos
     (hdim : Module.finrank Real E = 3)
     (hreg : Ham3LimitRegWin (I := I) L)
     (hconn : Ham3LimitConnected (I := I) L)
-    (hbdry : Ham3LimitBoundaryless (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I))
     (hscalarPos : LimitScalarPos (I := I) L)
     (htf : LimitTracefreeZero (I := I) L) :
     LimitConstPosSec (I := I) L := by

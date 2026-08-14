@@ -2267,7 +2267,7 @@ theorem round0_of_cgh
     exact one_pos
   have hconn : Ham3LimitConnected (I := I) (M := M) Lh := by
     simpa [Lh, cghToHam3, Ham3LimitConnected] using hconnected
-  have hbdry : Ham3LimitBoundaryless (I := I) (M := M) Lh := by
+  have hbdry : Ham3LimitBoundaryless (I := I) := by
     simpa [Lh, cghToHam3, Ham3LimitBoundaryless] using
       (inferInstance : I.Boundaryless)
   exact limit_round_base (I := I) (M := M) hdim hconn hbdry
@@ -2678,7 +2678,7 @@ theorem toHam3Exists
       cghToHam3] using
       hconnected
   have hbdHam :
-      Ham3LimitBoundaryless (I := I) (M := M) Lh := by
+      Ham3LimitBoundaryless (I := I) := by
     simpa [Lh, DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci.Ham3LimitBoundaryless,
       cghToHam3] using (inferInstance : I.Boundaryless)
   refine
