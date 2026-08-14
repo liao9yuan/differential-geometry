@@ -18,19 +18,20 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+
+variable [T2Space M]
+variable [CompactSpace M] [I.Boundaryless]
 
 section SlabSup
 
 variable {a c : Real}
 
+omit [T2Space M] in
 theorem slabBound (F : Real → M → Real)
     (hF : ContinuousOn (fun p : Real × M => F p.1 p.2) (Icc a c ×ˢ (univ : Set M))) :
     ∃ C : Real, 0 ≤ C ∧ ∀ t ∈ Icc a c, ∀ x : M, |F t x| ≤ C := by
@@ -41,12 +42,14 @@ theorem slabBound (F : Real → M → Real)
   rw [Real.norm_eq_abs] at h
   exact h.trans (le_max_left _ _)
 
+omit [T2Space M] in
 theorem slabBound_ioo (F : Real → M → Real)
     (hF : ContinuousOn (fun p : Real × M => F p.1 p.2) (Icc a c ×ˢ (univ : Set M))) :
     ∃ C : Real, 0 ≤ C ∧ ∀ t ∈ Ioo a c, ∀ x : M, F t x ≤ C := by
   obtain ⟨C, hC0, hC⟩ := slabBound (M := M) F hF
   exact ⟨C, hC0, fun t ht x => (le_abs_self _).trans (hC t (Ioo_subset_Icc_self ht) x)⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] in
 theorem normSqSlabBound {s : Nat} (g : Real → SmoothRiemannianMetric I M)
     (A : Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (hA : ContinuousOn (fun p : Real × M => normSq0S (I := I) (g p.1) p.2 s (A p.1 p.2))
@@ -82,6 +85,7 @@ end RicciField
 
 section FluxField
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -105,6 +109,7 @@ private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -113,6 +118,7 @@ private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   intro i j
   constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem reLowerPairSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -145,6 +151,7 @@ theorem reLowerPairSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
   rw [hcongr, hprod] at htr
   exact htr
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem sdecFluxSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (Rm2 P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -249,6 +256,7 @@ section BackgroundSups
 
 variable {a c : Real}
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] in
 theorem normSqSlabSup {s : Nat} (g : Real → SmoothRiemannianMetric I M)
     (A : Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -265,6 +273,7 @@ theorem normSqSlabSup {s : Nat} (g : Real → SmoothRiemannianMetric I M)
   normSqSlabBound (I := I) g A
     ((normSq0S_jointContMDiffOn (I := I) g A hgram hA).continuousOn)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] in
 theorem metricDiffSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -281,6 +290,7 @@ theorem metricDiffSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     ((metricDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂).continuousOn)
   exact ⟨B, hB0, fun t ht x => (le_abs_self _).trans (hB t ht x)⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] in
 theorem metricSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -295,6 +305,7 @@ theorem metricSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   normSqSlabSup (I := I) g₁ (fun t x => metricTensorField (I := I) (g₂ t) x) hgram₁
     (fun x₀ K _ ht => metricChartJoint (I := I) g₂ x₀ (hgram₂ x₀) K ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rm04SlabSup (gN gL gC : Real → SmoothRiemannianMetric I M)
     (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -317,6 +328,7 @@ theorem rm04SlabSup (gN gL gC : Real → SmoothRiemannianMetric I M)
       (metricCov (I := I) (gC t)) (metricCov_smooth (I := I) (gC t)) x) hgramN
     (fun x₀ K _ ht => rm04ChartJoint (I := I) gL gC x₀ (hgramL x₀) (hgramC x₀) K ht)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem ricciSq_le_rm04 (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 2 (metricRicciAt (I := I) g₂ x) ≤
       (Module.finrank Real E : Real) ^ 4 *
@@ -334,6 +346,7 @@ theorem ricciSq_le_rm04 (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
   rw [metricRicci_eq_trace_cross (I := I) g₁ g₂ x]
   exact htr
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -466,6 +479,7 @@ theorem crossRm2SlabSup
       crossRm2ChartJoint (I := I) gL gC gD x₀
         (hgramL x₀) (hgramC x₀) (hgramD x₀) K ht)
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem fu_metric_comp_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     g₁.inner x v v ≤
@@ -488,6 +502,7 @@ theorem fu_metric_comp_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
   rw [hval, hprod] at h
   exact (le_abs_self _).trans h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] in
 theorem metricCompSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -508,6 +523,7 @@ theorem metricCompSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   refine (fu_metric_comp_le (I := I) (g₁ t) (g₂ t) x v).trans ?_
   exact mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (hB t ht x)) hvv
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] in
 theorem metricEquivSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -554,6 +570,7 @@ theorem metricEquivSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   · exact (hΛ₂₁ t ht x v).trans
       (mul_le_mul_of_nonneg_right hΛ₂₁C hv₁)
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem tracePairSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
     (metricTracePair0SAt (I := I) g Q) ^ 2 ≤
@@ -564,6 +581,7 @@ theorem tracePairSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x))))
     (onFrame_inv (I := I) g basis hON) Q
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem volSlabSup (g₁ : Real → SmoothRiemannianMetric I M) {B : Real}
     (htr : ∀ t ∈ Ioo a c, ∀ x : M, traceTimeDerivMetric (I := I) g₁ t x =
       (-2 : Real) * metricTracePair0SAt (I := I) (g₁ t) (metricRicciAt (I := I) (g₁ t) x))
@@ -591,6 +609,7 @@ section ReactField
 
 variable {a c : Real}
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem reactOrtho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {s : Nat} {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
@@ -787,6 +806,7 @@ private theorem ricReactAbs_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {s 
   ring_nf
   exact le_refl _
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem movingReactAbs_le {s : Nat} {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -895,6 +915,7 @@ end ReactField
 
 section EdgeContinuity
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem energyEdgeCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
