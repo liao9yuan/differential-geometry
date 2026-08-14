@@ -94,7 +94,7 @@ theorem fderiv_sublevelPullback_ne_zero [I.Boundaryless] [IsManifold I (⊤ : Wi
 noncomputable def sublevelPullback (f : M → ℝ) (p : M) : MorseModel (m + 1) → ℝ :=
   fun y => f ((extChartAt I p).symm y)
 
-theorem contDiffOn_sublevelPullback [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem contDiffOn_sublevelPullback [IsManifold I (⊤ : WithTop ℕ∞) M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) (p : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (sublevelPullback I f p) (extChartAt I p).target := by
   have hcomp : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
@@ -150,7 +150,7 @@ theorem sublevelPullbackCutoff_eqOn (f : M → ℝ) (x : M) (b : ContDiffBump ((
   unfold sublevelPullbackCutoff
   rw [hb, one_mul]
 
-theorem sublevelPullbackCutoff_eventuallyEq [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem sublevelPullbackCutoff_eventuallyEq
     (f : M → ℝ) (x : M) (b : ContDiffBump ((extChartAt I x) x)) :
     sublevelPullbackCutoff I f x b =ᶠ[nhds ((extChartAt I x) x)] sublevelPullback I f x := by
   exact Filter.eventuallyEq_of_mem (Metric.ball_mem_nhds ((extChartAt I x) x) b.rIn_pos)
@@ -195,7 +195,7 @@ theorem contDiff_sublevelPullbackCutoff [I.Boundaryless] [IsManifold I (⊤ : Wi
     exact (contDiffAt_const : ContDiffAt ℝ (⊤ : ℕ∞)
       (fun _ : MorseModel (m + 1) => (0 : ℝ)) y).congr_of_eventuallyEq hzero
 
-theorem fderiv_sublevelPullbackCutoff_ne_zero [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem fderiv_sublevelPullbackCutoff_ne_zero
     (f : M → ℝ) (x : M) (b : ContDiffBump ((extChartAt I x) x))
     (hne : fderiv ℝ (sublevelPullback I f x) ((extChartAt I x) x) ≠ 0) :
     fderiv ℝ (sublevelPullbackCutoff I f x b) ((extChartAt I x) x) ≠ 0 := by
@@ -453,7 +453,7 @@ theorem isOpen_sublevelChartTransitionDomain [I.Boundaryless] (x₁ x₂ : M) :
     (hcont.isOpen_inter_preimage (isOpen_extChartAt_target (I := I) x₁)
       (isOpen_extChartAt_source (I := I) x₂))
 
-theorem contDiffOn_sublevelChartTransition [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem contDiffOn_sublevelChartTransition [IsManifold I (⊤ : WithTop ℕ∞) M]
     (x₁ x₂ : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (sublevelChartTransition I x₁ x₂)
       (sublevelChartTransitionDomain I x₁ x₂) := by
@@ -1183,8 +1183,7 @@ noncomputable def manifoldSublevelChartedSpace [I.Boundaryless]
         (lt_of_le_of_ne (show f x.1 ≤ a from x.2) hx) hf
   chart_mem_atlas := fun x => ⟨x, rfl⟩
 
-@[reducible]
-noncomputable def manifoldSublevelHasGroupoid [I.Boundaryless]
+theorem manifoldSublevelHasGroupoid [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :
@@ -1213,8 +1212,7 @@ noncomputable def manifoldSublevelHasGroupoid [I.Boundaryless]
           (lt_of_le_of_ne (show f x₁.1 ≤ a from x₁.2) hx₁)
           (lt_of_le_of_ne (show f x₂.1 ≤ a from x₂.2) hx₂)
 
-@[reducible]
-noncomputable def manifoldSublevelIsManifold [I.Boundaryless]
+theorem manifoldSublevelIsManifold [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :
@@ -1746,8 +1744,7 @@ noncomputable def manifoldLevelSetChartedSpace [I.Boundaryless]
   mem_chart_source := fun x => mem_manifoldLevelSetChart_source I f a hf hreg x
   chart_mem_atlas := fun x => ⟨x, rfl⟩
 
-@[reducible]
-noncomputable def manifoldLevelSetHasGroupoid [I.Boundaryless]
+theorem manifoldLevelSetHasGroupoid [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :
@@ -1786,8 +1783,7 @@ noncomputable def manifoldLevelSetHasGroupoid [I.Boundaryless]
   rw [hfun, hdom]
   exact contDiffOn_manifoldLevelSet_transition I f a hf hreg x₁ x₂
 
-@[reducible]
-noncomputable def manifoldLevelSetIsManifold [I.Boundaryless]
+theorem manifoldLevelSetIsManifold [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :

@@ -3548,8 +3548,7 @@ theorem exists_relDiffeomorph_sublevel_of_regularFamily
 
 
 theorem regularFamilySliceSmooth
-    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H)
     (F : M → ℝ → ℝ)
     (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
       (fun q : M × ℝ => F q.1 q.2)) (s : ℝ) :
@@ -3557,8 +3556,7 @@ theorem regularFamilySliceSmooth
   exact hF.comp (contMDiff_id.prodMk contMDiff_const)
 
 theorem regularFamilySliceRegular
-    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H)
     (F : M → ℝ → ℝ) (ε₀ : ℝ) (hε₀ : 0 < ε₀)
     (hreg : ∀ q : M × ℝ, |F q.1 q.2| ≤ 2 * ε₀ → q.2 ∈ Set.Icc 0 1 →
       ¬ IsCriticalPointAt I (fun x : M => F x q.2) q.1)

@@ -2379,7 +2379,7 @@ theorem modelRoundedFunction_le_c_iff_mem_attachedRegion {n k : ℕ} (hk : k ≤
     exact Or.inl hyatt
 
 theorem modelRoundedFunction_eq_attached_of_norm_gt {n k : ℕ} (hk : k ≤ n)
-    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (_hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hR0 : 0 ≤ R₀)
     (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel n}
     (hyatt : y ∈ modelAttachedRegion hk ε r δ) (hy₀ : R₀ < morseNorm n y) :
     modelRoundedFunction hk c ε r δ R₀ R₁ y = modelAttachedFunction hk c ε r δ y := by
@@ -2422,7 +2422,7 @@ theorem modelRoundedFunction_eq_c_iff_attachedFunction_eq {n k : ℕ} (hk : k �
     by_cases hnorm : morseNorm n y ≤ R₀
     · rwa [modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀ R₁ hR hR0 hnorm] at hy
     · have hnorm' : R₀ < morseNorm n y := lt_of_not_ge hnorm
-      rwa [modelRoundedFunction_eq_attached_of_norm_gt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig hyatt hnorm'] at hy
+      rwa [modelRoundedFunction_eq_attached_of_norm_gt hk c ε r δ R₀ R₁ hε hδ hR0 hbig hyatt hnorm'] at hy
   · intro hy
     have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
       (modelAttachedRegion_iff_sublevel hk c ε r δ y).mpr (le_of_eq hy)
@@ -2430,7 +2430,7 @@ theorem modelRoundedFunction_eq_c_iff_attachedFunction_eq {n k : ℕ} (hk : k �
     · rw [modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀ R₁ hR hR0 hnorm]
       exact hy
     · have hnorm' : R₀ < morseNorm n y := lt_of_not_ge hnorm
-      rw [modelRoundedFunction_eq_attached_of_norm_gt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig hyatt hnorm']
+      rw [modelRoundedFunction_eq_attached_of_norm_gt hk c ε r δ R₀ R₁ hε hδ hR0 hbig hyatt hnorm']
       exact hy
 
 theorem modelRoundedFunction_lt_c_iff_attachedFunction_lt {n k : ℕ} (hk : k ≤ n)

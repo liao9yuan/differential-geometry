@@ -581,10 +581,8 @@ theorem linearModel_strip_compact (a b : ℝ) :
       exact hr
   rwa [hset]
 
-theorem linearModel_no_critical (a b : ℝ) :
-    ∀ y : MorseModel 1, y ∈ sublevelStrip (fun y : MorseModel 1 => y 0) a b →
-      fderiv ℝ (fun y : MorseModel 1 => y 0) y ≠ 0 := by
-  intro y hy
+theorem linearModel_no_critical (y : MorseModel 1) :
+    fderiv ℝ (fun y : MorseModel 1 => y 0) y ≠ 0 := by
   have hfd : fderiv ℝ (fun y : MorseModel 1 => y 0) y = ContinuousLinearMap.proj (0 : Fin 1) := by
     have hlin : IsBoundedLinearMap ℝ (fun y : MorseModel 1 => y 0) :=
       (ContinuousLinearMap.proj (0 : Fin 1) : MorseModel 1 →L[ℝ] ℝ).isBoundedLinearMap

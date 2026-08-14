@@ -50,7 +50,7 @@ private theorem chartRep_contDiffOn (I : ModelWithCorners ℝ (MorseModel n) H)
   rwa [← hrange]
 
 theorem tangentTrivializationAt_apply (I : ModelWithCorners ℝ (MorseModel n) H)
-    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (x₀ x : M)
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (x₀ x : M)
     (hx : x ∈ (extChartAt I x₀).source) (v : TangentSpace I x) :
     (trivializationAt (MorseModel n) (TangentSpace I) x₀ ⟨x, v⟩).2 =
       (mfderiv I 𝓘(ℝ, MorseModel n) (extChartAt I x₀) x) v := by

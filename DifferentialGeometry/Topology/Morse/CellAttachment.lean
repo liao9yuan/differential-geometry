@@ -814,8 +814,7 @@ theorem cellRetractionStep_spine {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
   dsimp [cellRetractionStep, spineMap]
   rw [zero_smul]
 
-theorem cellRetractionStep_level {n k : ℕ} (hk : k ≤ n) (c : ℝ) {t : ℝ}
-    (_ht0 : 0 ≤ t) (_ht1 : t ≤ 1) (y : MorseModel n) :
+theorem cellRetractionStep_level {n k : ℕ} (hk : k ≤ n) (c : ℝ) {t : ℝ} (y : MorseModel n) :
     morseNormalForm hk c (cellRetractionStep hk t y) =
       c + (1 / 2) * (t ^ 2 * ‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) := by
   have hneg : negPart hk (cellRetractionStep hk t y) = negPart hk y := by
@@ -835,7 +834,7 @@ theorem cellRetractionStep_mem_upper {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) {t 
     (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {y : MorseModel n} (hy : y ∈ sublevel (morseNormalForm hk c) (c + ε)) :
     cellRetractionStep hk t y ∈ sublevel (morseNormalForm hk c) (c + ε) := by
   change morseNormalForm hk c (cellRetractionStep hk t y) ≤ c + ε
-  rw [cellRetractionStep_level hk c ht0 ht1 y]
+  rw [cellRetractionStep_level hk c y]
   have hle : t ^ 2 ≤ 1 := by nlinarith [sq_nonneg t, ht0, ht1]
   have hy' : morseNormalForm hk c y ≤ c + ε := by simpa [sublevel] using hy
   have hsplit := morseNormalForm_split hk c y
@@ -870,7 +869,7 @@ def cellInclusionStepFun {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) :
       rcases p.2.2 with hz | ⟨x, hx⟩
       · left
         change morseNormalForm hk c (cellRetractionStep hk (p.1 : ℝ) p.2.1) ≤ c - ε
-        rw [cellRetractionStep_level hk c p.1.2.1 p.1.2.2 p.2.1]
+        rw [cellRetractionStep_level hk c p.2.1]
         have hz' : morseNormalForm hk c p.2.1 ≤ c - ε := by simpa [sublevel] using hz
         have hsplit := morseNormalForm_split hk c p.2.1
         rw [hsplit] at hz'
@@ -899,7 +898,7 @@ theorem cellInclusionStep_mem {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
   rcases z.2 with hz | ⟨x, hx⟩
   · left
     change morseNormalForm hk c (cellRetractionStep hk (t : ℝ) z.1) ≤ c - ε
-    rw [cellRetractionStep_level hk c t.2.1 t.2.2 z.1]
+    rw [cellRetractionStep_level hk c z.1]
     have hz' : morseNormalForm hk c z.1 ≤ c - ε := by simpa [sublevel] using hz
     have hsplit := morseNormalForm_split hk c z.1
     rw [hsplit] at hz'
@@ -8104,7 +8103,6 @@ theorem modelRoundScale_pos_of_ge {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 <
 theorem modelLowerRoundMap_injective {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
     (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
     {y z : MorseModel n} (hy : y ∈ sublevel (morseNormalForm hk c) (c - ε))
-    (_hz : z ∈ sublevel (morseNormalForm hk c) (c - ε))
     (h : modelLowerRoundMap hk ε r δ θ y = modelLowerRoundMap hk ε r δ θ z) : y = z := by
   have hneg : negPart hk y = negPart hk z := by
     have hneg' := congrArg (negPart hk) h
@@ -8567,7 +8565,7 @@ theorem modelLowerRoundMap_image_norm_sq_le_of_negPart_le {n k : ℕ} (hk : k �
   nlinarith [hle, hcap, ht]
 
 theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (ha0 : 0 < a)
-    (_ha1 : a ≤ 1) (hb0 : 0 ≤ b) (_hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
+    (hb0 : 0 ≤ b) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht : t = (2 * ε + r ^ 2 * b) * a) :
     modelRoundCapInterp ε r a b = t * (1 - a) / (a * (r ^ 2 + 2 * ε - t)) := by
   have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
@@ -8609,15 +8607,12 @@ theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (h
 
 theorem modelRoundCapInterp_injective_fixed_t {ε r a₁ a₂ b₁ b₂ t : ℝ} (hε : 0 < ε)
     (hr : 0 < r) (ha1₀ : 0 < a₁) (ha2₀ : 0 < a₂) (hb1₀ : 0 ≤ b₁) (hb2₀ : 0 ≤ b₂)
-    (ha1₁ : a₁ ≤ 1) (ha2₁ : a₂ ≤ 1) (hb1₁ : b₁ ≤ 1) (hb2₁ : b₂ ≤ 1)
     (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht₁ : t = (2 * ε + r ^ 2 * b₁) * a₁) (ht₂ : t = (2 * ε + r ^ 2 * b₂) * a₂)
     (hφ : modelRoundCapInterp ε r a₁ b₁ = modelRoundCapInterp ε r a₂ b₂) :
     a₁ = a₂ := by
-  have hφ1 := modelRoundCapInterp_eq hε hr ha1₀ ha1₁ hb1₀
-    hb1₁ ht0 htpos ht₁
-  have hφ2 := modelRoundCapInterp_eq hε hr ha2₀ ha2₁ hb2₀
-    hb2₁ ht0 htpos ht₂
+  have hφ1 := modelRoundCapInterp_eq hε hr ha1₀ hb1₀ ht0 htpos ht₁
+  have hφ2 := modelRoundCapInterp_eq hε hr ha2₀ hb2₀ ht0 htpos ht₂
   have hD : r ^ 2 + 2 * ε - t ≠ 0 := by
     have hDpos : 0 < r ^ 2 + 2 * ε - t := by nlinarith [ht0]
     linarith
@@ -8755,7 +8750,7 @@ theorem modelRoundCapQ_nonneg {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < �
       have ht0 : t < r ^ 2 + 2 * ε := by
         dsimp [t]
         nlinarith [ht']
-      have hφ := modelRoundCapInterp_eq hε hr hapos ha1 hb0 hb1 ht0 htpos (by dsimp [t])
+      have hφ := modelRoundCapInterp_eq hε hr hapos hb0 ht0 htpos (by dsimp [t])
       have hbound : modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
         have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [ht', hθr]
         exact modelLowerRoundBound_eq_self_of_le hθ hle
@@ -8966,11 +8961,11 @@ theorem modelHandleRoundMap_attachedFunction_lt_c_of_cocore_lt_one {n k : ℕ} (
   nlinarith [hq]
 
 theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
-    (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a) (ha1 : a ≤ 1)
-    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a)
+    (hb0 : 0 ≤ b) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht : t ≤ 2 * ε) (hteq : t = (2 * ε + r ^ 2 * b) * a) :
     modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
-  have hφ := modelRoundCapInterp_eq hε hr hapos ha1 hb0 hb1 ht0 htpos hteq
+  have hφ := modelRoundCapInterp_eq hε hr hapos hb0 ht0 htpos hteq
   have hbound : modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
     have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [ht, hθr]
     exact modelLowerRoundBound_eq_self_of_le hθ hle
@@ -9164,7 +9159,7 @@ theorem modelRoundCapQ_pos_of_b_pos {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ :
         have h1 : 0 < 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
         dsimp [t]
         exact mul_pos h1 ha_pos
-      have hq := modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos ha1 hb0 hb1 ht0 htpos
+      have hq := modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos hb0 ht0 htpos
         (le_of_lt ht_lt) (by dsimp [t])
       rw [hq]
       exact mul_pos (sq_pos_of_pos hr) hb
@@ -9369,7 +9364,7 @@ theorem modelAttachedRegion_mem_handleRound_of_negPart_gt {n k : ℕ} (hk : k �
     nlinarith [hq_gt, hB_nonneg]
   have hcpos : 0 < 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
   have hinterp : modelRoundCapInterp ε r a b = φ := by
-    have hieq := modelRoundCapInterp_eq hε hr ha0 ha1 hb0 hb1 ht_lt htpos ht_eq.symm
+    have hieq := modelRoundCapInterp_eq hε hr ha0 hb0 ht_lt htpos ht_eq.symm
     rw [hieq]
     simpa [D] using hparams.2.1
   have hq_eq : modelRoundCapQ ε r δ θ a b = q := by
@@ -9514,7 +9509,7 @@ theorem modelAttachedRegion_mem_handleRound_of_negPart_le {n k : ℕ} (hk : k �
       have hapos : 0 < a := by
         dsimp [a]
         exact div_pos htpos hcpos
-      have hcq := modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr hapos ha1 hb0 hb1
+      have hcq := modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr hapos hb0
         (by nlinarith [ht_le, sq_nonneg r]) htpos ht_le hteq
       dsimp [b] at hcq ⊢
       rw [hcq]
@@ -9652,7 +9647,7 @@ theorem modelAttachedRegion_eq_lowerRound_union_handleRound {n k : ℕ} (hk : k 
   · intro hy
     exact lowerRound_union_handleRound_subset_modelAttachedRegion hk c ε r δ θ hε hδ hθ hδr hy
 
-theorem modelHandleRoundMap_posPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε r δ θ : ℝ)
+theorem modelHandleRoundMap_posPart_eq_of_scalar {n k : ℕ} (ε r δ θ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
     (p p' : StandardHandle k (n - k))
     (hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) ≠ 0)
@@ -9737,7 +9732,7 @@ theorem modelHandleRoundMap_posPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε
     Real.sqrt (modelRoundCapQ ε r δ θ a b) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖)
     hscalar_ne) hs_inj
 
-theorem modelHandleRoundMap_negPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε r : ℝ)
+theorem modelHandleRoundMap_negPart_eq_of_scalar {n k : ℕ} (ε r : ℝ)
     (hε : 0 < ε) (p p' : StandardHandle k (n - k))
     (hbb : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 =
       ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)
@@ -9872,7 +9867,7 @@ theorem modelHandleRoundMap_injective_cocore {n k : ℕ} (hk : k ≤ n) (ε r δ
         have hu0 : (p.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0
         have hu0' : (p'.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0'
         simpa [hu0, hu0'] using hpos'
-      exact modelHandleRoundMap_posPart_eq_of_scalar hk ε r δ θ hε hδ hθ hδr hθr hr p p'
+      exact modelHandleRoundMap_posPart_eq_of_scalar ε r δ θ hε hδ hθ hδr hθr hr p p'
         hbneq hbb' hqq'' hpos''
   apply Prod.ext
   · apply Subtype.ext
@@ -9965,7 +9960,7 @@ theorem modelHandleRoundMap_injective_of_eq {n k : ℕ} (hk : k ≤ n) (ε r δ 
     rw [hqn, hqn'] at hnorms
     exact hnorms
   have hu : (p.1 : EuclideanSpace ℝ (Fin k)) = (p'.1 : EuclideanSpace ℝ (Fin k)) := by
-    exact modelHandleRoundMap_negPart_eq_of_scalar hk ε r hε p p' hb hneg
+    exact modelHandleRoundMap_negPart_eq_of_scalar ε r hε p p' hb hneg
   have hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = (p'.2 : EuclideanSpace ℝ (Fin (n - k))) := by
     by_cases hw0 : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = 0
     · have hb0 : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0 := by
@@ -9977,7 +9972,7 @@ theorem modelHandleRoundMap_injective_of_eq {n k : ℕ} (hk : k ≤ n) (ε r δ 
       have hw0' : (p'.2 : EuclideanSpace ℝ (Fin (n - k))) = 0 := by
         exact norm_eq_zero.mp (sq_eq_zero_iff.mp hb0')
       rw [hw0, hw0']
-    · exact modelHandleRoundMap_posPart_eq_of_scalar hk ε r δ θ hε hδ hθ hδr hθr hr p p' hw0 hb hq hpos
+    · exact modelHandleRoundMap_posPart_eq_of_scalar ε r δ θ hε hδ hθ hδr hθr hr p p' hw0 hb hq hpos
   apply Prod.ext
   · apply Subtype.ext
     exact hu
@@ -10154,10 +10149,10 @@ theorem modelHandleRoundMap_injective {n k : ℕ} (hk : k ≤ n) (ε r δ θ : �
         nlinarith
       by_cases hlow : t < 2 * ε
       · have hq1 : modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
-          exact modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos ha1 hb0 hb1 ht_lt htpos
+          exact modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos hb0 ht_lt htpos
             (le_of_lt hlow) (by dsimp [t])
         have hq1' : modelRoundCapQ ε r δ θ a' b' = r ^ 2 * b' := by
-          exact modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha'_pos ha1' hb0' hb1' ht_lt htpos
+          exact modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha'_pos hb0' ht_lt htpos
             (le_of_lt hlow) (by simpa [t'] using ht)
         have hrb : r ^ 2 * b = r ^ 2 * b' := by
           rw [← hq1, ← hq1']
@@ -10182,7 +10177,6 @@ theorem modelHandleRoundMap_injective {n k : ℕ} (hk : k ≤ n) (ε r δ θ : �
           exact modelRoundCapInterp_injective_fixed_t (hε := hε) (hr := hr)
             (a₁ := a) (a₂ := a') (b₁ := b) (b₂ := b') (t := t)
             (ha1₀ := ha_pos) (ha2₀ := ha'_pos) (hb1₀ := hb0) (hb2₀ := hb0')
-            (ha1₁ := ha1) (ha2₁ := ha1') (hb1₁ := hb1) (hb2₁ := hb1')
             (ht0 := ht_lt) (htpos := htpos) (ht₁ := by dsimp [t])
             (ht₂ := by simpa [t'] using ht) (hφ := hφ)
         have hb_eq : b = b' := by

@@ -859,8 +859,7 @@ noncomputable def levelSetChartedSpace {m : ℕ} (g : MorseModel (m + 1) → ℝ
   mem_chart_source := fun x => mem_levelSetChart_source g a x hg (hreg x.1 x.2)
   chart_mem_atlas := fun x => ⟨x, rfl⟩
 
-@[reducible]
-noncomputable def levelSetHasGroupoid {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+theorem levelSetHasGroupoid {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
     (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0) :
     @HasGroupoid (MorseModel m) _ (LevelSetSpace g a) _ (levelSetChartedSpace g a hg hreg)
       (contDiffGroupoid (⊤ : ℕ∞) (𝓘(ℝ, MorseModel m))) := by
@@ -896,8 +895,7 @@ noncomputable def levelSetHasGroupoid {m : ℕ} (g : MorseModel (m + 1) → ℝ)
   rw [hfun, hdom]
   exact levelSetChart_transition_contDiffOn g a hg (hreg x₁.1 x₁.2) (hreg x₂.1 x₂.2)
 
-@[reducible]
-noncomputable def levelSetIsManifold {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+theorem levelSetIsManifold {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
     (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0) :
     @IsManifold ℝ _ (MorseModel m) _ _ (MorseModel m) _ (𝓘(ℝ, MorseModel m))
       (⊤ : ℕ∞) (LevelSetSpace g a) _ (levelSetChartedSpace g a hg hreg) := by
@@ -3443,8 +3441,7 @@ theorem sublevelInteriorBoundary_transition_mem_contDiffGroupoid {m : ℕ}
         rfl]
     exact contDiffOn_sublevelBoundaryInterior_transition g a hg hx₂ hx₁ hr₂
 
-@[reducible]
-noncomputable def sublevelHasGroupoid {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+theorem sublevelHasGroupoid {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
     (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0) :
     @HasGroupoid (MorseHalfSpace m) _ (SublevelSpace g a) _ (sublevelChartedSpace g a hg hreg)
       (contDiffGroupoid (⊤ : ℕ∞) (morseModelWithCornersHalfSpace m)) := by
@@ -3471,8 +3468,7 @@ noncomputable def sublevelHasGroupoid {m : ℕ} (g : MorseModel (m + 1) → ℝ)
         (lt_of_le_of_ne (show g x₁.1 ≤ a from x₁.2) hx₁)
         (lt_of_le_of_ne (show g x₂.1 ≤ a from x₂.2) hx₂)
 
-@[reducible]
-noncomputable def sublevelIsManifold {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+theorem sublevelIsManifold {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
     (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0) :
     @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
       (⊤ : ℕ∞) (SublevelSpace g a) _ (sublevelChartedSpace g a hg hreg) := by

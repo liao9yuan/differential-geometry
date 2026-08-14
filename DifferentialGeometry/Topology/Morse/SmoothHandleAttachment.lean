@@ -562,7 +562,7 @@ private theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [To
     have hnonneg : 0 ≤ Real.sqrt (2 * ε₀) := Real.sqrt_nonneg _
     have habs := sq_le_sq.mp hsq
     rwa [abs_of_nonneg hnonneg, abs_of_nonneg (le_of_lt hRpos)] at habs
-  let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R χ f
+  let g : M → ℝ := morseModifiedFunction (M := M) hk c ε₀ δ₀ R χ f
   have hgmd : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g := by
     dsimp [g]
     exact contMDiff_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' hε₀ hδ₀
@@ -571,14 +571,14 @@ private theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [To
   have hg_le : ∀ x : M, g x ≤ f x := by
     intro x
     dsimp [g]
-    exact morseModifiedFunction_le_f (H := H) (M := M) hk c ε₀ δ₀ R hε₀ χ f hnorm x
+    exact morseModifiedFunction_le_f (M := M) hk c ε₀ δ₀ R hε₀ χ f hnorm x
   have hgup : {x : M | g x ≤ c + ε₀} = sublevel f (c + ε₀) := by
     dsimp [g]
-    exact sublevel_upper_identity_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R hε₀ hδ₀
+    exact sublevel_upper_identity_morseModifiedFunction (M := M) hk c ε₀ δ₀ R hε₀ hδ₀
       hδε χ f hnorm
   have hcompactG : IsCompact (g ⁻¹' Set.Icc (c - ε₀) (c + ε₀)) := by
     dsimp [g]
-    exact isCompact_strip_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R a hε₀ hδ₀ hδε hεa
+    exact isCompact_strip_morseModifiedFunction (M := M) hk c ε₀ δ₀ R a hε₀ hδ₀ hδε hεa
       χ f hf.continuous hnorm hg hcompact
   have hregularG : ∀ x : M, x ∈ g ⁻¹' Set.Icc (c - ε₀) (c + ε₀) →
       ¬ IsCriticalPointAt I g x := by
@@ -764,7 +764,7 @@ private theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [To
       (toBase := sublevelInclusionLE hg_le (c - ε₀))
       (fromBase := sublevelUnionInclusion (c - ε₀) (χ '' (Set.range (fun z : ClosedCell k =>
         cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))))) :=
-    morseModifiedLowerSublevelHomotopyEquivUnder (H := H) (M := M) hk c ε₀ δ₀ R hε₀ hδ₀ hR'
+    morseModifiedLowerSublevelHomotopyEquivUnder (M := M) hk c ε₀ δ₀ R hε₀ hδ₀ hR'
       hRpos hεR χ f hg hnorm hχsrc
   have hcell : cellImage hk c data = χ '' (Set.range (fun z : ClosedCell k =>
       cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) := by
@@ -779,7 +779,7 @@ private theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [To
     intro x hx
     change g x ≤ c - ε₀
     dsimp [g]
-    exact lowerUnionCellImage_subset_modifiedSublevel (H := H) (M := M) hk c ε₀ δ₀ R hε₀ hδ₀ hεR
+    exact lowerUnionCellImage_subset_modifiedSublevel (M := M) hk c ε₀ δ₀ R hε₀ hδ₀ hεR
       χ f hnorm hχsrc hx
   have hlow_invFun_val : ∀ z : {x : M // x ∈ sublevel f (c - ε₀) ∪ χ '' (Set.range (fun z : ClosedCell k =>
       cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k))))}, (hlow0.invFun z).1 = z.1 := by
