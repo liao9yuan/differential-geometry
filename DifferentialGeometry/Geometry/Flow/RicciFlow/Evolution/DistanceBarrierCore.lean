@@ -21,15 +21,16 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open scoped Manifold ContDiff Topology Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
-  [InnerProductSpace Real E] [CompleteSpace E]
+  [FiniteDimensional Real E]
+  [InnerProductSpace Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
-  [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
+  [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem pathLength_timeDeriv_of_ricciFlow
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -241,6 +242,7 @@ private theorem pathLength_timeDeriv_of_ricciFlow
   rw [← hderiv]
   simpa only [Variation.arcLength, F, G, Ric, v] using hkey.2
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem pathLength_deriv_ge
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -375,6 +377,7 @@ private theorem pathLength_deriv_ge
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 private theorem intrGeo_vel_ne
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -439,6 +442,7 @@ structure ScaledDistSupport
         (I := I) (flowG (I := I) S) T
         (fun _ y => (0 : TangentSpace I y)) rho t x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem ScaledDistSupport.toResult
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -471,6 +475,7 @@ theorem ScaledDistSupport.toResult
     ⟨h.rho, h.eq_at, h.upper_nhds, h.time_diff, h.space_diff_nhds,
       h.grad_diff, h.grad_sq, h.par_lower⟩
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 private theorem exists_calabi_coeff
     (g : SmoothRiemannianMetric I M)
     {Λ : Real}
@@ -562,6 +567,7 @@ private theorem exists_calabi_coeff
       nlinarith
   exact ⟨q, hq, hRicLower, hnq⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricci_quad_of_curv
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -637,6 +643,7 @@ private structure CalabiFlowCore
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 private theorem calabi_core_of_sol
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -911,6 +918,7 @@ private theorem calabi_core_of_sol
     exact hvSupport_t y
   · exact hrho0_x.trans hr.symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem CalabiFlowCore.scale
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -1099,6 +1107,7 @@ private opaque completeInst
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem scaled_of_quad
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
