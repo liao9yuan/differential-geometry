@@ -69,7 +69,6 @@ noncomputable def covStepAcc2C (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
             (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) + 1))
 
 set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepAcc2_bound
@@ -247,8 +246,6 @@ noncomputable def iterCovThreeC (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
           (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
     else if m = 2 then covStepAcc2C (E := E) r Λ Λ' Λ'' Λ''' else 0) 3)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovThree_le

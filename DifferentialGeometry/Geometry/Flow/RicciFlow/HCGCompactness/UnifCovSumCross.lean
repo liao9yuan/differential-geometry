@@ -868,7 +868,6 @@ private theorem Dtower_nonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc
       simp only [Dtower]; linarith
 
 set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem iterCovG1_le
@@ -985,7 +984,6 @@ private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : �
         + diffStep (I := I) g₁ g₂ r T := rfl
   rw [hunfold, show telescAccum (I := I) g₁ g₂ r T 0 = 0 from rfl, covStep_zero', zero_add]
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovG1_two
