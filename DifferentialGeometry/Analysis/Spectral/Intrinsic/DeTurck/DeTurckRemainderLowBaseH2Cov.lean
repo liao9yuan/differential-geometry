@@ -1532,7 +1532,6 @@ theorem lieCovH2Pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-
   set a : ℝ := Real.sqrt (Cip * (R * A4)) with hadef
   have ha0 : 0 ≤ a := Real.sqrt_nonneg _
   have hasq : a ^ 2 = Cip * (R * A4) :=
@@ -1559,7 +1558,6 @@ theorem lieCovH2Pair
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
     linarith [sq_nonneg D3]
-
   have hUT :
       deTurckLieCovDerivArmField (I := I) (M := M) g gmT g -
         deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M)
@@ -1623,7 +1621,6 @@ theorem lieCovH2Pair
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   rw [htel, jetSmul, neg_one_sq, one_mul]
-
   have hPairD : lowJetSq (I := I) (M := M) g 2
       (lieCovPair (I := I) (M := M) g gmT -
         lieCovPair (I := I) (M := M) g gmU) ≤ (Cp * N) ^ 2 := by
@@ -1654,7 +1651,6 @@ theorem lieCovH2Pair
       hT2 hU2 hT3i hU3i hTU3 hs).trans (le_of_eq ?_)
     rw [hpl2]
     ring
-
   have hc1 : (0 : ℝ) ≤ Ca * Cp ^ 2 * Dx R :=
     mul_nonneg (mul_nonneg hCa (sq_nonneg _)) (hDx R hR)
   have hc2 : (0 : ℝ) ≤ Ca * Bp ^ 2 * Cx R :=
