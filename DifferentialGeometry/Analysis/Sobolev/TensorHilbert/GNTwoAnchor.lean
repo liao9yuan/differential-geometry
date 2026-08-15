@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -167,6 +166,59 @@ private theorem gnFam (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   choose A hA0 hA using h
   exact ⟨A, hA0, fun u Λ hΛ hsup k j hj0 hjk => hA k u Λ hΛ hsup j hj0 hjk⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+private lemma gnTwoAnchor_EA
+    (g₀ : SmoothRiemannianMetric I M) (F : M → ℝ) (hFnn : ∀ x, 0 ≤ F x)
+    (pA tA R Λ₀ : ℝ) (A : ℕ → ℝ) (n : ℕ)
+    (hpApos : 0 < pA) (htApA : tA * pA = 1) (htA1 : tA ≤ 1) (hRnn : 0 ≤ R)
+    (hΛ₀0 : 0 ≤ Λ₀) (hΛ₀1 : Λ₀ ≤ 1) (hA0 : 0 ≤ A (1 + n))
+    (hAraw : (∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tA ≤
+      A (1 + n) * Λ₀ ^ (2 * (1 - tA)) * R ^ (2 * tA)) :
+    (∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      max 1 (A (1 + n)) ^ pA * R ^ (2 : ℝ) := by
+  have hΛ₀e : Λ₀ ^ (2 * (1 - tA)) ≤ 1 := Real.rpow_le_one hΛ₀0 hΛ₀1 (by nlinarith)
+  have hEA1 : (∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tA ≤
+      max 1 (A (1 + n)) * R ^ (2 * tA) := by
+    refine le_trans hAraw ?_
+    have hstep : A (1 + n) * Λ₀ ^ (2 * (1 - tA)) * R ^ (2 * tA) ≤
+        A (1 + n) * 1 * R ^ (2 * tA) :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hΛ₀e hA0)
+        (Real.rpow_nonneg hRnn _)
+    refine le_trans hstep ?_
+    rw [mul_one]
+    exact mul_le_mul_of_nonneg_right (le_max_right 1 (A (1 + n))) (Real.rpow_nonneg hRnn _)
+  have hX : 0 ≤ ∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hFnn x) _)
+  refine le_trans (rpowFlip hX hpApos.le htApA hEA1) (le_of_eq ?_)
+  rw [Real.mul_rpow (le_trans zero_le_one (le_max_left _ _)) (Real.rpow_nonneg hRnn _),
+    ← Real.rpow_mul hRnn, show (2 : ℝ) * tA * pA = 2 by rw [mul_assoc, htApA, mul_one]]
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+private lemma gnTwoAnchor_EB
+    (g₀ : SmoothRiemannianMetric I M) (F : M → ℝ) (hFnn : ∀ x, 0 ≤ F x)
+    (pB tB R Λ₁ : ℝ) (B : ℕ → ℝ) (n : ℕ)
+    (hpBpos : 0 < pB) (htBpB : tB * pB = 1) (hRnn : 0 ≤ R) (hΛ₁0 : 0 ≤ Λ₁)
+    (hBraw : (∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tB ≤
+      B n * Λ₁ ^ (2 * (1 - tB)) * R ^ (2 * tB)) :
+    (∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      max 1 (B n) ^ pB * Λ₁ ^ (2 * (pB - 1)) * R ^ (2 : ℝ) := by
+  have hEB1 : (∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tB ≤
+      max 1 (B n) * Λ₁ ^ (2 * (1 - tB)) * R ^ (2 * tB) := by
+    refine le_trans hBraw ?_
+    refine mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right (le_max_right 1 (B n)) (Real.rpow_nonneg hΛ₁0 _))
+      (Real.rpow_nonneg hRnn _)
+  have hX : 0 ≤ ∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hFnn x) _)
+  refine le_trans (rpowFlip hX hpBpos.le htBpB hEB1) (le_of_eq ?_)
+  rw [Real.mul_rpow (mul_nonneg (le_trans zero_le_one (le_max_left _ _))
+        (Real.rpow_nonneg hΛ₁0 _)) (Real.rpow_nonneg hRnn _),
+      Real.mul_rpow (le_trans zero_le_one (le_max_left _ _)) (Real.rpow_nonneg hΛ₁0 _),
+      ← Real.rpow_mul hΛ₁0, ← Real.rpow_mul hRnn,
+      show (2 : ℝ) * tB * pB = 2 by rw [mul_assoc, htBpB, mul_one],
+      show (2 : ℝ) * (1 - tB) * pB = 2 * (pB - 1) by
+        nlinarith [htBpB]]
+
 theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ m, 0 ≤ C m) ∧
       ∀ (Ψ : SmoothCcTensor g₀ r s) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -276,43 +328,10 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     rw [hlamdef, div_le_one hden]; linarith
   have hmix : 1 / θ = lam * pA + (1 - lam) * pB := by
     rw [hlamdef]; field_simp; ring
-  have hΛ₀e : Λ₀ ^ (2 * (1 - tA)) ≤ 1 := Real.rpow_le_one hΛ₀0 hΛ₀1 (by linarith)
-  have hEA1 : (∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tA ≤
-      max 1 (A (1 + n)) * R ^ (2 * tA) := by
-    refine le_trans hAraw ?_
-    have hstep : A (1 + n) * Λ₀ ^ (2 * (1 - tA)) * R ^ (2 * tA) ≤
-        A (1 + n) * 1 * R ^ (2 * tA) :=
-      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hΛ₀e (hA0 _))
-        (Real.rpow_nonneg hRnn _)
-    refine le_trans hstep ?_
-    rw [mul_one]
-    exact mul_le_mul_of_nonneg_right (le_max_right 1 (A (1 + n))) (Real.rpow_nonneg hRnn _)
-  have hEA : ∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) ≤
-      max 1 (A (1 + n)) ^ pA * R ^ (2 : ℝ) := by
-    have hX : 0 ≤ ∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-      MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hFnn x) _)
-    refine le_trans (rpowFlip hX hpApos.le htApA hEA1) (le_of_eq ?_)
-    rw [Real.mul_rpow (le_trans zero_le_one (le_max_left _ _)) (Real.rpow_nonneg hRnn _),
-      ← Real.rpow_mul hRnn, show (2 : ℝ) * tA * pA = 2 by rw [mul_assoc, htApA, mul_one]]
-  have hEB1 : (∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tB ≤
-      max 1 (B n) * Λ₁ ^ (2 * (1 - tB)) * R ^ (2 * tB) := by
-    refine le_trans hBraw ?_
-    refine mul_le_mul_of_nonneg_right
-      (mul_le_mul_of_nonneg_right (le_max_right 1 (B n)) (Real.rpow_nonneg hΛ₁0 _))
-      (Real.rpow_nonneg hRnn _)
-  have hEB : ∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) ≤
-      max 1 (B n) ^ pB * Λ₁ ^ (2 * (pB - 1)) * R ^ (2 : ℝ) := by
-    have hX : 0 ≤ ∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-      MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hFnn x) _)
-    refine le_trans (rpowFlip hX hpBpos.le htBpB hEB1) (le_of_eq ?_)
-    rw [Real.mul_rpow (mul_nonneg (le_trans zero_le_one (le_max_left _ _))
-        (Real.rpow_nonneg hΛ₁0 _)) (Real.rpow_nonneg hRnn _),
-      Real.mul_rpow (le_trans zero_le_one (le_max_left _ _)) (Real.rpow_nonneg hΛ₁0 _),
-      ← Real.rpow_mul hΛ₁0, ← Real.rpow_mul hRnn,
-      show (2 : ℝ) * tB * pB = 2 by rw [mul_assoc, htBpB, mul_one],
-      show (2 : ℝ) * (1 - tB) * pB = 2 * (pB - 1) by
-        field_simp
-        nlinarith [htBpB]]
+  have hEA := gnTwoAnchor_EA (I := I) (M := M) g₀ F hFnn pA tA R Λ₀ A n
+    hpApos htApA htA1 hRnn hΛ₀0 hΛ₀1 (hA0 (1 + n)) hAraw
+  have hEB := gnTwoAnchor_EB (I := I) (M := M) g₀ F hFnn pB tB R Λ₁ B n
+    hpBpos htBpB hRnn hΛ₁0 hBraw
   have hnd_ne : ((n : ℝ) - (d : ℝ)) ≠ 0 := ne_of_gt (by linarith)
   have hlam' : 1 - lam = (1 / θ - pA) / (pB - pA) := by
     rw [hlamdef]; field_simp; ring
