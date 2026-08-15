@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -174,7 +173,8 @@ lemma slotExtend_zero_cc (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) =
       (0 : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x).comp
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D) from rfl]
-  rw [ContinuousLinearMap.zero_comp, map_zero]
+  rw [ContinuousLinearMap.zero_comp,
+    ContinuousLinearEquiv.map_zero (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
   rw [show ((0 : SmoothCcTensor g (r + 1) (s + 1)).toSection x) =
       (0 : TensorRSSpace (r + 1) (s + 1) I x) from by
     rw [SmoothCcTensor.toSection_zero]; rfl]
