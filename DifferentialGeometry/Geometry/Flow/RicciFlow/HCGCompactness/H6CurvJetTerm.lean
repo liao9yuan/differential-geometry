@@ -742,6 +742,7 @@ theorem CurvJetTerm.eval_le_of
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem CurvJetTerm.eval_le_geom
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -1297,6 +1298,7 @@ theorem IntrJetAtom.bTime_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 private theorem IntrJetAtom.timeCurv_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]

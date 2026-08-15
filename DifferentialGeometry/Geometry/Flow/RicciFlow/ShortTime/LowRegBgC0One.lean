@@ -556,6 +556,7 @@ theorem omegaInner_h2
       (jetNn (I := I) (M := M) (m := 2) g _)
       (mul_nonneg hC0 hJ)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem revSlot_eq
     (g gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     (htie : ∀ (x : M) (u v : TangentSpace I x),

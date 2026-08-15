@@ -136,6 +136,7 @@ theorem halfCage_ctrl
       _ = ENNReal.ofReal ρ := hsum
   exact ⟨hyTarget, hyCoord, hyp⟩
 
+omit [CompleteSpace E] in
 theorem halfSq_inf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -222,6 +223,7 @@ theorem halfSq_inf
   · intro y hy
     exact d.halfCage_ctrl k hcomplete hconn x hρ hρChart hy
 
+omit [CompleteSpace E] in
 theorem grad_half
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -323,6 +325,7 @@ theorem grad_half
   · intro z hz
     exact d.halfCage_ctrl k hcomplete hconn x hρ hρChart hz
 
+omit [CompleteSpace E] in
 theorem hess_half
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -1420,6 +1423,7 @@ theorem hess_pos
     simpa only [c, hptDecode] using hhess
   nlinarith
 
+omit [CompleteSpace E] in
 theorem center_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

@@ -25,6 +25,7 @@ variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 variable [NeZero (Module.finrank Real E)]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciDriftOwnSq_le (g : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g x 4 (ricciDrift04 (I := I) g x) ≤
       16 * (Module.finrank Real E : Real) ^ 6 *
@@ -66,6 +67,7 @@ def uhlSpeed04 (g : SmoothRiemannianMetric I M)
       (riemannOp (metricCov (I := I) g) x)
 
 omit [NeZero (Module.finrank Real E)] in
+omit [SigmaCompactSpace M] in
 theorem uhlSpeed04_low {Idx : Type*} [Fintype Idx]
     (g : SmoothRiemannianMetric I M)
     (R : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -97,6 +99,7 @@ theorem uhlSpeed04_low {Idx : Type*} [Fintype Idx]
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem uhlSpeedSq_le (g : SmoothRiemannianMetric I M)
     (R : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
