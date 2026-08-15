@@ -1115,7 +1115,8 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
           _ ≤ (Module.finrank ℝ E : ℝ) ^ 3 *
               ((∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                 (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) * WW) := by
-              have hfr3' : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 3 := by positivity
+              have hfr3' : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 3 :=
+                pow_nonneg (Nat.cast_nonneg _) _
               exact mul_le_mul_of_nonneg_left hmain hfr3'
           _ ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * BB i (i'' + 1)) * WW := by
               rw [hBBval i (i'' + 1)]
