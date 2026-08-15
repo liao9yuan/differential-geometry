@@ -1810,6 +1810,7 @@ import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Comparison.CenterOfMass
 import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.ConvexBalls
+import DifferentialGeometry.Geometry.Comparison.ConvexShaving
 import DifferentialGeometry.Geometry.Comparison.DistanceCalabi
 import DifferentialGeometry.Geometry.Comparison.DistanceSemiconcavity
 import DifferentialGeometry.Geometry.Comparison.EndpointContinuation
@@ -2926,6 +2927,7 @@ import DifferentialGeometry.Geometry.Topology.DirectLimit
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
 import DifferentialGeometry.Geometry.Topology.FiniteAtlasIndexOnCompact
+import DifferentialGeometry.Geometry.Topology.RelativeFrontier
 import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Geometry.Topology.StandardModel

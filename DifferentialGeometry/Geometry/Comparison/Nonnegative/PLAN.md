@@ -159,11 +159,28 @@ argument.  No complete Toponogov hierarchy is required for this route.
 levels, proves that this infimum is attained, and packages the resulting
 minimum core as nonempty, compact, and totally convex.
 
-The next N4 frontier is relative-boundary shaving of this minimum core to a
-terminal compact boundaryless totally geodesic submanifold.  This requires
-honest inner-parallel-set, distance-to-boundary, dimension-drop, and
-submanifold producers; it must not be replaced by an assumption bundle that
-restates the Soul theorem.
+`Comparison/ConvexShaving.lean` now provides the generic inner-parallel and
+deepest-set calculus for an explicit boundary set, while
+`Topology/RelativeFrontier.lean` defines interior, frontier, and closure in an
+explicit carrier.  The generic calculus proves compact maximum attainment and
+preservation of total convexity from geodesic concavity of boundary distance.
+It deliberately does not manufacture the smooth stratum or its boundary.
+
+The next N4 frontier is the convex-stratum theorem for the minimum core `C`:
+a connected embedded totally geodesic smooth stratum `N` that is relatively
+open and dense in `C`, with closure `C`.  Its convex boundary is then
+`C \ N = frontierIn C N`.  After that, the remaining producers are concavity
+of distance to this relative boundary, the flat-rectangle equality case,
+strict stratum-dimension drop, and the terminal submanifold.  Ambient
+`frontier C` cannot be used after dimension drop, while `frontierIn C C` is
+empty.  These gaps must not be replaced by an assumption bundle that restates
+the Soul theorem.
+
+The pure topology and metric bridge beyond this theorem is already complete:
+the relative frontier is compact in a compact core, and a nonempty stratum and
+nonempty frontier give a core point at strictly positive frontier distance.
+Thus the immediate blocker is the smooth dense-stratum producer itself, not
+maximum attainment or boundary-distance nondegeneracy.
 
 ## Honest progress
 
@@ -187,8 +204,10 @@ restates the Soul theorem.
 - Compact totally convex minimum ray level: 100% after focused, targeted,
   full-project, and direct axiom verification.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  31--32% through rays, convexity, compact exhaustion and minimum core, Calabi
-  comparison, and the all-segment Busemann theorem.
+  32--33% through rays, convexity, compact exhaustion and minimum core, Calabi
+  comparison, the all-segment Busemann theorem, and the generic shaving and
+  relative-frontier consumers.  The dense-stratum and dimension-drop
+  mathematics remain unproved.
 - Whole B1 nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.

@@ -69,6 +69,14 @@ def IsGeodesicConcave (g : SmoothRiemannianMetric I M) (f : M → ℝ) : Prop :=
     ContinuousOn γ (Set.Icc a b) →
     ConcaveOn ℝ (Set.Icc a b) (f ∘ γ)
 
+def IsGeodesicConcaveOn (g : SmoothRiemannianMetric I M)
+    (C : Set M) (f : M → ℝ) : Prop :=
+  ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
+    Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    ContinuousOn γ (Set.Icc a b) →
+    Set.MapsTo γ (Set.Icc a b) C →
+    ConcaveOn ℝ (Set.Icc a b) (f ∘ γ)
+
 def IsTotallyConvex (g : SmoothRiemannianMetric I M) (S : Set M) : Prop :=
   ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
     Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
@@ -132,6 +140,28 @@ theorem of_global
   exact congrArg f (hEq ht).symm
 
 end IsGeodesicConcave
+
+namespace IsGeodesicConcaveOn
+
+variable {g : SmoothRiemannianMetric I M} {C : Set M} {f : M → ℝ}
+
+theorem superlevel (hf : IsGeodesicConcaveOn (I := I) g C f)
+    (hC : IsTotallyConvex (I := I) g C) (c : ℝ) :
+    IsTotallyConvex (I := I) g (C ∩ {x | c ≤ f x}) := by
+  rintro γ a b hab hγ hcont ⟨haC, ha⟩ ⟨hbC, hb⟩
+  have hmaps := hC hab hγ hcont haC hbC
+  intro t ht
+  refine ⟨hmaps ht, ?_⟩
+  have ht' : t ∈ segment ℝ a b := by
+    rw [segment_eq_Icc hab]
+    exact ht
+  have hbound := (hf hab hγ hcont hmaps).ge_on_segment
+    (show a ∈ Set.Icc a b from ⟨le_rfl, hab⟩)
+    (show b ∈ Set.Icc a b from ⟨hab, le_rfl⟩) ht'
+  simpa only [Function.comp_apply, min_self] using
+    (min_le_min ha hb).trans hbound
+
+end IsGeodesicConcaveOn
 
 namespace IsTotallyConvex
 
@@ -305,6 +335,27 @@ theorem IsTotallyConvex.joinedIn {g : SmoothRiemannianMetric I M} {S : Set M}
     (minJoin_one (I := I) g hEnorm a b) ?_
   rintro x ⟨t, ht, rfl⟩
   exact hS.minJoin hEnorm ha hb ht
+
+
+theorem IsTotallyConvex.isPathConnected
+    {g : SmoothRiemannianMetric I M} {S : Set M}
+    (hS : IsTotallyConvex (I := I) g S)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hne : S.Nonempty) : IsPathConnected S := by
+  rw [isPathConnected_iff]
+  refine ⟨hne, ?_⟩
+  intro a ha b hb
+  exact hS.joinedIn hEnorm ha hb
+
+
+theorem IsTotallyConvex.isConnected
+    {g : SmoothRiemannianMetric I M} {S : Set M}
+    (hS : IsTotallyConvex (I := I) g S)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hne : S.Nonempty) : IsConnected S :=
+  (hS.isPathConnected hEnorm hne).isConnected
 
 
 theorem minJoin_edist_le
