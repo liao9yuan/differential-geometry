@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputS
 
 noncomputable section
 
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -594,11 +593,11 @@ lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (g₀ : SmoothRiemannianMetri
     have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB, hbC,
+    linarith [h1, h2, hbA, hbB, hbC,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PA,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PB,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PC]
-  nlinarith [hsum, hR2_nn,
+  linarith [hsum, hR2_nn,
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
 
 omit [NeZero (Module.finrank ℝ E)] in
