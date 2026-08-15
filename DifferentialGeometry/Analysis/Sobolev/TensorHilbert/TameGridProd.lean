@@ -170,6 +170,59 @@ theorem gridIntTwo (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ) :
   rw [Fin.prod_univ_two]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private lemma gridIntGrad_low
+    (g₀ : SmoothRiemannianMetric I M)
+    (K2 : ℕ → ℝ)
+    (P : SmoothCcTensor g₀ 0 2) {Λ₁ : ℝ}
+    (hcap : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) ≤ Λ₁ ^ 2)
+    (m d₁ d₂ : ℕ) (hm2 : ¬ 2 ≤ m) (hd : d₁ + d₂ = m) :
+    (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + d₁)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (1 + d₁) P).toSection x) *
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + d₂)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (1 + d₂) P).toSection x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      max (K2 m) 1 * (1 + Λ₁ ^ 2) * ‖iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P‖ ^ 2 := by
+  classical
+  set Rtop : ℝ := ‖iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P‖ with hRtop
+  have hRtop_nn : (0 : ℝ) ≤ Rtop ^ 2 := sq_nonneg _
+  have hΛsq_nn : (0 : ℝ) ≤ Λ₁ ^ 2 := sq_nonneg _
+  have hone_le : (1 : ℝ) ≤ max (K2 m) 1 := le_max_right _ _
+  have hcase : (1 + d₁) = 1 ∧ (1 + d₂) = 1 + m ∨
+      (1 + d₂) = 1 ∧ (1 + d₁) = 1 + m := by omega
+  have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
+    mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
+  have hfin : Λ₁ ^ 2 * Rtop ^ 2 ≤ max (K2 m) 1 * (1 + Λ₁ ^ 2) * Rtop ^ 2 := by
+    calc Λ₁ ^ 2 * Rtop ^ 2 ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
+          mul_le_mul_of_nonneg_right (by linarith) hRtop_nn
+      _ ≤ max (K2 m) 1 * ((1 + Λ₁ ^ 2) * Rtop ^ 2) := le_mul_of_one_le_left hpos hone_le
+      _ = max (K2 m) 1 * (1 + Λ₁ ^ 2) * Rtop ^ 2 := by ring
+  rcases hcase with ⟨h1, h2'⟩ | ⟨h1, h2'⟩
+  · have hd1 : d₁ = 0 := by omega
+    have hd2 : d₂ = m := by omega
+    subst d₁; subst d₂
+    exact le_trans (intCapMul (I := I) (M := M) g₀
+      (iteratedCovGrad (I := I) g₀ 0 2 1 P)
+      (iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P) hcap) hfin
+  · have hd1 : d₂ = 0 := by omega
+    have hd2 : d₁ = m := by omega
+    subst d₁; subst d₂
+    have hcomm : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + m)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P).toSection x) *
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) =
+        ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + m)) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P).toSection x) ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+      ring
+    rw [hcomm]
+    exact le_trans (intCapMul (I := I) (M := M) g₀
+      (iteratedCovGrad (I := I) g₀ 0 2 1 P)
+      (iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P) hcap) hfin
+
 theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ k, 0 ≤ K k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₁ : ℝ}, 0 ≤ Λ₁ →
@@ -282,34 +335,10 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
     have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
       mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
     nlinarith [mul_le_mul_of_nonneg_right hKmax hpos]
-  · have hcase : c₁ = 1 ∧ c₂ = 1 + m ∨ c₂ = 1 ∧ c₁ = 1 + m := by omega
-    have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
-      mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
-    have hfin : Λ₁ ^ 2 * Rtop ^ 2 ≤ max (K2 m) 1 * (1 + Λ₁ ^ 2) * Rtop ^ 2 := by
-      calc Λ₁ ^ 2 * Rtop ^ 2 ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
-            mul_le_mul_of_nonneg_right (by linarith) hRtop_nn
-        _ ≤ max (K2 m) 1 * ((1 + Λ₁ ^ 2) * Rtop ^ 2) := le_mul_of_one_le_left hpos hone_le
-        _ = max (K2 m) 1 * (1 + Λ₁ ^ 2) * Rtop ^ 2 := by ring
-    rcases hcase with ⟨h1, h2'⟩ | ⟨h1, h2'⟩
-    · subst h1; subst h2'
-      exact le_trans (intCapMul (I := I) (M := M) g₀
-        (iteratedCovGrad (I := I) g₀ 0 2 1 P)
-        (iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P) hcap) hfin
-    · subst h1; subst h2'
-      have hcomm : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + m)) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P).toSection x) *
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) ∂μ) =
-          ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) *
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + m)) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P).toSection x) ∂μ := by
-        refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-        ring
-      rw [hcomm]
-      exact le_trans (intCapMul (I := I) (M := M) g₀
-        (iteratedCovGrad (I := I) g₀ 0 2 1 P)
-        (iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P) hcap) hfin
+  · obtain ⟨d₁, rfl⟩ : ∃ d, c₁ = 1 + d := ⟨c₁ - 1, by omega⟩
+    obtain ⟨d₂, rfl⟩ : ∃ d, c₂ = 1 + d := ⟨c₂ - 1, by omega⟩
+    have hdsum : d₁ + d₂ = m := by omega
+    exact gridIntGrad_low (I := I) (M := M) g₀ K2 P hcap m d₁ d₂ hm2 hdsum
 
 theorem gridIntPull (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ k, 0 ≤ K k) ∧
