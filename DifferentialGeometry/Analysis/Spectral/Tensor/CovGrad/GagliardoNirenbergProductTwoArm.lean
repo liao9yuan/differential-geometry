@@ -741,6 +741,10 @@ private theorem young_arm_split_scaled
     _ ≤ CS * CT * (t * X + (1 / t) ^ k * Y) :=
         mul_le_mul_of_nonneg_left hXY (by positivity)
 
+private lemma gnProduct_cell_zero_tail (a b c d : ℝ) (h1 : a ≤ b) (h2 : b ≤ c) (h3 : 0 ≤ d) :
+    a ≤ d + c := by
+  linarith
+
 private lemma gnProduct_cell_tail
     (CS CT Cbig tt ΛT NS ΛS NT : ℝ) (k : ℕ)
     (hCSCT : CS * CT ≤ Cbig) (hbase : 0 ≤ tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) :
@@ -885,7 +889,10 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         have h1 : (1 : ℝ) ≤ Cbig * (1 / tt) ^ k := by nlinarith
         nlinarith [mul_nonneg (sq_nonneg ΛS) (sq_nonneg NT)]
       have htop_nn : 0 ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) := by positivity
-      linarith [hbound, harm]
+      exact gnProduct_cell_zero_tail
+        (∫ x, Sj 0 x * Tj (k - 0) x ∂μ) (ΛS ^ 2 * NT ^ 2)
+        (Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2))
+        (Cbig * tt * (ΛT ^ 2 * NS ^ 2)) hbound harm htop_nn
     · have hl_pos : 0 < k - i := by omega
       set l : ℕ := k - i with hl
       have hil : i + l = k := by omega
