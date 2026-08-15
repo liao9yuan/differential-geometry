@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibr
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 noncomputable section
 
@@ -216,7 +215,7 @@ private theorem ricciSelf_rfns_le
       (I := I) (M := M) g 4 (2 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB,
+    linarith [h1, h2, hbA, hbB,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 4 (2 + i) x PA,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 4 (2 + i) x PB,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 4 (2 + i) x PC]
@@ -266,7 +265,7 @@ private theorem ricciSelf_grid
           ((iteratedCovGrad (I := I) g 4 2 (i' + 1)
             (cometricDoubleTraceField (I := I) g 2)).toSection x)
       simp only [selfTraceC, Nat.succ_ne_zero, if_false] at htrace ⊢
-      nlinarith
+      linarith
 
 theorem phiSelf_grid
     (g g_bg : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
@@ -336,7 +335,7 @@ theorem phiSelf_grid
     (I := I) (M := M) g 4 (2 + i) x (A + B) (R + R)
   have hout := riemannianFiberNormSq_sub_le
     (I := I) (M := M) g 4 (2 + i) x (A + B - (R + R)) P
-  nlinarith [hAB, hRR, hmid, hout, hAbound, hBbound, hRbound, hPbound,
+  linarith [hAB, hRR, hmid, hout, hAbound, hBbound, hRbound, hPbound,
     selfTraceC_nonneg (E := E) i]
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
