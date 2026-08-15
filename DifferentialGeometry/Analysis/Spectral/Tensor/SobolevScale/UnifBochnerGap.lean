@@ -1702,7 +1702,22 @@ structure IsCurvAction0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (K : ℝ) 
     ‖pointwiseTensorCurv (I := I) (M := M) g₀ s S‖ ≤
       K * ∑ a ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 s a S‖
 
-set_option maxHeartbeats 1600000 in
+private lemma bochner_step_action_tail
+    (A B C D Cbase K : ℝ)
+    (hbase : A ≤ B + Cbase * D)
+    (hpair : |C| ≤ K * D) :
+    A - C ≤ B + (Cbase + K) * D := by
+  have hneg : -C ≤ |C| := by
+    simpa using (le_abs_self (-C) : -C ≤ |(-C : ℝ)|)
+  nlinarith
+
+private lemma baseAddLower_tail
+    (A I D S X Y C0 : ℝ)
+    (hI : 2 * I ≤ 2 * ((X * S) * (Y * S)))
+    (hD : D ≤ C0 * S ^ 2) :
+    A + 2 * I + D ≤ A + (C0 + 2 * (X * Y)) * S ^ 2 := by
+  nlinarith
+
 theorem bochner_step_action
     (g₀ : SmoothRiemannianMetric I M) (s k : ℕ)
     (K : ℝ) (hact : IsCurvAction0 (I := I) (M := M) g₀ (s + k) K)
@@ -1838,11 +1853,14 @@ theorem bochner_step_action
           (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2 := by
     rw [SmoothCcTensor.norm_toL2]
   rw [hLHS_norm_sq, hweitz, hbase_eq, hbase_toL2]
-  have hneg_le := neg_abs_le
+  exact bochner_step_action_tail
+    (‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + k) P‖ ^ 2)
+    (‖iteratedCovGrad (I := I) g₀ 0 s k
+      (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2)
     (tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
       (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
       (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun)
-  nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hact.nonneg]
+    (SUM ^ 2) Cbase K hbase_le hpair_bound
 
 def h2CovsumC (K : ℝ) : ℝ := 2 + Real.sqrt (1 + 4 * K)
 
@@ -2327,7 +2345,6 @@ theorem rawConnLapIter_const
           (mul_le_mul_of_nonneg_left hsub_le hCfun_nn)
     _ = ((Module.finrank ℝ E : ℝ) + roughLapCommC Fc a 0) * FULL := by ring
 
-set_option maxHeartbeats 12800000 in
 theorem baseAddLower_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2478,7 +2495,16 @@ theorem baseAddLower_const
           (Real.sqrt (Module.finrank ℝ E : ℝ) * (roughLapCommC Fc (j + 1) 1 * SUM))) := by
       have := (abs_le.mp hcross_abs).2
       linarith [this]
-    nlinarith [hcross_le, hDnorm_sq, hSUM_nn, hCrc_nn, hdimR_nn, hC0_nn, hC1_nn]
+    have hcross_le' : 2 * (⟪A, D⟫_ℝ : ℝ) ≤
+        2 * ((rawLapIterC Fc (Module.finrank ℝ E) j * SUM) *
+          ((Real.sqrt (Module.finrank ℝ E : ℝ) * roughLapCommC Fc (j + 1) 1) * SUM)) := by
+      simpa [mul_assoc, mul_left_comm, mul_comm] using hcross_le
+    exact baseAddLower_tail
+      (‖A‖ ^ 2) ((⟪A, D⟫_ℝ : ℝ)) (‖D‖ ^ 2) SUM
+      (rawLapIterC Fc (Module.finrank ℝ E) j)
+      (Real.sqrt (Module.finrank ℝ E : ℝ) * roughLapCommC Fc (j + 1) 1)
+      (roughLapCommC Fc (j + 1) 0 ^ 2)
+      hcross_le' hDnorm_sq
 
 theorem bochnerStep_const
     (g₀ : SmoothRiemannianMetric I M)
