@@ -68,7 +68,6 @@ noncomputable def covStepAcc2C (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
           (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
             (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) + 1))
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepAcc2_bound
@@ -93,7 +92,6 @@ theorem covStepAcc2_bound
     exact le_max_left _ _
   have hC₂ := covStepDiff2_le (I := I) g₁ g₂ r
     (metricUniformEquivalentOn_symm (I := I) hEq) hJet1 hJet2 hJet3 hjet
-
   set CA0 : ℝ := (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
     (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) with hCA0def
   set CA1 : ℝ := ((r + 1 : ℕ) : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 3)) *
@@ -101,14 +99,12 @@ theorem covStepAcc2_bound
   set cs0 : ℝ := (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 1)) *
     ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) with hcs0def
   intro T x hx
-
   have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
   have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hjet x hx)
   have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans (Real.sqrt_nonneg _) (hJet2 x hx)
   have hCA0nn : (0 : ℝ) ≤ CA0 := by rw [hCA0def]; positivity
   have hCA1nn : (0 : ℝ) ≤ CA1 := by rw [hCA1def]; positivity
   have hcs0nn : (0 : ℝ) ≤ cs0 := by rw [hcs0def]; positivity
-
   have hsplit : covStep (I := I) g₂ (r + 2) (telescAccum (I := I) g₁ g₂ r T 2)
       = covStep (I := I) g₂ (r + 2)
             (covStep (I := I) g₂ (r + 1) (diffStep (I := I) g₁ g₂ r T))
@@ -137,13 +133,11 @@ theorem covStepAcc2_bound
         + covStep (I := I) g₂ (r + 2)
             (diffStep (I := I) g₁ g₂ (r + 1) (iterCov (I := I) g₂ r T 1)) x := by
     rw [hsplit]; rfl
-
   obtain ⟨basis, hON⟩ :=
     DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g₂ x
   have hinv : MetricInverseInBasis_gen (I := I) g₂ x basis
       (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
     intro i j; constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
-
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]
   set p0 := Real.sqrt (normSq0S (I := I) g₂ x (r + 0) (iterCov (I := I) g₂ r T 0 x)) with hp0def
   set p1 := Real.sqrt (normSq0S (I := I) g₂ x (r + 1) (iterCov (I := I) g₂ r T 1 x)) with hp1def
@@ -151,7 +145,6 @@ theorem covStepAcc2_bound
   have hp0nn : 0 ≤ p0 := Real.sqrt_nonneg _
   have hp1nn : 0 ≤ p1 := Real.sqrt_nonneg _
   have hp2nn : 0 ≤ p2 := Real.sqrt_nonneg _
-
   have hb1' : Real.sqrt (normSq0S (I := I) g₂ x (r + 3)
         (covStep (I := I) g₂ (r + 2)
           (covStep (I := I) g₂ (r + 1) (diffStep (I := I) g₁ g₂ r T)) x)) ≤
@@ -170,7 +163,6 @@ theorem covStepAcc2_bound
       CA1 * (p1 + p2) :=
     covStepDiff_of_jets (I := I) g₁ g₂ (r + 1) (iterCov (I := I) g₂ r T 1) x
       (metricUniformEquivalentOn_symm (I := I) hEq) hJet1 hJet2 hjet hx
-
   have hb2a' : Real.sqrt (normSq0S (I := I) g₂ x (r + 1) (diffStep (I := I) g₁ g₂ r T x)) ≤
       cs0 * p0 :=
     diffStep_jet_one_le (I := I) g₁ g₂ r T hEq hjet hx
@@ -184,7 +176,6 @@ theorem covStepAcc2_bound
           (diffStep (I := I) g₁ g₂ (r + 1) (diffStep (I := I) g₁ g₂ r T)) x)) ≤
       CA1 * (cs0 * p0 + CA0 * (p0 + p1)) :=
     le_trans hb2' (mul_le_mul_of_nonneg_left (add_le_add hb2a' hb2b') hCA1nn)
-
   set av := covStep (I := I) g₂ (r + 2)
     (covStep (I := I) g₂ (r + 1) (diffStep (I := I) g₁ g₂ r T)) x with hav
   set bv := covStep (I := I) g₂ (r + 2)
@@ -192,13 +183,19 @@ theorem covStepAcc2_bound
   set cv := covStep (I := I) g₂ (r + 2)
     (diffStep (I := I) g₁ g₂ (r + 1) (iterCov (I := I) g₂ r T 1)) x with hcv
   clear_value av bv cv
-
   have hSle : C₂ * (p0 + p1 + p2) + CA1 * (cs0 * p0 + CA0 * (p0 + p1)) + CA1 * (p1 + p2)
       ≤ (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := by
-    nlinarith [mul_nonneg (mul_nonneg hCA1nn hcs0nn) hp1nn,
-      mul_nonneg (mul_nonneg hCA1nn hcs0nn) hp2nn,
-      mul_nonneg (mul_nonneg hCA1nn hCA0nn) hp2nn,
-      mul_nonneg hCA1nn hp0nn]
+    have h1 : 0 ≤ CA1 * cs0 * p1 := by positivity
+    have h2 : 0 ≤ CA1 * cs0 * p2 := by positivity
+    have h3 : 0 ≤ CA1 * CA0 * p2 := by positivity
+    have h4 : 0 ≤ CA1 * p0 := by positivity
+    have hdiff :
+        (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) -
+            (C₂ * (p0 + p1 + p2) + CA1 * (cs0 * p0 + CA0 * (p0 + p1)) + CA1 * (p1 + p2))
+          = CA1 * cs0 * p1 + CA1 * cs0 * p2 + CA1 * CA0 * p2 + CA1 * p0 := by
+      ring
+    rw [← sub_nonneg, hdiff]
+    exact add_nonneg (add_nonneg (add_nonneg h1 h2) h3) h4
   have hfin : (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2)
       ≤ max 0 (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) :=
     mul_le_mul_of_nonneg_right (le_max_right _ _)
