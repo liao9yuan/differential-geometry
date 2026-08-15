@@ -1348,7 +1348,6 @@ private theorem coreBddH1
   exact hmain
 
 set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem dlaBg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -2711,7 +2710,6 @@ private theorem kappaSelfHs
         nlinarith [sq_nonneg (Ch * N)]
 
 set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 private theorem amixHalfH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -3240,8 +3238,6 @@ private theorem lie0_bg_split
     lc0_decomp (I := I) (M := M) g gU g]
   module
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem lie0_bg_pair_h1
     (hDim : Module.finrank ℝ E = 3)

@@ -31,7 +31,6 @@ variable
 
 namespace LowRegBgC0Core
 
-set_option maxHeartbeats 2400000 in
 theorem daWeightPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -152,7 +151,6 @@ theorem daWeightPairH2
       simp only [B, x, y]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem daTransPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

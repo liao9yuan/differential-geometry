@@ -31,7 +31,6 @@ variable
 
 namespace LowRegBgC0Core
 
-set_option maxHeartbeats 3200000 in
 theorem vbOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -286,7 +285,6 @@ theorem prod23Sub
   rw [prod23, prod23, prod23, ← appCcRS_sub_right,
     ← slotIterSub]
 
-set_option maxHeartbeats 4000000 in
 theorem amixOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -517,7 +515,6 @@ theorem amixOne_h2
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
     _ ≤ (B R * (1 + A)) ^ 2 := le_rfl
 
-set_option maxHeartbeats 1200000 in
 theorem omegaInner_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -768,7 +765,6 @@ def OmegaOneH2
   lowJetSq (I := I) (M := M) g 2
       (omegaOne (I := I) (M := M) g gm) ≤ B R ^ 2
 
-set_option maxHeartbeats 1200000 in
 theorem omegaOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -790,7 +786,6 @@ theorem omegaOne_h2
     hfull gm P hP htie R hR hP2
   exact hmul gm (Bf R) Bi (hBf R hR) hBi hf hi
 
-set_option maxHeartbeats 1600000 in
 theorem omegaOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1173,7 +1168,6 @@ theorem jetAddSix
     (A + B + C + D + E') F).trans ?_
   nlinarith [sq_nonneg X]
 
-set_option maxHeartbeats 2400000 in
 theorem quadOpPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1408,7 +1402,6 @@ def QbaH2
       (qaOne (I := I) (M := M) g gm) ≤
       (Ba R * (1 + A)) ^ 2
 
-set_option maxHeartbeats 1200000 in
 theorem qba_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1569,7 +1562,6 @@ def QuadOpH2
       (quadOp (I := I) (M := M) g gm) ≤
     (B R * (1 + A)) ^ 2
 
-set_option maxHeartbeats 1600000 in
 theorem quadOp_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1728,7 +1720,6 @@ def QuadMidH2
       (quadMid (I := I) (M := M) g gm W) ≤
     (B R * (1 + A)) ^ 2
 
-set_option maxHeartbeats 1200000 in
 theorem quadMid_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1809,7 +1800,6 @@ def QuadActH2
       (quadAct (I := I) (M := M) g gm W) ≤
     (B R * (1 + A)) ^ 2
 
-set_option maxHeartbeats 1200000 in
 theorem quadAct_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1863,7 +1853,6 @@ theorem midScaleSq (p f c d b r a q : ℝ) :
       (p * f * c * (d * r + b) * a * q) ^ 2 := by
   ring
 
-set_option maxHeartbeats 3200000 in
 theorem quadMidPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2032,7 +2021,6 @@ theorem actScaleSq (p c m b d a q : ℝ) :
       (p * (c * m + b * d) * a * q) ^ 2 := by
   ring
 
-set_option maxHeartbeats 3200000 in
 theorem quadActPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2186,7 +2174,6 @@ theorem quadActPairH2
   simpa only [B] using
     actScaleSq P Cp (Bmb R) Bp (Bmd R) (1 + A) D
 
-set_option maxHeartbeats 1600000 in
 theorem lowOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2350,7 +2337,6 @@ theorem lowOne_h2
       simpa only [mul_pow] using
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
 
-set_option maxHeartbeats 1200000 in
 theorem lowOneA_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

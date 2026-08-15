@@ -345,7 +345,6 @@ private theorem kappa_fix_h2
       connLow_rfns (I := I) (M := M) g gB i x)
 
 set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem psiBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -724,8 +723,6 @@ private theorem lieTrace_eq1
   rw [reindexCoeffFibGen_apply, deTurckLieTraceFib,
     ContinuousLinearMap.comp_apply, domDomCongrFibPerm_apply]
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem lieBgCorr_unif
     (hDim : Module.finrank ℝ E = 3)
@@ -1028,8 +1025,6 @@ private theorem rhs1_corr_eq
   simp only [rhsLow1Coeff]
   abel
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem lowC1Corr_unif
     (hDim : Module.finrank ℝ E = 3)
@@ -1134,8 +1129,6 @@ theorem lowC1Corr_unif
     (B := B R) (hB R hR) hpoint
   simpa only [lowC1CorrInt, Φ, S, lowJetSq, Nat.reduceAdd] using hpath
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 private theorem lieBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -1345,8 +1338,6 @@ private theorem lieBg_pair_h2
       simp only [Z0, Z1, B]
       ring
 
-set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 
 theorem lie1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)

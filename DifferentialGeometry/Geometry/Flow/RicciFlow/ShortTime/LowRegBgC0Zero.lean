@@ -217,7 +217,6 @@ theorem riemLive_h2_low
       simp only [K]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem lc0Riem_h2_low
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -279,7 +278,6 @@ theorem lc0Riem_h2_low
       simp only [K]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem curvZero_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -660,7 +658,6 @@ theorem curvZeroPairH2
   exact hsum.trans
     (pow_le_pow_left₀ (add_nonneg hx hy) hxy 2)
 
-set_option maxHeartbeats 1600000 in
 theorem lowZeroAPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -807,7 +804,6 @@ theorem lowZeroAPairH2
       simp only [B, Z]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem lowZeroA_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1216,7 +1212,6 @@ noncomputable def lowZeroADiff
       (lowZeroA_joint (I := I) (M := M) g T hT hδT hδZ)
       (lowZeroA_joint (I := I) (M := M) g U hU hδU hδZ))
 
-set_option maxHeartbeats 1600000 in
 theorem lowZeroIntSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -1273,7 +1268,6 @@ theorem lowZeroIntSub
     TensorRSSpace.toModel_sub]
   rw [intervalIntegral.integral_sub hTint hUint]
 
-set_option maxHeartbeats 1600000 in
 theorem lowZeroIntPair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1338,7 +1332,6 @@ theorem lowZeroIntPair
     g T U hT hU hδ_lt hδT hδU hδZ]
   simpa only [lowZeroADiff, Φ, S, lowJetSq, Nat.reduceAdd] using hpath
 
-set_option maxHeartbeats 1600000 in
 theorem lowZeroAInt_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1381,7 +1374,6 @@ theorem lowZeroAInt_h2
         hpoint T hT hδ_le hδ0 hδT hδZ R hR hT2 hTn hs)
   simpa only [lowZeroAInt, lowJetSq, Nat.reduceAdd] using hpath
 
-set_option maxHeartbeats 4000000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem connSec_zero
     (g : SmoothRiemannianMetric I M) :
@@ -1398,7 +1390,6 @@ theorem connSec_zero
   change om (0 : Fin 1 → TangentSpace I x) = 0
   exact ContinuousMultilinearMap.map_zero om
 
-set_option maxHeartbeats 4000000 in
 theorem connSec_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1478,7 +1469,6 @@ theorem connSec_h2
       mul_nonneg hc1 hR]
   exact hraw.trans (pow_le_pow_left₀ hold hlin 2)
 
-set_option maxHeartbeats 1600000 in
 theorem connInn_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1530,7 +1520,6 @@ theorem connInn_h2
       simp only [B]
       nlinarith [sq_nonneg (C R * (1 + A))]
 
-set_option maxHeartbeats 1600000 in
 theorem connOut_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1834,7 +1823,6 @@ theorem fullIns_h2
       simp only [K]
       ring
 
-set_option maxHeartbeats 2000000 in
 theorem innerAct_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2029,7 +2017,6 @@ theorem aaCap3
   unfold aaCapOne
   rcases hpm with rfl | rfl <;> linarith
 
-set_option maxHeartbeats 4000000 in
 theorem aaKerOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2283,7 +2270,6 @@ theorem fourTrace_h2
   simp only [L]
   exact mul_le_mul_of_nonneg_left hF (by norm_num)
 
-set_option maxHeartbeats 2400000 in
 theorem aaOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2360,7 +2346,6 @@ theorem aaOne_h2
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
     _ ≤ (B R * (1 + A)) ^ 2 := le_rfl
 
-set_option maxHeartbeats 1200000 in
 theorem ricciOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

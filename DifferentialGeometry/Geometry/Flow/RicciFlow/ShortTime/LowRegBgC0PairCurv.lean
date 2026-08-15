@@ -422,7 +422,6 @@ theorem reindexSubC0
     reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     ContinuousLinearMap.sub_apply]
 
-set_option maxHeartbeats 2400000 in
 theorem fourTracePair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

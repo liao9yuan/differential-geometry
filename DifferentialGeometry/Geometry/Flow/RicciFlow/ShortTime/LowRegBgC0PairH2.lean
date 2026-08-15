@@ -577,7 +577,6 @@ private theorem amixHalfH2
       dsimp only [B0, B1]
       ring
 
-set_option maxHeartbeats 2400000 in
 
 theorem amixBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -775,7 +774,6 @@ private theorem lieBgLow_raw_h2
       dsimp only [a, b, P, Q]
       ring
 
-set_option maxHeartbeats 3200000 in
 
 private theorem lieBgLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -873,7 +871,6 @@ private theorem lieBgLow_pair_h2
         dsimp only [B0, B1, X, Y]
         ring
 
-set_option maxHeartbeats 2400000 in
 
 private theorem lieBgLow_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1092,7 +1089,6 @@ private theorem rev3_bdd_h2
     _ = L R := by rfl
     _ = (B R) ^ 2 := hBsq.symm
 
-set_option maxHeartbeats 3200000 in
 
 private theorem lieBgCore_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1269,7 +1265,6 @@ private theorem lieBgCore_pair_h2
       _ = (B0 R * D3 + B1 R * D2 + B1 R * A * D2) ^ 2 := by
         rfl
 
-set_option maxHeartbeats 2400000 in
 
 private theorem lieBgCore_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1408,8 +1403,6 @@ private theorem dLaBgPass_h2
   simpa only [lowJetSq] using
     slotIter_h2 (I := I) (M := M) g 0 4 2 S
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem dlaBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1695,7 +1688,6 @@ private theorem lie0_bg_split_h2
   module
 
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 
 theorem lie0_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)

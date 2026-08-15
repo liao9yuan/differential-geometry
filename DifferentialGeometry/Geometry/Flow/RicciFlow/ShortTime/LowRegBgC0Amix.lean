@@ -585,7 +585,6 @@ theorem amixHalfPairH2
   have hhalfU : amixHalfOne (I := I) (M := M) g gU g U σ = Z4U := by rfl
   simpa only [hhalfT, hhalfU, B, D] using hZ4D
 
-set_option maxHeartbeats 1600000 in
 theorem amixOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
