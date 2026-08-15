@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -689,7 +687,6 @@ lemma rfns_iteratedCovGrad_WBform_le (g₀ : SmoothRiemannianMetric I M)
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option maxHeartbeats 12800000 in
 set_option maxHeartbeats 12800000 in
 theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
