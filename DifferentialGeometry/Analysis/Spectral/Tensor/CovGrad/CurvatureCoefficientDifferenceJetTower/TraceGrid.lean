@@ -687,7 +687,13 @@ lemma rfns_iteratedCovGrad_WBform_le (g₀ : SmoothRiemannianMetric I M)
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option maxHeartbeats 12800000 in
+private lemma tracegrid_add_tail
+    (x a b A B : ℝ)
+    (hx : x ≤ 2 * a + 2 * b) (ha : a ≤ A) (hb : b ≤ B) :
+    (2 : ℝ) ^ 2 * x ≤ (2 : ℝ) ^ 2 * (2 * A + 2 * B) := by
+  have hsum : x ≤ 2 * A + 2 * B := by nlinarith
+  nlinarith
+
 theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1092,11 +1098,19 @@ theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_
             (appCcRS (I := I) (M := M) g₀ 2 6 2 (pairTraceOp (I := I) (M := M) g₀ g₀)
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 sigmaE0
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff)))).toSection x)
-        nlinarith [hT1, hT2, hadd]
+        exact tracegrid_add_tail _ _ _ _ _ hadd hT1 hT2
     _ ≤ (8 * (cB i * (dim * dim)) +
           8 * (appCcGdiag (E := E) i * (∑ j ∈ Finset.range (i + 1), CΔ j) *
             (dim * dim) * 2)) * RHS := by
-        nlinarith [hRHS_nn]
+        have hEq : (2 : ℝ) ^ 2 *
+              (2 * ((appCcGdiag (E := E) i * (∑ j ∈ Finset.range (i + 1), CΔ j) *
+                  (dim * dim) * 2) * RHS) +
+                2 * ((cB i * (dim * dim)) * RHS)) =
+            (8 * (cB i * (dim * dim)) +
+              8 * (appCcGdiag (E := E) i * (∑ j ∈ Finset.range (i + 1), CΔ j) *
+                (dim * dim) * 2)) * RHS := by
+          ring
+        rw [hEq]
 
 theorem rfns_iteratedCovGrad_riemannMixedCoeff_backgroundDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
