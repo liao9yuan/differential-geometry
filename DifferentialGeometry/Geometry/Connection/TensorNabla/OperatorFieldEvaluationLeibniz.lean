@@ -22,6 +22,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun b : M => TensorRSSpace r s I b) b
+
 structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop where
 
@@ -48,8 +54,6 @@ theorem op_zero_value_homogeneous
   rw [hlin]
   simp only [zero_smul, add_zero]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
@@ -72,8 +76,6 @@ private lemma riemannianFiberNormSq_eq_bundle_norm_sq
     rw [← h_inner]; rfl
   rw [← hself, real_inner_self_eq_norm_sq]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
