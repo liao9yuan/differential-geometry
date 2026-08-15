@@ -213,7 +213,6 @@ private theorem h3TameSc
     mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hc2) hfr) hX
   nlinarith only [h0Y, h1Y, h2X]
 
-set_option maxHeartbeats 1600000 in
 private theorem appH3Tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -880,7 +879,6 @@ private theorem jetSub
   refine (jetAdd (I := I) (M := M) g m A (-B)).trans ?_
   rw [jetNeg (I := I) (M := M) g m B]
 
-set_option maxHeartbeats 2400000 in
 private theorem fullPairH3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1179,7 +1177,6 @@ private theorem fullPairH3
     _ = (B R * (D3 + D2 + A * D2)) ^ 2 := by
       rw [mul_pow, hBsq]
 
-set_option maxHeartbeats 1600000 in
 theorem full_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1370,7 +1367,6 @@ private def koszulH2
       permCoeff (I := I) (M := M) g (finRotate 3) -
       permCoeff (I := I) (M := M) g (Equiv.swap (1 : Fin 3) 2))
 
-set_option maxHeartbeats 3200000 in
 private theorem connPairH3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1507,7 +1503,6 @@ private theorem connPairH3
           (CP * CK) * (3 * BF R * Q) ^ 2 by ring, ← hCsq]
       ring
 
-set_option maxHeartbeats 2200000 in
 theorem dag_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
