@@ -2731,7 +2731,6 @@ private theorem quad_pair_h1
       rw [hxdef, hydef]
     _ ≤ 384 * (C₀ + C₁) * S := by nlinarith [hQB, hQA, hS0, hC₀, hC₁]
 
-set_option maxHeartbeats 1600000 in
 private theorem r4_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2865,7 +2864,6 @@ private theorem lcvPair_eq_lip
         (pureTrace (I := I) (M := M) g gm 2)
         (pureTrace (I := I) (M := M) g gm 4) := rfl
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvPair_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3143,8 +3141,6 @@ private theorem rsperm_h1_lip
   intro i _
   exact rsperm_l2_lip (I := I) (M := M) g σ S i
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem armSlot_succ_lip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -3224,7 +3220,6 @@ private theorem armSlot_succ_lip
   · rfl
   · rfl
 
-set_option maxHeartbeats 1600000 in
 private theorem rfns_arm_le_lip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -3375,8 +3370,6 @@ private theorem arm_h2_lip
             (armSlotEndoCc (I := I) (M := M) g 0 A)‖ ^ 2 := by
       rw [Finset.mul_sum]
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem armSlot_sub_lip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -3482,8 +3475,6 @@ private theorem armU_bdd_h2
         (pow_nonneg (Nat.cast_nonneg _) 2)
     _ = (((Module.finrank ℝ E : ℝ)) * Bs R * A) ^ 2 := by ring
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 private theorem armD_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -3581,7 +3572,6 @@ private theorem armD_pair_h1
         ((Module.finrank ℝ E : ℝ)) * B1 R * A * D2) ^ 2 := by
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvPair_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5484,7 +5474,6 @@ private theorem vbmcd_sub_h1_lip
   exact slot_h1_lip (I := I) (M := M) g 0 3 _
 
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem vb_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6154,7 +6143,6 @@ private theorem vb_pair_h1
       ring
 
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem amixHalf_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7078,7 +7066,6 @@ private theorem amixHalf_pair_h1
       simp only [B, hpl2, hu]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem amix_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8031,7 +8018,6 @@ private noncomputable def aaBlk
     (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
       (connDiffContrInsertionField (I := I) g gm) Z)
 
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem aaKer_eq_lip (g gm : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g gm =
@@ -8318,7 +8304,6 @@ private theorem aaBlk_pair_h1
     mul_nonneg (mul_nonneg (mul_nonneg hCa hp0) hCb) ha0,
     mul_nonneg (mul_nonneg (mul_nonneg hCa hp0) hCf) hb0]
 
-set_option maxHeartbeats 1600000 in
 private theorem aaKer_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8882,7 +8867,6 @@ private theorem aaKer_pair_h1
   apply le_of_eq
   ring
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciAA_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9069,8 +9053,6 @@ private theorem ricciAA_pair_h1
         2 * (K1 R * (W * u) + K2 R * (W * u)) := by linarith [h1, h2]
     _ = B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := hsum
 
-set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem ricciDA_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9459,8 +9441,6 @@ private theorem ricciDA_pair_h1
   refine le_trans ?_ (le_of_eq hlast)
   linarith only [hA', hB', hfold]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem good_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9956,7 +9936,6 @@ private theorem selfLow_pair_h1
       simp only [B]
       ring
 
-set_option maxHeartbeats 3200000 in
 theorem c0Diff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
