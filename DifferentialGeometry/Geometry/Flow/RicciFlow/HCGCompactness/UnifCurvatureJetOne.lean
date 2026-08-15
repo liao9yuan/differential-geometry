@@ -7,7 +7,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -292,6 +291,115 @@ noncomputable def rmOneOpC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   curvConnC Λ Kb₀ + (Real.sqrt Λ) ^ 5 * palatiniOneC Λ +
     (Real.sqrt Λ) ^ 5 * Kb₁
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma curv_aux_outer
+    (S C₀ F a b c d e f g h i : ℝ)
+    (hS : 0 ≤ S) (hC : 0 ≤ C₀)
+    (hd : 0 ≤ d) (he : 0 ≤ e) (hf : 0 ≤ f)
+    (h1 : a ≤ S * b) (h2 : b ≤ C₀ * c * d)
+    (h3 : c ≤ S * e) (h4 : d ≤ S * f)
+    (h5 : e ≤ F * g * h * i) :
+    a ≤ S ^ 3 * C₀ * F * f * g * h * i := by
+  calc
+    a ≤ S * b := h1
+    _ ≤ S * (C₀ * c * d) := by gcongr
+    _ ≤ S * (C₀ * (S * e) * (S * f)) := by gcongr
+    _ ≤ S * (C₀ * (S * (F * g * h * i)) * (S * f)) := by gcongr
+    _ = S ^ 3 * C₀ * F * f * g * h * i := by ring
+
+private lemma curv_aux_x
+    (S C₀ F a b c d e f g h i : ℝ)
+    (hS : 0 ≤ S) (hC : 0 ≤ C₀) (hF : 0 ≤ F)
+    (hd : 0 ≤ d) (hg : 0 ≤ g) (hh : 0 ≤ h) (hi : 0 ≤ i)
+    (h1 : a ≤ F * e * h * i)
+    (h2 : e ≤ S * b)
+    (h3 : b ≤ C₀ * c * d)
+    (h4 : c ≤ S * g)
+    (h5 : d ≤ S * f) :
+    a ≤ S ^ 3 * C₀ * F * f * g * h * i := by
+  calc
+    a ≤ F * e * h * i := h1
+    _ ≤ F * (S * b) * h * i := by gcongr
+    _ ≤ F * (S * (C₀ * c * d)) * h * i := by gcongr
+    _ ≤ F * (S * (C₀ * (S * g) * (S * f))) * h * i := by gcongr
+    _ = S ^ 3 * C₀ * F * f * g * h * i := by ring
+
+private lemma curv_aux_y
+    (S C₀ F a b c d e f g h i : ℝ)
+    (hS : 0 ≤ S) (hC : 0 ≤ C₀) (hF : 0 ≤ F)
+    (hd : 0 ≤ d) (hg : 0 ≤ g) (hh : 0 ≤ h) (hi : 0 ≤ i)
+    (h1 : a ≤ F * g * e * i)
+    (h2 : e ≤ S * b)
+    (h3 : b ≤ C₀ * c * d)
+    (h4 : c ≤ S * h)
+    (h5 : d ≤ S * f) :
+    a ≤ S ^ 3 * C₀ * F * f * g * h * i := by
+  calc
+    a ≤ F * g * e * i := h1
+    _ ≤ F * g * (S * b) * i := by gcongr
+    _ ≤ F * g * (S * (C₀ * c * d)) * i := by gcongr
+    _ ≤ F * g * (S * (C₀ * (S * h) * (S * f))) * i := by gcongr
+    _ = S ^ 3 * C₀ * F * f * g * h * i := by ring
+
+private lemma curv_aux_z
+    (S C₀ F a b c d e f g h i : ℝ)
+    (hS : 0 ≤ S) (hC : 0 ≤ C₀) (hF : 0 ≤ F)
+    (hd : 0 ≤ d) (hg : 0 ≤ g) (hh : 0 ≤ h) (hi : 0 ≤ i)
+    (h1 : a ≤ F * g * h * e)
+    (h2 : e ≤ S * b)
+    (h3 : b ≤ C₀ * c * d)
+    (h4 : c ≤ S * i)
+    (h5 : d ≤ S * f) :
+    a ≤ S ^ 3 * C₀ * F * f * g * h * i := by
+  calc
+    a ≤ F * g * h * e := h1
+    _ ≤ F * g * h * (S * b) := by gcongr
+    _ ≤ F * g * h * (S * (C₀ * c * d)) := by gcongr
+    _ ≤ F * g * h * (S * (C₀ * (S * i) * (S * f))) := by gcongr
+    _ = S ^ 3 * C₀ * F * f * g * h * i := by ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma sqrt_sub_le
+    (g₀ : SmoothRiemannianMetric I M) {x : M} (u v : TangentSpace I x) :
+    Real.sqrt (g₀.inner x (u - v) (u - v)) ≤
+      Real.sqrt (g₀.inner x u u) + Real.sqrt (g₀.inner x v v) := by
+  have hneg : Real.sqrt (g₀.inner x (-v) (-v)) = Real.sqrt (g₀.inner x v v) := by
+    simpa only [neg_one_smul, abs_neg, abs_one, one_mul] using
+      Geometry.Riemannian.sqrt_inner_smul (I := I) g₀ x (-1 : ℝ) v
+  calc
+    Real.sqrt (g₀.inner x (u - v) (u - v))
+        = Real.sqrt (g₀.inner x (u + -v) (u + -v)) := by rw [sub_eq_add_neg]
+    _ ≤ Real.sqrt (g₀.inner x u u) + Real.sqrt (g₀.inner x (-v) (-v)) :=
+      Geometry.Riemannian.sqrt_inner_add_le (I := I) g₀ x u (-v)
+    _ = Real.sqrt (g₀.inner x u u) + Real.sqrt (g₀.inner x v v) := by rw [hneg]
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma curv_conn_tail
+    (g₀ : SmoothRiemannianMetric I M) {x : M}
+    (L₀ : TangentSpace I x → ℝ) (u v w z : TangentSpace I x) (B : ℝ)
+    (hL₀ : ∀ a, L₀ a = Real.sqrt (g₀.inner x a a))
+    (hu : L₀ u ≤ B) (hv : L₀ v ≤ B) (hw : L₀ w ≤ B) (hz : L₀ z ≤ B) :
+    Real.sqrt (g₀.inner x (u - v - w - z) (u - v - w - z)) ≤ 4 * B := by
+  have hsub : ∀ a b : TangentSpace I x, L₀ (a - b) ≤ L₀ a + L₀ b := by
+    intro a b
+    rw [hL₀ (a - b), hL₀ a, hL₀ b]
+    exact sqrt_sub_le (I := I) (M := M) g₀ a b
+  have hle : L₀ (u - v - w - z) ≤ 4 * B := by
+    calc
+      L₀ (u - v - w - z) ≤ L₀ (u - v - w) + L₀ z := hsub (u - v - w) z
+      _ ≤ (L₀ (u - v) + L₀ w) + L₀ z := by
+        nlinarith [hsub (u - v) w]
+      _ ≤ ((L₀ u + L₀ v) + L₀ w) + L₀ z := by
+        nlinarith [hsub u v]
+      _ ≤ (B + B + B) + B := by
+        gcongr
+      _ = 4 * B := by ring
+  rw [hL₀ (u - v - w - z)] at hle
+  exact hle
+
 theorem rmOneOpC_nonneg {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 0 ≤ Λ) (hKb₁ : 0 ≤ Kb₁) :
     0 ≤ rmOneOpC Λ Kb₀ Kb₁ := by
@@ -379,103 +487,51 @@ private theorem curvConn_le_of
           (metric_inner_self_nonneg (I := I) (M := M) g₀ x v)
           (metric_inner_self_nonneg (I := I) (M := M) g₀ x w)
   have houter : L₀ (A (R X Y Z) D) ≤ B := by
-    calc
-      L₀ (A (R X Y Z) D) ≤ S * LB (A (R X Y Z) D) := h0B _
-      _ ≤ S * (C₀ * LB (R X Y Z) * LB D) := by
-        gcongr
-        exact hA _ _
-      _ ≤ S * (C₀ * (S * L₀ (R X Y Z)) * (S * L₀ D)) := by
-        gcongr
-        · exact hB0 _
-        · exact hB0 _
-      _ ≤ S * (C₀ * (S * (F * L₀ X * L₀ Y * L₀ Z)) * (S * L₀ D)) := by
-        gcongr
-        exact hR _ _ _
-      _ = B := by
-        dsimp [B]
-        ring
+    dsimp [B]
+    exact curv_aux_outer S C₀ F (L₀ (A (R X Y Z) D))
+      (LB (A (R X Y Z) D)) (LB (R X Y Z)) (LB D)
+      (L₀ (R X Y Z)) (L₀ D) (L₀ X) (L₀ Y) (L₀ Z)
+      (by positivity) hC₀0
+      (by positivity) (by positivity) (by positivity)
+      (h0B _) (hA _ _) (hB0 _) (hB0 _) (hR _ _ _)
   have hX : L₀ (R (A X D) Y Z) ≤ B := by
-    calc
-      L₀ (R (A X D) Y Z) ≤ F * L₀ (A X D) * L₀ Y * L₀ Z := hR _ _ _
-      _ ≤ F * (S * LB (A X D)) * L₀ Y * L₀ Z := by
-        gcongr
-        exact h0B _
-      _ ≤ F * (S * (C₀ * LB X * LB D)) * L₀ Y * L₀ Z := by
-        gcongr
-        exact hA _ _
-      _ ≤ F * (S * (C₀ * (S * L₀ X) * (S * L₀ D))) * L₀ Y * L₀ Z := by
-        gcongr
-        · exact hB0 _
-        · exact hB0 _
-      _ = B := by
-        dsimp [B]
-        ring
+    dsimp [B]
+    exact curv_aux_x S C₀ F (L₀ (R (A X D) Y Z))
+      (LB (A X D)) (LB X) (LB D) (L₀ (A X D))
+      (L₀ D) (L₀ X) (L₀ Y) (L₀ Z)
+      (by positivity) hC₀0 hF0
+      (by positivity) (by positivity) (by positivity) (by positivity)
+      (hR _ _ _) (h0B _) (hA _ _) (hB0 _) (hB0 _)
   have hY : L₀ (R X (A Y D) Z) ≤ B := by
-    calc
-      L₀ (R X (A Y D) Z) ≤ F * L₀ X * L₀ (A Y D) * L₀ Z := hR _ _ _
-      _ ≤ F * L₀ X * (S * LB (A Y D)) * L₀ Z := by
-        gcongr
-        exact h0B _
-      _ ≤ F * L₀ X * (S * (C₀ * LB Y * LB D)) * L₀ Z := by
-        gcongr
-        exact hA _ _
-      _ ≤ F * L₀ X * (S * (C₀ * (S * L₀ Y) * (S * L₀ D))) * L₀ Z := by
-        gcongr
-        · exact hB0 _
-        · exact hB0 _
-      _ = B := by
-        dsimp [B]
-        ring
+    dsimp [B]
+    exact curv_aux_y S C₀ F (L₀ (R X (A Y D) Z))
+      (LB (A Y D)) (LB Y) (LB D) (L₀ (A Y D))
+      (L₀ D) (L₀ X) (L₀ Y) (L₀ Z)
+      (by positivity) hC₀0 hF0
+      (by positivity) (by positivity) (by positivity) (by positivity)
+      (hR _ _ _) (h0B _) (hA _ _) (hB0 _) (hB0 _)
   have hZ : L₀ (R X Y (A Z D)) ≤ B := by
-    calc
-      L₀ (R X Y (A Z D)) ≤ F * L₀ X * L₀ Y * L₀ (A Z D) := hR _ _ _
-      _ ≤ F * L₀ X * L₀ Y * (S * LB (A Z D)) := by
-        gcongr
-        exact h0B _
-      _ ≤ F * L₀ X * L₀ Y * (S * (C₀ * LB Z * LB D)) := by
-        gcongr
-        exact hA _ _
-      _ ≤ F * L₀ X * L₀ Y * (S * (C₀ * (S * L₀ Z) * (S * L₀ D))) := by
-        gcongr
-        · exact hB0 _
-        · exact hB0 _
-      _ = B := by
-        dsimp [B]
-        ring
-  have hneg : ∀ v : TangentSpace I x, L₀ (-v) = L₀ v := by
-    intro v
-    simpa only [L₀, neg_one_smul, abs_neg, abs_one, one_mul] using
-      Geometry.Riemannian.sqrt_inner_smul (I := I) g₀ x (-1 : ℝ) v
-  have hsub : ∀ u v : TangentSpace I x, L₀ (u - v) ≤ L₀ u + L₀ v := by
-    intro u v
-    calc
-      L₀ (u - v) = L₀ (u + -v) := by rw [sub_eq_add_neg]
-      _ ≤ L₀ u + L₀ (-v) :=
-        Geometry.Riemannian.sqrt_inner_add_le (I := I) g₀ x u (-v)
-      _ = L₀ u + L₀ v := by rw [hneg]
-  have hsum :
-      L₀ (A (R X Y Z) D - R (A X D) Y Z -
-          R X (A Y D) Z - R X Y (A Z D)) ≤ 4 * B := by
-    calc
-      L₀ (A (R X Y Z) D - R (A X D) Y Z -
-          R X (A Y D) Z - R X Y (A Z D)) ≤
-          L₀ (A (R X Y Z) D - R (A X D) Y Z -
-            R X (A Y D) Z) + L₀ (R X Y (A Z D)) := hsub _ _
-      _ ≤ (L₀ (A (R X Y Z) D - R (A X D) Y Z) +
-            L₀ (R X (A Y D) Z)) + L₀ (R X Y (A Z D)) := by
-        gcongr
-        exact hsub _ _
-      _ ≤ ((L₀ (A (R X Y Z) D) + L₀ (R (A X D) Y Z)) +
-            L₀ (R X (A Y D) Z)) + L₀ (R X Y (A Z D)) := by
-        gcongr
-        exact hsub _ _
-      _ ≤ ((B + B) + B) + B := by gcongr
-      _ = 4 * B := by ring
+    dsimp [B]
+    exact curv_aux_z S C₀ F (L₀ (R X Y (A Z D)))
+      (LB (A Z D)) (LB Z) (LB D) (L₀ (A Z D))
+      (L₀ D) (L₀ X) (L₀ Y) (L₀ Z)
+      (by positivity) hC₀0 hF0
+      (by positivity) (by positivity) (by positivity) (by positivity)
+      (hR _ _ _) (h0B _) (hA _ _) (hB0 _) (hB0 _)
+  have hsqrt :
+      Real.sqrt (g₀.inner x
+        (A (R X Y Z) D - R (A X D) Y Z -
+          R X (A Y D) Z - R X Y (A Z D))
+        (A (R X Y Z) D - R (A X D) Y Z -
+          R X (A Y D) Z - R X Y (A Z D))) ≤ 4 * B :=
+    curv_conn_tail g₀ L₀
+      (A (R X Y Z) D) (R (A X D) Y Z) (R X (A Y D) Z) (R X Y (A Z D)) B
+      (fun _ => rfl) houter hX hY hZ
   calc
     Real.sqrt (g₀.inner x
         (curvConnAt (I := I) gBase g₀ x D X Y Z)
         (curvConnAt (I := I) gBase g₀ x D X Y Z)) ≤ 4 * B := by
-      simpa [curvConnAt, A, R, L₀] using hsum
+      simpa [curvConnAt, A, R, L₀] using hsqrt
     _ = (4 * S ^ 3 * C₀ * F) * Real.sqrt (g₀.inner x D D) *
         Real.sqrt (g₀.inner x X X) *
         Real.sqrt (g₀.inner x Y Y) *
