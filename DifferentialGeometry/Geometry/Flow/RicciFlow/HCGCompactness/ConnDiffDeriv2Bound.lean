@@ -2132,8 +2132,6 @@ theorem covStep2_mixedComm_eval
   abel
 
 open DifferentialGeometry.Integral.Connection in
-set_option maxHeartbeats 1600000 in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem mixedComm_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
@@ -2166,12 +2164,10 @@ private theorem mixedComm_le
       (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
     TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
-
   set CA2 : ℝ := 3 / 2 * Λ ^ 5 * Λ''' + 9 / 2 * Λ ^ 6 * Λ' * Λ'' + 3 * Λ ^ 7 * Λ' ^ 3 with hCA2def
   set CA1 : ℝ := 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) with hCA1def
   set NAb : ℝ := 3 / 2 * Λ ^ 3 * Λ' with hNAbdef
   intro S x hx
-
   have hL1 : (1 : ℝ) ≤ Λ := hEq.1
   have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hL1
   have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hJet1 x hx)
@@ -2191,7 +2187,6 @@ private theorem mixedComm_le
   have hNAbnn : (0 : ℝ) ≤ NAb := by
     rw [hNAbdef]
     exact mul_nonneg (mul_nonneg (by norm_num) (by positivity)) hL'nn
-
   obtain ⟨basis, hON⟩ :=
     DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g₂ x
   have hbnorm : ∀ i, Real.sqrt (g₂.inner x (basis i) (basis i)) = 1 := by
@@ -2199,7 +2194,6 @@ private theorem mixedComm_le
   have hinv : MetricInverseInBasis_gen (I := I) g₂ x basis
       (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
     intro i j; constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
-
   set NS := Real.sqrt (normSq0S (I := I) g₂ x s (S x)) with hNSdef
   set N1 := Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x)) with hN1def
   set N2 := Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
@@ -2207,13 +2201,11 @@ private theorem mixedComm_le
   have hNSnn : (0 : ℝ) ≤ NS := Real.sqrt_nonneg _
   have hN1nn : (0 : ℝ) ≤ N1 := Real.sqrt_nonneg _
   have hN2nn : (0 : ℝ) ≤ N2 := Real.sqrt_nonneg _
-
   have hA2 := fun (v' v w u : TangentSpace I x) =>
     covDConnDiff2_gJet_le (I := I) hEq hJet1 hJet2 hJet3 hx v' v w u
   have hA1 := fun (v w u : TangentSpace I x) =>
     DifferentialGeometry.Geometry.Curvature.covDerivConnDiff_gJet_le (I := I)
       hEq hJet1 hJet2 hx v w u
-
   have hvec : ∀ z : TangentSpace I x,
       Real.sqrt (g₁.inner x z z) ≤ Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := by
     intro z
@@ -2304,7 +2296,6 @@ private theorem mixedComm_le
           rw [hNAbdef]
           linear_combination (3 / 2 * Λ' * (Real.sqrt Λ ^ 2 + Λ) *
             (Real.sqrt (g₂.inner x Xv Xv) * Real.sqrt (g₂.inner x Yv Yv)) * Λ) * hs2
-
   have habs : ∀ (r : ℕ)
       (T : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r x)
       (tup : Fin r → TangentSpace I x) (j : Fin r),
@@ -2315,7 +2306,6 @@ private theorem mixedComm_le
     have hcs := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I) g₂ x r basis hON T tup
     rwa [Finset.prod_eq_single j (fun b _ hbj => hb b hbj)
       (fun hj => absurd (Finset.mem_univ j) hj)] at hcs
-
   set B : ℝ := (s : ℝ) * (NS * CA2) + (3 * (s : ℝ) + 1) * (N1 * CA1) +
     (2 * (s : ℝ) + 1) * (N2 * NAb) with hBdef
   have hBnn : (0 : ℝ) ≤ B := by
@@ -2334,7 +2324,6 @@ private theorem mixedComm_le
             - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x) φ| ≤ B := by
     intro φ
     rw [Tensor0SBundle.component0S_apply]
-
     set Usec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
       ContMDiffSection.mk (smoothExtensionTangent (I := I) x (basis (φ 0)))
         (smoothExtensionTangent_contMDiff (I := I) x (basis (φ 0))) with hUsec
@@ -2373,7 +2362,6 @@ private theorem mixedComm_le
           · exact hVval.symm
           · exact (hZval a).symm
     rw [htuple, covStep2_mixedComm_eval (I := I) g₁ g₂ s S Usec Wsec Vsec Zsec x]
-
     have hI : ∀ a : Fin s, |(S x) (Function.update (fun b : Fin s => Zsec b x) a
         (covDerivConnDiff2 (I := I) g₂ g₁
           (fun z => Usec z) (fun z => Wsec z) (fun z => Vsec z) (fun z => Zsec a z) x))| ≤
@@ -2392,7 +2380,6 @@ private theorem mixedComm_le
       rw [hbnorm (φ 0), hbnorm (φ (Fin.succ 0)), hbnorm (φ (Fin.succ (Fin.succ 0))),
         hbnorm (φ a.succ.succ.succ), mul_one, mul_one, mul_one, mul_one] at h
       exact h
-
     have hII : ∀ a : Fin s, |covStep (I := I) g₂ s S x
         (Fin.cons (Usec x) (Function.update (fun b : Fin s => Zsec b x) a
           (covDerivConnDiff (I := I) g₂ g₁
@@ -2425,7 +2412,6 @@ private theorem mixedComm_le
       rw [hbnorm (φ (Fin.succ 0)), hbnorm (φ (Fin.succ (Fin.succ 0))),
         hbnorm (φ a.succ.succ.succ), mul_one, mul_one, mul_one] at h
       exact h
-
     have hIII : ∀ a : Fin s, |covStep (I := I) g₂ s S x
         (Fin.cons (Wsec x) (Function.update (fun b : Fin s => Zsec b x) a
           (covDerivConnDiff (I := I) g₂ g₁
@@ -2458,7 +2444,6 @@ private theorem mixedComm_le
       rw [hbnorm (φ 0), hbnorm (φ (Fin.succ (Fin.succ 0))),
         hbnorm (φ a.succ.succ.succ), mul_one, mul_one, mul_one] at h
       exact h
-
     have hV : ∀ a : Fin s, |covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x
         (Fin.cons (Usec x) (Fin.cons (Wsec x) (Function.update (fun b : Fin s => Zsec b x) a
           ((CovariantDerivative.difference
@@ -2500,7 +2485,6 @@ private theorem mixedComm_le
       have h := hA0 (Zsec a x) (Vsec x)
       rw [hnV, hnZ a, mul_one, mul_one] at h
       exact h
-
     have hIV : ∀ j : Fin (s + 1), |(covStep (I := I) g₂ s S x)
         (Function.update (Fin.cons (Vsec x) (fun b : Fin s => Zsec b x)) j
           (covDerivConnDiff (I := I) g₂ g₁ (fun z => Usec z) (fun z => Wsec z)
@@ -2543,7 +2527,6 @@ private theorem mixedComm_le
         rw [hbnorm (φ 0), hbnorm (φ (Fin.succ 0)), hbnorm (φ c.succ.succ.succ),
           mul_one, mul_one, mul_one] at h
         exact h
-
     have hnVV : ∀ j : Fin (s + 1),
         Real.sqrt (g₂.inner x
           ((Fin.cons Vsec Zsec :
@@ -2609,7 +2592,6 @@ private theorem mixedComm_le
           (TangentSpace I : M -> Type _)) j x) (Wsec x)
       rw [hnW, hnVV j, mul_one, mul_one] at h
       exact h
-
     have habs_sub : ∀ p q : ℝ, |p - q| ≤ |p| + |q| := by
       intro p q
       calc |p - q| = |p + -q| := by rw [sub_eq_add_neg]
@@ -2641,7 +2623,6 @@ private theorem mixedComm_le
     refine le_of_eq ?_
     push_cast
     ring
-
   have hcard := Tensor0SBundle.normSq0S_le_card_of_component_bound (I := I) g₂ x (s + 3) basis hinv
     (covStep (I := I) g₂ (s + 2)
       (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
@@ -2658,7 +2639,7 @@ private theorem mixedComm_le
     have hc1 : (0 : ℝ) ≤ (s : ℝ) * CA2 := mul_nonneg (by positivity) hCA2nn
     have hc2 : (0 : ℝ) ≤ (3 * (s : ℝ) + 1) * CA1 := mul_nonneg (by positivity) hCA1nn
     have hc3 : (0 : ℝ) ≤ (2 * (s : ℝ) + 1) * NAb := mul_nonneg (by positivity) hNAbnn
-    nlinarith [mul_nonneg hc1 (add_nonneg hN1nn hN2nn),
+    linarith [mul_nonneg hc1 (add_nonneg hN1nn hN2nn),
       mul_nonneg hc2 (add_nonneg hNSnn hN2nn),
       mul_nonneg hc3 (add_nonneg hNSnn hN1nn)]
   calc Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
