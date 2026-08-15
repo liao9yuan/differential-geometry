@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -758,12 +756,11 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
       (2 * CAd l * gridSumPairCount (i' + 1) (l + 3) + 2 * cbg l) := by
     intro i i'
     refine Finset.sum_nonneg fun l _ => add_nonneg ?_ ?_
-    · have := hCAd_nn l
-      have := gridSumPairCount_nonneg (i' + 1) (l + 3)
-      positivity
-    · have := hcbg_nn l
-      linarith
-  have hc0fac_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1 := by positivity
+    · exact mul_nonneg (mul_nonneg (by norm_num) (hCAd_nn l))
+        (gridSumPairCount_nonneg (i' + 1) (l + 3))
+    · exact mul_nonneg (by norm_num) (hcbg_nn l)
+  have hc0fac_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1 :=
+    add_nonneg (mul_nonneg (sq_nonneg _) (sq_nonneg _)) (by norm_num)
   have hBB_nn : ∀ i i', 0 ≤ BB i i' := by
     intro i i'
     rw [hBB_def]
@@ -777,7 +774,8 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
   refine ⟨fun i => appCcGdiag (E := E) i *
       ∑ i' ∈ Finset.range (i + 1), (Module.finrank ℝ E : ℝ) ^ 3 * BB i i',
     fun i => mul_nonneg (appCcGdiag_nonneg (E := E) i)
-      (Finset.sum_nonneg fun i' _ => mul_nonneg (by positivity) (hBB_nn i i')), ?_⟩
+      (Finset.sum_nonneg fun i' _ =>
+        mul_nonneg (pow_nonneg (Nat.cast_nonneg _) _) (hBB_nn i i')), ?_⟩
   intro g₁ T htie δ hδ_le hδ0 hbound i x
   set b : ℕ → ℝ := fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
     ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x) with hb_def
@@ -856,10 +854,9 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
             ∏ m : Fin n, b (e m)) =
         ∑ k ∈ Finset.range (l + 3), Combinatorics.antidiagonalTupleGrid b k from rfl] at h1
     have h2 := hcbg l x
-    have h1nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
-      ((iteratedCovGrad (I := I) g₀ 0 4 l
-        (riemannLoweredBackgroundDifference (I := I) (M := M) g₀ g₁)).toSection x)
-    linarith
+    have h1' := mul_le_mul_of_nonneg_left h1 (by norm_num : (0 : ℝ) ≤ 2)
+    have h2' := mul_le_mul_of_nonneg_left h2 (by norm_num : (0 : ℝ) ≤ 2)
+    exact add_le_add (by simpa only [mul_assoc] using h1') h2'
   have hcell : ∀ i' ∈ Finset.range (i + 1),
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + i') x
           ((iteratedCovGrad (I := I) g₀ 4 4 i'
@@ -894,12 +891,9 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
         (2 * CAd l * (∑ k ∈ Finset.range (l + 3), Combinatorics.antidiagonalTupleGrid b k) +
           2 * cbg l) := by
       refine Finset.sum_nonneg fun l _ => add_nonneg ?_ ?_
-      · have := hCAd_nn l
-        have : 0 ≤ ∑ k ∈ Finset.range (l + 3), Combinatorics.antidiagonalTupleGrid b k :=
-          Finset.sum_nonneg fun k _ => Combinatorics.antidiagonalTupleGrid_nonneg b hb k
-        positivity
-      · have := hcbg_nn l
-        linarith
+      · exact mul_nonneg (mul_nonneg (by norm_num) (hCAd_nn l))
+          (Finset.sum_nonneg fun k _ => Combinatorics.antidiagonalTupleGrid_nonneg b hb k)
+      · exact mul_nonneg (by norm_num) (hcbg_nn l)
     have hpairsum : ∀ gsA : ℝ, 0 ≤ gsA →
         (∀ m3ok : ∀ l ∈ Finset.range (i + 1 - i'),
           gsA * (∑ k ∈ Finset.range (l + 3), Combinatorics.antidiagonalTupleGrid b k) ≤
@@ -918,26 +912,26 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
         calc gsA * (2 * CAd l * (∑ k ∈ Finset.range (l + 3),
             Combinatorics.antidiagonalTupleGrid b k))
             = (2 * CAd l) * (gsA * (∑ k ∈ Finset.range (l + 3),
-              Combinatorics.antidiagonalTupleGrid b k)) := by ring
+              Combinatorics.antidiagonalTupleGrid b k)) := by ac_rfl
           _ ≤ (2 * CAd l) * (gridSumPairCount (i' + 1) (l + 3) * WW) := by
               refine mul_le_mul_of_nonneg_left (hm3 l hl) ?_
-              have := hCAd_nn l
-              linarith
-          _ = 2 * CAd l * gridSumPairCount (i' + 1) (l + 3) * WW := by ring
+              exact mul_nonneg (by norm_num) (hCAd_nn l)
+          _ = 2 * CAd l * gridSumPairCount (i' + 1) (l + 3) * WW := by ac_rfl
       have h2 : gsA * (2 * cbg l) ≤ 2 * cbg l * WW := by
-        calc gsA * (2 * cbg l) = (2 * cbg l) * gsA := by ring
+        calc gsA * (2 * cbg l) = (2 * cbg l) * gsA := by ac_rfl
           _ ≤ (2 * cbg l) * WW := by
               refine mul_le_mul_of_nonneg_left hgsA_le ?_
-              have := hcbg_nn l
-              linarith
-          _ = 2 * cbg l * WW := by ring
+              exact mul_nonneg (by norm_num) (hcbg_nn l)
+          _ = 2 * cbg l * WW := rfl
       calc gsA * (2 * CAd l * (∑ k ∈ Finset.range (l + 3),
             Combinatorics.antidiagonalTupleGrid b k) + 2 * cbg l)
           = gsA * (2 * CAd l * (∑ k ∈ Finset.range (l + 3),
-              Combinatorics.antidiagonalTupleGrid b k)) + gsA * (2 * cbg l) := by ring
+              Combinatorics.antidiagonalTupleGrid b k)) + gsA * (2 * cbg l) :=
+            mul_add _ _ _
         _ ≤ 2 * CAd l * gridSumPairCount (i' + 1) (l + 3) * WW + 2 * cbg l * WW :=
             add_le_add h1 h2
-        _ = (2 * CAd l * gridSumPairCount (i' + 1) (l + 3) + 2 * cbg l) * WW := by ring
+        _ = (2 * CAd l * gridSumPairCount (i' + 1) (l + 3) + 2 * cbg l) * WW :=
+          (add_mul _ _ _).symm
     have hSIsymm : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + i') x
         ((iteratedCovGrad (I := I) g₀ 4 4 i'
           (slotInsertEndoCc (I := I) (M := M) g₀ 3
@@ -955,9 +949,9 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
             (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 := by
           rw [iteratedCovGrad_zero]
           refine le_trans (rfns_symmS_zero_le_of_ball (I := I) (M := M) g₀ T hδ0 hbound x) ?_
-          have hδsq : δ ^ 2 ≤ δ₀ ^ 2 := by nlinarith [hδ_le, hδ0]
-          have : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 := by positivity
-          nlinarith
+          have hδsq : δ ^ 2 ≤ δ₀ ^ 2 :=
+            (sq_le_sq₀ hδ0 (le_trans hδ0 hδ_le)).2 hδ_le
+          exact mul_le_mul_of_nonneg_left hδsq (sq_nonneg _)
         have hm3 : ∀ l ∈ Finset.range (i + 1 - 0),
             ((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2) *
               (∑ k ∈ Finset.range (l + 3), Combinatorics.antidiagonalTupleGrid b k) ≤
@@ -995,7 +989,7 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
               (((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2) *
                 ∑ l ∈ Finset.range (i + 1 - 0),
                   (2 * CAd l * (∑ k ∈ Finset.range (l + 3),
-                    Combinatorics.antidiagonalTupleGrid b k) + 2 * cbg l)) := by ring
+                    Combinatorics.antidiagonalTupleGrid b k) + 2 * cbg l)) := by ac_rfl
           _ ≤ (Module.finrank ℝ E : ℝ) ^ 3 *
               ((∑ l ∈ Finset.range (i + 1 - 0),
                 (2 * CAd l * gridSumPairCount (0 + 1) (l + 3) + 2 * cbg l)) *
@@ -1042,7 +1036,7 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
                       (((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1) *
                         ∑ l ∈ Finset.range (i + 1 - 0),
                           (2 * CAd l * gridSumPairCount (0 + 1) (l + 3) + 2 * cbg l))) * WW := by
-                    ring
+                    ac_rfl
     | (i'' + 1) =>
         have hb_le_grid : b (i'' + 1) ≤ Combinatorics.antidiagonalTupleGrid b (i'' + 1) := by
           have hmem : (fun _ : Fin 1 => (i'' + 1)) ∈
@@ -1111,7 +1105,7 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
               ((∑ k ∈ Finset.range ((i'' + 1) + 1), Combinatorics.antidiagonalTupleGrid b k) *
                 ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                   (2 * CAd l * (∑ k ∈ Finset.range (l + 3),
-                    Combinatorics.antidiagonalTupleGrid b k) + 2 * cbg l)) := by ring
+                    Combinatorics.antidiagonalTupleGrid b k) + 2 * cbg l)) := by ac_rfl
           _ ≤ (Module.finrank ℝ E : ℝ) ^ 3 *
               ((∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                 (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) * WW) := by
@@ -1121,21 +1115,25 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
           _ ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * BB i (i'' + 1)) * WW := by
               rw [hBBval i (i'' + 1)]
               have hsum_nn := hBBsum_nn i (i'' + 1)
-              have hc0nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 := by positivity
-              have hfr3 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 3 := by positivity
+              have hc0nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 :=
+                mul_nonneg (sq_nonneg _) (sq_nonneg _)
+              have hfr3 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 3 :=
+                pow_nonneg (Nat.cast_nonneg _) _
               have hstep : (∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                   (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) ≤
                   ((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1) *
                     ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                       (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l) := by
-                nlinarith [mul_nonneg hc0nn hsum_nn]
+                have hfac : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1 :=
+                  le_add_of_nonneg_left hc0nn
+                simpa only [one_mul] using mul_le_mul_of_nonneg_right hfac hsum_nn
               calc (Module.finrank ℝ E : ℝ) ^ 3 *
                     ((∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                       (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) * WW)
                   = ((Module.finrank ℝ E : ℝ) ^ 3 *
                       ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
                         (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) *
-                      WW := by ring
+                      WW := by ac_rfl
                 _ ≤ ((Module.finrank ℝ E : ℝ) ^ 3 *
                       (((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1) *
                         ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
@@ -1160,7 +1158,7 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
     _ = (appCcGdiag (E := E) i *
           ∑ i' ∈ Finset.range (i + 1), (Module.finrank ℝ E : ℝ) ^ 3 * BB i i') * WW := by
         rw [← Finset.sum_mul]
-        ring
+        ac_rfl
 
 namespace CurvatureCoefficientDifferenceJetTower
 

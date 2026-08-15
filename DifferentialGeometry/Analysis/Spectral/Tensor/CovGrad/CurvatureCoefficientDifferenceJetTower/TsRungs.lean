@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -1537,6 +1536,98 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
+private lemma ts_two_mul_add_mul_factor (a b x : ℝ) :
+    2 * (a * x) + 2 * (b * x) = (2 * a + 2 * b) * x := by
+  ring
+
+private lemma ts_head_bound_factor (d p n k x : ℝ) :
+    (2 : ℝ) ^ 2 * (2 * (d * ((n * n) * (k * x))) + 2 * (p * ((n * n) * (k * x)))) =
+      8 * (n * n) * (d + p) * k * x := by
+  ring
+
+private lemma ts_twice_pair_plus_factor (a b c x : ℝ) :
+    2 * ((2 * a + 2 * b) * x) + 2 * (c * x) = (4 * a + 4 * b + 2 * c) * x := by
+  ring
+
+private lemma ts_grid_sum_factor (a b c x : ℝ) :
+    2 * (a * x) + 2 * (2 * (b * x) + 2 * c) = (2 * a + 4 * b) * x + 4 * c := by
+  ring
+
+private lemma ts_product_sum_expand (a n b c x y : ℝ) :
+    (a * x) * (n * (b * y + c)) = a * n * b * (x * y) + a * n * c * x := by
+  ring
+
+private lemma ts_product_sum_factor (a n b c p x : ℝ) :
+    a * n * b * (p * x) + a * n * c * x = (a * n * (b * p + c)) * x := by
+  ring
+
+private lemma ts_residual_bound_factor (a b c d x : ℝ) :
+    (2 : ℝ) ^ 2 * (2 * (2 * (a * x) + 2 * (b * x)) + 2 * (2 * (c * (d * x)))) =
+      (4 * (2 * (2 * a + 2 * b) + 2 * (2 * c * d))) * x := by
+  ring
+
+private lemma ts_riemann_coeff_sub_head_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ)
+    (Dpt phiDt : SmoothCcTensor g₀ 6 2) (WBig WVd : SmoothCcTensor g₀ 2 6)
+    (HdT1 HdT2 : SmoothCcTensor g₀ 2 (2 + i))
+    (hRiemD : ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
+        ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ =
+      (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig +
+        (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) :
+    iteratedCovGrad (I := I) g₀ 2 2 i
+          (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
+            ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) -
+        (2 : ℝ) • (HdT1 + HdT2) =
+      (2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 2 2 i
+          (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1) +
+        (iteratedCovGrad (I := I) g₀ 2 2 i
+          (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2)) := by
+  rw [hRiemD]
+  rw [iteratedCovGrad_add (I := I) g₀ 2 2 i _ _]
+  rw [iteratedCovGrad_smul_pt (I := I) (M := M) g₀ 2 2 i 2 _]
+  rw [iteratedCovGrad_smul_pt (I := I) (M := M) g₀ 2 2 i 2 _]
+  simp only [smul_add, smul_sub]
+  abel
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma ts_combine_rfns_residual
+    (g₀ : SmoothRiemannianMetric I M) (i : ℕ) (x : M)
+    (R Z₁ Z₂ H₁ H₂ : SmoothCcTensor g₀ 2 (2 + i)) (a b c d w : ℝ)
+    (hR : R - (2 : ℝ) • (H₁ + H₂) = (2 : ℝ) • ((Z₁ - H₁) + (Z₂ - H₂)))
+    (h₁ : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+        ((Z₁ - H₁).toSection x) ≤ 2 * (a * w) + 2 * (b * w))
+    (h₂ : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+        ((Z₂ - H₂).toSection x) ≤ 2 * (c * (d * w))) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+        ((R - (2 : ℝ) • (H₁ + H₂)).toSection x) ≤
+      (4 * (2 * (2 * a + 2 * b) + 2 * (2 * c * d))) * w := by
+  rw [hR]
+  rw [show (((2 : ℝ) • ((Z₁ - H₁) + (Z₂ - H₂))).toSection x) =
+      (2 : ℝ) • (((Z₁ - H₁) + (Z₂ - H₂)).toSection x) from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [rfns_smul_pt (I := I) (M := M) g₀ 2 (2 + i) x 2 _]
+  rw [show (((Z₁ - H₁) + (Z₂ - H₂)).toSection x) =
+      (Z₁ - H₁).toSection x + (Z₂ - H₂).toSection x from by
+    rw [SmoothCcTensor.toSection_add]; rfl]
+  calc (2 : ℝ) ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+          ((Z₁ - H₁).toSection x + (Z₂ - H₂).toSection x)
+      ≤ (2 : ℝ) ^ 2 *
+          (2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+              ((Z₁ - H₁).toSection x) +
+            2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+              ((Z₂ - H₂).toSection x)) :=
+        mul_le_mul_of_nonneg_left
+          (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 (2 + i) x _ _)
+          (by norm_num)
+    _ ≤ (2 : ℝ) ^ 2 *
+          (2 * (2 * (a * w) + 2 * (b * w)) + 2 * (2 * (c * (d * w)))) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+        exact add_le_add (mul_le_mul_of_nonneg_left h₁ (by norm_num))
+          (mul_le_mul_of_nonneg_left h₂ (by norm_num))
+    _ = (4 * (2 * (2 * a + 2 * b) + 2 * (2 * c * d))) * w :=
+      ts_residual_bound_factor a b c d w
+
 theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -1583,7 +1674,9 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
   have hn_nn : (0 : ℝ) ≤ n := Nat.cast_nonneg _
   refine ⟨8 * (n * n) * (CD 0 + cP) * (2 * KtA' + 2 * KtA),
     mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (mul_nonneg hn_nn hn_nn))
-      (add_nonneg (hCD_nn 0) hcP_nn)) (by linarith [hKtA'_nn, hKtA_nn]), ?_⟩
+      (add_nonneg (hCD_nn 0) hcP_nn))
+        (add_nonneg (mul_nonneg (by norm_num) hKtA'_nn)
+          (mul_nonneg (by norm_num) hKtA_nn)), ?_⟩
   refine ⟨fun i => 4 * (2 * (2 * (CD 0 * (n * n) *
         (4 * KcA' i + 4 * KcA i + 2 * cfix i)) +
       2 * ((i : ℝ) * appCcGdiag (E := E) i *
@@ -1594,7 +1687,10 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
     fun i => by
       have hp1 : (0 : ℝ) ≤ CD 0 * (n * n) * (4 * KcA' i + 4 * KcA i + 2 * cfix i) :=
         mul_nonneg (mul_nonneg (hCD_nn 0) (mul_nonneg hn_nn hn_nn))
-          (by have := hKcA'_nn i; have := hKcA_nn i; have := hcfix_nn i; linarith)
+          (add_nonneg
+            (add_nonneg (mul_nonneg (by norm_num) (hKcA'_nn i))
+              (mul_nonneg (by norm_num) (hKcA_nn i)))
+            (mul_nonneg (by norm_num) (hcfix_nn i)))
       have hp2 : (0 : ℝ) ≤ (i : ℝ) * appCcGdiag (E := E) i *
           ∑ k ∈ Finset.range i, CD (i - k) * (n * n) *
             ((2 * C1 k + 4 * CA k) *
@@ -1603,13 +1699,20 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
           (Finset.sum_nonneg fun k _ => mul_nonneg
             (mul_nonneg (hCD_nn _) (mul_nonneg hn_nn hn_nn))
             (add_nonneg
-              (mul_nonneg (by have := hC1_nn k; have := hCA_nn k; linarith)
+              (mul_nonneg
+                (add_nonneg (mul_nonneg (by norm_num) (hC1_nn k))
+                  (mul_nonneg (by norm_num) (hCA_nn k)))
                 (Combinatorics.windowPairCellCount_nonneg _ _))
-              (by have := hcfix_nn k; linarith)))
+              (mul_nonneg (by norm_num) (hcfix_nn k))))
       have hp3 : (0 : ℝ) ≤ 2 * (cP * (n * n)) * (2 * KcA' i + 2 * KcA i) :=
         mul_nonneg (mul_nonneg (by norm_num) (mul_nonneg hcP_nn (mul_nonneg hn_nn hn_nn)))
-          (by have := hKcA'_nn i; have := hKcA_nn i; linarith)
-      linarith, ?_⟩
+          (add_nonneg (mul_nonneg (by norm_num) (hKcA'_nn i))
+            (mul_nonneg (by norm_num) (hKcA_nn i)))
+      exact mul_nonneg (by norm_num)
+        (add_nonneg
+          (mul_nonneg (by norm_num)
+            (add_nonneg (mul_nonneg (by norm_num) hp1) (mul_nonneg (by norm_num) hp2)))
+          (mul_nonneg (by norm_num) hp3)), ?_⟩
   intro g₁ T htie δ hδ_le hδ0 hbound i
   obtain ⟨HdA, hHdA_head, hHdA_res⟩ := hA g₁ T htie hδ_le hδ0 hbound i
   obtain ⟨HdA', hHdA'_head, hHdA'_res⟩ := hA' g₁ T htie hδ_le hδ0 hbound i
@@ -1707,7 +1810,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
             (mul_le_mul_of_nonneg_left h2 (by norm_num))
       _ = (2 * KtA' + 2 * KtA) * riemannianFiberNormSq (I := I) (M := M) g₀ 0
             (2 + (i + 2)) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) := by ring
+            ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) :=
+          ts_two_mul_add_mul_factor KtA' KtA _
   refine ⟨(2 : ℝ) • (HdT1 + HdT2), ?_, ?_⟩
   · intro x
     rw [show (((2 : ℝ) • (HdT1 + HdT2)).toSection x) =
@@ -1736,7 +1840,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
             exact mul_le_mul_of_nonneg_left (hHVc_head x) hn_nn
         _ = (n * n) * ((2 * KtA' + 2 * KtA) *
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x)) := by ring
+                ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x)) :=
+            (mul_assoc n n _).symm
     have hHWdchain : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
         (HWd.toSection x) ≤
         (n * n) * ((2 * KtA' + 2 * KtA) *
@@ -1755,7 +1860,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
             exact mul_le_mul_of_nonneg_left (hHVc_head x) hn_nn
         _ = (n * n) * ((2 * KtA' + 2 * KtA) *
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x)) := by ring
+                ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x)) :=
+            (mul_assoc n n _).symm
     have hDpt0 : riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x (Dpt.toSection x) ≤
         CD 0 := by
       have h := hCD g₁ T htie hδ_le hδ0 hbound 0 x
@@ -1804,7 +1910,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
             (mul_le_mul_of_nonneg_left hT2 (by norm_num))
       _ = 8 * (n * n) * (CD 0 + cP) * (2 * KtA' + 2 * KtA) *
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) := by ring
+              ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) :=
+          ts_head_bound_factor (CD 0) cP n (2 * KtA' + 2 * KtA) _
   · intro x
     set b : ℕ → ℝ := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
       ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) with hb_def
@@ -1855,7 +1962,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
           ≤ 2 * (KcA' i * Wfin) + 2 * (KcA i * Wfin) :=
             add_le_add (mul_le_mul_of_nonneg_left h1 (by norm_num))
               (mul_le_mul_of_nonneg_left h2 (by norm_num))
-        _ = (2 * KcA' i + 2 * KcA i) * Wfin := by ring
+        _ = (2 * KcA' i + 2 * KcA i) * Wfin :=
+          ts_two_mul_add_mul_factor (KcA' i) (KcA i) Wfin
     have hRLC11_res : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
         ((iteratedCovGrad (I := I) g₀ 0 4 i RLC11 - (HdA' + HdA)).toSection x) ≤
         (4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin := by
@@ -1881,7 +1989,7 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
         calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
               ((iteratedCovGrad (I := I) g₀ 0 4 i RLCfix).toSection x)
             ≤ cfix i := h2a
-          _ = cfix i * 1 := by ring
+          _ = cfix i * 1 := (mul_one (cfix i)).symm
           _ ≤ cfix i * Wfin := mul_le_mul_of_nonneg_left hWfin_one (hcfix_nn i)
       calc 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
             ((iteratedCovGrad (I := I) g₀ 0 4 i Vd - (HdA' + HdA)).toSection x) +
@@ -1890,7 +1998,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
           ≤ 2 * ((2 * KcA' i + 2 * KcA i) * Wfin) + 2 * (cfix i * Wfin) :=
             add_le_add (mul_le_mul_of_nonneg_left hVd_res (by norm_num))
               (mul_le_mul_of_nonneg_left h2 (by norm_num))
-        _ = (4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin := by ring
+        _ = (4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin :=
+          ts_twice_pair_plus_factor (KcA' i) (KcA i) (cfix i) Wfin
     have hT2res : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
         ((iteratedCovGrad (I := I) g₀ 2 2 i
             (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2).toSection x) ≤
@@ -1915,7 +2024,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
           _ ≤ n * (n * ((2 * KcA' i + 2 * KcA i) * Wfin)) := by
               refine mul_le_mul_of_nonneg_left ?_ hn_nn
               exact mul_le_mul_of_nonneg_left hVd_res hn_nn
-          _ = (n * n) * ((2 * KcA' i + 2 * KcA i) * Wfin) := by ring
+          _ = (n * n) * ((2 * KcA' i + 2 * KcA i) * Wfin) :=
+            (mul_assoc n n _).symm
       have hp0 : riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x (phiDt.toSection x) ≤
           cP := by
         rw [hphiDt_def]; exact hcP x
@@ -1994,7 +2104,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
             _ ≤ n * (n * ((4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin)) := by
                 refine mul_le_mul_of_nonneg_left ?_ hn_nn
                 exact mul_le_mul_of_nonneg_left hRLC11_res hn_nn
-            _ = (n * n) * ((4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin) := by ring
+            _ = (n * n) * ((4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin) :=
+              (mul_assoc n n _).symm
         calc riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x (Dpt.toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
                 ((iteratedCovGrad (I := I) g₀ 2 6 i WBig - HW11).toSection x)
@@ -2002,7 +2113,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
               refine mul_le_mul hDpt0 hchain
                 (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 (6 + i) x _)
                 (hCD_nn 0)
-          _ = CD 0 * (n * n) * (4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin := by ring
+          _ = CD 0 * (n * n) * (4 * KcA' i + 4 * KcA i + 2 * cfix i) * Wfin := by
+            simp only [mul_assoc]
       have hpiece2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
           ((∑ k ∈ Finset.range i,
             appCcRS (I := I) (M := M) g₀ 2 (6 + k) (2 + i)
@@ -2105,7 +2217,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
                   add_le_add (mul_le_mul_of_nonneg_left hd1 (by norm_num))
                     (mul_le_mul_of_nonneg_left hd23 (by norm_num))
               _ = (2 * C1 k + 4 * CA k) * (∑ k' ∈ Finset.range (k + 3),
-                    Combinatorics.antidiagonalTupleGrid b k') + 4 * cfix k := by ring
+                    Combinatorics.antidiagonalTupleGrid b k') + 4 * cfix k :=
+                ts_grid_sum_factor (C1 k) (CA k) (cfix k) _
           calc n * riemannianFiberNormSq (I := I) (M := M) g₀ 1 ((4 + 1) + k) x
                 ((iteratedCovGrad (I := I) g₀ 1 (4 + 1) k
                   (slotExtend (I := I) (M := M) g₀ 0 4 RLC11)).toSection x)
@@ -2117,7 +2230,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
                 refine mul_le_mul_of_nonneg_left ?_ hn_nn
                 exact mul_le_mul_of_nonneg_left hRLC11jet hn_nn
             _ = (n * n) * ((2 * C1 k + 4 * CA k) * (∑ k' ∈ Finset.range (k + 3),
-                  Combinatorics.antidiagonalTupleGrid b k') + 4 * cfix k) := by ring
+                  Combinatorics.antidiagonalTupleGrid b k') + 4 * cfix k) :=
+              (mul_assoc n n _).symm
         have hDptW : (∑ l ∈ Finset.range ((i - k) + 1),
             Combinatorics.antidiagonalTupleGrid b l) ≤
             Combinatorics.boundedFactorGridWindow b (i + 1) ((i - k) + 1) :=
@@ -2161,20 +2275,26 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
               · refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg hn_nn hn_nn)
                 refine add_le_add ?_ (le_refl _)
                 refine mul_le_mul_of_nonneg_left htgW ?_
-                have := hC1_nn k; have := hCA_nn k; linarith
+                exact add_nonneg (mul_nonneg (by norm_num) (hC1_nn k))
+                  (mul_nonneg (by norm_num) (hCA_nn k))
               · refine mul_nonneg (mul_nonneg hn_nn hn_nn) ?_
                 refine add_nonneg ?_ ?_
                 · refine mul_nonneg ?_ (Finset.sum_nonneg fun k' _ =>
                     Combinatorics.antidiagonalTupleGrid_nonneg b hb k')
-                  have := hC1_nn k; have := hCA_nn k; linarith
-                · have := hcfix_nn k; linarith
+                  exact add_nonneg (mul_nonneg (by norm_num) (hC1_nn k))
+                    (mul_nonneg (by norm_num) (hCA_nn k))
+                · exact mul_nonneg (by norm_num) (hcfix_nn k)
               · exact mul_nonneg (hCD_nn _)
                   (Combinatorics.boundedFactorGridWindow_nonneg b hb _ _)
           _ = CD (i - k) * (n * n) * (2 * C1 k + 4 * CA k) *
                 (Combinatorics.boundedFactorGridWindow b (i + 1) ((i - k) + 1) *
                   Combinatorics.boundedFactorGridWindow b (i + 1) (k + 3)) +
               CD (i - k) * (n * n) * (4 * cfix k) *
-                Combinatorics.boundedFactorGridWindow b (i + 1) ((i - k) + 1) := by ring
+                Combinatorics.boundedFactorGridWindow b (i + 1) ((i - k) + 1) :=
+              ts_product_sum_expand (CD (i - k)) (n * n) (2 * C1 k + 4 * CA k)
+                (4 * cfix k)
+                (Combinatorics.boundedFactorGridWindow b (i + 1) ((i - k) + 1))
+                (Combinatorics.boundedFactorGridWindow b (i + 1) (k + 3))
           _ ≤ CD (i - k) * (n * n) * (2 * C1 k + 4 * CA k) *
                 (Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) * Wfin) +
               CD (i - k) * (n * n) * (4 * cfix k) * Wfin := by
@@ -2189,7 +2309,9 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
           _ = (CD (i - k) * (n * n) *
               ((2 * C1 k + 4 * CA k) *
                   Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) + 4 * cfix k)) *
-              Wfin := by ring
+              Wfin :=
+            ts_product_sum_factor (CD (i - k)) (n * n) (2 * C1 k + 4 * CA k)
+              (4 * cfix k) (Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3)) Wfin
       calc 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((appCcRS (I := I) (M := M) g₀ 2 (6 + i) (2 + i)
               (appCcLeibnizPsi (I := I) (M := M) g₀ 6 2 Dpt i i)
@@ -2213,7 +2335,7 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
               ((2 * C1 k + 4 * CA k) *
                   Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) + 4 * cfix k)) *
               Wfin) := by
-          ring_nf
+          simp only [mul_assoc]
     have hsmul_diff : iteratedCovGrad (I := I) g₀ 2 2 i
           (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
             ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) -
@@ -2221,68 +2343,39 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
         (2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 2 2 i
             (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1) +
           (iteratedCovGrad (I := I) g₀ 2 2 i
-            (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2)) := by
-      rw [hRiemD]
-      rw [iteratedCovGrad_add (I := I) g₀ 2 2 i _ _]
-      rw [iteratedCovGrad_smul_pt (I := I) (M := M) g₀ 2 2 i 2 _]
-      rw [iteratedCovGrad_smul_pt (I := I) (M := M) g₀ 2 2 i 2 _]
-      simp only [smul_add, smul_sub]
-      abel
-    rw [hsmul_diff]
-    rw [show (((2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1) +
-        (iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2))).toSection x) =
-        (2 : ℝ) • (((iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1) +
-        (iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2)).toSection x) from by
-      rw [SmoothCcTensor.toSection_smul]; rfl]
-    rw [rfns_smul_pt (I := I) (M := M) g₀ 2 (2 + i) x 2 _]
-    rw [show ((((iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1) +
-        (iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2)).toSection x)) =
-        ((iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1).toSection x) +
-        ((iteratedCovGrad (I := I) g₀ 2 2 i
-          (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2).toSection x) from by
-      rw [SmoothCcTensor.toSection_add]; rfl]
-    calc (2 : ℝ) ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-          (((iteratedCovGrad (I := I) g₀ 2 2 i
-            (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1).toSection x) +
+            (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2)) :=
+      ts_riemann_coeff_sub_head_eq g₀ g₁ i Dpt phiDt WBig WVd HdT1 HdT2 hRiemD
+    have hT1res' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
           ((iteratedCovGrad (I := I) g₀ 2 2 i
-            (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2).toSection x))
-        ≤ (2 : ℝ) ^ 2 * (2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-            ((iteratedCovGrad (I := I) g₀ 2 2 i
-              (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1).toSection x) +
-          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-            ((iteratedCovGrad (I := I) g₀ 2 2 i
-              (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2).toSection x)) :=
-          mul_le_mul_of_nonneg_left
-            (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 (2 + i) x _ _)
-            (by norm_num)
-      _ ≤ (2 : ℝ) ^ 2 * (2 * (2 * (CD 0 * (n * n) *
-              (4 * KcA' i + 4 * KcA i + 2 * cfix i)) * Wfin +
-            2 * ((i : ℝ) * appCcGdiag (E := E) i *
-              ∑ k ∈ Finset.range i, (CD (i - k) * (n * n) *
-                ((2 * C1 k + 4 * CA k) *
-                    Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) +
-                  4 * cfix k)) * Wfin)) +
-          2 * (2 * (cP * ((n * n) * ((2 * KcA' i + 2 * KcA i) * Wfin))))) := by
-          refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
-          exact add_le_add (mul_le_mul_of_nonneg_left hT1res (by norm_num))
-            (mul_le_mul_of_nonneg_left hT2res (by norm_num))
-      _ = (4 * (2 * (2 * (CD 0 * (n * n) *
-              (4 * KcA' i + 4 * KcA i + 2 * cfix i)) +
-            2 * ((i : ℝ) * appCcGdiag (E := E) i *
-              ∑ k ∈ Finset.range i, CD (i - k) * (n * n) *
-                ((2 * C1 k + 4 * CA k) *
-                    Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) +
-                  4 * cfix k))) +
-          2 * (2 * (cP * (n * n)) * (2 * KcA' i + 2 * KcA i)))) * Wfin := by
-          rw [← Finset.sum_mul]
-          ring
+            (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig) - HdT1).toSection x) ≤
+        2 * ((CD 0 * (n * n) * (4 * KcA' i + 4 * KcA i + 2 * cfix i)) * Wfin) +
+          2 * (((i : ℝ) * appCcGdiag (E := E) i *
+            ∑ k ∈ Finset.range i, CD (i - k) * (n * n) *
+              ((2 * C1 k + 4 * CA k) *
+                  Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) + 4 * cfix k)) *
+            Wfin) := by
+      rw [← Finset.sum_mul] at hT1res
+      simpa only [mul_assoc] using hT1res
+    have hT2res' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 2 2 i
+            (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd) - HdT2).toSection x) ≤
+        2 * ((cP * (n * n)) * ((2 * KcA' i + 2 * KcA i) * Wfin)) := by
+      simpa only [mul_assoc] using hT2res
+    exact ts_combine_rfns_residual g₀ i x
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
+          ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (appCcRS (I := I) (M := M) g₀ 2 6 2 Dpt WBig))
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (appCcRS (I := I) (M := M) g₀ 2 6 2 phiDt WVd))
+      HdT1 HdT2
+      (CD 0 * (n * n) * (4 * KcA' i + 4 * KcA i + 2 * cfix i))
+      ((i : ℝ) * appCcGdiag (E := E) i *
+        ∑ k ∈ Finset.range i, CD (i - k) * (n * n) *
+          ((2 * C1 k + 4 * CA k) *
+              Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) + 4 * cfix k))
+      (cP * (n * n)) (2 * KcA' i + 2 * KcA i) Wfin hsmul_diff hT1res' hT2res'
 
 end TopSeparatedRungRiemannCoeff
 
