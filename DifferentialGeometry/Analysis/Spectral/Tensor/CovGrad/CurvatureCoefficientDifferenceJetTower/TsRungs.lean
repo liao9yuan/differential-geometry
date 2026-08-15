@@ -2212,7 +2212,8 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
             ∑ k ∈ Finset.range i, (CD (i - k) * (n * n) *
               ((2 * C1 k + 4 * CA k) *
                   Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) + 4 * cfix k)) *
-              Wfin) := by ring
+              Wfin) := by
+          ring_nf
     have hsmul_diff : iteratedCovGrad (I := I) g₀ 2 2 i
           (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
             ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) -
