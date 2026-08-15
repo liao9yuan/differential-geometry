@@ -76,6 +76,40 @@ noncomputable def intrinsicJacobi
   rw [hconst, mfderiv_const]
   rfl
 
+theorem intrJacobi_smul
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (p : M) (x w : E) (t s : Real) :
+    (intrinsicJacobi (I := I) g hEnorm p
+        (show TangentSpace I p from t • x)
+        (show TangentSpace I p from t • w) s : E) =
+      intrinsicJacobi (I := I) g hEnorm p
+        (show TangentSpace I p from x)
+        (show TangentSpace I p from w) (t * s) := by
+  have hfun :
+      (fun r : Real =>
+        intrinsicGeodesic (I := I) g hEnorm p
+          ((show TangentSpace I p from t • x) +
+            r • (show TangentSpace I p from t • w)) s) =
+        fun r : Real =>
+          intrinsicGeodesic (I := I) g hEnorm p
+            ((show TangentSpace I p from x) +
+              r • (show TangentSpace I p from w)) (t * s) := by
+    funext r
+    have hvec :
+        (show TangentSpace I p from t • x) +
+            r • (show TangentSpace I p from t • w) =
+          (show TangentSpace I p from t • (x + r • w)) := by
+      change (t • x) + r • (t • w) = t • (x + r • w)
+      module
+    rw [hvec]
+    exact intrGeo_smul_apply (I := I) g hEnorm p
+      (show TangentSpace I p from x + r • w) t s
+  unfold intrinsicJacobi
+  rw [hfun]
+  rfl
+
 /-- The intrinsic Jacobi field and its first covariant derivative have
 differentiable chart representatives at every time. -/
 theorem intrJacobi_diff
@@ -141,6 +175,10 @@ theorem intrinsicJacobi_perp
   rw [← hjac] at hgauss
   simpa only [intrinsicJacobi, expMapIntrinsic_def] using hgauss
 
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 private theorem curveVelocity_comp_mul
     (γ : Real → M) (c t : Real)
     (hγ : MDifferentiableAt 𝓘(Real, Real) I γ (c * t)) :

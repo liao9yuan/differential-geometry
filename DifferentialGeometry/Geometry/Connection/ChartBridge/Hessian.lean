@@ -856,6 +856,24 @@ theorem hessFun_congr
   intro j _
   rw [htensor i j]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] in
+theorem hessFun_symm_local [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} {U : Set M} {x : M}
+    (hU : IsOpen U)
+    (hf : ContMDiffOn I 𝓘(ℝ) ∞ f U) (hx : x ∈ U)
+    (v w : TangentSpace I x) :
+    hessFun (I := I) g f x v w = hessFun (I := I) g f x w v := by
+  obtain ⟨F, hF, hFf⟩ :=
+    DifferentialGeometry.exists_smooth_germ (I := I) hU hx hf
+  calc
+    hessFun (I := I) g f x v w = hessFun (I := I) g F x v w :=
+      congrArg (fun B => B v w) (hessFun_congr (I := I) g hFf.symm)
+    _ = hessFun (I := I) g F x w v :=
+      hessFun_symm_of_boundaryless (I := I) g hF x v w
+    _ = hessFun (I := I) g f x w v :=
+      congrArg (fun B => B w v) (hessFun_congr (I := I) g hFf)
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -905,6 +923,47 @@ theorem hessFun_eq_cov_local [I.Boundaryless]
       hessFun_eq_cov_grad (I := I) g hF x v w
     _ = g.inner x ((LeviCivita (I := I) g).toFun
           (fun b => gradFun (I := I) g f b) x v) w := by rw [hcov]
+
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+theorem hessFun_add_const [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (c : ℝ) {f : M → ℝ} {U : Set M} {x : M}
+    (hU : IsOpen U)
+    (hf : ContMDiffOn I 𝓘(ℝ) ∞ f U) (hx : x ∈ U)
+    (v w : TangentSpace I x) :
+    hessFun (I := I) g (fun y => c + f y) x v w =
+      hessFun (I := I) g f x v w := by
+  have hfadd : ContMDiffOn I 𝓘(ℝ) ∞ (fun y => c + f y) U :=
+    contMDiffOn_const.add hf
+  have hgrad_eq :
+      (fun y => gradientFun (I := I) g (fun z => c + f z) y) =ᶠ[𝓝 x]
+        (fun y => gradientFun (I := I) g f y) := by
+    filter_upwards [hU.mem_nhds hx] with y hy
+    have hfy : MDifferentiableAt I 𝓘(ℝ) f y :=
+      ((hf y hy).contMDiffAt (hU.mem_nhds hy)).mdifferentiableAt (by simp)
+    calc
+      gradientFun (I := I) g (fun z => c + f z) y =
+          gradientFun (I := I) g (fun _ : M => c) y +
+            gradientFun (I := I) g f y :=
+        gradientFun_add (I := I) g mdifferentiableAt_const hfy
+      _ = gradientFun (I := I) g f y := by
+        rw [gradientFun_const, zero_add]
+  have hgrad_add : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g (fun z => c + f z) y) x :=
+    gradientFun_mdiffOn (I := I) g hU hfadd hx
+  have hgrad : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g f y) x :=
+    gradientFun_mdiffOn (I := I) g hU hf hx
+  have hcov :
+      (LeviCivita (I := I) g).toFun
+          (fun y => gradFun (I := I) g (fun z => c + f z) y) x =
+        (LeviCivita (I := I) g).toFun
+          (fun y => gradFun (I := I) g f y) x := by
+    simpa only [← gradient_eq_gradFun] using
+      (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+        hgrad_add hgrad Filter.univ_mem hgrad_eq
+  rw [hessFun_eq_cov_local (I := I) g hU hfadd hx,
+    hessFun_eq_cov_local (I := I) g hU hf hx, hcov]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem

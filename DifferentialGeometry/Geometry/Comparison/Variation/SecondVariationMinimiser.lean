@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Calculus.UpperSupport
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
@@ -34,23 +35,8 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 theorem second_deriv_nonneg_of_isLocalMin {L : ℝ → ℝ} {x₀ c : ℝ}
     (hmin : IsLocalMin L x₀) (hL' : HasDerivAt L 0 x₀)
-    (hL'' : HasDerivAt (deriv L) c x₀) : 0 ≤ c := by
-  by_contra hc
-  push Not at hc
-  have hderiv0 : deriv L x₀ = 0 := hL'.deriv
-  have hsecond : deriv (deriv L) x₀ = c := hL''.deriv
-  have hmax : IsLocalMax L x₀ :=
-    isLocalMax_of_deriv_deriv_neg (by rw [hsecond]; exact hc) hderiv0 hL'.continuousAt
-  have hconst : L =ᶠ[𝓝 x₀] (fun _ => L x₀) :=
-    eventuallyEq_of_isMinFilter_of_isMaxFilter hmin hmax
-  have hderiv_const : deriv L =ᶠ[𝓝 x₀] (fun _ => (0 : ℝ)) := by
-    have := hconst.deriv
-    refine this.trans ?_
-    filter_upwards with x using deriv_const x (L x₀)
-  have hL''0 : HasDerivAt (deriv L) c x₀ := hL''
-  rw [hderiv_const.hasDerivAt_iff] at hL''0
-  have : c = 0 := hL''0.unique (hasDerivAt_const x₀ (0 : ℝ))
-  exact absurd this (ne_of_lt hc)
+    (hL'' : HasDerivAt (deriv L) c x₀) : 0 ≤ c :=
+  DifferentialGeometry.Analysis.second_deriv_nonneg hmin hL' hL''
 
 def reparam (r : ℝ) (s : ℝ) : ℝ :=
   (2 * r / Real.pi) * Real.arctan ((Real.pi / (2 * r)) * s)

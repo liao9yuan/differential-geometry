@@ -41,6 +41,7 @@ import DifferentialGeometry.Analysis.Calculus.TimeJetEvolution
 import DifferentialGeometry.Analysis.Calculus.TimeJetMatch
 import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
+import DifferentialGeometry.Analysis.Calculus.UpperSupport
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameTraceΓCorrectionT0Linear
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
@@ -1810,6 +1811,7 @@ import DifferentialGeometry.Geometry.Comparison.CenterOfMass
 import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.ConvexBalls
 import DifferentialGeometry.Geometry.Comparison.DistanceCalabi
+import DifferentialGeometry.Geometry.Comparison.DistanceSemiconcavity
 import DifferentialGeometry.Geometry.Comparison.EndpointContinuation
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 import DifferentialGeometry.Geometry.Comparison.ExpNonsingular
@@ -1825,6 +1827,7 @@ import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Busemann
+import DifferentialGeometry.Geometry.Comparison.Nonnegative.BusemannConcavity
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.ConvexExhaustion
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Ray
 import DifferentialGeometry.Geometry.Comparison.RadialLaplacian
@@ -1845,6 +1848,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.MinimalGeodesicNoConju
 import DifferentialGeometry.Geometry.Comparison.Variation.MinimizingNoConj
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrameIndex
+import DifferentialGeometry.Geometry.Comparison.Variation.RadialMinimizing
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser

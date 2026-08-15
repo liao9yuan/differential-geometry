@@ -133,16 +133,27 @@ basepoint-ray Busemann functions are geodesically concave.  This conditional
 compactness route is complete; the curvature-dependent compact exhaustion
 theorem remains unstated.
 
-`Variation/EndpointNonnegative.lean` supplies the first genuine comparison
-producer, `jacobi_pair_le_flat`, from `NonnegSecMetric`.  Its statement is for a
-unit-speed geodesic on `[0, L]`; the existing intrinsic selected branch is
-parameterized on `[0, 1]` with speed equal to its radial length.  The smallest
-remaining bridge is therefore a unit-speed reparameterization and minimizing-
-tail lemma.  It is routine geometric plumbing, but it must precede the
-selected-branch Hessian comparison theorem.  Calabi upper support across the
-cut locus and the one-dimensional barrier argument then give geodesic
-concavity of Busemann functions.  No complete Toponogov hierarchy is required
-before this selected consequence.
+`Variation/EndpointNonnegative.lean` supplies `jacobi_pair_le_flat` from
+`NonnegSecMetric` and the time-one specialization `intrJacobi_pair_le`.
+`Variation/RadialMinimizing.lean` supplies the exact unit-speed minimizing
+bridge, while `Exponential/EndpointShape.lean` exposes the all-time Jacobi
+scaling identity.  `RadialLaplacian.lean` now combines these producers with
+`branchHess_shape` in the perpendicular and arbitrary endpoint-vector bounds.
+`DistanceCalabi.lean` supplies the exact minimizing-tail distance, broken-path
+upper support, and its scalar second-derivative estimate along smooth
+geodesics.  `Analysis/Calculus/UpperSupport.lean` supplies the one-dimensional
+barrier calculus, while `DistanceSemiconcavity.lean` turns the Calabi supports
+into a reusable semiconcavity theorem and passes concavity through pointwise
+limits.
+
+`Nonnegative/BusemannConcavity.lean` now proves that the Busemann function of a
+minimizing ray is concave along every globally smooth ambient geodesic.  The
+remaining API frontier is deliberate: the existing `IsGeodesicConcave` and
+`IsTotallyConvex` definitions quantify bare `IsGeodesicOn` curves, but that
+predicate does not include continuity.  Before exposing the final public
+all-segment theorem, those predicates should require `ContinuousOn` on the
+segment and the Calabi argument should use local geodesic regularity.  No
+complete Toponogov hierarchy is required for this route.
 
 ## Honest progress
 
@@ -154,14 +165,19 @@ before this selected consequence.
 - Cheeger--Gromoll splitting theorem: unstated, therefore 0%; dedicated metric
   machinery approximately 20%.
 - Total-convexity and elementary convex-exhaustion interfaces: 100%.
-- `jacobi_pair_le_flat`: 100%; selected-branch Hessian comparison: unstated,
-  0%, with dedicated endpoint machinery approximately 60%.
-- Busemann geodesic-concavity theorem: unstated, 0%; dedicated comparison
-  machinery approximately 20%.
+- `jacobi_pair_le_flat`, `intrJacobi_pair_le`, selected-branch Hessian
+  comparison, Calabi scalar supports, and one-dimensional upper-support
+  calculus: 100% after focused, targeted, and full-project verification.
+- Smooth-geodesic Busemann composition concavity: 100% after focused and
+  targeted verification and the full-project build.
+- Public `IsGeodesicConcave` Busemann theorem: unstated, 0%; dedicated
+  comparison machinery approximately 60%.  Its precise blocker is the missing
+  continuity field in the current geodesic convexity predicates.
 - Compact exhaustion under nonnegative sectional curvature: unstated, 0%; its
   downstream conditional compactness argument is 100%.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  15% through ray, convexity, exhaustion, and endpoint-comparison infrastructure.
-- Whole B1 nonnegative-curvature lane: approximately 12--15%.
+  24% through rays, convexity, conditional exhaustion, Calabi comparison, and
+  the smooth-geodesic Busemann limit.
+- Whole B1 nonnegative-curvature lane: approximately 18--20%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.

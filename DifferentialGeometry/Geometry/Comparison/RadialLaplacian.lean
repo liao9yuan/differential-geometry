@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Exponential.EndpointShape
 import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
 import DifferentialGeometry.Geometry.Exponential.RawIntrinsicC2
 import DifferentialGeometry.Geometry.Comparison.HessianAlongGeodesic
+import DifferentialGeometry.Geometry.Comparison.Variation.EndpointNonnegative
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiShape
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
@@ -132,6 +133,301 @@ theorem branchHess_radial
       branchDeriv2_zero (I := I) B (t := (1 : Real)) zero_lt_one hu1
   rw [htrace] at hzero
   simpa only [curveVelocity] using hzero
+
+theorem branchHess_le_flat
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    {u w : TangentSpace I p}
+    (hsrc : (u : E) ∈ B.hom.source)
+    (hdist : Real.sqrt (g.inner p u u) =
+      (riemannianEDist I p
+        (expMapIntrinsic (I := I) g hEnorm p u)).toReal)
+    (hu : 0 < g.inner p u u)
+    (hw : g.inner p u w = 0)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    let γ := intrinsicGeodesic (I := I) g hEnorm p u
+    let J := intrinsicJacobi (I := I) g hEnorm p u w
+    hessFun (I := I) g (branchRadius (I := I) g B)
+        (γ 1) (J 1) (J 1) ≤
+      g.inner (γ 1) (J 1) (J 1) /
+        Real.sqrt (g.inner p u u) := by
+  dsimp only
+  calc
+    hessFun (I := I) g (branchRadius (I := I) g B)
+        (intrinsicGeodesic (I := I) g hEnorm p u 1)
+        (intrinsicJacobi (I := I) g hEnorm p u w 1)
+        (intrinsicJacobi (I := I) g hEnorm p u w 1) =
+      g.inner (intrinsicGeodesic (I := I) g hEnorm p u 1)
+        (covDerivAlong (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm p u)
+          (intrinsicJacobi (I := I) g hEnorm p u w) 1)
+        (intrinsicJacobi (I := I) g hEnorm p u w 1) /
+          Real.sqrt (g.inner p u u) :=
+      branchHess_shape (I := I) B hsrc hu hw hw
+    _ ≤ g.inner (intrinsicGeodesic (I := I) g hEnorm p u 1)
+        (intrinsicJacobi (I := I) g hEnorm p u w 1)
+        (intrinsicJacobi (I := I) g hEnorm p u w 1) /
+          Real.sqrt (g.inner p u u) := by
+      exact (div_le_div_iff_of_pos_right (Real.sqrt_pos.2 hu)).2
+        (intrJacobi_pair_le (I := I) g hEnorm hdist hu hw hsec)
+
+theorem branchHess_le_perp
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    {u : TangentSpace I p}
+    (hsrc : (u : E) ∈ B.hom.source)
+    (hdist : Real.sqrt (g.inner p u u) =
+      (riemannianEDist I p
+        (expMapIntrinsic (I := I) g hEnorm p u)).toReal)
+    (hu : 0 < g.inner p u u)
+    {Y : TangentSpace I
+      (expMapIntrinsic (I := I) g hEnorm p u)}
+    (hY : g.inner (expMapIntrinsic (I := I) g hEnorm p u)
+      (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd Y = 0)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    hessFun (I := I) g (branchRadius (I := I) g B)
+        (expMapIntrinsic (I := I) g hEnorm p u) Y Y ≤
+      g.inner (expMapIntrinsic (I := I) g hEnorm p u) Y Y /
+        Real.sqrt (g.inner p u u) := by
+  let q : M := expMapIntrinsic (I := I) g hEnorm p u
+  let w : TangentSpace I p :=
+    show E from mfderiv I 𝓘(Real, E) B.inv q Y
+  have hq : q ∈ B.dom := by
+    rw [show q = B.hom (u : E) from B.hom_eq hsrc]
+    exact B.hom.map_source hsrc
+  have hinv_eq : B.inv q = (u : E) := by
+    simpa only [q] using B.left_inv hsrc
+  have hJY :
+      intrinsicJacobi (I := I) g hEnorm p u w 1 = Y := by
+    have hJexp :
+        (intrinsicJacobi (I := I) g hEnorm p u w 1 : E) =
+          (mfderiv 𝓘(Real, E) I
+            (fun v : E => expMapIntrinsic (I := I) g hEnorm p
+              (show TangentSpace I p from v))
+            (u : E) (w : E) : E) := by
+      simpa only [intrinsicJacobi] using
+        intrinsic_jacobi_one (I := I) g hEnorm p (u : E) (w : E)
+    have hright := exp_inv_mfderiv (I := I) B hq Y
+    rw [hinv_eq] at hright
+    change (intrinsicJacobi (I := I) g hEnorm p u w 1 : E) = (Y : E)
+    exact hJexp.trans (by simpa only [q, w] using hright)
+  have hw : g.inner p u w = 0 := by
+    have hgauss := intrinsicJacobi_perp (I := I) g hEnorm p u w
+    have hleft :
+        g.inner (intrinsicGeodesic (I := I) g hEnorm p u 1)
+          (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd
+          (intrinsicJacobi (I := I) g hEnorm p u w 1) = 0 := by
+      rw [hJY]
+      simpa only [expMapIntrinsic_def] using hY
+    exact hgauss.symm.trans hleft
+  have h := branchHess_le_flat (I := I) B hsrc hdist hu hw hsec
+  dsimp only at h
+  rw [← expMapIntrinsic_def, hJY] at h
+  exact h
+
+theorem branchHess_cross
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    {u : TangentSpace I p}
+    (hsrc : (u : E) ∈ B.hom.source)
+    (hu : 0 < g.inner p u u)
+    {Y : TangentSpace I
+      (expMapIntrinsic (I := I) g hEnorm p u)}
+    (hY : g.inner (expMapIntrinsic (I := I) g hEnorm p u)
+      (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd Y = 0) :
+    hessFun (I := I) g (branchRadius (I := I) g B)
+        (expMapIntrinsic (I := I) g hEnorm p u) Y
+        (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd = 0 := by
+  let q : M := expMapIntrinsic (I := I) g hEnorm p u
+  let w : TangentSpace I p :=
+    show E from mfderiv I 𝓘(Real, E) B.inv q Y
+  have hq : q ∈ B.dom := by
+    rw [show q = B.hom (u : E) from B.hom_eq hsrc]
+    exact B.hom.map_source hsrc
+  have hinv_eq : B.inv q = (u : E) := by
+    simpa only [q] using B.left_inv hsrc
+  have hJY :
+      intrinsicJacobi (I := I) g hEnorm p u w 1 = Y := by
+    have hJexp :
+        (intrinsicJacobi (I := I) g hEnorm p u w 1 : E) =
+          (mfderiv 𝓘(Real, E) I
+            (fun v : E => expMapIntrinsic (I := I) g hEnorm p
+              (show TangentSpace I p from v))
+            (u : E) (w : E) : E) := by
+      simpa only [intrinsicJacobi] using
+        intrinsic_jacobi_one (I := I) g hEnorm p (u : E) (w : E)
+    have hright := exp_inv_mfderiv (I := I) B hq Y
+    rw [hinv_eq] at hright
+    change (intrinsicJacobi (I := I) g hEnorm p u w 1 : E) = (Y : E)
+    exact hJexp.trans (by simpa only [q, w] using hright)
+  have hw : g.inner p u w = 0 := by
+    have hgauss := intrinsicJacobi_perp (I := I) g hEnorm p u w
+    have hleft :
+        g.inner (intrinsicGeodesic (I := I) g hEnorm p u 1)
+          (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd
+          (intrinsicJacobi (I := I) g hEnorm p u w 1) = 0 := by
+      rw [hJY]
+      simpa only [expMapIntrinsic_def] using hY
+    exact hgauss.symm.trans hleft
+  have hself := intrJacobi_self (I := I) g hEnorm p u
+  have hpair :
+      g.inner (intrinsicGeodesic (I := I) g hEnorm p u 1)
+        (covDerivAlong (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm p u)
+          (intrinsicJacobi (I := I) g hEnorm p u w) 1)
+        (intrinsicJacobi (I := I) g hEnorm p u u 1) = 0 := by
+    rw [hself, g.symm]
+    exact intrJacobi_dperp (I := I) g hEnorm p u w one_ne_zero hw
+  have hpair' :
+      g.inner (expMapIntrinsic (I := I) g hEnorm p u)
+        (covDerivAlong (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm p u)
+          (intrinsicJacobi (I := I) g hEnorm p u w) 1)
+        (curveVelocity (I := I)
+          (intrinsicGeodesic (I := I) g hEnorm p u) 1) = 0 := by
+    simpa only [expMapIntrinsic_def, hself] using hpair
+  have hh := branchHess_jacobi (I := I) B
+    (w₁ := w) (w₂ := u) hsrc hu
+  dsimp only at hh
+  rw [← expMapIntrinsic_def, hJY, hself, hpair', hw] at hh
+  simp only [zero_mul, zero_div, sub_zero] at hh
+  simpa only [intrinsicVelocityLift, curveVelocity] using hh
+
+theorem branchHess_le
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    {u : TangentSpace I p}
+    (hsrc : (u : E) ∈ B.hom.source)
+    (hdist : Real.sqrt (g.inner p u u) =
+      (riemannianEDist I p
+        (expMapIntrinsic (I := I) g hEnorm p u)).toReal)
+    (hu : 0 < g.inner p u u)
+    (Y : TangentSpace I
+      (expMapIntrinsic (I := I) g hEnorm p u))
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    hessFun (I := I) g (branchRadius (I := I) g B)
+        (expMapIntrinsic (I := I) g hEnorm p u) Y Y ≤
+      g.inner (expMapIntrinsic (I := I) g hEnorm p u) Y Y /
+        Real.sqrt (g.inner p u u) := by
+  let q : M := expMapIntrinsic (I := I) g hEnorm p u
+  let Z : TangentSpace I q :=
+    show E from
+      ((intrinsicVelocityLift (I := I) g hEnorm p u 1).snd : E)
+  let D : Real := g.inner q Z Z
+  let α : Real := g.inner q Z Y / D
+  let W : TangentSpace I q := Y - α • Z
+  have hD : D = g.inner p u u := by
+    simpa only [D, q, Z, intrinsicVelocityLift, curveVelocity,
+      expMapIntrinsic_def] using
+      intrinsicGeodesic_speedSq_eq (I := I) g hEnorm p u 1
+  have hDpos : 0 < D := hD.trans_gt hu
+  have hW : g.inner q Z W = 0 := by
+    calc
+      g.inner q Z W = g.inner q Z Y - g.inner q Z (α • Z) :=
+        (g.inner q Z).map_sub Y (α • Z)
+      _ = g.inner q Z Y - α * g.inner q Z Z := by
+        exact congrArg (fun z : Real => g.inner q Z Y - z)
+          (by simpa only [smul_eq_mul] using (g.inner q Z).map_smul α Z)
+      _ = 0 := by
+        change g.inner q Z Y - (g.inner q Z Y / D) * D = 0
+        rw [div_mul_cancel₀ _ hDpos.ne', sub_self]
+  have hdec : Y = W + α • Z := by
+    dsimp only [W]
+    abel
+  have hW' :
+      g.inner (expMapIntrinsic (I := I) g hEnorm p u)
+        (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd W = 0 := by
+    simpa only [q, Z] using hW
+  have hWW := branchHess_le_perp (I := I) B hsrc hdist hu hW' hsec
+  have hWZ := branchHess_cross (I := I) B hsrc hu hW'
+  have hZZ := branchHess_radial (I := I) B hsrc hu
+  dsimp only at hZZ
+  have hZZ' :
+      hessFun (I := I) g (branchRadius (I := I) g B) q Z Z = 0 := by
+    simpa only [q, Z, intrinsicVelocityLift, curveVelocity,
+      expMapIntrinsic_def] using hZZ
+  have hWZ' :
+      hessFun (I := I) g (branchRadius (I := I) g B) q W Z = 0 := by
+    simpa only [q, Z] using hWZ
+  obtain ⟨U, hUopen, hqU, hrU⟩ :=
+    branchRadius_open (I := I) B hsrc hu
+  have hqU' : q ∈ U := by
+    simpa only [q] using hqU
+  have hZW' :
+      hessFun (I := I) g (branchRadius (I := I) g B) q Z W = 0 := by
+    rw [hessFun_symm_local (I := I) g hUopen hrU hqU' Z W]
+    exact hWZ'
+  let Hess := hessFun (I := I) g (branchRadius (I := I) g B) q
+  have hcrossR : Hess W (α • Z) = 0 := by
+    have hs := (Hess W).map_smul α Z
+    calc
+      Hess W (α • Z) = α * Hess W Z := by
+        simpa only [smul_eq_mul] using hs
+      _ = 0 := by rw [show Hess W Z = 0 from hWZ', mul_zero]
+  have hcrossL : Hess (α • Z) W = 0 := by
+    have hs := LinearMap.map_smul₂ Hess α Z W
+    calc
+      Hess (α • Z) W = α * Hess Z W := by
+        simpa only [smul_eq_mul] using hs
+      _ = 0 := by rw [show Hess Z W = 0 from hZW', mul_zero]
+  have hrad : Hess (α • Z) (α • Z) = 0 := by
+    have hleft := LinearMap.map_smul₂ Hess α Z (α • Z)
+    have hright := (Hess Z).map_smul α Z
+    calc
+      Hess (α • Z) (α • Z) = α * Hess Z (α • Z) := by
+        simpa only [smul_eq_mul] using hleft
+      _ = α * (α * Hess Z Z) := by
+        exact congrArg (fun r : Real => α * r)
+          (by simpa only [smul_eq_mul] using hright)
+      _ = 0 := by rw [show Hess Z Z = 0 from hZZ']; ring
+  have hexpand :
+      Hess (W + α • Z) (W + α • Z) =
+        (Hess W W + Hess W (α • Z)) +
+          (Hess (α • Z) W + Hess (α • Z) (α • Z)) := by
+    have hleft := LinearMap.map_add₂ Hess W (α • Z) (W + α • Z)
+    have hrightW := (Hess W).map_add W (α • Z)
+    have hrightZ := (Hess (α • Z)).map_add W (α • Z)
+    exact hleft.trans
+      (congrArg₂ (fun a b : Real => a + b) hrightW hrightZ)
+  have hHess : Hess Y Y = Hess W W := by
+    rw [hdec, hexpand]
+    simp only [hcrossR, hcrossL, hrad, add_zero]
+  have hWZmetric : g.inner q W Z = 0 :=
+    (g.symm q W Z).trans hW
+  have hmetric :
+      g.inner q Y Y = g.inner q W W + α ^ 2 * D := by
+    rw [hdec]
+    dsimp only [D]
+    simp only [map_add, map_smul, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, smul_eq_mul, hW, hWZmetric]
+    ring
+  have hWle : g.inner q W W ≤ g.inner q Y Y := by
+    rw [hmetric]
+    exact le_add_of_nonneg_right (mul_nonneg (sq_nonneg α) hDpos.le)
+  have hWW' :
+      Hess W W ≤ g.inner q W W / Real.sqrt (g.inner p u u) := by
+    simpa only [Hess, q] using hWW
+  calc
+    hessFun (I := I) g (branchRadius (I := I) g B)
+        (expMapIntrinsic (I := I) g hEnorm p u) Y Y = Hess W W := by
+      simpa only [Hess, q] using hHess
+    _ ≤ g.inner q W W / Real.sqrt (g.inner p u u) := hWW'
+    _ ≤ g.inner q Y Y / Real.sqrt (g.inner p u u) :=
+      (div_le_div_iff_of_pos_right (Real.sqrt_pos.2 hu)).2 hWle
+    _ = g.inner (expMapIntrinsic (I := I) g hEnorm p u) Y Y /
+        Real.sqrt (g.inner p u u) := by rfl
 
 /-- The scalar Laplacian of the fixed-first branch radius at a time-one
 intrinsic endpoint is the transverse Jacobi mean curvature divided by the
@@ -355,54 +651,6 @@ private theorem radialJacobi_eq_intr
       (I := 𝓘(Real, Real)) (I' := I) hagree
   have happ := congrArg (fun L => (L (1 : Real) : E)) hmf
   simpa only [radialJacobiField, intrinsicJacobi] using happ
-
-private theorem intrJacobi_smul
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
-    (p : M) (x w : E) (t s : Real) :
-    (intrinsicJacobi (I := I) g hEnorm p
-        (show TangentSpace I p from t • x)
-        (show TangentSpace I p from t • w) s : E) =
-      intrinsicJacobi (I := I) g hEnorm p
-        (show TangentSpace I p from x)
-        (show TangentSpace I p from w) (t * s) := by
-  have hfun :
-      (fun r : Real =>
-        intrinsicGeodesic (I := I) g hEnorm p
-          ((show TangentSpace I p from t • x) +
-            r • (show TangentSpace I p from t • w)) s) =
-        fun r : Real =>
-          intrinsicGeodesic (I := I) g hEnorm p
-            ((show TangentSpace I p from x) +
-              r • (show TangentSpace I p from w)) (t * s) := by
-    funext r
-    have hvec :
-        (show TangentSpace I p from t • x) +
-            r • (show TangentSpace I p from t • w) =
-          (show TangentSpace I p from t • (x + r • w)) := by
-      change (t • x) + r • (t • w) = t • (x + r • w)
-      module
-    rw [hvec]
-    calc
-      intrinsicGeodesic (I := I) g hEnorm p
-          (show TangentSpace I p from t • (x + r • w)) s =
-          intrinsicGeodesic (I := I) g hEnorm p
-            (show TangentSpace I p from s • (t • (x + r • w))) 1 := by
-              symm
-              exact intrinsicGeodesic_smul (I := I) g hEnorm p
-                (show TangentSpace I p from t • (x + r • w)) s
-      _ = intrinsicGeodesic (I := I) g hEnorm p
-            (show TangentSpace I p from (t * s) • (x + r • w)) 1 := by
-              rw [show s • (t • (x + r • w)) =
-                (t * s) • (x + r • w) by module]
-      _ = intrinsicGeodesic (I := I) g hEnorm p
-            (show TangentSpace I p from x + r • w) (t * s) := by
-              exact intrinsicGeodesic_smul (I := I) g hEnorm p
-                (show TangentSpace I p from x + r • w) (t * s)
-  unfold intrinsicJacobi
-  rw [hfun]
-  rfl
 
 /-- The scalar Laplacian of the selected branch radius along the chart-fixed
 raw radial family is the raw transverse Jacobi mean divided by the unscaled

@@ -29,6 +29,7 @@ open Geometry.Riemannian
 open Geometry.Riemannian.Exponential
 open Geometry.Riemannian.HopfRinow
 open Integral.Connection
+open Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
@@ -106,6 +107,270 @@ theorem CalabiTailData.target_mem
     tail.branch.hom.map_source tail.source_mem
   rw [tail.map_eq] at hmem
   exact hmem
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem CalabiTailData.dist_le_radius
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
+    {O x : M} {r : Real}
+    (tail : CalabiTailData (I := I) g hEnorm O x r)
+    {y : M} (hy : y ∈ tail.branch.dom) :
+    (riemannianEDist I O y).toReal ≤
+      tail.left + branchRadius (I := I) g tail.branch y := by
+  have hrad_nonneg :
+      0 ≤ branchRadius (I := I) g tail.branch y :=
+    Real.sqrt_nonneg _
+  have hdist :
+      riemannianEDist I O y ≤
+        ENNReal.ofReal tail.left +
+          ENNReal.ofReal (branchRadius (I := I) g tail.branch y) := by
+    calc
+      riemannianEDist I O y ≤
+          riemannianEDist I O tail.p + riemannianEDist I tail.p y :=
+        Manifold.riemannianEDist_triangle
+      _ ≤ ENNReal.ofReal tail.left +
+          ENNReal.ofReal (branchRadius (I := I) g tail.branch y) :=
+        add_le_add tail.left_edist.le (tail.branch.edist_le_radius hy)
+  have hreal := ENNReal.toReal_mono
+    (ENNReal.add_ne_top.mpr
+      ⟨ENNReal.ofReal_ne_top, ENNReal.ofReal_ne_top⟩) hdist
+  rw [ENNReal.toReal_add ENNReal.ofReal_ne_top ENNReal.ofReal_ne_top,
+    ENNReal.toReal_ofReal tail.left_nonneg,
+    ENNReal.toReal_ofReal hrad_nonneg] at hreal
+  exact hreal
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem CalabiTailData.tail_edist
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
+    {O x : M} {r : Real}
+    (tail : CalabiTailData (I := I) g hEnorm O x r)
+    (hr : r = (riemannianEDist I O x).toReal) :
+    riemannianEDist I tail.p x = ENNReal.ofReal tail.ell := by
+  have hr_pos : 0 < r := by
+    rw [← tail.split]
+    exact add_pos tail.left_pos tail.ell_pos
+  have hfin : riemannianEDist I O x ≠ (⊤ : ENNReal) := by
+    intro htop
+    rw [htop, ENNReal.toReal_top] at hr
+    linarith
+  have hfull : riemannianEDist I O x = ENNReal.ofReal r := by
+    rw [hr, ENNReal.ofReal_toReal hfin]
+  have hsplit :
+      ENNReal.ofReal r =
+        ENNReal.ofReal tail.left + ENNReal.ofReal tail.ell := by
+    rw [← ENNReal.ofReal_add tail.left_nonneg tail.ell_pos.le, tail.split]
+  have hlower : ENNReal.ofReal tail.ell ≤ riemannianEDist I tail.p x := by
+    have hsum :
+        ENNReal.ofReal tail.left + ENNReal.ofReal tail.ell ≤
+          ENNReal.ofReal tail.left + riemannianEDist I tail.p x := by
+      rw [← hsplit, ← hfull, ← tail.left_edist]
+      exact Manifold.riemannianEDist_triangle
+    exact (ENNReal.add_le_add_iff_left ENNReal.ofReal_ne_top).mp hsum
+  have hrad :
+      branchRadius (I := I) g tail.branch x = tail.ell := by
+    calc
+      branchRadius (I := I) g tail.branch x =
+          branchRadius (I := I) g tail.branch
+            (expMapIntrinsic (I := I) g hEnorm tail.p tail.u) :=
+        congrArg (branchRadius (I := I) g tail.branch) tail.exp_eq.symm
+      _ = Real.sqrt (g.inner tail.p tail.u tail.u) :=
+        branchRadius_exp (I := I) tail.branch tail.source_mem
+      _ = tail.ell := tail.u_norm
+  have hupper := tail.branch.edist_le_radius tail.target_mem
+  rw [hrad] at hupper
+  exact le_antisymm hupper hlower
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem CalabiTailData.hess_le_flat
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v))}
+    {O x : M} {r : Real}
+    (tail : CalabiTailData (I := I) g hEnorm O x r)
+    (hr : r = (riemannianEDist I O x).toReal)
+    {w : TangentSpace I tail.p}
+    (hw : g.inner tail.p tail.u w = 0)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    let J := intrinsicJacobi (I := I) g hEnorm tail.p tail.u w
+    hessFun (I := I) g
+        (branchRadius (I := I) g tail.branch) x (J 1) (J 1) ≤
+      g.inner x (J 1) (J 1) / tail.ell := by
+  dsimp only
+  have hdist : Real.sqrt (g.inner tail.p tail.u tail.u) =
+      (riemannianEDist I tail.p
+        (expMapIntrinsic (I := I) g hEnorm tail.p tail.u)).toReal := by
+    rw [tail.exp_eq, tail.tail_edist hr,
+      ENNReal.toReal_ofReal tail.ell_pos.le, tail.u_norm]
+  have hu : 0 < g.inner tail.p tail.u tail.u := by
+    apply Real.sqrt_pos.mp
+    rw [tail.u_norm]
+    exact tail.ell_pos
+  have h := Geometry.Riemannian.branchHess_le_flat
+    (I := I) tail.branch tail.source_mem hdist hu hw hsec
+  dsimp only at h
+  rw [← expMapIntrinsic_def, tail.exp_eq, tail.u_norm] at h
+  exact h
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem CalabiTailData.hess_le_perp
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v))}
+    {O x : M} {r : Real}
+    (tail : CalabiTailData (I := I) g hEnorm O x r)
+    (hr : r = (riemannianEDist I O x).toReal)
+    (Y : TangentSpace I x)
+    (hY : g.inner x
+      (intrinsicVelocityLift (I := I) g hEnorm tail.p tail.u 1).snd Y = 0)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    hessFun (I := I) g
+        (branchRadius (I := I) g tail.branch) x Y Y ≤
+      g.inner x Y Y / tail.ell := by
+  have hdist : Real.sqrt (g.inner tail.p tail.u tail.u) =
+      (riemannianEDist I tail.p
+        (expMapIntrinsic (I := I) g hEnorm tail.p tail.u)).toReal := by
+    rw [tail.exp_eq, tail.tail_edist hr,
+      ENNReal.toReal_ofReal tail.ell_pos.le, tail.u_norm]
+  have hu : 0 < g.inner tail.p tail.u tail.u := by
+    apply Real.sqrt_pos.mp
+    rw [tail.u_norm]
+    exact tail.ell_pos
+  have hY' :
+      g.inner (expMapIntrinsic (I := I) g hEnorm tail.p tail.u)
+        (intrinsicVelocityLift (I := I) g hEnorm tail.p tail.u 1).snd Y = 0 := by
+    rw [tail.exp_eq]
+    exact hY
+  have h := Geometry.Riemannian.branchHess_le_perp
+    (I := I) tail.branch tail.source_mem hdist hu hY' hsec
+  rw [tail.exp_eq, tail.u_norm] at h
+  exact h
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem CalabiTailData.hess_le
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v))}
+    {O x : M} {r : Real}
+    (tail : CalabiTailData (I := I) g hEnorm O x r)
+    (hr : r = (riemannianEDist I O x).toReal)
+    (Y : TangentSpace I x)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    hessFun (I := I) g
+        (branchRadius (I := I) g tail.branch) x Y Y ≤
+      g.inner x Y Y / tail.ell := by
+  have hdist : Real.sqrt (g.inner tail.p tail.u tail.u) =
+      (riemannianEDist I tail.p
+        (expMapIntrinsic (I := I) g hEnorm tail.p tail.u)).toReal := by
+    rw [tail.exp_eq, tail.tail_edist hr,
+      ENNReal.toReal_ofReal tail.ell_pos.le, tail.u_norm]
+  have hu : 0 < g.inner tail.p tail.u tail.u := by
+    apply Real.sqrt_pos.mp
+    rw [tail.u_norm]
+    exact tail.ell_pos
+  have h := Geometry.Riemannian.branchHess_le
+    (I := I) tail.branch tail.source_mem hdist hu Y hsec
+  rw [tail.exp_eq, tail.u_norm] at h
+  exact h
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem CalabiTailData.geo_upper
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v))}
+    {O : M} {r : ℝ} {γ : ℝ → M} {t : ℝ}
+    (tail : CalabiTailData (I := I) g hEnorm O (γ t) r)
+    (hr : r = (riemannianEDist I O (γ t)).toReal)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hgeo : Geodesic.HasGeodesicEquationAt (I := I) g γ t)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    let φ : ℝ → ℝ := fun s =>
+      tail.left + branchRadius (I := I) g tail.branch (γ s)
+    let v : TangentSpace I (γ t) :=
+      (mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1
+    ContDiffAt ℝ ∞ φ t ∧
+      φ t = r ∧
+      (∀ᶠ s in 𝓝 t,
+        (riemannianEDist I O (γ s)).toReal ≤ φ s) ∧
+      (deriv^[2] φ) t ≤ g.inner (γ t) v v / tail.ell := by
+  dsimp only
+  let ρ : M → ℝ := fun y =>
+    tail.left + branchRadius (I := I) g tail.branch y
+  let φ : ℝ → ℝ := fun s => ρ (γ s)
+  let v : TangentSpace I (γ t) :=
+    (mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1
+  have hu : 0 < g.inner tail.p tail.u tail.u := by
+    apply Real.sqrt_pos.mp
+    rw [tail.u_norm]
+    exact tail.ell_pos
+  obtain ⟨U, hU, hγtU, hbrU⟩ :=
+    branchRadius_open (I := I) tail.branch tail.source_mem hu
+  rw [tail.exp_eq] at hγtU
+  have hρU : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ ρ U := by
+    simpa only [ρ] using contMDiffOn_const.add hbrU
+  have hρAt : ContMDiffAt I 𝓘(ℝ, ℝ) ∞ ρ (γ t) :=
+    (hρU _ hγtU).contMDiffAt (hU.mem_nhds hγtU)
+  have hφ : ContDiffAt ℝ ∞ φ t := by
+    apply contMDiffAt_iff_contDiffAt.mp
+    simpa only [φ, Function.comp_apply] using hρAt.comp t hγ.contMDiffAt
+  have hrad :
+      branchRadius (I := I) g tail.branch (γ t) = tail.ell := by
+    calc
+      branchRadius (I := I) g tail.branch (γ t) =
+          branchRadius (I := I) g tail.branch
+            (expMapIntrinsic (I := I) g hEnorm tail.p tail.u) :=
+        congrArg (branchRadius (I := I) g tail.branch) tail.exp_eq.symm
+      _ = Real.sqrt (g.inner tail.p tail.u tail.u) :=
+        branchRadius_exp (I := I) tail.branch tail.source_mem
+      _ = tail.ell := tail.u_norm
+  have hφt : φ t = r := by
+    dsimp only [φ, ρ]
+    rw [hrad, tail.split]
+  have hupper :
+      ∀ᶠ s in 𝓝 t,
+        (riemannianEDist I O (γ s)).toReal ≤ φ s := by
+    filter_upwards [hγ.continuous.continuousAt
+      (tail.branch.hom.open_target.mem_nhds tail.target_mem)] with s hs
+    simpa only [φ, ρ] using tail.dist_le_radius hs
+  have hderiv :
+      (deriv^[2] φ) t = hessFun (I := I) g ρ (γ t) v v := by
+    simpa only [φ, Function.comp_def, v] using
+      deriv2_geo_on_at (I := I) g hU hρU hγ hgeo hγtU
+  have hhess :
+      hessFun (I := I) g ρ (γ t) v v =
+        hessFun (I := I) g
+          (branchRadius (I := I) g tail.branch) (γ t) v v := by
+    simpa only [ρ] using
+      hessFun_add_const (I := I) g tail.left hU hbrU hγtU v v
+  refine ⟨hφ, hφt, hupper, ?_⟩
+  rw [hderiv, hhess]
+  exact tail.hess_le hr v hsec
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -270,6 +535,62 @@ theorem exists_calabiTail
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+theorem calabi_geo_upper
+    [RiemannianBundle (fun y : M ↦ TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M ↦ TangentSpace I y)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    {O : M} {γ : ℝ → M} {t : ℝ}
+    (hO : O ≠ γ t)
+    (hfin : riemannianEDist I O (γ t) ≠ (⊤ : ENNReal))
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hgeo : Geodesic.HasGeodesicEquationAt (I := I) g γ t)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    let r := (riemannianEDist I O (γ t)).toReal
+    let v : TangentSpace I (γ t) :=
+      (mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1
+    ∃ φ : ℝ → ℝ,
+      ContDiffAt ℝ ∞ φ t ∧
+      φ t = r ∧
+      (∀ᶠ s in 𝓝 t,
+        (riemannianEDist I O (γ s)).toReal ≤ φ s) ∧
+      (deriv^[2] φ) t ≤ 2 * g.inner (γ t) v v / r := by
+  dsimp only
+  let r : ℝ := (riemannianEDist I O (γ t)).toReal
+  let v : TangentSpace I (γ t) :=
+    (mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1
+  have hdist_ne : riemannianEDist I O (γ t) ≠ 0 := by
+    intro hzero
+    exact hO (riemannianEDist_eq_zero_imp_eq (I := I) O (γ t) hzero)
+  have hr : 0 < r := ENNReal.toReal_pos hdist_ne hfin
+  obtain ⟨u, hexp, hlen⟩ :=
+    minExp_of_ne_top (I := I) g hEnorm O (γ t) hfin
+  obtain ⟨tail⟩ :=
+    exists_calabiTail (I := I) g hEnorm u hexp hlen hr rfl
+  let φ : ℝ → ℝ := fun s =>
+    tail.left + branchRadius (I := I) g tail.branch (γ s)
+  have hsupp := tail.geo_upper rfl hγ hgeo hsec
+  dsimp only at hsupp
+  refine ⟨φ, hsupp.1, hsupp.2.1, hsupp.2.2.1, ?_⟩
+  have hv : 0 ≤ g.inner (γ t) v v :=
+    gInner_self_nonneg (I := I) g (γ t) v
+  have hrell : r ≤ 2 * tail.ell := by
+    linarith [tail.half_le]
+  have hfrac :
+      g.inner (γ t) v v / tail.ell ≤
+        2 * g.inner (γ t) v v / r := by
+    apply (div_le_iff₀ tail.ell_pos).2
+    rw [show
+      2 * g.inner (γ t) v v / r * tail.ell =
+        (2 * g.inner (γ t) v v * tail.ell) / r by ring]
+    apply (le_div_iff₀ hr).2
+    nlinarith [mul_nonneg hv (sub_nonneg.mpr hrell)]
+  exact hsupp.2.2.2.trans hfrac
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- A finite nonbase point has selected Calabi-tail data whose explicit
 fixed-first branch radius is a smooth upper support with the standard
 Ricci-lower-bound Laplacian estimate. -/
@@ -355,32 +676,7 @@ theorem exists_calabiData
         (riemannianEDist I O y).toReal ≤ rho y := by
     filter_upwards [
       tail.branch.hom.open_target.mem_nhds tail.target_mem] with y hy
-    have hrad_nonneg :
-        0 ≤ branchRadius (I := I) g tail.branch y :=
-      Real.sqrt_nonneg _
-    have hdist :
-        riemannianEDist I O y ≤
-          ENNReal.ofReal tail.left +
-            ENNReal.ofReal
-              (branchRadius (I := I) g tail.branch y) := by
-      calc
-        riemannianEDist I O y ≤
-            riemannianEDist I O tail.p +
-              riemannianEDist I tail.p y :=
-          Manifold.riemannianEDist_triangle
-        _ ≤ ENNReal.ofReal tail.left +
-              ENNReal.ofReal
-                (branchRadius (I := I) g tail.branch y) := by
-          exact add_le_add tail.left_edist.le
-            (tail.branch.edist_le_radius hy)
-    have hreal :=
-      ENNReal.toReal_mono
-        (ENNReal.add_ne_top.mpr
-          ⟨ENNReal.ofReal_ne_top, ENNReal.ofReal_ne_top⟩) hdist
-    rw [ENNReal.toReal_add ENNReal.ofReal_ne_top ENNReal.ofReal_ne_top,
-      ENNReal.toReal_ofReal tail.left_nonneg,
-      ENNReal.toReal_ofReal hrad_nonneg] at hreal
-    exact hreal
+    exact tail.dist_le_radius hy
   have hbr_diff :
       MDifferentiableAt I 𝓘(Real, Real)
         (branchRadius (I := I) g tail.branch) x :=
