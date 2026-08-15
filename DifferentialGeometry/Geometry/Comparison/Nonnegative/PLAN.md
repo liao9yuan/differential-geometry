@@ -179,8 +179,14 @@ the Soul theorem.
 The pure topology and metric bridge beyond this theorem is already complete:
 the relative frontier is compact in a compact core, and a nonempty stratum and
 nonempty frontier give a core point at strictly positive frontier distance.
-Thus the immediate blocker is the smooth dense-stratum producer itself, not
-maximum attainment or boundary-distance nondegeneracy.
+`Comparison/ConvexNormalSlice.lean` also supplies the first local regularity
+brick: in intrinsic framed exponential coordinates, the pullback of a totally
+convex set to a sufficiently small normal ball is star-convex, its image is
+the corresponding relative neighborhood, and that relative neighborhood is
+path connected.  This does not yet identify a fixed linear tangent span or
+construct the smooth stratum.  Thus the immediate blocker is the
+maximal-dimensional smooth dense-stratum producer itself, not maximum
+attainment, boundary-distance nondegeneracy, or radial local connectivity.
 
 ## Honest progress
 
@@ -204,10 +210,13 @@ maximum attainment or boundary-distance nondegeneracy.
 - Compact totally convex minimum ray level: 100% after focused, targeted,
   full-project, and direct axiom verification.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  32--33% through rays, convexity, compact exhaustion and minimum core, Calabi
+  33--34% through rays, convexity, compact exhaustion and minimum core, Calabi
   comparison, the all-segment Busemann theorem, and the generic shaving and
-  relative-frontier consumers.  The dense-stratum and dimension-drop
-  mathematics remain unproved.
+  relative-frontier consumers, together with the normal-coordinate
+  star-convex slice.  The dense-stratum theorem remains unstated and 0%, with
+  approximately 10--15% of its dedicated local groundwork present; its
+  local-linearity, embedded-submanifold, total-geodesy, density, and the later
+  dimension-drop mathematics remain unproved.
 - Whole B1 nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.

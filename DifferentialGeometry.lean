@@ -1810,6 +1810,7 @@ import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Comparison.CenterOfMass
 import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.ConvexBalls
+import DifferentialGeometry.Geometry.Comparison.ConvexNormalSlice
 import DifferentialGeometry.Geometry.Comparison.ConvexShaving
 import DifferentialGeometry.Geometry.Comparison.DistanceCalabi
 import DifferentialGeometry.Geometry.Comparison.DistanceSemiconcavity
