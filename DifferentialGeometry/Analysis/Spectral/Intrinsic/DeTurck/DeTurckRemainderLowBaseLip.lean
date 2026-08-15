@@ -479,8 +479,6 @@ private theorem jet_add_lip
           ‖iteratedCovGrad (I := I) g r s q V‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
-set_option maxHeartbeats 1800000 in
-set_option synthInstance.maxHeartbeats 1800000 in
 theorem c1Diff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -731,7 +729,6 @@ private theorem riemLive_eq
     _ = _ := (pureTrace_toSection
       (I := I) (M := M) g gm 2 x).symm
 
-set_option maxHeartbeats 1800000 in
 theorem riem_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1105,7 +1102,6 @@ theorem lieArm2_pair_h1
       simp only [B0, B1, X]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem metricCorr_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2177,7 +2173,6 @@ private theorem omega_pair_h1
               (connDiffLoweredCc (I := I) g gT)) := by
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem lieOmega_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
