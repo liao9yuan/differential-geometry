@@ -2181,10 +2181,11 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_top
               refine add_le_add ?_ ?_
               · refine mul_le_mul_of_nonneg_left hWpair ?_
                 refine mul_nonneg (mul_nonneg (hCD_nn _) (mul_nonneg hn_nn hn_nn)) ?_
-                have := hC1_nn k; have := hCA_nn k; linarith
+                exact add_nonneg (mul_nonneg (by norm_num) (hC1_nn k))
+                  (mul_nonneg (by norm_num) (hCA_nn k))
               · refine mul_le_mul_of_nonneg_left hDptWfin ?_
                 refine mul_nonneg (mul_nonneg (hCD_nn _) (mul_nonneg hn_nn hn_nn)) ?_
-                have := hcfix_nn k; linarith
+                exact mul_nonneg (by norm_num) (hcfix_nn k)
           _ = (CD (i - k) * (n * n) *
               ((2 * C1 k + 4 * CA k) *
                   Combinatorics.windowPairCellCount ((i - k) + 1) (k + 3) + 4 * cfix k)) *
