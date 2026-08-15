@@ -339,7 +339,6 @@ theorem connDiff_gJet_le
         (3 / 2 * Λ' * (Real.sqrt Λ ^ 2 + Λ) *
           (Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u)) * Λ) * hs2
 
-set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
@@ -413,7 +412,6 @@ theorem covDerivConnDiff_g1_le
     rw [hWx] at h
     exact h
   rw [h4] at hkos
-
   have hcs4 : ∀ a b c d : TangentSpace I x,
       |metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons a ![b, c, d])| ≤
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4 (metricCovDeriv (I := I) g₁ g₂ 2 x)) *
@@ -438,7 +436,6 @@ theorem covDerivConnDiff_g1_le
     congr 1
     change (∏ i : Fin 3, Real.sqrt (g₁.inner x (![a, b, c] i) (![a, b, c] i))) = _
     simp [Fin.prod_univ_three]
-
   have hSA : Real.sqrt (g₁.inner x Avec Avec) ≤
       Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
@@ -449,7 +446,6 @@ theorem covDerivConnDiff_g1_le
     exact Tensor0SBundle.connDiffVec_norm_le (I := I) g₁
       (leviCivitaConnectionOfMetric (I := I) g₁)
       (leviCivitaConnectionOfMetric (I := I) g₂) w u
-
   have hBB_nn : 0 ≤ g₁.inner x B B := metric_inner_self_nonneg (I := I) (M := M) g₁ x B
   have hBBsq : g₁.inner x B B = Real.sqrt (g₁.inner x B B) ^ 2 := (Real.sq_sqrt hBB_nn).symm
   rw [hBBsq] at hkos
@@ -511,7 +507,7 @@ theorem covDerivConnDiff_g1_le
                 Real.sqrt (g₁.inner x u u))) := by
       nlinarith [hkos, hT1, hT2, hT3, hT4', habs1, habs2, habs3, habs4]
     have hdiv := le_of_mul_le_mul_left hmul hSBpos
-    nlinarith [hdiv]
+    linarith
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
