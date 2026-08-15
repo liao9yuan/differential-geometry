@@ -741,6 +741,17 @@ private theorem young_arm_split_scaled
     _ ≤ CS * CT * (t * X + (1 / t) ^ k * Y) :=
         mul_le_mul_of_nonneg_left hXY (by positivity)
 
+private lemma gnProduct_cell_tail
+    (CS CT Cbig tt ΛT NS ΛS NT : ℝ) (k : ℕ)
+    (hCSCT : CS * CT ≤ Cbig) (hbase : 0 ≤ tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) :
+    CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) ≤
+      Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
+  calc
+    CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) ≤
+        Cbig * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) :=
+      mul_le_mul_of_nonneg_right hCSCT hbase
+    _ = Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by ring
+
 theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
     (g : SmoothRiemannianMetric I M) (s₁ s₂ k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -947,14 +958,12 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         (by rw [hNSdef]; exact norm_nonneg _) (by rw [hNTdef]; exact norm_nonneg _)
         hIφp_nn hIψq_nn htt0 htt1 hSe hTe
       have hCSCT_le : CS * CT ≤ Cbig := by rw [hCbig]; linarith
+      have hbase : 0 ≤ tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by positivity
       calc ∫ x, Sj i x * Tj l x ∂μ
           ≤ Iφp ^ wi * Iψq ^ wl := hHolder
         _ ≤ CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := hys
-        _ ≤ Cbig * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := by
-            refine mul_le_mul_of_nonneg_right hCSCT_le ?_
-            positivity
-        _ = Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
-            ring
+        _ ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) :=
+            gnProduct_cell_tail CS CT Cbig tt ΛT NS ΛS NT k hCSCT_le hbase
   refine ⟨?_, ?_⟩
   · have hcont : Continuous (fun x => ∑ i ∈ Finset.range k, Sj i x * Tj (k - i) x) := by
       refine continuous_finset_sum _ (fun i _ => (hSj_cont i).mul (hTj_cont (k - i)))
