@@ -665,7 +665,6 @@ theorem linearizedRicciConnDiffOrder1Fib_realizedFam_jointContMDiffOn
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxRecDepth 8000 in
 theorem linearizedRicciConnDiffOrder0Fib_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -702,8 +701,7 @@ theorem linearizedRicciConnDiffOrder0Fib_realizedFam_jointContMDiffOn
       (Y p.1))
     hE0
   refine hCK.congr (fun p _ => ?_)
-  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
-    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl
+  simp [linearizedRicciConnDiffOrder0CometricTracedCLM]
 
 theorem linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
