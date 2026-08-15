@@ -158,28 +158,16 @@ theorem intrCore_minimizingVec_regular_unique
         (x := (pt : E)) (y := (q : E)) (u := u) (v := v)
         hpt hq huL hvL huEnd hvEnd').symm
 
-set_option maxHeartbeats 800000 in
-theorem intrCore_dist_germ
+private def intrCoreDistGermProp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
-    (p : M) {R a K : Real} (hR : 0 < R) (h4aR : 4 * a < R)
+    (p : M) {R : Real} (hR : 0 < R)
     (hloc :
       IsLocalDiffeomorphOn 𝓘(Real, E) I ∞
         (intrinsicFramedExp (I := I) g hEnorm p)
         (Metric.ball (0 : E) R))
-    (hK : 0 ≤ K)
-    (hsmall : K * (2 * a) ^ 2 < (Real.pi / 2) ^ 2)
-    (hRm :
-      ∀ z : E, ‖z‖ < 3 * R / 4 →
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (intrinsicFramedExp (I := I) g hEnorm p z) 4
-          (Integral.Connection.metricRm04At
-            (I := I) (M := M) g
-            (intrinsicFramedExp (I := I) g hEnorm p z))) ≤ K)
-    {pt q : intrPullBall (E := E) R}
-    (hpt : pt ∈ intrCore (E := E) R a)
-    (hq : q ∈ intrCore (E := E) R a) :
+    {pt q : intrPullBall (E := E) R} : Prop :=
     let gExt := intrExtMetric (I := I) g hEnorm p hR hloc
     letI : RiemannianBundle
         (fun z : E ↦ TangentSpace 𝓘(Real, E) z) :=
@@ -206,7 +194,30 @@ theorem intrCore_dist_germ
         (fun z =>
           (1 / 2 : Real) *
             (riemannianEDistOf
-              (I := 𝓘(Real, E)) gExt (pt : E) z).toReal ^ 2) := by
+              (I := 𝓘(Real, E)) gExt (pt : E) z).toReal ^ 2)
+
+theorem intrCore_dist_germ
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) {R a K : Real} (hR : 0 < R) (h4aR : 4 * a < R)
+    (hloc :
+      IsLocalDiffeomorphOn 𝓘(Real, E) I ∞
+        (intrinsicFramedExp (I := I) g hEnorm p)
+        (Metric.ball (0 : E) R))
+    (hK : 0 ≤ K)
+    (hsmall : K * (2 * a) ^ 2 < (Real.pi / 2) ^ 2)
+    (hRm :
+      ∀ z : E, ‖z‖ < 3 * R / 4 →
+        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
+          (intrinsicFramedExp (I := I) g hEnorm p z) 4
+          (Integral.Connection.metricRm04At
+            (I := I) (M := M) g
+            (intrinsicFramedExp (I := I) g hEnorm p z))) ≤ K)
+    {pt q : intrPullBall (E := E) R}
+    (hpt : pt ∈ intrCore (E := E) R a)
+    (hq : q ∈ intrCore (E := E) R a) :
+    intrCoreDistGermProp (I := I) g hEnorm p hR hloc (pt := pt) (q := q) := by
   let gExt := intrExtMetric (I := I) g hEnorm p hR hloc
   letI : RiemannianBundle
       (fun z : E ↦ TangentSpace 𝓘(Real, E) z) :=
@@ -233,7 +244,7 @@ theorem intrCore_dist_germ
         (I := 𝓘(Real, E)) gExt z v
   let u :=
     minimizingVec (I := 𝓘(Real, E)) gExt hExt (pt : E) (q : E)
-  dsimp only
+  dsimp only [intrCoreDistGermProp]
   have hru :=
     intrCore_minimizingVec_regular_unique
       (I := I) g hEnorm p hR h4aR hloc hK hsmall hRm hpt hq
