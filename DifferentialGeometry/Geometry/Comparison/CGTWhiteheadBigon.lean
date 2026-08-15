@@ -2292,7 +2292,8 @@ theorem intrCore_short_inj
         rw [hellFirst]
         have hluNonneg : 0 ≤ lu := Real.sqrt_nonneg _
         have hscaleLe : (1 - s) * lu ≤ lu := by
-          nlinarith [mul_nonneg hsPos.le hluNonneg]
+          have hsle : 1 - s ≤ 1 := by linarith
+          exact mul_le_of_le_one_left hluNonneg hsle
         exact hscaleLe.trans huLe
       have hsecondLt : ell (x₀, Br.inv (η s)) < L := by
         simpa only [ell, branchRadius] using hsBr
@@ -2837,7 +2838,7 @@ theorem intrCore_short_inj
         constructor
         · exact sub_nonneg.mpr (le_of_not_ge htT)
         · apply sub_le_iff_le_add.mpr
-          nlinarith [ht.2]
+          linarith [ht.2]
       have hp := hperiod (t - T)
       have heq : (t - T) + T = t := by ring
       rw [heq] at hp
