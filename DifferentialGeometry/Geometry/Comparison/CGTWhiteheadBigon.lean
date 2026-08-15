@@ -2711,7 +2711,7 @@ theorem intrCore_short_inj
     field_simp [hluPos.ne', hlvPos.ne']
   have hTPos : 0 < T := by
     dsimp only [T]
-    linarith
+    exact add_pos zero_lt_one hdPos
   have unnormalize (a₀ b₀ : Real) (ha₀ : a₀ ≠ 0)
       (A B : E) (h : a₀⁻¹ • A = -(b₀⁻¹ • B)) :
       A = (a₀ / b₀) • (-B) := by
