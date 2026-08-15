@@ -888,7 +888,9 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_topSeparated_le
       g₀ T 0 y
     rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h1
     have h2 := rfns_symmS_zero_le_of_ball (I := I) (M := M) g₀ T hδ0 hbound y
-    have hδ1 : δ ^ 2 ≤ 1 := by nlinarith [hδ0, lt_of_le_of_lt hδ_le hδ₀]
+    have hδ1 : δ ^ 2 ≤ 1 := by
+      have hδle1 : δ ≤ 1 := le_of_lt (lt_of_le_of_lt hδ_le hδ₀)
+      exact pow_le_one₀ hδ0 hδle1
     have h3 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 y
         ((symmS (I := I) (M := M) g₀ T).toSection y) ≤ n ^ 2 := by
       refine le_trans h2 ?_
