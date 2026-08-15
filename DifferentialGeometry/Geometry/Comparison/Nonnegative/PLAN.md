@@ -166,12 +166,25 @@ explicit carrier.  The generic calculus proves compact maximum attainment and
 preservation of total convexity from geodesic concavity of boundary distance.
 It deliberately does not manufacture the smooth stratum or its boundary.
 
-The next N4 frontier is the convex-stratum theorem for the minimum core `C`:
-a connected embedded totally geodesic smooth stratum `N` that is relatively
-open and dense in `C`, with closure `C`.  Its convex boundary is then
-`C \ N = frontierIn C N`.  After that, the remaining producers are concavity
-of distance to this relative boundary, the flat-rectangle equality case,
-strict stratum-dimension drop, and the terminal submanifold.  Ambient
+The next N4 theorem endpoint is still the convex-stratum theorem for the
+minimum core `C`: a connected embedded totally geodesic smooth stratum `N`
+that is relatively open and dense in `C`, with closure `C`.  Its convex
+boundary is then `C \ N = frontierIn C N`.
+
+`Comparison/ConvexStratum.lean` now proves the local Sakai dimension-growth
+theorem `exists_slice_succ`.  From an embedded `d`-slice contained in `C` and
+a point approached by `C \ N`, it constructs a nonempty embedded `(d + 1)`-
+slice inside `C` and inside any prescribed neighborhood.  Its uniform
+diagonal inverse branch, minimizing-vector identification, local nearest-point,
+transversality, immersed-slice, and cone-slice inputs are implemented.
+
+This completes the local slice-growth step, not the global stratum theorem.
+The immediate frontier is maximal-dimension assembly: define the maximal
+slice dimension and prove that the union of maximal-dimensional embedded
+slices is relatively open, connected, dense, and totally geodesic in the
+compact totally convex core.  After that, the remaining producers are
+concavity of distance to the relative boundary, the flat-rectangle equality
+case, strict stratum-dimension drop, and the terminal submanifold.  Ambient
 `frontier C` cannot be used after dimension drop, while `frontierIn C C` is
 empty.  These gaps must not be replaced by an assumption bundle that restates
 the Soul theorem.
@@ -179,18 +192,17 @@ the Soul theorem.
 The pure topology and metric bridge beyond this theorem is already complete:
 the relative frontier is compact in a compact core, and a nonempty stratum and
 nonempty frontier give a core point at strictly positive frontier distance.
-`Comparison/ConvexNormalSlice.lean` also supplies the first local regularity
-brick: in intrinsic framed exponential coordinates, the pullback of a totally
-convex set to a sufficiently small normal ball is star-convex, its image is
-the corresponding relative neighborhood, and that relative neighborhood is
-path connected.  `Topology/EmbeddedSlice.lean` now provides the honest
-set-local-flat representation needed for the future stratum: exact local
-identification with a finite-dimensional affine subspace.  Its full-dimensional
-case is proved equivalent to openness, and every such slice is locally closed.
-Neither file yet identifies the maximal-dimensional tangent span or constructs
-the dense stratum.  Thus the immediate blocker is the maximal-dimensional
-smooth dense-stratum producer itself, not representation, maximum attainment,
-boundary-distance nondegeneracy, or radial local connectivity.
+`Comparison/ConvexNormalSlice.lean` supplies intrinsic framed star-convex
+normal slices, exact radial distance, and relative path connectivity.
+`Topology/EmbeddedSlice.lean` provides the honest set-local-flat
+representation, exact parameterizations, and local closedness;
+`Topology/ImmersedSlice.lean`, `Topology/ConeSlice.lean`, and
+`Topology/NearestPoint.lean` provide the inverse-function, radial-cone, and
+nearest-point inputs.  `Exponential/DiagInvBranch.lean` and
+`Comparison/MinimizingBranch.lean` supply uniform moving-center source control
+and identify the selected logarithm with the minimizing vector.  These files
+close local dimension growth, but they do not yet construct the maximal dense
+stratum.
 
 ## Honest progress
 
@@ -217,17 +229,25 @@ boundary-distance nondegeneracy, or radial local connectivity.
   relative path-connected neighborhood producer: 100% after focused,
   targeted, full-project, and direct axiom verification.
 - The affine local-flat `IsEmbeddedSlice` representation, its affine/open
-  producers, full-dimensional openness converse, and local-closedness
-  consumer: 100% after focused, targeted, root-aggregate, and direct axiom
-  verification; full-project verification is pending.
+  producers, transport and restriction adapters, exact local parameterization,
+  full-dimensional openness converse, and local-closedness consumer: 100%
+  after focused, targeted, root-aggregate, and direct axiom verification;
+  full-project verification is pending.
+- Local Sakai slice growth `exists_slice_succ`: 100% after focused, targeted,
+  root-aggregate, and direct axiom verification.  It depends only on
+  `propext`, `Classical.choice`, and `Quot.sound`.
+- Dense convex-stratum theorem `exists_convex_stratum`: unstated, therefore
+  0%; dedicated smooth-stratum machinery approximately 45%.  The remaining
+  substantial producer is maximal-dimension assembly, including relative
+  openness, connectedness, density, and total geodesy.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  34--35% through rays, convexity, compact exhaustion and minimum core, Calabi
+  38--40% through rays, convexity, compact exhaustion and minimum core, Calabi
   comparison, the all-segment Busemann theorem, and the generic shaving and
   relative-frontier consumers, together with the normal-coordinate
-  star-convex slice and affine local-flat representation.  The dense-stratum
-  theorem remains unstated and 0%, with approximately 15--20% of its dedicated
-  local groundwork present; its tangent-span producer, total-geodesy, density,
-  and the later dimension-drop mathematics remain unproved.
+  star-convex slice, affine local-flat representation, and local slice-growth
+  theorem.  The latter is one input to the convex-stratum stage and does not
+  discharge maximal-dimension assembly, later shaving, dimension drop, the
+  terminal submanifold, or the normal-bundle diffeomorphism.
 - Whole B1 nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.

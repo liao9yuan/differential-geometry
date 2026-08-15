@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.ExpInvBranch
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import Mathlib.Topology.VectorBundle.Riemannian
 
 set_option autoImplicit false
 
@@ -395,6 +396,88 @@ theorem center_mem
     · exact expMapIntrinsic_zero (I := I) g hEnorm p
   rw [heq, hdiag] at hmap
   exact hmap
+
+
+theorem exists_source_tube
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {p : M} (B : DiagInvBranch (I := I) g hEnorm p) :
+    ∃ A ∈ 𝓝 p, ∃ δ : ℝ, 0 < δ ∧
+      ∀ y ∈ A, ∀ v : TangentSpace I y,
+        Real.sqrt (g.inner y v v) < δ →
+          (⟨y, v⟩ : TangentBundle I M) ∈ B.hom.source := by
+  classical
+  let e := trivializationAt E (TangentSpace I) p
+  let z₀ : TangentBundle I M := ⟨p, (0 : TangentSpace I p)⟩
+  let O : Set (M × E) := e '' (e.source ∩ B.hom.source)
+  have hpbase : p ∈ e.baseSet := by
+    exact FiberBundle.mem_baseSet_trivializationAt' p
+  have hOopen : IsOpen O := by
+    change IsOpen (e.toOpenPartialHomeomorph ''
+      (e.toOpenPartialHomeomorph.source ∩ B.hom.source))
+    exact e.toOpenPartialHomeomorph.isOpen_image_source_inter
+      B.hom.open_source
+  have hOmem : (p, (0 : E)) ∈ O := by
+    refine ⟨z₀, ⟨?_, B.zero_mem⟩, ?_⟩
+    · rw [e.mem_source]
+      exact hpbase
+    · exact e.zeroSection ℝ hpbase
+  obtain ⟨U, hU, V, hV, hUV⟩ :=
+    mem_nhds_prod_iff.mp (hOopen.mem_nhds hOmem)
+  obtain ⟨ε, hε, hεV⟩ := Metric.mem_nhds_iff.mp hV
+  obtain ⟨C, hC, hbound⟩ :=
+    eventually_norm_trivializationAt_lt E (fun y : M ↦ TangentSpace I y) p
+  change ∀ᶠ y in 𝓝 p, ‖e.continuousLinearMapAt ℝ y‖ < C at hbound
+  let A : Set M :=
+    (U ∩ {y | ‖e.continuousLinearMapAt ℝ y‖ < C}) ∩ e.baseSet
+  have hA : A ∈ 𝓝 p := by
+    exact Filter.inter_mem (Filter.inter_mem hU hbound)
+      (e.open_baseSet.mem_nhds hpbase)
+  refine ⟨A, hA, ε / C, div_pos hε hC, ?_⟩
+  intro y hy v hv
+  have hyU : y ∈ U := hy.1.1
+  have hybound : ‖e.continuousLinearMapAt ℝ y‖ < C := hy.1.2
+  have hybase : y ∈ e.baseSet := hy.2
+  have hvnorm : ‖v‖ = Real.sqrt (g.inner y v v) := by
+    have h := hEnorm y v
+    rw [← ofReal_norm_eq_enorm] at h
+    exact (ENNReal.ofReal_eq_ofReal_iff
+      (norm_nonneg v) (Real.sqrt_nonneg _)).mp h
+  have hv' : ‖v‖ < ε / C := by
+    rw [hvnorm]
+    exact hv
+  let w : E := e.continuousLinearMapAt ℝ y v
+  have hwlt : ‖w‖ < ε := by
+    calc
+      ‖w‖ ≤ ‖e.continuousLinearMapAt ℝ y‖ * ‖v‖ :=
+        (e.continuousLinearMapAt ℝ y).le_opNorm v
+      _ ≤ C * ‖v‖ :=
+        mul_le_mul_of_nonneg_right hybound.le (norm_nonneg v)
+      _ < C * (ε / C) := mul_lt_mul_of_pos_left hv' hC
+      _ = ε := mul_div_cancel₀ ε hC.ne'
+  have hwV : w ∈ V := by
+    apply hεV
+    rw [Metric.mem_ball, dist_zero_right]
+    exact hwlt
+  have hpair : (y, w) ∈ O := hUV ⟨hyU, hwV⟩
+  obtain ⟨u, hu, heu⟩ := hpair
+  let z : TangentBundle I M := ⟨y, v⟩
+  have hzsource : z ∈ e.source := by
+    rw [e.mem_source]
+    exact hybase
+  have hez : e z = (y, w) := by
+    calc
+      e z = (y, e.continuousLinearEquivAt ℝ y hybase v) :=
+        e.apply_eq_prod_continuousLinearEquivAt ℝ y hybase v
+      _ = (y, w) := congrArg (fun w' : E ↦ (y, w'))
+        (congrFun (e.coe_continuousLinearEquivAt_eq hybase) v)
+  have huz : u = z :=
+    e.toOpenPartialHomeomorph.injOn hu.1 hzsource
+      (heu.trans hez.symm)
+  change z ∈ B.hom.source
+  rw [← huz]
+  exact hu.2
 
 
 theorem center_inv

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedJacobi
+import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Exponential.NormalBallChart
 
 set_option autoImplicit false
@@ -116,6 +117,39 @@ theorem framed_eq_intr
   change intrFrameCLE (I := I) g p z ∈ B.hom.source at hz
   simpa only [intrFrame_apply, framed_apply, intrFrameCLE_apply] using
     B.hom_eq hz
+
+theorem exists_radial_ball
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {p : M} (B : ExpInvBranch (I := I) g hEnorm p)
+    (h0 : (0 : E) ∈ B.framed.source) :
+    ∃ r : ℝ, 0 < r ∧ Metric.ball (0 : E) r ⊆ B.framed.source ∧
+      ∀ z ∈ Metric.ball (0 : E) r,
+        Manifold.riemannianEDist I p (B.framed z) = ENNReal.ofReal ‖z‖ := by
+  obtain ⟨r₀, hr₀, hsource⟩ :=
+    Metric.isOpen_iff.mp B.framed.open_source 0 h0
+  obtain ⟨ρ, hρ, hradial⟩ :=
+    radial_riemannianEDist_eq_of_small' (I := I) g hEnorm p
+  refine ⟨min r₀ ρ, lt_min hr₀ hρ, ?_, ?_⟩
+  · intro z hz
+    apply hsource
+    rw [Metric.mem_ball] at hz ⊢
+    exact hz.trans_le (min_le_left _ _)
+  · intro z hz
+    have hzsource : z ∈ B.framed.source := by
+      apply hsource
+      rw [Metric.mem_ball] at hz ⊢
+      exact hz.trans_le (min_le_left _ _)
+    have hzsmall :
+        Real.sqrt
+            (g.inner p (normalFrame (I := I) g p z)
+              (normalFrame (I := I) g p z)) < ρ := by
+      rw [normalFrame_sqrt]
+      rw [Metric.mem_ball, dist_zero_right] at hz
+      exact hz.trans_le (min_le_right _ _)
+    rw [← B.framed_eq_intr hzsource, intrFrame_apply,
+      hradial hzsmall, normalFrame_sqrt]
 
 end ExpInvBranch
 end Exponential

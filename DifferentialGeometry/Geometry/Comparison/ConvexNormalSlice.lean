@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
-import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedCoordinates
+import DifferentialGeometry.Geometry.Exponential.IntrinsicBallDiffeo
 import Mathlib.Analysis.Normed.Module.Convex
 import Mathlib.Analysis.Convex.PathConnected
 
@@ -119,6 +119,53 @@ theorem exists_slice_chart
     · rintro ⟨⟨z, hzV, rfl⟩, hzC⟩
       exact ⟨z, ⟨hzV, by
         simpa only [B, intrFrameDiffeo_apply] using hzC⟩, rfl⟩
+
+omit [ConnectedSpace M] in
+theorem exists_radial_chart
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (C : Set M) (p : M) :
+    ∃ (B : PartialDiffeomorph 𝓘(ℝ, E) I E M ∞) (r : ℝ), 0 < r ∧
+      let V := Metric.ball (0 : E) r
+      let U := B '' V
+      V ⊆ B.source ∧
+        (∀ z ∈ V,
+          Manifold.riemannianEDist I p (B z) = ENNReal.ofReal ‖z‖) ∧
+        IsOpen U ∧ p ∈ U ∧ Set.InjOn B V ∧
+        B '' normalSlice (I := I) g hEnorm C p r = U ∩ C := by
+  have hzero : ¬ IsConjVec (I := I) g hEnorm p (0 : E) := by
+    simpa only [IsConjVec, not_not,
+      mfderiv_expMapIntrinsic_at_zero (I := I) g hEnorm p] using
+      (Function.injective_id : Function.Injective (fun z : E => z))
+  obtain ⟨B₀, hB₀⟩ := branch_of_not_conj (I := I) g hEnorm hzero
+  let B := B₀.framed
+  have hzeroB : (0 : E) ∈ B.source := by
+    change (0 : E) ∈ B₀.framed.source
+    rw [ExpInvBranch.framed_source]
+    change intrFrameCLE (I := I) g p 0 ∈ B₀.hom.source
+    simpa only [map_zero] using hB₀
+  obtain ⟨r, hr, hball, hradial⟩ := B₀.exists_radial_ball hzeroB
+  refine ⟨B, r, hr, hball, hradial, ?_, ?_, ?_, ?_⟩
+  · exact B.toOpenPartialHomeomorph.isOpen_image_of_subset_source
+      Metric.isOpen_ball hball
+  · refine ⟨0, Metric.mem_ball_self hr, ?_⟩
+    calc
+      B 0 = intrinsicFramedExp (I := I) g hEnorm p 0 :=
+        (B₀.framed_eq_intr hzeroB).symm
+      _ = p := intrFrame_zero (I := I) g hEnorm p
+  · exact B.toPartialEquiv.injOn.mono hball
+  · ext x
+    constructor
+    · rintro ⟨z, ⟨hzV, hzC⟩, rfl⟩
+      exact ⟨⟨z, hzV, rfl⟩, by
+        rw [← B₀.framed_eq_intr (hball hzV)]
+        exact hzC⟩
+    · rintro ⟨⟨z, hzV, rfl⟩, hzC⟩
+      exact ⟨z, ⟨hzV, by
+        change intrinsicFramedExp (I := I) g hEnorm p z ∈ C
+        rw [B₀.framed_eq_intr (hball hzV)]
+        exact hzC⟩, rfl⟩
 
 omit [ConnectedSpace M] in
 theorem exists_rel_path

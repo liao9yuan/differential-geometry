@@ -1812,6 +1812,7 @@ import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.ConvexBalls
 import DifferentialGeometry.Geometry.Comparison.ConvexNormalSlice
 import DifferentialGeometry.Geometry.Comparison.ConvexShaving
+import DifferentialGeometry.Geometry.Comparison.ConvexStratum
 import DifferentialGeometry.Geometry.Comparison.DistanceCalabi
 import DifferentialGeometry.Geometry.Comparison.DistanceSemiconcavity
 import DifferentialGeometry.Geometry.Comparison.EndpointContinuation
@@ -1827,6 +1828,7 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinow
 import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
+import DifferentialGeometry.Geometry.Comparison.MinimizingBranch
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Busemann
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.BusemannConcavity
@@ -2923,12 +2925,15 @@ import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Geometry.Operator.VossWeyl
+import DifferentialGeometry.Geometry.Topology.ConeSlice
 import DifferentialGeometry.Geometry.Topology.CoveringSimple
 import DifferentialGeometry.Geometry.Topology.DirectLimit
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Geometry.Topology.EmbeddedSlice
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
 import DifferentialGeometry.Geometry.Topology.FiniteAtlasIndexOnCompact
+import DifferentialGeometry.Geometry.Topology.ImmersedSlice
+import DifferentialGeometry.Geometry.Topology.NearestPoint
 import DifferentialGeometry.Geometry.Topology.RelativeFrontier
 import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
