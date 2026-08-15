@@ -3360,7 +3360,6 @@ private theorem ricciKer_zero
     connIns_zero (I := I) (M := M) g, hzero]
 
 set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem ricci1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3968,7 +3967,6 @@ private theorem jet_neg1
   simpa only [neg_one_smul, neg_one_sq, one_mul] using
     jet_smul1 (I := I) (M := M) g m (-1 : ℝ) S
 
-set_option maxHeartbeats 1200000 in
 theorem sharp_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -4139,7 +4137,6 @@ private theorem corr_tel
   rw [metricCorr_sub (I := I) (M := M) g gT g T U]
   abel
 
-set_option maxHeartbeats 1200000 in
 private theorem corr_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4783,7 +4780,6 @@ theorem mcd_pair_h2
       simp only [B0, B1, Z, S, Y, X]
       ring
 
-set_option maxHeartbeats 1200000 in
 theorem mcd_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -4862,7 +4858,6 @@ theorem mcd_h2_bdd
     _ = (B R * (1 + A)) ^ 2 := by
       rw [mul_pow, hBsq]
 
-set_option maxHeartbeats 1600000 in
 theorem mcd_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5120,7 +5115,6 @@ theorem fullSlot_bdd_h2
       exact mul_le_mul_of_nonneg_left (by linarith) hK
     _ = (B R) ^ 2 := hBsq.symm
 
-set_option maxHeartbeats 1600000 in
 theorem fullSlot_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5376,7 +5370,6 @@ private theorem psiLeft_sub_h2
   exact raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0 _
 
 set_option maxHeartbeats 2400000 in
-set_option synthInstance.maxHeartbeats 2400000 in
 private theorem psi_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5862,8 +5855,6 @@ theorem connSec_self_h2
     _ = lowJetSq (I := I) (M := M) g 2
         (wXi (I := I) (M := M) g gm g) := rfl
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 4000000 in
 theorem lie1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6292,8 +6283,6 @@ theorem lie1_pair_h2
         show B1 = 47 * (LC1 + LP1) by rfl]
       ring
 
-set_option maxHeartbeats 1800000 in
-set_option synthInstance.maxHeartbeats 1800000 in
 theorem rhs1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
