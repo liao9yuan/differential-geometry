@@ -647,26 +647,15 @@ def IsCoreMinJoin
     ∀ t ∈ Set.Icc (0 : Real) 1,
       join x y t ∈ intrCore (E := E) R a
 
-set_option maxHeartbeats 1200000 in
-attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-theorem intrCore_jensen_min
+private def intrCoreJensenMinProp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
-    (p : M) {R a K : Real} (hR : 0 < R) (h4aR : 4 * a < R)
+    (p : M) {R a : Real} (hR : 0 < R)
     (hloc :
       IsLocalDiffeomorphOn 𝓘(Real, E) I ∞
         (intrinsicFramedExp (I := I) g hEnorm p)
-        (Metric.ball (0 : E) R))
-    (hK : 0 ≤ K)
-    (hsmall : K * (2 * a) ^ 2 < (Real.pi / 2) ^ 2)
-    (hRm :
-      ∀ z : E, ‖z‖ < 3 * R / 4 →
-        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
-          (intrinsicFramedExp (I := I) g hEnorm p z) 4
-          (Integral.Connection.metricRm04At
-            (I := I) (M := M) g
-            (intrinsicFramedExp (I := I) g hEnorm p z))) ≤ K) :
+        (Metric.ball (0 : E) R)) : Prop :=
     let gPull := intrPullMetric (I := I) g hEnorm p hloc
     letI : RiemannianBundle
         (fun z : intrPullBall (E := E) R ↦
@@ -688,7 +677,28 @@ theorem intrCore_jensen_min
       IsCoreMinJoin (I := I) (a := a) g hEnorm p hR hloc join ∧
         ∀ pt ∈ intrCore (E := E) R a,
           CenterOfMass.StrictMidJensenOn join
-            (intrCore (E := E) R a) (CenterOfMass.halfSqDist pt) := by
+            (intrCore (E := E) R a) (CenterOfMass.halfSqDist pt)
+
+attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
+theorem intrCore_jensen_min
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) {R a K : Real} (hR : 0 < R) (h4aR : 4 * a < R)
+    (hloc :
+      IsLocalDiffeomorphOn 𝓘(Real, E) I ∞
+        (intrinsicFramedExp (I := I) g hEnorm p)
+        (Metric.ball (0 : E) R))
+    (hK : 0 ≤ K)
+    (hsmall : K * (2 * a) ^ 2 < (Real.pi / 2) ^ 2)
+    (hRm :
+      ∀ z : E, ‖z‖ < 3 * R / 4 →
+        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
+          (intrinsicFramedExp (I := I) g hEnorm p z) 4
+          (Integral.Connection.metricRm04At
+            (I := I) (M := M) g
+            (intrinsicFramedExp (I := I) g hEnorm p z))) ≤ K) :
+    intrCoreJensenMinProp (I := I) g hEnorm p (a := a) hR hloc := by
   classical
   let gPull := intrPullMetric (I := I) g hEnorm p hloc
   letI : RiemannianBundle
@@ -704,6 +714,7 @@ theorem intrCore_jensen_min
   letI : MetricSpace (intrPullBall (E := E) R) :=
     HopfRinow.riemMetricSpace
       (I := 𝓘(Real, E)) (M := intrPullBall (E := E) R)
+  dsimp only [intrCoreJensenMinProp]
   change
     ∃ join :
         intrPullBall (E := E) R →
