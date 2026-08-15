@@ -209,6 +209,9 @@ attainment, boundary-distance nondegeneracy, or radial local connectivity.
   level.
 - Compact totally convex minimum ray level: 100% after focused, targeted,
   full-project, and direct axiom verification.
+- Normal-coordinate star-convex slices, local branch identification, and the
+  relative path-connected neighborhood producer: 100% after focused,
+  targeted, full-project, and direct axiom verification.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
   33--34% through rays, convexity, compact exhaustion and minimum core, Calabi
   comparison, the all-segment Busemann theorem, and the generic shaving and

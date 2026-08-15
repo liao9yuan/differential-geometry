@@ -30,10 +30,9 @@ connected.
 
 ## Verification
 
-Focused and targeted verification passed without a warning or placeholder in
-the edited module.  Direct axiom verification of the public API
-found only `propext`, `Classical.choice`, and `Quot.sound`.  Full-project
-verification remains pending.
+Focused, targeted, and full-project verification passed without a warning or
+placeholder in the edited module.  Direct axiom verification of the public API
+found only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ## Frontier and progress
 
