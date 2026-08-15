@@ -402,7 +402,6 @@ theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxRecDepth 8000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff
@@ -426,8 +425,7 @@ theorem linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff
       ((covGrad (I := I) (M := M) g₀ 1 2
           (connDiffSection (I := I) g₁ g₀)).toSection x) (Y x)) hE0
   refine hCK.congr (fun x => ?_)
-  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
-    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
+  simp [linearizedRicciConnDiffOrder0CometricTracedCLM]
 
 noncomputable def linearizedRicciConnDiffOrder1CoeffField
     (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 2 where
