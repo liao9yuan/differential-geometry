@@ -910,9 +910,8 @@ theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_
           nlinarith [mul_le_mul h1 h2 hWB_nn (hcB0 i), hcB0 i]
       _ ≤ cB i * ((dim * dim) * RHS) := by
           have hdd : (0 : ℝ) ≤ dim * dim := by positivity
-          have hmono := mul_le_mul_of_nonneg_left hLd_le_RHS
-            (mul_nonneg (hcB0 i) hdd)
-          nlinarith [hmono]
+          simpa [mul_assoc] using
+            (mul_le_mul_of_nonneg_left hLd_le_RHS (mul_nonneg (hcB0 i) hdd))
       _ = (cB i * (dim * dim)) * RHS := by ring
   have hT1 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 2 i
