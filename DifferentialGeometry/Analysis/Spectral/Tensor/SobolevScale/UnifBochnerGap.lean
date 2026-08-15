@@ -2108,7 +2108,6 @@ theorem covsum_hs_three
       dsimp [C₂, C₃, N, h3CovsumC]
       ring
 
-set_option maxHeartbeats 12800000 in
 theorem roughLapComm_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2253,7 +2252,6 @@ theorem roughLapComm_const
         ≤ Fc p * fullSum + roughLapCommC Fc m (p + 1) * fullSum := add_le_add harm1 harm2
       _ = (Fc p + roughLapCommC Fc m (p + 1)) * fullSum := hfinal
 
-set_option maxHeartbeats 12800000 in
 theorem rawConnLapIter_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2482,7 +2480,6 @@ theorem baseAddLower_const
       linarith [this]
     nlinarith [hcross_le, hDnorm_sq, hSUM_nn, hCrc_nn, hdimR_nn, hC0_nn, hC1_nn]
 
-set_option maxHeartbeats 12800000 in
 theorem bochnerStep_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2693,7 +2690,6 @@ private theorem elliptic_engine_const
       exact mul_le_mul_of_nonneg_right (le_max_right _ _)
         (Finset.sum_nonneg (fun _ _ => norm_nonneg _))
 
-set_option maxHeartbeats 12800000 in
 theorem ellipticLapSum_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2713,7 +2709,6 @@ theorem ellipticLapSum_const
   exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
     (fun i _ _ => norm_nonneg _)
 
-set_option maxHeartbeats 12800000 in
 theorem jetEven_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2764,7 +2759,6 @@ theorem jetEven_const
     _ = ((2 * k + 1 : ℕ) : ℝ) * (ellipticEngC Fc (Module.finrank ℝ E) (2 * k) * ((k : ℝ) + 1)) * Nspec := by
         rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; push_cast; ring
 
-set_option maxHeartbeats 12800000 in
 theorem iterRawLap_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2839,7 +2833,6 @@ theorem iterRawLap_const
       _ = (iterRawLapC Fc (Module.finrank ℝ E) i p * ∑ a ∈ Finset.range (2 * i + p + 1),
             rawLapIterC Fc (Module.finrank ℝ E) a) * FULL := by ring
 
-set_option maxHeartbeats 12800000 in
 theorem modeLeJet_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -2945,7 +2938,6 @@ theorem modeLeJet_const
       _ = iterRawLapC Fc (Module.finrank ℝ E) i 1 ^ 2 * (∑ a ∈ Finset.range (j + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 s a S‖) ^ 2 := by ring
 
-set_option maxHeartbeats 12800000 in
 theorem hsCovsum_unif_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -3067,7 +3059,6 @@ theorem hsCovsum_unif_const
   rw [Real.sqrt_sq hnorm_nn, Real.sqrt_sq hrhs_nn] at hsqrt
   simpa only [hSall_def] using hsqrt
 
-set_option maxHeartbeats 12800000 in
 theorem lapGradComm_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -3244,7 +3235,6 @@ theorem lapGradComm_const
               (∑ q ∈ Finset.range (p + 3), lapGradCommC Fc (Module.finrank ℝ E) i q)) * FULL := by
           ring
 
-set_option maxHeartbeats 12800000 in
 theorem lapCovComm_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -3261,7 +3251,6 @@ theorem lapCovComm_const
   have h := lapGradComm_const (I := I) (M := M) g₀ Fc hFc hcurv s i 0 S
   simpa only [iteratedCovGrad_zero, Nat.add_zero] using h
 
-set_option maxHeartbeats 12800000 in
 theorem jetOdd_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -3410,7 +3399,6 @@ theorem jetOdd_const
     _ = (jetEvenC Fc (Module.finrank ℝ E) k + ellipticEngC Fc (Module.finrank ℝ E) (2 * k) *
           (((k + 1 : ℕ) : ℝ) + (∑ i ∈ Finset.range (k + 1), lapGradCommC Fc (Module.finrank ℝ E) i 0) * jetEvenC Fc (Module.finrank ℝ E) k)) * Nspec := by ring
 
-set_option maxHeartbeats 12800000 in
 theorem covsum_hs_unif_const
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
