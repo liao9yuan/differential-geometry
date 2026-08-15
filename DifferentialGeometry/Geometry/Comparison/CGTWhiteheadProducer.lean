@@ -35,7 +35,6 @@ noncomputable local instance {R : Real} :
     (Geometry.isSigmaCompact_of_isOpen
       𝓘(Real, E) (intrPullBall (E := E) R).isOpen)
 
-set_option maxHeartbeats 800000 in
 theorem intrCore_minimizingVec_regular_unique
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
