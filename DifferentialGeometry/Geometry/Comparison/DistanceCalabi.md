@@ -14,5 +14,6 @@ The exact full-distance hypothesis in `tail_edist` is essential: a local inverse
 - Arbitrary-direction Calabi Hessian bound: 100%.
 - Finite-distance semiconcavity along smooth geodesics: 100%.
 - Smooth-geodesic Busemann composition concavity: 100%.
-- Public all-segment Busemann concavity: unstated, 0%; the current geodesic-concavity predicate omits curve continuity.
-- Soul theorem: unstated, 0%; dedicated machinery approximately 24%.
+- Public all-segment Busemann concavity: 100%.
+- Compact totally convex exhaustion under nonnegative sectional curvature: 100%.
+- Soul theorem: unstated, 0%; dedicated machinery approximately 30%.

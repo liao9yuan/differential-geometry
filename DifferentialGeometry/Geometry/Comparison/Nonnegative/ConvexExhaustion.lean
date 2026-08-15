@@ -1,3 +1,5 @@
+import Mathlib.Topology.Compactness.SigmaCompact
+import DifferentialGeometry.Geometry.Comparison.Nonnegative.BusemannConcavity
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Ray
 
 noncomputable section
@@ -202,11 +204,11 @@ theorem totallyConvex {g : SmoothRiemannianMetric I M} {p : M} {c : ℝ}
     (hconv : ∀ (γ : ℝ → M), IsMinGeodesicRay (I := I) g γ → γ 0 = p →
       IsGeodesicConcave (I := I) g (busemannOf (I := I) g γ)) :
     IsTotallyConvex (I := I) g (rayBusemannSublevel (I := I) g p c) := by
-  intro η a b hab hη ha hb t ht
+  intro η a b hab hη hηcont ha hb t ht
   rw [mem] at ha hb ⊢
   intro γ hγ hγ0
   exact busemannHalfspace.totallyConvex (hconv γ hγ hγ0) hab hη
-    (ha γ hγ hγ0) (hb γ hγ hγ0) ht
+    hηcont (ha γ hγ hγ0) (hb γ hγ hγ0) ht
 
 end rayBusemannSublevel
 
@@ -270,6 +272,48 @@ theorem raySublevel_compact
   · exact (compact_nonneg 0 le_rfl).of_isClosed_subset
       (Geometry.Riemannian.rayBusemannSublevel.isClosed g p c)
       (Geometry.Riemannian.rayBusemannSublevel.mono (le_of_not_ge hc))
+
+theorem ray_convex_of_nonneg
+    {g : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g) (p : M) {c : ℝ}
+    (hsec : Integral.Connection.NonnegSecMetric (I := I) (M := M) g) :
+    IsTotallyConvex (I := I) g
+      (Geometry.Riemannian.rayBusemannSublevel (I := I) g p c) := by
+  apply Geometry.Riemannian.rayBusemannSublevel.totallyConvex
+  intro γ hγ hγ0
+  exact buse_geo_concave (I := I) hg hγ.minRay hsec
+
+theorem ray_compact_nonneg
+    {g : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g) (p : M) {c : ℝ}
+    (hsec : Integral.Connection.NonnegSecMetric (I := I) (M := M) g) :
+    IsCompact
+      (Geometry.Riemannian.rayBusemannSublevel (I := I) g p c) := by
+  apply raySublevel_compact (I := I) hg p
+  intro γ hγ hγ0
+  exact buse_geo_concave (I := I) hg hγ.minRay hsec
+
+def rayExhaustion
+    {g : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g) (p : M)
+    (hsec : Integral.Connection.NonnegSecMetric (I := I) (M := M) g) :
+    CompactExhaustion M where
+  toFun n := Geometry.Riemannian.rayBusemannSublevel (I := I) g p (n : ℝ)
+  isCompact' n := ray_compact_nonneg (I := I) hg p hsec
+  subset_interior_succ' n := by
+    simpa only [Nat.cast_add, Nat.cast_one] using
+      Geometry.Riemannian.rayBusemannSublevel.subset_interior
+        (I := I) g p (c := (n : ℝ)) (d := (n : ℝ) + 1) (by linarith)
+  iUnion_eq' := Geometry.Riemannian.rayBusemannSublevel.iUnion_nat
+    (I := I) g p
+
+theorem rayExhaustion_convex
+    {g : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g) (p : M)
+    (hsec : Integral.Connection.NonnegSecMetric (I := I) (M := M) g) (n : ℕ) :
+    IsTotallyConvex (I := I) g (rayExhaustion (I := I) hg p hsec n) := by
+  simpa only [rayExhaustion] using
+    (ray_convex_of_nonneg (I := I) hg p (c := (n : ℝ)) hsec)
 
 end RiemannianMetricComplete
 end DifferentialGeometry

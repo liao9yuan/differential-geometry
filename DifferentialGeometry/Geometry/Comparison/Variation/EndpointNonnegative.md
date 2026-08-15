@@ -22,9 +22,9 @@ These theorems carry the unit-speed `[0, L]` index-form estimate through normali
 - `intrJacobi_pair_le`: 100% after focused, targeted, and full-project verification.
 - Selected-branch Hessian comparison theorem: 100% after focused, targeted, and full-project verification.
 - Smooth-geodesic Busemann composition concavity: 100%.
-- Public `IsGeodesicConcave` Busemann theorem: unstated, 0%; dedicated comparison machinery approximately 60%.
+- Public `IsGeodesicConcave` Busemann theorem: 100%.
 - Compact totally convex exhaustion under nonnegative sectional curvature:
-  unstated, 0%; its downstream conditional compactness argument is 100%.
-- Soul theorem: unstated, 0%; dedicated machinery approximately 24%.
-- Whole nonnegative-curvature lane: approximately 18--20%.
+  100%.
+- Soul theorem: unstated, 0%; dedicated machinery approximately 30%.
+- Whole nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: approximately 15--20%.

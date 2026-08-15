@@ -10,7 +10,8 @@ Focused, targeted, and full-project verification passed after the declaration wa
 
 - Finite-distance geodesic semiconcavity: 100% after focused, targeted, and full-project verification.
 - Smooth-geodesic Busemann composition concavity: 100% after focused, targeted, and full-project verification.
-- Public `IsGeodesicConcave` Busemann theorem: unstated, 0%; dedicated comparison machinery approximately 60%.
-- Soul theorem: unstated, 0%; dedicated machinery approximately 24%.
-- Whole B1 nonnegative-curvature lane: approximately 18--20%.
+- Public `IsGeodesicConcave` Busemann theorem: 100%.
+- Compact totally convex exhaustion under nonnegative sectional curvature: 100%.
+- Soul theorem: unstated, 0%; dedicated machinery approximately 30%.
+- Whole B1 nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: approximately 15--20%.

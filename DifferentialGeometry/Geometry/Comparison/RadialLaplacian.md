@@ -18,7 +18,7 @@ The perpendicular proof composes `branchHess_shape` with `intrJacobi_pair_le`. T
 - Selected-branch Hessian comparison phase: 100%.
 - Exact Calabi-tail distance, scalar upper support, and one-dimensional barrier passage: 100%.
 - Smooth-geodesic Busemann composition concavity: 100%.
-- Public `IsGeodesicConcave` Busemann theorem: unstated, 0%; dedicated comparison machinery approximately 60%.
-- Compact exhaustion under nonnegative sectional curvature: unstated, 0%; its conditional compactness argument is 100%.
-- Soul theorem: unstated, 0%; dedicated machinery approximately 24%.
-- Whole B1 nonnegative-curvature lane: approximately 18--20%.
+- Public `IsGeodesicConcave` Busemann theorem: 100%.
+- Compact totally convex exhaustion under nonnegative sectional curvature: 100%.
+- Soul theorem: unstated, 0%; dedicated machinery approximately 30%.
+- Whole B1 nonnegative-curvature lane: approximately 22--25%.

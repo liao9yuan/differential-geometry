@@ -32,6 +32,9 @@ bound then prove the `IsMinRay` identity on every nonnegative subsegment.
 For the set-preserving version, total convexity keeps every finite minimizing
 segment in the set, continuity of the intrinsic exponential map passes this
 membership to the limiting ray, and closedness supplies the limit step.
+The all-geodesic total-convexity predicate now records segment continuity
+explicitly; the finite intrinsic segments discharge this input with
+`intrinsicGeodesic_continuous`.
 The generic escape theorem keeps its ambient-distance conclusion under the
 explicit norm-identification hypothesis; the complete-metric wrapper installs
 `g` canonically before constructing `IsMinGeodesicRay`.
@@ -46,12 +49,11 @@ argument needed to produce a two-sided minimizing line is still absent, so the
 line producer remains 0% and Phase N1 as a whole is approximately 50%.
 
 The Soul theorem itself remains unstated and therefore 0%.  Its dedicated
-machinery is approximately 15%; this ray theorem is shared
+machinery is approximately 30%; this ray theorem is shared
 nonnegative-curvature infrastructure, not a proof of the Soul theorem.
-The whole B1 nonnegative-curvature lane is approximately 12--15%, while the
+The whole B1 nonnegative-curvature lane is approximately 22--25%, while the
 whole post-HCG Poincare program remains approximately 15--20%.
 
 ## Verification
 
-Focused verification passed with no warnings or placeholders, and the
-full-project build passed.  The public endpoints have no `sorryAx` dependency.
+Focused and targeted verification passed with no new warnings or placeholders.

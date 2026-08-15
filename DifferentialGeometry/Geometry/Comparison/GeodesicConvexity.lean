@@ -60,16 +60,19 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 def IsGeodesicConvex (g : SmoothRiemannianMetric I M) (f : M → ℝ) : Prop :=
   ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
     Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    ContinuousOn γ (Set.Icc a b) →
     ConvexOn ℝ (Set.Icc a b) (f ∘ γ)
 
 def IsGeodesicConcave (g : SmoothRiemannianMetric I M) (f : M → ℝ) : Prop :=
   ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
     Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    ContinuousOn γ (Set.Icc a b) →
     ConcaveOn ℝ (Set.Icc a b) (f ∘ γ)
 
 def IsTotallyConvex (g : SmoothRiemannianMetric I M) (S : Set M) : Prop :=
   ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
     Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    ContinuousOn γ (Set.Icc a b) →
     γ a ∈ S → γ b ∈ S → Set.MapsTo γ (Set.Icc a b) S
 
 namespace IsGeodesicConvex
@@ -78,11 +81,11 @@ variable {g : SmoothRiemannianMetric I M} {f : M → ℝ}
 
 theorem sublevel (hf : IsGeodesicConvex (I := I) g f) (c : ℝ) :
     IsTotallyConvex (I := I) g {x | f x ≤ c} := by
-  intro γ a b hab hγ ha hb t ht
+  intro γ a b hab hγ hcont ha hb t ht
   have ht' : t ∈ segment ℝ a b := by
     rw [segment_eq_Icc hab]
     exact ht
-  have hbound := (hf hab hγ).le_on_segment
+  have hbound := (hf hab hγ hcont).le_on_segment
     (show a ∈ Set.Icc a b from ⟨le_rfl, hab⟩)
     (show b ∈ Set.Icc a b from ⟨hab, le_rfl⟩) ht'
   exact hbound.trans (max_le ha hb)
@@ -95,15 +98,38 @@ variable {g : SmoothRiemannianMetric I M} {f : M → ℝ}
 
 theorem superlevel (hf : IsGeodesicConcave (I := I) g f) (c : ℝ) :
     IsTotallyConvex (I := I) g {x | c ≤ f x} := by
-  intro γ a b hab hγ ha hb t ht
+  intro γ a b hab hγ hcont ha hb t ht
   have ht' : t ∈ segment ℝ a b := by
     rw [segment_eq_Icc hab]
     exact ht
-  have hbound := (hf hab hγ).ge_on_segment
+  have hbound := (hf hab hγ hcont).ge_on_segment
     (show a ∈ Set.Icc a b from ⟨le_rfl, hab⟩)
     (show b ∈ Set.Icc a b from ⟨hab, le_rfl⟩) ht'
   simpa only [Function.comp_apply, min_self] using
     (min_le_min ha hb).trans hbound
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem of_global
+    [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {f : M → ℝ}
+    (hf : ∀ ⦃Γ : ℝ → M⦄, ContMDiff 𝓘(ℝ, ℝ) I ∞ Γ →
+      Geodesic.IsGeodesic (I := I) g Γ → ∀ ⦃a b : ℝ⦄, a ≤ b →
+        ConcaveOn ℝ (Set.Icc a b) (f ∘ Γ)) :
+    IsGeodesicConcave (I := I) g f := by
+  intro γ a b hab hgeo hcont
+  obtain ⟨Γ, hΓgeo, hΓsmooth, hEq⟩ :=
+    Exponential.exists_geo_eqOn_Icc (I := I) g hEnorm hab hgeo hcont
+  apply (hf hΓsmooth hΓgeo hab).congr
+  intro t ht
+  exact congrArg f (hEq ht).symm
 
 end IsGeodesicConcave
 
@@ -114,31 +140,32 @@ variable {g : SmoothRiemannianMetric I M} {S T : Set M}
 theorem mapsTo (hS : IsTotallyConvex (I := I) g S) {γ : ℝ → M}
     {a b : ℝ} (hab : a ≤ b)
     (hγ : Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b))
+    (hcont : ContinuousOn γ (Set.Icc a b))
     (ha : γ a ∈ S) (hb : γ b ∈ S) :
     Set.MapsTo γ (Set.Icc a b) S :=
-  hS hab hγ ha hb
+  hS hab hγ hcont ha hb
 
 theorem univ : IsTotallyConvex (I := I) g (Set.univ : Set M) := by
-  intro γ a b hab hγ ha hb t ht
+  intro γ a b hab hγ hcont ha hb t ht
   exact Set.mem_univ _
 
 theorem empty : IsTotallyConvex (I := I) g (∅ : Set M) := by
-  intro γ a b hab hγ ha
+  intro γ a b hab hγ hcont ha
   exact ha.elim
 
 theorem inter (hS : IsTotallyConvex (I := I) g S)
     (hT : IsTotallyConvex (I := I) g T) :
     IsTotallyConvex (I := I) g (S ∩ T) := by
-  rintro γ a b hab hγ ⟨haS, haT⟩ ⟨hbS, hbT⟩ t ht
-  exact ⟨hS hab hγ haS hbS ht, hT hab hγ haT hbT ht⟩
+  rintro γ a b hab hγ hcont ⟨haS, haT⟩ ⟨hbS, hbT⟩ t ht
+  exact ⟨hS hab hγ hcont haS hbS ht, hT hab hγ hcont haT hbT ht⟩
 
 theorem sInter {C : Set (Set M)}
     (hC : ∀ S ∈ C, IsTotallyConvex (I := I) g S) :
     IsTotallyConvex (I := I) g (⋂₀ C) := by
-  intro γ a b hab hγ ha hb t ht
+  intro γ a b hab hγ hcont ha hb t ht
   rw [Set.mem_sInter] at ha hb ⊢
   intro S hSC
-  exact hC S hSC hab hγ (ha S hSC) (hb S hSC) ht
+  exact hC S hSC hab hγ hcont (ha S hSC) (hb S hSC) ht
 
 end IsTotallyConvex
 
@@ -262,6 +289,7 @@ theorem IsTotallyConvex.minJoin {g : SmoothRiemannianMetric I M} {S : Set M}
   apply hS (a := 0) (b := 1) zero_le_one
   · exact (intrinsicGeodesic_isGeodesic (I := I) g hEnorm a
       (minimizingVec (I := I) g hEnorm a b)).isGeodesicOn _
+  · exact (minJoin_cont (I := I) g hEnorm a b).continuousOn
   · simpa only [minJoin_zero] using ha
   · simpa only [minJoin_one] using hb
 

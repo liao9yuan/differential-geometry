@@ -1828,6 +1828,7 @@ import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Busemann
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.BusemannConcavity
+import DifferentialGeometry.Geometry.Comparison.Nonnegative.ConvexCore
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.ConvexExhaustion
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Ray
 import DifferentialGeometry.Geometry.Comparison.RadialLaplacian

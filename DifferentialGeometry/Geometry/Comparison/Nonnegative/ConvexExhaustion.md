@@ -14,16 +14,31 @@ The sign is the classical exhaustion sign: the existing Busemann function is dis
 - No defining minimizing geodesic ray can remain inside one fixed finite ray sublevel, providing the contradiction half of the compactness route.
 - Total convexity is obtained conditionally from geodesic concavity of every Busemann function.
 - `RiemannianMetricComplete.raySublevel_compact` combines that conditional total convexity with the internal-ray escape producer and proves compactness for every real level; negative levels are closed subsets of the compact zero level.
+- `ray_convex_of_nonneg` and `ray_compact_nonneg` discharge the conditional
+  input from `NonnegSecMetric` through the public Busemann concavity theorem.
+- `rayExhaustion` packages the natural levels as a `CompactExhaustion`, and
+  `rayExhaustion_convex` proves that every level is totally convex.
 
 ## Verification
 
-Focused verification and the full-project build passed without a new
-placeholder.  The public compactness endpoint has no `sorryAx` dependency.
+Focused, targeted, and full-project verification passed without a new warning
+or placeholder.  Direct axiom verification of the public exhaustion endpoints
+found only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ## Frontier
 
-The remaining curvature producer is the nonnegative-sectional-curvature theorem that Busemann functions are geodesically concave.  The Hopf--Rinow escape lemma and the compactness contradiction are now proved; `raySublevel_compact` is deliberately conditional on concavity until the comparison theorem exists.
+The curvature-dependent compact totally convex exhaustion is complete, and
+`ConvexCore.lean` now selects its least nonempty level.  The next Soul frontier
+is relative-boundary shaving: prove stability of the appropriate inner parallel
+sets, obtain dimension drop at boundary, and identify the terminal set as a
+compact boundaryless totally geodesic submanifold.
 
 ## Progress
 
-The Soul theorem endpoint remains unstated and is therefore 0% complete. Its dedicated infrastructure is approximately 15% complete.  The elementary exhaustion and conditional compactness route are checked, while Busemann concavity, minimum-set regularity, shaving, normal-bundle structure, and the final diffeomorphism remain.  The curvature-dependent compact exhaustion theorem itself is still unstated and therefore 0%.
+The compact totally convex exhaustion theorem is stated and proved, so that
+endpoint is 100%.  The Soul theorem itself remains unstated and therefore 0%;
+its dedicated machinery is approximately 31--32% after the minimum-core
+producer.  Shaving, terminal-set
+submanifold regularity, normal-bundle structure, and the final diffeomorphism
+remain.  The whole B1 lane is approximately 22--25%, and the whole post-HCG
+Poincare program remains approximately 15--20%.

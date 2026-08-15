@@ -11,4 +11,6 @@ This preserves the variation-layer API while removing the analytic fact from the
 - Compatibility wrapper: 100%.
 - One-dimensional upper-support concavity calculus: 100%.
 - Smooth-geodesic Busemann composition concavity: 100%.
-- Soul theorem: unstated, 0%; dedicated machinery approximately 24%.
+- Public all-segment Busemann concavity: 100%.
+- Compact totally convex exhaustion under nonnegative sectional curvature: 100%.
+- Soul theorem: unstated, 0%; dedicated machinery approximately 30%.

@@ -1625,6 +1625,101 @@ theorem geo_eqOn_of_init
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+theorem exists_geo_eqOn_Icc
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
+    (hgeo : Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b))
+    (hcont : ContinuousOn γ (Set.Icc a b)) :
+    ∃ Γ : ℝ → M, Geodesic.IsGeodesic (I := I) g Γ ∧
+      ContMDiff 𝓘(ℝ, ℝ) I ∞ Γ ∧ Set.EqOn γ Γ (Set.Icc a b) := by
+  rcases hab.eq_or_lt with hab | hab
+  · subst b
+    refine ⟨fun _ : ℝ => γ a, Geodesic.isGeodesic_const (I := I) g (γ a),
+      contMDiff_const, ?_⟩
+    intro t ht
+    have ht' : t = a := by
+      simpa only [Set.Icc_self, Set.mem_singleton_iff] using ht
+    subst t
+    rfl
+  · let c : ℝ := (a + b) / 2
+    let δ : ℝ → M := fun s => γ (s + c)
+    let O : Set ℝ := Set.Ioo (a - c) (b - c)
+    have hc_left : a < c := by
+      dsimp only [c]
+      linarith
+    have hc_right : c < b := by
+      dsimp only [c]
+      linarith
+    have h0O : (0 : ℝ) ∈ O := by
+      dsimp only [O]
+      constructor <;> linarith
+    have hmapO : Set.MapsTo (fun s : ℝ => s + c) O (Set.Icc a b) := by
+      intro s hs
+      dsimp only [O] at hs
+      change a ≤ s + c ∧ s + c ≤ b
+      constructor <;> linarith [hs.1, hs.2]
+    have hδgeo : Geodesic.IsGeodesicOn (I := I) g δ O := by
+      have hshift := Geodesic.isGeodesicOn_comp_affine (I := I)
+        (hgeo.mono Set.Ioo_subset_Icc_self) (c := 1) (d := c)
+      intro s hs
+      have hs' : s + c ∈ Set.Ioo a b := by
+        dsimp only [O] at hs
+        change a < s + c ∧ s + c < b
+        constructor <;> linarith [hs.1, hs.2]
+      change Geodesic.HasGeodesicEquationAt (I := I) g (fun t : ℝ => γ (t + c)) s
+      simpa only [one_mul] using hshift s (by simpa only [one_mul] using hs')
+    have hδcont : ContinuousOn δ O := by
+      change ContinuousOn (fun s : ℝ => γ (s + c)) O
+      exact hcont.comp (continuous_id.add continuous_const).continuousOn hmapO
+    let p : M := δ 0
+    let v : TangentSpace I p := mfderiv 𝓘(ℝ, ℝ) I δ 0 1
+    let κ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p v
+    have hκgeo : Geodesic.IsGeodesic (I := I) g κ := by
+      exact intrinsicGeodesic_isGeodesic (I := I) g hEnorm p v
+    have hκcont : Continuous κ := by
+      exact intrinsicGeodesic_continuous (I := I) g hEnorm p v
+    have hEqOpen : Set.EqOn δ κ O := by
+      apply geo_eqOn_of_init (I := I) g isOpen_Ioo isPreconnected_Ioo h0O
+        hδgeo (hκgeo.isGeodesicOn O) hδcont hκcont.continuousOn
+      · simpa only [p, κ] using
+          (intrinsicGeodesic_zero (I := I) g hEnorm p v).symm
+      · simpa only [v, κ] using
+          (intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p v).symm
+    have hmapClosed : Set.MapsTo (fun s : ℝ => s + c)
+        (Set.Icc (a - c) (b - c)) (Set.Icc a b) := by
+      intro s hs
+      change a ≤ s + c ∧ s + c ≤ b
+      constructor <;> linarith [hs.1, hs.2]
+    have hδclosed : ContinuousOn δ (Set.Icc (a - c) (b - c)) := by
+      exact hcont.comp (continuous_id.add continuous_const).continuousOn hmapClosed
+    have hEqClosed : Set.EqOn δ κ (Set.Icc (a - c) (b - c)) := by
+      apply hEqOpen.of_subset_closure hδclosed hκcont.continuousOn
+        Set.Ioo_subset_Icc_self
+      intro s hs
+      rw [closure_Ioo (by linarith : a - c ≠ b - c)]
+      exact hs
+    let Γ : ℝ → M := fun t => κ (t - c)
+    have hΓgeo : Geodesic.IsGeodesic (I := I) g Γ := by
+      simpa only [Γ, sub_eq_add_neg] using
+        Geodesic.isGeodesic_comp_add (I := I) hκgeo (-c)
+    have hΓcont : Continuous Γ := by
+      exact hκcont.comp (continuous_id.sub continuous_const)
+    have hΓsmooth : ContMDiff 𝓘(ℝ, ℝ) I ∞ Γ := by
+      apply contMDiffOn_univ.mp
+      exact Geodesic.isGeodesicOn_contMDiffOn_infty (I := I) g isOpen_univ
+        (hΓgeo.isGeodesicOn Set.univ) hΓcont.continuousOn
+    refine ⟨Γ, hΓgeo, hΓsmooth, ?_⟩
+    intro t ht
+    have ht' : t - c ∈ Set.Icc (a - c) (b - c) := by
+      constructor <;> linarith [ht.1, ht.2]
+    simpa only [δ, Γ, sub_add_cancel] using hEqClosed ht'
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem geo_end_eq_intr
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

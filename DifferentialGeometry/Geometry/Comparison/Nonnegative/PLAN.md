@@ -123,15 +123,19 @@ The canonical all-geodesic predicate `IsTotallyConvex` now lives in
 adapter to the existing Hopf--Rinow selected join.  It intentionally quantifies
 every geodesic segment, not only minimizing segments.  The same module now has
 all-geodesic scalar convexity and concavity predicates with sublevel and
-superlevel adapters.
+superlevel adapters.  These predicates explicitly require continuity on the
+closed segment.  `IntrinsicExp.exists_geo_eqOn_Icc` and
+`IsGeodesicConcave.of_global` globalize such a segment to the existing smooth
+complete geodesic API.
 
 `ConvexExhaustion.lean` implements the correctly signed Busemann half-spaces,
 their ray-family intersections, closedness, monotonicity, natural-level cover,
 strict interior nesting, and the compactness contradiction.  In particular,
 `raySublevel_compact` proves compactness of every real level once all
 basepoint-ray Busemann functions are geodesically concave.  This conditional
-compactness route is complete; the curvature-dependent compact exhaustion
-theorem remains unstated.
+route is retained as a reusable consumer.  `ray_convex_of_nonneg`,
+`ray_compact_nonneg`, and `rayExhaustion` now discharge its hypothesis from
+`NonnegSecMetric` and produce an actual compact totally convex exhaustion.
 
 `Variation/EndpointNonnegative.lean` supplies `jacobi_pair_le_flat` from
 `NonnegSecMetric` and the time-one specialization `intrJacobi_pair_le`.
@@ -146,14 +150,20 @@ barrier calculus, while `DistanceSemiconcavity.lean` turns the Calabi supports
 into a reusable semiconcavity theorem and passes concavity through pointwise
 limits.
 
-`Nonnegative/BusemannConcavity.lean` now proves that the Busemann function of a
-minimizing ray is concave along every globally smooth ambient geodesic.  The
-remaining API frontier is deliberate: the existing `IsGeodesicConcave` and
-`IsTotallyConvex` definitions quantify bare `IsGeodesicOn` curves, but that
-predicate does not include continuity.  Before exposing the final public
-all-segment theorem, those predicates should require `ContinuousOn` on the
-segment and the Calabi argument should use local geodesic regularity.  No
-complete Toponogov hierarchy is required for this route.
+`Nonnegative/BusemannConcavity.lean` proves both global smooth-geodesic
+composition concavity and the public all-segment `buse_geo_concave` theorem.
+The latter combines segment globalization with the established Calabi limit
+argument.  No complete Toponogov hierarchy is required for this route.
+
+`Nonnegative/ConvexCore.lean` defines the infimum of the nonempty ray-sublevel
+levels, proves that this infimum is attained, and packages the resulting
+minimum core as nonempty, compact, and totally convex.
+
+The next N4 frontier is relative-boundary shaving of this minimum core to a
+terminal compact boundaryless totally geodesic submanifold.  This requires
+honest inner-parallel-set, distance-to-boundary, dimension-drop, and
+submanifold producers; it must not be replaced by an assumption bundle that
+restates the Soul theorem.
 
 ## Honest progress
 
@@ -170,14 +180,15 @@ complete Toponogov hierarchy is required for this route.
   calculus: 100% after focused, targeted, and full-project verification.
 - Smooth-geodesic Busemann composition concavity: 100% after focused and
   targeted verification and the full-project build.
-- Public `IsGeodesicConcave` Busemann theorem: unstated, 0%; dedicated
-  comparison machinery approximately 60%.  Its precise blocker is the missing
-  continuity field in the current geodesic convexity predicates.
-- Compact exhaustion under nonnegative sectional curvature: unstated, 0%; its
-  downstream conditional compactness argument is 100%.
+- Public `IsGeodesicConcave` Busemann theorem: 100%.
+- Compact totally convex exhaustion under nonnegative sectional curvature:
+  100%, including the `CompactExhaustion` package and total convexity of every
+  level.
+- Compact totally convex minimum ray level: 100% after focused, targeted,
+  full-project, and direct axiom verification.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  24% through rays, convexity, conditional exhaustion, Calabi comparison, and
-  the smooth-geodesic Busemann limit.
-- Whole B1 nonnegative-curvature lane: approximately 18--20%.
+  31--32% through rays, convexity, compact exhaustion and minimum core, Calabi
+  comparison, and the all-segment Busemann theorem.
+- Whole B1 nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.

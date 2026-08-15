@@ -81,6 +81,7 @@ theorem minRay_in_of_escape
         (Set.Icc 0 1) C := by
     apply hCconv (by norm_num)
       ((intrinsicGeodesic_isGeodesic (I := I) g hEnorm p (v n)).isGeodesicOn _)
+      ((intrinsicGeodesic_continuous (I := I) g hEnorm p (v n)).continuousOn)
     · simpa only [intrinsicGeodesic_zero] using hp
     · change expMapIntrinsic (I := I) g hEnorm p (v n) ∈ C
       rw [hvexp n]

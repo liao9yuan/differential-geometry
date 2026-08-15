@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.DistanceSemiconcavity
+import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Busemann
 import DifferentialGeometry.Geometry.Metric.Completeness
@@ -131,6 +132,23 @@ theorem buse_comp_concave
       (happrox s).sub (herr s)
   exact Analysis.concaveOn_tendsto hG hlim
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem buse_geo_concave
+    [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
+    [ConnectedSpace M] [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    {η : ℝ → M} (hη : IsMinRay (I := I) η)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    IsGeodesicConcave (I := I) g (busemann (I := I) η) := by
+  apply Geometry.Riemannian.IsGeodesicConcave.of_global (I := I) g hEnorm
+  intro Γ hΓsmooth hΓgeo a b hab
+  exact buse_comp_concave (I := I) g hEnorm hη hΓsmooth hΓgeo hsec hab
+
 end DifferentialGeometry
 
 namespace DifferentialGeometry
@@ -181,6 +199,35 @@ theorem buse_comp_concave
   change ConcaveOn ℝ (Icc a b) (busemann (I := I) η ∘ γ)
   exact DifferentialGeometry.buse_comp_concave
     (I := I) g hEnorm hη hγ hgeo hsec hab
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem buse_geo_concave
+    {g : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g)
+    {η : ℝ → M} (hη : IsMinRayOf (I := I) g η)
+    (hsec : NonnegSecMetric (I := I) (M := M) g) :
+    IsGeodesicConcave (I := I) g (busemannOf (I := I) g η) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : M ↦ TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : CompleteSpace M := by simpa only using hg.complete
+  let hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)) :=
+    fun x v => tensor0SBundle_enorm_eq_riemannianBundle_enorm
+      (I := I) g x v
+  change IsMinRay (I := I) η at hη
+  change IsGeodesicConcave (I := I) g (busemann (I := I) η)
+  exact DifferentialGeometry.buse_geo_concave
+    (I := I) g hEnorm hη hsec
 
 end RiemannianMetricComplete
 end DifferentialGeometry
