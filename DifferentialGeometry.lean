@@ -2926,6 +2926,7 @@ import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Geometry.Topology.CoveringSimple
 import DifferentialGeometry.Geometry.Topology.DirectLimit
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
+import DifferentialGeometry.Geometry.Topology.EmbeddedSlice
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
 import DifferentialGeometry.Geometry.Topology.FiniteAtlasIndexOnCompact
 import DifferentialGeometry.Geometry.Topology.RelativeFrontier

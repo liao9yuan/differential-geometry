@@ -183,10 +183,14 @@ nonempty frontier give a core point at strictly positive frontier distance.
 brick: in intrinsic framed exponential coordinates, the pullback of a totally
 convex set to a sufficiently small normal ball is star-convex, its image is
 the corresponding relative neighborhood, and that relative neighborhood is
-path connected.  This does not yet identify a fixed linear tangent span or
-construct the smooth stratum.  Thus the immediate blocker is the
-maximal-dimensional smooth dense-stratum producer itself, not maximum
-attainment, boundary-distance nondegeneracy, or radial local connectivity.
+path connected.  `Topology/EmbeddedSlice.lean` now provides the honest
+set-local-flat representation needed for the future stratum: exact local
+identification with a finite-dimensional affine subspace.  Its full-dimensional
+case is proved equivalent to openness, and every such slice is locally closed.
+Neither file yet identifies the maximal-dimensional tangent span or constructs
+the dense stratum.  Thus the immediate blocker is the maximal-dimensional
+smooth dense-stratum producer itself, not representation, maximum attainment,
+boundary-distance nondegeneracy, or radial local connectivity.
 
 ## Honest progress
 
@@ -212,14 +216,18 @@ attainment, boundary-distance nondegeneracy, or radial local connectivity.
 - Normal-coordinate star-convex slices, local branch identification, and the
   relative path-connected neighborhood producer: 100% after focused,
   targeted, full-project, and direct axiom verification.
+- The affine local-flat `IsEmbeddedSlice` representation, its affine/open
+  producers, full-dimensional openness converse, and local-closedness
+  consumer: 100% after focused, targeted, root-aggregate, and direct axiom
+  verification; full-project verification is pending.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  33--34% through rays, convexity, compact exhaustion and minimum core, Calabi
+  34--35% through rays, convexity, compact exhaustion and minimum core, Calabi
   comparison, the all-segment Busemann theorem, and the generic shaving and
   relative-frontier consumers, together with the normal-coordinate
-  star-convex slice.  The dense-stratum theorem remains unstated and 0%, with
-  approximately 10--15% of its dedicated local groundwork present; its
-  local-linearity, embedded-submanifold, total-geodesy, density, and the later
-  dimension-drop mathematics remain unproved.
+  star-convex slice and affine local-flat representation.  The dense-stratum
+  theorem remains unstated and 0%, with approximately 15--20% of its dedicated
+  local groundwork present; its tangent-span producer, total-geodesy, density,
+  and the later dimension-drop mathematics remain unproved.
 - Whole B1 nonnegative-curvature lane: approximately 22--25%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.
