@@ -170,6 +170,20 @@ theorem gridIntTwo (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ) :
   rw [Fin.prod_univ_two]
   rfl
 
+private lemma gridIntGrad_high_tail (Λ₁ Rtop K : ℝ)
+    (hRtop : 0 ≤ Rtop ^ 2) (hK : 0 ≤ K) :
+    K * (max Λ₁ 1 ^ 2 * Rtop ^ 2) ≤ max K 1 * (1 + Λ₁ ^ 2) * Rtop ^ 2 := by
+  have hΛsq : max Λ₁ 1 ^ 2 ≤ 1 + Λ₁ ^ 2 := by
+    rcases le_total Λ₁ 1 with h | h
+    · rw [max_eq_right h]; nlinarith [sq_nonneg Λ₁]
+    · rw [max_eq_left h]; nlinarith
+  have hKmax : K ≤ max K 1 := le_max_left _ _
+  have hstep : K * (max Λ₁ 1 ^ 2 * Rtop ^ 2) ≤ K * ((1 + Λ₁ ^ 2) * Rtop ^ 2) :=
+    mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hΛsq hRtop) hK
+  refine hstep.trans ?_
+  have hpos : 0 ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 := mul_nonneg (by positivity) hRtop
+  nlinarith [mul_le_mul_of_nonneg_right hKmax hpos]
+
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma gridIntGrad_low
     (g₀ : SmoothRiemannianMetric I M)
@@ -323,18 +337,7 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
         K2 m * (Λ ^ 2 * (Λ ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 (2 + 1) m v‖ ^ 2)) := by
       ring
     rw [hcollapse, htop]
-    have hΛsq : Λ ^ 2 ≤ 1 + Λ₁ ^ 2 := by
-      rcases le_total Λ₁ 1 with h | h
-      · have hL : Λ = 1 := max_eq_right h
-        rw [hL]; nlinarith [hΛsq_nn]
-      · have hL : Λ = Λ₁ := max_eq_left h
-        rw [hL]; nlinarith
-    have hstep : K2 m * (Λ ^ 2 * Rtop ^ 2) ≤ K2 m * ((1 + Λ₁ ^ 2) * Rtop ^ 2) :=
-      mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hΛsq hRtop_nn) hK2m_nn
-    refine hstep.trans ?_
-    have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
-      mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
-    nlinarith [mul_le_mul_of_nonneg_right hKmax hpos]
+    exact gridIntGrad_high_tail Λ₁ Rtop (K2 m) hRtop_nn hK2m_nn
   · obtain ⟨d₁, rfl⟩ : ∃ d, c₁ = 1 + d := ⟨c₁ - 1, by omega⟩
     obtain ⟨d₂, rfl⟩ : ∃ d, c₂ = 1 + d := ⟨c₂ - 1, by omega⟩
     have hdsum : d₁ + d₂ = m := by omega
