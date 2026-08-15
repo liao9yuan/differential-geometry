@@ -358,7 +358,7 @@ theorem unifPalatini1_le
         L ((A₂xy - A₂yx) + ((P + Q) - (R + S))) := by
           rw [hsplit]
           congr 1
-          abel
+          abel_nf
     _ ≤ L (A₂xy - A₂yx) + L ((P + Q) - (R + S)) :=
       Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x _ _
     _ ≤ (L A₂xy + L A₂yx) + ((L P + L Q) + (L R + L S)) :=
