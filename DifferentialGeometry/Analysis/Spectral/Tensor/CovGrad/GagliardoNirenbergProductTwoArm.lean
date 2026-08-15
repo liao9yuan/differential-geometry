@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
