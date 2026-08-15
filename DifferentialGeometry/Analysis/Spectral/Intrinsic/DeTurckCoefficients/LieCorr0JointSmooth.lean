@@ -438,7 +438,7 @@ private theorem lieCorr0InsertFib_apply_jointContMDiffOn
       lieCorr0NEndo (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' pp.2) g_bg pp.1) hΛ
     (A := fun pp : M × ℝ => Y pp.1) hY
   have h1 := slotInsertEndo1Field_apply_jointContMDiffOn (I := I) (M := M) (d := 0)
-    (S := realizedSmallSet (δ := δ) (δ' := δ')) g₀
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
     (Λ := fun pp : M × ℝ =>
       lieCorr0NEndo (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' pp.2) g_bg pp.1) hΛ
     (A := fun pp : M × ℝ => Y pp.1) hY

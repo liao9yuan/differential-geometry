@@ -358,7 +358,7 @@ private lemma lc0RiemRF_eval
           (slotExtend (I := I) (M := M) g 1 3
             (slotFreeOpCc (I := I) (M := M) g 1))
           (Equiv.swap (0 : Fin 2) 1)).toSection x) D) =
-        slotExtendFib (I := I) (M := M) g 1 3 x
+        slotExtendFib (I := I) (M := M) 1 3 x
           (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
             (slotFreeOpCc (I := I) (M := M) g 1).toSection x) D' := by
     rw [hD'_def]
@@ -372,7 +372,7 @@ private lemma lc0RiemRF_eval
     funext i
     fin_cases i <;> rfl]
   rw [slotExtendFib_apply_eval
-    (I := I) (M := M) g 1 3 x
+    (I := I) (M := M) 1 3 x
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
       (slotFreeOpCc (I := I) (M := M) g 1).toSection x)
     D' (v 1) (![v 2, v 3, v 0] : Fin 3 → E)]
@@ -1163,7 +1163,7 @@ private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         (tensor0SProdKappaFib (I := I) (p := 1) (q := 3) x
           (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x) B) =
       Tensor0SSpace.toModel
-        (slotExtendFib (I := I) (M := M) g₀ 0 3 x
+        (slotExtendFib (I := I) (M := M) 0 3 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
             (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x) B) := by
   classical
@@ -1172,7 +1172,7 @@ private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [show (u : Fin 4 → E) = Fin.cons (u 0) (Fin.tail u) from (Fin.cons_self_tail u).symm]
   rw [tensor0SProdKappaFib_apply, Tensor0SSpace.toModel_ofModel,
     Bundle.continuousMultilinearMap.modelProduct_apply]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 3 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 0 3 x
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
       (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x) B (u 0) (Fin.tail u)]
   have hc : tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x B (u 0) =

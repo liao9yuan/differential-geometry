@@ -127,10 +127,10 @@ lemma lc0b_KLift_fiber_13 (g₀ : SmoothRiemannianMetric I M)
         Tensor0SSpace.toModel κ (Fin.tail m) := by
     rw [show ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x from
         (slotExtendIter (I := I) (M := M) g₀ 0 3 1 K).toSection x) D) =
-        slotExtendPointwise (I := I) (M := M) g₀ 0 3 x
+        slotExtendPointwise (I := I) (M := M) 0 3 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from K.toSection x) D from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 3 x _ D (m 0) (Fin.tail m)]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 0 3 x _ D (m 0) (Fin.tail m)]
     rw [lc0b_curry_zero (I := I) (M := M) x D (m 0)]
     rw [lc0b_clm_unit_smul (I := I) (M := M) x 3 _ _]
     rw [← hκ, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
@@ -164,7 +164,7 @@ lemma lc0b_KLift_fiber_21 (g₀ : SmoothRiemannianMetric I M)
       (unitTensor (I := I) (M := M) x) with hκ
   have hstep1 : ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 3 I x from
       (slotExtendIter (I := I) (M := M) g₀ 0 1 2 K).toSection x) D) =
-      slotExtendPointwise (I := I) (M := M) g₀ 1 2 x
+      slotExtendPointwise (I := I) (M := M) 1 2 x
         (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
           (slotExtendIter (I := I) (M := M) g₀ 0 1 1 K).toSection x) D := rfl
   have hLHS : Tensor0SSpace.toModel
@@ -173,18 +173,18 @@ lemma lc0b_KLift_fiber_21 (g₀ : SmoothRiemannianMetric I M)
       Tensor0SSpace.toModel D ![m 0, m 1] * Tensor0SSpace.toModel κ (fun _ : Fin 1 => m 2) := by
     rw [hstep1]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 2 x _ D (m 0) (Fin.tail m)]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 2 x _ D (m 0) (Fin.tail m)]
     set D1 : Tensor0SSpace 1 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x D (m 0) with hD1
     have hinner : ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
         (slotExtendIter (I := I) (M := M) g₀ 0 1 1 K).toSection x) D1) =
-        slotExtendPointwise (I := I) (M := M) g₀ 0 1 x
+        slotExtendPointwise (I := I) (M := M) 0 1 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from K.toSection x) D1 := rfl
     rw [hinner]
     rw [show (Fin.tail m : Fin 2 → E) = Fin.cons (m 1) (fun _ : Fin 1 => m 2) from by
       funext k
       fin_cases k <;> rfl]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 1 x _ D1 (m 1) (fun _ : Fin 1 => m 2)]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 0 1 x _ D1 (m 1) (fun _ : Fin 1 => m 2)]
     rw [lc0b_curry_zero (I := I) (M := M) x D1 (m 1)]
     rw [lc0b_clm_unit_smul (I := I) (M := M) x 1 _ _]
     rw [← hκ, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
@@ -232,22 +232,22 @@ lemma lc0b_KLift_fiber_23 (g₀ : SmoothRiemannianMetric I M)
         Tensor0SSpace.toModel κ (fun j : Fin 3 => m (Fin.natAdd 2 j)) := by
     rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 5 I x from
         (slotExtendIter (I := I) (M := M) g₀ 0 3 2 K).toSection x) D) =
-        slotExtendPointwise (I := I) (M := M) g₀ 1 4 x
+        slotExtendPointwise (I := I) (M := M) 1 4 x
           (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x from
             (slotExtendIter (I := I) (M := M) g₀ 0 3 1 K).toSection x) D from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 4 x _ D (m 0) (Fin.tail m)]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 4 x _ D (m 0) (Fin.tail m)]
     set D1 : Tensor0SSpace 1 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x D (m 0) with hD1
     rw [show ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x from
         (slotExtendIter (I := I) (M := M) g₀ 0 3 1 K).toSection x) D1) =
-        slotExtendPointwise (I := I) (M := M) g₀ 0 3 x
+        slotExtendPointwise (I := I) (M := M) 0 3 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from K.toSection x) D1 from rfl]
     rw [show (Fin.tail m : Fin 4 → E) =
         Fin.cons (m 1) (fun j : Fin 3 => m (Fin.natAdd 2 j)) from by
       funext k
       fin_cases k <;> rfl]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 3 x _ D1 (m 1)
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 0 3 x _ D1 (m 1)
       (fun j : Fin 3 => m (Fin.natAdd 2 j))]
     rw [lc0b_curry_zero (I := I) (M := M) x D1 (m 1)]
     rw [lc0b_clm_unit_smul (I := I) (M := M) x 3 _ _]
@@ -303,11 +303,11 @@ lemma lc0b_KLift_fiber_33 (g₀ : SmoothRiemannianMetric I M)
         Tensor0SSpace.toModel κ (fun j : Fin 3 => m (Fin.natAdd 3 j)) := by
     rw [show ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 6 I x from
         (slotExtendIter (I := I) (M := M) g₀ 0 3 3 K).toSection x) D) =
-        slotExtendPointwise (I := I) (M := M) g₀ 2 5 x
+        slotExtendPointwise (I := I) (M := M) 2 5 x
           (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 5 I x from
             (slotExtendIter (I := I) (M := M) g₀ 0 3 2 K).toSection x) D from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 2 5 x _ D (m 0) (Fin.tail m)]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 2 5 x _ D (m 0) (Fin.tail m)]
     set D2 : Tensor0SSpace 2 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D (m 0) with hD2
     rw [lc0b_KLift_fiber_23 (I := I) (M := M) g₀ K x D2]

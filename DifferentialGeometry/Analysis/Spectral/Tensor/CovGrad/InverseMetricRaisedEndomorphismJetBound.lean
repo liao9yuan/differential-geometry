@@ -91,12 +91,12 @@ private lemma rfns_smul_fib (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
-private lemma slotExtendFib_comp (g : SmoothRiemannianMetric I M) (p q r : ℕ) (x : M)
+private lemma slotExtendFib_comp (p q r : ℕ) (x : M)
     (A : Tensor0SSpace p I x →L[ℝ] Tensor0SSpace q I x)
     (B : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace p I x) :
-    (slotExtendPointwise (I := I) (M := M) g p q x A).comp
-        (slotExtendPointwise (I := I) (M := M) g r p x B) =
-      slotExtendPointwise (I := I) (M := M) g r q x (A.comp B) := by
+    (slotExtendPointwise (I := I) (M := M) p q x A).comp
+        (slotExtendPointwise (I := I) (M := M) r p x B) =
+      slotExtendPointwise (I := I) (M := M) r q x (A.comp B) := by
   apply ContinuousLinearMap.ext
   intro D
   rw [ContinuousLinearMap.comp_apply]
@@ -106,8 +106,8 @@ private lemma slotExtendFib_comp (g : SmoothRiemannianMetric I M) (p q r : ℕ) 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
-private lemma slotExtendFib_id_eq (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M) :
-    slotExtendPointwise (I := I) (M := M) g r r x (ContinuousLinearMap.id ℝ (Tensor0SSpace r I x)) =
+private lemma slotExtendFib_id_eq (r : ℕ) (x : M) :
+    slotExtendPointwise (I := I) (M := M) r r x (ContinuousLinearMap.id ℝ (Tensor0SSpace r I x)) =
       ContinuousLinearMap.id ℝ (Tensor0SSpace (r + 1) I x) := by
   apply ContinuousLinearMap.ext
   intro D
@@ -531,7 +531,7 @@ private lemma slotInsertIter_recovery_comp_eq_id (g₀ g₁ : SmoothRiemannianMe
               (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
                 (fullRaisedEndoField (I := I) (M := M) g₁ g₀))) from rfl]
       rw [slotExtend_toSection, slotExtend_toSection, slotExtendFib_comp, ih]
-      exact slotExtendFib_id_eq (I := I) (M := M) g₀ (1 + w) x
+      exact slotExtendFib_id_eq (I := I) (M := M) (1 + w) x
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in

@@ -112,7 +112,7 @@ theorem appCc_slotExtend_curvOpField_covGrad_unit_eval
       (covGrad (I := I) (M := M) g 0 (s + 0) S) x,
     ContinuousLinearMap.comp_apply,
     slotExtend_toSection (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) x]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g (s + 0) (s + 0) x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) (s + 0) (s + 0) x
     (show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0) I x from
       (curvOpField (I := I) (M := M) g s).toSection x)
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
@@ -237,7 +237,7 @@ theorem appCc_slotExtend_covGrad_curvOpField_covGrad_unit_eval
     ContinuousLinearMap.comp_apply,
     slotExtend_toSection (I := I) (M := M) g (s + 0) (s + 0 + 1)
       (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) x]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g (s + 0) (s + 0 + 1) x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) (s + 0) (s + 0 + 1) x
     (show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
       (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)).toSection x)
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from

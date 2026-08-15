@@ -176,7 +176,6 @@ theorem left_poincare_lt
   linarith
 
 theorem IsJacobiSolOn.end_pair_pos
-    [CompleteSpace F]
     {R : ℝ → F →L[ℝ] F} {y v : ℝ → F} {κ : ℝ}
     (hR : ContinuousOn R (Set.Icc (0 : ℝ) 1))
     (hsol : IsJacobiSolOn R 0 1 y v)

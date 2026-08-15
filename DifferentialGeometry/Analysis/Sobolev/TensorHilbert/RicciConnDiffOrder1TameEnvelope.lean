@@ -968,21 +968,21 @@ theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
           (slotExtend (I := I) (M := M) g₀ 2 3
             (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
           connDiffContrInsertionReindexPerm).toSection x) D) =
-        slotExtendPointwise (I := I) (M := M) g₀ 2 3 x
-          (slotExtendPointwise (I := I) (M := M) g₀ 1 2 x
+        slotExtendPointwise (I := I) (M := M) 2 3 x
+          (slotExtendPointwise (I := I) (M := M) 1 2 x
             (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
               (connDiffSection (I := I) g₁ g₀).toSection x)) D' := by
       rw [hD'_def]
       exact reindexCoeffFibGen_apply (I := I) 3 4 connDiffContrInsertionReindexPerm x _ D
     rw [h1]
     conv_lhs => rw [show u = Fin.cons (u 0) (Matrix.vecTail u) from (Fin.cons_self_tail u).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 2 3 x
-      (slotExtendPointwise (I := I) (M := M) g₀ 1 2 x
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 2 3 x
+      (slotExtendPointwise (I := I) (M := M) 1 2 x
         (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
           (connDiffSection (I := I) g₁ g₀).toSection x)) D' (u 0) (Matrix.vecTail u)]
     conv_lhs => rw [show Matrix.vecTail u = Fin.cons (Matrix.vecTail u 0)
       (Matrix.vecTail (Matrix.vecTail u)) from (Fin.cons_self_tail (Matrix.vecTail u)).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 2 x
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 2 x
       (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
         (connDiffSection (I := I) g₁ g₀).toSection x)
       ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x) D' (u 0))

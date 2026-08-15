@@ -1352,7 +1352,7 @@ private def k3_slotExtendIterFib (g : SmoothRiemannianMetric I M) (b c : ℕ) (x
     (A : Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x) :
     ∀ w : ℕ, Tensor0SSpace (b + w) I x →L[ℝ] Tensor0SSpace (c + w) I x
   | 0 => A
-  | (w + 1) => slotExtendPointwise (I := I) (M := M) g (b + w) (c + w) x
+  | (w + 1) => slotExtendPointwise (I := I) (M := M) (b + w) (c + w) x
       (k3_slotExtendIterFib g b c x A w)
 
 omit [BoundarylessManifold I M] in
@@ -1396,7 +1396,7 @@ private lemma k3_appCcLeibnizPsi_diag_toSection (g : SmoothRiemannianMetric I M)
       rw [hdiag]
       rw [show (k3_slotExtendIterFib (I := I) (M := M) g b c x
             (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x) (i + 1)) =
-          slotExtendPointwise (I := I) (M := M) g (b + i) (c + i) x
+          slotExtendPointwise (I := I) (M := M) (b + i) (c + i) x
             (k3_slotExtendIterFib (I := I) (M := M) g b c x
               (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x) i)
           from rfl]
@@ -1412,7 +1412,7 @@ private lemma k3_fiberNormSqComponent_slotExtendFib_eq
     (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
     (K' : Fin (r + 1) → Fin n) (J' : Fin (s + 1) → Fin n) :
     fiberNormSqComponent (I := I) (M := M) g x (r + 1) (s + 1)
-        (show TensorRSSpace (r + 1) (s + 1) I x from slotExtendPointwise (I := I) (M := M) g r s x
+        (show TensorRSSpace (r + 1) (s + 1) I x from slotExtendPointwise (I := I) (M := M) r s x
           A)
         n e K' J' =
       (if J' 0 = K' 0 then (1 : ℝ) else 0) *
@@ -1421,19 +1421,19 @@ private lemma k3_fiberNormSqComponent_slotExtendFib_eq
           (fun k => K' (Fin.succ k)) (fun k => J' (Fin.succ k)) := by
   classical
   have hcomp : fiberNormSqComponent (I := I) (M := M) g x (r + 1) (s + 1)
-        (show TensorRSSpace (r + 1) (s + 1) I x from slotExtendPointwise (I := I) (M := M) g r s x
+        (show TensorRSSpace (r + 1) (s + 1) I x from slotExtendPointwise (I := I) (M := M) r s x
           A)
         n e K' J' =
       Tensor0SSpace.toModel
-        (slotExtendPointwise (I := I) (M := M) g r s x A
+        (slotExtendPointwise (I := I) (M := M) r s x A
           (coframeS (I := I) (M := M) g x (r + 1) e K'))
         (Fin.cons (show E from e (J' 0)) (fun k : Fin s => (show E from e (J' (Fin.succ k))))) := by
     rw [show fiberNormSqComponent (I := I) (M := M) g x (r + 1) (s + 1)
-          (show TensorRSSpace (r + 1) (s + 1) I x from slotExtendPointwise (I := I) (M := M) g r s x
+          (show TensorRSSpace (r + 1) (s + 1) I x from slotExtendPointwise (I := I) (M := M) r s x
             A)
           n e K' J' =
         Tensor0SSpace.toModel
-          (slotExtendPointwise (I := I) (M := M) g r s x A
+          (slotExtendPointwise (I := I) (M := M) r s x A
             (coframeS (I := I) (M := M) g x (r + 1) e K'))
           (fun k => (show E from e (J' k))) from rfl]
     congr 1
@@ -1442,7 +1442,7 @@ private lemma k3_fiberNormSqComponent_slotExtendFib_eq
     · rw [Fin.cons_zero]
     · rw [Fin.cons_succ]
   rw [hcomp]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g r s x A
+  rw [slotExtendFib_apply_eval (I := I) (M := M) r s x A
     (coframeS (I := I) (M := M) g x (r + 1) e K') (show E from e (J' 0))
     (fun k : Fin s => (show E from e (J' (Fin.succ k))))]
   have hcurry : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)

@@ -84,19 +84,19 @@ theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : 
   rw [show (show Tensor0SSpace (b + 2) I x →L[ℝ] Tensor0SSpace (s + 2) I x from
         (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
           (slotExtend (I := I) (M := M) g₀ b s Φ)).toSection x) D =
-      slotExtendPointwise (I := I) (M := M) g₀ (b + 1) (s + 1) x
+      slotExtendPointwise (I := I) (M := M) (b + 1) (s + 1) x
         (show Tensor0SSpace (b + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (slotExtend (I := I) (M := M) g₀ b s Φ).toSection x) D from rfl]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ (b + 1) (s + 1) x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) (b + 1) (s + 1) x
     (show Tensor0SSpace (b + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
       (slotExtend (I := I) (M := M) g₀ b s Φ).toSection x) D a (Fin.cons c m)]
   rw [show (show Tensor0SSpace (b + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (slotExtend (I := I) (M := M) g₀ b s Φ).toSection x)
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (b + 1) x D a) =
-      slotExtendPointwise (I := I) (M := M) g₀ b s x
+      slotExtendPointwise (I := I) (M := M) b s x
         (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (b + 1) x D a) from rfl]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ b s x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) b s x
     (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (b + 1) x D a) c m]
 

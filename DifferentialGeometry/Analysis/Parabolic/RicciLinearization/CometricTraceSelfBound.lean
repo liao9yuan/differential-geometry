@@ -168,7 +168,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
 private theorem traceSucc_fib
     (g : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
     reindexCoeffFibGen (I := I) (p + 2 + 1) (p + 1) (traceSuccPerm p) x
-        (slotExtendFib (I := I) (M := M) g (p + 2) p x
+        (slotExtendFib (I := I) (M := M) (p + 2) p x
           (cometricDoubleTraceFib (I := I) g p x)) =
       cometricDoubleTraceFib (I := I) g (p + 1) x := by
   classical

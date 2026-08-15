@@ -341,11 +341,11 @@ private lemma slotExtend_connDiffLowered_toModel (x : M)
         (slotExtend (I := I) (M := M) g₀ 0 3
           (connDiffLoweredCc (I := I) g₀ g₁)).toSection x) om) (Fin.cons v0 vs) =
       Tensor0SSpace.toModel
-        (slotExtendPointwise (I := I) (M := M) g₀ 0 3 x
+        (slotExtendPointwise (I := I) (M := M) 0 3 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
             (connDiffLoweredCc (I := I) g₀ g₁).toSection x) om) (Fin.cons v0 vs) := rfl
   rw [h0]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 3 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 0 3 x
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
       (connDiffLoweredCc (I := I) g₀ g₁).toSection x) om v0 vs]
   have hc : tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x om v0 =
@@ -428,10 +428,10 @@ private lemma gInvQuadRefoldWeight_toModel (x : M) (D : Tensor0SSpace 2 I x) (m 
   rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 3 I x from
       (slotExtend (I := I) (M := M) g₀ 1 2
         (gInvQuadRefoldArm (I := I) (M := M) g₀ g₁)).toSection x) =
-      slotExtendPointwise (I := I) (M := M) g₀ 1 2 x
+      slotExtendPointwise (I := I) (M := M) 1 2 x
         (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
           (gInvQuadRefoldArm (I := I) (M := M) g₀ g₁).toSection x) from rfl]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 2 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 1 2 x
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
       (gInvQuadRefoldArm (I := I) (M := M) g₀ g₁).toSection x)
     (Tensor0SSpace.ofModel

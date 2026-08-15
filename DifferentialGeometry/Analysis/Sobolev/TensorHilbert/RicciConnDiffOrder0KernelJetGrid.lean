@@ -119,14 +119,14 @@ theorem connDiffContrInsertionInnerField_eq_reindex_slotExtend
         (reindexCoeffGen (I := I) (M := M) g₀ 2 3
           (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀))
           innerContractionSwapPerm).toSection x) D) =
-        slotExtendPointwise (I := I) (M := M) g₀ 1 2 x
+        slotExtendPointwise (I := I) (M := M) 1 2 x
           (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
             (connDiffSection (I := I) g₁ g₀).toSection x) D' := by
       rw [hD'_def]
       exact reindexCoeffFibGen_apply (I := I) 2 3 innerContractionSwapPerm x _ D
     rw [h1]
     conv_lhs => rw [show u = Fin.cons (u 0) (Matrix.vecTail u) from (Fin.cons_self_tail u).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 2 x
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 2 x
       (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
         (connDiffSection (I := I) g₁ g₀).toSection x) D' (u 0) (Matrix.vecTail u)]
     rw [show Tensor0SSpace.toModel
@@ -331,7 +331,7 @@ theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
           (slotExtend (I := I) (M := M) g₀ 1 3
             (covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
           innerContractionSwapPerm).toSection x) D) =
-        slotExtendPointwise (I := I) (M := M) g₀ 1 3 x
+        slotExtendPointwise (I := I) (M := M) 1 3 x
           (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
             (covGrad (I := I) (M := M) g₀ 1 2
               (connDiffSection (I := I) g₁ g₀)).toSection x) D' := by
@@ -339,7 +339,7 @@ theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
       exact reindexCoeffFibGen_apply (I := I) 2 4 innerContractionSwapPerm x _ D
     rw [h1]
     conv_lhs => rw [show u = Fin.cons (u 0) (Matrix.vecTail u) from (Fin.cons_self_tail u).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 3 x
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 3 x
       (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
         (covGrad (I := I) (M := M) g₀ 1 2
           (connDiffSection (I := I) g₁ g₀)).toSection x) D' (u 0) (Matrix.vecTail u)]

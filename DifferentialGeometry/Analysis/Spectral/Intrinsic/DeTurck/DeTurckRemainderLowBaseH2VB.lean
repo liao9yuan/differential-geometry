@@ -879,7 +879,7 @@ lemma vbPKSlot (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         (tensor0SProdKappaFib (I := I) (p := 1) (q := 3) x
           (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x) B) =
       Tensor0SSpace.toModel
-        (slotExtendFib (I := I) (M := M) g₀ 0 3 x
+        (slotExtendFib (I := I) (M := M) 0 3 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
             (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x)
           B) := by
@@ -890,7 +890,7 @@ lemma vbPKSlot (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (Fin.cons_self_tail u).symm]
   rw [tensor0SProdKappaFib_apply, Tensor0SSpace.toModel_ofModel,
     Bundle.continuousMultilinearMap.modelProduct_apply]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 3 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 0 3 x
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
       (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x)
     B (u 0) (Fin.tail u)]

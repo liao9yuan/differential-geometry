@@ -550,19 +550,19 @@ lemma tsSlotExtend_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   intro D
   rw [show ((show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (show TensorRSSpace (r + 1) (s + 1) I x from
-          slotExtendFib (I := I) (M := M) g₀ r s x
+          slotExtendFib (I := I) (M := M) r s x
             (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X.toSection x)) -
         (show TensorRSSpace (r + 1) (s + 1) I x from
-          slotExtendFib (I := I) (M := M) g₀ r s x
+          slotExtendFib (I := I) (M := M) r s x
             (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X'.toSection x))) D) =
       (show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        slotExtendFib (I := I) (M := M) g₀ r s x
+        slotExtendFib (I := I) (M := M) r s x
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X.toSection x)) D -
       (show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        slotExtendFib (I := I) (M := M) g₀ r s x
+        slotExtendFib (I := I) (M := M) r s x
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X'.toSection x)) D from rfl]
   rw [show ((show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        slotExtendFib (I := I) (M := M) g₀ r s x
+        slotExtendFib (I := I) (M := M) r s x
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from (X - X').toSection x)) D) =
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from (X - X').toSection x).comp

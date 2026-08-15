@@ -146,26 +146,26 @@ lemma slotLift23 (g : SmoothRiemannianMetric I M)
     rw [show
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 5 I x from
           (slotExtendIter (I := I) (M := M) g 0 3 2 K).toSection x) D) =
-          slotExtendFib (I := I) (M := M) g 1 4 x
+          slotExtendFib (I := I) (M := M) 1 4 x
             (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x from
               (slotExtendIter (I := I) (M := M) g 0 3 1 K).toSection x) D
           from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 1 4 x _ D
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 4 x _ D
       (m 0) (Fin.tail m)]
     set D₁ : Tensor0SSpace 1 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x D (m 0) with hD₁
     rw [show
         ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x from
           (slotExtendIter (I := I) (M := M) g 0 3 1 K).toSection x) D₁) =
-          slotExtendFib (I := I) (M := M) g 0 3 x
+          slotExtendFib (I := I) (M := M) 0 3 x
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
               K.toSection x) D₁ from rfl]
     rw [show (Fin.tail m : Fin 4 → E) =
         Fin.cons (m 1) (fun j : Fin 3 => m (Fin.natAdd 2 j)) from by
       funext k
       fin_cases k <;> rfl]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 0 3 x _ D₁
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 0 3 x _ D₁
       (m 1) (fun j : Fin 3 => m (Fin.natAdd 2 j))]
     rw [curry0 (I := I) (M := M) x D₁ (m 1)]
     rw [clm_smul (I := I) (M := M) x 3 _ _]
@@ -215,26 +215,26 @@ lemma slotLift24 (g : SmoothRiemannianMetric I M)
     rw [show
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
           (slotExtendIter (I := I) (M := M) g 0 4 2 K).toSection x) D) =
-          slotExtendFib (I := I) (M := M) g 1 5 x
+          slotExtendFib (I := I) (M := M) 1 5 x
             (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 5 I x from
               (slotExtendIter (I := I) (M := M) g 0 4 1 K).toSection x) D
           from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 1 5 x _ D
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 5 x _ D
       (m 0) (Fin.tail m)]
     set D₁ : Tensor0SSpace 1 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x D (m 0) with hD₁
     rw [show
         ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 5 I x from
           (slotExtendIter (I := I) (M := M) g 0 4 1 K).toSection x) D₁) =
-          slotExtendFib (I := I) (M := M) g 0 4 x
+          slotExtendFib (I := I) (M := M) 0 4 x
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from
               K.toSection x) D₁ from rfl]
     rw [show (Fin.tail m : Fin 5 → E) =
         Fin.cons (m 1) (fun j : Fin 4 => m (Fin.natAdd 2 j)) from by
       funext k
       fin_cases k <;> rfl]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 0 4 x _ D₁
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 0 4 x _ D₁
       (m 1) (fun j : Fin 4 => m (Fin.natAdd 2 j))]
     rw [curry0 (I := I) (M := M) x D₁ (m 1)]
     rw [clm_smul (I := I) (M := M) x 4 _ _]
@@ -284,26 +284,26 @@ lemma slotLift22 (g : SmoothRiemannianMetric I M)
     rw [show
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
           (slotExtendIter (I := I) (M := M) g 0 2 2 K).toSection x) D) =
-          slotExtendFib (I := I) (M := M) g 1 3 x
+          slotExtendFib (I := I) (M := M) 1 3 x
             (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
               (slotExtendIter (I := I) (M := M) g 0 2 1 K).toSection x) D
           from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 1 3 x _ D
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 1 3 x _ D
       (m 0) (Fin.tail m)]
     set D₁ : Tensor0SSpace 1 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x D (m 0) with hD₁
     rw [show
         ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
           (slotExtendIter (I := I) (M := M) g 0 2 1 K).toSection x) D₁) =
-          slotExtendFib (I := I) (M := M) g 0 2 x
+          slotExtendFib (I := I) (M := M) 0 2 x
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
               K.toSection x) D₁ from rfl]
     rw [show (Fin.tail m : Fin 3 → E) =
         Fin.cons (m 1) (fun j : Fin 2 => m (Fin.natAdd 2 j)) from by
       funext k
       fin_cases k <;> rfl]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 0 2 x _ D₁
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 0 2 x _ D₁
       (m 1) (fun j : Fin 2 => m (Fin.natAdd 2 j))]
     rw [curry0 (I := I) (M := M) x D₁ (m 1)]
     rw [clm_smul (I := I) (M := M) x 2 _ _]
@@ -353,12 +353,12 @@ lemma slotLift32 (g : SmoothRiemannianMetric I M)
     rw [show
         ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
           (slotExtendIter (I := I) (M := M) g 0 2 3 K).toSection x) D) =
-          slotExtendFib (I := I) (M := M) g 2 4 x
+          slotExtendFib (I := I) (M := M) 2 4 x
             (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
               (slotExtendIter (I := I) (M := M) g 0 2 2 K).toSection x) D
           from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 2 4 x _ D
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 2 4 x _ D
       (m 0) (Fin.tail m)]
     set D₂ : Tensor0SSpace 2 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D (m 0) with hD₂
@@ -411,12 +411,12 @@ lemma slotLift33 (g : SmoothRiemannianMetric I M)
     rw [show
         ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 6 I x from
           (slotExtendIter (I := I) (M := M) g 0 3 3 K).toSection x) D) =
-          slotExtendFib (I := I) (M := M) g 2 5 x
+          slotExtendFib (I := I) (M := M) 2 5 x
             (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 5 I x from
               (slotExtendIter (I := I) (M := M) g 0 3 2 K).toSection x) D
           from rfl]
     rw [show m = Fin.cons (m 0) (Fin.tail m) from (Fin.cons_self_tail m).symm]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g 2 5 x _ D
+    rw [slotExtendFib_apply_eval (I := I) (M := M) 2 5 x _ D
       (m 0) (Fin.tail m)]
     set D₂ : Tensor0SSpace 2 I x :=
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D (m 0) with hD₂

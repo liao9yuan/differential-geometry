@@ -841,13 +841,13 @@ private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
       ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
         (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D) ![u0, u1, u2, u3, u4] =
       Tensor0SSpace.toModel
-        (slotExtendFib (I := I) (M := M) g₀ 2 4 x
+        (slotExtendFib (I := I) (M := M) 2 4 x
           (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
             (slotExtend (I := I) (M := M) g₀ 1 3
               (slotExtend (I := I) (M := M) g₀ 0 2 P)).toSection x) D)
         (Fin.cons u0 ![u1, u2, u3, u4]) := rfl
   rw [h0]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 2 4 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 2 4 x
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
       (slotExtend (I := I) (M := M) g₀ 1 3
         (slotExtend (I := I) (M := M) g₀ 0 2 P)).toSection x) D u0 ![u1, u2, u3, u4]]
@@ -857,13 +857,13 @@ private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
           (slotExtend (I := I) (M := M) g₀ 0 2 P)).toSection x)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0)) ![u1, u2, u3, u4] =
       Tensor0SSpace.toModel
-        (slotExtendFib (I := I) (M := M) g₀ 1 3 x
+        (slotExtendFib (I := I) (M := M) 1 3 x
           (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
             (slotExtend (I := I) (M := M) g₀ 0 2 P).toSection x)
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0))
         (Fin.cons u1 ![u2, u3, u4]) := rfl
   rw [h1]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 3 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 1 3 x
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
       (slotExtend (I := I) (M := M) g₀ 0 2 P).toSection x)
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1 ![u2, u3, u4]]
@@ -873,13 +873,13 @@ private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1)) ![u2, u3, u4] =
       Tensor0SSpace.toModel
-        (slotExtendFib (I := I) (M := M) g₀ 0 2 x
+        (slotExtendFib (I := I) (M := M) 0 2 x
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from P.toSection x)
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
             (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1))
         (Fin.cons u2 ![u3, u4]) := rfl
   rw [h2]
-  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 2 x
+  rw [slotExtendFib_apply_eval (I := I) (M := M) 0 2 x
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from P.toSection x)
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1) u2 ![u3, u4]]

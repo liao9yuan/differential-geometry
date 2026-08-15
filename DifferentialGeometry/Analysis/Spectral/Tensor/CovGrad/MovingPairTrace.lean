@@ -65,10 +65,10 @@ private lemma slotExtend_toModel_cons
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D v0)) vs := by
   rw [show ((show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
       (slotExtend (I := I) (M := M) g r s Phi).toSection x) D) =
-      slotExtendFib (I := I) (M := M) g r s x
+      slotExtendFib (I := I) (M := M) r s x
         (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
           Phi.toSection x) D from rfl]
-  exact slotExtendFib_apply_eval (I := I) (M := M) g r s x
+  exact slotExtendFib_apply_eval (I := I) (M := M) r s x
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
       Phi.toSection x) D (show E from v0) vs
 

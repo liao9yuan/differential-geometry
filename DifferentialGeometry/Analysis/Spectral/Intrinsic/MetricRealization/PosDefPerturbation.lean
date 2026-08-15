@@ -187,7 +187,7 @@ theorem perturbedInner_isVonNBounded
   exact (gSublevel_isVonNBounded (I := I) (M := M) g x hr_pos).subset hsub
 
 theorem perturbedInner_contMDiff
-    [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hsmooth : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -296,7 +296,7 @@ noncomputable def perturbedMetric
   rfl
 
 theorem exists_posDef_perturbation_radius
-    [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless]
+    [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) :
     ∃ δ : ℝ, 0 < δ ∧
