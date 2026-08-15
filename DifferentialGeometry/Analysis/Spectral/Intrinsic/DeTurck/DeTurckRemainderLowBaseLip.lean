@@ -9142,7 +9142,6 @@ private theorem ricciDA_pair_h1
     linarith only [e1, e2]
   intro gT gU P Q hP hQ hPtie hQtie δ hδ_le hδ0 hδP hδQ
     R A D2 N hR hA hD2 hN hP2 hQ2 hP3 hQ3 hPQ2 hPn hQn hPQn
-
   set p : ℝ := 1 + A + A ^ 2 with hp
   have hp1 : (1 : ℝ) ≤ p := by
     rw [hp]; linarith only [hA, sq_nonneg A]
@@ -9167,7 +9166,6 @@ private theorem ricciDA_pair_h1
   have huple : u ≤ p * u := by
     have h := mul_le_mul_of_nonneg_right hp1 hu0
     linarith only [h]
-
   set GT : SmoothCcTensor g 0 4 :=
     ccOperatorFieldComp (I := I) (M := M) g 0 3 4
       (LowBaseInternal.dagLowOp (I := I) (M := M) g gT)
@@ -9202,7 +9200,6 @@ private theorem ricciDA_pair_h1
   have hgd1 : lowJetSq (I := I) (M := M) g 1
       (covGrad (I := I) (M := M) g 0 2 (P - Q)) ≤ D2 ^ 2 :=
     (grad_h1_le_h2_lip (I := I) (M := M) g (P - Q)).trans hPQ2
-
   have hGcomb : ccOperatorFieldComp (I := I) (M := M) g 0 3 4
         (LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
           LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
@@ -9301,7 +9298,6 @@ private theorem ricciDA_pair_h1
           Cb034 * Kdag * ((1 + A ^ 2) * A ^ 2) := by ring
       _ ≤ Cb034 * Kdag * (2 * p ^ 2) := hmulc
       _ = 2 * (Cb034 * Kdag) * p ^ 2 := by ring
-
   have hETb : lowJetSq (I := I) (M := M) g 2 ET ≤ Be R ^ 2 := by
     rw [hET]
     exact hfsb gT P hP hPtie hδ_le hδ0 hδP R hR hP2
@@ -9323,7 +9319,6 @@ private theorem ricciDA_pair_h1
         2 * Be1 R ^ 2 * (p * u) :=
       mul_le_mul_of_nonneg_left e2 (by positivity)
     linarith only [f1, f2]
-
   have hmono : ∀ σ : Equiv.Perm (Fin 4),
       lowJetSq (I := I) (M := M) g 1
         (LowBaseInternal.daMono (I := I) (M := M) g gT GT σ -
@@ -9395,7 +9390,6 @@ private theorem ricciDA_pair_h1
       ring
     refine (jet_add_lip (I := I) (M := M) g 1 _ _).trans ?_
     linarith only [e1, e2]
-
   have hDAT : LowBaseInternal.ricciDALow (I := I) (M := M) g gT P =
       LowBaseInternal.daMono (I := I) (M := M) g gT GT
           LowBaseInternal.daPermA -
@@ -9489,7 +9483,6 @@ private theorem good_pair_h1
     positivity
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2 hTn hUn hTUn s hs
-
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   set gmT : SmoothRiemannianMetric I M :=
     realizedFam (I := I) g T 0 hδT hδZ s with hgmT
@@ -9591,7 +9584,6 @@ private theorem good_pair_h1
       (by simpa using hTUn)
   obtain ⟨hPnA, hQnA⟩ := hball ρA (min_le_left _ _)
   obtain ⟨hPnD, hQnD⟩ := hball ρD (min_le_right _ _)
-
   set Z : ℝ := (1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2) with hZ
   have hAA : lowJetSq (I := I) (M := M) g 1
       (ricciAAArm (I := I) (M := M) g gmT -
@@ -9606,7 +9598,6 @@ private theorem good_pair_h1
     rw [hZ]
     exact hda gmT gmU P Q hPsymm hQsymm hPtie hQtie hδ_le hδ0 hδP hδQ
       R A D2 N hR hA hD2 hN hP2 hQ2 hP3 hQ3 hPQ2 hPnD hQnD hPQn
-
   have hlowT : LowBaseInternal.ricciLow (I := I) (M := M) g gmT P =
       ricciAAArm (I := I) (M := M) g gmT +
         LowBaseInternal.ricciDALow (I := I) (M := M) g gmT P := rfl
