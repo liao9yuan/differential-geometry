@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
 noncomputable section
 
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -756,6 +755,166 @@ private lemma gnProduct_cell_tail
       mul_le_mul_of_nonneg_right hCSCT hbase
     _ = Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by ring
 
+private lemma gnProduct_cell_pos
+    (g : SmoothRiemannianMetric I M) (s₁ s₂ k : ℕ)
+    (S : Integral.L2.SmoothCcTensor g 0 s₁) (T : Integral.L2.SmoothCcTensor g 0 s₂)
+    (ΛS ΛT CS CT Cbig NS NT tt : ℝ)
+    (hk1 : 1 ≤ k)
+    (hSsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₁ x (S.toSection x) ≤ ΛS ^ 2)
+    (hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₂ x (T.toSection x) ≤ ΛT ^ 2)
+    (hΛS : 0 ≤ ΛS) (hΛT : 0 ≤ ΛT)
+    (hCS_nn : 0 ≤ CS) (hCT_nn : 0 ≤ CT)
+    (hCSdef : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le (I := I) (M := M) g s₁ k hk1).choose = CS)
+    (hCTdef : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le (I := I) (M := M) g s₂ k hk1).choose = CT)
+    (hCbig : Cbig = 1 + CS * CT)
+    (hNSdef : NS = ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S‖)
+    (hNTdef : NT = ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T‖)
+    (htt0 : 0 < tt) (htt1 : tt ≤ 1)
+    (i l : ℕ) (hipos : i > 0) (hl_pos : 0 < l) (hil : i + l = k)
+    (hmi : i < k) (hml : l < k) :
+    (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i S).toSection x)) *
+          (riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + l) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T).toSection x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+      Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
+  let Sj : ℕ → M → ℝ := fun a x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + a) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S).toSection x)
+  let Tj : ℕ → M → ℝ := fun b x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T).toSection x)
+  have hSj_cont : ∀ a, Continuous (Sj a) := fun a => by
+    dsimp [Sj]; exact continuous_rfns g 0 (s₁ + a) _
+  have hTj_cont : ∀ b, Continuous (Tj b) := fun b => by
+    dsimp [Tj]; exact continuous_rfns g 0 (s₂ + b) _
+  have hSj_nn : ∀ a x, 0 ≤ Sj a x := fun a x => by
+    dsimp [Sj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + a) x _
+  have hTj_nn : ∀ b x, 0 ≤ Tj b x := fun b x => by
+    dsimp [Tj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
+  have hk_posR : 0 < (k : ℝ) := by positivity
+  set wi : ℝ := (i : ℝ) / k with hwi
+  set wl : ℝ := (l : ℝ) / k with hwl
+  have hi_posR : 0 < (i : ℝ) := by exact_mod_cast hipos
+  have hl_posR : 0 < (l : ℝ) := by exact_mod_cast hl_pos
+  have hwi_pos : 0 < wi := by rw [hwi]; positivity
+  have hwl_pos : 0 < wl := by rw [hwl]; positivity
+  have hwsum : wi + wl = 1 := by
+    rw [hwi, hwl, ← add_div, show (i : ℝ) + l = (k : ℝ) by push_cast [← hil]; ring]
+    exact div_self (ne_of_gt hk_posR)
+  have hwk : wi / wl ≤ (k : ℝ) := by
+    have hwiwl : wi / wl = (i : ℝ) / l := by
+      rw [hwi, hwl]
+      field_simp
+    rw [hwiwl, div_le_iff₀ hl_posR]
+    have h1l : (1 : ℝ) ≤ (l : ℝ) := by exact_mod_cast hl_pos
+    have hik' : (i : ℝ) ≤ (k : ℝ) := le_of_lt (by exact_mod_cast hmi)
+    nlinarith
+  set p : ℝ := (k : ℝ) / i with hp
+  set q : ℝ := (k : ℝ) / l with hq
+  have hp_one : 1 < p := by rw [hp, lt_div_iff₀ hi_posR, one_mul]; exact_mod_cast hmi
+  have hpq : p.HolderConjugate q := by
+    rw [Real.holderConjugate_iff]
+    refine ⟨hp_one, ?_⟩
+    rw [hp, hq, inv_div, inv_div, ← add_div,
+      show (i : ℝ) + l = (k : ℝ) by push_cast [← hil]; ring]
+    exact div_self (ne_of_gt hk_posR)
+  have hHolder := real_holder_two_nonneg g (Sj i) (Tj l)
+    (hSj_cont i) (hTj_cont l) (hSj_nn i) (hTj_nn l) hpq
+  have h1p : (1 : ℝ) / p = wi := by rw [hp, one_div_div, hwi]
+  have h1q : (1 : ℝ) / q = wl := by rw [hq, one_div_div, hwl]
+  rw [h1p, h1q] at hHolder
+  have hSe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+    (I := I) (M := M) g s₁ k hk1).choose_spec.2 S ΛS hΛS hSsup i hipos hmi
+  have hTe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+    (I := I) (M := M) g s₂ k hk1).choose_spec.2 T ΛT hΛT hTsup l hl_pos hml
+  have hCS_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+      (I := I) (M := M) g s₁ k hk1).choose = CS := by
+    simp only [hCSdef]
+  have hCT_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+      (I := I) (M := M) g s₂ k hk1).choose = CT := by
+    simp only [hCTdef]
+  rw [hCS_m] at hSe
+  rw [hCT_m] at hTe
+  rw [mul_div_assoc 2 (i : ℝ) k, ← hwi] at hSe
+  rw [mul_div_assoc 2 (l : ℝ) k, ← hwl] at hTe
+  rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₁ + k)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S).toFun = NS from by
+      rw [hNSdef]
+      exact (Integral.L2.SmoothCcTensor.norm_def
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S)).symm] at hSe
+  rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₂ + k)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T).toFun = NT from by
+      rw [hNTdef]
+      exact (Integral.L2.SmoothCcTensor.norm_def
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T)).symm] at hTe
+  set Iφp : ℝ := ∫ x, Sj i x ^ p ∂(riemannianVolumeMeasure (I := I) (M := M) g) with hIφp
+  set Iψq : ℝ := ∫ x, Tj l x ^ q ∂(riemannianVolumeMeasure (I := I) (M := M) g) with hIψq
+  have hIφp_nn : 0 ≤ Iφp := by
+    rw [hIφp]; exact integral_nonneg (fun x => Real.rpow_nonneg (hSj_nn i x) _)
+  have hIψq_nn : 0 ≤ Iψq := by
+    rw [hIψq]; exact integral_nonneg (fun x => Real.rpow_nonneg (hTj_nn l x) _)
+  have hys := young_arm_split_scaled wi wl CS CT ΛS ΛT NS NT Iφp Iψq tt k
+    hwi_pos hwl_pos hwsum hwk hCS_nn hCT_nn hΛS hΛT
+    (by rw [hNSdef]; exact norm_nonneg _) (by rw [hNTdef]; exact norm_nonneg _)
+    hIφp_nn hIψq_nn htt0 htt1 hSe hTe
+  have hCSCT_le : CS * CT ≤ Cbig := by rw [hCbig]; linarith
+  have hbase : 0 ≤ tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by positivity
+  calc ∫ x, Sj i x * Tj l x ∂(riemannianVolumeMeasure (I := I) (M := M) g)
+      ≤ Iφp ^ wi * Iψq ^ wl := hHolder
+    _ ≤ CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := hys
+    _ ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) :=
+        gnProduct_cell_tail CS CT Cbig tt ΛT NS ΛS NT k hCSCT_le hbase
+
+private lemma antiDiagGrid_topArm_scaled_tail
+    (k : ℕ) (Cbig tt t ΛS ΛT NS NT YS : ℝ)
+    (hCbig1 : 1 ≤ Cbig) (ht0 : 0 < t)
+    (htt : tt = t / ((k : ℝ) * Cbig + 1))
+    (hNT_sum : NT ^ 2 ≤ YS) :
+    (k : ℝ) * (Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) ≤
+      t * (ΛT ^ 2 * NS ^ 2) +
+        (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k) *
+          (ΛS ^ 2 * YS) := by
+  have hkR : (0 : ℝ) ≤ (k : ℝ) := by exact_mod_cast Nat.zero_le k
+  have htop : (k : ℝ) * (Cbig * tt) ≤ t := by
+    rw [htt]
+    rw [show (k : ℝ) * (Cbig * (t / ((k : ℝ) * Cbig + 1)))
+        = ((k : ℝ) * Cbig * t) / ((k : ℝ) * Cbig + 1) from by ring]
+    have hden_pos : (0 : ℝ) < (k : ℝ) * Cbig + 1 := by
+      nlinarith [hCbig1, hkR]
+    rw [div_le_iff₀ hden_pos]
+    nlinarith [ht0.le,
+      mul_nonneg (mul_nonneg hkR (by linarith : (0:ℝ) ≤ Cbig)) ht0.le]
+  have hinv_tt : (1 / tt) ^ k = ((k : ℝ) * Cbig + 1) ^ k * (1 / t) ^ k := by
+    rw [htt, one_div_div,
+      show ((k : ℝ) * Cbig + 1) / t = ((k : ℝ) * Cbig + 1) * (1 / t) from by ring,
+      mul_pow]
+  have hlow : (k : ℝ) * (Cbig * (1 / tt) ^ k) ≤
+      ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
+    rw [hinv_tt]
+    have h1tk : (0 : ℝ) ≤ (1 / t) ^ k := by positivity
+    have hbase : (0 : ℝ) ≤ ((k : ℝ) * Cbig + 1) ^ k := by positivity
+    nlinarith [mul_nonneg hkR (by linarith : (0:ℝ) ≤ Cbig)]
+  have hXnn : (0 : ℝ) ≤ ΛT ^ 2 * NS ^ 2 := by positivity
+  have hYnn : (0 : ℝ) ≤ ΛS ^ 2 * NT ^ 2 := by positivity
+  have hYsum : ΛS ^ 2 * NT ^ 2 ≤ ΛS ^ 2 * YS :=
+    mul_le_mul_of_nonneg_left hNT_sum (by positivity)
+  have hCfin_nn : (0 : ℝ) ≤ ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
+    positivity
+  calc (k : ℝ) * (Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2))
+      = ((k : ℝ) * (Cbig * tt)) * (ΛT ^ 2 * NS ^ 2)
+          + ((k : ℝ) * (Cbig * (1 / tt) ^ k)) * (ΛS ^ 2 * NT ^ 2) := by ring
+    _ ≤ t * (ΛT ^ 2 * NS ^ 2)
+          + (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k)
+            * (ΛS ^ 2 * NT ^ 2) := by
+        refine add_le_add (mul_le_mul_of_nonneg_right htop hXnn)
+          (mul_le_mul_of_nonneg_right hlow hYnn)
+    _ ≤ t * (ΛT ^ 2 * NS ^ 2)
+          + (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k)
+            * (ΛS ^ 2 * YS) := by
+        exact add_le_add le_rfl (mul_le_mul_of_nonneg_left hYsum hCfin_nn)
+    _ = t * (ΛT ^ 2 * NS ^ 2)
+          + ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k *
+            (ΛS ^ 2 * YS) := by ring
+
 theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
     (g : SmoothRiemannianMetric I M) (s₁ s₂ k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -898,79 +1057,17 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
       have hil : i + l = k := by omega
       have hmi : i < k := hik
       have hml : l < k := by omega
-      have hk_posR : 0 < (k : ℝ) := by positivity
-      set wi : ℝ := (i : ℝ) / k with hwi
-      set wl : ℝ := (l : ℝ) / k with hwl
-      have hi_posR : 0 < (i : ℝ) := by exact_mod_cast hipos
-      have hl_posR : 0 < (l : ℝ) := by exact_mod_cast hl_pos
-      have hwi_pos : 0 < wi := by rw [hwi]; positivity
-      have hwl_pos : 0 < wl := by rw [hwl]; positivity
-      have hwsum : wi + wl = 1 := by
-        rw [hwi, hwl, ← add_div, show (i : ℝ) + l = (k : ℝ) by push_cast [← hil]; ring]
-        exact div_self (ne_of_gt hk_posR)
-      have hwk : wi / wl ≤ (k : ℝ) := by
-        have hwiwl : wi / wl = (i : ℝ) / l := by
-          rw [hwi, hwl]
-          field_simp
-        rw [hwiwl, div_le_iff₀ hl_posR]
-        have h1l : (1 : ℝ) ≤ (l : ℝ) := by exact_mod_cast hl_pos
-        have hik' : (i : ℝ) ≤ (k : ℝ) := le_of_lt (by exact_mod_cast hik)
-        nlinarith
-      set p : ℝ := (k : ℝ) / i with hp
-      set q : ℝ := (k : ℝ) / l with hq
-      have hp_one : 1 < p := by rw [hp, lt_div_iff₀ hi_posR, one_mul]; exact_mod_cast hmi
-      have hpq : p.HolderConjugate q := by
-        rw [Real.holderConjugate_iff]
-        refine ⟨hp_one, ?_⟩
-        rw [hp, hq, inv_div, inv_div, ← add_div,
-          show (i : ℝ) + l = (k : ℝ) by push_cast [← hil]; ring]
-        exact div_self (ne_of_gt hk_posR)
-      have hHolder := real_holder_two_nonneg g (Sj i) (Tj l)
-        (hSj_cont i) (hTj_cont l) (hSj_nn i) (hTj_nn l) hpq
-      have h1p : (1 : ℝ) / p = wi := by rw [hp, one_div_div, hwi]
-      have h1q : (1 : ℝ) / q = wl := by rw [hq, one_div_div, hwl]
-      rw [h1p, h1q] at hHolder
-      have hSe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
-        (I := I) (M := M) g s₁ k hk1).choose_spec.2 S ΛS hΛS hSsup i hipos hmi
-      have hTe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
-        (I := I) (M := M) g s₂ k hk1).choose_spec.2 T ΛT hΛT hTsup l hl_pos hml
-      have hCS_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+      have hk1 : 1 ≤ k := by omega
+      have hCS_def : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
           (I := I) (M := M) g s₁ k hk1).choose = CS := by
         simp only [hCSdef, dif_pos hk1]
-      have hCT_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+      have hCT_def : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
           (I := I) (M := M) g s₂ k hk1).choose = CT := by
         simp only [hCTdef, dif_pos hk1]
-      rw [hCS_m] at hSe
-      rw [hCT_m] at hTe
-      rw [mul_div_assoc 2 (i : ℝ) k, ← hwi] at hSe
-      rw [mul_div_assoc 2 (l : ℝ) k, ← hwl] at hTe
-      rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₁ + k)
-            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S).toFun = NS from by
-          rw [hNSdef]
-          exact (Integral.L2.SmoothCcTensor.norm_def
-            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S)).symm] at hSe
-      rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₂ + k)
-            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T).toFun = NT from by
-          rw [hNTdef]
-          exact (Integral.L2.SmoothCcTensor.norm_def
-            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T)).symm] at hTe
-      set Iφp : ℝ := ∫ x, Sj i x ^ p ∂μ with hIφp
-      set Iψq : ℝ := ∫ x, Tj l x ^ q ∂μ with hIψq
-      have hIφp_nn : 0 ≤ Iφp := by
-        rw [hIφp]; exact integral_nonneg (fun x => Real.rpow_nonneg (hSj_nn i x) _)
-      have hIψq_nn : 0 ≤ Iψq := by
-        rw [hIψq]; exact integral_nonneg (fun x => Real.rpow_nonneg (hTj_nn l x) _)
-      have hys := young_arm_split_scaled wi wl CS CT ΛS ΛT NS NT Iφp Iψq tt k
-        hwi_pos hwl_pos hwsum hwk hCS_nn hCT_nn hΛS hΛT
-        (by rw [hNSdef]; exact norm_nonneg _) (by rw [hNTdef]; exact norm_nonneg _)
-        hIφp_nn hIψq_nn htt0 htt1 hSe hTe
-      have hCSCT_le : CS * CT ≤ Cbig := by rw [hCbig]; linarith
-      have hbase : 0 ≤ tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by positivity
-      calc ∫ x, Sj i x * Tj l x ∂μ
-          ≤ Iφp ^ wi * Iψq ^ wl := hHolder
-        _ ≤ CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := hys
-        _ ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) :=
-            gnProduct_cell_tail CS CT Cbig tt ΛT NS ΛS NT k hCSCT_le hbase
+      simpa [hSj, hTj, hl, hμ] using
+        gnProduct_cell_pos g s₁ s₂ k S T ΛS ΛT CS CT Cbig NS NT tt
+          hk1 hSsup hTsup hΛS hΛT hCS_nn hCT_nn hCS_def hCT_def hCbig hNSdef hNTdef
+          htt0 htt1 i l hipos hl_pos hil hmi hml
   refine ⟨?_, ?_⟩
   · have hcont : Continuous (fun x => ∑ i ∈ Finset.range k, Sj i x * Tj (k - i) x) := by
       refine continuous_finset_sum _ (fun i _ => (hSj_cont i).mul (hTj_cont (k - i)))
@@ -986,47 +1083,9 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
       Finset.sum_le_sum (fun i hi => hcell i (Finset.mem_range.mp hi))
     refine le_trans hsum_le ?_
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_range]
-    have htop : (k : ℝ) * (Cbig * tt) ≤ t := by
-      rw [htt]
-      rw [show (k : ℝ) * (Cbig * (t / ((k : ℝ) * Cbig + 1)))
-          = ((k : ℝ) * Cbig * t) / ((k : ℝ) * Cbig + 1) from by ring]
-      rw [div_le_iff₀ (by linarith : (0 : ℝ) < (k : ℝ) * Cbig + 1)]
-      nlinarith [ht0.le,
-        mul_nonneg (mul_nonneg (Nat.cast_nonneg k : (0:ℝ) ≤ (k:ℝ)) hCbig_nn) ht0.le]
-    have hinv_tt : (1 / tt) ^ k = ((k : ℝ) * Cbig + 1) ^ k * (1 / t) ^ k := by
-      rw [htt, one_div_div,
-        show ((k : ℝ) * Cbig + 1) / t = ((k : ℝ) * Cbig + 1) * (1 / t) from by ring,
-        mul_pow]
-    have hlow : (k : ℝ) * (Cbig * (1 / tt) ^ k) ≤
-        ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
-      rw [hinv_tt]
-      have h1tk : (0 : ℝ) ≤ (1 / t) ^ k := by positivity
-      have hbase : (0 : ℝ) ≤ ((k : ℝ) * Cbig + 1) ^ k := by positivity
-      nlinarith [mul_nonneg (Nat.cast_nonneg k : (0:ℝ) ≤ (k:ℝ)) hCbig_nn]
-    have hXnn : (0 : ℝ) ≤ ΛT ^ 2 * NS ^ 2 := by positivity
-    have hYnn : (0 : ℝ) ≤ ΛS ^ 2 * NT ^ 2 := by positivity
-    have hYsum : ΛS ^ 2 * NT ^ 2 ≤ ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
-        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2 :=
-      mul_le_mul_of_nonneg_left hNT_sum (by positivity)
-    have hCfin_nn : (0 : ℝ) ≤ ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
-      positivity
-    calc (k : ℝ) * (Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2))
-        = ((k : ℝ) * (Cbig * tt)) * (ΛT ^ 2 * NS ^ 2)
-            + ((k : ℝ) * (Cbig * (1 / tt) ^ k)) * (ΛS ^ 2 * NT ^ 2) := by ring
-      _ ≤ t * (ΛT ^ 2 * NS ^ 2)
-            + (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k)
-              * (ΛS ^ 2 * NT ^ 2) := by
-          refine add_le_add (mul_le_mul_of_nonneg_right htop hXnn)
-            (mul_le_mul_of_nonneg_right hlow hYnn)
-      _ ≤ t * (ΛT ^ 2 * NS ^ 2)
-            + (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k)
-              * (ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
-                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by
-          exact add_le_add le_rfl (mul_le_mul_of_nonneg_left hYsum hCfin_nn)
-      _ = t * (ΛT ^ 2 * NS ^ 2)
-            + ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k *
-              (ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
-                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by ring
+    exact antiDiagGrid_topArm_scaled_tail k Cbig tt t ΛS ΛT NS NT
+      (∑ l ∈ Finset.range (k + 1), ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2)
+      hCbig1 ht0 htt hNT_sum
 
 end DifferentialGeometry.Analysis.Sobolev.Tensor
 
