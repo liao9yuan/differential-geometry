@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap

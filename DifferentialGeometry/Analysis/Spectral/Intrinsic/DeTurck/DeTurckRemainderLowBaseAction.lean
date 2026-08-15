@@ -811,7 +811,6 @@ private theorem daContr_trans
   rw [daContr, daTrans, appCc_sub_left, appCc_sub_left,
     daMono_trans, daMono_trans]
 
-set_option maxHeartbeats 3200000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem daMono_eval
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
@@ -904,7 +903,6 @@ private theorem unit_sub
       ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
   rw [hfun, ContinuousMultilinearMap.sub_apply]
 
-set_option maxHeartbeats 3200000 in
 private theorem ricciDA_action
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (hW : ∀ (x : M) (u v : TangentSpace I x),
@@ -2651,7 +2649,6 @@ private def selfTopInt
       rw [Set.uIcc_of_le zero_le_one]
       exact Icc_subset_realizedSmallSet hδ_lt hδ_lt)
     (selfTop_joint (I := I) (M := M) g T hδ hδZ)
-set_option maxHeartbeats 1600000 in
 private theorem refold0_self
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3845,7 +3842,6 @@ theorem c1_eq
 
 end LowBaseInternal
 
-set_option maxHeartbeats 1600000 in
 theorem lowData_split
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -4442,7 +4438,6 @@ private theorem aaKer_eq
       aa5 (I := I) (M := M) g g₁ := by
   rfl
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciAA_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5130,7 +5125,6 @@ private theorem jet3_le_grad2
     ‖iteratedCovGrad (I := I) g r s 1 S‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g r s 2 S‖]
 
-set_option maxHeartbeats 1600000 in
 private theorem app_h3_mul
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -5949,7 +5943,6 @@ private theorem h3p_app_of
       simp only [X]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem connLow_h3_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -6014,7 +6007,6 @@ theorem connLow_h3_rf
     h3p_app_of (I := I) (M := M) g P C hC (happ _ _) hp hi
   simpa only [K, connLowOp, Nat.zero_add, H3Poly, pow_one] using hout.2
 
-set_option maxHeartbeats 1600000 in
 theorem dagLow_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -6084,7 +6076,6 @@ private theorem gradP_hp
       grad_h2_le_h3 (I := I) (M := M) g P
     _ ≤ 1 + lowJetSq (I := I) (M := M) g 3 P := by linarith
 
-set_option maxHeartbeats 1600000 in
 private theorem dagAct_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -6480,7 +6471,6 @@ private lemma slotIterFour_eval
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem curvMono_pair
     (g g₁ : SmoothRiemannianMetric I M)
@@ -6769,7 +6759,6 @@ private theorem curvMono_h2
       simp only [C, fr]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem refold_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6841,7 +6830,6 @@ private theorem refold_h2
       simp only [K]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciDA_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -6927,7 +6915,6 @@ private theorem ricciDA_h2_rf
       (hmono daPermA) (hmono daPermB)
   simpa only [K, ricciDALow, daContr, G, Nat.reduceAdd, H2Poly] using hsub.2
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciDA_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -7165,7 +7152,6 @@ private theorem ricciGood_act_tame
       rw [mul_pow, show (D R) ^ 2 = Z R by
         simpa only [D] using Real.sq_sqrt hZ0]
 
-set_option maxHeartbeats 1600000 in
 private theorem inputSymm_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7225,7 +7211,6 @@ private theorem inputSymm_h2
       simp only [K]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciGood_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -7477,7 +7462,6 @@ private theorem riemLive_h2_rf
       simp only [K]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem lc0Riem_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -7757,7 +7741,6 @@ private theorem mcd_h2_tame
       rw [mul_pow, show (B R) ^ 2 = Z R by
         simpa only [B] using Real.sq_sqrt (hZ R hR)]
 
-set_option maxHeartbeats 1600000 in
 private theorem connLower_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -7817,7 +7800,6 @@ private theorem connLower_h2_rf
   rw [← connLowOp_app (I := I) (M := M) g g₁ P hP htie]
   simpa only [K, Nat.reduceAdd, mul_one] using hApp.2
 
-set_option maxHeartbeats 1600000 in
 private theorem wOmega_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -8021,7 +8003,6 @@ private theorem vbMcd_h2
           (metricConnDiffLoweredCc (I := I) (M := M) g g₁ g)‖ ^ 2 := by
       rw [← Finset.mul_sum]
 
-set_option maxHeartbeats 3200000 in
 private theorem lc0VB_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -8131,7 +8112,6 @@ private theorem lc0VB_h2_rf
   simpa only [lc0VBFormRF, Kvm, Kip, Kinner, Kouter, K,
     Nat.reduceAdd] using hScaled.2
 
-set_option maxHeartbeats 3200000 in
 private theorem lc0VB_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -8318,7 +8298,6 @@ private theorem lc0VB_act_tame
     (Bv R) R A (hBv R hR) hR hA hcoeff hW2
   simpa only [D, mul_assoc] using hraw
 
-set_option maxHeartbeats 6400000 in
 private theorem lc0AMix_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -8498,7 +8477,6 @@ private theorem lc0AMix_h2_rf
   rw [amix_refold_rf (I := I) (M := M) g g₁ g]
   simpa only [lc0AMixFormRF, Ksum, K, Nat.reduceAdd] using hScaled.2
 
-set_option maxHeartbeats 6400000 in
 private theorem lc0AMix_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -9336,7 +9314,6 @@ private theorem lcvPair_h2_low
         (mul_nonneg hCa (mul_nonneg hK2 (by positivity)))
     _ = B R := by rfl
 
-set_option maxHeartbeats 2400000 in
 theorem ricciDAOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9471,7 +9448,6 @@ theorem ricciDAOne_h2
       rw [mul_pow, show B R ^ 2 = L R by
         simpa only [B] using Real.sq_sqrt (hL R hR)]
 
-set_option maxHeartbeats 1600000 in
 private theorem lieRefold2_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9633,7 +9609,6 @@ private theorem lieRefold2_h2
       simp only [C, Z, mul_pow, hsqrt]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciTop_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -10212,7 +10187,6 @@ private theorem lcvOmega_h2_tame
       simp only [D, mul_pow, hsqrt, Z]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvOmega_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10274,7 +10248,6 @@ private theorem lcvOmega_h2_rf
       hR hL
   simpa only [lcvOmega, K, Nat.reduceAdd] using hOut.2
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvQuad_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10366,7 +10339,6 @@ private theorem lcvQuad_h2_rf
   have h123456 := hp_add (I := I) (M := M) g P h12345 h₆
   simpa only [lcvQuad, Kq, K₂, K₃, K₄, K₅, K] using h123456.2
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvQuad_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10529,7 +10501,6 @@ private theorem lcvQuad_h2_tame
       simp only [D, mul_pow, hsqrt]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvR4_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10642,7 +10613,6 @@ private theorem lcvR4_h2_rf
   have hSub := hp_sub (I := I) (M := M) g T hA hQ
   simpa only [lcvR4, gm, K] using hSub.2
 
-set_option maxHeartbeats 1600000 in
 private theorem lcvR4_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10819,7 +10789,6 @@ private theorem edgePair_eq
           ![(-1 : ℝ), -1, 1] s := by
   rfl
 
-set_option maxHeartbeats 1600000 in
 private theorem lieCov_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10933,7 +10902,6 @@ private theorem lieCov_h2_rf
   simpa only [K, fr, gm, Nat.reduceAdd, neg_sq, one_pow, one_mul]
     using hNeg.2
 
-set_option maxHeartbeats 1600000 in
 private theorem lieCov_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11180,7 +11148,6 @@ private theorem selfBase_decomp
       simp only [sub_self, zero_add, add_zero]
       abel
 
-set_option maxHeartbeats 3200000 in
 private theorem rhsSelf_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11443,7 +11410,6 @@ private theorem rhsSelf_act_tame
         Real.sq_sqrt (hK R)
       simp only [D, X, mul_pow, hsqrt]
 
-set_option maxHeartbeats 3200000 in
 private theorem selfInt_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11547,7 +11513,6 @@ private theorem curvC0_act_tame
       rw [mul_pow, show D ^ 2 = K by
         simpa only [D] using Real.sq_sqrt hK]
 
-set_option maxHeartbeats 3200000 in
 private theorem lowC0_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11631,7 +11596,6 @@ private theorem grad_jet2
   rw [h0, h1, h2]
   nlinarith [sq_nonneg ‖W‖]
 
-set_option maxHeartbeats 3200000 in
 private theorem rhsOne_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11792,7 +11756,6 @@ private theorem rhsOne_act_tame
       simp only [D, mul_pow, hCsq]
       ring
 
-set_option maxHeartbeats 3200000 in
 private theorem oneInt_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11854,7 +11817,6 @@ private theorem oneInt_act_tame
   rw [hcomm] at hpath
   simpa only [rhsLow1PathIntegral, S, Φ, W, lowJetSq] using hpath
 
-set_option maxHeartbeats 3200000 in
 private theorem lowA1_act_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -11921,7 +11883,6 @@ private theorem lowA1_act_tame
       simp only [mul_pow, hDsq, K]
       ring
 
-set_option maxHeartbeats 3200000 in
 private theorem rhsSelf_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -12071,7 +12032,6 @@ private theorem rhsSelf_h2_rf
     g T hT hδ_lt hδ hδZ hs]
   simpa only [gm, P, Krs, K₂, K₃, K₄, K] using h12345.2
 
-set_option maxHeartbeats 3200000 in
 private theorem selfInt_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -12119,7 +12079,6 @@ private theorem selfInt_h2_rf
   rw [hsX] at hpath
   simpa only [selfLowInt, lowJetSq, X] using hpath
 
-set_option maxHeartbeats 3200000 in
 private theorem lowC0_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -12370,7 +12329,6 @@ private theorem ricci1_split
   intro x
   rfl
 
-set_option maxHeartbeats 1600000 in
 private theorem ricciKer_h2_rf
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -12886,7 +12844,6 @@ private theorem lieOne_h2_rf
       (Z7 + Z8 - Z9 - Z10 - Z11 - Z12) + Z13)
   simpa only [K] using hAll
 
-set_option maxHeartbeats 3200000 in
 private theorem rhsOne_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -12985,7 +12942,6 @@ private theorem rhsOne_h2_rf
   simpa only [rhsLow1Coeff, linearizedRicciConnDiffOrder1Coeff,
     gm, Krs, K] using hout.2
 
-set_option maxHeartbeats 3200000 in
 private theorem oneInt_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -13034,7 +12990,6 @@ private theorem oneInt_h2_rf
   rw [hsX] at hpath
   simpa only [rhsLow1PathIntegral, lowJetSq, X] using hpath
 
-set_option maxHeartbeats 3200000 in
 private theorem lowC1_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
