@@ -850,42 +850,42 @@ private theorem daMono_eval
   refine Finset.sum_congr rfl fun a _ => ?_
   refine Finset.sum_congr rfl fun b _ => ?_
   congr 1
-  rw [show Tensor0SSpace.toModel
-        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+  · rw [show Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (appCc (I := I) (M := M) g 2 2
+              (slotInsertEndoCc (I := I) (M := M) g 1
+                (fullRaisedEndoField (I := I) (M := M) g gm)) W).toSection x)
+            (unitTensor (I := I) (M := M) x))
+          ![smoothOrthoFrame (I := I) g x a x,
+            smoothOrthoFrame (I := I) g x b x] =
+        unitModel (I := I) (M := M) g 2
           (appCc (I := I) (M := M) g 2 2
             (slotInsertEndoCc (I := I) (M := M) g 1
-              (fullRaisedEndoField (I := I) (M := M) g gm)) W).toSection x)
-          (unitTensor (I := I) (M := M) x))
-        ![smoothOrthoFrame (I := I) g x a x,
-          smoothOrthoFrame (I := I) g x b x] =
-      unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2
-          (slotInsertEndoCc (I := I) (M := M) g 1
-            (fullRaisedEndoField (I := I) (M := M) g gm)) W) x
-        ![smoothOrthoFrame (I := I) g x a x,
-          smoothOrthoFrame (I := I) g x b x] from rfl]
-  rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
-    slotInsertEndoCc_toSection, slotInsertEndoFib_apply_eval]
-  have hv :
-      Function.update
+              (fullRaisedEndoField (I := I) (M := M) g gm)) W) x
           ![smoothOrthoFrame (I := I) g x a x,
-            smoothOrthoFrame (I := I) g x b x]
-          0
-          (fullRaisedEndoField (I := I) (M := M) g gm x
-            (![smoothOrthoFrame (I := I) g x a x,
-              smoothOrthoFrame (I := I) g x b x] 0)) =
-        ![fullRaisedEndoField (I := I) (M := M) g gm x
-            (smoothOrthoFrame (I := I) g x a x),
-          smoothOrthoFrame (I := I) g x b x] := by
+            smoothOrthoFrame (I := I) g x b x] from rfl]
+    rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
+      slotInsertEndoCc_toSection, slotInsertEndoFib_apply_eval]
+    have hv :
+        Function.update
+            ![smoothOrthoFrame (I := I) g x a x,
+              smoothOrthoFrame (I := I) g x b x]
+            0
+            (fullRaisedEndoField (I := I) (M := M) g gm x
+              (![smoothOrthoFrame (I := I) g x a x,
+                smoothOrthoFrame (I := I) g x b x] 0)) =
+          ![fullRaisedEndoField (I := I) (M := M) g gm x
+              (smoothOrthoFrame (I := I) g x a x),
+            smoothOrthoFrame (I := I) g x b x] := by
+      funext i
+      fin_cases i <;> simp
+    rw [hv]
+    rfl
+  · congr 1
     funext i
-    fin_cases i <;> simp
-  rw [hv]
-  rfl
-  congr 1
-  funext i
-  congr 1
-  funext j
-  fin_cases j <;> rfl
+    congr 1
+    funext j
+    fin_cases j <;> rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
