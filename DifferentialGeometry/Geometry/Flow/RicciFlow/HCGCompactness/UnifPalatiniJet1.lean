@@ -6,7 +6,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -125,6 +124,154 @@ def palatiniOneC (Λ : ℝ) : ℝ :=
   2 * (3 / 2 * Λ ^ 5 * Λ + 9 / 2 * Λ ^ 6 * Λ * Λ + 3 * Λ ^ 7 * Λ ^ 3) +
     4 * (3 / 2 * Λ ^ 3 * Λ) * (3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2))
 
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_aux_p
+    (C₀ C₁ a b d x y z : ℝ)
+    (hC₁0 : 0 ≤ C₁)
+    (hd : 0 ≤ d) (hx : 0 ≤ x)
+    (h1 : a ≤ C₁ * d * x * b)
+    (h2 : b ≤ C₀ * y * z) :
+    a ≤ C₀ * C₁ * (d * x * y * z) := by
+  have hmul := mul_le_mul_of_nonneg_left h2 (by positivity : 0 ≤ C₁ * d * x)
+  calc
+    a ≤ C₁ * d * x * b := h1
+    _ ≤ C₁ * d * x * (C₀ * y * z) := hmul
+    _ = C₀ * C₁ * (d * x * y * z) := by ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_aux_r
+    (C₀ C₁ a b d x y z : ℝ)
+    (hC₁0 : 0 ≤ C₁)
+    (hd : 0 ≤ d) (hx : 0 ≤ x)
+    (h1 : a ≤ C₁ * d * x * b)
+    (h2 : b ≤ C₀ * y * z) :
+    a ≤ C₀ * C₁ * (d * y * x * z) := by
+  have hmul := mul_le_mul_of_nonneg_left h2 (by positivity : 0 ≤ C₁ * d * x)
+  calc
+    a ≤ C₁ * d * x * b := h1
+    _ ≤ C₁ * d * x * (C₀ * y * z) := hmul
+    _ = C₀ * C₁ * (d * y * x * z) := by ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_aux_q
+    (C₀ C₁ a b d x y z : ℝ)
+    (hC₀0 : 0 ≤ C₀) (hx : 0 ≤ x)
+    (h1 : a ≤ C₀ * b * x)
+    (h2 : b ≤ C₁ * d * y * z) :
+    a ≤ C₀ * C₁ * (d * x * y * z) := by
+  have hmul := mul_le_mul_of_nonneg_left h2 (by positivity : 0 ≤ C₀ * x)
+  calc
+    a ≤ C₀ * b * x := h1
+    _ ≤ C₀ * x * (C₁ * d * y * z) := by
+      simpa [mul_assoc, mul_left_comm, mul_comm] using hmul
+    _ = C₀ * C₁ * (d * x * y * z) := by ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_aux_s
+    (C₀ C₁ a b d x y z : ℝ)
+    (hC₀0 : 0 ≤ C₀) (hy : 0 ≤ y)
+    (h1 : a ≤ C₀ * b * y)
+    (h2 : b ≤ C₁ * d * x * z) :
+    a ≤ C₀ * C₁ * (d * x * y * z) := by
+  have hmul := mul_le_mul_of_nonneg_left h2 (by positivity : 0 ≤ C₀ * y)
+  calc
+    a ≤ C₀ * b * y := h1
+    _ ≤ C₀ * y * (C₁ * d * x * z) := by
+      simpa [mul_assoc, mul_left_comm, mul_comm] using hmul
+    _ = C₀ * C₁ * (d * x * y * z) := by ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_P1
+    (gBase g₀ : SmoothRiemannianMetric I M) {x : M}
+    (L : TangentSpace I x → ℝ) (D X : TangentSpace I x)
+    (Ds Xs AYZs : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (P : TangentSpace I x) (C₁ : ℝ)
+    (hL : ∀ v, L v = Real.sqrt (gBase.inner x v v))
+    (hP : P = covDerivConnDiff (I := I) gBase g₀ Ds Xs AYZs x)
+    (hD : Ds x = D) (hX : Xs x = X)
+    (h : Real.sqrt (gBase.inner x (covDerivConnDiff (I := I) gBase g₀ Ds Xs AYZs x)
+          (covDerivConnDiff (I := I) gBase g₀ Ds Xs AYZs x)) ≤
+        C₁ * Real.sqrt (gBase.inner x (Ds x) (Ds x)) *
+          Real.sqrt (gBase.inner x (Xs x) (Xs x)) *
+          Real.sqrt (gBase.inner x (AYZs x) (AYZs x))) :
+    L P ≤ C₁ * L D * L X * L (AYZs x) := by
+  rw [hL P, hL D, hL X, hL (AYZs x)]
+  simpa [hP, hD, hX] using h
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_R1
+    (gBase g₀ : SmoothRiemannianMetric I M) {x : M}
+    (L : TangentSpace I x → ℝ) (D Y : TangentSpace I x)
+    (Ds Ys AXZs : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (R : TangentSpace I x) (C₁ : ℝ)
+    (hL : ∀ v, L v = Real.sqrt (gBase.inner x v v))
+    (hR : R = covDerivConnDiff (I := I) gBase g₀ Ds Ys AXZs x)
+    (hD : Ds x = D) (hY : Ys x = Y)
+    (h : Real.sqrt (gBase.inner x (covDerivConnDiff (I := I) gBase g₀ Ds Ys AXZs x)
+          (covDerivConnDiff (I := I) gBase g₀ Ds Ys AXZs x)) ≤
+        C₁ * Real.sqrt (gBase.inner x (Ds x) (Ds x)) *
+          Real.sqrt (gBase.inner x (Ys x) (Ys x)) *
+          Real.sqrt (gBase.inner x (AXZs x) (AXZs x))) :
+    L R ≤ C₁ * L D * L Y * L (AXZs x) := by
+  rw [hL R, hL D, hL Y, hL (AXZs x)]
+  simpa [hR, hD, hY] using h
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma palatini_conn_tail
+    (gBase : SmoothRiemannianMetric I M) {x : M}
+    (L : TangentSpace I x → ℝ)
+    (A B P Q R S : TangentSpace I x)
+    (C₂ C₀ C₁ prod : ℝ)
+    (hL : ∀ v, L v = Real.sqrt (gBase.inner x v v))
+    (hA : L A ≤ C₂ * prod) (hB : L B ≤ C₂ * prod)
+    (hP : L P ≤ C₀ * C₁ * prod) (hQ : L Q ≤ C₀ * C₁ * prod)
+    (hR : L R ≤ C₀ * C₁ * prod) (hS : L S ≤ C₀ * C₁ * prod) :
+    Real.sqrt (gBase.inner x ((A - B) + ((P + Q) - (R + S)))
+      ((A - B) + ((P + Q) - (R + S)))) ≤
+      (2 * C₂ + 4 * C₀ * C₁) * prod := by
+  have hsub : ∀ u v : TangentSpace I x, L (u - v) ≤ L u + L v := by
+    intro u v
+    rw [hL (u - v), hL u, hL v]
+    have hneg : Real.sqrt (gBase.inner x (-v) (-v)) = Real.sqrt (gBase.inner x v v) := by
+      simpa only [neg_one_smul, abs_neg, abs_one, one_mul] using
+        Geometry.Riemannian.sqrt_inner_smul (I := I) gBase x (-1 : ℝ) v
+    calc
+      Real.sqrt (gBase.inner x (u - v) (u - v))
+          = Real.sqrt (gBase.inner x (u + -v) (u + -v)) := by rw [sub_eq_add_neg]
+      _ ≤ Real.sqrt (gBase.inner x u u) + Real.sqrt (gBase.inner x (-v) (-v)) :=
+        Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x u (-v)
+      _ = Real.sqrt (gBase.inner x u u) + Real.sqrt (gBase.inner x v v) := by rw [hneg]
+  have hleft : L (A - B) ≤ L A + L B := hsub A B
+  have hpq : L (P + Q) ≤ L P + L Q := by
+    rw [hL (P + Q), hL P, hL Q]
+    exact Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x P Q
+  have hrs : L (R + S) ≤ L R + L S := by
+    rw [hL (R + S), hL R, hL S]
+    exact Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x R S
+  have hright : L ((P + Q) - (R + S)) ≤ (L P + L Q) + (L R + L S) :=
+    le_trans (hsub (P + Q) (R + S)) (add_le_add hpq hrs)
+  calc
+    Real.sqrt (gBase.inner x ((A - B) + ((P + Q) - (R + S)))
+        ((A - B) + ((P + Q) - (R + S)))) = L ((A - B) + ((P + Q) - (R + S))) := by
+      rw [hL ((A - B) + ((P + Q) - (R + S)))]
+    _ ≤ L (A - B) + L ((P + Q) - (R + S)) := by
+      rw [hL ((A - B) + ((P + Q) - (R + S))), hL (A - B), hL ((P + Q) - (R + S))]
+      exact Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x (A - B) ((P + Q) - (R + S))
+    _ ≤ (L A + L B) + ((L P + L Q) + (L R + L S)) := by
+      exact add_le_add hleft hright
+    _ ≤ (C₂ * prod + C₂ * prod) +
+        ((C₀ * C₁ * prod + C₀ * C₁ * prod) +
+          (C₀ * C₁ * prod + C₀ * C₁ * prod)) := by
+      gcongr
+    _ = (2 * C₂ + 4 * C₀ * C₁) * prod := by ring
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem unifPalatini1_le
@@ -269,26 +416,6 @@ theorem unifPalatini1_le
   have hCdxz : L (Cdxzs x) ≤ C₁ * L D * L X * L Z := by
     have h := hC₁ x D X Z
     simpa [Cdxzs, Ds, Xs, Zs, L] using h
-  have hP : L P ≤ C₀ * C₁ * prod4 := by
-    have heq :
-        covDerivConnDiff (I := I) gBase g₀ Ds Xs AYZs x =
-          covDerivConnDiff (I := I) gBase g₀
-            (smoothExtensionTangent (I := I) x (Ds x))
-            (smoothExtensionTangent (I := I) x (Xs x))
-            (smoothExtensionTangent (I := I) x (AYZs x)) x := by
-      simpa [extSec] using covD_eq_ext (I := I) gBase g₀ Ds Xs AYZs x
-    have h := hC₁ x (Ds x) (Xs x) (AYZs x)
-    rw [← heq] at h
-    have hcoef : 0 ≤ C₁ * L D * L X := by
-      exact mul_nonneg (mul_nonneg hC₁0 (Real.sqrt_nonneg _))
-        (Real.sqrt_nonneg _)
-    have hmul := mul_le_mul_of_nonneg_left hAYZ hcoef
-    calc
-      L P ≤ C₁ * L D * L X * L (AYZs x) := by
-        simpa [P, Ds, Xs, L] using h
-      _ ≤ (C₁ * L D * L X) * (C₀ * L Y * L Z) := by
-        simpa [mul_assoc] using hmul
-      _ = C₀ * C₁ * prod4 := by ring
   have hR : L R ≤ C₀ * C₁ * prod4 := by
     have heq :
         covDerivConnDiff (I := I) gBase g₀ Ds Ys AXZs x =
@@ -299,76 +426,58 @@ theorem unifPalatini1_le
       simpa [extSec] using covD_eq_ext (I := I) gBase g₀ Ds Ys AXZs x
     have h := hC₁ x (Ds x) (Ys x) (AXZs x)
     rw [← heq] at h
-    have hcoef : 0 ≤ C₁ * L D * L Y := by
-      exact mul_nonneg (mul_nonneg hC₁0 (Real.sqrt_nonneg _))
-        (Real.sqrt_nonneg _)
-    have hmul := mul_le_mul_of_nonneg_left hAXZ hcoef
-    calc
-      L R ≤ C₁ * L D * L Y * L (AXZs x) := by
-        simpa [R, Ds, Ys, L] using h
-      _ ≤ (C₁ * L D * L Y) * (C₀ * L X * L Z) := by
-        simpa [mul_assoc] using hmul
-      _ = C₀ * C₁ * prod4 := by ring
+    have hR1 : L R ≤ C₁ * L D * L Y * L (AXZs x) :=
+      palatini_R1 gBase g₀ L D Y Ds Ys AXZs R C₁
+        (fun _ => rfl) rfl (by simp [Ds]) (by simp [Ys]) h
+    exact palatini_aux_r C₀ C₁ (L R) (L (AXZs x)) (L D) (L Y) (L X) (L Z)
+      hC₁0 (Real.sqrt_nonneg _) (Real.sqrt_nonneg _) hR1 hAXZ
+  have hP : L P ≤ C₀ * C₁ * prod4 := by
+    have heq :
+        covDerivConnDiff (I := I) gBase g₀ Ds Xs AYZs x =
+          covDerivConnDiff (I := I) gBase g₀
+            (smoothExtensionTangent (I := I) x (Ds x))
+            (smoothExtensionTangent (I := I) x (Xs x))
+            (smoothExtensionTangent (I := I) x (AYZs x)) x := by
+      simpa [extSec] using covD_eq_ext (I := I) gBase g₀ Ds Xs AYZs x
+    have h := hC₁ x (Ds x) (Xs x) (AYZs x)
+    rw [← heq] at h
+    have hP1 : L P ≤ C₁ * L D * L X * L (AYZs x) :=
+      palatini_P1 gBase g₀ L D X Ds Xs AYZs P C₁
+        (fun _ => rfl) rfl (by simp [Ds]) (by simp [Xs]) h
+    exact palatini_aux_p C₀ C₁ (L P) (L (AYZs x)) (L D) (L X) (L Y) (L Z)
+      hC₁0 (Real.sqrt_nonneg _) (Real.sqrt_nonneg _) hP1 hAYZ
   have hQ : L Q ≤ C₀ * C₁ * prod4 := by
     have h := hC₀ x (Cdyzs x) (Xs x)
-    have hcoef : 0 ≤ C₀ * L X := by
-      exact mul_nonneg hC₀0 (Real.sqrt_nonneg _)
-    have hmul := mul_le_mul_of_nonneg_left hCdyz hcoef
-    calc
-      L Q ≤ C₀ * L (Cdyzs x) * L X := by
-        simpa [Q, Cdyzs, Xs, L, DifferentialGeometry.PDE.DeTurck.connDiff,
-          diffSec] using h
-      _ ≤ (C₀ * L X) * (C₁ * L D * L Y * L Z) := by
-        simpa [mul_assoc, mul_left_comm, mul_comm] using hmul
-      _ = C₀ * C₁ * prod4 := by ring
+    exact palatini_aux_q C₀ C₁ (L Q) (L (Cdyzs x)) (L D) (L X) (L Y) (L Z)
+      hC₀0 (Real.sqrt_nonneg _)
+      (by simpa [Q, Cdyzs, Xs, L, DifferentialGeometry.PDE.DeTurck.connDiff,
+        diffSec] using h)
+      hCdyz
   have hS : L S ≤ C₀ * C₁ * prod4 := by
     have h := hC₀ x (Cdxzs x) (Ys x)
-    have hcoef : 0 ≤ C₀ * L Y := by
-      exact mul_nonneg hC₀0 (Real.sqrt_nonneg _)
-    have hmul := mul_le_mul_of_nonneg_left hCdxz hcoef
-    calc
-      L S ≤ C₀ * L (Cdxzs x) * L Y := by
-        simpa [S, Cdxzs, Ys, L, DifferentialGeometry.PDE.DeTurck.connDiff,
-          diffSec] using h
-      _ ≤ (C₀ * L Y) * (C₁ * L D * L X * L Z) := by
-        simpa [mul_assoc, mul_left_comm, mul_comm] using hmul
-      _ = C₀ * C₁ * prod4 := by ring
-  have hneg : ∀ v : TangentSpace I x, L (-v) = L v := by
-    intro v
-    simpa only [L, neg_one_smul, abs_neg, abs_one, one_mul] using
-      Geometry.Riemannian.sqrt_inner_smul (I := I) gBase x (-1 : ℝ) v
-  have hsub : ∀ u v : TangentSpace I x, L (u - v) ≤ L u + L v := by
-    intro u v
-    calc
-      L (u - v) = L (u + -v) := by rw [sub_eq_add_neg]
-      _ ≤ L u + L (-v) :=
-        Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x u (-v)
-      _ = L u + L v := by rw [hneg]
-  have hleft : L (A₂xy - A₂yx) ≤ L A₂xy + L A₂yx := hsub _ _
-  have hpq : L (P + Q) ≤ L P + L Q :=
-    Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x P Q
-  have hrs : L (R + S) ≤ L R + L S :=
-    Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x R S
-  have hright : L ((P + Q) - (R + S)) ≤ (L P + L Q) + (L R + L S) :=
-    le_trans (hsub _ _) (add_le_add hpq hrs)
+    exact palatini_aux_s C₀ C₁ (L S) (L (Cdxzs x)) (L D) (L X) (L Y) (L Z)
+      hC₀0 (Real.sqrt_nonneg _)
+      (by simpa [S, Cdxzs, Ys, L, DifferentialGeometry.PDE.DeTurck.connDiff,
+        diffSec] using h)
+      hCdxz
+  have hcore :
+      Real.sqrt (gBase.inner x
+        ((A₂xy - A₂yx) + ((P + Q) - (R + S)))
+        ((A₂xy - A₂yx) + ((P + Q) - (R + S)))) ≤
+        (2 * C₂ + 4 * C₀ * C₁) * prod4 :=
+    palatini_conn_tail gBase L A₂xy A₂yx P Q R S C₂ C₀ C₁ prod4
+      (fun _ => rfl) hA₂xy hA₂yx hP hQ hR hS
   calc
     Real.sqrt (gBase.inner x
         (palatiniJet1At (I := I) gBase g₀ x D X Y Z)
         (palatiniJet1At (I := I) gBase g₀ x D X Y Z)) =
-        L ((A₂xy - A₂yx) + ((P + Q) - (R + S))) := by
+        Real.sqrt (gBase.inner x
+          ((A₂xy - A₂yx) + ((P + Q) - (R + S)))
+          ((A₂xy - A₂yx) + ((P + Q) - (R + S)))) := by
           rw [hsplit]
           congr 1
           abel_nf
-    _ ≤ L (A₂xy - A₂yx) + L ((P + Q) - (R + S)) :=
-      Geometry.Riemannian.sqrt_inner_add_le (I := I) gBase x _ _
-    _ ≤ (L A₂xy + L A₂yx) + ((L P + L Q) + (L R + L S)) :=
-      add_le_add hleft hright
-    _ ≤ (C₂ * prod4 + C₂ * prod4) +
-        ((C₀ * C₁ * prod4 + C₀ * C₁ * prod4) +
-          (C₀ * C₁ * prod4 + C₀ * C₁ * prod4)) :=
-      add_le_add (add_le_add hA₂xy hA₂yx)
-        (add_le_add (add_le_add hP hQ) (add_le_add hR hS))
-    _ = (2 * C₂ + 4 * C₀ * C₁) * prod4 := by ring
+    _ ≤ (2 * C₂ + 4 * C₀ * C₁) * prod4 := hcore
     _ = (2 * C₂ + 4 * C₀ * C₁) *
         Real.sqrt (gBase.inner x D D) *
         Real.sqrt (gBase.inner x X X) *
@@ -381,7 +490,6 @@ theorem unifPalatini1_le
         Real.sqrt (gBase.inner x Y Y) *
         Real.sqrt (gBase.inner x Z Z) := by
       dsimp [palatiniOneC, C₀, C₁, C₂]
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem unifPalatini1
