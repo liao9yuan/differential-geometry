@@ -1003,7 +1003,8 @@ theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
               refine mul_le_mul_of_nonneg_left ?_ (by positivity)
               rw [Finset.mul_sum, Finset.sum_mul]
               refine Finset.sum_le_sum fun l hl => ?_
-              have hc0nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 := by positivity
+              have hc0nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 :=
+                mul_nonneg (sq_nonneg _) (sq_nonneg _)
               have hCADl := hCAd_nn l
               have hcbgl := hcbg_nn l
               have hml := hm3 l hl
