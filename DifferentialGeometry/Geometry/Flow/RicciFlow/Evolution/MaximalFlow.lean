@@ -54,6 +54,7 @@ theorem flow_to_seed (g0 : SmoothRiemannianMetric I M) :
   · simpa [S] using hjoint
   · simpa [S] using hpde
 
+omit [SigmaCompactSpace M] in
 theorem flow_to_agree
     {g0 : SmoothRiemannianMetric I M} {T U : Real}
     (P : FlowTo (I := I) (M := M) g0 T)
@@ -80,6 +81,7 @@ theorem flow_to_agree
     exact Q.pde t ⟨ht.1, lt_of_lt_of_le ht.2 (min_le_right T U)⟩ x v w
   · exact P.start.trans Q.start.symm
 
+omit [SigmaCompactSpace M] in
 theorem flow_to_eq
     {g0 : SmoothRiemannianMetric I M} {T U t : Real}
     (P : FlowTo (I := I) (M := M) g0 T)

@@ -84,6 +84,7 @@ theorem connSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     hPDE₁ hgamma v
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [CompactSpace M] in
 theorem rmSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Svec : Real → (y : M) →
       TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y →L[Real]

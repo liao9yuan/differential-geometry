@@ -280,6 +280,7 @@ theorem chartFlow_contDiff (g : SmoothRiemannianMetric I M) {p : M}
     ContDiffOn Real ∞ Z (Set.Ioo a b) :=
   contDiffOn_of_right hab (chartPhase_contDiff (I := I) g c) hZcont hZright
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartFlow_geoOn (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}

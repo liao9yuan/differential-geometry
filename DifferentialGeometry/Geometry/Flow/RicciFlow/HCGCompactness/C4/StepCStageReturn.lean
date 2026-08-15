@@ -46,6 +46,7 @@ private theorem legacy_restrict_eq
       (normalExpPD (I := I) Y x).target := by
   rfl
 
+omit [CompleteSpace E] in
 theorem liveCenters_radial
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

@@ -224,6 +224,7 @@ variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_chartBiflow
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]

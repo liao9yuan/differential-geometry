@@ -598,6 +598,7 @@ private theorem raised_cancel_lr
     (g0FlatCLM (I := I) b x v)]
   rw [inverseMetricSharpFib_g0FlatCLM (I := I) b x v]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 private theorem raised_sub_factor
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -705,6 +706,7 @@ private theorem endoSlotZero_sub_c2
   exact slotInsertEndoCc_sub (I := I) (M := M) g s A B
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem invSlot_factor
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -759,6 +761,7 @@ private theorem invSlot_factor
     slotInsertEndoFib_smul_left, neg_one_smul]
   rw [ContinuousLinearMap.comp_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem invSlot_sub_factor
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)

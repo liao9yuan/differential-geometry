@@ -172,6 +172,7 @@ theorem lift0_unit
   simpa only [lift0, MixedSection.toMultilinearSection,
     unitTensor, Tensor0SSpace.ofModel] using h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slot24_joint
     (g : SmoothRiemannianMetric I M) {S : Set ℝ}
     {K : ℝ → SmoothCcTensor g 0 4}
@@ -860,6 +861,7 @@ theorem lieArm_joint
   have hout := c0j_app (I := I) (M := M) g hp hi
   simpa only [S, arm2_eq_ins] using hout
 
+omit [BoundarylessManifold I M] in
 theorem revSlot_path
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -907,6 +909,7 @@ theorem revSlot_path
       _ = _ := add_comm _ _
   rw [hfull, slotInsertEndoCc_add, slotInsertEndoCc_smul]
 
+omit [BoundarylessManifold I M] in
 theorem revSlot_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -972,6 +975,7 @@ theorem omegaOne_joint
   have hout := c0j_app (I := I) (M := M) g hins hinner
   simpa only [S, omegaOne] using hout
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem omega_one
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -1113,6 +1117,7 @@ theorem quadOp_joint
           (c0j_add (I := I) (M := M) g h₀ hqb) h₂) h₃) h₄) h₅
   simpa only [S, quadOp] using hout
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quad_op
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -1306,6 +1311,7 @@ noncomputable def quadMid
       (quadOp (I := I) (M := M) g gm))
     (prod23 (I := I) (M := M) g T)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem quad_mid
     (g gm : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g 0 3) (W : SmoothCcTensor g 0 2) :
@@ -1526,6 +1532,7 @@ theorem prod23Smul
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem innerOneSmul
     (g : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1536,6 +1543,7 @@ theorem innerOneSmul
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem innerActSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1544,6 +1552,7 @@ theorem innerActSmul
   rw [innerAct, innerOneSmul, appRSSmulLeft]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaMidOneSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2)
@@ -1552,6 +1561,7 @@ theorem aaMidOneSmul
       a • aaMidOne (I := I) (M := M) g gm W mid out := by
   simp only [aaMidOne, innerActSmul, appCcRS_smul_right]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaBareOneSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) (out : Equiv.Perm (Fin 4)) :
@@ -1559,6 +1569,7 @@ theorem aaBareOneSmul
       a • aaBareOne (I := I) (M := M) g gm W out := by
   simp only [aaBareOne, innerActSmul, appCcRS_smul_right]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaKerOneSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1567,6 +1578,7 @@ theorem aaKerOneSmul
   simp only [aaKerOne, aaMidOneSmul, aaBareOneSmul]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aaOneSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1648,6 +1660,7 @@ theorem vbOneSmul
   simp only [vbOne, vbCoreSmul]
   module
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem amixHalfSmul
     (g gm gB : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
@@ -1656,6 +1669,7 @@ theorem amixHalfSmul
   simp only [amixHalfOne, prod23Smul, appRSSmulLeft,
     appCcRS_smul_right]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem amixOneSmul
     (g gm gB : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1664,6 +1678,7 @@ theorem amixOneSmul
   simp only [amixOne, amixHalfSmul]
   module
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem quadMidSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1674,6 +1689,7 @@ theorem quadMidSmul
   rw [appCcRS_smul_right]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem quadActSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
@@ -1702,6 +1718,7 @@ theorem quadAct_joint
   simpa only [S, quadAct] using
     c0j_app (I := I) (M := M) g hpair hσ
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quad_act
     (g gm : SmoothRiemannianMetric I M)
     (P W : SmoothCcTensor g 0 2)

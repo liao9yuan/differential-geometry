@@ -191,6 +191,7 @@ private theorem drift02_sub_left
   rw [sub_add_cancel] at h
   exact eq_sub_of_add_eq h.symm
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem lowerTri_split
     (q₁ q₂ : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A₁ A₂ : TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -209,6 +210,7 @@ theorem lowerTri_split
   ring
 
 
+omit [SigmaCompactSpace M] in
 theorem lowerRm_eq_rm04 (g : SmoothRiemannianMetric I M) (x : M) :
     lowerTri (I := I) (metricTensorField (I := I) g x)
         (riemannOp (metricCov (I := I) g) x) =
@@ -227,6 +229,7 @@ def ricciDrift04 (g : SmoothRiemannianMetric I M) (x : M) :
     (lowerTri (I := I) (metricRicciAt (I := I) g x)
       (riemannOp (metricCov (I := I) g) x))
 
+omit [SigmaCompactSpace M] in
 theorem ricciDrift_sub (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     ricciDrift04 (I := I) g₁ x - ricciDrift04 (I := I) g₂ x =
       driftSlots (I := I)
@@ -243,6 +246,7 @@ variable [NeZero (Module.finrank Real E)]
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciDriftSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 4
         (ricciDrift04 (I := I) g₁ x - ricciDrift04 (I := I) g₂ x) ≤
@@ -355,6 +359,7 @@ private theorem rm04_pair (g : SmoothRiemannianMetric I M) (x : M)
   exact riemannOp_inner_pair_symm (I := I) g x A B C D
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem ricciLow_comp
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -421,6 +426,7 @@ private theorem ricciLow_comp
             rw [Finset.sum_mul]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciDrift_comp
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -500,6 +506,7 @@ theorem ricciDrift_comp
   ring
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciDrift_low
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))

@@ -63,6 +63,7 @@ end SlabSup
 
 section RicciField
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem ricciSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     normSq0S (I := I) (g₁ t) x 2
         (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x) ≤
@@ -222,6 +223,7 @@ theorem sdecFluxSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
       4 * (Module.finrank Real E : Real) ^ 10 := by ring
   nlinarith [hfirst, hsecond, hcd, hpow10]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem fluxSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Rm2 P : Real → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -868,6 +870,7 @@ theorem movingReactAbs_le {s : Nat} {x : M} {t : Real}
   rw [hcard, hcard1, hNW2, show 2 * s + 2 = s * 2 + 2 from by ring, pow_add, pow_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem reactSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M) {Λric : Real}
     (hpde : ∀ t ∈ Ioo a c, ∀ (x : M) (X Y : TangentSpace I x),
       HasDerivAt (fun r : Real => (g₁ r).inner x X Y)

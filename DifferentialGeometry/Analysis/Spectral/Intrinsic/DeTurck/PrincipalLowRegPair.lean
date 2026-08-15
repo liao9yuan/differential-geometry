@@ -464,6 +464,7 @@ private theorem pcoeff1_bound
       dsimp only [C, A, B]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem pcoeff_add
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     perturbCoeff4 (I := I) (M := M) g (T + U) =

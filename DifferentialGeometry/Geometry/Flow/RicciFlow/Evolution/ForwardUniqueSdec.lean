@@ -27,6 +27,7 @@ section Algebra
 
 variable {s : ℕ}
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem fieldSub_eval
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -35,6 +36,7 @@ private theorem fieldSub_eval
   rw [h]
   exact Tensor0SSpace.sub_apply (I := I) s x _ _ v
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem fieldAdd_eval
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -43,6 +45,7 @@ private theorem fieldAdd_eval
   rw [h]
   exact Tensor0SSpace.add_apply (I := I) s x _ _ v
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem metField0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then u else Z) =
@@ -53,6 +56,7 @@ end Algebra
 
 section KeyIdentity
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem nabla1_metric2 (g₁ g₂ : SmoothRiemannianMetric I M) :
     metricNabla0S (I := I) g₁ (metricTensorField (I := I) g₂) =
       lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂) := by
@@ -65,6 +69,7 @@ section Fiber
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem inner_raiseAt (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) (a : Idx -> Real) (m : Idx) :
     g.inner x (raiseAt (I := I) g x basis a) (basis m) = a m := by
@@ -100,6 +105,7 @@ theorem inner_raiseAt (g : SmoothRiemannianMetric I M) (x : M)
   rw [Finset.sum_congr rfl fun l (_ : l ∈ Finset.univ) => hrow l]
   simp
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem inner_sharpFlat (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (V W : TangentSpace I x) :
     g₁.inner x V (sharpFlat (I := I) g₂ g₁ x W) = g₂.inner x V W := by
@@ -119,6 +125,7 @@ theorem inner_sharpFlat (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     _ = g₂.inner x V W := g₂.symm x W V
 
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem rm04mix_inner (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     CovariantDerivative.riemannCurvature04At (I := I) g₁ (metricCov (I := I) g₂)
@@ -141,6 +148,7 @@ def lowOfComp (g : SmoothRiemannianMetric I M) {x : M}
       (fun i j k l => b.repr (raiseAt (I := I) g x b (fun m : Idx => c i j k m)) l))
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem lowOfComp_eval (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) (i j k l : Idx) :
@@ -168,6 +176,7 @@ def gapAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
       (metricCov_smooth (I := I) g₂) x
 
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem rmDiffLow_split (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 4 -> TangentSpace I x) :
     rmDiffLowAt (I := I) g₁ g₂ x v =
@@ -196,7 +205,9 @@ section Deriv
 variable {x : M}
 
 
-theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
+omit [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+theorem vec3_deriv_basis {Idx : Type*} [Finite Idx]
     (F : Real -> (TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x))
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -208,6 +219,7 @@ theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
     (X Y Z : TangentSpace I x) :
     HasDerivAt (fun r : Real => ((F r X) Y) Z) (((Sdot X) Y) Z) t := by
   classical
+  haveI : Fintype Idx := Fintype.ofFinite Idx
   have hexp : ∀ r : Real, ((F r X) Y) Z =
       ∑ i, ∑ j, ∑ k, (b.repr X i * b.repr Y j * b.repr Z k) • ((F r (b i)) (b j)) (b k) :=
     fun r => tri_expand (I := I) _ b X Y Z
@@ -225,6 +237,7 @@ theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
   simpa only [← hexp] using hstep
 
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem innerCurve_deriv (g : Real -> SmoothRiemannianMetric I M)
     (V : Real -> TangentSpace I x) (Vdot Z : TangentSpace I x) {t : Real}
     (hV : HasDerivAt V Vdot t)
@@ -281,6 +294,7 @@ theorem innerCurve_deriv (g : Real -> SmoothRiemannianMetric I M)
   simpa only [hsum] using hfin
 
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem gap_deriv (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (Rm2dot : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x)
@@ -357,6 +371,7 @@ end Deriv
 section LapGap
 
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem reLower_rm2Low (g₁ g₂ : SmoothRiemannianMetric I M)
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M)
@@ -380,6 +395,8 @@ theorem reLower_rm2Low (g₁ g₂ : SmoothRiemannianMetric I M)
   rw [metricRm04At_inner]
 
 
+omit [IsManifold I 2 M] [CompleteSpace E] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem lapGap_eq (g₁ g₂ : SmoothRiemannianMetric I M)
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -424,6 +441,7 @@ def uhlRm2Vec (g : Real -> SmoothRiemannianMetric I M)
       (uhlRaisedDeriv (I := I) g basisAt Rm04 roughLapRm04 B ricciOneUp t y i j k) l)
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [SigmaCompactSpace M] in
 theorem uhlRm2_deriv
     {D : RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -493,6 +511,8 @@ def sdecRem (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
         (lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂))) x
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem sdec_core
     {D : RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -703,7 +723,7 @@ end NormedBase
 section Bundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -714,6 +734,8 @@ variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 variable {Idx : Type*} [Fintype Idx]
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem sdec_of_uhlenbeck
     {D : RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)

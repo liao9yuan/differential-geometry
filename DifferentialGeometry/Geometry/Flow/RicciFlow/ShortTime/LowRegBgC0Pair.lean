@@ -398,6 +398,7 @@ private theorem symmSelf
   rw [hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem perturbSlotH2
     (g : SmoothRiemannianMetric I M) (D : SmoothCcTensor g 0 2)
     (hD : symmS (I := I) (M := M) g D = D) :
@@ -2343,6 +2344,7 @@ private theorem kappaSelfSub
     kappa_self (I := I) (M := M) g gU U hUtie,
     ← domSubLocal, ← koszulSub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem kappaKoszulH1
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2) :
     lowJetSq (I := I) (M := M) g 1
@@ -2379,6 +2381,7 @@ private theorem kappaKoszulH1
     sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 1 P‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 2 P‖]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem kappaPairH1
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -2395,6 +2398,7 @@ private theorem kappaPairH1
   rw [kappaSelfSub (I := I) (M := M) g gT gU T U hTtie hUtie]
   exact kappaKoszulH1 (I := I) (M := M) g (T - U)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem kappaOneH1
     (g gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     (htie : ∀ (x : M) (u v : TangentSpace I x),
@@ -3089,6 +3093,7 @@ private theorem amixHalfH1
   rw [hhalfT, hhalfU]
   simpa only [N] using hS1D
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem amixBg_eq
     (g gm g_bg : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g gm g_bg -

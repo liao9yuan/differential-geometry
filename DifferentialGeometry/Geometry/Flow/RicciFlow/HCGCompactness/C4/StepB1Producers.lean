@@ -874,6 +874,7 @@ theorem normSq0S_ortho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     Finset.sum_ite_eq, Finset.mem_univ, if_true]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] [T2Space M'] [T2Space (TangentBundle I M')] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
 theorem sqrtNormSq_le_of_comp
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M') (x : M')
@@ -1123,6 +1124,7 @@ theorem exists_gON_bd (g : SmoothRiemannianMetric I M') (x : M')
     sq_nonneg (‖(basis i : TangentSpace I x)‖ * Real.sqrt cLow - 1)]
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M'] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
 theorem pullbackErrNorm
     [Module.Finite ℝ E]
     {N' : Type u} [TopologicalSpace N'] [ChartedSpace H N'] [IsManifold I ∞ N']
@@ -1258,12 +1260,13 @@ open scoped Topology Manifold ContDiff
 
 variable {M'' : Type u} [TopologicalSpace M''] [ChartedSpace H M''] [IsManifold I ∞ M'']
   [T2Space M''] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M'']
-  [ConnectedSpace M''] [T3Space M''] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M'']
+  [ConnectedSpace M''] [T3Space M'']
   [MetricSpace M''] [Nonempty M'']
 variable {N'' : Type u} [TopologicalSpace N''] [ChartedSpace H N''] [IsManifold I ∞ N'']
   [T2Space N''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N'']
   [ConnectedSpace N''] [T3Space N'']
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M''] [ConnectedSpace M''] [T3Space M''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N''] [ConnectedSpace N''] [T3Space N''] in
 theorem stepB1_of_bounds
     (g : SmoothRiemannianMetric I M'') (h : SmoothRiemannianMetric I N'')
     (Ok : M'') (Oℓ : N'') (r ε : ℝ) (p : ℕ) (U : Set M'')
@@ -1296,6 +1299,7 @@ theorem stepB1_of_bounds
       hpbR heps heps1 hsmoothR hc0R hcovR)
 
 omit [FiniteDimensional ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M''] [ConnectedSpace M''] [T3Space M''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N''] [ConnectedSpace N''] [T3Space N''] in
 theorem stepB1_zero
     [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M'') (h : SmoothRiemannianMetric I N'')

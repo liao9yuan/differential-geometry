@@ -141,7 +141,7 @@ theorem connDiffLow_eq_lower (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
 
 
 omit [SigmaCompactSpace M] [T2Space M] in
-private theorem comp_lowerBilin {Idx : Type*} [Fintype Idx] {x : M}
+private theorem comp_lowerBilin {Idx : Type*} [Finite Idx] {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -150,6 +150,7 @@ private theorem comp_lowerBilin {Idx : Type*} [Fintype Idx] {x : M}
         (fun a : Fin 3 => if a = 0 then i else if a = 1 then j else k) =
       q (fun a : Fin 2 => if a = 0 then (A (b j)) (b i) else b k) := by
   classical
+  haveI : Fintype Idx := Fintype.ofFinite Idx
   rw [component0S_apply, lowerBilin_apply]
   congr 1
 
@@ -405,6 +406,7 @@ private theorem nablaTracePerm_normSq_le [I.Boundaryless] {s : ℕ}
         (E := TangentSpace I) (∞ : WithTop ℕ∞) e A))) ?_
   exact le_of_eq (by rw [hiso])
 
+omit [SigmaCompactSpace M] in
 theorem nablaRicDiff_trace_le [I.Boundaryless]
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (S : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1037,6 +1039,7 @@ theorem connSpeedRHS_self (g₁ g₂ : Real → SmoothRiemannianMetric I M) {t :
     metricDiffAt_self, connDiffLowAt_self, hzero, hzero]
   ring
 
+omit [SigmaCompactSpace M] in
 theorem connSpeedLow_normSq_le [I.Boundaryless]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
@@ -1152,6 +1155,7 @@ theorem connSpeedLow_normSq_le [I.Boundaryless]
     (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 2 _) hB₃) hΛ0
     hham hsplit htrace hB₃ hd1 hd2 hd3 (hpow 5 (by norm_num)) (hpow 3 (by norm_num))
 
+omit [SigmaCompactSpace M] in
 theorem connDiffDot_normSq_le [I.Boundaryless]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)

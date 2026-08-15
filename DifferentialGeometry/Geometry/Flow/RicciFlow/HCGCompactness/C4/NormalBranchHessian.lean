@@ -1250,6 +1250,7 @@ theorem hess_inv_sixth
     (mul_nonneg (by norm_num) (sq_nonneg ‖v‖)).trans hquad.1
   exact (mul_le_mul_of_nonneg_right hcoef hg0).trans hlower
 
+omit [CompleteSpace E] in
 theorem chartCmEqnC_factor
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1318,6 +1319,7 @@ theorem chartCmEqnC_factor
   exact IsNormalDiag.chart_readout (I := I) Y hcomplete hconn x
     hq he hf (htgt i)
 
+omit [CompleteSpace E] in
 theorem chartCmC_zero_iff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1357,6 +1359,7 @@ theorem chartCmC_zero_iff
   rw [chartCmEqnC_factor (I := I) Y hcomplete hconn x
     hq he hf z mu xi htgt]
 
+omit [CompleteSpace E] in
 theorem HasCmSolC.target_mem
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1432,6 +1435,7 @@ theorem HasCmSolC.target_mem
     c.hom.left_inv (c.ball_subset (hxiBall i))
   rwa [hzDecode, hxiDecode] at hout
 
+omit [CompleteSpace E] in
 theorem HasCmSolC.invVel_zero
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)

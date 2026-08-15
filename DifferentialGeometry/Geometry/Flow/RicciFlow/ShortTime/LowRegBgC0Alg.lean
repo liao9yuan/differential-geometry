@@ -32,6 +32,7 @@ variable
 
 namespace LowRegBgC0Core
 
+omit [BoundarylessManifold I M] in
 theorem ricciDA_self
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     appCc (I := I) (M := M) g 2 2
@@ -42,6 +43,7 @@ theorem ricciDA_self
   rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
   exact LowBaseInternal.ricciDA_one (I := I) (M := M) g gm T T
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ipLow_swap
     (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g 0 1)
     (W : SmoothCcTensor g 0 2) :
@@ -328,6 +330,7 @@ lemma slotLift22 (g : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotLift32 (g : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g 0 2) (x : M) (D : Tensor0SSpace 3 I x) :
     (show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
@@ -385,6 +388,7 @@ lemma slotLift32 (g : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotLift33 (g : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g 0 3) (x : M) (D : Tensor0SSpace 3 I x) :
     (show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 6 I x from
@@ -607,6 +611,7 @@ noncomputable def prod23
     (permCoeff (I := I) (M := M) g block23)
     (slotExtendIter (I := I) (M := M) g 0 2 3 W)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem prod23_app
     (g : SmoothRiemannianMetric I M) (K : SmoothCcTensor g 0 3)
     (W : SmoothCcTensor g 0 2) :
@@ -678,6 +683,7 @@ noncomputable def amixHalfOne
             (prod23 (I := I) (M := M) g W)
             (mcdOne (I := I) (M := M) g)))))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem amix_half_one
     (g gm gB : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (σlast : Equiv.Perm (Fin 4))
@@ -733,6 +739,7 @@ noncomputable def amixOne
       amixHalfOne (I := I) (M := M) g gm gB W
         (lc0SwapPermRF * LieCorr0Core.lieCorr0AMixPerm2))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem amix_one
     (g gm gB : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -810,6 +817,7 @@ noncomputable def innerOne
       (symmRaiseEndo (I := I) (M := M) g W))
     (permCoeff (I := I) (M := M) g (finRotate 3))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inner_one
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     appCc (I := I) (M := M) g 2 3
@@ -883,6 +891,7 @@ noncomputable def innerAct
     (innerOne (I := I) (M := M) g W)
     (LowBaseInternal.connLowOp (I := I) (M := M) g gm)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inner_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1007,6 +1016,7 @@ noncomputable def aaMidOne
         (permCoeff (I := I) (M := M) g mid)
         (innerAct (I := I) (M := M) g gm W)))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa_mid_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (mid : Equiv.Perm (Fin 3)) (out : Equiv.Perm (Fin 4))
@@ -1038,6 +1048,7 @@ theorem aa_mid_act
   conv_rhs =>
     rw [← appCc_assoc, ← appCc_assoc, ← appCc_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa0_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1128,6 +1139,7 @@ noncomputable def aaBareOne
       (connDiffContrInsertionField (I := I) g gm)
       (innerAct (I := I) (M := M) g gm W))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa_bare_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (out : Equiv.Perm (Fin 4))
@@ -1157,6 +1169,7 @@ theorem aa_bare_act
   conv_rhs =>
     rw [← appCc_assoc, ← appCc_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa1_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1174,6 +1187,7 @@ theorem aa1_act
   exact aa_mid_act (I := I) (M := M) g gm P W
     ricPerm102 ricPerm2301 hP htie
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa2_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1191,6 +1205,7 @@ theorem aa2_act
   exact aa_mid_act (I := I) (M := M) g gm P W
     ricPerm120 ricPerm3102 hP htie
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa3_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1207,6 +1222,7 @@ theorem aa3_act
   rw [aa3, reindex_symm]
   exact aa_bare_act (I := I) (M := M) g gm P W ricPerm1302 hP htie
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa4_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1223,6 +1239,7 @@ theorem aa4_act
   rw [aa4]
   exact aa_bare_act (I := I) (M := M) g gm P W ricPerm1203 hP htie
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa5_act
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),
@@ -1257,6 +1274,7 @@ noncomputable def aaOne
     (ricciCometricFourTraceCastG0 (I := I) g gm)
     (aaKerOne (I := I) (M := M) g gm W)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aa_one
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2)
     (hP : ∀ (x : M) (u v : TangentSpace I x),

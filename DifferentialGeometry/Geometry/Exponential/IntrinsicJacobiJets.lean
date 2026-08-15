@@ -1345,6 +1345,7 @@ theorem intrJetCurv_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrJetResidual_succ
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]

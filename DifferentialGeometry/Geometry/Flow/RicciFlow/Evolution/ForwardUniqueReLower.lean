@@ -718,6 +718,7 @@ theorem lapCommFlux_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
   rw [lapCommFlux, reLowerOp_succ, reLowerOp_succ, nabla_reLower]
   abel
 
+omit [SigmaCompactSpace M] in
 theorem lapComm_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -826,6 +827,7 @@ theorem lapCommRem_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     nabla_reLower, metricTraceFirstTwoField_add, trace_reLower]
   abel
 
+omit [SigmaCompactSpace M] in
 theorem lapComm_reLower_eq (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -839,6 +841,7 @@ theorem lapComm_reLower_eq (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
             (metricNabla0S (I := I) g₂ (metricTensorField (I := I) g₁))) := by
   rw [lapComm_reLower (I := I) g₁ g₂ T, lapCommRem_reLower (I := I) g₁ g₂ T]
 
+omit [SigmaCompactSpace M] in
 theorem lapComm_reLower_flux (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :

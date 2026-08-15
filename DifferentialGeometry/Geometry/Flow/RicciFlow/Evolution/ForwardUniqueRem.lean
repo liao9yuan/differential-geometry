@@ -26,6 +26,7 @@ section Fiber
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem lowOfComp_ext (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx → Idx → Idx → Idx → Real)
@@ -44,6 +45,7 @@ theorem lowOfComp_ext (g : SmoothRiemannianMetric I M)
   rw [lowOfComp_eval]
   exact (hcomp (w 0) (w 1) (w 2) (w 3)).symm
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem lowerTri_low (g : SmoothRiemannianMetric I M)
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -64,6 +66,7 @@ section ComponentRemainder
 
 variable {Idx : Type*} [Fintype Idx]
 
+omit [SigmaCompactSpace M] [I.Boundaryless] in
 theorem rmDotRem_low
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (T₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -97,6 +100,7 @@ variable [NeZero (Module.finrank Real E)]
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [I.Boundaryless] in
 theorem rmDotRemSq_le
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (T₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -394,6 +398,7 @@ private def lowerTriPerm : Equiv.Perm (Fin 6) :=
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
     {x : M}
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -476,6 +481,7 @@ theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem lowerTriDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     {x : M}
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -491,6 +497,7 @@ theorem lowerTriDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem lowerTriSwapSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     {x : M}
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -551,6 +558,7 @@ theorem lowerTriSwapSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ownRmDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {BP : Real}
     (hP : normSq0S (I := I) g₁ x 4
@@ -706,6 +714,7 @@ section GapRemainder
 
 variable {Idx : Type*} [Fintype Idx]
 
+omit [SigmaCompactSpace M] in
 theorem uhlSpeed_low
     (g : Real → SmoothRiemannianMetric I M)
     (basisAt : (y : M) → Module.Basis Idx Real (TangentSpace I y))
@@ -739,6 +748,7 @@ theorem uhlSpeed_low
   unfold uhlRaisedDeriv
   rw [inner_raiseAt]
 
+omit [SigmaCompactSpace M] in
 theorem gapDot_uhl
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (basisAt : (y : M) → Module.Basis Idx Real (TangentSpace I y))

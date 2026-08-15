@@ -233,6 +233,7 @@ private noncomputable def curvOpNMap
     exact map_smul _ _ _
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 @[simp] private theorem curvOpNMap_apply
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) :
@@ -240,6 +241,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] 
   rfl
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private theorem curvOpN_expand
     (g : SmoothRiemannianMetric I M) (k d : Nat) (x : M)
     (c : Fin (k + 3) -> Fin d -> Real)
@@ -256,6 +258,7 @@ private theorem curvOpN_expand
   rw [MultilinearMap.map_smul_univ, curvOpNMap_apply]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private theorem curvOpN_update_add
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (i : Fin (k + 3))
@@ -267,6 +270,7 @@ private theorem curvOpN_update_add
   rw [MultilinearMap.map_update_add, curvOpNMap_apply, curvOpNMap_apply]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private theorem curvOpN_update_smul
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (i : Fin (k + 3))
@@ -277,6 +281,7 @@ private theorem curvOpN_update_smul
   rw [MultilinearMap.map_update_smul, curvOpNMap_apply]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 theorem curvOpN_zero_at
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (i : Fin (k + 3))
@@ -288,6 +293,7 @@ theorem curvOpN_zero_at
       (0 : TangentSpace I x)
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 theorem curvOpN_eq_sharp
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) :
@@ -969,6 +975,7 @@ noncomputable def curvOpNDerivAlong
           (covDerivAlong (I := I) g γ (Y i) t))
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private theorem curvOpNDeriv_congr
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1810,6 +1817,7 @@ theorem curvOpN_cov
       rw [update_snoc_last]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 theorem curvOpN_inner
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (w : TangentSpace I x) :
@@ -1925,6 +1933,7 @@ theorem curvOpN_zero
       (g.symm x _ _).symm
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 theorem curvOpN_one
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) :
@@ -1969,6 +1978,7 @@ theorem curvAlong_eq_op0
     (curvOpN_zero (I := I) g (gamma t) (X t) (Y t) (Z t)).symm
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] in
 theorem curvDeriv_eq_op1
     (g : SmoothRiemannianMetric I M) (gamma : Real -> M)
     (X Y Z : forall s : Real, TangentSpace I (gamma s)) (t : Real)
@@ -2030,6 +2040,7 @@ private theorem inner_self_nonneg
   · exact le_of_lt (g.pos x v hv)
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompleteSpace E] in
 theorem curvOpN_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {k : Nat} {C : Real} (hP : HasCurvDerivBound (I := I) P k C) :

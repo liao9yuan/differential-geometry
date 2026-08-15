@@ -1120,6 +1120,7 @@ theorem connLow_tame
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem kappaSelf_h1
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1160,6 +1161,7 @@ theorem kappaSelf_h1
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 1 P‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 2 P‖]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem kappaSelf_h2
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1248,6 +1250,7 @@ theorem koszul_covec_sub
     coeffJets_domDomCongr_sub]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem kappa_self_pair_h2
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -2229,6 +2232,7 @@ theorem amix_h1
   rw [lc0AMix_eq_lc0AMixField (I := I) (M := M) g₀ g₁ gB]
   exact hform g₁ P htie hδ_le hδ_nonneg hbound R A hR hA hP2 hP3
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tail0_split
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg +
@@ -2240,6 +2244,7 @@ theorem tail0_split
   rw [endoArmField_eq_dLbCoeffField (I := I) (M := M) g₀ g₁ g₀]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tail0_decomp
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg +
@@ -2254,6 +2259,7 @@ theorem tail0_decomp
   rw [tail0_split (I := I) (M := M) g₀ g₁ g_bg,
     tail_base_split (I := I) (M := M) g₀ g₁ g_bg]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tail_h1_parts
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (Bd Bi Bv Ba Br : ℝ)

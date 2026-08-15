@@ -221,6 +221,7 @@ theorem localPull_enorm
     rfl
   rw [hsrc, localPullMetric_inner]
 
+omit [FiniteDimensional ℝ F] in
 theorem localPull_pathLen
     [SigmaCompactSpace M] [T2Space M]
     [RiemannianBundle (fun y : N ↦ TangentSpace J y)]

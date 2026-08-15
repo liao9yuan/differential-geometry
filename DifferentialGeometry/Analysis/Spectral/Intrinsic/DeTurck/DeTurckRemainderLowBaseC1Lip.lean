@@ -2866,6 +2866,7 @@ private theorem raise_cancel
     (g0FlatCLM (I := I) b x v)]
   rw [inverseMetricSharpFib_g0FlatCLM (I := I) b x v]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 private theorem raise_pair
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -2952,6 +2953,7 @@ private noncomputable def perturb0
   endoSlotZeroCcTensor (I := I) (M := M) g 0
     (symmRaiseEndo (I := I) (M := M) g T)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem sharp_pair
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -3918,6 +3920,7 @@ private theorem psi_sub_eq
     appCcRS_sub_right, appCcRS_sub_left]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem perturb_h2_eq
     (g : SmoothRiemannianMetric I M) (D : SmoothCcTensor g 0 2)
     (hD : ccTensor02Symm (I := I) (M := M) g D = D) :
@@ -4386,6 +4389,7 @@ private theorem mcd_sub_eq
 
 namespace LowBaseInternal
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem fullRev_sub
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)

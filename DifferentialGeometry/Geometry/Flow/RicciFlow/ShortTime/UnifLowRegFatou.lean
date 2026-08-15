@@ -29,6 +29,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 theorem lowregProjMode_state_bound
     (g : SmoothRiemannianMetric I M) {R T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)

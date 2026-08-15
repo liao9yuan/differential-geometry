@@ -103,6 +103,7 @@ private theorem lieKappa_eq
   simp only [neg_neg] at hneg
   exact hneg.symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem lieKappa_bg
     (g gT gB : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
@@ -124,6 +125,7 @@ private noncomputable def psiBgLeft
     (domDomCongrSection (I := I) g lieArm1RhoSlot0
       (lieArm1LoweredBgKappa (I := I) (M := M) g gT gB))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem psiBgLeft_corr
     (g gT gB : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
@@ -156,6 +158,7 @@ private theorem psiBgCorr_eq
   simp only [psiBgCorr, psiBgLeft, lieArm1PsiB, lieArm1RhoSlot0]
   rw [appCcRS_sub_left]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem psiBgLeft_pair
     (g gT gU gB : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)

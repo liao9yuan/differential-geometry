@@ -53,6 +53,7 @@ def perturbCoeff4
   slotInsertEndoCc (I := I) (M := M) g 3
     (symmRaiseEndo (I := I) (M := M) g T)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma perturbCoeff4_add
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
       perturbCoeff4 (I := I) (M := M) g (T + U) =

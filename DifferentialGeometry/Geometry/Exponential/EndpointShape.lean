@@ -22,16 +22,45 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [FiniteDimensional Real E]
-  [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
-  [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
+
+private theorem curveVelocity_comp_mul
+    (γ : Real → M) (c t : Real)
+    (hγ : MDifferentiableAt 𝓘(Real, Real) I γ (c * t)) :
+    curveVelocity (I := I) (fun s => γ (c * s)) t =
+      c • curveVelocity (I := I) γ (c * t) := by
+  let a : Real → Real := fun s => c * s
+  have ha : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, Real) a t := by
+    have haInf : ContMDiff 𝓘(Real, Real) 𝓘(Real, Real) ∞ a :=
+      contMDiff_const.mul contMDiff_id
+    exact haInf.mdifferentiableAt (by simp)
+  have hcomp := mfderiv_comp_apply (f := a) (g := γ) (x := t)
+    hγ ha (1 : Real)
+  have ha_one :
+      mfderiv 𝓘(Real, Real) 𝓘(Real, Real) a t (1 : Real) = c := by
+    rw [mfderiv_eq_fderiv]
+    have hfd : HasFDerivAt a (c • (1 : Real →L[Real] Real)) t := by
+      simpa only [a] using (hasFDerivAt_id t).const_mul c
+    rw [hfd.fderiv]
+    change c * 1 = c
+    ring
+  change mfderiv 𝓘(Real, Real) I (γ ∘ a) t (1 : Real) =
+    c • mfderiv 𝓘(Real, Real) I γ (a t) (1 : Real)
+  rw [hcomp, ha_one]
+  simpa only [smul_eq_mul, mul_one] using
+    map_smul (mfderiv 𝓘(Real, Real) I γ (a t)) c (1 : Real)
+
+
+variable [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)]
+variable [I.Boundaryless]
+variable [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
 variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -126,31 +155,6 @@ theorem intrinsicJacobi_perp
   rw [← hjac] at hgauss
   simpa only [intrinsicJacobi, expMapIntrinsic_def] using hgauss
 
-private theorem curveVelocity_comp_mul
-    (γ : Real → M) (c t : Real)
-    (hγ : MDifferentiableAt 𝓘(Real, Real) I γ (c * t)) :
-    curveVelocity (I := I) (fun s => γ (c * s)) t =
-      c • curveVelocity (I := I) γ (c * t) := by
-  let a : Real → Real := fun s => c * s
-  have ha : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, Real) a t := by
-    have haInf : ContMDiff 𝓘(Real, Real) 𝓘(Real, Real) ∞ a :=
-      contMDiff_const.mul contMDiff_id
-    exact haInf.mdifferentiableAt (by simp)
-  have hcomp := mfderiv_comp_apply (f := a) (g := γ) (x := t)
-    hγ ha (1 : Real)
-  have ha_one :
-      mfderiv 𝓘(Real, Real) 𝓘(Real, Real) a t (1 : Real) = c := by
-    rw [mfderiv_eq_fderiv]
-    have hfd : HasFDerivAt a (c • (1 : Real →L[Real] Real)) t := by
-      simpa only [a] using (hasFDerivAt_id t).const_mul c
-    rw [hfd.fderiv]
-    change c * 1 = c
-    ring
-  change mfderiv 𝓘(Real, Real) I (γ ∘ a) t (1 : Real) =
-    c • mfderiv 𝓘(Real, Real) I γ (a t) (1 : Real)
-  rw [hcomp, ha_one]
-  simpa only [smul_eq_mul, mul_one] using
-    map_smul (mfderiv 𝓘(Real, Real) I γ (a t)) c (1 : Real)
 
 private theorem intrVel_smul
     (g : SmoothRiemannianMetric I M)

@@ -91,6 +91,7 @@ private theorem eq_zero_of_normSq0S (g : SmoothRiemannianMetric I M) (x : M) (s 
     {A : Tensor0SSpace s I x} (h : normSq0S (I := I) g x s A = 0) : A = 0 :=
   ((tensor0SMetricData (I := I) g x s).inner_self_eq_zero_iff A).1 h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem energy_nonneg (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     0 ≤ forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t :=
   integral_nonneg fun x => density_nonneg (I := I) g₁ g₂ t x
@@ -224,6 +225,7 @@ private theorem metricExtInner {g g' : SmoothRiemannianMetric I M}
   subst hi
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem metric_eq_of_energy_zero (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (hdcont : Continuous (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x))
     (hidens : Integrable (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x)

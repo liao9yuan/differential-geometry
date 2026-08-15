@@ -335,8 +335,8 @@ section Frame
 
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
-omit [SigmaCompactSpace M] [T2Space M] in
-theorem connDiffVec_hasDerivAt
+omit [Fintype Idx] [SigmaCompactSpace M] [T2Space M] in
+theorem connDiffVec_hasDerivAt [Finite Idx]
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u) (hx : x ∈ u) {t : Real}
@@ -357,6 +357,7 @@ theorem connDiffVec_hasDerivAt
           (metricCov (I := I) (g₂ r)) x Y X)
       ((Adot x Y) X) t := by
   classical
+  haveI : Fintype Idx := Fintype.ofFinite Idx
   set b : Module.Basis Idx Real (TangentSpace I x) := hframe.toBasisAt hx with hbdef
   have hbcoe : ∀ i : Idx, b i = frame i x := fun i =>
     IsLocalFrameOn.toBasisAt_coe hframe hx i
@@ -447,8 +448,8 @@ theorem connDiffVec_hasDerivAt
       HasDerivAt.fun_sum fun i _ => (hvec i j).const_smul _
   simpa only [← hexp] using hstep
 
-omit [SigmaCompactSpace M] [T2Space M] in
-theorem connDiffLow_hasDerivAt_frame
+omit [Fintype Idx] [SigmaCompactSpace M] [T2Space M] in
+theorem connDiffLow_hasDerivAt_frame [Finite Idx]
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u) (hx : x ∈ u) {t : Real}
@@ -468,8 +469,10 @@ theorem connDiffLow_hasDerivAt_frame
         (hframe.coeff k x ((Adot x (frame j x)) (frame i x))) t)
     (v : Fin 3 -> TangentSpace I x) :
     HasDerivAt (fun r : Real => connDiffLowAt (I := I) (g₁ r) (g₂ r) x v)
-      (connDiffDot (I := I) g₁ g₂ Adot t x v) t :=
-  connDiffLow_hasDerivAt (I := I) g₁ g₂ Adot hPDE₁
+      (connDiffDot (I := I) g₁ g₂ Adot t x v) t := by
+  classical
+  haveI : Fintype Idx := Fintype.ofFinite Idx
+  exact connDiffLow_hasDerivAt (I := I) g₁ g₂ Adot hPDE₁
     (fun X Y => connDiffVec_hasDerivAt (I := I) g₁ g₂ frame hframe hu hx Adot hΓ X Y) v
 
 def bilinOfComp (b : Module.Basis Idx Real (TangentSpace I x))

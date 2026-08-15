@@ -568,6 +568,7 @@ private theorem amixHalf_bg
     ← appCcRS_sub_right, ← appCcRS_sub_right,
     ← appCcRS_sub_left, ← slotIter_sub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem bgAmix_eq
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g₀ g₁ gB -

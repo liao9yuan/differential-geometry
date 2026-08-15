@@ -26,7 +26,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E]
-  [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+  [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -878,6 +878,7 @@ noncomputable def totalPts
   | some target => pairPts alpha target a b x
   | none => x
 
+omit [CompleteSpace E] in
 @[simp] theorem activeFill_totalPts_zero
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -892,6 +893,7 @@ noncomputable def totalPts
         (fun y => y) x gamma = x := by
   simp [centerAverage.activeFill, hzero]
 
+omit [CompleteSpace E] in
 theorem activeFill_totalPts_of_ne
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -2667,6 +2669,7 @@ theorem HasSuppConvData.toOnLegacy
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     simpa only [legacyChartFamily, legacyTransition_eq] using hsmooth alpha target k
 
+omit [CompleteSpace E] in
 theorem HasSuppConvDataOn.weight_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2704,6 +2707,7 @@ theorem HasSuppConvDataOn.weight_on
       hweightInfC, _hweightConv⟩
   exact ⟨hweightInfC, hweight alpha⟩
 
+omit [CompleteSpace E] in
 theorem HasSuppConvDataOn.core_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2731,6 +2735,7 @@ theorem HasSuppConvDataOn.core_on
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact ⟨hU alpha, hC0 alpha, hC1 alpha, hC01 alpha, hC1U alpha⟩
 
+omit [CompleteSpace E] in
 theorem HasSuppConvDataOn.geom_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2774,6 +2779,7 @@ theorem HasSuppConvDataOn.geom_on
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact (hgeom k).1 alpha
 
+omit [CompleteSpace E] in
 theorem HasSuppConvDataOn.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

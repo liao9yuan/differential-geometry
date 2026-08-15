@@ -28,6 +28,7 @@ section Quad
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem tri_expand {ι : Type*} [Fintype ι]
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x)
@@ -38,6 +39,14 @@ theorem tri_expand {ι : Type*} [Fintype ι]
   have hX : (∑ i, b.repr X i • b i) = X := b.sum_repr X
   have hY : (∑ j, b.repr Y j • b j) = Y := b.sum_repr Y
   have hZ : (∑ k, b.repr Z k • b k) = Z := b.sum_repr Z
+  letI : NormedAddCommGroup (TangentSpace I x →L[ℝ] TangentSpace I x) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedAddCommGroup (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) :=
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : AddMonoidHomClass (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
+      (TangentSpace I x) (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) :=
+    (SemilinearMapClass.distribMulActionSemiHomClass
+      (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)).toAddMonoidHomClass
   have step1 : ((A X) Y) Z = ∑ i, b.repr X i • (((A (b i)) Y) Z) := by
     conv_lhs => rw [← hX]
     simp only [map_sum, map_smul, ContinuousLinearMap.sum_apply,
@@ -71,6 +80,7 @@ def quadOfComp (b : Module.Basis Idx Real (TangentSpace I x))
         (b.constr Real fun j =>
           LinearMap.toContinuousLinearMap (b.constr Real fun k => ∑ l, c i j k l • b l)))
 
+omit [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 theorem quadOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) (i j k : Idx) :
@@ -100,6 +110,7 @@ theorem quadOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
   rw [Module.Basis.constr_basis]
 
 
+omit [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem quadOfComp_vec (b : Module.Basis Idx Real (TangentSpace I x))
     (V : Idx -> Idx -> Idx -> TangentSpace I x) (i j k : Idx) :
     ((quadOfComp (I := I) b (fun i j k l => b.repr (V i j k) l) (b i)) (b j)) (b k) =
@@ -108,6 +119,7 @@ theorem quadOfComp_vec (b : Module.Basis Idx Real (TangentSpace I x))
   exact b.sum_repr (V i j k)
 
 
+omit [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem coeff_quadOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hx : x ∈ u)
     (c : Idx -> Idx -> Idx -> Idx -> Real) (i j k l : Idx) :
@@ -127,7 +139,8 @@ theorem coeff_quadOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
   simp [Finsupp.single_apply]
 
 
-theorem rmDiffVec_hasDerivAt_of_basis
+omit [Fintype Idx] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
+theorem rmDiffVec_hasDerivAt_of_basis [Finite Idx]
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
     (Sdot : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -140,6 +153,7 @@ theorem rmDiffVec_hasDerivAt_of_basis
     HasDerivAt (fun r : Real => ((rmDiffVec (I := I) (g₁ r) (g₂ r) x X) Y) Z)
       (((Sdot X) Y) Z) t := by
   classical
+  haveI : Fintype Idx := Fintype.ofFinite Idx
   have hexp : ∀ r : Real,
       ((rmDiffVec (I := I) (g₁ r) (g₂ r) x X) Y) Z =
         ∑ i, ∑ j, ∑ k, (b.repr X i * b.repr Y j * b.repr Z k) •
@@ -197,6 +211,7 @@ def uhlRmDiffSpeed (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
           uhlRaisedDeriv (I := I) g₂ basisAt Rm04₂ roughLapRm04₂ B₂ ricciOneUp₂ t y i j k) l)
 
 
+omit [IsManifold I 2 M] [SigmaCompactSpace M] in
 theorem rm_of_uhlenbeck
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -269,7 +284,7 @@ end NormedBase
 section Gamma
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -282,11 +297,13 @@ def solOfMetric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M) : SolutionOn (I := I) (M := M) D :=
   ⟨⟨g⟩⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 @[simp]
 theorem solOfMetric_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M) (s : Real) :
     (solOfMetric (I := I) (D := D) g).base.metric s = g s := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem christoffelInFrame_solOfMetric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} {u : Set M}
@@ -312,6 +329,7 @@ def christoffelDiffSpeed
       christoffelEvolutionRHSInFrame (M := M) (gInv₁ x) (nablaRic₁ x) t x i j k -
         christoffelEvolutionRHSInFrame (M := M) (gInv₂ x) (nablaRic₂ x) t x i j k)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem gamma_of_fields
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -355,6 +373,7 @@ theorem gamma_of_fields
   exact hdiff.hasDerivAt hnhds
 
 variable (I) in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem chartFrame_isFrameTop (x₀ : M) :
     IsLocalFrameOn I E (∞ : WithTop ℕ∞) (chartFrame I x₀)
       (trivializationAt E (TangentSpace I) x₀).baseSet :=
@@ -377,7 +396,8 @@ def chartNablaRic (g : Real -> SmoothRiemannianMetric I M) (x₀ : M) :
     ricciCovDerivCompInFrame (I := I) (D := refInterval) (solOfMetric (I := I) g)
       (chartFrame I x₀) t x d p q
 
-theorem chrEvo_of_gram (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [SigmaCompactSpace M] [CompactSpace M] in
+theorem chrEvo_of_gram [FiniteDimensional ℝ E] (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
         (fun p : Real × M =>
@@ -401,7 +421,8 @@ theorem chrEvo_of_gram (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (ha
     (trivializationAt E (TangentSpace I) x₀).open_baseSet
   exact h
 
-theorem gamma_of_gram (g₁ g₂ : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [SigmaCompactSpace M] [CompactSpace M] in
+theorem gamma_of_gram [FiniteDimensional ℝ E] (g₁ g₂ : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
         (fun p : Real × M =>

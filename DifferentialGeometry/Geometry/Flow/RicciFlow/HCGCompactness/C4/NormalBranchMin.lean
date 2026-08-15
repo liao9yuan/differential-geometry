@@ -68,6 +68,7 @@ theorem normalTanHome_target
 
 namespace IsNormalDiag
 
+omit [CompleteSpace E] in
 theorem tan_mem_of_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -214,6 +215,7 @@ theorem tan_mem_of_ctrl
   rw [← htransport.1]
   exact ⟨z, hzBall, hAz⟩
 
+omit [CompleteSpace E] in
 theorem inv_is_min_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -321,6 +323,7 @@ theorem inv_is_min_ctrl
     exact hmap
   exact ⟨v, hdom, hinv, hexp, hlen⟩
 
+omit [CompleteSpace E] in
 theorem halfSq_eq_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -413,6 +416,7 @@ theorem halfSq_eq_ctrl
   dsimp only
   rw [hinv, ← hlen, Real.sq_sqrt hinnerNonneg]
 
+omit [CompleteSpace E] in
 theorem halfSq_inf_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -553,6 +557,7 @@ theorem halfSq_inf_ctrl
     hρ hρq hρmetric (hctrl y hy).1 (hctrl y hy).2.1
     (hctrl y hy).2.2
 
+omit [CompleteSpace E] in
 theorem grad_half_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -656,6 +661,7 @@ theorem grad_half_ctrl
   rw [hinv]
   exact hgrad
 
+omit [CompleteSpace E] in
 theorem hess_half_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
