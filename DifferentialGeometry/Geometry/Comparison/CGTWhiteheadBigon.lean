@@ -219,7 +219,6 @@ private theorem pinned_inj_nhds
     exact hH.contDiffAt.mem_toOpenPartialHomeomorph_source hHD (by simp)
   refine ⟨e.source, e.open_source.mem_nhds hmem, ?_⟩
   simpa only [e, H, Analysis.pinnedRootMap] using e.injOn
-set_option linter.unusedSectionVars true
 
 private def shortBigons
     (F : E × E → E) (ell : E × E → Real) (a L : Real) :
@@ -327,7 +326,6 @@ private theorem shortBigons_compact
   · simpa only [Metric.mem_closedBall, dist_zero_right] using hz.1
   · simpa only [Metric.mem_closedBall, dist_zero_right] using hb.1
   · simpa only [Metric.mem_closedBall, dist_zero_right] using hb.2
-set_option linter.unusedSectionVars true
 
 theorem intrExt_minVec_mem
     (g : SmoothRiemannianMetric I M)
