@@ -1027,8 +1027,7 @@ theorem stagePtsSub_eq_ne
         simpa only [Lphi, NetLimitData.subseq_lamInf] using hC2) z (by
         simpa only [stageWeightSub, stageWeight, alphaPhi, Lphi] using hweight)
     simpa only [Lphi, NetLimitData.subseq_lamInf] using h
-  set_option maxRecDepth 2048 in
-    exact stagePtsSub_eq_raw inp.toCore P L phi hphi alpha target k l z
+  exact stagePtsSub_eq_raw inp.toCore P L phi hphi alpha target k l z
       (chart := legacyChartFamily (I := I) X) (hsmall := hsmall)
 
 theorem pairStageFill_conv
