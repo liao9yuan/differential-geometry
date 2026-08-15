@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -1256,7 +1255,7 @@ theorem tsExists_palatiniPair_jets (g₀ : SmoothRiemannianMetric I M) {δ₀ : 
       refine mul_le_mul_of_nonneg_left ?_ (hKQ_nn m)
       rw [hWfin_def]
       exact Combinatorics.boundedFactorGridWindow_mono b hb (by omega) (le_refl _)
-    nlinarith [hcd, hq]
+    linarith [hcd, hq]
   rw [show ((iteratedCovGrad (I := I) g₀ 1 3 m
         (rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 (Equiv.swap (1 : Fin 3) 2) A -
           rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 (finRotate 3) A)).toSection x) =
@@ -1271,7 +1270,7 @@ theorem tsExists_palatiniPair_jets (g₀ : SmoothRiemannianMetric I M) {δ₀ : 
     (Equiv.swap (1 : Fin 3) 2) A m x]
   rw [tsRfns_iteratedCovGrad_rsDomDomCongrSection_eq (I := I) (M := M) g₀ 1 3
     (finRotate 3) A m x]
-  nlinarith [hAjets]
+  linarith [hAjets]
 
 end CurvatureCoefficientDifferenceJetTower
 
@@ -1321,7 +1320,7 @@ theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_topSeparated_le
       have h4 : (0 : ℝ) ≤ (i : ℝ) * appCcGdiag (E := E) i :=
         mul_nonneg (Nat.cast_nonneg _) (appCcGdiag_nonneg (E := E) i)
       have h5 : (0 : ℝ) ≤ n * cg 0 := mul_nonneg hn_nn (hcg_nn 0)
-      nlinarith [mul_nonneg h4 h3, mul_nonneg h5 (by linarith : (0:ℝ) ≤ 4 * (2 * (Kc0 (i + 1) * ((i + 1 : ℕ) : ℝ)) + 2 * KQ i))], ?_⟩
+      linarith [mul_nonneg h4 h3, mul_nonneg h5 (by linarith : (0:ℝ) ≤ 4 * (2 * (Kc0 (i + 1) * ((i + 1 : ℕ) : ℝ)) + 2 * KQ i))], ?_⟩
   intro g₁ T htie δ hδ_le hδ0 hbound i
   have hpal := riemannLoweredBackgroundDifference_palatini_repr (I := I) (M := M) g₀ g₁
   set A : SmoothCcTensor g₀ 1 3 :=
@@ -1526,7 +1525,7 @@ theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_topSeparated_le
         refine le_trans (tsResSum_le_boundedWindow b hb (i + 1)) ?_
         rw [show (i + 1) + 2 = i + 3 from by omega]
       have hqW := hKQ g₁ T htie hδ_le hδ0 hbound i x
-      nlinarith [hresW, hqW, hWfin_nn, hKc0_nn (i + 1), hKQ_nn i]
+      linarith [hresW, hqW, hWfin_nn, hKc0_nn (i + 1), hKQ_nn i]
     have hcorr : ∀ k ∈ Finset.range i,
         (n * riemannianFiberNormSq (I := I) (M := M) g₀ 1 ((2 + 1) + (i - (k + 1))) x
           ((iteratedCovGrad (I := I) g₀ 1 (2 + 1) (i - (k + 1)) PA).toSection x)) *
@@ -1583,7 +1582,7 @@ theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_topSeparated_le
           ((iteratedCovGrad (I := I) g₀ 1 (2 + 1) i PA - HPA).toSection x) ≤
           4 * (2 * (Kc0 (i + 1) * ((i + 1 : ℕ) : ℝ)) * Wfin + 2 * KQ i * Wfin) := by
         refine le_trans hPAHPA ?_
-        nlinarith [hAHA, riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 (3 + i) x
+        linarith [hAHA, riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 (3 + i) x
           ((iteratedCovGrad (I := I) g₀ 1 3 i A - HA).toSection x)]
       have hgW_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x
         ((tsMetricCc (I := I) (M := M) g₀).toSection x)
