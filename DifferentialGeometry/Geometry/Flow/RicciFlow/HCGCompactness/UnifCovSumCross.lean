@@ -867,7 +867,6 @@ private theorem Dtower_nonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc
           Dtower n q r Racc N := mul_nonneg h2 ih
       simp only [Dtower]; linarith
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem iterCovG1_le
@@ -898,13 +897,11 @@ theorem iterCovG1_le
     fun M => Finset.sum_nonneg (fun k _ => Real.sqrt_nonneg _)
   induction N with
   | zero =>
-
       simp only [Dtower, one_mul]
       rw [Finset.sum_range_one]
       exact le_of_eq rfl
   | succ N ih =>
       have ihN := ih (fun m hm => hAcc m (Nat.lt_succ_of_lt hm))
-
       have hidF : iterCov (I := I) g₁ r T (N + 1)
           = (covStep (I := I) g₂ (r + N) (iterCov (I := I) g₂ r T N)
               + covStep (I := I) g₂ (r + N) (telescAccum (I := I) g₁ g₂ r T N))
@@ -921,9 +918,7 @@ theorem iterCovG1_le
               + covStep (I := I) g₂ (r + N) (telescAccum (I := I) g₁ g₂ r T N) x)
             + diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) x := by
         rw [hidF]; simp only [ContMDiffSection.coe_add, Pi.add_apply]
-
       rw [Finset.sum_range_succ, iterCov_succ (I := I) g₂ r T N]
-
       set a := covStep (I := I) g₂ (r + N) (iterCov (I := I) g₂ r T N) x with ha
       set b := covStep (I := I) g₂ (r + N) (telescAccum (I := I) g₁ g₂ r T N) x with hb
       set c := diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) x with hc
@@ -937,10 +932,8 @@ theorem iterCovG1_le
       have hDsucc : Dtower (Module.finrank ℝ E) ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
             r Racc (N + 1) = 1 + Racc N + cstep * DN := by
         rw [hcstep, hDNdef]; rfl
-
       rw [hDsucc, show Real.sqrt (normSq0S (I := I) g₂ x (r + (N + 1)) a)
         = Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) from rfl]
-
       have htri :
           Real.sqrt (normSq0S (I := I) g₂ x (r + (N + 1)) (iterCov (I := I) g₁ r T (N + 1) x)) ≤
             Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)
@@ -949,30 +942,59 @@ theorem iterCovG1_le
         rw [hidx]
         refine le_trans (sqrt_normSq0S_add_le (I := I) g₂ (a + b) c basis hinv) ?_
         exact add_le_add (sqrt_normSq0S_add_le (I := I) g₂ a b basis hinv) (le_refl _)
-
       have hboundB :
           Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) b) ≤
             Racc N * (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) := by
         have h := hAcc N (Nat.lt_succ_self N)
         rw [Finset.sum_range_succ, iterCov_succ (I := I) g₂ r T N, ← hSNdef, ← ha, ← hb] at h
         exact h
-
       have hboundC :=
         diffStep_jet_one_le (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) hEq hjet hx
       rw [← hc, ← hcstep] at hboundC
       have hcstep_nn : 0 ≤ cstep := by rw [hcstep]; positivity
       have hC2 : Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) c) ≤ cstep * (DN * SN) :=
         le_trans hboundC (mul_le_mul_of_nonneg_left ihN hcstep_nn)
-
       have hDN_nn : 0 ≤ DN := by
         rw [hDNdef]; exact Dtower_nonneg (Module.finrank ℝ E) hqnn r hRnn N
       have hSN_nn : 0 ≤ SN := by rw [hSNdef]; exact hSnn N
       have hRN_nn : 0 ≤ Racc N := hRnn N
       have hAterm_nn : 0 ≤ Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) := Real.sqrt_nonneg _
-      nlinarith [htri, hboundB, hC2, hSN_nn, hRN_nn, hcstep_nn, hDN_nn, hAterm_nn,
-        mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hAterm_nn,
-        mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hSN_nn,
-        mul_nonneg hRN_nn hSN_nn, mul_nonneg hRN_nn hAterm_nn]
+      have hbc :
+          Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) b) +
+              Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) c) ≤
+            Racc N * (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) +
+              cstep * (DN * SN) :=
+        add_le_add hboundB hC2
+      have hmain :
+          Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) +
+              (Racc N * (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) +
+                cstep * (DN * SN)) ≤
+            (1 + Racc N + cstep * DN) *
+              (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) := by
+        have hdiff :
+            (1 + Racc N + cstep * DN) *
+                (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) -
+              (Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) +
+                (Racc N * (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) +
+                  cstep * (DN * SN)))
+              = SN + cstep * DN * Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) := by
+          ring
+        rw [← sub_nonneg, hdiff]
+        exact add_nonneg hSN_nn
+          (mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hAterm_nn)
+      calc
+        Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) (iterCov (I := I) g₁ r T (N + 1) x))
+            ≤ Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)
+                + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) b)
+                + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) c) := htri
+        _ = Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)
+            + (Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) b)
+              + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) c)) := by rw [add_assoc]
+        _ ≤ Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)
+            + (Racc N * (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) +
+              cstep * (DN * SN)) := add_le_add_right hbc _
+        _ ≤ (1 + Racc N + cstep * DN) *
+            (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) := hmain
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
