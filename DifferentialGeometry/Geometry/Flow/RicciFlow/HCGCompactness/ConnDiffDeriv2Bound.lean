@@ -648,8 +648,6 @@ noncomputable def mixedCommC (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
       (2 * (s : ℝ) + 1) * (3 / 2 * Λ ^ 3 * Λ')))
 
 open DifferentialGeometry.Integral.Connection in
-set_option maxHeartbeats 1600000 in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem covDConnDiff2_gJet_le
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -688,9 +686,7 @@ theorem covDConnDiff2_gJet_le
   have hs5 : Real.sqrt (Λ ^ 5) = Λ ^ 2 * Real.sqrt Λ := by
     rw [show Λ ^ 5 = (Λ ^ 2) ^ 2 * Λ by ring, Real.sqrt_mul (by positivity),
       Real.sqrt_sq (by positivity)]
-
   have hcore := covDConnDiff2_g1_le (I := I) g₂ g₁ x v' v w u
-
   have hM3 : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 5
       (metricCovDeriv (I := I) g₁ g₂ 3 x)) ≤ Λ ^ 2 * Real.sqrt Λ * Λ''' := by
     have hcomp := DifferentialGeometry.Geometry.Curvature.sqrt_normSq0S_comp (I := I) hEq hx 5
@@ -730,7 +726,6 @@ theorem covDConnDiff2_gJet_le
     exact mul_le_mul_of_nonneg_left
       (mul_le_mul_of_nonneg_left hJ1 (mul_nonneg hLnn (Real.sqrt_nonneg _)))
       (by norm_num : (0 : ℝ) ≤ 3 / 2)
-
   set M3 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 5
     (metricCovDeriv (I := I) g₁ g₂ 3 x)) with hM3def
   set M2 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
@@ -751,7 +746,6 @@ theorem covDConnDiff2_gJet_le
   have hc2nn : (0 : ℝ) ≤ Λ ^ 2 * Λ'' := mul_nonneg (by positivity) hL''nn
   have hc3nn : (0 : ℝ) ≤ 3 / 2 * (Λ * Real.sqrt Λ * Λ') :=
     mul_nonneg (by norm_num) hc1nn
-
   have hp1 : M2 * NA ≤ 3 / 2 * (Λ ^ 3 * Real.sqrt Λ * Λ' * Λ'') := by
     have h := mul_le_mul hM2 hNA hNAnn hc2nn
     refine le_trans h (le_of_eq ?_)
@@ -773,7 +767,6 @@ theorem covDConnDiff2_gJet_le
   have hbrnn : (0 : ℝ) ≤ 3 / 2 * M3 + M2 * NA + 2 * M1 * (3 / 2 * M2 + M1 * NA) :=
     add_nonneg (add_nonneg (by linarith) (mul_nonneg hM2nn hNAnn))
       (mul_nonneg (by linarith) (add_nonneg (by linarith) (mul_nonneg hM1nn hNAnn)))
-
   set B2 : TangentSpace I x :=
     covDerivConnDiff2 (I := I) g₂ g₁
       (smoothExtensionTangent (I := I) x v') (smoothExtensionTangent (I := I) x v)
@@ -821,7 +814,7 @@ theorem covDConnDiff2_gJet_le
           (Real.sqrt Λ * Real.sqrt (g₂.inner x v v)) *
           (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
           (Real.sqrt Λ * Real.sqrt (g₂.inner x u u)) by positivity)
-    nlinarith [h1, h2]
+    linarith [h1, h2]
   calc Real.sqrt (g₂.inner x B2 B2)
       ≤ Real.sqrt Λ * Real.sqrt (g₁.inner x B2 B2) := hBcomp
     _ ≤ Real.sqrt Λ *
