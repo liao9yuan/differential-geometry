@@ -498,6 +498,7 @@ theorem NormalBallChart.MetricEquivOn.core_dist
           (riemannianEDist I (c.hom z) x).toReal := hfull'
   exact ⟨hxcore, hcoord⟩
 
+omit [CompleteSpace E] in
 theorem H6NormalData.metric_buffer
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

@@ -1203,6 +1203,7 @@ noncomputable def stageScale
       ConnectedSpace (X.obj k).M) : Real :=
   min (baseScale d hre hcomplete hconn) (d.ratio / 96)
 
+omit [CompleteSpace E] in
 theorem stageScale_pos
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd)
@@ -1217,6 +1218,7 @@ theorem stageScale_pos
       (d.exists_live_scale hre hcomplete hconn)).1
   · exact div_pos d.ratio_pos (by norm_num)
 
+omit [CompleteSpace E] in
 theorem stageScale_ratio
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd)
