@@ -1627,7 +1627,6 @@ private theorem reindexSubH2
     reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     ContinuousLinearMap.sub_apply]
 
-set_option maxHeartbeats 4000000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connSecZeroH2
     (g : SmoothRiemannianMetric I M) :
@@ -1644,7 +1643,6 @@ private theorem connSecZeroH2
   change om (0 : Fin 1 → TangentSpace I x) = 0
   exact ContinuousMultilinearMap.map_zero om
 
-set_option maxHeartbeats 4000000 in
 private theorem connSecBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1785,7 +1783,6 @@ private theorem connSecPairH2
       mul_nonneg hc1 hD3]
   exact hraw.trans (pow_le_pow_left₀ hold hlin 2)
 
-set_option maxHeartbeats 1600000 in
 private theorem connInnBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1837,7 +1834,6 @@ private theorem connInnBddH2
       simp only [B]
       nlinarith [sq_nonneg (C R * (1 + A))]
 
-set_option maxHeartbeats 1600000 in
 private theorem connOutBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1898,7 +1894,6 @@ private theorem connOutBddH2
       mul_le_mul_of_nonneg_left hs (by norm_num)
     _ = (B R * (1 + A)) ^ 2 := by simp only [B]; ring
 
-set_option maxHeartbeats 1600000 in
 private theorem connInnPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1972,7 +1967,6 @@ private theorem connInnPairH2
       simp only [B]
       nlinarith [sq_nonneg (C R * (D3 + D2 + A * D2))]
 
-set_option maxHeartbeats 1600000 in
 private theorem connOutPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2097,7 +2091,6 @@ private noncomputable def aaBlkH2
     (appCcRS (I := I) (M := M) g 2 3 4
       (connDiffContrInsertionField (I := I) g gm) Z)
 
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem aaKerEqH2 (g gm : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g gm =
@@ -2218,7 +2211,6 @@ private theorem aaCap3H2
   unfold aaCapH2
   rcases hρ with rfl | rfl <;> linarith
 
-set_option maxHeartbeats 1600000 in
 private theorem aaBlkBoundH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2250,7 +2242,6 @@ private theorem aaBlkBoundH2
       (jetNn (I := I) (M := M) (m := 2) g
         (permCoeff (I := I) (M := M) g pm)))).trans_eq (by ring)
 
-set_option maxHeartbeats 2200000 in
 private theorem aaBlkPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2358,7 +2349,6 @@ private theorem jetSum6H2
     (jetAdd (I := I) (M := M) g 2
       (Y0 + Y1 + Y2 + Y3 + Y4) Y5).trans (by linarith)
 
-set_option maxHeartbeats 3200000 in
 private theorem aaKerBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3186,7 +3176,6 @@ private theorem refoldSubH2
   rw [domSubH2, slotExtend_sub, slotExtend_sub, rspermSubH2,
     appCcRS_sub_right]
 
-set_option maxHeartbeats 1600000 in
 private theorem refoldH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3260,7 +3249,6 @@ private theorem refoldH2
       simp only [K, P]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem inputSymmH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5497,7 +5485,6 @@ private theorem amixHalfH2Pair
   simp only [B0, B1]
   exact amixScalar (hBhnn R hR) hCip hR hA hA4 hD2 hD3 hD4 hN hasq
 
-set_option maxHeartbeats 3200000 in
 private theorem amixH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5616,7 +5603,6 @@ private theorem amixH2Pair
         4 * Bp1 R * A4 * (D3 + N)) ^ 2 := by
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem riemH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5717,7 +5703,6 @@ private theorem riemH2Pair
   exact pow_le_pow_left₀ (mul_nonneg hC hN) hbig 2
 
 set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 theorem selfLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5973,7 +5958,6 @@ theorem selfLow_pair_h2
   rw [hZg, hZl, hZv, hZa, hZr]
   ring
 
-set_option maxHeartbeats 3200000 in
 theorem c0Diff_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7396,7 +7380,6 @@ private theorem riem_h3_pair
     (mul_le_mul_of_nonneg_left hNle hC) 2
 
 set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem vb_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8116,7 +8099,6 @@ private theorem vb_h3_pair
   exact localPairSq (hBhnn R hR) hD3 hN
 
 set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem amixHalf_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9036,7 +9018,6 @@ private theorem amixHalf_h3_pair
   simp only [B]
   exact localPairSq (hBhnn R hR) hD3 hN
 
-set_option maxHeartbeats 3200000 in
 private theorem amix_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9142,7 +9123,6 @@ private theorem amix_h3_pair
       ring
 
 set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem selfLow_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9393,7 +9373,6 @@ private theorem selfLow_h3_pair
   simp only [B, Zg, Zl, Zv, Za, Zr, F, S]
   ring
 
-set_option maxHeartbeats 3200000 in
 theorem c0_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
