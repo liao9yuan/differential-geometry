@@ -15,12 +15,20 @@ source membership for every contraction.  Together these results remove the
 moving-center quantifier gap that a pointwise normal-ball radius cannot
 address.
 
+`DiagInvBranch.min_join_chord` identifies the selected minimizing join between
+two sufficiently nearby points on one complete intrinsic geodesic with the
+corresponding affine subarc, including reversed parameter order.  This is the
+local continuation input used by the clopen propagation proof for the maximal
+slice locus.
+
 Focused verification, the targeted module build, the root aggregate check,
 and direct axiom inspection passed.  The public endpoints depend only on
 `propext`, `Classical.choice`, and `Quot.sound`; the current full-project build
 is pending.
 
-This is branch-control infrastructure rather than the convex-stratum theorem.
-It is consumed by `RiemannianMetricComplete.exists_slice_succ`, whose local
-dimension-growth conclusion is verified.  The maximal dense-stratum theorem
-and the Soul theorem remain unstated and therefore 0%.
+This is branch-control infrastructure.  It is consumed both by
+`RiemannianMetricComplete.exists_slice_succ` and by the verified maximal-locus
+propagation theorem in `ConvexStratum.lean`.  The capstone
+`RiemannianMetricComplete.max_stratum_spec` and its textbook-facing existential
+form `exists_max_stratum` are verified.  The Soul theorem remains unstated and
+therefore 0%.

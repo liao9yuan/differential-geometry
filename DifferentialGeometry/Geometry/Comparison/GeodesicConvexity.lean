@@ -83,6 +83,14 @@ def IsTotallyConvex (g : SmoothRiemannianMetric I M) (S : Set M) : Prop :=
     ContinuousOn γ (Set.Icc a b) →
     γ a ∈ S → γ b ∈ S → Set.MapsTo γ (Set.Icc a b) S
 
+def IsTotallyGeodesic (g : SmoothRiemannianMetric I M) (S : Set M) : Prop :=
+  ∀ p ∈ S, ∃ U : Set M, IsOpen U ∧ p ∈ U ∧
+    ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
+      Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+      ContinuousOn γ (Set.Icc a b) →
+      Set.MapsTo γ (Set.Icc a b) U →
+      γ a ∈ S → γ b ∈ S → Set.MapsTo γ (Set.Icc a b) S
+
 namespace IsGeodesicConvex
 
 variable {g : SmoothRiemannianMetric I M} {f : M → ℝ}
@@ -166,6 +174,13 @@ end IsGeodesicConcaveOn
 namespace IsTotallyConvex
 
 variable {g : SmoothRiemannianMetric I M} {S T : Set M}
+
+theorem is_totally_geodesic (hS : IsTotallyConvex (I := I) g S) :
+    IsTotallyGeodesic (I := I) g S := by
+  intro p hp
+  refine ⟨Set.univ, isOpen_univ, Set.mem_univ p, ?_⟩
+  intro γ a b hab hγ hcont hmap ha hb
+  exact hS hab hγ hcont ha hb
 
 theorem mapsTo (hS : IsTotallyConvex (I := I) g S) {γ : ℝ → M}
     {a b : ℝ} (hab : a ≤ b)

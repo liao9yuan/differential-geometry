@@ -2,10 +2,15 @@
 
 ## Scope
 
-This module contains two deliberately distinct convexity interfaces.
+This module contains deliberately distinct local and global geodesic
+interfaces.
 `IsGeodesicallyConvexWith join S` says that one selected family of joins stays
 inside `S`.  `IsTotallyConvex g S` says that every ambient geodesic segment
 whose endpoints lie in `S` stays inside `S`.
+
+`IsTotallyGeodesic g S` is the local chord version: around every point of `S`,
+ambient geodesic chords with endpoints in `S` stay in `S`.  It is strictly
+local and does not identify total geodesy with global total convexity.
 
 The total-convexity definition explicitly quantifies the curve and its two
 parameter endpoints.  It does not require the geodesic to be minimizing.  This
@@ -38,6 +43,8 @@ joined inside that set.  A nonempty totally convex set is therefore
 path-connected and connected via `IsTotallyConvex.isPathConnected` and
 `IsTotallyConvex.isConnected`; these are the connectivity inputs used by the
 classical convex-stratum theorem.
+`IsTotallyConvex.is_totally_geodesic` supplies the canonical implication from
+the stronger global property to the local chord property.
 
 The selected-join interface remains useful for local ball and HCG arguments,
 but it is not used as the definition of total convexity.
@@ -48,18 +55,20 @@ The canonical total-convexity and scalar geodesic-convexity interfaces are
 complete.  Busemann concavity under nonnegative sectional curvature now feeds
 these interfaces and produces a compact totally convex exhaustion.  Generic
 inner-parallel and deepest-set consumers live in `ConvexShaving.lean`.  The
-next genuine Soul frontier is the dense smooth-stratum theorem and concavity
-of distance to its relative boundary, followed by strict dimension drop and
-the passage to a compact boundaryless totally geodesic submanifold.
+dense smooth-stratum theorem is now verified in `ConvexStratum.lean`.  The next
+genuine Soul frontier is concavity of distance to its relative boundary,
+followed by strict dimension drop and the passage to a compact boundaryless
+totally geodesic submanifold.
 
 The Soul theorem remains unstated and therefore 0%; its dedicated machinery
-is approximately 32--33%.  The whole B1 nonnegative-curvature lane is
-approximately 22--25%, and the whole post-HCG Poincare program remains
-approximately 15--20%.
+is approximately 48--52%.  The whole B1 nonnegative-curvature lane is
+approximately 30--34%, and the whole post-HCG Poincare program remains
+approximately 18--22%.
 
 ## Verification
 
-Focused, targeted, and full-project verification passed.  The edited source
-introduced no warnings or placeholders, and direct axiom verification of the
-new relative superlevel and connectivity consumers found only `propext`,
-`Classical.choice`, and `Quot.sound`.
+Focused and targeted verification and the root aggregate check passed.  The
+edited source introduced no warnings or placeholders, and direct axiom
+verification of the new total-geodesy bridge found only `propext`,
+`Classical.choice`, and `Quot.sound`.  The current full-project build is
+pending.

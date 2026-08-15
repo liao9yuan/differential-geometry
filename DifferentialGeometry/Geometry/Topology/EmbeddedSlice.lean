@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.ChartRegistration
 import Mathlib.Analysis.Normed.Module.FiniteDimension
+import Mathlib.Data.Nat.Lattice
 import Mathlib.Topology.LocallyClosed
 
 open Set Topology
@@ -23,6 +24,15 @@ def IsEmbeddedSlice (I : ModelWithCorners ℝ E H) (d : ℕ) (N : Set M) : Prop 
         Module.finrank ℝ A.direction = d ∧
         Φ.toPartialEquiv.IsImage N (A : Set E)
 
+def sliceDims (I : ModelWithCorners ℝ E H) (C : Set M) : Set ℕ :=
+  {d | ∃ N : Set M, N.Nonempty ∧ N ⊆ C ∧ IsEmbeddedSlice I d N}
+
+noncomputable def maxSliceDim (I : ModelWithCorners ℝ E H) (C : Set M) : ℕ :=
+  sSup (sliceDims I C)
+
+def maxSliceLocus (I : ModelWithCorners ℝ E H) (C : Set M) : Set M :=
+  {x | ∃ N : Set M, x ∈ N ∧ N ⊆ C ∧ IsEmbeddedSlice I (maxSliceDim I C) N}
+
 private noncomputable def extChartPD [I.Boundaryless] [IsManifold I ∞ M]
     (x : M) : PartialDiffeomorph I 𝓘(ℝ, E) M E ∞ where
   toPartialEquiv := extChartAt I x
@@ -45,6 +55,36 @@ theorem of_affine_subspace (A : AffineSubspace ℝ E)
   · intro y _
     change (y ∈ (A : Set E) ↔ y ∈ (A : Set E))
     exact Iff.rfl
+
+theorem singleton [I.Boundaryless] [IsManifold I ∞ M] (x : M) :
+    IsEmbeddedSlice I 0 ({x} : Set M) := by
+  intro y hy
+  rw [Set.mem_singleton_iff] at hy
+  subst y
+  let Φ := extChartPD (I := I) x
+  let A := AffineSubspace.mk' (Φ x) (⊥ : Submodule ℝ E)
+  have hxΦ : x ∈ Φ.source := mem_extChartAt_source x
+  have hAfin : FiniteDimensional ℝ A.direction := by
+    dsimp only [A]
+    rw [AffineSubspace.direction_mk']
+    infer_instance
+  refine ⟨Φ, A, hAfin, hxΦ, ?_, ?_⟩
+  · rw [AffineSubspace.direction_mk', finrank_bot]
+  · intro y hy
+    change Φ y ∈ AffineSubspace.mk' (Φ x) (⊥ : Submodule ℝ E) ↔
+      y ∈ ({x} : Set M)
+    rw [AffineSubspace.mem_mk', Submodule.mem_bot, vsub_eq_zero_iff_eq,
+      Set.mem_singleton_iff]
+    exact ⟨fun h ↦ Φ.toPartialEquiv.injOn hy hxΦ h, fun h ↦ congrArg Φ h⟩
+
+theorem dim_le [FiniteDimensional ℝ E] {N : Set M} {d : ℕ}
+    (hN : IsEmbeddedSlice I d N) (hne : N.Nonempty) :
+    d ≤ Module.finrank ℝ E := by
+  obtain ⟨x, hx⟩ := hne
+  obtain ⟨_, A, hAfin, _, hdim, _⟩ := hN x hx
+  letI : FiniteDimensional ℝ A.direction := hAfin
+  rw [← hdim]
+  exact A.direction.finrank_le
 
 theorem image
     {H' : Type*} [TopologicalSpace H'] {J : ModelWithCorners ℝ E H'}
@@ -105,6 +145,17 @@ theorem image
       change Φ.toPartialEquiv.symm (Φ.toPartialEquiv u) ∈ S
       rw [Φ.toPartialEquiv.left_inv (hsub huS)]
       exact huS
+
+theorem image_smul {S : Set E} {d : ℕ}
+    (hS : IsEmbeddedSlice 𝓘(ℝ, E) d S) {t : ℝ} (ht : t ≠ 0) :
+    IsEmbeddedSlice 𝓘(ℝ, E) d ((fun x : E ↦ t • x) '' S) := by
+  let e : E ≃L[ℝ] E := ContinuousLinearEquiv.smulLeft (Units.mk0 t ht)
+  have hsub : S ⊆ e.toDiffeomorph.toPartialDiffeomorph.source := by
+    intro x _
+    exact Set.mem_univ x
+  simpa only [e, ContinuousLinearEquiv.coe_toDiffeomorph,
+    ContinuousLinearEquiv.smulLeft_apply_apply, Units.smul_def] using
+      hS.image e.toDiffeomorph.toPartialDiffeomorph hsub
 
 theorem inter_open {S U : Set M} {d : ℕ}
     (hS : IsEmbeddedSlice I d S) (hU : IsOpen U) :
@@ -249,6 +300,33 @@ theorem of_is_open [I.Boundaryless] [IsManifold I ∞ M]
     · intro _
       exact AffineSubspace.mem_top ℝ E (Φ y)
 
+theorem of_germ {S : Set M} {d : ℕ}
+    (h : ∀ x ∈ S,
+      ∃ (N U : Set M), IsEmbeddedSlice I d N ∧ IsOpen U ∧
+        x ∈ U ∧ x ∈ N ∧ U ∩ S = U ∩ N) :
+    IsEmbeddedSlice I d S := by
+  intro x hxS
+  obtain ⟨N, U, hN, hU, hxU, hxN, heq⟩ := h x hxS
+  obtain ⟨c, A, hAfin, hxc, hdim, himage⟩ := hN x hxN
+  let e := c.toOpenPartialHomeomorph
+  let s := c.source ∩ U
+  have hs : IsOpen s := c.open_source.inter hU
+  have hse : s ⊆ e.source := inter_subset_left
+  let Φ :=
+    DifferentialGeometry.Tensor.Coordinates.PartialDiffeomorph.ofOpenPartialHomeomorphRestr
+      e s hs hse (c.contMDiffOn_toFun.mono inter_subset_left)
+        (c.contMDiffOn_invFun.mono (by
+          rintro y ⟨z, hz, rfl⟩
+          exact c.map_source' hz.1))
+  refine ⟨Φ, A, hAfin, ⟨hxc, hxU⟩, hdim, ?_⟩
+  intro y hy
+  change c y ∈ (A : Set E) ↔ y ∈ S
+  rw [himage.apply_mem_iff hy.1]
+  have hmem : y ∈ S ↔ y ∈ N := by
+    have hmem' := Set.ext_iff.mp heq y
+    simpa only [Set.mem_inter_iff, hy.2, true_and] using hmem'
+  exact hmem.symm
+
 theorem is_open [FiniteDimensional ℝ E] {N : Set M}
     (hN : IsEmbeddedSlice I (Module.finrank ℝ E) N) : IsOpen N := by
   rw [isOpen_iff_mem_nhds]
@@ -281,5 +359,43 @@ theorem is_locally_closed {N : Set M} {d : ℕ}
   exact A.closed_of_finiteDimensional.preimage hcont
 
 end IsEmbeddedSlice
+
+theorem slice_dims_nonempty [I.Boundaryless] [IsManifold I ∞ M]
+    {C : Set M} (hC : C.Nonempty) : (sliceDims I C).Nonempty := by
+  obtain ⟨x, hxC⟩ := hC
+  exact ⟨0, {x}, Set.singleton_nonempty x, Set.singleton_subset_iff.mpr hxC,
+    IsEmbeddedSlice.singleton x⟩
+
+theorem slice_dims_bdd [FiniteDimensional ℝ E] (I : ModelWithCorners ℝ E H)
+    (C : Set M) : BddAbove (sliceDims I C) := by
+  refine ⟨Module.finrank ℝ E, ?_⟩
+  rintro d ⟨N, hNne, _, hN⟩
+  exact hN.dim_le hNne
+
+theorem max_slice_dim_mem [I.Boundaryless] [IsManifold I ∞ M]
+    [FiniteDimensional ℝ E] {C : Set M} (hC : C.Nonempty) :
+    maxSliceDim I C ∈ sliceDims I C :=
+  Nat.sSup_mem (slice_dims_nonempty (I := I) hC) (slice_dims_bdd I C)
+
+theorem le_max_slice_dim [FiniteDimensional ℝ E] {C : Set M} {d : ℕ}
+    (hd : d ∈ sliceDims I C) : d ≤ maxSliceDim I C :=
+  le_csSup (slice_dims_bdd I C) hd
+
+theorem exists_max_slice [I.Boundaryless] [IsManifold I ∞ M]
+    [FiniteDimensional ℝ E] {C : Set M} (hC : C.Nonempty) :
+    ∃ N : Set M, N.Nonempty ∧ N ⊆ C ∧ IsEmbeddedSlice I (maxSliceDim I C) N :=
+  max_slice_dim_mem (I := I) hC
+
+theorem max_slice_nonempty [I.Boundaryless] [IsManifold I ∞ M]
+    [FiniteDimensional ℝ E] {C : Set M} (hC : C.Nonempty) :
+    (maxSliceLocus I C).Nonempty := by
+  obtain ⟨N, hNne, hNC, hN⟩ := exists_max_slice (I := I) hC
+  obtain ⟨x, hxN⟩ := hNne
+  exact ⟨x, N, hxN, hNC, hN⟩
+
+theorem max_slice_subset {C : Set M} : maxSliceLocus I C ⊆ C := by
+  rintro x ⟨N, hxN, hNC, _⟩
+  exact hNC hxN
+
 end Geometry
 end DifferentialGeometry

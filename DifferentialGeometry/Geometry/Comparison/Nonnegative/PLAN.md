@@ -166,28 +166,41 @@ explicit carrier.  The generic calculus proves compact maximum attainment and
 preservation of total convexity from geodesic concavity of boundary distance.
 It deliberately does not manufacture the smooth stratum or its boundary.
 
-The next N4 theorem endpoint is still the convex-stratum theorem for the
-minimum core `C`: a connected embedded totally geodesic smooth stratum `N`
-that is relatively open and dense in `C`, with closure `C`.  Its convex
-boundary is then `C \ N = frontierIn C N`.
+`Comparison/ConvexStratum.lean` now completes the maximal-dimension assembly
+expressible in the current API.  The local Sakai theorem `exists_slice_succ`
+raises dimension near a nonsaturated slice point.  The resulting maximal
+dimension is attained; `maxSliceLocus` is nonempty, contained in `C`, an
+embedded slice of that dimension, relatively open and dense in `C`, connected,
+and all-geodesic totally convex.  The canonical complete-metric package is
+`RiemannianMetricComplete.max_stratum_spec`.
 
-`Comparison/ConvexStratum.lean` now proves the local Sakai dimension-growth
-theorem `exists_slice_succ`.  From an embedded `d`-slice contained in `C` and
-a point approached by `C \ N`, it constructs a nonempty embedded `(d + 1)`-
-slice inside `C` and inside any prescribed neighborhood.  Its uniform
-diagonal inverse branch, minimizing-vector identification, local nearest-point,
-transversality, immersed-slice, and cone-slice inputs are implemented.
+`GeodesicConvexity.lean` now supplies the local-chord predicate
+`IsTotallyGeodesic` and the implication from global total convexity.  The
+textbook-facing `RiemannianMetricComplete.exists_max_stratum` is therefore also
+verified: it returns a connected embedded stratum that is relatively open and
+dense, totally convex, and locally totally geodesic.  The convex-stratum stage
+is 100%.
 
-This completes the local slice-growth step, not the global stratum theorem.
-The immediate frontier is maximal-dimension assembly: define the maximal
-slice dimension and prove that the union of maximal-dimensional embedded
-slices is relatively open, connected, dense, and totally geodesic in the
-compact totally convex core.  After that, the remaining producers are
-concavity of distance to the relative boundary, the flat-rectangle equality
-case, strict stratum-dimension drop, and the terminal submanifold.  Ambient
-`frontier C` cannot be used after dimension drop, while `frontierIn C C` is
-empty.  These gaps must not be replaced by an assumption bundle that restates
-the Soul theorem.
+The next genuine Soul producer is concavity on `C` of distance to the relative
+boundary `B = C \ maxSliceLocus I C`.  Once this is available, the generic
+`deepestSet` calculus gives the next compact totally convex core.  The later
+frontiers are the flat-rectangle equality case, strict stratum-dimension drop,
+the terminal boundaryless submanifold, and the normal-bundle diffeomorphism.
+Ambient `frontier C` cannot be used after dimension drop, while
+`frontierIn C C` is empty.  These gaps must not be replaced by an assumption
+bundle that restates the Soul theorem.
+
+The smallest honest hard leaf is the local affine upper support for boundary
+distance along a geodesic through `maxSliceLocus`: locally,
+`infDist (Γ s) B` must lie below its value at `t` plus `m * (s - t)` for some
+slope `m`.  `Analysis.concaveOn_of_upper` can then perform the one-dimensional
+assembly.  Sakai V.3 Lemma 3.3 derives this support from three producers not
+currently present in the library: the IV.5.7 boundary tangent-cone supporting
+half-space theorem, the sharp Rauch II(2) moving-base parallel-exponential
+estimate with Jacobi data `J(0) = v`, `J'(0) = 0`, and a local Toponogov/Rauch
+hinge comparison.  The existing endpoint Jacobi estimate treats `J(0) = 0`
+and cannot supply this sign.  Directly postulating relative concavity would
+hide these genuine comparison frontiers and is not an acceptable replacement.
 
 The pure topology and metric bridge beyond this theorem is already complete:
 the relative frontier is compact in a compact core, and a nonempty stratum and
@@ -199,10 +212,17 @@ representation, exact parameterizations, and local closedness;
 `Topology/ImmersedSlice.lean`, `Topology/ConeSlice.lean`, and
 `Topology/NearestPoint.lean` provide the inverse-function, radial-cone, and
 nearest-point inputs.  `Exponential/DiagInvBranch.lean` and
-`Comparison/MinimizingBranch.lean` supply uniform moving-center source control
-and identify the selected logarithm with the minimizing vector.  These files
-close local dimension growth, but they do not yet construct the maximal dense
-stratum.
+`Comparison/MinimizingBranch.lean` supply uniform moving-center source control,
+identify the selected logarithm with the minimizing vector, and identify short
+joins along one intrinsic geodesic with affine subarcs.  These inputs now feed
+the verified maximal dense-locus package.
+
+`ConvexShaving.frontier_shave_data` closes the topology-and-metric part of the
+nonterminal branch: it identifies `C \ N` with the relative frontier, proves
+that boundary compact, produces positive boundary distance, and packages a
+nonempty compact deepest set disjoint from the boundary and contained in `N`.
+It intentionally does not assert total convexity without the missing boundary-
+distance concavity theorem.
 
 ## Honest progress
 
@@ -230,24 +250,26 @@ stratum.
   targeted, full-project, and direct axiom verification.
 - The affine local-flat `IsEmbeddedSlice` representation, its affine/open
   producers, transport and restriction adapters, exact local parameterization,
-  full-dimensional openness converse, and local-closedness consumer: 100%
-  after focused, targeted, root-aggregate, and direct axiom verification;
-  full-project verification is pending.
+  full-dimensional openness converse, local-closedness consumer, maximal
+  dimension selection, and germ glue: 100% after focused, targeted,
+  root-aggregate, and direct axiom verification; full-project verification is
+  pending.
 - Local Sakai slice growth `exists_slice_succ`: 100% after focused, targeted,
   root-aggregate, and direct axiom verification.  It depends only on
   `propext`, `Classical.choice`, and `Quot.sound`.
-- Dense convex-stratum theorem `exists_convex_stratum`: unstated, therefore
-  0%; dedicated smooth-stratum machinery approximately 45%.  The remaining
-  substantial producer is maximal-dimension assembly, including relative
-  openness, connectedness, density, and total geodesy.
+- Maximal dense-locus package `max_stratum_spec`: 100% after focused, targeted,
+  root-aggregate, independent review, and direct axiom verification.  It gives
+  a nonempty embedded maximal slice that is relatively open and dense,
+  connected, and all-geodesic totally convex.
+- Textbook-facing `exists_max_stratum`: 100%, including the explicit local
+  `IsTotallyGeodesic` conclusion.
+- Relative-frontier metric shave package: 100%; the deepest set is nonempty,
+  compact, disjoint from the boundary, and contained in the dense stratum.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  38--40% through rays, convexity, compact exhaustion and minimum core, Calabi
-  comparison, the all-segment Busemann theorem, and the generic shaving and
-  relative-frontier consumers, together with the normal-coordinate
-  star-convex slice, affine local-flat representation, and local slice-growth
-  theorem.  The latter is one input to the convex-stratum stage and does not
-  discharge maximal-dimension assembly, later shaving, dimension drop, the
-  terminal submanifold, or the normal-bundle diffeomorphism.
-- Whole B1 nonnegative-curvature lane: approximately 22--25%.
-- Whole post-HCG Poincare program: still approximately 15--20%; this first B1
-  brick does not materially change that large denominator.
+  48--52% through rays, convexity, compact exhaustion and minimum core, Calabi
+  comparison, the all-segment Busemann theorem, generic shaving and
+  relative-frontier consumers, local slice growth, and the maximal dense-locus
+  package.  Boundary-distance concavity, flat rectangles, strict dimension
+  drop, the terminal submanifold, and the normal-bundle diffeomorphism remain.
+- Whole B1 nonnegative-curvature lane: approximately 30--34%.
+- Whole post-HCG Poincare program: approximately 18--22%.

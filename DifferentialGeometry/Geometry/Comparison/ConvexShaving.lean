@@ -115,6 +115,44 @@ theorem exists_frontier_dist [T2Space X] {A N : Set X}
   exact Set.disjoint_left.mp (disjoint_frontier_iff_isOpen.mpr hopen)
     hyfrontier hyN
 
+theorem frontier_shave_data [T2Space X] {C N : Set X}
+    (hC : IsCompact C) (hNne : N.Nonempty) (hNC : N ⊆ C)
+    (hopen : IsOpen (C ↓∩ N)) (hdense : Set.closureIn C N = C)
+    (hBne : (C \ N).Nonempty) :
+    Set.frontierIn C N = C \ N ∧
+      IsCompact (C \ N) ∧
+      (∃ x ∈ C, 0 < Metric.infDist x (C \ N)) ∧
+      (deepestSet C (C \ N)).Nonempty ∧
+      IsCompact (deepestSet C (C \ N)) ∧
+      deepestSet C (C \ N) ⊆ N ∧
+      Disjoint (deepestSet C (C \ N)) (C \ N) := by
+  have hfront : Set.frontierIn C N = C \ N :=
+    Set.frontierIn_eq_sdiff hopen hdense
+  have hBcompact : IsCompact (C \ N) := by
+    rw [← hfront]
+    exact Set.frontierIn_isCompact hC
+  have hCN : (C ∩ N).Nonempty := by
+    obtain ⟨x, hxN⟩ := hNne
+    exact ⟨x, hNC hxN, hxN⟩
+  have hfrontne : (Set.frontierIn C N).Nonempty := by
+    simpa only [hfront] using hBne
+  have hpos : ∃ x ∈ C, 0 < Metric.infDist x (C \ N) := by
+    have h := exists_frontier_dist hC hopen hCN hfrontne
+    simpa only [hfront] using h
+  have hCne : C.Nonempty := hNne.mono hNC
+  have hDne : (deepestSet C (C \ N)).Nonempty :=
+    deepestSet.nonempty hC hCne
+  have hDcompact : IsCompact (deepestSet C (C \ N)) :=
+    deepestSet.isCompact hC
+  have hDdisjoint : Disjoint (deepestSet C (C \ N)) (C \ N) :=
+    deepestSet.disjoint hpos
+  have hDsub : deepestSet C (C \ N) ⊆ N := by
+    intro x hxD
+    have hxC : x ∈ C := deepestSet.subset hxD
+    by_contra hxN
+    exact Set.disjoint_left.mp hDdisjoint hxD ⟨hxC, hxN⟩
+  exact ⟨hfront, hBcompact, hpos, hDne, hDcompact, hDsub, hDdisjoint⟩
+
 end Metric
 
 section Geodesic

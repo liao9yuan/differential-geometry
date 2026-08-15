@@ -28,6 +28,12 @@ nonempty stratum and frontier, `exists_frontier_dist` produces a carrier point
 at strictly positive distance from `frontierIn C N`.  This supplies the exact
 nondegeneracy input used by `deepestSet.disjoint`.
 
+`frontier_shave_data` packages the whole topology-and-metric part of one
+nonterminal shave.  Relative openness and density identify the boundary with
+`C \ N`; when this boundary is nonempty, it is compact, has positive distance
+from some carrier point, and its deepest set is nonempty, compact, disjoint
+from the boundary, and contained in `N`.
+
 ## Correctness boundary
 
 `Metric.infDist x empty = 0`, so an empty boundary makes every distance level
@@ -39,20 +45,28 @@ dimension-drop theorem.
 The classical relative boundary uses the dense smooth stratum `N` of `C`:
 `B = C \ N = frontierIn C N`.  `RelativeFrontier.lean` records this identity
 from relative openness and density.  Taking `frontierIn C C` instead gives an
-empty frontier.  Producing the embedded totally geodesic dense stratum remains
-a genuine missing theorem.
+empty frontier.  `ConvexStratum.lean` now produces the embedded, totally
+geodesic dense stratum; the missing geometric producer is concavity on `C` of
+distance to this relative boundary.
+
+The smallest hard leaf for that producer is Sakai's local affine upper support
+for boundary distance.  Its proof still needs a boundary tangent-cone
+supporting half-space theorem, a sharp moving-base parallel-exponential Rauch
+estimate with `J(0) = v` and `J'(0) = 0`, and a local hinge comparison.  The
+current Jacobi and Calabi APIs do not provide these statements, so this is a
+comparison-geometry blocker rather than a set-theoretic or instance issue.
 
 ## Verification
 
-Focused, targeted, and full-project verification passed without a new warning
-or placeholder.  Direct axiom verification of compactness, maximum attainment,
-the two total-convexity consumers, and the positive frontier-distance bridge
-found only `propext`, `Classical.choice`, and `Quot.sound`.
+Focused and targeted verification and the root aggregate check passed without
+a new warning or placeholder.  Direct axiom verification of the frontier
+shave package found only `propext`, `Classical.choice`, and `Quot.sound`.  The
+current full-project build is pending.
 
 ## Progress
 
 The Soul theorem remains unstated and therefore 0%.  Its dedicated machinery
-is approximately 32--33%; this module supplies generic shaving consumers, not
-the dense stratum, boundary-concavity, or dimension-drop producers.  The whole B1
-lane remains approximately 22--25%, and the whole post-HCG Poincare program
-remains approximately 15--20%.
+is approximately 48--52%; this module now closes the generic topology-and-
+metric shaving package, but not boundary concavity or dimension drop.  The
+whole B1 lane is approximately 30--34%, and the whole post-HCG Poincare program
+approximately 18--22%.

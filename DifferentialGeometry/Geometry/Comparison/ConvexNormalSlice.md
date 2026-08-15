@@ -42,12 +42,11 @@ new local producer chain found only `propext`, `Classical.choice`, and
 
 The local dimension-growth theorem `exists_slice_succ` is now stated, proved,
 and verified.  This normal-slice API supplies its coordinate and radial input.
-The next genuine N4 producer is maximal-dimension assembly: prove that the
-union of maximal embedded slices is relatively open, connected, dense, and
-totally geodesic in the compact totally convex core.
+The maximal-dimension assembly and textbook-facing `exists_max_stratum` are
+now verified in `ConvexStratum.lean`.  The next genuine N4 producer is
+concavity of distance to that stratum's relative boundary.
 
 The Soul theorem remains unstated and therefore 0%.  Its dedicated machinery
-is approximately 38--40%; the convex-stratum theorem remains unstated and 0%,
-with approximately 45% of its dedicated smooth-stratum machinery now present.
-The whole B1 lane remains approximately 22--25%, and the whole post-HCG
-Poincare program remains approximately 15--20%.
+is approximately 48--52%; the convex-stratum stage is 100%.  The whole B1 lane
+is approximately 30--34%, and the whole post-HCG Poincare program approximately
+18--22%.

@@ -126,6 +126,86 @@ theorem inv_eq_minimizingVec
   exact B.inv_eq_of_exp hsource
     (minimizingVec_exp (I := I) g hEnorm yz.1 yz.2)
 
+theorem min_join_chord
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {O : M} (v : TangentSpace I O) (s₀ : ℝ)
+    (B : DiagInvBranch (I := I) g hEnorm
+      (intrinsicGeodesic (I := I) g hEnorm O v s₀)) :
+    ∀ᶠ st : ℝ × ℝ in 𝓝 (s₀, s₀), ∀ t : ℝ,
+      minJoin (I := I) g hEnorm
+          (intrinsicGeodesic (I := I) g hEnorm O v st.2)
+          (intrinsicGeodesic (I := I) g hEnorm O v st.1) t =
+        intrinsicGeodesic (I := I) g hEnorm O v
+          (t * (st.1 - st.2) + st.2) := by
+  let γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm O v
+  let pair : ℝ × ℝ → M × M := fun st ↦ (γ st.2, γ st.1)
+  have hγ : Continuous γ :=
+    intrinsicGeodesic_continuous (I := I) g hEnorm O v
+  have hpair : Filter.Tendsto pair (𝓝 (s₀, s₀)) (𝓝 (γ s₀, γ s₀)) := by
+    exact (hγ.comp continuous_snd).continuousAt.prodMk
+      (hγ.comp continuous_fst).continuousAt
+  have hinv := hpair.eventually B.inv_eq_minimizingVec
+  rcases B.exists_source_tube with ⟨A, hA, δ, hδ, hsource⟩
+  have hbase : {st : ℝ × ℝ | γ st.2 ∈ A} ∈ 𝓝 (s₀, s₀) :=
+    (hγ.comp continuous_snd).continuousAt hA
+  have hsmall :
+      {st : ℝ × ℝ |
+        |st.1 - st.2| * Real.sqrt (g.inner O v v) < δ} ∈
+        𝓝 (s₀, s₀) := by
+    apply (isOpen_lt
+      ((continuous_fst.sub continuous_snd).abs.mul continuous_const)
+      continuous_const).mem_nhds
+    change |s₀ - s₀| * Real.sqrt (g.inner O v v) < δ
+    simpa only [sub_self, abs_zero, zero_mul] using hδ
+  filter_upwards [hinv, hbase, hsmall] with st hinv hbase hsmall
+  let q : M := γ st.2
+  let w : TangentSpace I q :=
+    (st.1 - st.2) • mfderiv 𝓘(ℝ, ℝ) I γ st.2 (1 : ℝ)
+  have hwlen : Real.sqrt (g.inner q w w) =
+      |st.1 - st.2| * Real.sqrt (g.inner O v v) := by
+    have hspeed :
+        g.inner (γ st.2) (mfderiv 𝓘(ℝ, ℝ) I γ st.2 (1 : ℝ))
+            (mfderiv 𝓘(ℝ, ℝ) I γ st.2 (1 : ℝ)) = g.inner O v v := by
+      simpa only [γ] using
+        intrinsicGeodesic_speedSq_eq (I := I) g hEnorm O v st.2
+    dsimp only [q, w]
+    rw [gInner_smul_self, hspeed,
+      Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq_eq_abs]
+  have hwsource : (⟨q, w⟩ : TangentBundle I M) ∈ B.hom.source := by
+    apply hsource q hbase
+    rw [hwlen]
+    exact hsmall
+  have hwexp : expMapIntrinsic (I := I) g hEnorm q w = γ st.1 := by
+    have hcont := congrFun
+      (intrinsicGeodesic_continuation (I := I) g hEnorm O v st.2)
+      (st.1 - st.2)
+    dsimp only [w]
+    rw [expMapIntrinsic_def,
+      intrGeo_smul_apply (I := I) g hEnorm q _ _ 1, mul_one]
+    rw [← hcont]
+    congr 1
+    ring
+  have hmin : minimizingVec (I := I) g hEnorm q (γ st.1) = w := by
+    have hbranch := B.inv_eq_of_exp hwsource hwexp
+    have htotal :
+        (⟨q, minimizingVec (I := I) g hEnorm q (γ st.1)⟩ :
+            TangentBundle I M) = (⟨q, w⟩ : TangentBundle I M) := by
+      simpa only [pair, q] using hinv.symm.trans hbranch
+    exact congrArg TotalSpace.snd htotal
+  intro t
+  rw [minJoin, hmin]
+  dsimp only [w]
+  rw [
+    intrGeo_smul_apply (I := I) g hEnorm q _ _ t]
+  have hcont := congrFun
+    (intrinsicGeodesic_continuation (I := I) g hEnorm O v st.2)
+    ((st.1 - st.2) * t)
+  rw [← hcont]
+  congr 1
+  ring
+
 end Normed
 
 section Framed
