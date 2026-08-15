@@ -1247,6 +1247,18 @@ private def symmVelocityDiffSec (g₀ : SmoothRiemannianMetric I M) (T T' : Smoo
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
       (ccTensor02Symm (I := I) (M := M) g₀ (T - T')).toSection y) (unitZeroSec (I := I) (M := M) y)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private lemma iteratedCovGrad_zero_unit_eq_symmVelocityDiffSec
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) (x : M) :
+    (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+        Tensor0SBundle.Tensor0SSpace 2 I x from
+      (iteratedCovGrad (I := I) g₀ 0 2 0
+        (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection x)
+        (unitTensor (I := I) (M := M) x) =
+      symmVelocityDiffSec (I := I) (M := M) g₀ T T' x := by
+  rw [iteratedCovGrad_zero]
+  rfl
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma hUnitSec_tsmdiffAt (g₀ : SmoothRiemannianMetric I M)
@@ -1954,8 +1966,6 @@ private lemma lichnerowiczFib_toModel_eq_fourTrace (g₀ : SmoothRiemannianMetri
   rw [Finset.sum_sub_distrib, Finset.sum_add_distrib]
   ring
 
-set_option maxRecDepth 16000 in
-
 private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (_hδ_lt : δ < 1)
@@ -2104,7 +2114,11 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
         (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
           (iteratedCovGrad (I := I) g₀ 0 2 0
-            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v from rfl]
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v from by
+    rw [unitModel, appCc_toSection, linearizedRicciConnDiffOrder0Coeff_toSection,
+      ContinuousLinearMap.comp_apply, linearizedRicciConnDiffOrder0CometricTracedCLM_apply,
+      iteratedCovGrad_zero_unit_eq_symmVelocityDiffSec]
+  ]
   ring
 
 theorem linearizedRicciAt_eq_threeArm_connDiffCoeff (g₀ : SmoothRiemannianMetric I M)

@@ -73,7 +73,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section UniformBound
 
-set_option maxRecDepth 16000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope
@@ -323,6 +322,16 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
             linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x)
           (Module.finrank ℝ E) e K J) ^ 2 ≤ Mc0 ^ 2 := by
       intro K J
+      have hread : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+          (show Tensor0SBundle.TensorRSSpace 2 2 I x from
+            linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x)
+          (Module.finrank ℝ E) e K J =
+          Tensor0SBundle.Tensor0SSpace.toModel
+            (linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x
+              (coframeS (I := I) (M := M) g₀ x 2 e K))
+            (fun j => ((e (J j) : TangentSpace I x) : E)) := by
+        exact fiberNormSqComponent_eq_toModel_coframe (I := I) (M := M) g₀ x 2 2
+          (linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) e K J
       have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
           (show Tensor0SBundle.TensorRSSpace 2 2 I x from
             linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x)
@@ -331,7 +340,9 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
             (ricciCometricFourTraceCLM (I := I) g₁ x
               (linearizedRicciConnDiffOrder0CLM (I := I) x A DAv
                 (coframeS (I := I) (M := M) g₀ x 2 e K)))
-            (fun j => ((e (J j) : TangentSpace I x) : E)) := rfl
+            (fun j => ((e (J j) : TangentSpace I x) : E)) := by
+        rw [hread, linearizedRicciConnDiffOrder0CometricTracedCLM_apply,
+          ← hAset, ← hDAset]
       have hfpb := fibPointwiseBound_order0CLM (I := I) g₀ x e horth hrepr_v A hCA_nn hpwA'
         DAv hCcd0 hDAf (fibPointwiseBound_coframe (I := I) g₀ x 2 e horth K)
       have hb := fourTrace_toModel_bound (I := I) g₀ g₁ x e horth hrepr_v hq0 hqb hfpb

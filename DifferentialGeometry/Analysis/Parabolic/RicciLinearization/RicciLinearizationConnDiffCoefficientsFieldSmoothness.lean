@@ -375,6 +375,17 @@ noncomputable def linearizedRicciConnDiffOrder0CometricTracedCLM
       ((connDiffSection (I := I) g₁ g₀).toSection x)
       ((covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)).toSection x))
 
+omit [NeZero (Module.finrank ℝ E)] in
+@[simp] theorem linearizedRicciConnDiffOrder0CometricTracedCLM_apply
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x) :
+    linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x D =
+      ricciCometricFourTraceCLM (I := I) g₁ x
+        (linearizedRicciConnDiffOrder0CLM (I := I) x
+          ((connDiffSection (I := I) g₁ g₀).toSection x)
+          ((covGrad (I := I) (M := M) g₀ 1 2
+            (connDiffSection (I := I) g₁ g₀)).toSection x) D) := by
+  rw [linearizedRicciConnDiffOrder0CometricTracedCLM, ContinuousLinearMap.comp_apply]
+
 set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -479,6 +490,18 @@ def linearizedRicciConnDiffOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' s)
+
+@[simp] theorem linearizedRicciConnDiffOrder0Coeff_toSection
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) :
+    (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s).toSection x =
+      (show Tensor0SBundle.TensorRSSpace 2 2 I x from
+        linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) x) := rfl
 
 
 theorem linearizedRicciConnDiffOrder0Coeff_eq_base_add_sub
