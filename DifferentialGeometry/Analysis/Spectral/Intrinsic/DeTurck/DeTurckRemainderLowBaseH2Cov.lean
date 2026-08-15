@@ -156,8 +156,6 @@ theorem armSuccEq
   · rfl
   · rfl
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem armSub
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -407,8 +405,6 @@ theorem armBddH2
       mul_le_mul_of_nonneg_left h0 (pow_nonneg (Nat.cast_nonneg _) 2)
     _ = ((Module.finrank ℝ E : ℝ) * Bs R * A) ^ 2 := by ring
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 theorem armPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -659,7 +655,6 @@ theorem quadTelA
   rw [domSub, appCcRS_sub_right, appCcRS_sub_left]
   module
 
-set_option maxHeartbeats 1600000 in
 theorem quadPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -774,7 +769,6 @@ theorem envOne {A : ℝ} (hA : 0 ≤ A) : (1 : ℝ) ≤ (1 + A) ^ 4 := by
       mul_le_mul h2 h2 zero_le_one (by positivity)
     _ = (1 + A) ^ 4 := by ring
 
-set_option maxHeartbeats 1600000 in
 theorem r4BddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1322,7 +1316,6 @@ theorem covXBddH2
         (mul_le_mul_of_nonneg_left hbase hfr) hfr
     _ = fr ^ 2 * Dr R * (1 + A) ^ 4 := by ring
 
-set_option maxHeartbeats 1600000 in
 theorem covXPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1422,8 +1415,6 @@ theorem edgeEq
             Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
           ![(-1 : ℝ), -1, 1] s := rfl
 
-set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 theorem lieCovH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
