@@ -7,7 +7,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
