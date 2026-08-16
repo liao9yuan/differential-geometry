@@ -28,6 +28,43 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+private lemma unit_interval_sq_le_one {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) :
+    s ^ 2 ≤ 1 := by
+  nlinarith
+
+private lemma one_le_one_add_sq {A : ℝ} (hA : 0 ≤ A) :
+    1 ≤ (1 + A) ^ 2 := by
+  nlinarith
+
+private lemma sq_le_one_add_sq {A : ℝ} (hA : 0 ≤ A) :
+    A ^ 2 ≤ (1 + A) ^ 2 := by
+  nlinarith
+
+private lemma vb_k2_factor (C B X Y Z : ℝ) :
+    C * B ^ 2 * (2 * (X * Z + Y * Z)) =
+      (C * B ^ 2 * (2 * (X + Y))) * Z := by
+  ring
+
+private lemma vb_inner_factor (C X Y p u : ℝ) :
+    C * (X * p) * (Y * (p * u)) =
+      (C * X * Y) * ((p * p) * u) := by
+  ring
+
+private lemma vb_inner_factor_swap (C X Y p u : ℝ) :
+    C * (X * (p * u)) * (Y * p) =
+      (C * X * Y) * ((p * p) * u) := by
+  ring
+
+private lemma vb_outer_factor (C B S p u : ℝ) :
+    C * (B ^ 2 * u) * (S * (p * p)) =
+      (C * B ^ 2 * S) * ((p * p) * u) := by
+  ring
+
+private lemma vb_whole_factor (X Y Z : ℝ) :
+    4 * (2 * (X * Z + Y * Z)) =
+      (4 * (2 * (X + Y))) * Z := by
+  ring
+
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem jetNn
@@ -1015,7 +1052,6 @@ theorem riemLiveEq
     _ = _ := (pureTrace_toSection
       (I := I) (M := M) g gm 2 x).symm
 
-set_option maxHeartbeats 6400000 in
 theorem vbH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1113,13 +1149,11 @@ theorem vbH2Pair
   have hM5 : ∀ R : ℝ, 0 ≤ R → 0 ≤ M5 R := fun R hR => by
     have h1 : (0 : ℝ) ≤ 2 * (B0m R + B1m R) ^ 2 := by positivity
     have h2 : (0 : ℝ) ≤ 2 * (B1m R) ^ 2 := by positivity
-    simp only [M5]
-    linarith
+    simpa only [M5] using add_nonneg h1 h2
   have hM5w : ∀ R : ℝ, 0 ≤ R → 0 ≤ M5w R := fun R hR => by
     have h1 : (0 : ℝ) ≤ 2 * (W0 R + W1 R) ^ 2 := by positivity
     have h2 : (0 : ℝ) ≤ 2 * (W1 R) ^ 2 := by positivity
-    simp only [M5w]
-    linarith
+    simpa only [M5w] using add_nonneg h1 h2
   have hWb : ∀ R : ℝ, 0 ≤ R → 0 ≤ Wb R := fun R hR =>
     mul_nonneg (mul_nonneg hCw (sq_nonneg _)) (hCs R hR)
   have hWm : ∀ R : ℝ, 0 ≤ R → 0 ≤ Wm R := fun R hR => by
@@ -1127,8 +1161,8 @@ theorem vbH2Pair
       mul_nonneg (mul_nonneg hCw (sq_nonneg _)) (hCs R hR)
     have h2 : (0 : ℝ) ≤ Cw * Bt1 ^ 2 * M5w R :=
       mul_nonneg (mul_nonneg hCw (sq_nonneg _)) (hM5w R hR)
-    simp only [Wm]
-    linarith
+    simpa only [Wm] using
+      mul_nonneg (show (0 : ℝ) ≤ 2 by norm_num) (add_nonneg h1 h2)
   have hIb : ∀ R : ℝ, 0 ≤ R → 0 ≤ Ib R := fun R hR =>
     mul_nonneg (mul_nonneg (mul_nonneg hCipp hJp) hfr2) (hWb R hR)
   have hIm : ∀ R : ℝ, 0 ≤ R → 0 ≤ Im R := fun R hR =>
@@ -1147,15 +1181,11 @@ theorem vbH2Pair
     mul_nonneg (mul_nonneg hCout (sq_nonneg _)) (hSin R hR)
   have hK2 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K2 R := fun R hR =>
     mul_nonneg (mul_nonneg hCout (sq_nonneg _))
-      (by
-        have := hKv R hR
-        have := hKi R hR
-        linarith)
+      (mul_nonneg (by norm_num) (add_nonneg (hKv R hR) (hKi R hR)))
   have hBhnn : ∀ R : ℝ, 0 ≤ R → 0 ≤ Bh R := fun R hR => by
-    have := hK1 R hR
-    have := hK2 R hR
     simp only [Bh]
-    linarith
+    exact mul_nonneg (by norm_num)
+      (mul_nonneg (by norm_num) (add_nonneg (hK1 R hR) (hK2 R hR)))
   refine ⟨ρ, B0, B1, hρ0,
     fun R hR => by
       simp only [B0]
@@ -1178,8 +1208,7 @@ theorem vbH2Pair
   have hsabs : ‖s‖ ≤ (1 : ℝ) := by
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
     exact hs.2
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) := unit_interval_sq_le_one hs.1 hs.2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -1273,7 +1302,6 @@ theorem vbH2Pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-
   set a : ℝ := Real.sqrt (Cip * (R * A4)) with hadef
   have ha0 : 0 ≤ a := Real.sqrt_nonneg _
   have hasq : a ^ 2 = Cip * (R * A4) :=
@@ -1287,27 +1315,26 @@ theorem vbH2Pair
   set pl2 : ℝ := (1 + a) ^ 2 with hpl2
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
-    nlinarith [ha0]
+    exact one_le_one_add_sq ha0
   have hpl20 : 0 ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : a ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith [ha0]
+    exact sq_le_one_add_sq ha0
   set u : ℝ := D3 ^ 2 + N ^ 2 with hu
   have hu0 : 0 ≤ u := by
     rw [hu]
-    positivity
+    exact add_nonneg (sq_nonneg D3) (sq_nonneg N)
   have hD3le : D3 ^ 2 ≤ u := by
     rw [hu]
-    linarith [sq_nonneg N]
+    exact le_add_of_nonneg_right (sq_nonneg N)
   have hD3u : D3 ^ 2 ≤ pl2 * u := by
     calc D3 ^ 2 ≤ u := hD3le
       _ = 1 * u := (one_mul u).symm
       _ ≤ pl2 * u := mul_le_mul_of_nonneg_right hpl21 hu0
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
-    linarith [sq_nonneg D3]
+    exact le_add_of_nonneg_left (sq_nonneg D3)
   have hpl2u : 0 ≤ pl2 * u := mul_nonneg hpl20 hu0
-
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -1336,7 +1363,6 @@ theorem vbH2Pair
     appCcRS (I := I) (M := M) g 2 1 4 VmT IpT with hInT
   set InU : SmoothCcTensor g 2 4 :=
     appCcRS (I := I) (M := M) g 2 1 4 VmU IpU with hInU
-
   have hρc : ρ ≤ ρt1 ∧ ρ ≤ ρb1 ∧ ρ ≤ ρt2 ∧ ρ ≤ ρb2 := by
     refine ⟨?_, ?_, ?_, ?_⟩ <;>
       · rw [hρdef]
@@ -1401,7 +1427,6 @@ theorem vbH2Pair
   have htb1' := htrb 1 Bt1 ρb1 htb1 hρc.2.1
   have htp2' := htrp 2 Ct2 ρt2 htp2 hCt2 hρc.2.2.1
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2
-
   have hmbT : lowJetSq (I := I) (M := M) g 2 mcdT ≤ (Bm R) ^ 2 * pl2 := by
     have h := hmcdb gmT P hPsymm hPtie hδ_le hδ0 hδP R a hR ha0 hP2 hP3i
     rw [hmT]
@@ -1442,7 +1467,6 @@ theorem vbH2Pair
     refine (pairFold3 (b0 := W0 R) (b1 := W1 R) (a := a) (pl2 := pl2)
       (u := u) (D3 := D3) hpl21 hplA2 hu0 hD3le).trans (le_of_eq ?_)
     simp only [M5w]
-
   have hTr1T2 : lowJetSq (I := I) (M := M) g 2 Tr1T ≤ Bt1 ^ 2 := by
     rw [hTr1T, trJet]
     exact htb1'.1
@@ -1510,11 +1534,10 @@ theorem vbH2Pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (Cw * Ct1 ^ 2 * Cs R * (pl2 * u) +
           Cw * Bt1 ^ 2 * M5w R * (pl2 * u)) := by
-        linarith [h1, h2]
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
       _ = Wm R * (pl2 * u) := by
         simp only [Wm]
         ring
-
   have hIpT2 : lowJetSq (I := I) (M := M) g 2 IpT ≤ Ib R * pl2 := by
     rw [hIpT, ipForm]
     refine (happIp (ipHead (I := I) (M := M) g) _).trans ?_
@@ -1564,7 +1587,6 @@ theorem vbH2Pair
       _ = Im R * (pl2 * u) := by
         simp only [Im]
         ring
-
   have hVmT2 : lowJetSq (I := I) (M := M) g 2 VmT ≤ Vb R * pl2 := by
     rw [hVmT]
     refine (vbmcdH2 (I := I) (M := M) g gmT).trans ?_
@@ -1606,7 +1628,6 @@ theorem vbH2Pair
       _ = Vd R * (pl2 * u) := by
         simp only [Vd]
         ring
-
   have hInT2 : lowJetSq (I := I) (M := M) g 2 InT ≤ Sin R * (pl2 * pl2) := by
     rw [hInT]
     refine (happIn VmT IpT).trans ?_
@@ -1643,7 +1664,7 @@ theorem vbH2Pair
             (mul_nonneg hCin (mul_nonneg (hVd R hR) hpl2u))
         _ = Kv R * ((pl2 * pl2) * u) := by
           simp only [Kv]
-          ring
+          exact vb_inner_factor_swap Cin (Vd R) (Ib R) pl2 u
     have h2 : lowJetSq (I := I) (M := M) g 2
         (appCcRS (I := I) (M := M) g 2 1 4 VmU (IpT - IpU)) ≤
         Ki R * ((pl2 * pl2) * u) := by
@@ -1657,15 +1678,14 @@ theorem vbH2Pair
             (mul_nonneg hCin (mul_nonneg (hVb R hR) hpl20))
         _ = Ki R * ((pl2 * pl2) * u) := by
           simp only [Ki]
-          ring
+          exact vb_inner_factor Cin (Vb R) (Im R) pl2 u
     calc
       lowJetSq (I := I) (M := M) g 2 (_ + _) ≤
         2 * (lowJetSq (I := I) (M := M) g 2 _ +
           lowJetSq (I := I) (M := M) g 2 _) :=
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
-
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hLvd2 : lowJetSq (I := I) (M := M) g 2 (LvT - LvU) ≤ Ct2 ^ 2 * u := by
     rw [hLvT, hLvU, riemLiveEq, riemLiveEq]
     exact htp2'
@@ -1699,7 +1719,7 @@ theorem vbH2Pair
           (mul_nonneg hCout (mul_nonneg (sq_nonneg _) hu0))
       _ = K1 R * ((pl2 * pl2) * u) := by
         simp only [K1]
-        ring
+        exact vb_outer_factor Cout Ct2 (Sin R) pl2 u
   have h2 : lowJetSq (I := I) (M := M) g 2
       (appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
       K2 R * ((pl2 * pl2) * u) := by
@@ -1713,8 +1733,8 @@ theorem vbH2Pair
           (jetNn (I := I) (M := M) (m := 2) g _)
           (mul_nonneg hCout (sq_nonneg _))
       _ = K2 R * ((pl2 * pl2) * u) := by
-        simp only [K2]
-        ring
+        rw [show K2 R = Cout * Bt2 ^ 2 * (2 * (Kv R + Ki R)) from rfl]
+        exact vb_k2_factor Cout Bt2 (Kv R) (Ki R) ((pl2 * pl2) * u)
   have hsum : lowJetSq (I := I) (M := M) g 2
       (appCcRS (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
         appCcRS (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
@@ -1725,7 +1745,7 @@ theorem vbH2Pair
           lowJetSq (I := I) (M := M) g 2 _) :=
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hwhole : lowJetSq (I := I) (M := M) g 2
       (lc0VB (I := I) (M := M) g gmT - lc0VB (I := I) (M := M) g gmU) ≤
       Bh R * ((pl2 * pl2) * u) := by
@@ -1741,7 +1761,7 @@ theorem vbH2Pair
         mul_le_mul_of_nonneg_left hsum (by norm_num)
       _ = Bh R * ((pl2 * pl2) * u) := by
         simp only [Bh]
-        ring
+        exact vb_whole_factor (K1 R) (K2 R) ((pl2 * pl2) * u)
   refine hwhole.trans ?_
   rw [hpl2, hu]
   simp only [B0, B1]
