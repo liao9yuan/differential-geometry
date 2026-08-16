@@ -1622,7 +1622,311 @@ theorem intrOrigin_no_return
   rw [h0T, ← hT2] at hlt
   linarith
 
-set_option maxHeartbeats 800000 in
+omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)] in
+private theorem periodic_core_bound
+    {γu γv : Real → E} {a c d T : Real}
+    (hTdef : T = 1 + d) (hcPos : 0 < c) (hcd : c * d = 1)
+    (hjoin : ∀ s : Real, γu (s + 1) = γv (1 - c * s))
+    (hperiod : ∀ s : Real, γu (s + T) = γu s)
+    (hcoreU : ∀ t ∈ Set.Icc (0 : Real) 1, ‖γu t‖ ≤ a)
+    (hcoreV : ∀ t ∈ Set.Icc (0 : Real) 1, ‖γv t‖ ≤ a) :
+    ∀ t ∈ Set.Ioo (0 : Real) (2 * T), ‖γu t‖ ≤ a := by
+  have honeCore :
+      ∀ t ∈ Set.Icc (0 : Real) T, ‖γu t‖ ≤ a := by
+    intro t ht
+    by_cases ht1 : t ≤ 1
+    · exact hcoreU t ⟨ht.1, ht1⟩
+    · have hs0 : 0 ≤ t - 1 := sub_nonneg.mpr (le_of_not_ge ht1)
+      have hsd : t - 1 ≤ d := by
+        have ht' : t ≤ 1 + d := by
+          simpa only [hTdef] using ht.2
+        exact sub_le_iff_le_add.mpr (by simpa only [add_comm] using ht')
+      have hcs : 0 ≤ c * (t - 1) :=
+        mul_nonneg hcPos.le hs0
+      have hcs1 : c * (t - 1) ≤ 1 := by
+        calc
+          c * (t - 1) ≤ c * d :=
+            mul_le_mul_of_nonneg_left hsd hcPos.le
+          _ = 1 := hcd
+      have hj := hjoin (t - 1)
+      have htime : (t - 1) + 1 = t := by ring
+      rw [htime] at hj
+      rw [hj]
+      exact hcoreV (1 - c * (t - 1))
+        ⟨sub_nonneg.mpr hcs1, sub_le_self 1 hcs⟩
+  intro t ht
+  by_cases htT : t ≤ T
+  · exact honeCore t ⟨ht.1.le, htT⟩
+  · have hred : t - T ∈ Set.Icc (0 : Real) T := by
+      constructor
+      · exact sub_nonneg.mpr (le_of_not_ge htT)
+      · apply sub_le_iff_le_add.mpr
+        simpa only [two_mul] using ht.2.le
+    have hp := hperiod (t - T)
+    have heq : (t - T) + T = t := by ring
+    rw [heq] at hp
+    rw [hp]
+    exact honeCore (t - T) hred
+
+private theorem midpoint_minimal_loop
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) {R a K L : Real} (hR : 0 < R)
+    (hloc :
+      IsLocalDiffeomorphOn 𝓘(Real, E) I ∞
+        (intrinsicFramedExp (I := I) g hEnorm p)
+        (Metric.ball (0 : E) R))
+    (hK : 0 ≤ K)
+    (hRm :
+      ∀ z : E, ‖z‖ < 3 * R / 4 →
+        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
+          (intrinsicFramedExp (I := I) g hEnorm p z) 4
+          (Integral.Connection.metricRm04At
+            (I := I) (M := M) g
+            (intrinsicFramedExp (I := I) g hEnorm p z))) ≤ K)
+    (hsmall : K * L ^ 2 < (Real.pi / 2) ^ 2)
+    (h2aL : 2 * a < L) (hbudget : a + L < 3 * R / 4) :
+    let gExt := intrExtMetric (I := I) g hEnorm p hR hloc
+    letI : RiemannianBundle
+        (fun z : E ↦ TangentSpace 𝓘(Real, E) z) :=
+      ⟨gExt.toRiemannianMetric⟩
+    letI (z : E) : NormedAddCommGroup (TangentSpace 𝓘(Real, E) z) :=
+      inferInstance
+    letI (z : E) : NormedSpace Real (TangentSpace 𝓘(Real, E) z) :=
+      inferInstance
+    letI : ∀ z : E, ENormSMulClass Real (TangentSpace 𝓘(Real, E) z) :=
+      fun _ => inferInstance
+    letI : IsContinuousRiemannianBundle E
+        (fun z : E ↦ TangentSpace 𝓘(Real, E) z) :=
+      ⟨gExt.inner, gExt.contMDiff.continuous, by intro z w r; rfl⟩
+    letI : EMetricSpace E :=
+      EMetricSpace.ofRiemannianMetric 𝓘(Real, E) E
+    letI : IsRiemannianManifold 𝓘(Real, E) E := ⟨fun _ _ => rfl⟩
+    letI : UniformSpace E := PseudoEMetricSpace.toUniformSpace
+    letI : CompleteSpace E :=
+      (intrExt_complete (I := I) g hEnorm p hR hloc).complete
+    let hExt : ∀ (z : E) (w : TangentSpace 𝓘(Real, E) z),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (gExt.inner z w w)) :=
+      fun z w =>
+        tensor0SBundle_enorm_eq_riemannianBundle_enorm
+          (I := 𝓘(Real, E)) gExt z w
+    let F : E × E → E := fun z =>
+      expMapIntrinsic (I := 𝓘(Real, E)) gExt hExt z.1 z.2
+    let ell : E × E → Real := fun z =>
+      Real.sqrt (gExt.inner z.1 z.2 z.2)
+    let total : E × E × E → Real := fun z =>
+      ell (z.1, z.2.1) + ell (z.1, z.2.2)
+    ∀ (z₀ : E × E × E),
+      IsMinOn total (shortBigons F ell a L) z₀ →
+      total z₀ < 2 * L →
+      ∀ (x₀ q₀ : E), ‖x₀‖ ≤ a →
+        ell (x₀, q₀) ≤ L → q₀ ≠ 0 →
+        F (x₀, q₀) = x₀ → total z₀ = ell (x₀, q₀) →
+        ∃ z₁ : E × E × E,
+          z₁ ∈ shortBigons F ell a L ∧
+          IsMinOn total (shortBigons F ell a L) z₁ ∧
+          z₁.2.1 ≠ 0 ∧ z₁.2.2 ≠ 0 ∧
+          ell (z₁.1, z₁.2.1) < L ∧
+          ell (z₁.1, z₁.2.2) < L := by
+  dsimp only
+  let gExt := intrExtMetric (I := I) g hEnorm p hR hloc
+  letI : RiemannianBundle
+      (fun z : E ↦ TangentSpace 𝓘(Real, E) z) :=
+    ⟨gExt.toRiemannianMetric⟩
+  letI (z : E) : NormedAddCommGroup (TangentSpace 𝓘(Real, E) z) :=
+    inferInstance
+  letI (z : E) : NormedSpace Real (TangentSpace 𝓘(Real, E) z) :=
+    inferInstance
+  letI : ∀ z : E, ENormSMulClass Real (TangentSpace 𝓘(Real, E) z) :=
+    fun _ => inferInstance
+  letI : IsContinuousRiemannianBundle E
+      (fun z : E ↦ TangentSpace 𝓘(Real, E) z) :=
+    ⟨gExt.inner, gExt.contMDiff.continuous, by intro z w r; rfl⟩
+  letI : EMetricSpace E :=
+    EMetricSpace.ofRiemannianMetric 𝓘(Real, E) E
+  letI : IsRiemannianManifold 𝓘(Real, E) E := ⟨fun _ _ => rfl⟩
+  letI : UniformSpace E := PseudoEMetricSpace.toUniformSpace
+  letI : CompleteSpace E :=
+    (intrExt_complete (I := I) g hEnorm p hR hloc).complete
+  let hExt : ∀ (z : E) (w : TangentSpace 𝓘(Real, E) z),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (gExt.inner z w w)) :=
+    fun z w =>
+      tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := 𝓘(Real, E)) gExt z w
+  let F : E × E → E := fun z =>
+    expMapIntrinsic (I := 𝓘(Real, E)) gExt hExt z.1 z.2
+  let ell : E × E → Real := fun z =>
+    Real.sqrt (gExt.inner z.1 z.2 z.2)
+  let total : E × E × E → Real := fun z =>
+    ell (z.1, z.2.1) + ell (z.1, z.2.2)
+  intro z₀ hmin htotalLt x₀ q₀ hx₀ hqL hqne hloop htot
+  let γ : Real → E :=
+    intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt x₀ q₀
+  let m : E := γ (1 / 2)
+  let w : E :=
+    mfderiv 𝓘(Real, Real) 𝓘(Real, E) γ (1 / 2) (1 : Real)
+  have hγ0 : γ 0 = x₀ :=
+    intrinsicGeodesic_zero
+      (I := 𝓘(Real, E)) gExt hExt x₀ q₀
+  have hγ1 : γ 1 = x₀ := by
+    simpa only [γ, F, expMapIntrinsic_def] using hloop
+  have hm : ‖m‖ ≤ a := by
+    apply intrExt_edge_core
+      (I := I) g hEnorm p hR hloc hK hRm hsmall h2aL hbudget
+      hx₀ hx₀ q₀
+    · simpa only [ell, gExt] using hqL
+    · simpa only [γ, m, gExt, hExt, intrExtLaunch] using hγ1
+    · norm_num
+  have hcont :
+      (fun s : Real => γ (s + 1 / 2)) =
+        intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt m w := by
+    simpa only [γ, m, w] using
+      intrinsicGeodesic_continuation
+        (I := 𝓘(Real, E)) gExt hExt x₀ q₀ (1 / 2)
+  have hplus : F (m, (1 / 2 : Real) • w) = x₀ := by
+    change
+      intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
+        m ((1 / 2 : Real) • w) 1 = x₀
+    have hscale :
+        intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
+            m ((1 / 2 : Real) • w) 1 =
+          intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt m w (1 / 2) :=
+      intrinsicGeodesic_smul
+        (I := 𝓘(Real, E)) gExt hExt m w (1 / 2)
+    rw [hscale]
+    rw [← congrFun hcont (1 / 2)]
+    norm_num
+    exact hγ1
+  have hminus : F (m, (-1 / 2 : Real) • w) = x₀ := by
+    change
+      intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
+        m ((-1 / 2 : Real) • w) 1 = x₀
+    have hscale :
+        intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
+            m ((-1 / 2 : Real) • w) 1 =
+          intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt m w (-1 / 2) :=
+      intrinsicGeodesic_smul
+        (I := 𝓘(Real, E)) gExt hExt m w (-1 / 2)
+    rw [hscale]
+    rw [← congrFun hcont (-1 / 2)]
+    norm_num
+    exact hγ0
+  have hspeed :
+      gExt.inner m w w = gExt.inner x₀ q₀ q₀ := by
+    simpa only [γ, m, w] using
+      intrinsicGeodesic_speedSq_eq
+        (I := 𝓘(Real, E)) gExt hExt x₀ q₀ (1 / 2)
+  have hellPlus :
+      ell (m, (1 / 2 : Real) • w) =
+        (1 / 2 : Real) * ell (x₀, q₀) := by
+    simp only [ell]
+    have hscale :
+        Real.sqrt
+            (gExt.inner m ((1 / 2 : Real) • w)
+              ((1 / 2 : Real) • w)) =
+          (1 / 2 : Real) * Real.sqrt (gExt.inner m w w) :=
+      sqrt_gInner_smul_self
+        (I := 𝓘(Real, E)) gExt m (by norm_num) w
+    rw [hscale, hspeed]
+  have hellMinus :
+      ell (m, (-1 / 2 : Real) • w) =
+        (1 / 2 : Real) * ell (x₀, q₀) := by
+    simp only [ell]
+    rw [show (-1 / 2 : Real) • w =
+        (1 / 2 : Real) • (-w) by module]
+    have hscale :
+        Real.sqrt
+            (gExt.inner m ((1 / 2 : Real) • (-w))
+              ((1 / 2 : Real) • (-w))) =
+          (1 / 2 : Real) * Real.sqrt (gExt.inner m (-w) (-w)) :=
+      sqrt_gInner_smul_self
+        (I := 𝓘(Real, E)) gExt m (by norm_num) (-w)
+    have hneg : gExt.inner m (-w) (-w) = gExt.inner m w w := by
+      have h :=
+        gInner_smul_self
+          (I := 𝓘(Real, E)) gExt m (-1 : Real) w
+      simpa only [neg_one_smul, neg_sq, one_pow, one_mul] using h
+    rw [hscale, hneg, hspeed]
+  have hwne : w ≠ 0 := by
+    simpa only [γ, w] using
+      intrGeo_vel_ne
+        (I := 𝓘(Real, E)) gExt hExt x₀ q₀ hqne (1 / 2)
+  have hplusNe : (1 / 2 : Real) • w ≠ 0 :=
+    smul_ne_zero (by norm_num) hwne
+  have hminusNe : (-1 / 2 : Real) • w ≠ 0 :=
+    smul_ne_zero (by norm_num) hwne
+  let z₁ : E × E × E :=
+    (m, ((1 / 2 : Real) • w, (-1 / 2 : Real) • w))
+  have hz₁ : z₁ ∈ shortBigons F ell a L := by
+    change
+      ‖m‖ ≤ a ∧
+      ‖F (m, (1 / 2 : Real) • w)‖ ≤ a ∧
+      F (m, (1 / 2 : Real) • w) = F (m, (-1 / 2 : Real) • w) ∧
+      ell (m, (1 / 2 : Real) • w) ≤ L ∧
+      ell (m, (-1 / 2 : Real) • w) ≤ L ∧
+      (1 / 2 : Real) • w ≠ (-1 / 2 : Real) • w
+    refine ⟨hm, ?_, hplus.trans hminus.symm, ?_, ?_, ?_⟩
+    · rw [hplus]
+      exact hx₀
+    · rw [hellPlus]
+      have hqnonneg : 0 ≤ ell (x₀, q₀) := Real.sqrt_nonneg _
+      exact (mul_le_of_le_one_left hqnonneg (by norm_num)).trans hqL
+    · rw [hellMinus]
+      have hqnonneg : 0 ≤ ell (x₀, q₀) := Real.sqrt_nonneg _
+      exact (mul_le_of_le_one_left hqnonneg (by norm_num)).trans hqL
+    · intro heq
+      let q : E := (1 / 2 : Real) • w
+      have hqneg : q = -q := by
+        calc
+          q = (-1 / 2 : Real) • w := heq
+          _ = -q := by simp only [q]; module
+      have htwo : (2 : Real) • q = 0 := by
+        rw [two_smul]
+        nth_rewrite 1 [hqneg]
+        exact neg_add_cancel q
+      have hq0 : q = 0 :=
+        (smul_eq_zero.mp htwo).resolve_left (by norm_num)
+      exact hplusNe (by simpa only [q] using hq0)
+  have htotal₁ : total z₁ = total z₀ := by
+    calc
+      total z₁ =
+          ell (m, (1 / 2 : Real) • w) +
+            ell (m, (-1 / 2 : Real) • w) := by
+              rfl
+      _ = ell (x₀, q₀) := by
+        rw [hellPlus, hellMinus]
+        ring
+      _ = total z₀ := htot.symm
+  have hmin₁ : IsMinOn total (shortBigons F ell a L) z₁ := by
+    apply isMinOn_iff.mpr
+    intro z hz
+    rw [htotal₁]
+    exact (isMinOn_iff.mp hmin) z hz
+  have hqLt : ell (x₀, q₀) < 2 * L := by
+    have hqLtRaw := htotalLt
+    rw [htot] at hqLtRaw
+    simpa only [ell, gExt] using hqLtRaw
+  have hplusLt : ell (m, (1 / 2 : Real) • w) < L := by
+    rw [hellPlus]
+    calc
+      (1 / 2 : Real) * ell (x₀, q₀) < (1 / 2 : Real) * (2 * L) :=
+        mul_lt_mul_of_pos_left hqLt (by norm_num)
+      _ = L := by ring
+  have hminusLt : ell (m, (-1 / 2 : Real) • w) < L := by
+    rw [hellMinus]
+    calc
+      (1 / 2 : Real) * ell (x₀, q₀) < (1 / 2 : Real) * (2 * L) :=
+        mul_lt_mul_of_pos_left hqLt (by norm_num)
+      _ = L := by ring
+  exact
+    ⟨z₁, hz₁, hmin₁,
+      by simpa only [z₁] using hplusNe,
+      by simpa only [z₁] using hminusNe,
+      by simpa only [z₁] using hplusLt,
+      by simpa only [z₁] using hminusLt⟩
+
 theorem intrCore_short_inj
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1834,14 +2138,20 @@ theorem intrCore_short_inj
     (isMinOn_iff.mp hmin) zInit hzInit
   have htotalLt : total z₀ < 2 * L := by
     dsimp only [total, zInit] at hminInit ⊢
-    linarith
+    exact hminInit.trans_lt
+      (by simpa only [ell, gExt, two_mul] using add_lt_add huL hvL)
   have hslack :
       ell (z₀.1, z₀.2.1) < L ∨
         ell (z₀.1, z₀.2.2) < L := by
     by_contra h
     push Not at h
     dsimp only [total] at htotalLt
-    linarith
+    have htwo : 2 * L ≤ ell (z₀.1, z₀.2.1) + ell (z₀.1, z₀.2.2) := by
+      calc
+        2 * L = L + L := by ring
+        _ ≤ ell (z₀.1, z₀.2.1) + ell (z₀.1, z₀.2.2) :=
+          add_le_add h.1 h.2
+    exact (not_lt_of_ge htwo) htotalLt
   have midpoint_min
       (x₀ q₀ : E) (hx₀ : ‖x₀‖ ≤ a)
       (hqL : ell (x₀, q₀) ≤ L) (hqne : q₀ ≠ 0)
@@ -1852,167 +2162,9 @@ theorem intrCore_short_inj
         IsMinOn total (shortBigons F ell a L) z₁ ∧
         z₁.2.1 ≠ 0 ∧ z₁.2.2 ≠ 0 ∧
         ell (z₁.1, z₁.2.1) < L ∧
-        ell (z₁.1, z₁.2.2) < L := by
-    let γ : Real → E :=
-      intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt x₀ q₀
-    let m : E := γ (1 / 2)
-    let w : E :=
-      mfderiv 𝓘(Real, Real) 𝓘(Real, E) γ (1 / 2) (1 : Real)
-    have hγ0 : γ 0 = x₀ :=
-      intrinsicGeodesic_zero
-        (I := 𝓘(Real, E)) gExt hExt x₀ q₀
-    have hγ1 : γ 1 = x₀ := by
-      simpa only [γ, F, expMapIntrinsic_def] using hloop
-    have hm : ‖m‖ ≤ a := by
-      apply intrExt_edge_core
-        (I := I) g hEnorm p hR hloc hK hRm hsmall h2aL hbudget
-        hx₀ hx₀ q₀
-      · simpa only [ell, gExt] using hqL
-      · simpa only [γ, m, gExt, hExt, intrExtLaunch] using hγ1
-      · norm_num
-    have hcont :
-        (fun s : Real => γ (s + 1 / 2)) =
-          intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt m w := by
-      simpa only [γ, m, w] using
-        intrinsicGeodesic_continuation
-          (I := 𝓘(Real, E)) gExt hExt x₀ q₀ (1 / 2)
-    have hplus :
-        F (m, (1 / 2 : Real) • w) = x₀ := by
-      change
-        intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
-          m ((1 / 2 : Real) • w) 1 = x₀
-      have hscale :
-          intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
-              m ((1 / 2 : Real) • w) 1 =
-            intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt m w (1 / 2) :=
-        intrinsicGeodesic_smul
-          (I := 𝓘(Real, E)) gExt hExt m w (1 / 2)
-      rw [hscale]
-      rw [← congrFun hcont (1 / 2)]
-      norm_num
-      exact hγ1
-    have hminus :
-        F (m, (-1 / 2 : Real) • w) = x₀ := by
-      change
-        intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
-          m ((-1 / 2 : Real) • w) 1 = x₀
-      have hscale :
-          intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt
-              m ((-1 / 2 : Real) • w) 1 =
-            intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt m w (-1 / 2) :=
-        intrinsicGeodesic_smul
-          (I := 𝓘(Real, E)) gExt hExt m w (-1 / 2)
-      rw [hscale]
-      rw [← congrFun hcont (-1 / 2)]
-      norm_num
-      exact hγ0
-    have hspeed :
-        gExt.inner m w w = gExt.inner x₀ q₀ q₀ := by
-      simpa only [γ, m, w] using
-        intrinsicGeodesic_speedSq_eq
-          (I := 𝓘(Real, E)) gExt hExt x₀ q₀ (1 / 2)
-    have hellPlus :
-        ell (m, (1 / 2 : Real) • w) =
-          (1 / 2 : Real) * ell (x₀, q₀) := by
-      simp only [ell]
-      have hscale :
-          Real.sqrt
-              (gExt.inner m ((1 / 2 : Real) • w)
-                ((1 / 2 : Real) • w)) =
-            (1 / 2 : Real) * Real.sqrt (gExt.inner m w w) :=
-        sqrt_gInner_smul_self
-          (I := 𝓘(Real, E)) gExt m (by norm_num) w
-      rw [hscale, hspeed]
-    have hellMinus :
-        ell (m, (-1 / 2 : Real) • w) =
-          (1 / 2 : Real) * ell (x₀, q₀) := by
-      simp only [ell]
-      rw [show (-1 / 2 : Real) • w =
-          (1 / 2 : Real) • (-w) by module]
-      have hscale :
-          Real.sqrt
-              (gExt.inner m ((1 / 2 : Real) • (-w))
-                ((1 / 2 : Real) • (-w))) =
-            (1 / 2 : Real) * Real.sqrt (gExt.inner m (-w) (-w)) :=
-        sqrt_gInner_smul_self
-          (I := 𝓘(Real, E)) gExt m (by norm_num) (-w)
-      have hneg : gExt.inner m (-w) (-w) = gExt.inner m w w := by
-        have h :=
-          gInner_smul_self
-            (I := 𝓘(Real, E)) gExt m (-1 : Real) w
-        simpa only [neg_one_smul, neg_sq, one_pow, one_mul] using h
-      rw [hscale, hneg, hspeed]
-    have hwne : w ≠ 0 := by
-      simpa only [γ, w] using
-        intrGeo_vel_ne
-          (I := 𝓘(Real, E)) gExt hExt x₀ q₀ hqne (1 / 2)
-    have hplusNe : (1 / 2 : Real) • w ≠ 0 :=
-      smul_ne_zero (by norm_num) hwne
-    have hminusNe : (-1 / 2 : Real) • w ≠ 0 :=
-      smul_ne_zero (by norm_num) hwne
-    let z₁ : E × E × E :=
-      (m, ((1 / 2 : Real) • w, (-1 / 2 : Real) • w))
-    have hz₁ : z₁ ∈ shortBigons F ell a L := by
-      change
-        ‖m‖ ≤ a ∧
-        ‖F (m, (1 / 2 : Real) • w)‖ ≤ a ∧
-        F (m, (1 / 2 : Real) • w) =
-          F (m, (-1 / 2 : Real) • w) ∧
-        ell (m, (1 / 2 : Real) • w) ≤ L ∧
-        ell (m, (-1 / 2 : Real) • w) ≤ L ∧
-        (1 / 2 : Real) • w ≠ (-1 / 2 : Real) • w
-      refine ⟨hm, ?_, hplus.trans hminus.symm, ?_, ?_, ?_⟩
-      · rw [hplus]
-        exact hx₀
-      · rw [hellPlus]
-        have hqnonneg : 0 ≤ ell (x₀, q₀) := Real.sqrt_nonneg _
-        linarith
-      · rw [hellMinus]
-        have hqnonneg : 0 ≤ ell (x₀, q₀) := Real.sqrt_nonneg _
-        linarith
-      · intro heq
-        let q : E := (1 / 2 : Real) • w
-        have hqneg : q = -q := by
-          calc
-            q = (-1 / 2 : Real) • w := heq
-            _ = -q := by simp only [q]; module
-        have htwo : (2 : Real) • q = 0 := by
-          rw [two_smul]
-          nth_rewrite 1 [hqneg]
-          exact neg_add_cancel q
-        have hq0 : q = 0 :=
-          (smul_eq_zero.mp htwo).resolve_left (by norm_num)
-        exact hplusNe (by simpa only [q] using hq0)
-    have htotal₁ : total z₁ = total z₀ := by
-      calc
-        total z₁ =
-            ell (m, (1 / 2 : Real) • w) +
-              ell (m, (-1 / 2 : Real) • w) := by
-                rfl
-        _ = ell (x₀, q₀) := by
-          rw [hellPlus, hellMinus]
-          ring
-        _ = total z₀ := htot.symm
-    have hmin₁ : IsMinOn total (shortBigons F ell a L) z₁ := by
-      apply isMinOn_iff.mpr
-      intro z hz
-      rw [htotal₁]
-      exact (isMinOn_iff.mp hmin) z hz
-    have hqLt : ell (x₀, q₀) < 2 * L := by
-      rw [← htot]
-      exact htotalLt
-    have hplusLt : ell (m, (1 / 2 : Real) • w) < L := by
-      rw [hellPlus]
-      linarith
-    have hminusLt : ell (m, (-1 / 2 : Real) • w) < L := by
-      rw [hellMinus]
-      linarith
-    exact
-      ⟨z₁, hz₁, hmin₁,
-        by simpa only [z₁] using hplusNe,
-        by simpa only [z₁] using hminusNe,
-        by simpa only [z₁] using hplusLt,
-        by simpa only [z₁] using hminusLt⟩
+        ell (z₁.1, z₁.2.2) < L :=
+    midpoint_minimal_loop (I := I) g hEnorm p hR hloc hK hRm hsmall
+      h2aL hbudget z₀ hmin htotalLt x₀ q₀ hx₀ hqL hqne hloop htot
   have hnormalize :
       ∃ z₁ : E × E × E,
         z₁ ∈ shortBigons F ell a L ∧
@@ -2267,7 +2419,7 @@ theorem intrCore_short_inj
           with s hsDom hsBr hsNe hsPos hsOne
       change 0 < s at hsPos
       have hsIcc : 1 - s ∈ Set.Icc (0 : Real) 1 := by
-        exact ⟨sub_nonneg.mpr hsOne.le, by linarith⟩
+        exact ⟨sub_nonneg.mpr hsOne.le, sub_le_self 1 hsPos.le⟩
       have hηCore : ‖η s‖ ≤ a := by
         simpa only [η, γu, gExt, hExt, intrExtLaunch] using
           intrExt_edge_core
@@ -2292,7 +2444,7 @@ theorem intrCore_short_inj
         rw [hellFirst]
         have hluNonneg : 0 ≤ lu := Real.sqrt_nonneg _
         have hscaleLe : (1 - s) * lu ≤ lu := by
-          have hsle : 1 - s ≤ 1 := by linarith
+          have hsle : 1 - s ≤ 1 := sub_le_self 1 hsPos.le
           exact mul_le_of_le_one_left hluNonneg hsle
         exact hscaleLe.trans huLe
       have hsecondLt : ell (x₀, Br.inv (η s)) < L := by
@@ -2487,7 +2639,7 @@ theorem intrCore_short_inj
     have hWzero : W = 0 := by
       by_contra hWne
       have hpos := gExt.pos y₀ W hWne
-      linarith
+      exact hpos.ne' hWInner
     have hunitOpp : lu⁻¹ • U = -(lv⁻¹ • V) :=
       eq_neg_of_add_eq_zero_left hWzero
     simpa only [x₀, u₀, v₀, lu, lv, U, V, γu, γv] using hunitOpp
@@ -2806,56 +2958,33 @@ theorem intrCore_short_inj
           hx₁ hy₁ v₁
           (by simpa only [lv, ell, gExt] using hz₁.2.2.2.2.1)
           hvEnd₁ t ht
-  have honeCore :
-      ∀ t ∈ Set.Icc (0 : Real) T, ‖γu t‖ ≤ a := by
-    intro t ht
-    by_cases ht1 : t ≤ 1
-    · exact hcoreU t ⟨ht.1, ht1⟩
-    · have hs0 : 0 ≤ t - 1 := sub_nonneg.mpr (le_of_not_ge ht1)
-      have hsd : t - 1 ≤ d := by
-        have ht' : t ≤ 1 + d := by
-          simpa only [T] using ht.2
-        linarith
-      have hcs : 0 ≤ c * (t - 1) :=
-        mul_nonneg hcPos.le hs0
-      have hcs1 : c * (t - 1) ≤ 1 := by
-        calc
-          c * (t - 1) ≤ c * d :=
-            mul_le_mul_of_nonneg_left hsd hcPos.le
-          _ = 1 := hcd
-      have hj := hjoin (t - 1)
-      have htime : (t - 1) + 1 = t := by ring
-      rw [htime] at hj
-      rw [hj]
-      exact hcoreV (1 - c * (t - 1))
-        ⟨sub_nonneg.mpr hcs1, by linarith⟩
   have hcore :
-      ∀ t ∈ Set.Ioo (0 : Real) (2 * T), ‖γu t‖ ≤ a := by
-    intro t ht
-    by_cases htT : t ≤ T
-    · exact honeCore t ⟨ht.1.le, htT⟩
-    · have hred : t - T ∈ Set.Icc (0 : Real) T := by
-        constructor
-        · exact sub_nonneg.mpr (le_of_not_ge htT)
-        · apply sub_le_iff_le_add.mpr
-          linarith [ht.2]
-      have hp := hperiod (t - T)
-      have heq : (t - T) + T = t := by ring
-      rw [heq] at hp
-      rw [hp]
-      exact honeCore (t - T) hred
-  have haL : a ≤ L := by linarith
-  have haFence : a < 3 * R / 4 := by linarith
+      ∀ t ∈ Set.Ioo (0 : Real) (2 * T), ‖γu t‖ ≤ a :=
+    periodic_core_bound (E := E) (γu := γu) (γv := γv)
+      (a := a) (c := c) (d := d) (T := T) rfl hcPos hcd
+      hjoin hperiod hcoreU hcoreV
+  have ha0 : 0 ≤ a := (norm_nonneg x).trans hx
+  have haL : a ≤ L := by
+    calc
+      a ≤ a + a := le_add_of_nonneg_right ha0
+      _ = 2 * a := by ring
+      _ ≤ L := h2aL.le
+  have haFence : a < 3 * R / 4 := by
+    exact (le_add_of_nonneg_right hLpos.le).trans_lt hbudget
+  have hgeo :
+      IsGeodesicOn (I := 𝓘(Real, E))
+        (intrExtMetric (I := I) g hEnorm p hR hloc) γu
+        (Set.Ioo (0 : Real) (2 * T)) := by
+    change IsGeodesicOn (I := 𝓘(Real, E)) gExt γu _
+    exact
+      (intrinsicGeodesic_isGeodesic
+        (I := 𝓘(Real, E)) gExt hExt x₁ u₁).isGeodesicOn _
   apply intrOrigin_no_return
     (I := I) g hEnorm p hR hloc hK hRm hsmall hTPos
     (γ := γu)
     (intrinsicGeodesic_contMDiff
       (I := 𝓘(Real, E)) gExt hExt x₁ u₁)
-    (by
-      simpa only [γu, gExt] using
-        (intrinsicGeodesic_isGeodesic
-          (I := 𝓘(Real, E)) gExt hExt x₁ u₁).isGeodesicOn
-            (Set.Ioo (0 : Real) (2 * T)))
+    hgeo
     (fun t ht => (hcore t ht).trans_lt haFence)
     (fun t ht => (hcore t ht).trans haL)
     (fun t _ =>
