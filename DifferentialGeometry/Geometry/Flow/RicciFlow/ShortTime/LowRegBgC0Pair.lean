@@ -658,7 +658,63 @@ private theorem lowPairRaw
       (((-1 : ℝ) • X1 + X2) + X3) ≤ _
   nlinarith [hsum, hX1, hX2, hX3]
 
-set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
+private theorem connDiffLowered_sub_eq_wXi_sub
+    (g gT gU : SmoothRiemannianMetric I M) :
+    connDiffLoweredCc (I := I) g gT - connDiffLoweredCc (I := I) g gU =
+      wXi (I := I) (M := M) g gT g - wXi (I := I) (M := M) g gU g := by
+  simp only [wXi]
+  module
+
+private lemma sq_add_sq_le_sum_sq
+    (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
+  nlinarith only [mul_nonneg hx hy]
+
+private lemma low_pair_envelope_eq
+    (k0 k1 w0 w1 s0 s1 A D : ℝ) :
+    k0 * (w0 * D + w1 * A * D) + k1 * (s0 * D + s1 * A * D) =
+      (k0 * w0 + k1 * s0) * D + (k0 * w1 + k1 * s1) * A * D := by
+  ring
+
+private lemma neg_smul_sub {V : Type*} [AddCommGroup V] [Module ℝ V]
+    (X Y : V) :
+    (-1 : ℝ) • X - (-1 : ℝ) • Y = (-1 : ℝ) • (X - Y) := by
+  module
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] in
+private theorem appCcRS_sub_bilinear
+    (g : SmoothRiemannianMetric I M)
+    (PT PU : SmoothCcTensor g 6 2) (XT XU : SmoothCcTensor g 2 6) :
+    appCcRS (I := I) (M := M) g 2 6 2 PT XT -
+        appCcRS (I := I) (M := M) g 2 6 2 PU XU =
+      appCcRS (I := I) (M := M) g 2 6 2 PU (XT - XU) +
+        appCcRS (I := I) (M := M) g 2 6 2 (PT - PU) XT := by
+  simp only [appCcRS]
+  rw [ccOperatorFieldComp_sub_right, appCcRS_sub_left]
+  module
+
+private lemma pair_split_eq
+    (C Pb fr Bc Cp N Bt D : ℝ) :
+    2 * (C * Pb ^ 2 * (fr * Bc * D) ^ 2 +
+        C * (Cp * N) ^ 2 * (fr * Bt) ^ 2) =
+      (2 * C * Pb ^ 2 * (fr * Bc) ^ 2) * D ^ 2 +
+        (2 * C * Cp ^ 2 * (fr * Bt) ^ 2) * N ^ 2 := by
+  ring
+
+private lemma pair_coeff_nonneg
+    {P B D C A : ℝ} (hP : 0 ≤ P) (hB : 0 ≤ B) (hD : 0 ≤ D)
+    (hC : 0 ≤ C) (hA : 0 ≤ A) :
+    0 ≤ P * (B * D + C * A) :=
+  mul_nonneg hP (add_nonneg (mul_nonneg hB hD) (mul_nonneg hC hA))
+
+private lemma pair_coeff_mul_eq
+    (P B D C A N : ℝ) :
+    P * (B * (D * N) + (C * N) * A) =
+      (P * (B * D + C * A)) * N := by
+  ring
+
 private theorem lowPairH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -717,10 +773,11 @@ private theorem lowPairH1
   have hJC : 0 ≤ JC := jetNn (I := I) (M := M) (m := 2) g _
   have hQ0 : 0 ≤ Q0 := by
     dsimp only [Q0]
-    positivity
+    exact mul_nonneg (mul_nonneg (by norm_num) hC21) hJA
   have hQ1 : 0 ≤ Q1 := by
     dsimp only [Q1]
-    positivity
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (by norm_num) hC12) hJC) (sq_nonneg fr)
   have hK0 : 0 ≤ K0 := Real.sqrt_nonneg _
   have hK1 : 0 ≤ K1 := Real.sqrt_nonneg _
   have hK0sq : K0 ^ 2 = Q0 := by
@@ -761,9 +818,7 @@ private theorem lowPairH1
           lowJetSq (I := I) (M := M) g 1
             (wXi (I := I) (M := M) g gT g -
               wXi (I := I) (M := M) g gU g) := by
-                congr 1
-                simp only [wXi]
-                module
+          rw [connDiffLowered_sub_eq_wXi_sub (I := I) (M := M) g gT gU]
         _ ≤ X ^ 2 := by
           simpa only [X] using
             hw gT gU g T U hT hU hTtie hUtie
@@ -787,7 +842,8 @@ private theorem lowPairH1
         (connDiffLoweredCc (I := I) g gT -
           connDiffLoweredCc (I := I) g gU) ≤ Q0 * X ^ 2 :=
       mul_le_mul_of_nonneg_left hlow hQ0
-    have hbase1 : 0 ≤ 6 * C12 * JC := by positivity
+    have hbase1 : 0 ≤ 6 * C12 * JC :=
+      mul_nonneg (mul_nonneg (by norm_num) hC12) hJC
     have hpart1 : (6 * C12 * JC) *
         lowJetSq (I := I) (M := M) g 1
           (lieCovArm2 (I := I) (M := M) g gT -
@@ -800,8 +856,7 @@ private theorem lowPairH1
           (6 * C12 * JC) * (fr ^ 2 * Y ^ 2) :=
             mul_le_mul_of_nonneg_left harm hbase1
         _ = Q1 * Y ^ 2 := by
-          simp only [Q1]
-          ring
+          simp only [Q1, mul_assoc]
     have hquad : lowJetSq (I := I) (M := M) g 1
         (lieBgLow (I := I) (M := M) g gT g_bg -
           lieBgLow (I := I) (M := M) g gU g_bg) ≤
@@ -825,13 +880,10 @@ private theorem lowPairH1
       _ = (K0 * X) ^ 2 + (K1 * Y) ^ 2 := by
         rw [mul_pow, mul_pow, hK0sq, hK1sq]
       _ ≤ (K0 * X + K1 * Y) ^ 2 := by
-        have hcross : 0 ≤ (K0 * X) * (K1 * Y) :=
-          mul_nonneg (mul_nonneg hK0 hX) (mul_nonneg hK1 hY)
-        nlinarith only [hcross]
+        exact sq_add_sq_le_sum_sq (K0 * X) (K1 * Y)
+          (mul_nonneg hK0 hX) (mul_nonneg hK1 hY)
       _ = (B0 R * D2 + B1 R * A * D2) ^ 2 := by
-        simp only [B0, B1, X, Y]
-        congr 1
-        ring
+        rw [low_pair_envelope_eq]
 
 private theorem lowBddH1
     (hDim : Module.finrank ℝ E = 3)
@@ -1347,8 +1399,6 @@ private theorem coreBddH1
   rw [hBsq]
   exact hmain
 
-set_option maxHeartbeats 2400000 in
-
 theorem dlaBg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -1448,14 +1498,12 @@ theorem dlaBg_pair_h1
       (dlaBg_eq (I := I) (M := M) g g_bg gU)
   have hFsub : FT - FU = (-1 : ℝ) • (YT - YU) := by
     rw [hFT, hFU]
-    module
+    exact neg_smul_sub YT YU
   have hYsub : YT - YU =
       appCcRS (I := I) (M := M) g 2 6 2 PU (XT - XU) +
         appCcRS (I := I) (M := M) g 2 6 2 (PT - PU) XT := by
     dsimp only [YT, YU]
-    simp only [appCcRS]
-    rw [ccOperatorFieldComp_sub_right, appCcRS_sub_left]
-    module
+    exact appCcRS_sub_bilinear (I := I) (M := M) g PT PU XT XU
   have hXsub : XT - XU =
       bgPass (I := I) (M := M) g
         (lieBgCore (I := I) (M := M) g gT g_bg -
@@ -1502,7 +1550,8 @@ theorem dlaBg_pair_h1
         bgPassH1 (I := I) (M := M) g _
       _ ≤ fr ^ 2 * (Bc R A * D2) ^ 2 :=
         mul_le_mul_of_nonneg_left hcoreD (sq_nonneg _)
-      _ = (fr * Bc R A * D2) ^ 2 := by ring
+      _ = (fr * Bc R A * D2) ^ 2 := by
+        simp only [mul_pow, mul_assoc]
   have hXT : lowJetSq (I := I) (M := M) g 1 XT ≤
       (fr * Bt A) ^ 2 := by
     dsimp only [XT]
@@ -1515,7 +1564,7 @@ theorem dlaBg_pair_h1
         bgPassH1 (I := I) (M := M) g _
       _ ≤ fr ^ 2 * (Bt A) ^ 2 :=
         mul_le_mul_of_nonneg_left hcoreT (sq_nonneg _)
-      _ = (fr * Bt A) ^ 2 := by ring
+      _ = (fr * Bt A) ^ 2 := by rw [mul_pow]
   have hPU0 : 0 ≤ lowJetSq (I := I) (M := M) g 2 PU :=
     jetNn (I := I) (M := M) (m := 2) g _
   have hPD0 : 0 ≤ lowJetSq (I := I) (M := M) g 2 (PT - PU) :=
@@ -1575,11 +1624,12 @@ theorem dlaBg_pair_h1
       2 * (C * Pb ^ 2 * (fr * Bc R A * D2) ^ 2 +
           C * (Cp * N) ^ 2 * (fr * Bt A) ^ 2) =
         K0 R A * D2 ^ 2 + K1 A * N ^ 2 := by
-          dsimp only [K0, K1]
-          ring
+          simpa only [K0, K1] using
+            pair_split_eq C Pb fr (Bc R A) Cp N (Bt A) D2
       _ = (B0 R A) ^ 2 * D2 ^ 2 + (B1 A) ^ 2 * N ^ 2 := by
         rw [hB0sq, hB1sq]
-      _ = (B0 R A * D2) ^ 2 + (B1 A * N) ^ 2 := by ring
+      _ = (B0 R A * D2) ^ 2 + (B1 A * N) ^ 2 := by
+        rw [mul_pow, mul_pow]
   have hN : 0 ≤ N := norm_nonneg _
   have hZ0 : 0 ≤ B0 R A * D2 :=
     mul_nonneg (Real.sqrt_nonneg _) hD2
@@ -1599,7 +1649,7 @@ theorem dlaBg_pair_h1
           C * (Cp * N) ^ 2 * (fr * Bt A) ^ 2) := hY
     _ = (B0 R A * D2) ^ 2 + (B1 A * N) ^ 2 := hsplitSq
     _ ≤ (B0 R A * D2 + B1 A * N) ^ 2 := by
-      nlinarith [mul_nonneg hZ0 hZ1]
+      exact sq_add_sq_le_sum_sq _ _ hZ0 hZ1
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradL2Sq
@@ -2709,7 +2759,6 @@ private theorem kappaSelfHs
         dsimp only [C]
         nlinarith [sq_nonneg (Ch * N)]
 
-set_option maxHeartbeats 2400000 in
 private theorem amixHalfH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -2783,9 +2832,20 @@ private theorem amixHalfH1
     exact lt_min (by norm_num)
       (lt_min hρ2p (lt_min hρ2b
         (lt_min hρ3p (lt_min hρ3b (lt_min hρ4p hρ4b)))))
-  have hD1 : 0 ≤ D1 := by
-    dsimp only [D1, D2, D3, D4, D5, Dk, A2, A3, A4, A5, Ak, sf2, sf3]
-    positivity
+  have hsf2 : 0 ≤ sf2 := Real.sqrt_nonneg _
+  have hsf3 : 0 ≤ sf3 := Real.sqrt_nonneg _
+  have hA5 : 0 ≤ A5 := mul_nonneg hsf2 hB0
+  have hD5 : 0 ≤ D5 := mul_nonneg hsf2 hC0
+  have hA4 : 0 ≤ A4 := mul_nonneg (mul_nonneg hO3 hBt3) hA5
+  have hD4 : 0 ≤ D4 := pair_coeff_nonneg hP3 hBt3 hD5 hCt3 hA5
+  have hAk : 0 ≤ Ak := mul_nonneg hsf3 hBk
+  have hDk : 0 ≤ Dk := mul_nonneg hsf3 hCk
+  have hA3 : 0 ≤ A3 := mul_nonneg (mul_nonneg hOk hAk) hA4
+  have hD3 : 0 ≤ D3 := pair_coeff_nonneg hPk hAk hD4 hDk hA4
+  have hA2 : 0 ≤ A2 := mul_nonneg (mul_nonneg hO4 hBt4) hA3
+  have hD2 : 0 ≤ D2 := pair_coeff_nonneg hP4 hBt4 hD3 hCt4 hA3
+  have hA1 : 0 ≤ A1 := mul_nonneg (mul_nonneg hO2 hBt2) hA2
+  have hD1 : 0 ≤ D1 := pair_coeff_nonneg hP2 hBt2 hD2 hCt2 hA2
   refine ⟨ρ, D1, hρ, hD1, ?_⟩
   intro σ T U gT gU hTtie hUtie hTHs hUHs
   let N : ℝ :=
@@ -2958,20 +3018,6 @@ private theorem amixHalfH1
           lc0TraceRF (I := I) (M := M) g gU 4 lieCorr0AMixPerm1 by rfl,
       trSub, reindexJet]
     simpa only [N] using hp4 T U gT gU hTtie hUtie hTHs4p hUHs4p
-  have hsf2 : 0 ≤ sf2 := Real.sqrt_nonneg _
-  have hsf3 : 0 ≤ sf3 := Real.sqrt_nonneg _
-  have hA5 : 0 ≤ A5 := by
-    dsimp only [A5]
-    positivity
-  have hD5 : 0 ≤ D5 := by
-    dsimp only [D5]
-    positivity
-  have hAk : 0 ≤ Ak := by
-    dsimp only [Ak]
-    positivity
-  have hDk : 0 ≤ Dk := by
-    dsimp only [Dk]
-    positivity
   have hK0T : lowJetSq (I := I) (M := M) g 1 K0T ≤ B0 ^ 2 := by
     simpa only [K0T] using h0One T gT hTtie hTHs1
   have hK0D : lowJetSq (I := I) (M := M) g 1 (K0T - K0U) ≤
@@ -3011,12 +3057,6 @@ private theorem amixHalfH1
     have hs := slotIter_h2b (I := I) (M := M) g 0 3 3
       (KbT - KbU) (Ck * N) hKbD
     simpa only [Dk, sf3, mul_assoc] using hs
-  have hA4 : 0 ≤ A4 := by
-    dsimp only [A4]
-    positivity
-  have hD4 : 0 ≤ D4 := by
-    dsimp only [D4]
-    positivity
   have hS4T : lowJetSq (I := I) (M := M) g 1 S4T ≤ A4 ^ 2 := by
     simpa only [S4T, A4] using
       hone3 Tr3T S5T Bt3 A5 hBt3 hA5 hTr3T hS5T
@@ -3026,16 +3066,9 @@ private theorem amixHalfH1
       hBt3 (mul_nonneg hCt3 hN) hA5 (mul_nonneg hD5 hN)
       hTr3U hTr3D hS5T hS5D
     have heq : P3 * (Bt3 * (D5 * N) + (Ct3 * N) * A5) = D4 * N := by
-      dsimp only [D4]
-      ring
+      simpa only [D4] using pair_coeff_mul_eq P3 Bt3 D5 Ct3 A5 N
     rw [← heq]
     simpa only [S4T, S4U] using hp
-  have hA3 : 0 ≤ A3 := by
-    dsimp only [A3]
-    positivity
-  have hD3 : 0 ≤ D3 := by
-    dsimp only [D3]
-    positivity
   have hS3T : lowJetSq (I := I) (M := M) g 1 S3T ≤ A3 ^ 2 := by
     simpa only [S3T, A3] using
       honek E3T S4T Ak A4 hAk hA4 hE3T hS4T
@@ -3045,16 +3078,9 @@ private theorem amixHalfH1
       hAk (mul_nonneg hDk hN) hA4 (mul_nonneg hD4 hN)
       hE3U hE3D hS4T hS4D
     have heq : Pk * (Ak * (D4 * N) + (Dk * N) * A4) = D3 * N := by
-      dsimp only [D3]
-      ring
+      simpa only [D3] using pair_coeff_mul_eq Pk Ak D4 Dk A4 N
     rw [← heq]
     simpa only [S3T, S3U] using hp
-  have hA2 : 0 ≤ A2 := by
-    dsimp only [A2]
-    positivity
-  have hD2 : 0 ≤ D2 := by
-    dsimp only [D2]
-    positivity
   have hS2T : lowJetSq (I := I) (M := M) g 1 S2T ≤ A2 ^ 2 := by
     simpa only [S2T, A2] using
       hone4 Tr4T S3T Bt4 A3 hBt4 hA3 hTr4T hS3T
@@ -3064,13 +3090,9 @@ private theorem amixHalfH1
       hBt4 (mul_nonneg hCt4 hN) hA3 (mul_nonneg hD3 hN)
       hTr4U hTr4D hS3T hS3D
     have heq : P4 * (Bt4 * (D3 * N) + (Ct4 * N) * A3) = D2 * N := by
-      dsimp only [D2]
-      ring
+      simpa only [D2] using pair_coeff_mul_eq P4 Bt4 D3 Ct4 A3 N
     rw [← heq]
     simpa only [S2T, S2U] using hp
-  have hA1 : 0 ≤ A1 := by
-    dsimp only [A1]
-    positivity
   have hS1T : lowJetSq (I := I) (M := M) g 1 S1T ≤ A1 ^ 2 := by
     simpa only [S1T, A1] using
       hone2 Tr2T S2T Bt2 A2 hBt2 hA2 hTr2T hS2T
@@ -3080,8 +3102,7 @@ private theorem amixHalfH1
       hBt2 (mul_nonneg hCt2 hN) hA2 (mul_nonneg hD2 hN)
       hTr2U hTr2D hS2T hS2D
     have heq : P2 * (Bt2 * (D2 * N) + (Ct2 * N) * A2) = D1 * N := by
-      dsimp only [D1]
-      ring
+      simpa only [D1] using pair_coeff_mul_eq P2 Bt2 D2 Ct2 A2 N
     rw [← heq]
     simpa only [S1T, S1U] using hp
   have hhalfT : amixBgHalf (I := I) (M := M) g gT g_bg σ = S1T := by
