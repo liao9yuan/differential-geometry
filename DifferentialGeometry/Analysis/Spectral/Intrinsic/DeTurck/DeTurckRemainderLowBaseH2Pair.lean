@@ -2560,7 +2560,6 @@ private theorem aaKerBddH2
   rw [mul_pow, hBsq]
   ring
 
-set_option maxHeartbeats 4800000 in
 private theorem aaKerPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2693,7 +2692,12 @@ private theorem aaKerPairH2
     simp only [KZ]
     have hz : 0 ≤ Bi R ^ 2 * S :=
       mul_nonneg (sq_nonneg _) hS
-    nlinarith [mul_nonneg hCi hP]
+    calc
+      Bi R ^ 2 * S = 1 * (Bi R ^ 2 * S) := (one_mul _).symm
+      _ ≤ (1 + Ci * P) * (Bi R ^ 2 * S) :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_right (mul_nonneg hCi hP)) hz
+      _ = (1 + Ci * P) * Bi R ^ 2 * S := by ring
   have hZDdir :
       lowJetSq (I := I) (M := M) g 2
           (connDiffContrInsertionInnerField (I := I) g gT -
@@ -2703,7 +2707,12 @@ private theorem aaKerPairH2
     simp only [KD]
     have hz : 0 ≤ Bid R ^ 2 * D :=
       mul_nonneg (sq_nonneg _) hD
-    nlinarith [mul_nonneg hCi hP]
+    calc
+      Bid R ^ 2 * D = 1 * (Bid R ^ 2 * D) := (one_mul _).symm
+      _ ≤ (1 + Ci * P) * (Bid R ^ 2 * D) :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_right (mul_nonneg hCi hP)) hz
+      _ = (1 + Ci * P) * Bid R ^ 2 * D := by ring
   have hZTinn : ∀ ρ : Equiv.Perm (Fin 3),
       (ρ = aaP102H2 ∨ ρ = aaP120H2) →
       lowJetSq (I := I) (M := M) g 2
@@ -2730,7 +2739,11 @@ private theorem aaKerPairH2
     simp only [KZ]
     have hz : 0 ≤ Bi R ^ 2 * S :=
       mul_nonneg (sq_nonneg _) hS
-    nlinarith [mul_nonneg hCi hP]
+    calc
+      Ci * P * (Bi R ^ 2 * S) ≤ (1 + Ci * P) * (Bi R ^ 2 * S) :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_left zero_le_one) hz
+      _ = (1 + Ci * P) * Bi R ^ 2 * S := by ring
   have hZDinn : ∀ ρ : Equiv.Perm (Fin 3),
       (ρ = aaP102H2 ∨ ρ = aaP120H2) →
       lowJetSq (I := I) (M := M) g 2
@@ -2764,7 +2777,11 @@ private theorem aaKerPairH2
     simp only [KD]
     have hz : 0 ≤ Bid R ^ 2 * D :=
       mul_nonneg (sq_nonneg _) hD
-    nlinarith [mul_nonneg hCi hP]
+    calc
+      Ci * P * (Bid R ^ 2 * D) ≤ (1 + Ci * P) * (Bid R ^ 2 * D) :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_left zero_le_one) hz
+      _ = (1 + Ci * P) * Bid R ^ 2 * D := by ring
   have hQ : 0 ≤ Q := by
     exact mul_nonneg hCb
       (mul_nonneg hP
