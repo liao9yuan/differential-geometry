@@ -34,6 +34,22 @@ variable
 private local instance : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+private lemma two_sum_le_four {a b z : ℝ} (ha : a ≤ z) (hb : b ≤ z) :
+    2 * (a + b) ≤ 4 * z := by
+  linarith
+
+private lemma two_sum_le_ten {a b z : ℝ} (ha : a ≤ 4 * z) (hb : b ≤ z) :
+    2 * (a + b) ≤ 10 * z := by
+  linarith
+
+private lemma unit_interval_sq_le_one {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) :
+    s ^ 2 ≤ 1 := by
+  nlinarith
+
+private lemma ten_mul_sq_le_four_mul_sq (K N : ℝ) :
+    10 * (K * N) ^ 2 ≤ (4 * K * N) ^ 2 := by
+  nlinarith [sq_nonneg (K * N)]
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cc_toFun_ext
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -2169,7 +2185,6 @@ theorem curv_pair_h2
     hzero_tie hzero_tie hzero_norm hzero_norm S R σ A D hA hD hS hSR
   simpa only [sub_self, hcc0, norm_zero, mul_zero, zero_add] using hraw
 
-set_option maxHeartbeats 2400000 in
 private theorem lieRefold_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2371,7 +2386,7 @@ private theorem lieRefold_pair_lip
             c2JetSq (I := I) (M := M) g (W 1)) :=
         jet3_add_c2 (I := I) (M := M) g (W 0) (W 1)
       _ ≤ 4 * (K * N) ^ 2 := by
-        nlinarith [hW 0, hW 1]
+        exact two_sum_le_four (hW 0) (hW 1)
   have hsum :
       c2JetSq (I := I) (M := M) g (W 0 + W 1 + W 2) ≤
         10 * (K * N) ^ 2 := by
@@ -2381,10 +2396,9 @@ private theorem lieRefold_pair_lip
             c2JetSq (I := I) (M := M) g (W 2)) :=
         jet3_add_c2 (I := I) (M := M) g (W 0 + W 1) (W 2)
       _ ≤ 10 * (K * N) ^ 2 := by
-        nlinarith [h01, hW 2]
+        exact two_sum_le_ten h01 (hW 2)
   rw [hrefold, jet3_smul_c2]
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) := unit_interval_sq_le_one hs.1 hs.2
   calc
     s ^ 2 * c2JetSq (I := I) (M := M) g (W 0 + W 1 + W 2) ≤
         c2JetSq (I := I) (M := M) g (W 0 + W 1 + W 2) :=
@@ -2393,7 +2407,7 @@ private theorem lieRefold_pair_lip
     _ ≤ 10 * (K * N) ^ 2 := hsum
     _ ≤ (C * N) ^ 2 := by
       dsimp only [C]
-      nlinarith [sq_nonneg (K * N)]
+      exact ten_mul_sq_le_four_mul_sq K N
 
 private theorem fullSlot_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
