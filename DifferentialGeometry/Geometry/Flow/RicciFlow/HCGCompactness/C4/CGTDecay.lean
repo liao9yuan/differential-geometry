@@ -114,6 +114,29 @@ private lemma cgt_quarter {s : Real} (hs : 0 < s) :
     s < (5 * s) / 4 := by
   nlinarith
 
+private lemma shift_exp_mul_decay
+    {shift lower s C D : Real} (hshift : shift ≠ 0) :
+    (shift * Real.exp (C * D)) *
+        ((lower / shift) * s * Real.exp (-C * D)) = lower * s := by
+  field_simp
+  calc
+    Real.exp (C * D) * lower * s * Real.exp (-(C * D)) =
+        lower * s * (Real.exp (C * D) * Real.exp (-(C * D))) := by ring
+    _ = lower * s := by
+      rw [← Real.exp_add]
+      ring_nf
+      norm_num
+
+private lemma decay_ratio_eq
+    {lower tau b shift spheres upper e : Real} (n : Nat)
+    (hshift : shift ≠ 0) (hspheres : spheres ≠ 0)
+    (hupper : upper ≠ 0) (htau : tau ≠ 0) (hb : b ≠ 0) :
+    ((tau * b) / 2) *
+          ((lower / shift) * (tau * b) ^ n * e) /
+        (spheres * (upper * (tau * b) ^ n)) =
+      (lower * tau / (2 * shift * spheres * upper)) * b * e := by
+  field_simp
+
 noncomputable def riemSeqDist
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :
     PointedSeqDistance (I := I) X :=
@@ -123,8 +146,6 @@ noncomputable def riemSeqDist
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option maxHeartbeats 800000 in
-
 def injDecay_of_bg
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -242,47 +263,48 @@ def injDecay_of_bg
       C_nonneg := hC
       decay := ?_ }
   intro k x
+  let Y := X.obj k
   have hprofile :
       0 < a * b ^ n *
-        Real.exp (-C * riemSeqDist (I := I) X k x (X.obj k).basepoint) :=
+        Real.exp (-C * riemSeqDist (I := I) X k x Y.basepoint) :=
     mul_pos (mul_pos ha (pow_pos hb _)) (Real.exp_pos _)
   refine ⟨by simpa only [n, b] using hprofile, ?_⟩
   intro hcomplete'
-  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
-  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
-  letI : IsManifold I 1 (X.obj k).M :=
-    IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
-  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
-  letI : T2Space (X.obj k).M := (X.obj k).t2
-  letI : T2Space (TangentBundle I (X.obj k).M) :=
-    (X.obj k).t2TangentBundle
-  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
-    Manifold.metrizableSpace I (X.obj k).M
-  letI : T3Space (X.obj k).M := inferInstance
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M :=
+    IsManifold.of_le (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) :=
+    Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
   letI : RiemannianBundle
-      (fun y : (X.obj k).M => TangentSpace I y) :=
-    (X.obj k).riemBundle (I := I)
-  letI : (y : (X.obj k).M) →
+      (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) →
       InnerProductSpace Real (TangentSpace I y) :=
-    (X.obj k).riemInner (I := I)
+    Y.riemInner (I := I)
   letI : IsContinuousRiemannianBundle E
-      (fun y : (X.obj k).M => TangentSpace I y) :=
-    (X.obj k).riemBundle_cont (I := I)
-  letI : EMetricSpace (X.obj k).M :=
-    (X.obj k).emetricSpace (I := I)
-  haveI : IsRiemannianManifold I (X.obj k).M :=
+      (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M :=
+    Y.emetricSpace (I := I)
+  haveI : IsRiemannianManifold I Y.M :=
     ⟨fun _ _ => rfl⟩
-  letI : CompleteSpace (X.obj k).M :=
-    MetricComplete.complete (I := I) (X.obj k) hcomplete'
-  letI : ConnectedSpace (X.obj k).M := hconn k
-  let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+  letI : CompleteSpace Y.M :=
+    MetricComplete.complete (I := I) Y hcomplete'
+  letI : ConnectedSpace Y.M := hconn k
+  let hEnorm : ∀ (y : Y.M) (w : TangentSpace I y),
       ‖w‖ₑ =
-        ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+        ENNReal.ofReal (Real.sqrt (Y.metric.inner y w w)) := by
     intro y w
     simpa using
       (tensor0SBundle_enorm_eq_riemannianBundle_enorm
-        (I := I) (X.obj k).metric y w)
+        (I := I) Y.metric y w)
   have htauCtrl : tau ≤ rCtrl / 10 := by
     exact min_le_left _ _
   have htauPi :
@@ -299,14 +321,14 @@ def injDecay_of_bg
       dsimp only [s]
       exact mul_le_mul_of_nonneg_right htauHalf hb.le
     have hbRho : b ≤ base.ρ := min_le_left _ _
-    nlinarith
+    linarith
   have hfiveCtrl : 5 * s < rCtrl := by
     have hfiveTau : 5 * tau ≤ rCtrl / 2 := by
       calc
         5 * tau ≤ 5 * (rCtrl / 10) :=
           mul_le_mul_of_nonneg_left htauCtrl (by norm_num)
         _ = rCtrl / 2 := by ring
-    nlinarith
+    linarith
   have hsCtrl : s < rCtrl := by
     linarith
   have hpiHalf :
@@ -319,7 +341,7 @@ def injDecay_of_bg
           (1 / 2 : Real) * (Real.pi / Real.sqrt K) := by
       field_simp
     rw [heq]
-    nlinarith
+    exact mul_le_of_le_one_left hpiDiv.le (by norm_num)
   have hfivePi :
       5 * s ≤ Real.pi / Real.sqrt K := by
     calc
@@ -336,55 +358,55 @@ def injDecay_of_bg
   have hmetricCtrl :
       ∀ z ∈ Metric.ball (0 : E) rCtrl, ∀ v : E,
         (1 / 2 : Real) * ‖v‖ ^ 2 ≤
-            intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ∧
-          intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ≤
+            intrFrameMetric (I := I) Y.metric hEnorm x z v v ∧
+          intrFrameMetric (I := I) Y.metric hEnorm x z v v ≤
             2 * ‖v‖ ^ 2 := by
     exact (hcontrol k x).1
   have hlocalCtrl :
       IsLocalDiffeomorphOn (modelWithCornersSelf Real E) I ∞
-        (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm x)
+        (intrinsicFramedExp (I := I) Y.metric hEnorm x)
         (Metric.ball (0 : E) rCtrl) := by
     exact (hcontrol k x).2
   have hlocalS :
       IsLocalDiffeomorphOn (modelWithCornersSelf Real E) I ∞
-        (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm
-          (X.obj k).basepoint)
+        (intrinsicFramedExp (I := I) Y.metric hEnorm
+          Y.basepoint)
         (Metric.ball (0 : E) s) := by
     intro z
-    exact (hcontrol k (X.obj k).basepoint).2
+    exact (hcontrol k Y.basepoint).2
       ⟨z.1, Metric.ball_subset_ball hsCtrl.le z.2⟩
   have hinjS :
       InjOn
-        (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm
-          (X.obj k).basepoint)
+        (intrinsicFramedExp (I := I) Y.metric hEnorm
+          Y.basepoint)
         (Metric.ball (0 : E) s) := by
     exact (base.bound k).injOn_ball hcomplete' hsRho
   obtain ⟨baseChart⟩ :=
-    exists_intrBallChart (I := I) (X.obj k).metric hEnorm
-      (X.obj k).basepoint hlocalS hinjS
+    exists_intrBallChart (I := I) Y.metric hEnorm
+      Y.basepoint hlocalS hinjS
   have hmetricS :
       ∀ z ∈ Metric.ball (0 : E) s, ∀ v : E,
         (1 / 2 : Real) * ‖v‖ ^ 2 ≤
-            intrFrameMetric (I := I) (X.obj k).metric hEnorm
-              (X.obj k).basepoint z v v ∧
-          intrFrameMetric (I := I) (X.obj k).metric hEnorm
-              (X.obj k).basepoint z v v ≤
+            intrFrameMetric (I := I) Y.metric hEnorm
+              Y.basepoint z v v ∧
+          intrFrameMetric (I := I) Y.metric hEnorm
+              Y.basepoint z v v ≤
             2 * ‖v‖ ^ 2 := by
     intro z hz v
-    apply (hcontrol k (X.obj k).basepoint).1 z
+    apply (hcontrol k Y.basepoint).1 z
     exact Metric.ball_subset_ball hsCtrl.le hz
   let V0 : ENNReal :=
-    riemannianVolumeMeasure (I := I) (M := (X.obj k).M)
-      (X.obj k).metric
-      {y : (X.obj k).M |
-        riemannianEDist I (X.obj k).basepoint y <
+    riemannianVolumeMeasure (I := I) (M := Y.M)
+      Y.metric
+      {y : Y.M |
+        riemannianEDist I Y.basepoint y <
           ENNReal.ofReal s}
   have hV0raw :
       ENNReal.ofReal dens *
           (modelHaar (E := E)) (Metric.ball (0 : E) s) ≤ V0 := by
     simpa only [dens, V0, smallNormalBall] using
-      (intrBall_vol_ge (I := I) (X.obj k).metric hEnorm
-        (X.obj k).basepoint hs baseChart hmetricS)
+      (intrBall_vol_ge (I := I) Y.metric hEnorm
+        Y.basepoint hs baseChart hmetricS)
   have hunitEq :
       (modelHaar (E := E)) (Metric.ball (0 : E) 1) =
         ENNReal.ofReal unitVol := by
@@ -408,36 +430,36 @@ def injDecay_of_bg
         rw [modelHaar_ball (E := E) hs]
       _ ≤ V0 := hV0raw
   let D : Real :=
-    riemSeqDist (I := I) X k x (X.obj k).basepoint
+    riemSeqDist (I := I) X k x Y.basepoint
   have hD : 0 ≤ D := by
     exact ENNReal.toReal_nonneg
   have hedistTop :
-      edist x (X.obj k).basepoint ≠ (⊤ : ENNReal) := by
+      edist x Y.basepoint ≠ (⊤ : ENNReal) := by
     rw [IsRiemannianManifold.out (I := I)]
-    exact riemannianEDist_ne_top (I := I) x (X.obj k).basepoint
+    exact riemannianEDist_ne_top (I := I) x Y.basepoint
   have hdist :
-      riemannianEDist I (X.obj k).basepoint x =
+      riemannianEDist I Y.basepoint x =
         ENNReal.ofReal D := by
     rw [← IsRiemannianManifold.out (I := I)]
     dsimp only [D, riemSeqDist]
     rw [edist_comm]
     exact (ENNReal.ofReal_toReal hedistTop).symm
   let Vx : ENNReal :=
-    riemannianVolumeMeasure (I := I) (M := (X.obj k).M)
-      (X.obj k).metric
-      {y : (X.obj k).M |
+    riemannianVolumeMeasure (I := I) (M := Y.M)
+      Y.metric
+      {y : Y.M |
         riemannianEDist I x y < ENNReal.ofReal s}
   let VxR : ENNReal :=
-    riemannianVolumeMeasure (I := I) (M := (X.obj k).M)
-      (X.obj k).metric
-      {y : (X.obj k).M |
+    riemannianVolumeMeasure (I := I) (M := Y.M)
+      Y.metric
+      {y : Y.M |
         riemannianEDist I x y < ENNReal.ofReal (D + s)}
   have hV0shift : V0 ≤ VxR := by
     exact measure_mono
-      (edistBall_shift (I := I) (a := (X.obj k).basepoint) (b := x)
+      (edistBall_shift (I := I) (a := Y.basepoint) (b := x)
         (t := D) (ρ := s) hdist.le hD hs.le)
   have hRic :
-      RicciBoundedBelow (I := I) (X.obj k).metric
+      RicciBoundedBelow (I := I) Y.metric
         (-(((n - 1 : Nat) : Real) * q ^ 2)) := by
     by_cases hn1 : n = 1
     · have hzero : ((n - 1 : Nat) : Real) * q ^ 2 = 0 := by
@@ -445,13 +467,13 @@ def injDecay_of_bg
         norm_num
       rw [hzero, neg_zero]
       exact ricci_dim1_bddBelow (by simpa only [n] using hn1)
-        (X.obj k).metric
+        Y.metric
     · have hn2 : 2 ≤ n := by
         omega
       have hsrc :
-          RicciBoundedBelow (I := I) (X.obj k).metric
+          RicciBoundedBelow (I := I) Y.metric
             (-((n : Real) ^ 2 * bg.C 0)) :=
-        ricciLower_of_rm (I := I) (X.obj k).metric
+        ricciLower_of_rm (I := I) Y.metric
           (by
             simpa only [n,
               Geometry.Riemannian.VolumeComparison.Rm04GlobalBound] using
@@ -461,11 +483,11 @@ def injDecay_of_bg
         rw [mul_pow, Real.sq_sqrt hC0]
       intro y v
       have hinner :
-          0 ≤ (X.obj k).metric.inner y v v := by
+          0 ≤ Y.metric.inner y v v := by
         rcases eq_or_ne v 0 with hv | hv
         · subst hv
           simp
-        · exact ((X.obj k).metric.pos y v hv).le
+        · exact (Y.metric.pos y v hv).le
       have hkappa :
           -(((n - 1 : Nat) : Real) * q ^ 2) ≤
             -((n : Real) ^ 2 * bg.C 0) := by
@@ -473,14 +495,20 @@ def injDecay_of_bg
         have hone : (1 : Real) ≤ ((n - 1 : Nat) : Real) := by
           have : 1 ≤ n - 1 := by omega
           exact_mod_cast this
-        nlinarith [mul_nonneg (sq_nonneg (n : Real)) hC0]
+        have hbase : 0 ≤ (n : Real) ^ 2 * bg.C 0 :=
+          mul_nonneg (sq_nonneg _) hC0
+        calc
+          (n : Real) ^ 2 * bg.C 0 = 1 * ((n : Real) ^ 2 * bg.C 0) := by
+            rw [one_mul]
+          _ ≤ ((n - 1 : Nat) : Real) * ((n : Real) ^ 2 * bg.C 0) :=
+            mul_le_mul_of_nonneg_right hone hbase
       calc
         -(((n - 1 : Nat) : Real) * q ^ 2) *
-              (X.obj k).metric.inner y v v
+              Y.metric.inner y v v
             ≤ -((n : Real) ^ 2 * bg.C 0) *
-                (X.obj k).metric.inner y v v :=
+                Y.metric.inner y v v :=
           mul_le_mul_of_nonneg_right hkappa hinner
-        _ ≤ ricciTensor (I := I) (X.obj k).metric y v v := hsrc y v
+        _ ≤ ricciTensor (I := I) Y.metric y v v := hsrc y v
   have hdSucc : d + 1 = n := by
     dsimp only [d]
     omega
@@ -488,7 +516,7 @@ def injDecay_of_bg
       VxR * ENNReal.ofReal (hypRadVol q d s) ≤
         ENNReal.ofReal (hypRadVol q d (D + s)) * Vx := by
     simpa only [VxR, Vx, d, n] using
-      (segBall_vol_rel (I := I) (X.obj k).metric hEnorm x hq hs
+      (segBall_vol_rel (I := I) Y.metric hEnorm x hq hs
         (by linarith : s ≤ D + s) hRic)
   have hmodelShift :
       hypRadVol q d (D + s) ≤
@@ -532,15 +560,14 @@ def injDecay_of_bg
     (lowerC / shiftC) * s ^ n * Real.exp (-C * D)
   have hlow : 0 < low := by
     dsimp only [low]
-    positivity
+    exact mul_pos
+      (mul_pos (div_pos hlower hshift) (pow_pos hs _))
+      (Real.exp_pos _)
   have hlowMul :
       (shiftC * Real.exp (C * D)) * low =
         lowerC * s ^ n := by
     dsimp only [low]
-    field_simp
-    rw [← Real.exp_add]
-    ring_nf
-    norm_num
+    exact shift_exp_mul_decay hshift.ne'
   have hVxLow : ENNReal.ofReal low ≤ Vx := by
     apply
       (ENNReal.mul_le_mul_iff_right
@@ -550,15 +577,15 @@ def injDecay_of_bg
     rw [← ENNReal.ofReal_mul hcoeffNonneg, hlowMul]
     exact hV0.trans (hV0shift.trans hVxRel)
   have hRm :
-      Rm04GlobalBound (I := I) (M := (X.obj k).M)
-        (X.obj k).metric K := by
+      Rm04GlobalBound (I := I) (M := Y.M)
+        Y.metric K := by
     intro y
     exact (rm04Bound_of_seq (I := I) bg k y).trans (by
       dsimp only [K]
       linarith)
   have hlocalFive :
       IsLocalDiffeomorphOn (modelWithCornersSelf Real E) I ∞
-        (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm x)
+        (intrinsicFramedExp (I := I) Y.metric hEnorm x)
         (Metric.ball (0 : E) (5 * s)) := by
     intro z
     exact hlocalCtrl
@@ -570,8 +597,8 @@ def injDecay_of_bg
   have hno :
       ∀ z, z ∈ Metric.ball (0 : E) (2 * s) → z ≠ 0 →
         ∀ t, t ∈ Ioo (0 : Real) 1 →
-          ¬ IsConjVec (I := I) (X.obj k).metric hEnorm x
-            ((t • normalFrame (I := I) (X.obj k).metric x z :
+          ¬ IsConjVec (I := I) Y.metric hEnorm x
+            ((t • normalFrame (I := I) Y.metric x z :
               TangentSpace I x) : E) := by
     intro z hz hz0 t ht
     have htz : t • z ∈ Metric.ball (0 : E) rCtrl := by
@@ -584,17 +611,17 @@ def injDecay_of_bg
         _ < 2 * s := hz
         _ < rCtrl := htwoCtrl
     have hraw :=
-      intrFrame_not_conj (I := I) (X.obj k).metric hEnorm x
+      intrFrame_not_conj (I := I) Y.metric hEnorm x
         (t • z) (c := (1 / 2 : Real)) (by norm_num)
         (fun v => (hmetricCtrl (t • z) htz v).1)
     simpa only [map_smul] using hraw
   let P : ENNReal :=
-    intrPullVol (I := I) (X.obj k).metric hEnorm x (2 * s)
+    intrPullVol (I := I) Y.metric hEnorm x (2 * s)
   have hPraw :
       P ≤ (volume : Measure E).toSphere Set.univ *
         ENNReal.ofReal (hypRadVol q d (2 * s)) := by
     simpa only [P, d, n] using
-      (intrPullVol_le_hyp (I := I) (X.obj k).metric hEnorm x hq
+      (intrPullVol_le_hyp (I := I) Y.metric hEnorm x hq
         (by positivity : 0 < 2 * s) hno hRic)
   have hVxRaw :
       Vx ≤
@@ -603,9 +630,9 @@ def injDecay_of_bg
             ENNReal.ofReal (hypRadVol q d (2 * s)) := by
     calc
       Vx ≤
-          riemannianVolumeMeasure (I := I) (M := (X.obj k).M)
-            (X.obj k).metric
-            {y : (X.obj k).M |
+          riemannianVolumeMeasure (I := I) (M := Y.M)
+            Y.metric
+            {y : Y.M |
               riemannianEDist I x y < ENNReal.ofReal (2 * s)} := by
         exact measure_mono
           (edistBall_mono (I := I) x (by linarith : s ≤ 2 * s))
@@ -614,7 +641,7 @@ def injDecay_of_bg
             (EuclideanSpace Real (Fin n))).toSphere Set.univ *
               ENNReal.ofReal (hypRadVol q d (2 * s)) := by
         simpa only [d, n] using
-          (segBall_vol_le (I := I) (X.obj k).metric hEnorm x hq
+          (segBall_vol_le (I := I) Y.metric hEnorm x hq
             (by positivity : 0 < 2 * s) hRic)
   have hmodelTwo :
       hypRadVol q d (2 * s) ≤ upperC * s ^ n := by
@@ -687,10 +714,10 @@ def injDecay_of_bg
   have hquarter : s < (5 * s) / 4 := cgt_quarter hs
   have hcgt :
       ENNReal.ofReal (s / 2) * Vx / (Vx + P) ≤
-        intrInjRadius (I := I) (X.obj k).metric hEnorm x := by
+        intrInjRadius (I := I) Y.metric hEnorm x := by
     simpa only [Vx, P, two_mul] using
       (intrInj_ge_cgt (I := I) (K := K) (R := 5 * s)
-        (r₀ := s) (s := s) (X.obj k).metric hEnorm x
+        (r₀ := s) (s := s) Y.metric hEnorm x
         hK hfivePos hfivePi hRm hlocalFive hs hs hfit hquarter)
   have hratio :
       ENNReal.ofReal ((s / 2) * low / den) ≤
@@ -708,7 +735,8 @@ def injDecay_of_bg
         a * b * Real.exp (-C * D) := by
     dsimp only [low, den, T, a]
     rw [show s = tau * b from rfl]
-    field_simp [hshift.ne', hspheres.ne', hupper.ne', htau.ne', hb.ne']
+    exact decay_ratio_eq n hshift.ne' hspheres.ne' hupper.ne'
+      htau.ne' hb.ne'
   have hprofileRatio :
       a * b ^ n * Real.exp (-C * D) ≤
         (s / 2) * low / den := by
@@ -719,7 +747,7 @@ def injDecay_of_bg
   have hfinal :
       ENNReal.ofReal
           (a * b ^ n * Real.exp (-C * D)) ≤
-        intrInjRadius (I := I) (X.obj k).metric hEnorm x := by
+        intrInjRadius (I := I) Y.metric hEnorm x := by
     exact (ENNReal.ofReal_le_ofReal hprofileRatio).trans
       (hratio.trans hcgt)
   simpa only [n, b, C, D, PointedRiemannianManifold.intrInjRadius] using
