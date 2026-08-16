@@ -191,7 +191,25 @@ private theorem bgKappaH2
     exact hpair (T - U) D hD (by
       simpa only [lowJetSq, Nat.reduceAdd] using hTU)
 
-set_option maxHeartbeats 6400000 in
+private lemma ten_mul_sq_le_four_mul_sq (x : ℝ) :
+    10 * x ^ 2 ≤ (4 * x) ^ 2 := by
+  nlinarith only [sq_nonneg x]
+
+private lemma one_stage_eq (O B a A : ℝ) :
+    O * B * (a * A) = (O * B * a) * A := by
+  ring
+
+private lemma base_pair_stage_eq
+    (P c b a d N A D : ℝ) :
+    P * ((c * N) * (a * A) + b * (d * D)) =
+      (P * b * d) * D + (P * c * a) * A * N := by
+  ring
+
+private lemma pair_stage_eq
+    (P c b a d0 d1 N A D : ℝ) :
+    P * ((c * N) * (a * A) + b * (d0 * D + d1 * A * N)) =
+      (P * b * d0) * D + (P * (c * a + b * d1)) * A * N := by
+  ring
 
 private theorem amixHalfH2
     (hDim : Module.finrank ℝ E = 3)
@@ -457,7 +475,7 @@ private theorem amixHalfH2
     calc
       _ ≤ 10 * lowJetSq (I := I) (M := M) g 3 (T - U) := hk'
       _ ≤ 10 * D3 ^ 2 := mul_le_mul_of_nonneg_left hTU3 (by norm_num)
-      _ ≤ (4 * D3) ^ 2 := by nlinarith [sq_nonneg D3]
+      _ ≤ (4 * D3) ^ 2 := ten_mul_sq_le_four_mul_sq D3
   have hKbT : lowJetSq (I := I) (M := M) g 2 KbT ≤ BK ^ 2 := by
     simpa only [KbT, BK] using hkOne gT T hTtie Ch hCh hT2
   have hKbU : lowJetSq (I := I) (M := M) g 2 KbU ≤ BK ^ 2 := by
@@ -504,7 +522,8 @@ private theorem amixHalfH2
       (mul_nonneg hA5 hA) hTr3T hS5T
     calc
       _ ≤ (O3 * Bt3 * (A5 * A)) ^ 2 := by simpa only [S4T] using hs
-      _ = (A4 * A) ^ 2 := by dsimp only [A4]; ring
+      _ = (A4 * A) ^ 2 := by
+        rw [one_stage_eq]
   have hS4D : lowJetSq (I := I) (M := M) g 2 (S4T - S4U) ≤
       (D40 * D3 + D41 * A * N) ^ 2 := by
     have hp := hpair3 Tr3T Tr3U S5T S5U (Ct3 * N) Bt3
@@ -515,14 +534,14 @@ private theorem amixHalfH2
       _ ≤ (P3 * ((Ct3 * N) * (A5 * A) + Bt3 * (D5 * D3))) ^ 2 := by
         simpa only [S4T, S4U] using hp
       _ = (D40 * D3 + D41 * A * N) ^ 2 := by
-        dsimp only [D40, D41]
-        ring
+        rw [base_pair_stage_eq]
   have hS3T : lowJetSq (I := I) (M := M) g 2 S3T ≤ (A3 * A) ^ 2 := by
     have hs := honek E3T S4T AK (A4 * A) hAK
       (mul_nonneg hA4 hA) hE3T hS4T
     calc
       _ ≤ (Ok * AK * (A4 * A)) ^ 2 := by simpa only [S3T] using hs
-      _ = (A3 * A) ^ 2 := by dsimp only [A3]; ring
+      _ = (A3 * A) ^ 2 := by
+        rw [one_stage_eq]
   have hS3D : lowJetSq (I := I) (M := M) g 2 (S3T - S3U) ≤
       (D30 * D3 + D31 * A * N) ^ 2 := by
     have hp := hpairk E3T E3U S4T S4U (DK * N) AK
@@ -536,14 +555,14 @@ private theorem amixHalfH2
           AK * (D40 * D3 + D41 * A * N))) ^ 2 := by
         simpa only [S3T, S3U] using hp
       _ = (D30 * D3 + D31 * A * N) ^ 2 := by
-        dsimp only [D30, D31]
-        ring
+        rw [pair_stage_eq]
   have hS2T : lowJetSq (I := I) (M := M) g 2 S2T ≤ (A2 * A) ^ 2 := by
     have hs := hone4 Tr4T S3T Bt4 (A3 * A) hBt4
       (mul_nonneg hA3 hA) hTr4T hS3T
     calc
       _ ≤ (O4 * Bt4 * (A3 * A)) ^ 2 := by simpa only [S2T] using hs
-      _ = (A2 * A) ^ 2 := by dsimp only [A2]; ring
+      _ = (A2 * A) ^ 2 := by
+        rw [one_stage_eq]
   have hS2D : lowJetSq (I := I) (M := M) g 2 (S2T - S2U) ≤
       (D20 * D3 + D21 * A * N) ^ 2 := by
     have hp := hpair4 Tr4T Tr4U S3T S3U (Ct4 * N) Bt4
@@ -557,8 +576,7 @@ private theorem amixHalfH2
           Bt4 * (D30 * D3 + D31 * A * N))) ^ 2 := by
         simpa only [S2T, S2U] using hp
       _ = (D20 * D3 + D21 * A * N) ^ 2 := by
-        dsimp only [D20, D21]
-        ring
+        rw [pair_stage_eq]
   have hp := hpair2 Tr2T Tr2U S2T S2U (Ct2 * N) Bt2
     (A2 * A) (D20 * D3 + D21 * A * N)
     (mul_nonneg hCt2 hN) hBt2 (mul_nonneg hA2 hA)
@@ -574,8 +592,7 @@ private theorem amixHalfH2
     _ ≤ (P2 * ((Ct2 * N) * (A2 * A) +
         Bt2 * (D20 * D3 + D21 * A * N))) ^ 2 := hp
     _ = (B0 * D3 + B1 * A * N) ^ 2 := by
-      dsimp only [B0, B1]
-      ring
+      rw [pair_stage_eq]
 
 
 theorem amixBg_pair_h2
@@ -674,7 +691,16 @@ theorem amixBg_pair_h2
       dsimp only [B0, B1, Q', N]
       ring
 
-set_option maxHeartbeats 3200000 in
+private lemma four_six_sq_le_two_three_sq
+    (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    4 * a ^ 2 + 6 * b ^ 2 ≤ (2 * a + 3 * b) ^ 2 := by
+  nlinarith only [mul_nonneg ha hb, sq_nonneg b]
+
+private lemma two_three_mul_eq
+    (C A K X Y : ℝ) :
+    2 * (C * A * X) + 3 * (C * Y * K) =
+      (2 * C * A) * X + (3 * C * K) * Y := by
+  ring
 
 private theorem lieBgLow_raw_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -734,8 +760,8 @@ private theorem lieBgLow_raw_h2
         (connDiffLoweredCc (I := I) g gB))
   let a : ℝ := Ca * KA * X
   let b : ℝ := Ca * Y * KC
-  have ha : 0 ≤ a := by dsimp only [a]; positivity
-  have hb : 0 ≤ b := by dsimp only [b]; positivity
+  have ha : 0 ≤ a := mul_nonneg (mul_nonneg hCa hKA) hX
+  have hb : 0 ≤ b := mul_nonneg (mul_nonneg hCa hY) hKC
   have hX1 : lowJetSq (I := I) (M := M) g 2 X1 ≤ a ^ 2 := by
     dsimp only [X1]
     rw [domH2]
@@ -761,18 +787,32 @@ private theorem lieBgLow_raw_h2
           4 * lowJetSq (I := I) (M := M) g 2 X2 +
           2 * lowJetSq (I := I) (M := M) g 2 X3 := by
     rw [hneg] at h12sum
-    nlinarith
+    calc
+      lowJetSq (I := I) (M := M) g 2 (((-1 : ℝ) • X1 + X2) + X3) ≤
+          2 * (lowJetSq (I := I) (M := M) g 2 ((-1 : ℝ) • X1 + X2) +
+            lowJetSq (I := I) (M := M) g 2 X3) := h123sum
+      _ ≤ 2 * (2 * (lowJetSq (I := I) (M := M) g 2 X1 +
+              lowJetSq (I := I) (M := M) g 2 X2) +
+            lowJetSq (I := I) (M := M) g 2 X3) :=
+        mul_le_mul_of_nonneg_left (add_le_add h12sum le_rfl) (by norm_num)
+      _ = 4 * lowJetSq (I := I) (M := M) g 2 X1 +
+          4 * lowJetSq (I := I) (M := M) g 2 X2 +
+          2 * lowJetSq (I := I) (M := M) g 2 X3 := by ring
   rw [lieBgLow_sub (I := I) (M := M) g gT gU gB]
   change lowJetSq (I := I) (M := M) g 2
     (((-1 : ℝ) • X1 + X2) + X3) ≤ _
   calc
-    _ ≤ 4 * a ^ 2 + 6 * b ^ 2 := by
-      nlinarith [hsum, hX1, hX2, hX3]
-    _ ≤ (2 * a + 3 * b) ^ 2 := by
-      nlinarith [mul_nonneg ha hb, sq_nonneg b]
+    _ ≤ 4 * a ^ 2 + 4 * b ^ 2 + 2 * b ^ 2 := by
+      exact hsum.trans
+        (add_le_add
+          (add_le_add
+            (mul_le_mul_of_nonneg_left hX1 (show 0 ≤ (4 : ℝ) by norm_num))
+            (mul_le_mul_of_nonneg_left hX2 (show 0 ≤ (4 : ℝ) by norm_num)))
+          (mul_le_mul_of_nonneg_left hX3 (show 0 ≤ (2 : ℝ) by norm_num)))
+    _ = 4 * a ^ 2 + 6 * b ^ 2 := by ring
+    _ ≤ (2 * a + 3 * b) ^ 2 := four_six_sq_le_two_three_sq a b ha hb
     _ = (P * X + Q * Y) ^ 2 := by
-      dsimp only [a, b, P, Q]
-      ring
+      rw [two_three_mul_eq]
 
 
 private theorem lieBgLow_pair_h2
@@ -1687,7 +1727,27 @@ private theorem lie0_bg_split_h2
     lc0_decomp (I := I) (M := M) g gU g]
   module
 
-set_option maxHeartbeats 3200000 in
+private lemma weighted_three_sq_sum_eq (x y z : ℝ) :
+    2 * (2 * (x ^ 2 + y ^ 2) + z ^ 2) =
+      4 * x ^ 2 + 4 * y ^ 2 + 2 * z ^ 2 := by
+  ring
+
+private lemma weighted_three_sq_le_sum_sq
+    (x y z : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) :
+    4 * x ^ 2 + 4 * y ^ 2 + 2 * z ^ 2 ≤
+      (2 * (x + y + z)) ^ 2 := by
+  nlinarith only [mul_nonneg hx hy, mul_nonneg hx hz,
+    mul_nonneg hy hz, sq_nonneg z]
+
+private lemma lie0_envelope_eq
+    (a0 a1 b m0 m1 D3 D2 A N : ℝ) :
+    2 * (a0 + b + m0) * D3 + 2 * (a1 + b + m1) * D2 +
+        2 * (a1 + b + m1) * A * D2 + 2 * (a1 + b + m1) * N +
+        2 * (a1 + b + m1) * A * N =
+      2 * ((a0 * D3 + a1 * D2 + a1 * A * D2 + a1 * N + a1 * A * N) +
+          b * (D3 + D2 + A * D2) + (m0 * D3 + m1 * N + m1 * A * N)) +
+        2 * (m1 * D2 + m1 * A * D2 + b * N + b * A * N) := by
+  ring
 
 theorem lie0_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1857,11 +1917,11 @@ theorem lie0_bg_pair_h2
             (add_le_add
               (mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)) hZ)
             (by norm_num)
-        _ = 4 * SX ^ 2 + 4 * SY ^ 2 + 2 * SZ ^ 2 := by ring
+        _ = 4 * SX ^ 2 + 4 * SY ^ 2 + 2 * SZ ^ 2 :=
+          weighted_three_sq_sum_eq SX SY SZ
     have hsq : 4 * SX ^ 2 + 4 * SY ^ 2 + 2 * SZ ^ 2 ≤
         (2 * (SX + SY + SZ)) ^ 2 := by
-      nlinarith [mul_nonneg hSX hSY, mul_nonneg hSX hSZ,
-        mul_nonneg hSY hSZ, sq_nonneg SZ]
+      exact weighted_three_sq_le_sum_sq SX SY SZ hSX hSY hSZ
     let Extra : ℝ :=
       Bm1 * D2 + Bm1 * A * D2 + Bb R * N + Bb R * A * N
     have hExtra : 0 ≤ Extra := by
@@ -1876,10 +1936,10 @@ theorem lie0_bg_pair_h2
         B0 R * D3 + B1 R * D2 + B1 R * A * D2 +
             B1 R * N + B1 R * A * N =
           2 * (SX + SY + SZ) + 2 * Extra := by
-      dsimp only [B0, B1, SX, SY, SZ]
-      dsimp only [Extra]
-      ring
-    have hroot0 : 0 ≤ 2 * (SX + SY + SZ) := by positivity
+      simpa only [B0, B1, SX, SY, SZ, Extra] using
+        lie0_envelope_eq (Ba0 R) (Ba1 R) (Bb R) Bm0 Bm1 D3 D2 A N
+    have hroot0 : 0 ≤ 2 * (SX + SY + SZ) :=
+      mul_nonneg (by norm_num) (add_nonneg (add_nonneg hSX hSY) hSZ)
     have hrootLe : 2 * (SX + SY + SZ) ≤
         B0 R * D3 + B1 R * D2 + B1 R * A * D2 +
           B1 R * N + B1 R * A * N := by
