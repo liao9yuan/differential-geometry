@@ -31,7 +31,37 @@ variable
 
 namespace LowRegBgC0Core
 
-set_option maxHeartbeats 5000000 in
+private lemma second_le_three_term_sum
+    (D3 D2 A : ℝ) (hD3 : 0 ≤ D3) (hD2 : 0 ≤ D2) (hA : 0 ≤ A) :
+    D2 ≤ D3 + D2 + A * D2 := by
+  nlinarith only [hD3, mul_nonneg hA hD2]
+
+private lemma two_mul_sq_add_sq_le_four_sum_sq
+    (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    2 * (x ^ 2 + y ^ 2) ≤ (2 * (x + y)) ^ 2 := by
+  nlinarith only [sq_nonneg x, sq_nonneg y, mul_nonneg hx hy]
+
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem aaKerOne_sub_eq_six
+    (g gT gU : SmoothRiemannianMetric I M)
+    (T U : SmoothCcTensor g 0 2) :
+    aaKerOne (I := I) (M := M) g gT T -
+        aaKerOne (I := I) (M := M) g gU U =
+      (aaMidOne (I := I) (M := M) g gT T ricPerm102 ricPerm3201 -
+        aaMidOne (I := I) (M := M) g gU U ricPerm102 ricPerm3201) +
+      (aaMidOne (I := I) (M := M) g gT T ricPerm102 ricPerm2301 -
+        aaMidOne (I := I) (M := M) g gU U ricPerm102 ricPerm2301) +
+      (aaMidOne (I := I) (M := M) g gT T ricPerm120 ricPerm3102 -
+        aaMidOne (I := I) (M := M) g gU U ricPerm120 ricPerm3102) +
+      (aaBareOne (I := I) (M := M) g gT T ricPerm1302 -
+        aaBareOne (I := I) (M := M) g gU U ricPerm1302) +
+      (aaBareOne (I := I) (M := M) g gT T ricPerm1203 -
+        aaBareOne (I := I) (M := M) g gU U ricPerm1203) +
+      (aaMidOne (I := I) (M := M) g gT T ricPerm120 ricPerm2103 -
+        aaMidOne (I := I) (M := M) g gU U ricPerm120 ricPerm2103) := by
+  simp only [aaKerOne]
+  module
+
 theorem aaKerOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -251,7 +281,7 @@ theorem aaKerOnePairH2
         (mul_nonneg hBp (add_nonneg hD2 (mul_nonneg hR hN)))
   have hD2D : D2 ≤ D := by
     dsimp only [D]
-    nlinarith [mul_nonneg hA hD2]
+    exact second_le_three_term_sum D3 D2 A hD3 hD2 hA
   have hDS : D ≤ S := by
     have hDN : D ≤ D + N := le_add_of_nonneg_right hN
     have hmul : D + N ≤ (1 + A) * (D + N) := by
@@ -376,24 +406,7 @@ theorem aaKerOnePairH2
         (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr rfl))))) _ _
         (hmidB ricPerm120 (Or.inr rfl))
         (hmidD ricPerm120 (Or.inr rfl))
-  have hker :
-      aaKerOne (I := I) (M := M) g gT T -
-          aaKerOne (I := I) (M := M) g gU U =
-        (aaMidOne (I := I) (M := M) g gT T ricPerm102 ricPerm3201 -
-          aaMidOne (I := I) (M := M) g gU U ricPerm102 ricPerm3201) +
-        (aaMidOne (I := I) (M := M) g gT T ricPerm102 ricPerm2301 -
-          aaMidOne (I := I) (M := M) g gU U ricPerm102 ricPerm2301) +
-        (aaMidOne (I := I) (M := M) g gT T ricPerm120 ricPerm3102 -
-          aaMidOne (I := I) (M := M) g gU U ricPerm120 ricPerm3102) +
-        (aaBareOne (I := I) (M := M) g gT T ricPerm1302 -
-          aaBareOne (I := I) (M := M) g gU U ricPerm1302) +
-        (aaBareOne (I := I) (M := M) g gT T ricPerm1203 -
-          aaBareOne (I := I) (M := M) g gU U ricPerm1203) +
-        (aaMidOne (I := I) (M := M) g gT T ricPerm120 ricPerm2103 -
-          aaMidOne (I := I) (M := M) g gU U ricPerm120 ricPerm2103) := by
-    simp only [aaKerOne]
-    module
-  rw [hker]
+  rw [aaKerOne_sub_eq_six (I := I) (M := M) g gT gU T U]
   refine (jetSix (I := I) (M := M) g 2 _ _ _ _ _ _
     hx0 hx1 hx2 hx3 hx4 hx5).trans ?_
   calc
@@ -495,7 +508,23 @@ theorem fourTracePair
       simp only [L]
       ring
 
-set_option maxHeartbeats 4000000 in
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem aaOne_sub_eq_two
+    (g gT gU : SmoothRiemannianMetric I M)
+    (T U : SmoothCcTensor g 0 2) :
+    aaOne (I := I) (M := M) g gT T -
+        aaOne (I := I) (M := M) g gU U =
+      appCcRS (I := I) (M := M) g 3 4 2
+          (ricciCometricFourTraceCastG0 (I := I) g gT -
+            ricciCometricFourTraceCastG0 (I := I) g gU)
+          (aaKerOne (I := I) (M := M) g gT T) +
+        appCcRS (I := I) (M := M) g 3 4 2
+          (ricciCometricFourTraceCastG0 (I := I) g gU)
+          (aaKerOne (I := I) (M := M) g gT T -
+            aaKerOne (I := I) (M := M) g gU U) := by
+  simp only [aaOne, appCcRS_sub_left, appCcRS_sub_right]
+  module
+
 theorem aaOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -639,12 +668,6 @@ theorem aaOnePairH2
         (mul_nonneg
           (mul_nonneg (hBp R hR) (add_nonneg (by norm_num) hA)) hD)
         hFU hKdiff
-  have hsplit :
-      aaOne (I := I) (M := M) g gT T -
-          aaOne (I := I) (M := M) g gU U = X + Y := by
-    simp only [aaOne, X, Y, FT, FU, KT, KU,
-      appCcRS_sub_left, appCcRS_sub_right]
-    module
   have hNle : N ≤ D := by
     dsimp only [D]
     exact le_add_of_nonneg_left
@@ -664,15 +687,17 @@ theorem aaOnePairH2
       2 * (x + y) ≤ 2 * (c * D + y) :=
         mul_le_mul_of_nonneg_left (add_le_add hx le_rfl) (by norm_num)
       _ = B R * (1 + A) * D := by simp only [B, c, y]; ring
-  rw [hsplit]
+  rw [aaOne_sub_eq_two (I := I) (M := M) g gT gU T U]
+  change lowJetSq (I := I) (M := M) g 2 (X + Y) ≤
+    (B R * (1 + A) * D) ^ 2
   refine (jetAdd (I := I) (M := M) g 2 X Y).trans ?_
   calc
     2 * (lowJetSq (I := I) (M := M) g 2 X +
         lowJetSq (I := I) (M := M) g 2 Y) ≤
       2 * (x ^ 2 + y ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)
-    _ ≤ (2 * (x + y)) ^ 2 := by
-      nlinarith [mul_nonneg hx0 hy0]
+    _ ≤ (2 * (x + y)) ^ 2 :=
+      two_mul_sq_add_sq_le_four_sum_sq x y hx0 hy0
     _ ≤ (B R * (1 + A) * D) ^ 2 :=
       pow_le_pow_left₀
         (mul_nonneg (by norm_num) (add_nonneg hx0 hy0)) hlead 2
