@@ -1244,7 +1244,76 @@ theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Rea
     (fun t ht x => hΛ t (Ioo_subset_Icc_self ht) x)
 
 
-set_option maxHeartbeats 2000000 in
+private lemma sq_le_sq_of_nonneg {x y : Real} (hx : 0 ≤ x) (hxy : x ≤ y) :
+    x ^ 2 ≤ y ^ 2 :=
+  pow_le_pow_left₀ hx hxy 2
+
+private lemma fu_rem_kq_factor
+    (n BP BR1 BR2 Λ BH d : Real) :
+    16 * (4 * n ^ 14 * ((2 + 2 * n ^ 6 * BP) * d) * (BR1 + BR2) +
+        2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) *
+          d * BR2 ^ 2) =
+      (16 * (4 * n ^ 14 * (2 + 2 * n ^ 6 * BP) * (BR1 + BR2) +
+        2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) *
+          BR2 ^ 2)) * d := by
+  ring
+
+private lemma fu_rem_kd_factor (n BR1 BRic d : Real) :
+    32 * n ^ 6 * ((n ^ 4 * d) * BR1 + BRic * d) =
+      (32 * n ^ 6 * (n ^ 4 * BR1 + BRic)) * d := by
+  ring
+
+private lemma fu_rem_kr0_factor (n B5 Λ B6 KQ KD d : Real) :
+    4 * (50 * n ^ 12 * d * B5 + 2 * n ^ 10 * Λ ^ 2 * d * B6) +
+        16 * (KQ * d) + 2 * (KD * d) =
+      (200 * n ^ 12 * B5 + 8 * n ^ 10 * Λ ^ 2 * B6 +
+        16 * KQ + 2 * KD) * d := by
+  ring
+
+private lemma fu_rem_rg_factor (n BP d : Real) :
+    n ^ 6 * ((n ^ 4 * d) * BP) = n ^ 10 * BP * d := by
+  ring
+
+private lemma fu_rem_kg_factor (n BP Ce BSpeed d : Real) :
+    2 * (4 * (n ^ 10 * BP * d)) +
+        2 * (Ce ^ 6 * n ^ 6 * BSpeed * d) =
+      (8 * n ^ 10 * BP + 2 * Ce ^ 6 * n ^ 6 * BSpeed) * d := by
+  ring
+
+private lemma fu_rem_kl_factor (n BP d : Real) :
+    n ^ 6 * ((n ^ 6 * BP) * d) = n ^ 12 * BP * d := by
+  ring
+
+private lemma fu_rem_pair_factor (n BP Bg d : Real) :
+    n ^ 8 * (BP * (4 * n ^ 3 * Bg * d)) =
+      4 * n ^ 11 * BP * Bg * d := by
+  ring
+
+private lemma fu_rem_trace_factor (n BP Bg d : Real) :
+    n ^ 6 * (4 * n ^ 11 * BP * Bg * d) =
+      4 * n ^ 17 * BP * Bg * d := by
+  ring
+
+private lemma fu_rem_four_term_bound
+    {R G L T RG RGL : Real}
+    (hRG : RG ≤ 2 * R + 2 * G)
+    (hRGL : RGL ≤ 2 * RG + 2 * L) :
+    2 * RGL + 2 * T ≤ 8 * R + 8 * G + 4 * L + 2 * T := by
+  linarith
+
+private lemma fu_rem_four_term_mono
+    {R G L T KR KG KL KT d : Real}
+    (hR : R ≤ KR * d) (hG : G ≤ KG * d)
+    (hL : L ≤ KL * d) (hT : T ≤ KT * d) :
+    8 * R + 8 * G + 4 * L + 2 * T ≤
+      8 * (KR * d) + 8 * (KG * d) + 4 * (KL * d) + 2 * (KT * d) := by
+  linarith
+
+private lemma fu_rem_total_factor (KR KG KL KT d : Real) :
+    8 * (KR * d) + 8 * (KG * d) + 4 * (KL * d) + 2 * (KT * d) =
+      (8 * KR + 8 * KG + 4 * KL + 2 * KT) * d := by
+  ring
+
 omit [NeZero (Module.finrank ℝ E)] in
 theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -1374,7 +1443,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
             (mul_le_mul_of_nonneg_left hrm (by norm_num))
             (mul_le_mul_of_nonneg_left hmetric
               (mul_nonneg (mul_nonneg (by norm_num) (pow_nonneg hn 6)) hBP0))
-        _ = (2 + 2 * n ^ 6 * BP) * d := by ring
+        _ = (2 + 2 * n ^ 6 * BP) * d := by rw [add_mul]
     have hsum :
         normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₁ t x) +
             normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x) ≤
@@ -1388,7 +1457,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
       normSq0S_nonneg (I := I) (g₁ t) x 4 _
     have hTf2sq :
         normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x) ^ 2 ≤ BR2 ^ 2 := by
-      nlinarith
+      exact sq_le_sq_of_nonneg hTf20 hTf2
     have hQ0 := bCombDiffSq_le (I := I) (g₁ t) (g₂ t)
       (fuTf (I := I) g₁ t) (fuTf (I := I) g₂ t) x hΛ0
       (hΛ t hIcc x) (hBH t hIcc x)
@@ -1457,7 +1526,8 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
           exact mul_le_mul_of_nonneg_left (add_le_add hterm1 hterm2) (by norm_num)
         _ = (16 * (4 * n ^ 14 * (2 + 2 * n ^ 6 * BP) * (BR1 + BR2) +
               2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) *
-                BR2 ^ 2)) * d := by ring
+                BR2 ^ 2)) * d :=
+          fu_rem_kq_factor n BP BR1 BR2 Λ BH d
     have hD0 := ricciDriftSq_le (I := I) (g₁ t) (g₂ t) x
     have hRicDiff := ricciSlabLe (I := I) g₁ g₂ t x
     have hRicDiffUpper0 : 0 ≤ n ^ 4 * d :=
@@ -1502,7 +1572,8 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
             ((n ^ 4 * d) * BR1 + BRic21 * d) := by
           exact mul_le_mul_of_nonneg_left (add_le_add hDprod1 hDprod2)
             (mul_nonneg (by norm_num) (pow_nonneg hn 6))
-        _ = (32 * n ^ 6 * (n ^ 4 * BR1 + BRic21)) * d := by ring
+        _ = (32 * n ^ 6 * (n ^ 4 * BR1 + BRic21)) * d :=
+          fu_rem_kd_factor n BR1 BRic21 d
     have hR0raw := rmDotRemSq_le (I := I) (g₁ t) (g₂ t)
       (fuTf (I := I) g₂ t) (coordBasisAt (I := I))
       (fuRm04 (I := I) g₁) (fuRm04 (I := I) g₂)
@@ -1535,7 +1606,8 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
           16 * (KQ * d) + 2 * (KD * d) := by
         exact add_le_add (add_le_add hspace (le_refl _)) (le_refl _)
       _ = (200 * n ^ 12 * B5 + 8 * n ^ 10 * Λ ^ 2 * B6 +
-          16 * KQ + 2 * KD) * d := by ring
+          16 * KQ + 2 * KD) * d :=
+        fu_rem_kr0_factor n B5 Λ B6 KQ KD d
   have hG : normSq0S (I := I) (g₁ t) x 4 G ≤ KG * d := by
     have hn : 0 ≤ n := by
       dsimp only [n]
@@ -1581,7 +1653,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
       calc
         _ ≤ n ^ 6 * ((n ^ 4 * d) * BP) :=
           mul_le_mul_of_nonneg_left hprodR (pow_nonneg hn 6)
-        _ = n ^ 10 * BP * d := by ring
+        _ = n ^ 10 * BP * d := fu_rem_rg_factor n BP d
     have h2Rg_eq :
         normSq0S (I := I) (g₁ t) x 4 ((2 : Real) • Rg) =
           4 * normSq0S (I := I) (g₁ t) x 4 Rg := by
@@ -1610,7 +1682,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     have hRm2sq :
         normSq0S (I := I) (g₂ t) x 4 (fuTf (I := I) g₂ t x) ^ 2 ≤
           BR2g2 ^ 2 := by
-      nlinarith
+      exact sq_le_sq_of_nonneg hRm20 hRm2
     have hRicRm :
         normSq0S (I := I) (g₂ t) x 2 (metricRicciAt (I := I) (g₂ t) x) *
             normSq0S (I := I) (g₂ t) x 4 (metricRm04At (I := I) (g₂ t) x) ≤
@@ -1688,7 +1760,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
         _ ≤ Ce ^ 6 * n ^ 6 * (BSpeed * d) :=
           mul_le_mul_of_nonneg_left hSpeedMetric
             (mul_nonneg (pow_nonneg (le_trans (by norm_num) hCe) 6) (pow_nonneg hn 6))
-        _ = Ce ^ 6 * n ^ 6 * BSpeed * d := by ring
+        _ = Ce ^ 6 * n ^ 6 * BSpeed * d := by simp only [mul_assoc]
     rw [hGsplit]
     refine (normSq0S_sub_le (I := I) (g₁ t) x 4 ((2 : Real) • Rg) Hg).trans ?_
     dsimp only [KG]
@@ -1698,7 +1770,8 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
         add_le_add
           (mul_le_mul_of_nonneg_left h2Rg (by norm_num))
           (mul_le_mul_of_nonneg_left hHg (by norm_num))
-      _ = (8 * n ^ 10 * BP + 2 * Ce ^ 6 * n ^ 6 * BSpeed) * d := by ring
+      _ = (8 * n ^ 10 * BP + 2 * Ce ^ 6 * n ^ 6 * BSpeed) * d :=
+        fu_rem_kg_factor n BP Ce BSpeed d
   have hPfield :
       P = CovariantDerivative.rm04Section (I := I) (g₁ t)
         (metricCov (I := I) (g₂ t)) (metricCov_smooth (I := I) (g₂ t)) := by
@@ -1754,7 +1827,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     calc
       _ ≤ n ^ 6 * ((n ^ 6 * BP2) * d) :=
         mul_le_mul_of_nonneg_left hprod (pow_nonneg hn 6)
-      _ = n ^ 12 * BP2 * d := by ring
+      _ = n ^ 12 * BP2 * d := fu_rem_kl_factor n BP2 d
   have hT : normSq0S (I := I) (g₁ t) x 4 T ≤ KT * d := by
     have hn : 0 ≤ n := by
       dsimp only [n]
@@ -1813,7 +1886,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
       calc
         _ ≤ n ^ 8 * (BP1 * (4 * n ^ 3 * Bg * d)) :=
           mul_le_mul_of_nonneg_left hPairProd (pow_nonneg hn 8)
-        _ = 4 * n ^ 11 * BP1 * Bg * d := by ring
+        _ = 4 * n ^ 11 * BP1 * Bg * d := fu_rem_pair_factor n BP1 Bg d
     have hTrace0 := traceNormSq_le (I := I) (s := 4) (g₁ t) x
       (reLowerPair (I := I) (g₁ t) (metricNabla0S (I := I) (g₁ t) P) K x)
     have hTrace :
@@ -1828,7 +1901,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     calc
       _ ≤ n ^ 6 * (4 * n ^ 11 * BP1 * Bg * d) :=
         mul_le_mul_of_nonneg_left hPair (pow_nonneg hn 6)
-      _ = 4 * n ^ 17 * BP1 * Bg * d := by ring
+      _ = 4 * n ^ 17 * BP1 * Bg * d := fu_rem_trace_factor n BP1 Bg d
   have hAB := normSq0S_add_le (I := I) (g₁ t) x 4 R0 G
   have hABC := normSq0S_sub_le (I := I) (g₁ t) x 4 (R0 + G) L
   have hABCD := normSq0S_sub_le (I := I) (g₁ t) x 4 ((R0 + G) - L) T
@@ -1841,12 +1914,12 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
           8 * normSq0S (I := I) (g₁ t) x 4 G +
           4 * normSq0S (I := I) (g₁ t) x 4 L +
           2 * normSq0S (I := I) (g₁ t) x 4 T := by
-      nlinarith [hAB, hABC]
+      exact fu_rem_four_term_bound hAB hABC
     _ ≤ 8 * (KR0 * d) + 8 * (KG * d) + 4 * (KL * d) + 2 * (KT * d) := by
-      nlinarith [hR0, hG, hL, hT]
+      exact fu_rem_four_term_mono hR0 hG hL hT
     _ = C_rem * d := by
       dsimp only [C_rem]
-      ring
+      exact fu_rem_total_factor KR0 KG KL KT d
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
