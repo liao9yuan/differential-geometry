@@ -22,6 +22,11 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
+private lemma two_mul_sq_add_sq_le_four_sum_sq
+    (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    2 * (x ^ 2 + y ^ 2) ≤ (2 * (x + y)) ^ 2 := by
+  nlinarith only [sq_nonneg x, sq_nonneg y, mul_nonneg hx hy]
+
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -344,7 +349,227 @@ private theorem kappa_fix_h2
     (Filter.Eventually.of_forall fun x =>
       connLow_rfns (I := I) (M := M) g gB i x)
 
-set_option maxHeartbeats 2400000 in
+private theorem psiBgLeft_pair_h2_aux
+    (hDim : Module.finrank ℝ E = 3)
+    (g gB : SmoothRiemannianMetric I M) :
+    ∃ ρ L D : ℝ, 0 < ρ ∧ 0 ≤ L ∧ 0 ≤ D ∧
+      ∀ (gT gU : SmoothRiemannianMetric I M)
+        (T U : SmoothCcTensor g 0 2)
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
+          gT.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
+          gU.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g U x u v),
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+      lowJetSq (I := I) (M := M) g 2
+          (psiBgLeft (I := I) (M := M) g gT gB -
+            psiBgLeft (I := I) (M := M) g gT g) ≤ L ^ 2 ∧
+        lowJetSq (I := I) (M := M) g 2
+          ((psiBgLeft (I := I) (M := M) g gT gB -
+              psiBgLeft (I := I) (M := M) g gT g) -
+            (psiBgLeft (I := I) (M := M) g gU gB -
+              psiBgLeft (I := I) (M := M) g gU g)) ≤
+          (D * ‖ccTensorToHs (I := I) (M := M) g 2
+            (2 : ℝ) (T - U)‖) ^ 2 := by
+  obtain ⟨Kp, hKp, hpb⟩ :=
+    pbLow_h2_mul (I := I) (M := M) hDim g gB
+  obtain ⟨Ch, hCh, hhs⟩ :=
+    hs2_low2 (I := I) (M := M) g 2
+  let F : SmoothCcTensor g 0 3 :=
+    -lc0Kappa (I := I) (M := M) g g gB
+  let F0 : ℝ := Real.sqrt (lowJetSq (I := I) (M := M) g 2 F)
+  let D : ℝ := Kp * Ch
+  let L : ℝ := 2 * (F0 + D)
+  have hF0 : 0 ≤ F0 := Real.sqrt_nonneg _
+  have hF0sq : F0 ^ 2 = lowJetSq (I := I) (M := M) g 2 F := by
+    simpa only [F0] using Real.sq_sqrt
+      (Finset.sum_nonneg fun _ _ => sq_nonneg _)
+  have hD : 0 ≤ D := mul_nonneg hKp hCh
+  have hL : 0 ≤ L :=
+    mul_nonneg (by norm_num) (add_nonneg hF0 hD)
+  refine ⟨1, L, D, by norm_num, hL, hD, ?_⟩
+  intro gT gU T U hTtie hUtie hTHs
+  let N : ℝ :=
+    ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖
+  let LT : SmoothCcTensor g 1 2 :=
+    psiBgLeft (I := I) (M := M) g gT gB -
+      psiBgLeft (I := I) (M := M) g gT g
+  let LU : SmoothCcTensor g 1 2 :=
+    psiBgLeft (I := I) (M := M) g gU gB -
+      psiBgLeft (I := I) (M := M) g gU g
+  let PbT : SmoothCcTensor g 0 3 :=
+    lc0PbLow (I := I) (M := M) g T g gB
+  have hN : 0 ≤ N := norm_nonneg _
+  have hT2 : lowJetSq (I := I) (M := M) g 2 T ≤ Ch ^ 2 := by
+    calc
+      lowJetSq (I := I) (M := M) g 2 T ≤
+          (Ch * ‖ccTensorToHs (I := I) (M := M) g 2
+            (2 : ℝ) T‖) ^ 2 := by
+        simpa only [lowJetSq, Nat.reduceAdd] using hhs T
+      _ ≤ (Ch * 1) ^ 2 :=
+        pow_le_pow_left₀
+          (mul_nonneg hCh (norm_nonneg _))
+          (mul_le_mul_of_nonneg_left hTHs hCh) 2
+      _ = Ch ^ 2 := by rw [mul_one]
+  have hTU2 : lowJetSq (I := I) (M := M) g 2 (T - U) ≤
+      (Ch * N) ^ 2 := by
+    simpa only [lowJetSq, Nat.reduceAdd, N] using hhs (T - U)
+  have hPbT : lowJetSq (I := I) (M := M) g 2 PbT ≤ D ^ 2 := by
+    simpa only [PbT, D] using hpb T Ch hCh hT2
+  have hLT : lowJetSq (I := I) (M := M) g 2 LT ≤ L ^ 2 := by
+    rw [show LT =
+        cometricRaiseSlot0Field (I := I) (M := M) g 1
+          (domDomCongrSection (I := I) g lieArm1RhoSlot0 (F - PbT)) by
+      simpa only [LT, F, PbT] using
+        psiBgLeft_corr (I := I) (M := M) g gT gB T hTtie]
+    rw [raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0 (F - PbT)]
+    calc
+      lowJetSq (I := I) (M := M) g 2 (F - PbT) =
+          lowJetSq (I := I) (M := M) g 2 (F + -PbT) := by
+        rw [sub_eq_add_neg]
+      _ ≤ 2 * (lowJetSq (I := I) (M := M) g 2 F +
+          lowJetSq (I := I) (M := M) g 2 (-PbT)) :=
+        jet_add1 (I := I) (M := M) g 2 F (-PbT)
+      _ = 2 * (F0 ^ 2 + lowJetSq (I := I) (M := M) g 2 PbT) := by
+        rw [jet_neg1 (I := I) (M := M) g 2 PbT, hF0sq]
+      _ ≤ 2 * (F0 ^ 2 + D ^ 2) :=
+        mul_le_mul_of_nonneg_left (add_le_add le_rfl hPbT) (by norm_num)
+      _ ≤ L ^ 2 := by
+        simpa only [L] using two_mul_sq_add_sq_le_four_sum_sq F0 D hF0 hD
+  have hPbD : lowJetSq (I := I) (M := M) g 2
+      (lc0PbLow (I := I) (M := M) g (T - U) g gB) ≤
+      (D * N) ^ 2 := by
+    simpa only [D, mul_assoc] using hpb (T - U) (Ch * N)
+      (mul_nonneg hCh hN) hTU2
+  have hLD : lowJetSq (I := I) (M := M) g 2 (LT - LU) ≤
+      (D * N) ^ 2 := by
+    rw [show LT - LU =
+        cometricRaiseSlot0Field (I := I) (M := M) g 1
+          (domDomCongrSection (I := I) g lieArm1RhoSlot0
+            (-lc0PbLow (I := I) (M := M) g (T - U) g gB)) by
+      simpa only [LT, LU] using
+        psiBgLeft_pair (I := I) (M := M) g gT gU gB T U hTtie hUtie]
+    rw [raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0,
+      jet_neg1 (I := I) (M := M) g 2]
+    exact hPbD
+  simpa only [LT, LU, N] using And.intro hLT hLD
+
+private theorem sharpFlat_pair_h2_aux
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ ρ S C : ℝ, 0 < ρ ∧ 0 ≤ S ∧ 0 ≤ C ∧
+      ∀ (gT gU : SmoothRiemannianMetric I M)
+        (T U : SmoothCcTensor g 0 2)
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g U x u v =
+            ccTensorBilin (I := I) g U x v u)
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
+          gT.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
+          gU.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
+        {δT δU : ℝ}
+        (_hδT_le : δT ≤ δ₀) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δT)
+        (_hδU_le : δU ≤ δ₀) (_hδU0 : 0 ≤ δU)
+        (_hδU : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g U) δU),
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+      lowJetSq (I := I) (M := M) g 2
+          (sharpFlatEndoCc (I := I) g gT) ≤ S ^ 2 ∧
+        lowJetSq (I := I) (M := M) g 2
+          (sharpFlatEndoCc (I := I) g gU) ≤ S ^ 2 ∧
+        lowJetSq (I := I) (M := M) g 2
+          (sharpFlatEndoCc (I := I) g gT -
+            sharpFlatEndoCc (I := I) g gU) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g 2
+            (2 : ℝ) (T - U)‖) ^ 2 := by
+  obtain ⟨ρs, Cs, hρs, hCs, hsharpPair⟩ :=
+    sharp_pair_h2 (I := I) (M := M) hDim g hδ₀0 hδ₀
+  obtain ⟨Ks, hKs, hsharpBdd⟩ :=
+    sharp_h2_low (I := I) (M := M) g hδ₀0 hδ₀
+  obtain ⟨Ch, hCh, hhs⟩ :=
+    hs2_low2 (I := I) (M := M) g 2
+  let ρ : ℝ := min ρs 1
+  let S0 : ℝ := Ks * (1 + Ch ^ 2)
+  let S : ℝ := Real.sqrt S0
+  have hρ : 0 < ρ := lt_min hρs (by norm_num)
+  have hS0 : 0 ≤ S0 :=
+    mul_nonneg hKs (add_nonneg (by norm_num) (sq_nonneg Ch))
+  have hS : 0 ≤ S := Real.sqrt_nonneg _
+  have hSsq : S ^ 2 = S0 := by
+    simpa only [S] using Real.sq_sqrt hS0
+  refine ⟨ρ, S, Cs, hρ, hS, hCs, ?_⟩
+  intro gT gU T U hT hU hTtie hUtie
+    δT δU hδT_le hδT0 hδT hδU_le hδU0 hδU hTHs hUHs
+  have hTHss : ‖ccTensorToHs (I := I) (M := M) g 2
+      (2 : ℝ) T‖ ≤ ρs := hTHs.trans (min_le_left _ _)
+  have hUHss : ‖ccTensorToHs (I := I) (M := M) g 2
+      (2 : ℝ) U‖ ≤ ρs := hUHs.trans (min_le_left _ _)
+  have hTHs1 : ‖ccTensorToHs (I := I) (M := M) g 2
+      (2 : ℝ) T‖ ≤ 1 := hTHs.trans (min_le_right _ _)
+  have hUHs1 : ‖ccTensorToHs (I := I) (M := M) g 2
+      (2 : ℝ) U‖ ≤ 1 := hUHs.trans (min_le_right _ _)
+  have hT2 : lowJetSq (I := I) (M := M) g 2 T ≤ Ch ^ 2 := by
+    calc
+      lowJetSq (I := I) (M := M) g 2 T ≤
+          (Ch * ‖ccTensorToHs (I := I) (M := M) g 2
+            (2 : ℝ) T‖) ^ 2 := by
+        simpa only [lowJetSq, Nat.reduceAdd] using hhs T
+      _ ≤ (Ch * 1) ^ 2 :=
+        pow_le_pow_left₀
+          (mul_nonneg hCh (norm_nonneg _))
+          (mul_le_mul_of_nonneg_left hTHs1 hCh) 2
+      _ = Ch ^ 2 := by rw [mul_one]
+  have hU2 : lowJetSq (I := I) (M := M) g 2 U ≤ Ch ^ 2 := by
+    calc
+      lowJetSq (I := I) (M := M) g 2 U ≤
+          (Ch * ‖ccTensorToHs (I := I) (M := M) g 2
+            (2 : ℝ) U‖) ^ 2 := by
+        simpa only [lowJetSq, Nat.reduceAdd] using hhs U
+      _ ≤ (Ch * 1) ^ 2 :=
+        pow_le_pow_left₀
+          (mul_nonneg hCh (norm_nonneg _))
+          (mul_le_mul_of_nonneg_left hUHs1 hCh) 2
+      _ = Ch ^ 2 := by rw [mul_one]
+  have hST : lowJetSq (I := I) (M := M) g 2
+      (sharpFlatEndoCc (I := I) g gT) ≤ S ^ 2 := by
+    calc
+      lowJetSq (I := I) (M := M) g 2
+          (sharpFlatEndoCc (I := I) g gT) ≤
+          Ks * (1 + lowJetSq (I := I) (M := M) g 2 T) :=
+        hsharpBdd gT T hT hTtie hδT_le hδT0 hδT
+      _ ≤ S0 := by
+        dsimp only [S0]
+        exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hT2) hKs
+      _ = S ^ 2 := hSsq.symm
+  have hSU : lowJetSq (I := I) (M := M) g 2
+      (sharpFlatEndoCc (I := I) g gU) ≤ S ^ 2 := by
+    calc
+      lowJetSq (I := I) (M := M) g 2
+          (sharpFlatEndoCc (I := I) g gU) ≤
+          Ks * (1 + lowJetSq (I := I) (M := M) g 2 U) :=
+        hsharpBdd gU U hU hUtie hδU_le hδU0 hδU
+      _ ≤ S0 := by
+        dsimp only [S0]
+        exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hU2) hKs
+      _ = S ^ 2 := hSsq.symm
+  have hSD : lowJetSq (I := I) (M := M) g 2
+      (sharpFlatEndoCc (I := I) g gT -
+        sharpFlatEndoCc (I := I) g gU) ≤
+      (Cs * ‖ccTensorToHs (I := I) (M := M) g 2
+        (2 : ℝ) (T - U)‖) ^ 2 := by
+    exact hsharpPair gT gU T U hT hU hTtie hUtie
+      hδT_le hδT0 hδT hδU_le hδU0 hδU hTHss hUHss
+  exact ⟨hST, hSU, hSD⟩
 
 theorem psiBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -385,45 +610,22 @@ theorem psiBg_pair_h2
             (lieArm1PsiB (I := I) (M := M) g gU gB -
               lieArm1PsiB (I := I) (M := M) g gU g)) ≤
           (B * N) ^ 2 := by
-  obtain ⟨ρs, Cs, hρs, hCs, hsharpPair⟩ :=
-    sharp_pair_h2 (I := I) (M := M) hDim g hδ₀0 hδ₀
-  obtain ⟨Ks, hKs, hsharpBdd⟩ :=
-    sharp_h2_low (I := I) (M := M) g hδ₀0 hδ₀
-  obtain ⟨Kp, hKp, hpb⟩ :=
-    pbLow_h2_mul (I := I) (M := M) hDim g gB
-  obtain ⟨Ch, hCh, hhs⟩ :=
-    hs2_low2 (I := I) (M := M) g 2
+  obtain ⟨ρl, L, D, hρl, hL, hD, hleft⟩ :=
+    psiBgLeft_pair_h2_aux (I := I) (M := M) hDim g gB
+  obtain ⟨ρs, S, C, hρs, hS, hC, hsharp⟩ :=
+    sharpFlat_pair_h2_aux (I := I) (M := M) hDim g hδ₀0 hδ₀
   obtain ⟨Ca, hCa, happ⟩ :=
     appRS_h2_h2_h2 (I := I) (M := M) hDim g 1 1 2
-  let ρ : ℝ := min ρs 1
-  let S0 : ℝ := Ks * (1 + Ch ^ 2)
-  let Bs : ℝ := Real.sqrt S0
-  let F : SmoothCcTensor g 0 3 :=
-    -lc0Kappa (I := I) (M := M) g g gB
-  let F0 : ℝ := Real.sqrt (lowJetSq (I := I) (M := M) g 2 F)
-  let Pb0 : ℝ := Kp * Ch
-  let L0 : ℝ := 2 * (F0 + Pb0)
-  let P : ℝ := Ca * L0 * Bs
-  let B : ℝ := 2 * (Ca * L0 * Cs + Ca * Kp * Ch * Bs)
-  have hρ : 0 < ρ := lt_min hρs (by norm_num)
-  have hS0 : 0 ≤ S0 :=
-    mul_nonneg hKs (add_nonneg (by norm_num) (sq_nonneg Ch))
-  have hBs : 0 ≤ Bs := Real.sqrt_nonneg _
-  have hBssq : Bs ^ 2 = S0 := by
-    simpa only [Bs] using Real.sq_sqrt hS0
-  have hF0 : 0 ≤ F0 := Real.sqrt_nonneg _
-  have hF0sq : F0 ^ 2 = lowJetSq (I := I) (M := M) g 2 F := by
-    simpa only [F0] using Real.sq_sqrt
-      (Finset.sum_nonneg fun _ _ => sq_nonneg _)
-  have hPb0 : 0 ≤ Pb0 := mul_nonneg hKp hCh
-  have hL0 : 0 ≤ L0 :=
-    mul_nonneg (by norm_num) (add_nonneg hF0 hPb0)
-  have hP : 0 ≤ P := mul_nonneg (mul_nonneg hCa hL0) hBs
+  let ρ : ℝ := min ρl ρs
+  let P : ℝ := Ca * L * S
+  let B : ℝ := 2 * (Ca * L * C + Ca * D * S)
+  have hρ : 0 < ρ := lt_min hρl hρs
+  have hP : 0 ≤ P := mul_nonneg (mul_nonneg hCa hL) hS
   have hB : 0 ≤ B :=
     mul_nonneg (by norm_num)
       (add_nonneg
-        (mul_nonneg (mul_nonneg hCa hL0) hCs)
-        (mul_nonneg (mul_nonneg (mul_nonneg hCa hKp) hCh) hBs))
+        (mul_nonneg (mul_nonneg hCa hL) hC)
+        (mul_nonneg (mul_nonneg hCa hD) hS))
   refine ⟨ρ, P, B, hρ, hP, hB, ?_⟩
   intro gT gU T U hT hU hTtie hUtie
     δT δU hδT_le hδT0 hδT hδU_le hδU0 hδU hTHs hUHs
@@ -438,116 +640,27 @@ theorem psiBg_pair_h2
       psiBgLeft (I := I) (M := M) g gU g
   let ST : SmoothCcTensor g 1 1 := sharpFlatEndoCc (I := I) g gT
   let SU : SmoothCcTensor g 1 1 := sharpFlatEndoCc (I := I) g gU
-  let PbT : SmoothCcTensor g 0 3 :=
-    lc0PbLow (I := I) (M := M) g T g gB
   have hN : 0 ≤ N := norm_nonneg _
+  have hTHsl : ‖ccTensorToHs (I := I) (M := M) g 2
+      (2 : ℝ) T‖ ≤ ρl := hTHs.trans (min_le_left _ _)
   have hTHss : ‖ccTensorToHs (I := I) (M := M) g 2
-      (2 : ℝ) T‖ ≤ ρs := hTHs.trans (min_le_left _ _)
+      (2 : ℝ) T‖ ≤ ρs := hTHs.trans (min_le_right _ _)
   have hUHss : ‖ccTensorToHs (I := I) (M := M) g 2
-      (2 : ℝ) U‖ ≤ ρs := hUHs.trans (min_le_left _ _)
-  have hTHs1 : ‖ccTensorToHs (I := I) (M := M) g 2
-      (2 : ℝ) T‖ ≤ 1 := hTHs.trans (min_le_right _ _)
-  have hUHs1 : ‖ccTensorToHs (I := I) (M := M) g 2
-      (2 : ℝ) U‖ ≤ 1 := hUHs.trans (min_le_right _ _)
-  have hT2 : lowJetSq (I := I) (M := M) g 2 T ≤ Ch ^ 2 := by
-    calc
-      lowJetSq (I := I) (M := M) g 2 T ≤
-          (Ch * ‖ccTensorToHs (I := I) (M := M) g 2
-            (2 : ℝ) T‖) ^ 2 := by
-        simpa only [lowJetSq, Nat.reduceAdd] using hhs T
-      _ ≤ (Ch * 1) ^ 2 :=
-        pow_le_pow_left₀
-          (mul_nonneg hCh (norm_nonneg _))
-          (mul_le_mul_of_nonneg_left hTHs1 hCh) 2
-      _ = Ch ^ 2 := by rw [mul_one]
-  have hU2 : lowJetSq (I := I) (M := M) g 2 U ≤ Ch ^ 2 := by
-    calc
-      lowJetSq (I := I) (M := M) g 2 U ≤
-          (Ch * ‖ccTensorToHs (I := I) (M := M) g 2
-            (2 : ℝ) U‖) ^ 2 := by
-        simpa only [lowJetSq, Nat.reduceAdd] using hhs U
-      _ ≤ (Ch * 1) ^ 2 :=
-        pow_le_pow_left₀
-          (mul_nonneg hCh (norm_nonneg _))
-          (mul_le_mul_of_nonneg_left hUHs1 hCh) 2
-      _ = Ch ^ 2 := by rw [mul_one]
-  have hST : lowJetSq (I := I) (M := M) g 2 ST ≤ Bs ^ 2 := by
-    calc
-      lowJetSq (I := I) (M := M) g 2 ST ≤
-          Ks * (1 + lowJetSq (I := I) (M := M) g 2 T) := by
-        simpa only [ST] using
-          hsharpBdd gT T hT hTtie hδT_le hδT0 hδT
-      _ ≤ S0 := by
-        dsimp only [S0]
-        exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hT2) hKs
-      _ = Bs ^ 2 := hBssq.symm
-  have hSU : lowJetSq (I := I) (M := M) g 2 SU ≤ Bs ^ 2 := by
-    calc
-      lowJetSq (I := I) (M := M) g 2 SU ≤
-          Ks * (1 + lowJetSq (I := I) (M := M) g 2 U) := by
-        simpa only [SU] using
-          hsharpBdd gU U hU hUtie hδU_le hδU0 hδU
-      _ ≤ S0 := by
-        dsimp only [S0]
-        exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hU2) hKs
-      _ = Bs ^ 2 := hBssq.symm
-  have hSD : lowJetSq (I := I) (M := M) g 2 (ST - SU) ≤
-      (Cs * N) ^ 2 := by
-    simpa only [ST, SU, N] using
-      hsharpPair gT gU T U hT hU hTtie hUtie
-        hδT_le hδT0 hδT hδU_le hδU0 hδU hTHss hUHss
-  have hTU2 : lowJetSq (I := I) (M := M) g 2 (T - U) ≤
-      (Ch * N) ^ 2 := by
-    simpa only [lowJetSq, Nat.reduceAdd, N] using hhs (T - U)
-  have hPbT : lowJetSq (I := I) (M := M) g 2 PbT ≤ Pb0 ^ 2 := by
-    simpa only [PbT, Pb0] using hpb T Ch hCh hT2
-  have hLT : lowJetSq (I := I) (M := M) g 2 LT ≤ L0 ^ 2 := by
-    rw [show LT =
-        cometricRaiseSlot0Field (I := I) (M := M) g 1
-          (domDomCongrSection (I := I) g lieArm1RhoSlot0 (F - PbT)) by
-      simpa only [LT, F, PbT] using
-        psiBgLeft_corr (I := I) (M := M) g gT gB T hTtie]
-    rw [raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0 (F - PbT)]
-    calc
-      lowJetSq (I := I) (M := M) g 2 (F - PbT) =
-          lowJetSq (I := I) (M := M) g 2 (F + -PbT) := by
-        rw [sub_eq_add_neg]
-      _ ≤ 2 * (lowJetSq (I := I) (M := M) g 2 F +
-          lowJetSq (I := I) (M := M) g 2 (-PbT)) :=
-        jet_add1 (I := I) (M := M) g 2 F (-PbT)
-      _ = 2 * (F0 ^ 2 + lowJetSq (I := I) (M := M) g 2 PbT) := by
-        rw [jet_neg1 (I := I) (M := M) g 2 PbT, hF0sq]
-      _ ≤ 2 * (F0 ^ 2 + Pb0 ^ 2) :=
-        mul_le_mul_of_nonneg_left (add_le_add le_rfl hPbT) (by norm_num)
-      _ ≤ L0 ^ 2 := by
-        simp only [L0]
-        nlinarith [mul_nonneg hF0 hPb0]
-  have hPbD : lowJetSq (I := I) (M := M) g 2
-      (lc0PbLow (I := I) (M := M) g (T - U) g gB) ≤
-      (Kp * (Ch * N)) ^ 2 :=
-    hpb (T - U) (Ch * N) (mul_nonneg hCh hN) hTU2
-  have hLD : lowJetSq (I := I) (M := M) g 2 (LT - LU) ≤
-      (Kp * (Ch * N)) ^ 2 := by
-    rw [show LT - LU =
-        cometricRaiseSlot0Field (I := I) (M := M) g 1
-          (domDomCongrSection (I := I) g lieArm1RhoSlot0
-            (-lc0PbLow (I := I) (M := M) g (T - U) g gB)) by
-      simpa only [LT, LU] using
-        psiBgLeft_pair (I := I) (M := M) g gT gU gB T U hTtie hUtie]
-    rw [raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0,
-      jet_neg1 (I := I) (M := M) g 2]
-    exact hPbD
+      (2 : ℝ) U‖ ≤ ρs := hUHs.trans (min_le_right _ _)
+  obtain ⟨hLT, hLD⟩ := hleft gT gU T U hTtie hUtie hTHsl
+  obtain ⟨hST, hSU, hSD⟩ :=
+    hsharp gT gU T U hT hU hTtie hUtie
+      hδT_le hδT0 hδT hδU_le hδU0 hδU hTHss hUHss
   let V1 : SmoothCcTensor g 1 2 :=
     ccOperatorFieldComp (I := I) (M := M) g 1 1 2 LT (ST - SU)
   let V2 : SmoothCcTensor g 1 2 :=
     ccOperatorFieldComp (I := I) (M := M) g 1 1 2 (LT - LU) SU
-  let Z1 : ℝ := Ca * L0 * (Cs * N)
-  let Z2 : ℝ := Ca * (Kp * (Ch * N)) * Bs
+  let Z1 : ℝ := Ca * L * (C * N)
+  let Z2 : ℝ := Ca * (D * N) * S
   have hZ1 : 0 ≤ Z1 :=
-    mul_nonneg (mul_nonneg hCa hL0) (mul_nonneg hCs hN)
+    mul_nonneg (mul_nonneg hCa hL) (mul_nonneg hC hN)
   have hZ2 : 0 ≤ Z2 :=
-    mul_nonneg
-      (mul_nonneg hCa (mul_nonneg hKp (mul_nonneg hCh hN))) hBs
+    mul_nonneg (mul_nonneg hCa (mul_nonneg hD hN)) hS
   have hPsiT : lowJetSq (I := I) (M := M) g 2
       (lieArm1PsiB (I := I) (M := M) g gT gB -
         lieArm1PsiB (I := I) (M := M) g gT g) ≤ P ^ 2 := by
@@ -555,15 +668,15 @@ theorem psiBg_pair_h2
       (psiBgCorr (I := I) (M := M) g gT gB) ≤ P ^ 2
     rw [psiBgCorr_eq (I := I) (M := M) g gT gB]
     simpa only [LT, ST, P] using
-      happ LT ST L0 Bs hL0 hBs hLT hST
+      happ LT ST L S hL hS hLT hST
   have hV1 : lowJetSq (I := I) (M := M) g 2 V1 ≤ Z1 ^ 2 := by
     simpa only [V1, Z1] using
-      happ LT (ST - SU) L0 (Cs * N) hL0
-        (mul_nonneg hCs hN) hLT hSD
+      happ LT (ST - SU) L (C * N) hL
+        (mul_nonneg hC hN) hLT hSD
   have hV2 : lowJetSq (I := I) (M := M) g 2 V2 ≤ Z2 ^ 2 := by
     simpa only [V2, Z2] using
-      happ (LT - LU) SU (Kp * (Ch * N)) Bs
-        (mul_nonneg hKp (mul_nonneg hCh hN)) hBs hLD hSU
+      happ (LT - LU) SU (D * N) S
+        (mul_nonneg hD hN) hS hLD hSU
   refine ⟨hPsiT, ?_⟩
   change lowJetSq (I := I) (M := M) g 2
     (psiBgCorr (I := I) (M := M) g gT gB -
@@ -577,8 +690,8 @@ theorem psiBg_pair_h2
       jet_add1 (I := I) (M := M) g 2 V1 V2
     _ ≤ 2 * (Z1 ^ 2 + Z2 ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hV1 hV2) (by norm_num)
-    _ ≤ (2 * (Z1 + Z2)) ^ 2 := by
-      nlinarith [sq_nonneg Z1, sq_nonneg Z2, mul_nonneg hZ1 hZ2]
+    _ ≤ (2 * (Z1 + Z2)) ^ 2 :=
+      two_mul_sq_add_sq_le_four_sum_sq Z1 Z2 hZ1 hZ2
     _ = (B * N) ^ 2 := by
       simp only [Z1, Z2, B]
       ring
