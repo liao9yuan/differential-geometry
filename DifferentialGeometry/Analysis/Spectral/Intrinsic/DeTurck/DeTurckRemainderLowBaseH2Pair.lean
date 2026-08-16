@@ -6723,7 +6723,6 @@ private theorem ricciDA_h3_pair
       (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) (add_nonneg hu0 hv0))
       hscale 2)
 
-set_option maxHeartbeats 3200000 in
 private theorem good_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6793,7 +6792,8 @@ private theorem good_h3_pair
   have hsabs : ‖s‖ ≤ (1 : ℝ) := by
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
     exact hs.2
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) := by
+    simpa only [one_pow] using pow_le_pow_left₀ hs.1 hs.2 2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -6830,7 +6830,7 @@ private theorem good_h3_pair
     have hraw := convexPerturbation_gFibreOpBound_abs
       (I := I) g T 0 hδT hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -6840,7 +6840,7 @@ private theorem good_h3_pair
     have hraw := convexPerturbation_gFibreOpBound_abs
       (I := I) g U 0 hδU hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [Q, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -6889,7 +6889,9 @@ private theorem good_h3_pair
   let S : ℝ := D3 + D2 + N
   let SA : ℝ := BA R * (1 + A) ^ 2 * S
   let SD : ℝ := BD R * (1 + A ^ 2) * D3
-  have hS : 0 ≤ S := by simp only [S]; linarith
+  have hS : 0 ≤ S := by
+    simp only [S]
+    exact add_nonneg (add_nonneg hD3 hD2) hN
   have hSA0 : 0 ≤ SA :=
     mul_nonneg (mul_nonneg (hBA R hR) (sq_nonneg _)) hS
   have hSD0 : 0 ≤ SD :=
@@ -6940,8 +6942,12 @@ private theorem good_h3_pair
           (LowBaseInternal.ricciLow (I := I) (M := M) g gmU Q) = _
     rw [ccSymmSubH2, hlow]
   have hfac : (1 + A) ^ 2 ≤ 2 * (1 + A ^ 2) := by
-    nlinarith [sq_nonneg (A - 1)]
-  have hD3S : D3 ≤ S := by simp only [S]; linarith
+    nlinarith only [sq_nonneg (A - 1)]
+  have hD3S : D3 ≤ S := by
+    simp only [S]
+    calc
+      D3 ≤ D3 + (D2 + N) := le_add_of_nonneg_right (add_nonneg hD2 hN)
+      _ = D3 + D2 + N := by ring
   let W : ℝ := (2 * BA R + BD R) * (1 + A ^ 2) * S
   have hSAle : SA ≤ 2 * BA R * (1 + A ^ 2) * S := by
     simp only [SA]
