@@ -21,6 +21,26 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
+private lemma le_square_one_add (x : ℝ) :
+    x ≤ (1 + x) ^ 2 := by
+  nlinarith only [sq_nonneg x]
+
+private lemma second_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD3 : 0 ≤ D3) (hD2 : 0 ≤ D2)
+    (hA : 0 ≤ A) (hN : 0 ≤ N) :
+    D2 ≤ D3 + D2 + A * D2 + N := by
+  nlinarith only [hD3, hN, mul_nonneg hA hD2]
+
+private lemma first_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD2 : 0 ≤ D2) (hA : 0 ≤ A) (hN : 0 ≤ N) :
+    D3 ≤ D3 + D2 + A * D2 + N := by
+  nlinarith only [hD2, hN, mul_nonneg hA hD2]
+
+private lemma middle_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD3 : 0 ≤ D3) (hN : 0 ≤ N) :
+    D2 + A * D2 ≤ D3 + D2 + A * D2 + N := by
+  linarith only [hD3, hN]
+
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -31,7 +51,149 @@ variable
 
 namespace LowRegBgC0Core
 
-set_option maxHeartbeats 4800000 in
+private theorem vbMcdArm_pair_h2_aux
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ SM DM : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ SM R) ∧
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ DM R) ∧
+      ∀ (gT gU : SmoothRiemannianMetric I M)
+        (T U : SmoothCcTensor g 0 2)
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g U x u v =
+            ccTensorBilin (I := I) g U x v u)
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
+          gT.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
+          gU.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
+        {δ : ℝ} (_hδ_le : δ ≤ 1 / 3) (_hδ0 : 0 ≤ δ)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (_hδU : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g U) δ)
+        (R A D2 D3 D : ℝ),
+        0 ≤ R → 0 ≤ A → 0 ≤ D2 → 0 ≤ D3 → 0 ≤ D →
+        D3 ≤ D → D2 + A * D2 ≤ D →
+        lowJetSq (I := I) (M := M) g 2 T ≤ R ^ 2 →
+        lowJetSq (I := I) (M := M) g 2 U ≤ R ^ 2 →
+        lowJetSq (I := I) (M := M) g 3 T ≤ A ^ 2 →
+        lowJetSq (I := I) (M := M) g 3 U ≤ A ^ 2 →
+        lowJetSq (I := I) (M := M) g 2 (T - U) ≤ D2 ^ 2 →
+        lowJetSq (I := I) (M := M) g 3 (T - U) ≤ D3 ^ 2 →
+      lowJetSq (I := I) (M := M) g 2
+          (vbMcdArm (I := I) (M := M) g gT) ≤
+          (SM R * (1 + A)) ^ 2 ∧
+        lowJetSq (I := I) (M := M) g 2
+          (vbMcdArm (I := I) (M := M) g gU) ≤
+          (SM R * (1 + A)) ^ 2 ∧
+        lowJetSq (I := I) (M := M) g 2
+          (vbMcdArm (I := I) (M := M) g gT -
+            vbMcdArm (I := I) (M := M) g gU) ≤
+          (DM R * D) ^ 2 := by
+  obtain ⟨B0m, B1m, hB0m, hB1m, hmcdp⟩ :=
+    LowBaseInternal.mcd_pair_h2 (I := I) (M := M) hDim g
+      (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
+  obtain ⟨Bm, hBm, hmcdb⟩ :=
+    LowBaseInternal.mcd_h2_bdd (I := I) (M := M) hDim g
+      (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
+  let fr : ℝ := Module.finrank ℝ E
+  let SM : ℝ → ℝ := fun R => (1 + fr) * Bm R
+  let DM : ℝ → ℝ := fun R => (1 + fr) * (B0m R + B1m R)
+  have hfr : 0 ≤ fr := Nat.cast_nonneg _
+  have hSM : ∀ R : ℝ, 0 ≤ R → 0 ≤ SM R := fun R hR =>
+    mul_nonneg (add_nonneg (by norm_num) hfr) (hBm R hR)
+  have hDM : ∀ R : ℝ, 0 ≤ R → 0 ≤ DM R := fun R hR =>
+    mul_nonneg (add_nonneg (by norm_num) hfr)
+      (add_nonneg (hB0m R hR) (hB1m R hR))
+  refine ⟨SM, DM, hSM, hDM, ?_⟩
+  intro gT gU T U hT hU hTtie hUtie δ hδ_le hδ0 hδT hδU
+    R A D2 D3 D hR hA hD2 hD3 hD hD3le hrestle
+    hT2 hU2 hT3 hU3 hTU2 hTU3
+  let M0 : ℝ := B0m R * D3 + B1m R * D2 + B1m R * A * D2
+  have hM0 : 0 ≤ M0 := by
+    dsimp only [M0]
+    exact add_nonneg
+      (add_nonneg (mul_nonneg (hB0m R hR) hD3)
+        (mul_nonneg (hB1m R hR) hD2))
+      (mul_nonneg (mul_nonneg (hB1m R hR) hA) hD2)
+  have hM0le : M0 ≤ (B0m R + B1m R) * D := by
+    calc
+      M0 = B0m R * D3 + B1m R * (D2 + A * D2) := by
+        simp only [M0]
+        ring
+      _ ≤ B0m R * D + B1m R * D :=
+        add_le_add
+          (mul_le_mul_of_nonneg_left hD3le (hB0m R hR))
+          (mul_le_mul_of_nonneg_left hrestle (hB1m R hR))
+      _ = (B0m R + B1m R) * D := by ring
+  have hfr_le : fr ≤ (1 + fr) ^ 2 := le_square_one_add fr
+  have hVmT : lowJetSq (I := I) (M := M) g 2
+      (vbMcdArm (I := I) (M := M) g gT) ≤
+      (SM R * (1 + A)) ^ 2 := by
+    have hm := hmcdb gT T hT hTtie hδ_le hδ0 hδT
+      R A hR hA hT2 hT3
+    calc
+      lowJetSq (I := I) (M := M) g 2
+          (vbMcdArm (I := I) (M := M) g gT) ≤
+          fr * lowJetSq (I := I) (M := M) g 2
+            (metricConnDiffLoweredCc (I := I) (M := M) g gT g) := by
+        simpa only [fr] using vbmcdH2 (I := I) (M := M) g gT
+      _ ≤ fr * (Bm R * (1 + A)) ^ 2 :=
+        mul_le_mul_of_nonneg_left hm hfr
+      _ ≤ (1 + fr) ^ 2 * (Bm R * (1 + A)) ^ 2 :=
+        mul_le_mul_of_nonneg_right hfr_le (sq_nonneg _)
+      _ = (SM R * (1 + A)) ^ 2 := by
+        simp only [SM]
+        ring
+  have hVmU : lowJetSq (I := I) (M := M) g 2
+      (vbMcdArm (I := I) (M := M) g gU) ≤
+      (SM R * (1 + A)) ^ 2 := by
+    have hm := hmcdb gU U hU hUtie hδ_le hδ0 hδU
+      R A hR hA hU2 hU3
+    calc
+      lowJetSq (I := I) (M := M) g 2
+          (vbMcdArm (I := I) (M := M) g gU) ≤
+          fr * lowJetSq (I := I) (M := M) g 2
+            (metricConnDiffLoweredCc (I := I) (M := M) g gU g) := by
+        simpa only [fr] using vbmcdH2 (I := I) (M := M) g gU
+      _ ≤ fr * (Bm R * (1 + A)) ^ 2 :=
+        mul_le_mul_of_nonneg_left hm hfr
+      _ ≤ (1 + fr) ^ 2 * (Bm R * (1 + A)) ^ 2 :=
+        mul_le_mul_of_nonneg_right hfr_le (sq_nonneg _)
+      _ = (SM R * (1 + A)) ^ 2 := by
+        simp only [SM]
+        ring
+  have hVmD : lowJetSq (I := I) (M := M) g 2
+      (vbMcdArm (I := I) (M := M) g gT -
+        vbMcdArm (I := I) (M := M) g gU) ≤ (DM R * D) ^ 2 := by
+    have hm := hmcdp gT gU T U hT hU hTtie hUtie
+      hδ_le hδ0 hδT hδ_le hδ0 hδU
+      R A D2 D3 hR hA hD2 hD3 hU2 hT3 hTU2 hTU3
+    calc
+      lowJetSq (I := I) (M := M) g 2
+          (vbMcdArm (I := I) (M := M) g gT -
+            vbMcdArm (I := I) (M := M) g gU) ≤
+          fr * lowJetSq (I := I) (M := M) g 2
+            (metricConnDiffLoweredCc (I := I) (M := M) g gT g -
+              metricConnDiffLoweredCc (I := I) (M := M) g gU g) := by
+        simpa only [fr] using vbmcdSub (I := I) (M := M) g gT gU
+      _ ≤ fr * M0 ^ 2 := by
+        simpa only [M0] using mul_le_mul_of_nonneg_left hm hfr
+      _ ≤ fr * ((B0m R + B1m R) * D) ^ 2 :=
+        mul_le_mul_of_nonneg_left
+          (pow_le_pow_left₀ hM0 hM0le 2) hfr
+      _ ≤ (1 + fr) ^ 2 * ((B0m R + B1m R) * D) ^ 2 :=
+        mul_le_mul_of_nonneg_right hfr_le (sq_nonneg _)
+      _ = (DM R * D) ^ 2 := by
+        simp only [DM]
+        ring
+  exact ⟨hVmT, hVmU, hVmD⟩
+
 theorem vbOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -86,12 +248,8 @@ theorem vbOnePairH2
     LowBaseInternal.trace2_pair_h2 (I := I) (M := M) hDim g
   obtain ⟨ρt2b, Bt2, hρt2b, hBt2, ht2b⟩ :=
     LowBaseInternal.trace2_h2_bdd (I := I) (M := M) hDim g
-  obtain ⟨B0m, B1m, hB0m, hB1m, hmcdp⟩ :=
-    LowBaseInternal.mcd_pair_h2 (I := I) (M := M) hDim g
-      (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
-  obtain ⟨Bm, hBm, hmcdb⟩ :=
-    LowBaseInternal.mcd_h2_bdd (I := I) (M := M) hDim g
-      (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
+  obtain ⟨SM, DM, hSM, hDM, hvm⟩ :=
+    vbMcdArm_pair_h2_aux (I := I) (M := M) hDim g
   obtain ⟨C0, hC0, happ0⟩ :=
     appRoot_h2 (I := I) (M := M) hDim g 3 3 1
   obtain ⟨P0, hP0, hpair0⟩ :=
@@ -108,20 +266,16 @@ theorem vbOnePairH2
     appRoot_h2 (I := I) (M := M) hDim g 3 4 2
   obtain ⟨P3, hP3, hpair3⟩ :=
     appPairH2 (I := I) (M := M) hDim g 3 4 2
-  let fr : ℝ := Module.finrank ℝ E
   let ρ : ℝ :=
     min (min ρt1p ρt1b) (min (min ρcp ρcb) (min ρt2p ρt2b))
   let S0 : ℝ := C0 * Bt1 * Bc
   let D0 : ℝ := P0 * (Ct1 * Bc + Bt1 * Cc)
   let S1 : ℝ → ℝ := fun R => C1 * R * S0
   let D1 : ℝ → ℝ := fun R => P1 * (S0 + R * D0)
-  let SM : ℝ → ℝ := fun R => (1 + fr) * Bm R
-  let DM : ℝ → ℝ := fun R => (1 + fr) * (B0m R + B1m R)
   let S2 : ℝ → ℝ := fun R => C2 * SM R * S1 R
   let D2c : ℝ → ℝ := fun R => P2 * (DM R * S1 R + SM R * D1 R)
   let D3c : ℝ → ℝ := fun R => P3 * (Ct2 * S2 R + Bt2 * D2c R)
   let B : ℝ → ℝ := fun R => 2 * D3c R
-  have hfr : 0 ≤ fr := Nat.cast_nonneg _
   have hρ : 0 < ρ :=
     lt_min (lt_min hρt1p hρt1b)
       (lt_min (lt_min hρcp hρcb) (lt_min hρt2p hρt2b))
@@ -133,11 +287,6 @@ theorem vbOnePairH2
     mul_nonneg (mul_nonneg hC1 hR) hS0
   have hD1 : ∀ R : ℝ, 0 ≤ R → 0 ≤ D1 R := fun R hR =>
     mul_nonneg hP1 (add_nonneg hS0 (mul_nonneg hR hD0))
-  have hSM : ∀ R : ℝ, 0 ≤ R → 0 ≤ SM R := fun R hR =>
-    mul_nonneg (add_nonneg (by norm_num) hfr) (hBm R hR)
-  have hDM : ∀ R : ℝ, 0 ≤ R → 0 ≤ DM R := fun R hR =>
-    mul_nonneg (add_nonneg (by norm_num) hfr)
-      (add_nonneg (hB0m R hR) (hB1m R hR))
   have hS2 : ∀ R : ℝ, 0 ≤ R → 0 ≤ S2 R := fun R hR =>
     mul_nonneg (mul_nonneg hC2 (hSM R hR)) (hS1 R hR)
   have hD2c : ∀ R : ℝ, 0 ≤ R → 0 ≤ D2c R := fun R hR =>
@@ -164,7 +313,7 @@ theorem vbOnePairH2
       (add_nonneg (add_nonneg hD3 hD2) (mul_nonneg hA hD2))
   have hD2le : D2 ≤ D := by
     dsimp only [D]
-    nlinarith [mul_nonneg hA hD2]
+    exact second_le_four_term_sum D3 D2 A N hD3 hD2 hA hN
   have hρt1p_le : ρ ≤ ρt1p :=
     (min_le_left _ _).trans (min_le_left _ _)
   have hρt1b_le : ρ ≤ ρt1b :=
@@ -271,84 +420,16 @@ theorem vbOnePairH2
         rw [← raiseSub0, raise_jet]
       _ ≤ D2 ^ 2 := hTU2
       _ ≤ D ^ 2 := pow_le_pow_left₀ hD2 hD2le 2
-  let M0 : ℝ := B0m R * D3 + B1m R * D2 + B1m R * A * D2
-  have hM0 : 0 ≤ M0 := by
-    dsimp only [M0]
-    exact add_nonneg
-      (add_nonneg (mul_nonneg (hB0m R hR) hD3)
-        (mul_nonneg (hB1m R hR) hD2))
-      (mul_nonneg (mul_nonneg (hB1m R hR) hA) hD2)
-  have hM0le : M0 ≤ (B0m R + B1m R) * D := by
-    have hD3le : D3 ≤ D := by
-      dsimp only [D]
-      nlinarith [mul_nonneg hA hD2]
-    have hrestle : D2 + A * D2 ≤ D := by
-      dsimp only [D]
-      linarith
-    calc
-      M0 = B0m R * D3 + B1m R * (D2 + A * D2) := by
-        simp only [M0]
-        ring
-      _ ≤ B0m R * D + B1m R * D :=
-        add_le_add
-          (mul_le_mul_of_nonneg_left hD3le (hB0m R hR))
-          (mul_le_mul_of_nonneg_left hrestle (hB1m R hR))
-      _ = (B0m R + B1m R) * D := by ring
-  have hfr_le : fr ≤ (1 + fr) ^ 2 := by
-    nlinarith [sq_nonneg fr]
-  have hVmT : lowJetSq (I := I) (M := M) g 2 VmT ≤
-      (SM R * (1 + A)) ^ 2 := by
-    have hm := hmcdb gT T hT hTtie hδ_le hδ0 hδT
-      R A hR hA hT2 hT3
-    calc
-      lowJetSq (I := I) (M := M) g 2 VmT ≤
-          fr * lowJetSq (I := I) (M := M) g 2
-            (metricConnDiffLoweredCc (I := I) (M := M) g gT g) := by
-        simpa only [VmT, fr] using vbmcdH2 (I := I) (M := M) g gT
-      _ ≤ fr * (Bm R * (1 + A)) ^ 2 :=
-        mul_le_mul_of_nonneg_left hm hfr
-      _ ≤ (1 + fr) ^ 2 * (Bm R * (1 + A)) ^ 2 :=
-        mul_le_mul_of_nonneg_right hfr_le (sq_nonneg _)
-      _ = (SM R * (1 + A)) ^ 2 := by
-        simp only [SM]
-        ring
-  have hVmU : lowJetSq (I := I) (M := M) g 2 VmU ≤
-      (SM R * (1 + A)) ^ 2 := by
-    have hm := hmcdb gU U hU hUtie hδ_le hδ0 hδU
-      R A hR hA hU2 hU3
-    calc
-      lowJetSq (I := I) (M := M) g 2 VmU ≤
-          fr * lowJetSq (I := I) (M := M) g 2
-            (metricConnDiffLoweredCc (I := I) (M := M) g gU g) := by
-        simpa only [VmU, fr] using vbmcdH2 (I := I) (M := M) g gU
-      _ ≤ fr * (Bm R * (1 + A)) ^ 2 :=
-        mul_le_mul_of_nonneg_left hm hfr
-      _ ≤ (1 + fr) ^ 2 * (Bm R * (1 + A)) ^ 2 :=
-        mul_le_mul_of_nonneg_right hfr_le (sq_nonneg _)
-      _ = (SM R * (1 + A)) ^ 2 := by
-        simp only [SM]
-        ring
-  have hVmD : lowJetSq (I := I) (M := M) g 2 (VmT - VmU) ≤
-      (DM R * D) ^ 2 := by
-    have hm := hmcdp gT gU T U hT hU hTtie hUtie
-      hδ_le hδ0 hδT hδ_le hδ0 hδU
-      R A D2 D3 hR hA hD2 hD3 hU2 hT3 hTU2 hTU3
-    calc
-      lowJetSq (I := I) (M := M) g 2 (VmT - VmU) ≤
-          fr * lowJetSq (I := I) (M := M) g 2
-            (metricConnDiffLoweredCc (I := I) (M := M) g gT g -
-              metricConnDiffLoweredCc (I := I) (M := M) g gU g) := by
-        simpa only [VmT, VmU, fr] using vbmcdSub (I := I) (M := M) g gT gU
-      _ ≤ fr * M0 ^ 2 := by
-        simpa only [M0] using mul_le_mul_of_nonneg_left hm hfr
-      _ ≤ fr * ((B0m R + B1m R) * D) ^ 2 :=
-        mul_le_mul_of_nonneg_left
-          (pow_le_pow_left₀ hM0 hM0le 2) hfr
-      _ ≤ (1 + fr) ^ 2 * ((B0m R + B1m R) * D) ^ 2 :=
-        mul_le_mul_of_nonneg_right hfr_le (sq_nonneg _)
-      _ = (DM R * D) ^ 2 := by
-        simp only [DM]
-        ring
+  have hD3le : D3 ≤ D := by
+    dsimp only [D]
+    exact first_le_four_term_sum D3 D2 A N hD2 hA hN
+  have hrestle : D2 + A * D2 ≤ D := by
+    dsimp only [D]
+    exact middle_le_four_term_sum D3 D2 A N hD3 hN
+  obtain ⟨hVmT, hVmU, hVmD⟩ :=
+    hvm gT gU T U hT hU hTtie hUtie hδ_le hδ0 hδT hδU
+      R A D2 D3 D hR hA hD2 hD3 hD hD3le hrestle
+      hT2 hU2 hT3 hU3 hTU2 hTU3
   have hLvU : lowJetSq (I := I) (M := M) g 2 LvU ≤ Bt2 ^ 2 := by
     dsimp only [LvU]
     rw [riemLiveEq]
@@ -424,7 +505,7 @@ theorem vbOnePairH2
             DM R * S1 R = DM R * S1 R * 1 := by ring
             _ ≤ DM R * S1 R * (1 + A) :=
               mul_le_mul_of_nonneg_left
-                (by linarith : (1 : ℝ) ≤ 1 + A)
+                (le_add_of_nonneg_right hA)
                 (mul_nonneg (hDM R hR) (hS1 R hR))
         exact mul_le_mul_of_nonneg_right hbase hD
       calc
