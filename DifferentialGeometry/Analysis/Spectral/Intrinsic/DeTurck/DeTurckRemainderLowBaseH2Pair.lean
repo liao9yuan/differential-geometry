@@ -7398,7 +7398,6 @@ private theorem riem_h3_pair
   exact pow_le_pow_left₀ (mul_nonneg hC hN)
     (mul_le_mul_of_nonneg_left hNle hC) 2
 
-set_option maxHeartbeats 6400000 in
 private theorem vb_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7489,12 +7488,12 @@ private theorem vb_h3_pair
     have h1 : (0 : ℝ) ≤ 2 * (B0m R + B1m R) ^ 2 := by positivity
     have h2 : (0 : ℝ) ≤ 2 * (B1m R) ^ 2 := by positivity
     simp only [M5]
-    linarith
+    exact add_nonneg h1 h2
   have hM5w : ∀ R : ℝ, 0 ≤ R → 0 ≤ M5w R := fun R hR => by
     have h1 : (0 : ℝ) ≤ 2 * (W0 R + W1 R) ^ 2 := by positivity
     have h2 : (0 : ℝ) ≤ 2 * (W1 R) ^ 2 := by positivity
     simp only [M5w]
-    linarith
+    exact add_nonneg h1 h2
   have hWb : ∀ R : ℝ, 0 ≤ R → 0 ≤ Wb R := fun R hR =>
     mul_nonneg (mul_nonneg hCw (sq_nonneg _)) (hCs R hR)
   have hWm : ∀ R : ℝ, 0 ≤ R → 0 ≤ Wm R := fun R hR => by
@@ -7503,7 +7502,7 @@ private theorem vb_h3_pair
     have h2 : (0 : ℝ) ≤ Cw * Bt1 ^ 2 * M5w R :=
       mul_nonneg (mul_nonneg hCw (sq_nonneg _)) (hM5w R hR)
     simp only [Wm]
-    linarith
+    exact mul_nonneg (by norm_num) (add_nonneg h1 h2)
   have hIb : ∀ R : ℝ, 0 ≤ R → 0 ≤ Ib R := fun R hR =>
     mul_nonneg (mul_nonneg (mul_nonneg hCipp hJp) hfr2) (hWb R hR)
   have hIm : ∀ R : ℝ, 0 ≤ R → 0 ≤ Im R := fun R hR =>
@@ -7522,15 +7521,11 @@ private theorem vb_h3_pair
     mul_nonneg (mul_nonneg hCout (sq_nonneg _)) (hSin R hR)
   have hK2 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K2 R := fun R hR =>
     mul_nonneg (mul_nonneg hCout (sq_nonneg _))
-      (by
-        have := hKv R hR
-        have := hKi R hR
-        linarith)
+      (mul_nonneg (by norm_num) (add_nonneg (hKv R hR) (hKi R hR)))
   have hBhnn : ∀ R : ℝ, 0 ≤ R → 0 ≤ Bh R := fun R hR => by
-    have := hK1 R hR
-    have := hK2 R hR
     simp only [Bh]
-    linarith
+    exact mul_nonneg (by norm_num)
+      (mul_nonneg (by norm_num) (add_nonneg (hK1 R hR) (hK2 R hR)))
   refine ⟨ρ, B, hρ0,
     fun R hR => by
       simp only [B]
@@ -7551,7 +7546,7 @@ private theorem vb_h3_pair
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
     exact hs.2
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    simpa only [one_pow] using pow_le_pow_left₀ hs.1 hs.2 2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -7589,7 +7584,7 @@ private theorem vb_h3_pair
       convexPerturbation_gFibreOpBound_abs
         (I := I) g T 0 hδT hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcP, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -7600,7 +7595,7 @@ private theorem vb_h3_pair
       convexPerturbation_gFibreOpBound_abs
         (I := I) g U 0 hδU hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcQ, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -7645,7 +7640,6 @@ private theorem vb_h3_pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-
   set a : ℝ := A with hadef
   have ha0 : 0 ≤ a := by rw [hadef]; exact hA
   have hP3i : lowJetSq (I := I) (M := M) g 3 P ≤ a ^ 2 := by
@@ -7657,27 +7651,28 @@ private theorem vb_h3_pair
   set pl2 : ℝ := (1 + a) ^ 2 with hpl2
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
-    nlinarith [ha0]
+    simpa only [one_pow] using
+      pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1)
+        (le_add_of_nonneg_right ha0) 2
   have hpl20 : 0 ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : a ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith [ha0]
+    exact pow_le_pow_left₀ ha0 (le_add_of_nonneg_left (by norm_num)) 2
   set u : ℝ := D3 ^ 2 + N ^ 2 with hu
   have hu0 : 0 ≤ u := by
     rw [hu]
     positivity
   have hD3le : D3 ^ 2 ≤ u := by
     rw [hu]
-    linarith [sq_nonneg N]
+    exact le_add_of_nonneg_right (sq_nonneg N)
   have hD3u : D3 ^ 2 ≤ pl2 * u := by
     calc D3 ^ 2 ≤ u := hD3le
       _ = 1 * u := (one_mul u).symm
       _ ≤ pl2 * u := mul_le_mul_of_nonneg_right hpl21 hu0
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
-    linarith [sq_nonneg D3]
+    exact le_add_of_nonneg_left (sq_nonneg D3)
   have hpl2u : 0 ≤ pl2 * u := mul_nonneg hpl20 hu0
-
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -7706,7 +7701,6 @@ private theorem vb_h3_pair
     appCcRS (I := I) (M := M) g 2 1 4 VmT IpT with hInT
   set InU : SmoothCcTensor g 2 4 :=
     appCcRS (I := I) (M := M) g 2 1 4 VmU IpU with hInU
-
   have hρc : ρ ≤ ρt1 ∧ ρ ≤ ρb1 ∧ ρ ≤ ρt2 ∧ ρ ≤ ρb2 := by
     refine ⟨?_, ?_, ?_, ?_⟩ <;>
       · rw [hρdef]
@@ -7771,7 +7765,6 @@ private theorem vb_h3_pair
   have htb1' := htrb 1 Bt1 ρb1 htb1 hρc.2.1
   have htp2' := htrp 2 Ct2 ρt2 htp2 hCt2 hρc.2.2.1
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2
-
   have hmbT : lowJetSq (I := I) (M := M) g 2 mcdT ≤ (Bm R) ^ 2 * pl2 := by
     have h := hmcdb gmT P hPsymm hPtie hδ_le hδ0 hδP R a hR ha0 hP2 hP3i
     rw [hmT]
@@ -7812,7 +7805,6 @@ private theorem vb_h3_pair
     refine (pairFold3 (b0 := W0 R) (b1 := W1 R) (a := a) (pl2 := pl2)
       (u := u) (D3 := D3) hpl21 hplA2 hu0 hD3le).trans (le_of_eq ?_)
     simp only [M5w]
-
   have hTr1T2 : lowJetSq (I := I) (M := M) g 2 Tr1T ≤ Bt1 ^ 2 := by
     rw [hTr1T, trJet]
     exact htb1'.1
@@ -7880,11 +7872,10 @@ private theorem vb_h3_pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (Cw * Ct1 ^ 2 * Cs R * (pl2 * u) +
           Cw * Bt1 ^ 2 * M5w R * (pl2 * u)) := by
-        linarith [h1, h2]
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
       _ = Wm R * (pl2 * u) := by
         simp only [Wm]
         ring
-
   have hIpT2 : lowJetSq (I := I) (M := M) g 2 IpT ≤ Ib R * pl2 := by
     rw [hIpT, ipForm]
     refine (happIp (ipHead (I := I) (M := M) g) _).trans ?_
@@ -7934,7 +7925,6 @@ private theorem vb_h3_pair
       _ = Im R * (pl2 * u) := by
         simp only [Im]
         ring
-
   have hVmT2 : lowJetSq (I := I) (M := M) g 2 VmT ≤ Vb R * pl2 := by
     rw [hVmT]
     refine (vbmcdH2 (I := I) (M := M) g gmT).trans ?_
@@ -7976,7 +7966,6 @@ private theorem vb_h3_pair
       _ = Vd R * (pl2 * u) := by
         simp only [Vd]
         ring
-
   have hInT2 : lowJetSq (I := I) (M := M) g 2 InT ≤ Sin R * (pl2 * pl2) := by
     rw [hInT]
     refine (happIn VmT IpT).trans ?_
@@ -8034,8 +8023,7 @@ private theorem vb_h3_pair
           lowJetSq (I := I) (M := M) g 2 _) :=
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
-
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hLvd2 : lowJetSq (I := I) (M := M) g 2 (LvT - LvU) ≤ Ct2 ^ 2 * u := by
     rw [hLvT, hLvU, riemLiveEq, riemLiveEq]
     exact htp2'
@@ -8095,7 +8083,7 @@ private theorem vb_h3_pair
           lowJetSq (I := I) (M := M) g 2 _) :=
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hwhole : lowJetSq (I := I) (M := M) g 2
       (lc0VB (I := I) (M := M) g gmT - lc0VB (I := I) (M := M) g gmU) ≤
       Bh R * ((pl2 * pl2) * u) := by
