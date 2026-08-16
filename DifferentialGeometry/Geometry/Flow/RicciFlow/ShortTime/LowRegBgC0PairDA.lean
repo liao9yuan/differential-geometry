@@ -21,6 +21,20 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
+private lemma two_mul_sum_sq_le_square_two_mul_sum
+    (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    2 * (x ^ 2 + y ^ 2) ≤ (2 * (x + y)) ^ 2 := by
+  nlinarith only [sq_nonneg x, sq_nonneg y, mul_nonneg hx hy]
+
+private lemma one_add_square_le_square_one_add (x : ℝ) (hx : 0 ≤ x) :
+    1 + x ^ 2 ≤ (1 + x) ^ 2 := by
+  nlinarith only [hx]
+
+private lemma two_mul_sum_le_four_sq
+    (x y z : ℝ) (hx : x ≤ z ^ 2) (hy : y ≤ z ^ 2) :
+    2 * (x + y) ≤ 4 * z ^ 2 := by
+  linarith only [hx, hy]
+
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -145,8 +159,8 @@ theorem daWeightPairH2
         lowJetSq (I := I) (M := M) g 2 Y) ≤
       2 * (x ^ 2 + y ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)
-    _ ≤ (2 * (x + y)) ^ 2 := by
-      nlinarith [sq_nonneg x, sq_nonneg y, mul_nonneg hx0 hy0]
+    _ ≤ (2 * (x + y)) ^ 2 :=
+      two_mul_sum_sq_le_square_two_mul_sum x y hx0 hy0
     _ = (B R * D2) ^ 2 := by
       simp only [B, x, y]
       ring
@@ -239,12 +253,11 @@ theorem daTransPairH2
   calc
     2 * (lowJetSq (I := I) (M := M) g 2 XA +
         lowJetSq (I := I) (M := M) g 2 XB) ≤
-      4 * z ^ 2 := by nlinarith
+      4 * z ^ 2 := two_mul_sum_le_four_sq _ _ _ hXA hXB
     _ = (B R * D2) ^ 2 := by
       simp only [B, z]
       ring
 
-set_option maxHeartbeats 3200000 in
 theorem daOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -400,7 +413,7 @@ theorem daOnePairH2
     refine hDT0.trans ?_
     rw [mul_pow, hSdsq]
     exact mul_le_mul_of_nonneg_left
-      (by nlinarith [sq_nonneg A]) hKd
+      (one_add_square_le_square_one_add A hA) hKd
   have hDD :
       lowJetSq (I := I) (M := M) g 2 (DT - DU) ≤
         (Bd R * Q) ^ 2 := by
@@ -439,7 +452,8 @@ theorem daOnePairH2
     module
   have hD2Q : D2 ≤ Q := by
     dsimp only [Q]
-    nlinarith [mul_nonneg hA hD2]
+    exact (le_add_of_nonneg_left hD3).trans
+      (le_add_of_nonneg_right (mul_nonneg hA hD2))
   have hxle :
       x ≤ Ca * (Bt R * Sd) * (1 + A) * Q := by
     calc
@@ -459,7 +473,7 @@ theorem daOnePairH2
       y = (c * 1) * Q := by simp only [y, c]; ring
       _ ≤ (c * (1 + A)) * Q :=
         mul_le_mul_of_nonneg_right
-          (mul_le_mul_of_nonneg_left (by linarith : (1 : ℝ) ≤ 1 + A) hc) hQ
+          (mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hA) hc) hQ
       _ = Ca * (Tu R * Bd R) * (1 + A) * Q := by
         simp only [c]
   have hlin :
@@ -479,8 +493,8 @@ theorem daOnePairH2
         lowJetSq (I := I) (M := M) g 2 Y) ≤
       2 * (x ^ 2 + y ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)
-    _ ≤ (2 * (x + y)) ^ 2 := by
-      nlinarith [sq_nonneg x, sq_nonneg y, mul_nonneg hx0 hy0]
+    _ ≤ (2 * (x + y)) ^ 2 :=
+      two_mul_sum_sq_le_square_two_mul_sum x y hx0 hy0
     _ ≤ (B R * (1 + A) * Q) ^ 2 :=
       pow_le_pow_left₀ (mul_nonneg (by norm_num) (add_nonneg hx0 hy0)) hlin 2
 
