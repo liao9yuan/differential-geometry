@@ -6053,7 +6053,6 @@ theorem c0Diff_h2_tame
     simpa only [lowJetSq, lowC0Diff, Φ, S, Nat.reduceAdd] using hpath
   exact hfin
 
-set_option maxHeartbeats 3200000 in
 private theorem ricciAA_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6157,8 +6156,8 @@ private theorem ricciAA_h3_pair
   let S : ℝ := D3 + D2 + N
   let x : ℝ := Cs * Fd * Bk R * N * Q ^ 2
   let y : ℝ := Cs * Fb * Bd R * Q * (D3 + D2 + A * D2)
-  have hQ : 0 ≤ Q := by simp only [Q]; linarith
-  have hS : 0 ≤ S := by simp only [S]; linarith
+  have hQ : 0 ≤ Q := by simp only [Q]; exact add_nonneg zero_le_one hA
+  have hS : 0 ≤ S := by simp only [S]; exact add_nonneg (add_nonneg hD3 hD2) hN
   have hx0 : 0 ≤ x := by
     exact mul_nonneg
       (mul_nonneg
@@ -6204,12 +6203,25 @@ private theorem ricciAA_h3_pair
       simp only [y, mul_pow, hCsSq]
       ring
     rw [← hx, ← hy]
-    linarith
+    rw [mul_add]
+    exact add_le_add
+      (mul_le_mul_of_nonneg_left hterm1 (by norm_num))
+      (mul_le_mul_of_nonneg_left hterm2 (by norm_num))
   refine hsum.trans ((sqAdd2 hx0 hy0).trans ?_)
-  have hNle : N ≤ S := by simp only [S]; linarith
+  have hNle : N ≤ S := by
+    simp only [S]
+    calc
+      N ≤ D2 + N := le_add_of_nonneg_left hD2
+      _ ≤ D3 + (D2 + N) := le_add_of_nonneg_left hD3
+      _ = D3 + D2 + N := by ring
   have hinner : D3 + D2 + A * D2 ≤ Q * S := by
     simp only [Q, S]
-    nlinarith [mul_nonneg hA hD3, mul_nonneg hA hN]
+    calc
+      D3 + D2 + A * D2 ≤ D3 + D2 + A * D2 +
+          (N + A * D3 + A * N) :=
+        le_add_of_nonneg_right
+          (add_nonneg (add_nonneg hN (mul_nonneg hA hD3)) (mul_nonneg hA hN))
+      _ = (1 + A) * (D3 + D2 + N) := by ring
   have hxle : x ≤ Cs * Fd * Bk R * Q ^ 2 * S := by
     calc
       x = (Cs * Fd * Bk R * Q ^ 2) * N := by
