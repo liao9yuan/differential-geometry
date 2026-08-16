@@ -7,7 +7,6 @@ noncomputable section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -33,6 +32,18 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private lemma norm_sub_sq_le_two_sq
+    {x a b : ℝ} (hx : 0 ≤ x) (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (h : x ≤ a + b) :
+    x ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2 := by
+  nlinarith [sq_nonneg (a - b)]
+
+private lemma half_sq_three_term_le
+    {x y q : ℝ} (hq : 0 ≤ q)
+    (hx : x ≤ 2 * y + 2 * q) (hy : y ≤ 2 * q + 2 * q) :
+    (1 / 2 : ℝ) ^ 2 * x ≤ 3 * q := by
+  nlinarith
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma sieSplit (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -1243,32 +1254,7 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                   (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))‖ ^ 2 := by
-    nlinarith [htri, hnA, hnB, norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
-      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
-        (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
-          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-            (lrQuadF (I := I) (M := M) g₀
-              (realizedFam (I := I) g₀ T 0 hδg hδZ s))))) -
-      iteratedCovGrad (I := I) g₀ 2 2 i
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
-          (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
-            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))),
-      sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
-            (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
-              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (lrQuadF (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδg hδZ s)))))‖ -
-        ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
-              (lieCovPair (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδg hδZ s))
-              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
-                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                  (((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P))))‖)]
+    exact norm_sub_sq_le_two_sq (norm_nonneg _) hnB hnA htri
   refine hsq.trans ?_
   have hAfin : 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
       (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
@@ -1454,7 +1440,7 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
       (DA.toSection x) (DB.toSection x)
     rw [hC] at hsub
     rw [hA, hB] at hadd
-    nlinarith [hq_nn, hsub, hadd]
+    exact half_sq_three_term_le hq_nn hsub hadd
   have hE : q ≤ (fr ^ 2 * Cb (i + 1)) * Combinatorics.antidiagonalTupleGrid
       (gridBase (I := I) (M := M) g₀ P x) (i + 1) := by
     have hzero : iteratedCovGrad (I := I) g₀ 3 3 (i + 1)
@@ -1487,14 +1473,21 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
                 (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) := h1
       _ ≤ fr ^ 2 * (Cb (i + 1) * Combinatorics.antidiagonalTupleGrid
             (gridBase (I := I) (M := M) g₀ P x) (i + 1)) :=
-          mul_le_mul_of_nonneg_left h2 (by positivity)
+          mul_le_mul_of_nonneg_left h2 (sq_nonneg fr)
       _ = (fr ^ 2 * Cb (i + 1)) * Combinatorics.antidiagonalTupleGrid
-            (gridBase (I := I) (M := M) g₀ P x) (i + 1) := by ring
+            (gridBase (I := I) (M := M) g₀ P x) (i + 1) := by
+          simp only [mul_assoc]
   rw [hiso]
-  have hgnn : (0 : ℝ) ≤ Combinatorics.antidiagonalTupleGrid
-      (gridBase (I := I) (M := M) g₀ P x) (i + 1) :=
-    Combinatorics.antidiagonalTupleGrid_nonneg _ (gridBase_nn (I := I) (M := M) g₀ P x) _
-  nlinarith [hYq, hE, hgnn]
+  calc
+    _ ≤ 3 * q := hYq
+    _ ≤ 3 * ((fr ^ 2 * Cb (i + 1)) *
+        Combinatorics.antidiagonalTupleGrid
+          (gridBase (I := I) (M := M) g₀ P x) (i + 1)) :=
+      mul_le_mul_of_nonneg_left hE (show (0 : ℝ) ≤ 3 by norm_num)
+    _ = (3 * (fr ^ 2 * Cb (i + 1))) *
+        Combinatorics.antidiagonalTupleGrid
+          (gridBase (I := I) (M := M) g₀ P x) (i + 1) := by
+      simp only [mul_assoc]
 
 private theorem clCovMk (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
