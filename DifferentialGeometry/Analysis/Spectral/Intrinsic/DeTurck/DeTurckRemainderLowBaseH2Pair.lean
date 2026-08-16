@@ -8105,7 +8105,6 @@ private theorem vb_h3_pair
   simp only [B]
   exact localPairSq (hBhnn R hR) hD3 hN
 
-set_option maxHeartbeats 6400000 in
 private theorem amixHalf_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8207,7 +8206,7 @@ private theorem amixHalf_h3_pair
     have h1 : (0 : ℝ) ≤ 2 * (B0m R + B1m R) ^ 2 := by positivity
     have h2 : (0 : ℝ) ≤ 2 * (B1m R) ^ 2 := by positivity
     simp only [M5]
-    linarith
+    exact add_nonneg h1 h2
   have hD5c : ∀ R : ℝ, 0 ≤ R → 0 ≤ D5c R := fun R hR =>
     mul_nonneg hfr2 (hM5 R hR)
   have hE3d : ∀ R : ℝ, 0 ≤ R → 0 ≤ E3d R := fun R hR =>
@@ -8220,31 +8219,20 @@ private theorem amixHalf_h3_pair
     mul_nonneg (mul_nonneg hCa3 (hE3d R hR)) (hS4b R hR)
   have hK34 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K34 R := fun R hR =>
     mul_nonneg (mul_nonneg hCa3 (hE3b R hR))
-      (by
-        have := hK4 R hR
-        have := hK5 R hR
-        linarith)
+      (mul_nonneg (by norm_num) (add_nonneg (hK4 R hR) (hK5 R hR)))
   have hK2 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K2 R := fun R hR =>
     mul_nonneg (mul_nonneg hCa2 (sq_nonneg _)) (hS3b R hR)
   have hK23 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K23 R := fun R hR =>
     mul_nonneg (mul_nonneg hCa2 (sq_nonneg _))
-      (by
-        have := hK3 R hR
-        have := hK34 R hR
-        linarith)
+      (mul_nonneg (by norm_num) (add_nonneg (hK3 R hR) (hK34 R hR)))
   have hK1 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K1 R := fun R hR =>
     mul_nonneg (mul_nonneg hCa1 (sq_nonneg _)) (hS2b R hR)
   have hK12 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K12 R := fun R hR =>
     mul_nonneg (mul_nonneg hCa1 (sq_nonneg _))
-      (by
-        have := hK2 R hR
-        have := hK23 R hR
-        linarith)
+      (mul_nonneg (by norm_num) (add_nonneg (hK2 R hR) (hK23 R hR)))
   have hBhnn : ∀ R : ℝ, 0 ≤ R → 0 ≤ Bh R := fun R hR => by
-    have := hK1 R hR
-    have := hK12 R hR
     simp only [Bh]
-    linarith
+    exact mul_nonneg (by norm_num) (add_nonneg (hK1 R hR) (hK12 R hR))
   refine ⟨ρ, B, hρ0,
     fun R hR => by
       simp only [B]
@@ -8265,7 +8253,7 @@ private theorem amixHalf_h3_pair
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
     exact hs.2
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    simpa only [one_pow] using pow_le_pow_left₀ hs.1 hs.2 2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -8303,7 +8291,7 @@ private theorem amixHalf_h3_pair
       convexPerturbation_gFibreOpBound_abs
         (I := I) g T 0 hδT hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcP, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -8314,7 +8302,7 @@ private theorem amixHalf_h3_pair
       convexPerturbation_gFibreOpBound_abs
         (I := I) g U 0 hδU hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcQ, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -8359,7 +8347,6 @@ private theorem amixHalf_h3_pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-
   set a : ℝ := A with hadef
   have ha0 : 0 ≤ a := by rw [hadef]; exact hA
   have hP3i : lowJetSq (I := I) (M := M) g 3 P ≤ a ^ 2 := by
@@ -8371,26 +8358,27 @@ private theorem amixHalf_h3_pair
   set pl2 : ℝ := (1 + a) ^ 2 with hpl2
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
-    nlinarith [ha0]
+    simpa only [one_pow] using
+      pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1)
+        (le_add_of_nonneg_right ha0) 2
   have hpl20 : 0 ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : a ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith [ha0]
+    exact pow_le_pow_left₀ ha0 (le_add_of_nonneg_left (by norm_num)) 2
   set u : ℝ := D3 ^ 2 + N ^ 2 with hu
   have hu0 : 0 ≤ u := by
     rw [hu]
     positivity
   have hD3le : D3 ^ 2 ≤ u := by
     rw [hu]
-    linarith [sq_nonneg N]
+    exact le_add_of_nonneg_right (sq_nonneg N)
   have hD3u : D3 ^ 2 ≤ pl2 * u := by
     calc D3 ^ 2 ≤ u := hD3le
       _ = 1 * u := (one_mul u).symm
       _ ≤ pl2 * u := mul_le_mul_of_nonneg_right hpl21 hu0
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
-    linarith [sq_nonneg D3]
-
+    exact le_add_of_nonneg_left (sq_nonneg D3)
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -8427,7 +8415,7 @@ private theorem amixHalf_h3_pair
         mul_le_mul_of_nonneg_right hplA2 (sq_nonneg _)
       have h2 : pl2 * D3 ^ 2 ≤ pl2 * u :=
         mul_le_mul_of_nonneg_left hD3le hpl20
-      linarith
+      exact h1.trans h2
     have e1 : 2 * (B0m R + B1m R) ^ 2 * D3 ^ 2 ≤
         2 * (B0m R + B1m R) ^ 2 * (pl2 * u) :=
       mul_le_mul_of_nonneg_left hD3u (by positivity)
@@ -8440,8 +8428,7 @@ private theorem amixHalf_h3_pair
       simp only [M5]
       ring
     rw [hM5eq]
-    linarith
-
+    exact add_le_add e1 e2
   have hρc : ρ ≤ ρt2 ∧ ρ ≤ ρt3 ∧ ρ ≤ ρt4 ∧ ρ ≤ ρb2 ∧ ρ ≤ ρb3 ∧
       ρ ≤ ρb4 := by
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
@@ -8515,7 +8502,6 @@ private theorem amixHalf_h3_pair
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2.1
   have htb3' := htrb 3 Bt3 ρb3 htb3 hρc.2.2.2.2.1
   have htb4' := htrb 4 Bt4 ρb4 htb4 hρc.2.2.2.2.2
-
   set S5T : SmoothCcTensor g 2 5 :=
     slotExtendIter (I := I) (M := M) g 0 3 2 mcdT with hS5Tdef
   set S5U : SmoothCcTensor g 2 5 :=
@@ -8550,7 +8536,6 @@ private theorem amixHalf_h3_pair
   have hHalfU : lc0AMixHalfRF (I := I) (M := M) g gmU g σlast =
       appCcRS (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2U := rfl
-
   have hS5T2 : lowJetSq (I := I) (M := M) g 2 S5T ≤ S5b R * pl2 := by
     rw [hS5Tdef]
     have h0 : slotExtendIter (I := I) (M := M) g 0 3 2 mcdT =
@@ -8686,7 +8671,6 @@ private theorem amixHalf_h3_pair
       _ = S2b R * (pl2 * pl2) := by
         simp only [S2b]
         ring
-
   have hdel5 : S5T - S5U =
       slotExtend (I := I) (M := M) g 1 4
         (slotExtend (I := I) (M := M) g 0 3 (mcdT - mcdU)) := by
@@ -8717,7 +8701,6 @@ private theorem amixHalf_h3_pair
       _ = D5c R * (pl2 * u) := by
         simp only [D5c]
         ring
-
   have hdel4 : S4T - S4U =
       appCcRS (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
@@ -8783,8 +8766,7 @@ private theorem amixHalf_h3_pair
           lowJetSq (I := I) (M := M) g 2 _) :=
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K4 R * (pl2 * u) + K5 R * (pl2 * u)) := by
-        linarith [h1, h2]
-
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hdel3 : S3T - S3U =
       appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
         appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
@@ -8876,8 +8858,7 @@ private theorem amixHalf_h3_pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K3 R * ((pl2 * pl2) * u) +
           K34 R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
-
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hdel2 : S2T - S2U =
       appCcRS (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
@@ -8945,8 +8926,7 @@ private theorem amixHalf_h3_pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K2 R * ((pl2 * pl2) * u) +
           K23 R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
-
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have htrd2 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 2 σlast -
         lc0TraceRF (I := I) (M := M) g gmU 2 σlast) ≤
@@ -9016,7 +8996,7 @@ private theorem amixHalf_h3_pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K1 R * ((pl2 * pl2) * u) +
           K12 R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
+        exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
       _ = Bh R * ((pl2 * pl2) * u) := by
         simp only [Bh]
         ring
