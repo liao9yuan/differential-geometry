@@ -30,6 +30,10 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+private local instance (x : M) :
+    ContinuousAdd (TangentSpace I x →L[ℝ] TangentSpace I x) :=
+  ContinuousLinearMap.topologicalAddGroup.toContinuousAdd
+
 noncomputable def LowBaseActionData.a1Sub
     {g : SmoothRiemannianMetric I M}
     (A B : LowBaseActionData g) : LowBaseActionData g where
@@ -2465,7 +2469,57 @@ private theorem quadA_tel
   rw [dom_sub_lip, appCcRS_sub_right, appCcRS_sub_left]
   module
 
-set_option maxHeartbeats 1600000 in
+private theorem weighted_two_term_le_weight_sum
+    {C₀ C₁ X Y : ℝ} (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁)
+    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
+    C₀ * X + C₁ * Y ≤ (C₀ + C₁) * (X + Y) := by
+  nlinarith [mul_nonneg hC₀ hY, mul_nonneg hC₁ hX]
+
+private theorem quad_pair_scalar
+    {C₀ C₁ S x y : ℝ} (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁)
+    (hS : 0 ≤ S) (hx : x ≤ 2 * (C₀ + C₁) * S)
+    (hy : y ≤ 2 * (C₀ + C₁) * S) :
+    2 * x + 2 * (2 * x +
+      2 * (2 * y + 2 * (2 * y + 2 * (2 * (y + y))))) ≤
+      384 * (C₀ + C₁) * S := by
+  nlinarith [mul_nonneg (add_nonneg hC₀ hC₁) hS]
+
+private theorem sq_add_sq_le_sum_sq
+    {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
+  nlinarith [mul_nonneg hx hy]
+
+private theorem quad_nested_le
+    {K x y : ℝ} (hK : 0 ≤ K) (hx : x ≤ K) (hy : y ≤ K) :
+    2 * x + 2 * (2 * x +
+      2 * (2 * y + 2 * (2 * y + 2 * (2 * (y + y))))) ≤
+      384 * K := by
+  nlinarith
+
+private theorem sq_mul_sq_le_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
+    A ^ 2 * A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
+  nlinarith
+
+private theorem unit_interval_sq_le_one_lip
+    {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) : s ^ 2 ≤ (1 : ℝ) := by
+  nlinarith
+
+private theorem half_sq_le_one_lip
+    {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) : (s / 2) ^ 2 ≤ (1 : ℝ) := by
+  nlinarith
+
+private theorem sq_le_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
+    A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
+  nlinarith
+
+private theorem sq_le_one_add_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
+    A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
+  nlinarith
+
+private theorem add_sq_le_two_sq (x y : ℝ) :
+    (x + y) ^ 2 ≤ 2 * x ^ 2 + 2 * y ^ 2 := by
+  nlinarith [sq_nonneg (x - y)]
+
 private theorem quad_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2560,12 +2614,16 @@ private theorem quad_pair_h1
         mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)
       _ ≤ 2 * (C₀ + C₁) * S := by
         rw [hSdef]
-        linarith [mul_nonneg hC₀
-            (mul_nonneg (jet_nonneg_lip (I := I) (M := M) g (m := 1) cD)
-              (jet_nonneg_lip (I := I) (M := M) g (m := 2) hatT)),
-          mul_nonneg hC₁
-            (mul_nonneg (jet_nonneg_lip (I := I) (M := M) g (m := 2) cU)
-              (jet_nonneg_lip (I := I) (M := M) g (m := 1) hatD))]
+        have h := mul_le_mul_of_nonneg_left
+          (weighted_two_term_le_weight_sum hC₀ hC₁
+            (mul_nonneg
+              (jet_nonneg_lip (I := I) (M := M) g (m := 2) cU)
+              (jet_nonneg_lip (I := I) (M := M) g (m := 1) hatD))
+            (mul_nonneg
+              (jet_nonneg_lip (I := I) (M := M) g (m := 1) cD)
+              (jet_nonneg_lip (I := I) (M := M) g (m := 2) hatT)))
+          (show 0 ≤ (2 : ℝ) by norm_num)
+        simpa only [mul_assoc] using h
   have hQA : y ≤ 2 * (C₀ + C₁) * S := by
     rw [hydef]
     have hX := happ cU
@@ -2600,12 +2658,16 @@ private theorem quad_pair_h1
         mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)
       _ ≤ 2 * (C₀ + C₁) * S := by
         rw [hSdef]
-        linarith [mul_nonneg hC₀
-            (mul_nonneg (jet_nonneg_lip (I := I) (M := M) g (m := 1) cD)
-              (jet_nonneg_lip (I := I) (M := M) g (m := 2) hatT)),
-          mul_nonneg hC₁
-            (mul_nonneg (jet_nonneg_lip (I := I) (M := M) g (m := 2) cU)
-              (jet_nonneg_lip (I := I) (M := M) g (m := 1) hatD))]
+        have h := mul_le_mul_of_nonneg_left
+          (weighted_two_term_le_weight_sum hC₀ hC₁
+            (mul_nonneg
+              (jet_nonneg_lip (I := I) (M := M) g (m := 2) cU)
+              (jet_nonneg_lip (I := I) (M := M) g (m := 1) hatD))
+            (mul_nonneg
+              (jet_nonneg_lip (I := I) (M := M) g (m := 1) cD)
+              (jet_nonneg_lip (I := I) (M := M) g (m := 2) hatT)))
+          (show 0 ≤ (2 : ℝ) by norm_num)
+        simpa only [mul_assoc] using h
   have hsplit :
       lrQuadF (I := I) (M := M) g gT -
           lrQuadF (I := I) (M := M) g gU =
@@ -2729,7 +2791,8 @@ private theorem quad_pair_h1
             2 * (2 * y +
               2 * (2 * (y + y))))) := by
       rw [hxdef, hydef]
-    _ ≤ 384 * (C₀ + C₁) * S := by nlinarith [hQB, hQA, hS0, hC₀, hC₁]
+    _ ≤ 384 * (C₀ + C₁) * S :=
+      quad_pair_scalar hC₀ hC₁ hS0 hQB hQA
 
 private theorem r4_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -3636,7 +3699,6 @@ private theorem lcvPair_h2_bdd
           mul_le_mul_of_nonneg_left hstep hCa
         _ = Ca * B₂ ^ 2 * B₄ ^ 2 := by ring
 
-set_option maxHeartbeats 1600000 in
 theorem lieOmega_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3697,12 +3759,13 @@ theorem lieOmega_pair_h2
   refine ⟨B0, B1, ?_, ?_, ?_⟩
   · intro R hR
     exact mul_nonneg
-      (mul_nonneg hHc (mul_nonneg hCr (by linarith)))
+      (mul_nonneg hHc (mul_nonneg hCr (add_nonneg (by norm_num) hR)))
       (hW0 R hR)
   · intro R hR
     exact mul_nonneg hHc
       (add_nonneg
-        (mul_nonneg (mul_nonneg hCr (by linarith)) (hW1 R hR))
+        (mul_nonneg
+          (mul_nonneg hCr (add_nonneg (by norm_num) hR)) (hW1 R hR))
         (mul_nonneg hfr (hBs R hR)))
   intro gT gU T U hT hU hTtie hUtie
     δ hδ_le hδ0 hδT hδU hδZ
@@ -3732,7 +3795,8 @@ theorem lieOmega_pair_h2
   have hW0R : 0 ≤ W0 R := hW0 R hR
   have hW1R : 0 ≤ W1 R := hW1 R hR
   have hBsR : 0 ≤ Bs R := hBs R hR
-  have hP : 0 ≤ P := mul_nonneg hCr (by linarith)
+  have hP : 0 ≤ P :=
+    mul_nonneg hCr (add_nonneg (by norm_num) hR)
   have hQ : 0 ≤ Q := mul_nonneg hfr hBsR
   have hX : 0 ≤ X := by
     exact add_nonneg
@@ -3795,7 +3859,7 @@ theorem lieOmega_pair_h2
         mul_le_mul_of_nonneg_left (add_le_add hFirst hSecond) hC
       _ ≤ C * (P * X + Q * A * D2) ^ 2 := by
         apply mul_le_mul_of_nonneg_left _ hC
-        nlinarith [mul_nonneg hPX hQAD]
+        exact sq_add_sq_le_sum_sq hPX hQAD
       _ = L ^ 2 := by
         simp only [L]
         rw [mul_pow, hHcSq]
@@ -3957,7 +4021,6 @@ private theorem curvF_bdd_h1
   rw [curvF_zero_lip (I := I) (M := M) g, sub_zero, sub_zero] at h
   exact h
 
-set_option maxHeartbeats 1600000 in
 private theorem quadF_bdd_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4180,15 +4243,14 @@ private theorem quadF_bdd_h1
         rw [hxdef, hydef]
   have hKfin : lowJetSq (I := I) (M := M) g 1
       (lrQuadF (I := I) (M := M) g gT) ≤ 384 * K := by
-    nlinarith [hlift, hx, hy, hK0]
+    exact hlift.trans (quad_nested_le hK0 hx hy)
   calc
     lowJetSq (I := I) (M := M) g 1
         (lrQuadF (I := I) (M := M) g gT) ≤ 384 * K := hKfin
     _ = 384 * C₀ * (fr * Ba R) ^ 2 * (Bh R) ^ 2 * (A ^ 2 * A ^ 2) := by
       rw [hK]; ring
     _ ≤ 384 * C₀ * (fr * Ba R) ^ 2 * (Bh R) ^ 2 * (A + A ^ 2) ^ 2 := by
-      have hle : A ^ 2 * A ^ 2 ≤ (A + A ^ 2) ^ 2 := by nlinarith [hA]
-      exact mul_le_mul_of_nonneg_left hle
+      exact mul_le_mul_of_nonneg_left (sq_mul_sq_le_add_sq_sq hA)
         (by positivity)
     _ = (B R * (A + A ^ 2)) ^ 2 := by
       have hsq : Real.sqrt (384 * C₀) ^ 2 = 384 * C₀ :=
@@ -4202,7 +4264,6 @@ private theorem quadF_bdd_h1
         hsq]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem r4_bdd_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4239,8 +4300,8 @@ private theorem r4_bdd_h1
   set P : SmoothCcTensor g 0 2 := s • T with hcP
   have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
     Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) :=
+    unit_interval_sq_le_one_lip hs.1 hs.2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -4263,7 +4324,7 @@ private theorem r4_bdd_h1
       convexPerturbation_gFibreOpBound_abs
         (I := I) g T 0 hδT hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcP, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -4293,15 +4354,14 @@ private theorem r4_bdd_h1
           (-1 : ℝ) • lrQuadF (I := I) (M := M) g gm := by
     rw [hgm, lieCovR4_eq (I := I) (M := M) g T hδT hδZ s]
     module
-  have hs22 : (s / 2) ^ 2 ≤ 1 := by
-    nlinarith [hs.1, hs.2]
+  have hs22 : (s / 2) ^ 2 ≤ 1 :=
+    half_sq_le_one_lip hs.1 hs.2
   set u : ℝ := lowJetSq (I := I) (M := M) g 1
     (lrCurvF (I := I) (M := M) g T) with hu
   set v : ℝ := lowJetSq (I := I) (M := M) g 1
     (lrQuadF (I := I) (M := M) g gm) with hv
   have hu0 : 0 ≤ u := jet_nonneg_lip (I := I) (M := M) g _
   have hv0 : 0 ≤ v := jet_nonneg_lip (I := I) (M := M) g _
-  have hA2 : 0 ≤ (A + A ^ 2) ^ 2 := sq_nonneg _
   calc
     lowJetSq (I := I) (M := M) g 1
         (lieCovR4 (I := I) (M := M) g T hδT hδZ s) =
@@ -4328,11 +4388,10 @@ private theorem r4_bdd_h1
         have hvv : ((-1 : ℝ) ^ 2 * v) = v := by ring
         rw [hvv, hv]
         exact hQF
-      linarith
+      exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
     _ ≤ (D R * (A + A ^ 2)) ^ 2 := by
       have hCcA : Cc * A ^ 2 ≤ Cc * (A + A ^ 2) ^ 2 := by
-        have : A ^ 2 ≤ (A + A ^ 2) ^ 2 := by nlinarith [hA]
-        exact mul_le_mul_of_nonneg_left this hCc
+        exact mul_le_mul_of_nonneg_left (sq_le_add_sq_sq hA) hCc
       have hsq : D R ^ 2 = 2 * Cc + 2 * (Bq R) ^ 2 := by
         simp only [D]
         exact Real.sq_sqrt (by positivity)
@@ -4342,7 +4401,14 @@ private theorem r4_bdd_h1
       rw [hexp]
       have hBq2 : ((Bq R) * (A + A ^ 2)) ^ 2 =
           (Bq R) ^ 2 * (A + A ^ 2) ^ 2 := by ring
-      nlinarith [hCcA, hA2, sq_nonneg (Bq R), sq_nonneg (A + A ^ 2)]
+      calc
+        2 * (Cc * A ^ 2 + (Bq R * (A + A ^ 2)) ^ 2) ≤
+            2 * (Cc * (A + A ^ 2) ^ 2 +
+              (Bq R * (A + A ^ 2)) ^ 2) :=
+          mul_le_mul_of_nonneg_left (add_le_add hCcA le_rfl) (by norm_num)
+        _ = (2 * Cc + 2 * (Bq R) ^ 2) * (A + A ^ 2) ^ 2 := by
+          rw [hBq2]
+          ring
 
 omit [BoundarylessManifold I M] in
 private theorem edgePair_eq_lip
@@ -4444,7 +4510,6 @@ private theorem covX_bdd_h1
     _ = (Module.finrank ℝ E : ℝ) ^ 2 * (D R * (A + A ^ 2)) ^ 2 := by
       ring
 
-set_option maxHeartbeats 6400000 in
 private theorem covX_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4506,7 +4571,7 @@ private theorem covX_pair_h1
     have : (0 : ℝ) ≤ 1 + (fr * Ba R) ^ 2 *
         (2 * (B0ω R) ^ 2 + 2 * (B1ω R) ^ 2) +
         (2 * (fr * B0c R) ^ 2 + 2 * (fr * B1c R) ^ 2) * (Bh R) ^ 2 := by
-      linarith
+      exact add_nonneg (add_nonneg zero_le_one h1) h2
     exact mul_nonneg (mul_nonneg (sq_nonneg _) hCr) this
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 hR hA hD2 hT2 hU2 hT3 hU3 hTU2 s hs
@@ -4519,8 +4584,8 @@ private theorem covX_pair_h1
   set Q : SmoothCcTensor g 0 2 := s • U with hcQ
   have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
     Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) :=
+    unit_interval_sq_le_one_lip hs.1 hs.2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -4558,7 +4623,7 @@ private theorem covX_pair_h1
       convexPerturbation_gFibreOpBound_abs
         (I := I) g T 0 hδT hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcP, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -4569,7 +4634,7 @@ private theorem covX_pair_h1
       convexPerturbation_gFibreOpBound_abs
         (I := I) g U 0 hδU hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcQ, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -4697,14 +4762,15 @@ private theorem covX_pair_h1
           (fr * B0c R * D2 + fr * B1c R * A * D2) ^ 2 *
             (Bh R * A) ^ 2)) := by
     refine hr4.trans (mul_le_mul_of_nonneg_left ?_ hCr)
-    linarith [hTU2, hp1, hp2]
+    exact add_le_add hTU2 (add_le_add hp1 hp2)
   have hb1 : (1 : ℝ) ≤ 1 + A + A ^ 2 := by
-    nlinarith [hA, sq_nonneg A]
+    calc
+      (1 : ℝ) ≤ 1 + A := le_add_of_nonneg_right hA
+      _ ≤ 1 + A + A ^ 2 := le_add_of_nonneg_right (sq_nonneg A)
   have hb24 : (1 + A + A ^ 2) ^ 2 ≤ (1 + A + A ^ 2) ^ 4 :=
     pow_le_pow_right₀ hb1 (by norm_num)
-  have hbA2 : A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
-    nlinarith [hA, sq_nonneg A, mul_nonneg hA hA,
-      mul_nonneg (mul_nonneg hA hA) hA]
+  have hbA2 : A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 :=
+    sq_le_one_add_add_sq_sq hA
   set pl : ℝ := (1 + A + A ^ 2) ^ 4 with hpl
   have hpl1 : (1 : ℝ) ≤ pl := by
     rw [hpl]
@@ -4723,11 +4789,22 @@ private theorem covX_pair_h1
   have hpl0 : 0 ≤ pl := le_trans zero_le_one hpl1
   have hq1 : (B0ω R * D2 + B1ω R * A * D2) ^ 2 ≤
       (2 * (B0ω R) ^ 2 + 2 * (B1ω R) ^ 2 * A ^ 2) * D2 ^ 2 := by
-    nlinarith [sq_nonneg (B0ω R * D2 - B1ω R * A * D2)]
+    calc
+      (B0ω R * D2 + B1ω R * A * D2) ^ 2 ≤
+          2 * (B0ω R * D2) ^ 2 + 2 * (B1ω R * A * D2) ^ 2 :=
+        add_sq_le_two_sq _ _
+      _ = (2 * (B0ω R) ^ 2 + 2 * (B1ω R) ^ 2 * A ^ 2) * D2 ^ 2 := by
+        ring
   have hq2 : (fr * B0c R * D2 + fr * B1c R * A * D2) ^ 2 ≤
       (2 * (fr * B0c R) ^ 2 + 2 * (fr * B1c R) ^ 2 * A ^ 2) *
         D2 ^ 2 := by
-    nlinarith [sq_nonneg (fr * B0c R * D2 - fr * B1c R * A * D2)]
+    calc
+      (fr * B0c R * D2 + fr * B1c R * A * D2) ^ 2 ≤
+          2 * (fr * B0c R * D2) ^ 2 +
+            2 * (fr * B1c R * A * D2) ^ 2 := add_sq_le_two_sq _ _
+      _ = (2 * (fr * B0c R) ^ 2 + 2 * (fr * B1c R) ^ 2 * A ^ 2) *
+          D2 ^ 2 := by
+        ring
   have hD22 : 0 ≤ D2 ^ 2 := sq_nonneg _
   have hterm1 : (fr * Ba R * A) ^ 2 *
       (B0ω R * D2 + B1ω R * A * D2) ^ 2 ≤
@@ -4754,7 +4831,7 @@ private theorem covX_pair_h1
           mul_le_mul_of_nonneg_left hplA2 (by positivity)
         have i2 : 2 * (B1ω R) ^ 2 * A ^ 4 ≤ 2 * (B1ω R) ^ 2 * pl :=
           mul_le_mul_of_nonneg_left hplA4 (by positivity)
-        linarith
+        exact add_le_add i1 i2
       exact mul_le_mul_of_nonneg_right
         (mul_le_mul_of_nonneg_left hin (sq_nonneg _)) hD22
     calc (fr * Ba R * A) ^ 2 *
@@ -4795,7 +4872,7 @@ private theorem covX_pair_h1
         have i2 : 2 * (fr * B1c R) ^ 2 * A ^ 4 ≤
             2 * (fr * B1c R) ^ 2 * pl :=
           mul_le_mul_of_nonneg_left hplA4 (by positivity)
-        linarith
+        exact add_le_add i1 i2
       exact mul_le_mul_of_nonneg_right
         (mul_le_mul_of_nonneg_right hin (sq_nonneg _)) hD22
     calc (fr * B0c R * D2 + fr * B1c R * A * D2) ^ 2 *
@@ -4853,7 +4930,7 @@ private theorem covX_pair_h1
                 (pl * D2 ^ 2) +
               (2 * (fr * B0c R) ^ 2 + 2 * (fr * B1c R) ^ 2) *
                 (Bh R) ^ 2 * (pl * D2 ^ 2)) := by
-        linarith [hterm1, hterm2', hD2pl]
+        exact add_le_add hD2pl (add_le_add hterm1 hterm2')
       refine hsum.trans (le_of_eq ?_)
       ring
     _ = C R * ((1 + A + A ^ 2) ^ 4 * D2 ^ 2) := by
