@@ -2540,6 +2540,22 @@ private theorem affine_pair_sq_le_weight_lip
         (mul_le_mul_of_nonneg_left hAD (by positivity))
     _ = (2 * b0 ^ 2 + 2 * b1 ^ 2) * (pl * u) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private theorem jet_add_bound_step_lip
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (X Y : SmoothCcTensor g 2 4) (a q : ℝ)
+    (hX : lowJetSq (I := I) (M := M) g m X ≤ a * q)
+    (hY : lowJetSq (I := I) (M := M) g m Y ≤ q) :
+    lowJetSq (I := I) (M := M) g m (X + Y) ≤ (2 * a + 2) * q := by
+  calc
+    lowJetSq (I := I) (M := M) g m (X + Y) ≤
+        2 * (lowJetSq (I := I) (M := M) g m X +
+          lowJetSq (I := I) (M := M) g m Y) :=
+      jet_add_lip (I := I) (M := M) g m X Y
+    _ ≤ 2 * (a * q + q) :=
+      mul_le_mul_of_nonneg_left (add_le_add hX hY) (by norm_num)
+    _ = (2 * a + 2) * q := by ring
+
 private theorem quad_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8312,7 +8328,7 @@ private theorem aaKer_bdd_h2
     rw [hb]
     have hnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * Bs R ^ 2 := by
       positivity
-    nlinarith [hplA2, hnn]
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hplA2 hnn
   have hcnbase : lowJetSq (I := I) (M := M) g 2
       (connDiffContrInsertionInnerField (I := I) g gT) ≤ VN := by
     refine (hcn gT T hT hTtie hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3).trans ?_
@@ -8320,7 +8336,7 @@ private theorem aaKer_bdd_h2
     have hb : (Bn R * A) ^ 2 = Bn R ^ 2 * A ^ 2 := by ring
     rw [hb]
     have hnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) * Bn R ^ 2 := by positivity
-    nlinarith [hplA2, hnn]
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hplA2 hnn
   have hprodPK : 0 ≤ C233 * aaPK (I := I) (M := M) g * VN :=
     mul_nonneg (mul_nonneg hC233 hPK) hVN0
   have hZdir : lowJetSq (I := I) (M := M) g 2
@@ -8437,7 +8453,6 @@ private theorem aaKer_bdd_h2
   apply le_of_eq
   ring
 
-set_option maxHeartbeats 1600000 in
 private theorem aaKer_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8489,10 +8504,10 @@ private theorem aaKer_pair_h1
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   have hfr : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
   have hPK : 0 ≤ aaPK (I := I) (M := M) g := aaPK_nonneg (I := I) (M := M) g
-  have hone : (0 : ℝ) ≤ 1 + C233 * aaPK (I := I) (M := M) g := by
-    have := mul_nonneg hC233 hPK; linarith
-  have honep : (0 : ℝ) ≤ 1 + C233p * aaPK (I := I) (M := M) g := by
-    have := mul_nonneg hC233p hPK; linarith
+  have hone : (0 : ℝ) ≤ 1 + C233 * aaPK (I := I) (M := M) g :=
+    add_nonneg zero_le_one (mul_nonneg hC233 hPK)
+  have honep : (0 : ℝ) ≤ 1 + C233p * aaPK (I := I) (M := M) g :=
+    add_nonneg zero_le_one (mul_nonneg hC233p hPK)
   let B : ℝ → ℝ := fun R =>
     94 * Cblk * (aaPK (I := I) (M := M) g *
       (((Module.finrank ℝ E : ℝ) ^ 2 * (2 * Bi0 R ^ 2 + 2 * Bi1 R ^ 2)) *
@@ -8520,7 +8535,10 @@ private theorem aaKer_pair_h1
   intro gT gU T U hT hU hTtie hUtie δ hδ_le hδ0 hδT hδU hδZ
     R A D2 hR hA hD2 hT2 hU2 hT3 hU3 hTU2
   set pl2 : ℝ := (1 + A + A ^ 2) ^ 2 with hpl2
-  have hbase : (1 : ℝ) ≤ 1 + A + A ^ 2 := by nlinarith [hA, sq_nonneg A]
+  have hbase : (1 : ℝ) ≤ 1 + A + A ^ 2 := by
+    calc
+      (1 : ℝ) ≤ 1 + A := le_add_of_nonneg_right hA
+      _ ≤ 1 + A + A ^ 2 := le_add_of_nonneg_right (sq_nonneg A)
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
     calc (1 : ℝ) = 1 ^ 2 := by norm_num
@@ -8528,25 +8546,19 @@ private theorem aaKer_pair_h1
   have hpl20 : (0 : ℝ) ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : A ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith [hA, sq_nonneg A, mul_nonneg hA hA,
-      mul_nonneg (mul_nonneg hA hA) hA]
+    exact sq_le_one_add_add_sq_sq hA
   have hpu0 : (0 : ℝ) ≤ pl2 * D2 ^ 2 := mul_nonneg hpl20 (sq_nonneg D2)
-  have hD2p : D2 ^ 2 ≤ pl2 * D2 ^ 2 := by nlinarith [hpl21, sq_nonneg D2]
+  have hD2p : D2 ^ 2 ≤ pl2 * D2 ^ 2 := by
+    calc
+      D2 ^ 2 = 1 * D2 ^ 2 := (one_mul _).symm
+      _ ≤ pl2 * D2 ^ 2 := mul_le_mul_of_nonneg_right hpl21 (sq_nonneg D2)
   have hA2D : A ^ 2 * D2 ^ 2 ≤ pl2 * D2 ^ 2 :=
     mul_le_mul_of_nonneg_right hplA2 (sq_nonneg D2)
   have hpairfold : ∀ b0 b1 : ℝ,
       (b0 * D2 + b1 * A * D2) ^ 2 ≤
         (2 * b0 ^ 2 + 2 * b1 ^ 2) * (pl2 * D2 ^ 2) := by
     intro b0 b1
-    have hstep : (b0 * D2 + b1 * A * D2) ^ 2 ≤
-        2 * b0 ^ 2 * D2 ^ 2 + 2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) := by
-      nlinarith [sq_nonneg (b0 * D2 - b1 * A * D2)]
-    refine hstep.trans ?_
-    have e1 : 2 * b0 ^ 2 * D2 ^ 2 ≤ 2 * b0 ^ 2 * (pl2 * D2 ^ 2) :=
-      mul_le_mul_of_nonneg_left hD2p (by positivity)
-    have e2 : 2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) ≤ 2 * b1 ^ 2 * (pl2 * D2 ^ 2) :=
-      mul_le_mul_of_nonneg_left hA2D (by positivity)
-    linarith
+    exact affine_pair_sq_le_weight_lip b0 b1 A D2 pl2 (D2 ^ 2) hD2p hA2D
   set CI2 : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * Bs R ^ 2 * pl2 with hCI2
   set CID : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 *
     ((2 * Bi0 R ^ 2 + 2 * Bi1 R ^ 2) * (pl2 * D2 ^ 2)) with hCID
@@ -8575,7 +8587,7 @@ private theorem aaKer_pair_h1
     rw [hb]
     have hnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * Bs R ^ 2 := by
       positivity
-    nlinarith [hplA2, hnn]
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hplA2 hnn
   have hcidT : lowJetSq (I := I) (M := M) g 1
       (connDiffContrInsertionField (I := I) g gT -
         connDiffContrInsertionField (I := I) g gU) ≤ CID := by
@@ -8591,7 +8603,7 @@ private theorem aaKer_pair_h1
     have hb : (Bn R * A) ^ 2 = Bn R ^ 2 * A ^ 2 := by ring
     rw [hb]
     have hnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) * Bn R ^ 2 := by positivity
-    nlinarith [hplA2, hnn]
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hplA2 hnn
   have hcndT : lowJetSq (I := I) (M := M) g 1
       (connDiffContrInsertionInnerField (I := I) g gT -
         connDiffContrInsertionInnerField (I := I) g gU) ≤ VM := by
@@ -8602,12 +8614,20 @@ private theorem aaKer_pair_h1
   have hZdirB : lowJetSq (I := I) (M := M) g 2
       (connDiffContrInsertionInnerField (I := I) g gT) ≤ ZB := by
     rw [hZB]
-    linarith [hcnbase, mul_nonneg (mul_nonneg hC233 hPK) hVN0]
+    refine hcnbase.trans ?_
+    simpa only [one_mul] using
+      mul_le_mul_of_nonneg_right
+        (show (1 : ℝ) ≤ 1 + C233 * aaPK (I := I) (M := M) g from
+          le_add_of_nonneg_right (mul_nonneg hC233 hPK)) hVN0
   have hZdirD : lowJetSq (I := I) (M := M) g 1
       (connDiffContrInsertionInnerField (I := I) g gT -
         connDiffContrInsertionInnerField (I := I) g gU) ≤ ZD := by
     rw [hZD]
-    linarith [hcndT, mul_nonneg (mul_nonneg hC233p hPK) hVM0]
+    refine hcndT.trans ?_
+    simpa only [one_mul] using
+      mul_le_mul_of_nonneg_right
+        (show (1 : ℝ) ≤ 1 + C233p * aaPK (I := I) (M := M) g from
+          le_add_of_nonneg_right (mul_nonneg hC233p hPK)) hVM0
   have hZinnB : ∀ ρ : Equiv.Perm (Fin 3), (ρ = aaP102 ∨ ρ = aaP120) →
       lowJetSq (I := I) (M := M) g 2
         (aaInn (I := I) (M := M) g gT ρ) ≤ ZB := by
@@ -8628,7 +8648,8 @@ private theorem aaKer_pair_h1
         (jet_nonneg_lip (I := I) (M := M) (m := 2) g _)
         (mul_nonneg hC233 hPK)
     rw [hZB]
-    linarith [hstep, hVN0]
+    exact hstep.trans
+      (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left zero_le_one) hVN0)
   have hZinnD : ∀ ρ : Equiv.Perm (Fin 3), (ρ = aaP102 ∨ ρ = aaP120) →
       lowJetSq (I := I) (M := M) g 1
         (aaInn (I := I) (M := M) g gT ρ -
@@ -8662,7 +8683,8 @@ private theorem aaKer_pair_h1
         (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
         (mul_nonneg hC233p hPK)
     rw [hZD]
-    linarith [hstep, hVM0]
+    exact hstep.trans
+      (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left zero_le_one) hVM0)
   set Q : ℝ := Cblk * (aaPK (I := I) (M := M) g * (CID * ZB + CI2 * ZD))
     with hQ
   have hblkQ : ∀ (pm : Equiv.Perm (Fin 4)),
@@ -8710,7 +8732,7 @@ private theorem aaKer_pair_h1
               (connDiffContrInsertionField (I := I) g gU) *
             lowJetSq (I := I) (M := M) g 1 (ZT - ZU)) ≤
         aaPK (I := I) (M := M) g * (CID * ZB + CI2 * ZD) :=
-      mul_le_mul hpm (by linarith [h1, h2]) hsum0 hPK
+      mul_le_mul hpm (add_le_add h1 h2) hsum0 hPK
     rw [hQ]
     exact mul_le_mul_of_nonneg_left hmid hCblk
   have hx0 := hblkQ aaP3201 (Or.inl rfl) _ _
@@ -8779,22 +8801,36 @@ private theorem aaKer_pair_h1
         (y5 - z5) := by abel
   rw [hsplit]
   have s01 : lowJetSq (I := I) (M := M) g 1 ((y0 - z0) + (y1 - z1)) ≤
-      4 * Q :=
-    (jet_add_lip (I := I) (M := M) g 1 _ _).trans (by linarith [hx0, hb1])
+      4 * Q := by
+    convert jet_add_bound_step_lip (I := I) (M := M) g 1
+      (y0 - z0) (y1 - z1) 1 Q (by simpa using hx0) hb1 using 1
+    all_goals norm_num
   have s02 : lowJetSq (I := I) (M := M) g 1
       ((y0 - z0) + (y1 - z1) + (y2 - z2)) ≤ 10 * Q :=
-    (jet_add_lip (I := I) (M := M) g 1 _ _).trans (by linarith [s01, hx2])
+    by
+      convert jet_add_bound_step_lip (I := I) (M := M) g 1
+        ((y0 - z0) + (y1 - z1)) (y2 - z2) 4 Q s01 hx2 using 1
+      all_goals norm_num
   have s03 : lowJetSq (I := I) (M := M) g 1
       ((y0 - z0) + (y1 - z1) + (y2 - z2) + (y3 - z3)) ≤ 22 * Q :=
-    (jet_add_lip (I := I) (M := M) g 1 _ _).trans (by linarith [s02, hb3])
+    by
+      convert jet_add_bound_step_lip (I := I) (M := M) g 1
+        ((y0 - z0) + (y1 - z1) + (y2 - z2)) (y3 - z3) 10 Q s02 hb3 using 1
+      all_goals norm_num
   have s04 : lowJetSq (I := I) (M := M) g 1
       ((y0 - z0) + (y1 - z1) + (y2 - z2) + (y3 - z3) + (y4 - z4)) ≤
-      46 * Q :=
-    (jet_add_lip (I := I) (M := M) g 1 _ _).trans (by linarith [s03, hx4])
+      46 * Q := by
+    convert jet_add_bound_step_lip (I := I) (M := M) g 1
+      ((y0 - z0) + (y1 - z1) + (y2 - z2) + (y3 - z3)) (y4 - z4) 22 Q s03 hx4
+      using 1
+    all_goals norm_num
   have s05 : lowJetSq (I := I) (M := M) g 1
       ((y0 - z0) + (y1 - z1) + (y2 - z2) + (y3 - z3) + (y4 - z4) +
-        (y5 - z5)) ≤ 94 * Q :=
-    (jet_add_lip (I := I) (M := M) g 1 _ _).trans (by linarith [s04, hb5])
+        (y5 - z5)) ≤ 94 * Q := by
+    convert jet_add_bound_step_lip (I := I) (M := M) g 1
+      ((y0 - z0) + (y1 - z1) + (y2 - z2) + (y3 - z3) + (y4 - z4))
+      (y5 - z5) 46 Q s04 hb5 using 1
+    all_goals norm_num
   refine s05.trans ?_
   simp only [B, hQ, hCI2, hCID, hZB, hZD, hVN, hVM, hpl2]
   apply le_of_eq
