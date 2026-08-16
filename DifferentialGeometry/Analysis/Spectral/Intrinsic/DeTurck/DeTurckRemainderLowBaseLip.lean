@@ -2516,6 +2516,10 @@ private theorem sq_le_one_add_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
     A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
   nlinarith
 
+private theorem add_sq_le_one_add_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
+    A + A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
+  nlinarith
+
 private theorem add_sq_le_two_sq (x y : ℝ) :
     (x + y) ^ 2 ≤ 2 * x ^ 2 + 2 * y ^ 2 := by
   nlinarith [sq_nonneg (x - y)]
@@ -4937,7 +4941,6 @@ private theorem covX_pair_h1
       simp only [C, hpl]
       ring
 
-set_option maxHeartbeats 1600000 in
 private theorem lieCov_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4997,7 +5000,7 @@ private theorem lieCov_pair_h1
     have h1 : 0 ≤ C₂ * Cp ^ 2 * (fr ^ 2 * (Dr R) ^ 2) := by positivity
     have h2 : 0 ≤ C₂ * Bp * Cx R :=
       mul_nonneg (mul_nonneg hC₂ hBp) (hCx R hR)
-    linarith
+    exact mul_nonneg (by norm_num) (add_nonneg h1 h2)
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2 hTn hUn hTUn s hs
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
@@ -5151,11 +5154,12 @@ private theorem lieCov_pair_h1
         (slotExtendIter (I := I) (M := M) g 0 4 2
           (lieCovR4 (I := I) (M := M) g U hδU hδZ s)))
   have hb1 : (1 : ℝ) ≤ 1 + A + A ^ 2 := by
-    nlinarith [hA, sq_nonneg A]
+    calc
+      (1 : ℝ) ≤ 1 + A := le_add_of_nonneg_right hA
+      _ ≤ 1 + A + A ^ 2 := le_add_of_nonneg_right (sq_nonneg A)
   have hbAA : (A + A ^ 2) ^ 2 ≤ (1 + A + A ^ 2) ^ 4 := by
-    have h1 : A + A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
-      nlinarith [hA, sq_nonneg A, mul_nonneg hA hA,
-        mul_nonneg (mul_nonneg hA hA) hA]
+    have h1 : A + A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 :=
+      add_sq_le_one_add_add_sq_sq hA
     have h0 : (0 : ℝ) ≤ A + A ^ 2 := by positivity
     calc (A + A ^ 2) ^ 2 ≤ ((1 + A + A ^ 2) ^ 2) ^ 2 :=
         pow_le_pow_left₀ h0 h1 2
@@ -5235,14 +5239,6 @@ private theorem lieCov_pair_h1
       · exact mul_nonneg hC₂ hBp
     refine hstep.trans (le_of_eq ?_)
     ring
-  have hj1 : (0 : ℝ) ≤ lowJetSq (I := I) (M := M) g 1
-      (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
-        (lieCovPair (I := I) (M := M) g gmT -
-          lieCovPair (I := I) (M := M) g gmU)
-        (rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
-          (slotExtendIter (I := I) (M := M) g 0 4 2
-            (lieCovR4 (I := I) (M := M) g T hδT hδZ s)))) :=
-    jet_nonneg_lip (I := I) (M := M) (m := 1) g _
   calc
     lowJetSq (I := I) (M := M) g 1
         (ccOperatorFieldComp (I := I) (M := M) g 2 6 2
@@ -5279,8 +5275,7 @@ private theorem lieCov_pair_h1
     _ ≤ 2 * (C₂ * Cp ^ 2 * (fr ^ 2 * (Dr R) ^ 2) *
           ((1 + A + A ^ 2) ^ 4 * N ^ 2) +
         C₂ * Bp * Cx R * ((1 + A + A ^ 2) ^ 4 * D2 ^ 2)) := by
-      have := add_le_add hT1 hT2b
-      linarith
+      exact mul_le_mul_of_nonneg_left (add_le_add hT1 hT2b) (by norm_num)
     _ ≤ B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
       have c1 : (0 : ℝ) ≤ C₂ * Cp ^ 2 * (fr ^ 2 * (Dr R) ^ 2) := by
         positivity
@@ -5304,14 +5299,14 @@ private theorem lieCov_pair_h1
             C₂ * Cp ^ 2 * (fr ^ 2 * (Dr R) ^ 2) *
               ((1 + A + A ^ 2) ^ 4 * D2 ^ 2 +
                 (1 + A + A ^ 2) ^ 4 * N ^ 2) :=
-          mul_le_mul_of_nonneg_left (by linarith) c1
+          mul_le_mul_of_nonneg_left (le_add_of_nonneg_left hd) c1
         have e2 : C₂ * Bp * Cx R *
             ((1 + A + A ^ 2) ^ 4 * D2 ^ 2) ≤
             C₂ * Bp * Cx R *
               ((1 + A + A ^ 2) ^ 4 * D2 ^ 2 +
                 (1 + A + A ^ 2) ^ 4 * N ^ 2) :=
-          mul_le_mul_of_nonneg_left (by linarith) c2
-        linarith
+          mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hn) c2
+        exact mul_le_mul_of_nonneg_left (add_le_add e1 e2) (by norm_num)
       refine hsum.trans (le_of_eq ?_)
       simp only [B]
       ring
@@ -5550,7 +5545,180 @@ private theorem vbmcd_sub_h1_lip
     rsperm_h1_lip]
   exact slot_h1_lip (I := I) (M := M) g 0 3 _
 
-set_option maxHeartbeats 3200000 in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private theorem app_pair_h21_lip
+    (g : SmoothRiemannianMetric I M) {p r c : ℕ}
+    (C a b d e : ℝ) (hC : 0 ≤ C) (ha : 0 ≤ a) (hd : 0 ≤ d)
+    (ΦT ΦU : SmoothCcTensor g r c) (WT WU : SmoothCcTensor g p r)
+    (happ : ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
+      lowJetSq (I := I) (M := M) g 1
+          (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
+        C * lowJetSq (I := I) (M := M) g 2 Φ *
+          lowJetSq (I := I) (M := M) g 1 W)
+    (hΦd : lowJetSq (I := I) (M := M) g 2 (ΦT - ΦU) ≤ a)
+    (hWT : lowJetSq (I := I) (M := M) g 1 WT ≤ b)
+    (hΦU : lowJetSq (I := I) (M := M) g 2 ΦU ≤ d)
+    (hWd : lowJetSq (I := I) (M := M) g 1 (WT - WU) ≤ e) :
+    lowJetSq (I := I) (M := M) g 1
+        (ccOperatorFieldComp (I := I) (M := M) g p r c ΦT WT -
+          ccOperatorFieldComp (I := I) (M := M) g p r c ΦU WU) ≤
+      2 * (C * a * b + C * d * e) := by
+  have hdel :
+      ccOperatorFieldComp (I := I) (M := M) g p r c ΦT WT -
+          ccOperatorFieldComp (I := I) (M := M) g p r c ΦU WU =
+        ccOperatorFieldComp (I := I) (M := M) g p r c (ΦT - ΦU) WT +
+          ccOperatorFieldComp (I := I) (M := M) g p r c ΦU (WT - WU) := by
+    rw [appCcRS_sub_left, appCcRS_sub_right]
+    module
+  rw [hdel]
+  have h1 := (happ (ΦT - ΦU) WT).trans
+    (mul_le_mul (mul_le_mul_of_nonneg_left hΦd hC) hWT
+      (jet_nonneg_lip (I := I) (M := M) (m := 1) g WT)
+      (mul_nonneg hC ha))
+  have h2 := (happ ΦU (WT - WU)).trans
+    (mul_le_mul (mul_le_mul_of_nonneg_left hΦU hC) hWd
+      (jet_nonneg_lip (I := I) (M := M) (m := 1) g (WT - WU))
+      (mul_nonneg hC hd))
+  exact (jet_add_lip (I := I) (M := M) g 1 _ _).trans
+    (mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num))
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private theorem app_pair_h12_h21_lip
+    (g : SmoothRiemannianMetric I M) {p r c : ℕ}
+    (C12 C21 a b d e : ℝ) (hC12 : 0 ≤ C12) (hC21 : 0 ≤ C21)
+    (ha : 0 ≤ a) (hd : 0 ≤ d)
+    (ΦT ΦU : SmoothCcTensor g r c) (WT WU : SmoothCcTensor g p r)
+    (happ12 : ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
+      lowJetSq (I := I) (M := M) g 1
+          (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
+        C12 * lowJetSq (I := I) (M := M) g 1 Φ *
+          lowJetSq (I := I) (M := M) g 2 W)
+    (happ21 : ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
+      lowJetSq (I := I) (M := M) g 1
+          (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W) ≤
+        C21 * lowJetSq (I := I) (M := M) g 2 Φ *
+          lowJetSq (I := I) (M := M) g 1 W)
+    (hΦd : lowJetSq (I := I) (M := M) g 1 (ΦT - ΦU) ≤ a)
+    (hWT : lowJetSq (I := I) (M := M) g 2 WT ≤ b)
+    (hΦU : lowJetSq (I := I) (M := M) g 2 ΦU ≤ d)
+    (hWd : lowJetSq (I := I) (M := M) g 1 (WT - WU) ≤ e) :
+    lowJetSq (I := I) (M := M) g 1
+        (ccOperatorFieldComp (I := I) (M := M) g p r c ΦT WT -
+          ccOperatorFieldComp (I := I) (M := M) g p r c ΦU WU) ≤
+      2 * (C12 * a * b + C21 * d * e) := by
+  have hdel :
+      ccOperatorFieldComp (I := I) (M := M) g p r c ΦT WT -
+          ccOperatorFieldComp (I := I) (M := M) g p r c ΦU WU =
+        ccOperatorFieldComp (I := I) (M := M) g p r c (ΦT - ΦU) WT +
+          ccOperatorFieldComp (I := I) (M := M) g p r c ΦU (WT - WU) := by
+    rw [appCcRS_sub_left, appCcRS_sub_right]
+    module
+  rw [hdel]
+  have h1 := (happ12 (ΦT - ΦU) WT).trans
+    (mul_le_mul (mul_le_mul_of_nonneg_left hΦd hC12) hWT
+      (jet_nonneg_lip (I := I) (M := M) (m := 2) g WT)
+      (mul_nonneg hC12 ha))
+  have h2 := (happ21 ΦU (WT - WU)).trans
+    (mul_le_mul (mul_le_mul_of_nonneg_left hΦU hC21) hWd
+      (jet_nonneg_lip (I := I) (M := M) (m := 1) g (WT - WU))
+      (mul_nonneg hC21 hd))
+  exact (jet_add_lip (I := I) (M := M) g 1 _ _).trans
+    (mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num))
+
+private theorem vb_w_pair_factor_lip
+    (C Ct Bt Bs W0 W1 pl2 u : ℝ) :
+    2 * (C * (Ct ^ 2 * u) * (Bs ^ 2 * pl2) +
+      C * Bt ^ 2 * ((2 * W0 ^ 2 + 2 * W1 ^ 2) * (pl2 * u))) =
+      (2 * (C * Ct ^ 2 * Bs ^ 2 +
+        C * Bt ^ 2 * (2 * W0 ^ 2 + 2 * W1 ^ 2))) * (pl2 * u) := by
+  ring
+
+private theorem vb_inner_pair_factor_lip
+    (C12 C21 Vd Ib Vb Im pl2 u : ℝ) :
+    2 * (C12 * (Vd * (pl2 * u)) * (Ib * pl2) +
+      C21 * (Vb * pl2) * (Im * (pl2 * u))) =
+      2 * ((C12 * Vd * Ib) * ((pl2 * pl2) * u) +
+        (C21 * Vb * Im) * ((pl2 * pl2) * u)) := by
+  ring
+
+private theorem vb_outer_final_factor_lip
+    (C Ct Bt Sin Kv Ki x d n : ℝ) :
+    4 * (2 * (C * (Ct ^ 2 * (d ^ 2 + n ^ 2)) * (Sin * (x ^ 2 * x ^ 2)) +
+      C * Bt ^ 2 * (2 *
+        (Kv * ((x ^ 2 * x ^ 2) * (d ^ 2 + n ^ 2)) +
+          Ki * ((x ^ 2 * x ^ 2) * (d ^ 2 + n ^ 2)))))) =
+      (4 * (2 * (C * Ct ^ 2 * Sin + C * Bt ^ 2 * (2 * (Kv + Ki))))) *
+        (x ^ 4 * (d ^ 2 + n ^ 2)) := by
+  ring
+
+private theorem trace_pair_h2_to_sum_lip
+    (g : SmoothRiemannianMetric I M) (p : ℕ)
+    (P Q : SmoothCcTensor g 0 2)
+    (gP gQ : SmoothRiemannianMetric I M)
+    (hPtie : ∀ (y : M) (v w : TangentSpace I y),
+      gP.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g P y v w)
+    (hQtie : ∀ (y : M) (v w : TangentSpace I y),
+      gQ.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g Q y v w)
+    (ρ Cp D2 N : ℝ)
+    (hPn : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) P‖ ≤ ρ)
+    (hQn : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Q‖ ≤ ρ)
+    (hPQn : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (P - Q)‖ ≤ N)
+    (hCp : 0 ≤ Cp)
+    (hpair : ∀ (T U : SmoothCcTensor g 0 2)
+      (gT gU : SmoothRiemannianMetric I M),
+      (∀ (y : M) (v w : TangentSpace I y),
+        gT.inner y v w =
+          g.inner y v w + ccTensorBilinSymm (I := I) g T y v w) →
+      (∀ (y : M) (v w : TangentSpace I y),
+        gU.inner y v w =
+          g.inner y v w + ccTensorBilinSymm (I := I) g U y v w) →
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+      lowJetSq (I := I) (M := M) g 2
+          (pureTrace (I := I) (M := M) g gT p -
+            pureTrace (I := I) (M := M) g gU p) ≤
+        (Cp * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖) ^ 2) :
+    lowJetSq (I := I) (M := M) g 2
+        (pureTrace (I := I) (M := M) g gP p -
+          pureTrace (I := I) (M := M) g gQ p) ≤
+      Cp ^ 2 * (D2 ^ 2 + N ^ 2) := by
+  refine (hpair P Q gP gQ hPtie hQtie hPn hQn).trans ?_
+  have h1 : Cp * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (P - Q)‖ ≤
+      Cp * N := mul_le_mul_of_nonneg_left hPQn hCp
+  refine (pow_le_pow_left₀ (mul_nonneg hCp (norm_nonneg _)) h1 2).trans ?_
+  rw [mul_pow]
+  exact mul_le_mul_of_nonneg_left
+    (le_add_of_nonneg_left (sq_nonneg D2)) (sq_nonneg Cp)
+
+private theorem trace_pair_h2_bdd_lip
+    (g : SmoothRiemannianMetric I M) (p : ℕ)
+    (P Q : SmoothCcTensor g 0 2)
+    (gP gQ : SmoothRiemannianMetric I M)
+    (hPtie : ∀ (y : M) (v w : TangentSpace I y),
+      gP.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g P y v w)
+    (hQtie : ∀ (y : M) (v w : TangentSpace I y),
+      gQ.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g Q y v w)
+    (ρ Bp : ℝ)
+    (hPn : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) P‖ ≤ ρ)
+    (hQn : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Q‖ ≤ ρ)
+    (hbdd : ∀ (T : SmoothCcTensor g 0 2)
+      (gT : SmoothRiemannianMetric I M),
+      (∀ (y : M) (v w : TangentSpace I y),
+        gT.inner y v w =
+          g.inner y v w + ccTensorBilinSymm (I := I) g T y v w) →
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+      lowJetSq (I := I) (M := M) g 2
+          (pureTrace (I := I) (M := M) g gT p) ≤ Bp ^ 2) :
+    lowJetSq (I := I) (M := M) g 2
+        (pureTrace (I := I) (M := M) g gP p) ≤ Bp ^ 2 ∧
+      lowJetSq (I := I) (M := M) g 2
+        (pureTrace (I := I) (M := M) g gQ p) ≤ Bp ^ 2 :=
+  ⟨hbdd P gP hPtie hPn, hbdd Q gQ hQtie hQn⟩
+
 private theorem vb_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5587,7 +5755,6 @@ private theorem vb_pair_h1
             lc0VB (I := I) (M := M) g
               (realizedFam (I := I) g U 0 hδU hδZ s)) ≤
         B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
-
   obtain ⟨Cout, hCout, happOut⟩ :=
     app_h21_mul_lip (I := I) (M := M) hDim g 2 4 2
   obtain ⟨Cin1, hCin1, happIn1⟩ :=
@@ -5602,7 +5769,6 @@ private theorem vb_pair_h1
     app_h21_mul_lip (I := I) (M := M) hDim g 0 3 1
   obtain ⟨Cw2, hCw2, happW2⟩ :=
     app_h2_mul_lip (I := I) (M := M) hDim g 0 3 1
-
   obtain ⟨ρt1, Ct1, hρt1, hCt1, htp1⟩ :=
     LowBaseInternal.trace1_pair_h2 (I := I) (M := M) hDim g
   obtain ⟨ρb1, Bt1, hρb1, hBt1, htb1⟩ :=
@@ -5622,7 +5788,6 @@ private theorem vb_pair_h1
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   obtain ⟨Bs, hBs, hwxib⟩ :=
     wXi_self_tame (I := I) (M := M) hDim g
-
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfrdef
   have hfr : 0 ≤ fr := Nat.cast_nonneg _
   set Jp : ℝ := lowJetSq (I := I) (M := M) g 2 (ipHead (I := I) (M := M) g)
@@ -5631,7 +5796,6 @@ private theorem vb_pair_h1
   set ρ : ℝ := min (min ρt1 ρb1) (min ρt2 ρb2) with hρdef
   have hρ0 : 0 < ρ :=
     lt_min (lt_min hρt1 hρb1) (lt_min hρt2 hρb2)
-
   let Wb : ℝ → ℝ := fun R => Cw2 * Bt1 ^ 2 * (Bs R) ^ 2
   let Wm : ℝ → ℝ := fun R =>
     2 * (Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 +
@@ -5669,19 +5833,14 @@ private theorem vb_pair_h1
     mul_nonneg (mul_nonneg hCout (sq_nonneg _)) (hSin R hR)
   have hK2 : ∀ R : ℝ, 0 ≤ R → 0 ≤ K2 R := fun R hR =>
     mul_nonneg (mul_nonneg hCout (sq_nonneg _))
-      (by
-        have := hKv R hR
-        have := hKi R hR
-        linarith)
+      (mul_nonneg (by norm_num) (add_nonneg (hKv R hR) (hKi R hR)))
   refine ⟨ρ, B, hρ0, ?_, ?_⟩
   · intro R hR
-    have := hK1 R hR
-    have := hK2 R hR
     simp only [B]
-    linarith
+    exact mul_nonneg (by norm_num)
+      (mul_nonneg (by norm_num) (add_nonneg (hK1 R hR) (hK2 R hR)))
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2 hTn hUn hTUn s hs
-
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   set gmT : SmoothRiemannianMetric I M :=
     realizedFam (I := I) g T 0 hδT hδZ s with hgmT
@@ -5694,8 +5853,8 @@ private theorem vb_pair_h1
   have hsabs : ‖s‖ ≤ (1 : ℝ) := by
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
     exact hs.2
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) :=
+    unit_interval_sq_le_one_lip hs.1 hs.2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -5730,7 +5889,7 @@ private theorem vb_pair_h1
     have hraw :=
       convexPerturbation_gFibreOpBound_abs (I := I) g T 0 hδT hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcP, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -5740,7 +5899,7 @@ private theorem vb_pair_h1
     have hraw :=
       convexPerturbation_gFibreOpBound_abs (I := I) g U 0 hδU hδZ s x u v
     have heq : |1 - s| * δ + |s| * δ = δ := by
-      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+      rw [abs_of_nonneg (sub_nonneg.mpr hs.2),
         abs_of_nonneg hs.1]
       ring
     simpa only [hcQ, convexPerturbation, smul_zero, zero_add, heq] using hraw
@@ -5781,9 +5940,11 @@ private theorem vb_pair_h1
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-
   set pl2 : ℝ := (1 + A + A ^ 2) ^ 2 with hpl2
-  have hb1 : (1 : ℝ) ≤ 1 + A + A ^ 2 := by nlinarith [hA, sq_nonneg A]
+  have hb1 : (1 : ℝ) ≤ 1 + A + A ^ 2 := by
+    calc
+      (1 : ℝ) ≤ 1 + A := le_add_of_nonneg_right hA
+      _ ≤ 1 + A + A ^ 2 := le_add_of_nonneg_right (sq_nonneg A)
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
     calc (1 : ℝ) = 1 ^ 2 := by norm_num
@@ -5791,17 +5952,23 @@ private theorem vb_pair_h1
   have hpl20 : 0 ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : A ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith [hA, sq_nonneg A, mul_nonneg hA hA,
-      mul_nonneg (mul_nonneg hA hA) hA]
+    exact sq_le_one_add_add_sq_sq hA
   have h1A : (1 + A) ^ 2 ≤ 2 * pl2 := by
     rw [hpl2]
-    nlinarith [hA, sq_nonneg A, mul_nonneg hA hA,
-      mul_nonneg (mul_nonneg hA hA) hA]
+    calc
+      (1 + A) ^ 2 ≤ (1 + A + A ^ 2) ^ 2 :=
+        pow_le_pow_left₀ (add_nonneg zero_le_one hA)
+          (le_add_of_nonneg_right (sq_nonneg A)) 2
+      _ = 1 * (1 + A + A ^ 2) ^ 2 := (one_mul _).symm
+      _ ≤ 2 * (1 + A + A ^ 2) ^ 2 :=
+        mul_le_mul_of_nonneg_right (by norm_num) (sq_nonneg _)
   set u : ℝ := D2 ^ 2 + N ^ 2 with hu
   have hu0 : 0 ≤ u := by rw [hu]; positivity
   have hpl2u : 0 ≤ pl2 * u := mul_nonneg hpl20 hu0
   have hD2u : D2 ^ 2 ≤ pl2 * u := by
-    have h1 : D2 ^ 2 ≤ u := by rw [hu]; nlinarith [sq_nonneg N]
+    have h1 : D2 ^ 2 ≤ u := by
+      rw [hu]
+      exact le_add_of_nonneg_right (sq_nonneg N)
     calc D2 ^ 2 ≤ u := h1
       _ = 1 * u := (one_mul u).symm
       _ ≤ pl2 * u := mul_le_mul_of_nonneg_right hpl21 hu0
@@ -5810,28 +5977,31 @@ private theorem vb_pair_h1
       mul_le_mul_of_nonneg_right hplA2 (sq_nonneg _)
     have h2 : pl2 * D2 ^ 2 ≤ pl2 * u := by
       rw [hu]
-      have : D2 ^ 2 ≤ D2 ^ 2 + N ^ 2 := by nlinarith [sq_nonneg N]
-      exact mul_le_mul_of_nonneg_left this hpl20
-    linarith
-
+      exact mul_le_mul_of_nonneg_left
+        (le_add_of_nonneg_right (sq_nonneg N)) hpl20
+    exact h1.trans h2
   have hpairfold : ∀ b0 b1 : ℝ,
       (b0 * D2 + b1 * A * D2) ^ 2 ≤
         (2 * b0 ^ 2 + 2 * b1 ^ 2) * (pl2 * u) := by
     intro b0 b1
     have hstep : (b0 * D2 + b1 * A * D2) ^ 2 ≤
         2 * b0 ^ 2 * D2 ^ 2 + 2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) := by
-      nlinarith [sq_nonneg (b0 * D2 - b1 * A * D2)]
+      calc
+        (b0 * D2 + b1 * A * D2) ^ 2 ≤
+            2 * (b0 * D2) ^ 2 + 2 * (b1 * A * D2) ^ 2 :=
+          add_sq_le_two_sq _ _
+        _ = 2 * b0 ^ 2 * D2 ^ 2 +
+            2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) := by ring
     refine hstep.trans ?_
     have e1 : 2 * b0 ^ 2 * D2 ^ 2 ≤ 2 * b0 ^ 2 * (pl2 * u) :=
       mul_le_mul_of_nonneg_left hD2u (by positivity)
     have e2 : 2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) ≤ 2 * b1 ^ 2 * (pl2 * u) :=
       mul_le_mul_of_nonneg_left hA2D (by positivity)
-    linarith
-
-  set mcdT : SmoothCcTensor g 0 3 :=
-    metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
-  set mcdU : SmoothCcTensor g 0 3 :=
-    metricConnDiffLoweredCc (I := I) (M := M) g gmU g with hmU
+    calc
+      2 * b0 ^ 2 * D2 ^ 2 + 2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) ≤
+          2 * b0 ^ 2 * (pl2 * u) + 2 * b1 ^ 2 * (pl2 * u) :=
+        add_le_add e1 e2
+      _ = (2 * b0 ^ 2 + 2 * b1 ^ 2) * (pl2 * u) := by ring
   set cdT : SmoothCcTensor g 0 3 :=
     connDiffLoweredCc (I := I) g gmT with hcdT
   set cdU : SmoothCcTensor g 0 3 :=
@@ -5854,7 +6024,6 @@ private theorem vb_pair_h1
     ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmT IpT with hInT
   set InU : SmoothCcTensor g 2 4 :=
     ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU IpU with hInU
-
   have hρc : ρ ≤ ρt1 ∧ ρ ≤ ρb1 ∧ ρ ≤ ρt2 ∧ ρ ≤ ρb2 := by
     refine ⟨?_, ?_, ?_, ?_⟩ <;>
       · rw [hρdef]
@@ -5863,85 +6032,41 @@ private theorem vb_pair_h1
         | exact le_trans (min_le_left _ _) (min_le_right _ _)
         | exact le_trans (min_le_right _ _) (min_le_left _ _)
         | exact le_trans (min_le_right _ _) (min_le_right _ _)
-  have htrp : ∀ (p : ℕ) (Cp : ℝ) (ρp' : ℝ),
-      (∀ (T' U' : SmoothCcTensor g 0 2)
-        (gT' gU' : SmoothRiemannianMetric I M),
-        (∀ (y : M) (v w : TangentSpace I y),
-          gT'.inner y v w =
-            g.inner y v w + ccTensorBilinSymm (I := I) g T' y v w) →
-        (∀ (y : M) (v w : TangentSpace I y),
-          gU'.inner y v w =
-            g.inner y v w + ccTensorBilinSymm (I := I) g U' y v w) →
-        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T'‖ ≤ ρp' →
-        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U'‖ ≤ ρp' →
-        lowJetSq (I := I) (M := M) g 2
-            (pureTrace (I := I) (M := M) g gT' p -
-              pureTrace (I := I) (M := M) g gU' p) ≤
-          (Cp * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
-            (T' - U')‖) ^ 2) →
-      0 ≤ Cp → ρ ≤ ρp' →
-      lowJetSq (I := I) (M := M) g 2
-          (pureTrace (I := I) (M := M) g gmT p -
-            pureTrace (I := I) (M := M) g gmU p) ≤ Cp ^ 2 * u := by
-    intro p Cp ρp' hpair hCp hρp'
-    obtain ⟨hPn, hQn⟩ := hball ρp' hρp'
-    have h := hpair P Q gmT gmU hPtie hQtie hPn hQn
-    refine h.trans ?_
-    have h1 : Cp * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (P - Q)‖ ≤
-        Cp * N := mul_le_mul_of_nonneg_left hPQn hCp
-    have h2 : (Cp * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (P - Q)‖) ^ 2 ≤
-        (Cp * N) ^ 2 :=
-      pow_le_pow_left₀ (mul_nonneg hCp (norm_nonneg _)) h1 2
-    refine h2.trans ?_
-    have : (Cp * N) ^ 2 = Cp ^ 2 * N ^ 2 := by ring
-    rw [this, hu]
-    nlinarith [sq_nonneg Cp, sq_nonneg D2, sq_nonneg N]
-  have htrb : ∀ (p : ℕ) (Bp : ℝ) (ρp' : ℝ),
-      (∀ (T' : SmoothCcTensor g 0 2)
-        (gT' : SmoothRiemannianMetric I M),
-        (∀ (y : M) (v w : TangentSpace I y),
-          gT'.inner y v w =
-            g.inner y v w + ccTensorBilinSymm (I := I) g T' y v w) →
-        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T'‖ ≤ ρp' →
-        lowJetSq (I := I) (M := M) g 2
-            (pureTrace (I := I) (M := M) g gT' p) ≤ Bp ^ 2) →
-      ρ ≤ ρp' →
-      (lowJetSq (I := I) (M := M) g 2
-          (pureTrace (I := I) (M := M) g gmT p) ≤ Bp ^ 2 ∧
-        lowJetSq (I := I) (M := M) g 2
-          (pureTrace (I := I) (M := M) g gmU p) ≤ Bp ^ 2) := by
-    intro p Bp ρp' hbdd hρp'
-    obtain ⟨hPn, hQn⟩ := hball ρp' hρp'
-    exact ⟨hbdd P gmT hPtie hPn, hbdd Q gmU hQtie hQn⟩
-  have htp1' := htrp 1 Ct1 ρt1 htp1 hCt1 hρc.1
-  have htb1' := htrb 1 Bt1 ρb1 htb1 hρc.2.1
-  have htp2' := htrp 2 Ct2 ρt2 htp2 hCt2 hρc.2.2.1
-  have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2
-
-  have hmbT : lowJetSq (I := I) (M := M) g 2 mcdT ≤ (Bm R) ^ 2 * (2 * pl2) := by
-    rw [hmT]
+  obtain ⟨hPt1n, hQt1n⟩ := hball ρt1 hρc.1
+  obtain ⟨hPb1n, hQb1n⟩ := hball ρb1 hρc.2.1
+  obtain ⟨hPt2n, hQt2n⟩ := hball ρt2 hρc.2.2.1
+  obtain ⟨hPb2n, hQb2n⟩ := hball ρb2 hρc.2.2.2
+  have htp1' := trace_pair_h2_to_sum_lip (I := I) (M := M) g 1
+    P Q gmT gmU hPtie hQtie ρt1 Ct1 D2 N hPt1n hQt1n hPQn hCt1 htp1
+  have htb1' := trace_pair_h2_bdd_lip (I := I) (M := M) g 1
+    P Q gmT gmU hPtie hQtie ρb1 Bt1 hPb1n hQb1n htb1
+  have htp2' := trace_pair_h2_to_sum_lip (I := I) (M := M) g 2
+    P Q gmT gmU hPtie hQtie ρt2 Ct2 D2 N hPt2n hQt2n hPQn hCt2 htp2
+  have htb2' := trace_pair_h2_bdd_lip (I := I) (M := M) g 2
+    P Q gmT gmU hPtie hQtie ρb2 Bt2 hPb2n hQb2n htb2
+  have hmbT : lowJetSq (I := I) (M := M) g 2
+      (metricConnDiffLoweredCc (I := I) (M := M) g gmT g) ≤
+        (Bm R) ^ 2 * (2 * pl2) := by
     refine (hmcdb gmT P hPsymm hPtie hδ_le hδ0 hδP R A hR hA hP2 hP3).trans ?_
-    have : (Bm R * (1 + A)) ^ 2 = (Bm R) ^ 2 * (1 + A) ^ 2 := by ring
-    rw [this]
+    rw [mul_pow]
     exact mul_le_mul_of_nonneg_left h1A (sq_nonneg _)
-  have hmbU : lowJetSq (I := I) (M := M) g 2 mcdU ≤ (Bm R) ^ 2 * (2 * pl2) := by
-    rw [hmU]
+  have hmbU : lowJetSq (I := I) (M := M) g 2
+      (metricConnDiffLoweredCc (I := I) (M := M) g gmU g) ≤
+        (Bm R) ^ 2 * (2 * pl2) := by
     refine (hmcdb gmU Q hQsymm hQtie hδ_le hδ0 hδQ R A hR hA hQ2 hQ3).trans ?_
-    have : (Bm R * (1 + A)) ^ 2 = (Bm R) ^ 2 * (1 + A) ^ 2 := by ring
-    rw [this]
+    rw [mul_pow]
     exact mul_le_mul_of_nonneg_left h1A (sq_nonneg _)
-  have hmpd : lowJetSq (I := I) (M := M) g 1 (mcdT - mcdU) ≤
-      (2 * (B0m R) ^ 2 + 2 * (B1m R) ^ 2) * (pl2 * u) := by
-    rw [hmT, hmU]
+  have hmpd : lowJetSq (I := I) (M := M) g 1
+      (metricConnDiffLoweredCc (I := I) (M := M) g gmT g -
+        metricConnDiffLoweredCc (I := I) (M := M) g gmU g) ≤
+        (2 * (B0m R) ^ 2 + 2 * (B1m R) ^ 2) * (pl2 * u) := by
     exact (hmcdp gmT gmU P Q hPsymm hQsymm hPtie hQtie
       hδ_le hδ0 hδP hδ_le hδ0 hδQ R A D2 hR hA hD2 hQ2 hP3 hPQ2).trans
       (hpairfold (B0m R) (B1m R))
-
   have hcdT2 : lowJetSq (I := I) (M := M) g 2 cdT ≤ (Bs R) ^ 2 * pl2 := by
     rw [hcdT, ← wXi_self_eq (I := I) (M := M) g gmT]
     refine (hwxib gmT P hPsymm hPtie hδ_le hδ0 hδP hδZ R A hR hA hP2 hP3).trans ?_
-    have : (Bs R * A) ^ 2 = (Bs R) ^ 2 * A ^ 2 := by ring
-    rw [this]
+    rw [mul_pow]
     exact mul_le_mul_of_nonneg_left hplA2 (sq_nonneg _)
   have hcdT1 : lowJetSq (I := I) (M := M) g 1 cdT ≤ (Bs R) ^ 2 * pl2 :=
     le_trans (jet_mono_lip (I := I) (M := M) g (by norm_num) cdT) hcdT2
@@ -5952,7 +6077,6 @@ private theorem vb_pair_h1
     exact (hwxip gmT gmU g P Q hPsymm hQsymm hPtie hQtie
       hδ_le hδ0 hδP hδ_le hδ0 hδQ R A D2 hR hA hD2 hQ2 hP3 hPQ2).trans
       (hpairfold (W0 R) (W1 R))
-
   have hTr1U2 : lowJetSq (I := I) (M := M) g 2 Tr1U ≤ Bt1 ^ 2 := by
     rw [hTr1U, trPair_jet_lip]
     exact htb1'.2
@@ -5976,50 +6100,17 @@ private theorem vb_pair_h1
         mul_le_mul (mul_le_mul_of_nonneg_left hTr1T2 hCw2) hcdT2
           (jet_nonneg_lip (I := I) (M := M) (m := 2) g cdT)
           (mul_nonneg hCw2 (sq_nonneg _))
-      _ = Wb R * pl2 := by simp only [Wb]; ring
+      _ = Wb R * pl2 := by simp only [Wb]; ac_rfl
   have hWd1 : lowJetSq (I := I) (M := M) g 1 (WT - WU) ≤ Wm R * (pl2 * u) := by
-    have hdel : WT - WU =
-        ccOperatorFieldComp (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT +
-          ccOperatorFieldComp (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU) := by
-      rw [hWTform, hWUform, appCcRS_sub_left, appCcRS_sub_right]
-      module
-    rw [hdel]
-    have h1 : lowJetSq (I := I) (M := M) g 1
-        (ccOperatorFieldComp (I := I) (M := M) g 0 3 1 (Tr1T - Tr1U) cdT) ≤
-        Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 * (pl2 * u) := by
-      refine (happW1 _ cdT).trans ?_
-      calc
-        Cw1 * lowJetSq (I := I) (M := M) g 2 (Tr1T - Tr1U) *
-            lowJetSq (I := I) (M := M) g 1 cdT ≤
-            Cw1 * (Ct1 ^ 2 * u) * ((Bs R) ^ 2 * pl2) :=
-          mul_le_mul (mul_le_mul_of_nonneg_left hTr1d2 hCw1) hcdT1
-            (jet_nonneg_lip (I := I) (M := M) (m := 1) g cdT)
-            (mul_nonneg hCw1 (by positivity))
-        _ = Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 * (pl2 * u) := by ring
-    have h2 : lowJetSq (I := I) (M := M) g 1
-        (ccOperatorFieldComp (I := I) (M := M) g 0 3 1 Tr1U (cdT - cdU)) ≤
-        Cw1 * Bt1 ^ 2 * (2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u) := by
-      refine (happW1 Tr1U _).trans ?_
-      calc
-        Cw1 * lowJetSq (I := I) (M := M) g 2 Tr1U *
-            lowJetSq (I := I) (M := M) g 1 (cdT - cdU) ≤
-            Cw1 * Bt1 ^ 2 *
-              ((2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u)) :=
-          mul_le_mul (mul_le_mul_of_nonneg_left hTr1U2 hCw1) hcdd1
-            (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
-            (mul_nonneg hCw1 (sq_nonneg _))
-        _ = Cw1 * Bt1 ^ 2 * (2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u) := by
-          ring
-    calc
-      lowJetSq (I := I) (M := M) g 1 (_ + _) ≤
-          2 * (lowJetSq (I := I) (M := M) g 1 _ +
-            lowJetSq (I := I) (M := M) g 1 _) :=
-        jet_add_lip (I := I) (M := M) g 1 _ _
-      _ ≤ 2 * (Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 * (pl2 * u) +
-            Cw1 * Bt1 ^ 2 * (2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u)) := by
-        linarith [h1, h2]
-      _ = Wm R * (pl2 * u) := by simp only [Wm]; ring
-
+    rw [hWTform, hWUform]
+    refine (app_pair_h21_lip (I := I) (M := M) g Cw1
+      (Ct1 ^ 2 * u) ((Bs R) ^ 2 * pl2) (Bt1 ^ 2)
+      ((2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u))
+      hCw1 (mul_nonneg (sq_nonneg _) hu0) (sq_nonneg _)
+      Tr1T Tr1U cdT cdU happW1 hTr1d2 hcdT1 hTr1U2 hcdd1).trans ?_
+    simp only [Wm]
+    exact le_of_eq (vb_w_pair_factor_lip Cw1 Ct1 Bt1 (Bs R)
+      (W0 R) (W1 R) pl2 u)
   have hIpT2 : lowJetSq (I := I) (M := M) g 2 IpT ≤ Ib R * pl2 := by
     rw [hIpT, ip_form_lip]
     refine (happIp2 (ipHead (I := I) (M := M) g) _).trans ?_
@@ -6066,7 +6157,6 @@ private theorem vb_pair_h1
           (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
           (mul_nonneg hCip1 hJp)
       _ = Im R * (pl2 * u) := by simp only [Im]; ring
-
   have hVmT2 : lowJetSq (I := I) (M := M) g 2 VmT ≤ Vb R * pl2 := by
     rw [hVmT]
     refine (vbmcd_h2_lip (I := I) (M := M) g gmT).trans ?_
@@ -6074,10 +6164,8 @@ private theorem vb_pair_h1
       fr * lowJetSq (I := I) (M := M) g 2
           (metricConnDiffLoweredCc (I := I) (M := M) g gmT g) ≤
           fr * ((Bm R) ^ 2 * (2 * pl2)) := by
-        have := hmbT
-        rw [hmT] at this
-        exact mul_le_mul_of_nonneg_left this hfr
-      _ = Vb R * pl2 := by simp only [Vb]; ring
+        exact mul_le_mul_of_nonneg_left hmbT hfr
+      _ = Vb R * pl2 := by simp only [Vb]; ac_rfl
   have hVmU2 : lowJetSq (I := I) (M := M) g 2 VmU ≤ Vb R * pl2 := by
     rw [hVmU]
     refine (vbmcd_h2_lip (I := I) (M := M) g gmU).trans ?_
@@ -6085,10 +6173,8 @@ private theorem vb_pair_h1
       fr * lowJetSq (I := I) (M := M) g 2
           (metricConnDiffLoweredCc (I := I) (M := M) g gmU g) ≤
           fr * ((Bm R) ^ 2 * (2 * pl2)) := by
-        have := hmbU
-        rw [hmU] at this
-        exact mul_le_mul_of_nonneg_left this hfr
-      _ = Vb R * pl2 := by simp only [Vb]; ring
+        exact mul_le_mul_of_nonneg_left hmbU hfr
+      _ = Vb R * pl2 := by simp only [Vb]; ac_rfl
   have hVmd1 : lowJetSq (I := I) (M := M) g 1 (VmT - VmU) ≤ Vd R * (pl2 * u) := by
     rw [hVmT, hVmU]
     refine (vbmcd_sub_h1_lip (I := I) (M := M) g gmT gmU).trans ?_
@@ -6097,11 +6183,8 @@ private theorem vb_pair_h1
           (metricConnDiffLoweredCc (I := I) (M := M) g gmT g -
             metricConnDiffLoweredCc (I := I) (M := M) g gmU g) ≤
           fr * ((2 * (B0m R) ^ 2 + 2 * (B1m R) ^ 2) * (pl2 * u)) := by
-        have := hmpd
-        rw [hmT, hmU] at this
-        exact mul_le_mul_of_nonneg_left this hfr
-      _ = Vd R * (pl2 * u) := by simp only [Vd]; ring
-
+        exact mul_le_mul_of_nonneg_left hmpd hfr
+      _ = Vd R * (pl2 * u) := by simp only [Vd]; ac_rfl
   have hInT1 : lowJetSq (I := I) (M := M) g 1 InT ≤ Sin R * (pl2 * pl2) := by
     rw [hInT]
     refine (happIn1 VmT IpT).trans ?_
@@ -6115,44 +6198,15 @@ private theorem vb_pair_h1
       _ = Sin R * (pl2 * pl2) := by simp only [Sin]; ring
   have hInd1 : lowJetSq (I := I) (M := M) g 1 (InT - InU) ≤
       2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
-    have hdel : InT - InU =
-        ccOperatorFieldComp (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT +
-          ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU (IpT - IpU) := by
-      rw [hInT, hInU, appCcRS_sub_left, appCcRS_sub_right]
-      module
-    rw [hdel]
-    have h1 : lowJetSq (I := I) (M := M) g 1
-        (ccOperatorFieldComp (I := I) (M := M) g 2 1 4 (VmT - VmU) IpT) ≤
-        Kv R * ((pl2 * pl2) * u) := by
-      refine (happIn12 (VmT - VmU) IpT).trans ?_
-      calc
-        Cin12 * lowJetSq (I := I) (M := M) g 1 (VmT - VmU) *
-            lowJetSq (I := I) (M := M) g 2 IpT ≤
-            Cin12 * (Vd R * (pl2 * u)) * (Ib R * pl2) :=
-          mul_le_mul (mul_le_mul_of_nonneg_left hVmd1 hCin12) hIpT2
-            (jet_nonneg_lip (I := I) (M := M) (m := 2) g IpT)
-            (mul_nonneg hCin12 (mul_nonneg (hVd R hR) hpl2u))
-        _ = Kv R * ((pl2 * pl2) * u) := by simp only [Kv]; ring
-    have h2 : lowJetSq (I := I) (M := M) g 1
-        (ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU (IpT - IpU)) ≤
-        Ki R * ((pl2 * pl2) * u) := by
-      refine (happIn1 VmU (IpT - IpU)).trans ?_
-      calc
-        Cin1 * lowJetSq (I := I) (M := M) g 2 VmU *
-            lowJetSq (I := I) (M := M) g 1 (IpT - IpU) ≤
-            Cin1 * (Vb R * pl2) * (Im R * (pl2 * u)) :=
-          mul_le_mul (mul_le_mul_of_nonneg_left hVmU2 hCin1) hIpd1
-            (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
-            (mul_nonneg hCin1 (mul_nonneg (hVb R hR) hpl20))
-        _ = Ki R * ((pl2 * pl2) * u) := by simp only [Ki]; ring
-    calc
-      lowJetSq (I := I) (M := M) g 1 (_ + _) ≤
-          2 * (lowJetSq (I := I) (M := M) g 1 _ +
-            lowJetSq (I := I) (M := M) g 1 _) :=
-        jet_add_lip (I := I) (M := M) g 1 _ _
-      _ ≤ 2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
-
+    rw [hInT, hInU]
+    refine (app_pair_h12_h21_lip (I := I) (M := M) g Cin12 Cin1
+      (Vd R * (pl2 * u)) (Ib R * pl2) (Vb R * pl2)
+      (Im R * (pl2 * u)) hCin12 hCin1
+      (mul_nonneg (hVd R hR) hpl2u) (mul_nonneg (hVb R hR) hpl20)
+      VmT VmU IpT IpU happIn12 happIn1 hVmd1 hIpT2 hVmU2 hIpd1).trans ?_
+    simp only [Kv, Ki]
+    exact le_of_eq (vb_inner_pair_factor_lip Cin12 Cin1 (Vd R) (Ib R)
+      (Vb R) (Im R) pl2 u)
   have hLvd2 : lowJetSq (I := I) (M := M) g 2 (LvT - LvU) ≤ Ct2 ^ 2 * u := by
     rw [hLvT, hLvU, riemLive_eq, riemLive_eq]
     exact htp2'
@@ -6166,58 +6220,32 @@ private theorem vb_pair_h1
       (2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU InU := by
     rw [hLvU, hInU, hVmU, hIpU, hWUdef, vb_refold_rf, lc0VBFormRF]
   have hdel1 : lc0VB (I := I) (M := M) g gmT - lc0VB (I := I) (M := M) g gmU =
-      (2 : ℝ) • (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
-        ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) := by
-    rw [hFormT, hFormU, appCcRS_sub_left, appCcRS_sub_right]
+      (2 : ℝ) •
+        (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvT InT -
+          ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU InU) := by
+    rw [hFormT, hFormU]
     module
   rw [hdel1, jet_smul_lip]
-  have h1 : lowJetSq (I := I) (M := M) g 1
-      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT) ≤
-      K1 R * ((pl2 * pl2) * u) := by
-    refine (happOut (LvT - LvU) InT).trans ?_
-    calc
-      Cout * lowJetSq (I := I) (M := M) g 2 (LvT - LvU) *
-          lowJetSq (I := I) (M := M) g 1 InT ≤
-          Cout * (Ct2 ^ 2 * u) * (Sin R * (pl2 * pl2)) :=
-        mul_le_mul (mul_le_mul_of_nonneg_left hLvd2 hCout) hInT1
-          (jet_nonneg_lip (I := I) (M := M) (m := 1) g InT)
-          (mul_nonneg hCout (by positivity))
-      _ = K1 R * ((pl2 * pl2) * u) := by simp only [K1]; ring
-  have h2 : lowJetSq (I := I) (M := M) g 1
-      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
-      K2 R * ((pl2 * pl2) * u) := by
-    refine (happOut LvU (InT - InU)).trans ?_
-    calc
-      Cout * lowJetSq (I := I) (M := M) g 2 LvU *
-          lowJetSq (I := I) (M := M) g 1 (InT - InU) ≤
-          Cout * Bt2 ^ 2 *
-            (2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u))) :=
-        mul_le_mul (mul_le_mul_of_nonneg_left hLvU2 hCout) hInd1
-          (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
-          (mul_nonneg hCout (sq_nonneg _))
-      _ = K2 R * ((pl2 * pl2) * u) := by simp only [K2]; ring
-  have hsum : lowJetSq (I := I) (M := M) g 1
-      (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
-        ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
-      2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u)) := by
-    calc
-      lowJetSq (I := I) (M := M) g 1 (_ + _) ≤
-          2 * (lowJetSq (I := I) (M := M) g 1 _ +
-            lowJetSq (I := I) (M := M) g 1 _) :=
-        jet_add_lip (I := I) (M := M) g 1 _ _
-      _ ≤ 2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u)) := by
-        linarith [h1, h2]
+  have houter := app_pair_h21_lip (I := I) (M := M) g Cout
+    (Ct2 ^ 2 * u) (Sin R * (pl2 * pl2)) (Bt2 ^ 2)
+    (2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)))
+    hCout (mul_nonneg (sq_nonneg _) hu0) (sq_nonneg _)
+    LvT LvU InT InU happOut hLvd2 hInT1 hLvU2 hInd1
   have h4 : ((2 : ℝ)) ^ 2 = 4 := by norm_num
   rw [h4]
   calc
     (4 : ℝ) * lowJetSq (I := I) (M := M) g 1
-        (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 (LvT - LvU) InT +
-          ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU (InT - InU)) ≤
-        4 * (2 * (K1 R * ((pl2 * pl2) * u) + K2 R * ((pl2 * pl2) * u))) :=
-      mul_le_mul_of_nonneg_left hsum (by norm_num)
+        (ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvT InT -
+          ccOperatorFieldComp (I := I) (M := M) g 2 4 2 LvU InU) ≤
+        4 * (2 * (Cout * (Ct2 ^ 2 * u) * (Sin R * (pl2 * pl2)) +
+          Cout * Bt2 ^ 2 *
+            (2 * (Kv R * ((pl2 * pl2) * u) +
+              Ki R * ((pl2 * pl2) * u))))) :=
+      mul_le_mul_of_nonneg_left houter (by norm_num)
     _ = B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
-      simp only [B, hpl2, hu]
-      ring
+      simp only [B, K1, K2, hpl2, hu]
+      exact vb_outer_final_factor_lip Cout Ct2 Bt2 (Sin R) (Kv R) (Ki R)
+        (1 + A + A ^ 2) D2 N
 
 set_option maxHeartbeats 3200000 in
 private theorem amixHalf_pair_h1
