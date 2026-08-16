@@ -143,6 +143,13 @@ route is retained as a reusable consumer.  `ray_convex_of_nonneg`,
 bridge, while `Exponential/EndpointShape.lean` exposes the all-time Jacobi
 scaling identity.  `RadialLaplacian.lean` now combines these producers with
 `branchHess_shape` in the perpendicular and arbitrary endpoint-vector bounds.
+`Nonnegative/RadialRauch.lean` completes the fixed-center Rauch II(1) branch:
+the squared Jacobi ratio is antitone, its pole limit is the exact initial
+norm, the endpoint differential is norm nonincreasing in every direction,
+and the intrinsic framed exponential is distance nonincreasing on any model
+segment whose launches remain minimizing and stay in the selected local
+framed-diffeomorphism source.  This closes the local hinge
+comparison input, but it is not the moving-base Rauch II(2) theorem.
 `DistanceCalabi.lean` supplies the exact minimizing-tail distance, broken-path
 upper support, and its scalar second-derivative estimate along smooth
 geodesics.  `Analysis/Calculus/UpperSupport.lean` supplies the one-dimensional
@@ -196,11 +203,14 @@ distance along a geodesic through `maxSliceLocus`: locally,
 slope `m`.  `Analysis.concaveOn_of_upper` can then perform the one-dimensional
 assembly.  Sakai V.3 Lemma 3.3 derives this support from three producers not
 currently present in the library: the IV.5.7 boundary tangent-cone supporting
-half-space theorem, the sharp Rauch II(2) moving-base parallel-exponential
-estimate with Jacobi data `J(0) = v`, `J'(0) = 0`, and a local Toponogov/Rauch
-hinge comparison.  The existing endpoint Jacobi estimate treats `J(0) = 0`
-and cannot supply this sign.  Directly postulating relative concavity would
-hide these genuine comparison frontiers and is not an acceptable replacement.
+half-space theorem and the sharp Rauch II(2) moving-base parallel-exponential
+estimate.  The latter cannot be stated for one arbitrary field with
+`J(0) = v`, `J'(0) = 0`: it needs a self-adjoint full Neumann Lagrange Jacobi
+family that stays full rank before the endpoint, equivalently the relevant
+no-focal condition.  The fixed-center hinge comparison is now complete in
+`RadialRauch.lean`.  Directly postulating relative concavity would hide the
+two remaining genuine comparison frontiers and is not an acceptable
+replacement.
 
 The pure topology and metric bridge beyond this theorem is already complete:
 the relative frontier is compact in a compact core, and a nonempty stratum and
@@ -237,6 +247,16 @@ distance concavity theorem.
 - `jacobi_pair_le_flat`, `intrJacobi_pair_le`, selected-branch Hessian
   comparison, Calabi scalar supports, and one-dimensional upper-support
   calculus: 100% after focused, targeted, and full-project verification.
+- Fixed-center radial Rauch II(1), including the exact pole limit, arbitrary
+  endpoint differential contraction, and local framed-distance contraction:
+  100% after focused, targeted-module, root-aggregate, and direct axiom
+  verification, together with the full-project build.
+- Moving-base Rauch II(2): unstated, therefore 0%; its dedicated reusable
+  Jacobi/Wronskian/frame machinery is approximately 40%, while the Neumann
+  focal-index producer remains substantial.
+- Relative-boundary distance concavity: unstated, therefore 0%; fixed-center
+  hinge comparison is complete, while moving-base II(2) and the strict inward
+  tangent-half-space theorem remain.
 - Smooth-geodesic Busemann composition concavity: 100% after focused and
   targeted verification and the full-project build.
 - Public `IsGeodesicConcave` Busemann theorem: 100%.
@@ -252,8 +272,7 @@ distance concavity theorem.
   producers, transport and restriction adapters, exact local parameterization,
   full-dimensional openness converse, local-closedness consumer, maximal
   dimension selection, and germ glue: 100% after focused, targeted,
-  root-aggregate, and direct axiom verification; full-project verification is
-  pending.
+  root-aggregate, full-project, and direct axiom verification.
 - Local Sakai slice growth `exists_slice_succ`: 100% after focused, targeted,
   root-aggregate, and direct axiom verification.  It depends only on
   `propext`, `Classical.choice`, and `Quot.sound`.
@@ -266,10 +285,12 @@ distance concavity theorem.
 - Relative-frontier metric shave package: 100%; the deepest set is nonempty,
   compact, disjoint from the boundary, and contained in the dense stratum.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  48--52% through rays, convexity, compact exhaustion and minimum core, Calabi
+  50--54% through rays, convexity, compact exhaustion and minimum core, Calabi
   comparison, the all-segment Busemann theorem, generic shaving and
-  relative-frontier consumers, local slice growth, and the maximal dense-locus
-  package.  Boundary-distance concavity, flat rectangles, strict dimension
-  drop, the terminal submanifold, and the normal-bundle diffeomorphism remain.
-- Whole B1 nonnegative-curvature lane: approximately 30--34%.
-- Whole post-HCG Poincare program: approximately 18--22%.
+  relative-frontier consumers, local slice growth, the maximal dense-locus
+  package, and fixed-center radial Rauch.  Boundary-distance concavity,
+  moving-base Rauch II(2), the strict tangent half-space, flat rectangles,
+  strict dimension drop, the terminal submanifold, and the normal-bundle
+  diffeomorphism remain.
+- Whole B1 nonnegative-curvature lane: approximately 31--35%.
+- Whole post-HCG Poincare program: approximately 19--23%.
