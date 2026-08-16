@@ -9675,7 +9675,6 @@ private theorem selfLow_sub_parts
   dsimp only
   module
 
-set_option maxHeartbeats 3200000 in
 private theorem selfLow_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9735,7 +9734,7 @@ private theorem selfLow_pair_h1
     have h4 := hBa R hR
     have h5 : (0 : ℝ) ≤ Cr ^ 2 := sq_nonneg _
     simp only [B]
-    linarith
+    positivity
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2 hTn hUn hTUn s hs
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
@@ -9762,7 +9761,6 @@ private theorem selfLow_pair_h1
   have hXa := hamix T U hT hU hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2
     (hTn.trans hρc.2.2.2.1) (hUn.trans hρc.2.2.2.1) hTUn hs
-
   set gmT : SmoothRiemannianMetric I M :=
     realizedFam (I := I) g T 0 hδT hδZ s with hgmT
   set gmU : SmoothRiemannianMetric I M :=
@@ -9803,7 +9801,9 @@ private theorem selfLow_pair_h1
       (by simpa using hTUn)
   have hpl1 : (1 : ℝ) ≤ (1 + A + A ^ 2) ^ 4 := by
     have hb1 : (1 : ℝ) ≤ 1 + A + A ^ 2 := by
-      nlinarith [hA, sq_nonneg A]
+      calc
+        (1 : ℝ) ≤ 1 + A := le_add_of_nonneg_right hA
+        _ ≤ 1 + A + A ^ 2 := le_add_of_nonneg_right (sq_nonneg A)
     calc (1 : ℝ) = 1 ^ 4 := by norm_num
       _ ≤ (1 + A + A ^ 2) ^ 4 :=
         pow_le_pow_left₀ zero_le_one hb1 4
@@ -9822,9 +9822,12 @@ private theorem selfLow_pair_h1
     have hN2 : (Cr * N) ^ 2 = Cr ^ 2 * N ^ 2 := by ring
     rw [hN2]
     have hstep : N ^ 2 ≤ (1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2) := by
-      nlinarith [hpl1, sq_nonneg D2, sq_nonneg N,
-        mul_nonneg (le_trans zero_le_one hpl1)
-          (add_nonneg (sq_nonneg D2) (sq_nonneg N))]
+      calc
+        N ^ 2 ≤ D2 ^ 2 + N ^ 2 := le_add_of_nonneg_left (sq_nonneg D2)
+        _ = 1 * (D2 ^ 2 + N ^ 2) := (one_mul _).symm
+        _ ≤ (1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2) :=
+          mul_le_mul_of_nonneg_right hpl1
+            (add_nonneg (sq_nonneg D2) (sq_nonneg N))
     exact mul_le_mul_of_nonneg_left hstep (sq_nonneg _)
   rw [selfLow_sub_parts (I := I) (M := M) g T U hT hU
     hδ_lt hδT hδU hδZ hs]
@@ -9858,7 +9861,8 @@ private theorem selfLow_pair_h1
     rw [jet_smul_lip]
     have h4 : ((-2 : ℝ)) ^ 2 = 4 := by norm_num
     rw [h4]
-    linarith [hXg]
+    simpa only [mul_assoc] using
+      mul_le_mul_of_nonneg_left hXg (by norm_num : (0 : ℝ) ≤ 4)
   have hj2 : lowJetSq (I := I) (M := M) g 1 Y2 ≤ Bl R * X := by
     rw [hY2]
     exact hXl
@@ -9874,16 +9878,19 @@ private theorem selfLow_pair_h1
   have h12 : lowJetSq (I := I) (M := M) g 1 (Y1 + Y2) ≤
       2 * (4 * (Bg R * X) + Bl R * X) := by
     have hadd := jet_add_lip (I := I) (M := M) g 1 Y1 Y2
-    linarith [hj1, hj2, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add hj1 hj2) (by norm_num))
   have h123 : lowJetSq (I := I) (M := M) g 1 ((Y1 + Y2) + Y3) ≤
       2 * (2 * (4 * (Bg R * X) + Bl R * X) + Bv R * X) := by
     have hadd := jet_add_lip (I := I) (M := M) g 1 (Y1 + Y2) Y3
-    linarith [h12, hj3, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h12 hj3) (by norm_num))
   have h1234 : lowJetSq (I := I) (M := M) g 1 (((Y1 + Y2) + Y3) + Y4) ≤
       2 * (2 * (2 * (4 * (Bg R * X) + Bl R * X) + Bv R * X) +
         Ba R * X) := by
     have hadd := jet_add_lip (I := I) (M := M) g 1 ((Y1 + Y2) + Y3) Y4
-    linarith [h123, hj4, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h123 hj4) (by norm_num))
   calc
     lowJetSq (I := I) (M := M) g 1 ((((Y1 + Y2) + Y3) + Y4) + Y5) ≤
       2 * (lowJetSq (I := I) (M := M) g 1 (((Y1 + Y2) + Y3) + Y4) +
@@ -9891,7 +9898,7 @@ private theorem selfLow_pair_h1
       jet_add_lip (I := I) (M := M) g 1 _ _
     _ ≤ 2 * (2 * (2 * (2 * (4 * (Bg R * X) + Bl R * X) + Bv R * X) +
         Ba R * X) + Cr ^ 2 * X) := by
-      linarith [h1234, hj5]
+      exact mul_le_mul_of_nonneg_left (add_le_add h1234 hj5) (by norm_num)
     _ = B R * X := by
       simp only [B]
       ring
