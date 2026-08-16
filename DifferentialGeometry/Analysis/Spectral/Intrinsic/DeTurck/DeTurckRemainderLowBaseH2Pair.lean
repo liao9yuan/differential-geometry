@@ -5727,7 +5727,6 @@ private theorem riemH2Pair
     nlinarith [this]
   exact pow_le_pow_left₀ (mul_nonneg hC hN) hbig 2
 
-set_option maxHeartbeats 6400000 in
 theorem selfLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5794,7 +5793,8 @@ theorem selfLow_pair_h2
     have e4 := hW0 R hR
     have e5 := hC0 R hR
     simp only [MB0]
-    linarith
+    exact add_nonneg (mul_nonneg (by norm_num) e1)
+      (mul_nonneg (by norm_num) (add_nonneg (add_nonneg (add_nonneg e2 e3) e4) e5))
   · intro R hR
     have e1 := hG1 R hR
     have e2 := hL1 R hR
@@ -5802,7 +5802,8 @@ theorem selfLow_pair_h2
     have e4 := hW1 R hR
     have e5 := hC1 R hR
     simp only [MB1]
-    linarith
+    exact add_nonneg (mul_nonneg (by norm_num) e1)
+      (mul_nonneg (by norm_num) (add_nonneg (add_nonneg (add_nonneg e2 e3) e4) e5))
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A A4 D2 D3 D4 N hR hA hA4 hD2 hD3 hD4 hN hT2 hU2 hT3 hU3 hT4 hU4 hTU2 hTU3 hTU4
     hTn hUn hTUn s hs
@@ -5869,115 +5870,85 @@ theorem selfLow_pair_h2
     W1 R * A4 * (D3 + N) with hZa
   set Zr : ℝ := C0 R * (1 + A) * (D4 + D3 + D2 + N) +
     C1 R * A4 * (D3 + N) with hZr
+  have hA1 : 0 ≤ (1 : ℝ) + A := add_nonneg zero_le_one hA
+  have hbase : 0 ≤ D4 + D3 + D2 + N :=
+    add_nonneg (add_nonneg (add_nonneg hD4 hD3) hD2) hN
+  have htail : 0 ≤ D3 + N := add_nonneg hD3 hN
+  have hZnonneg : ∀ b0 b1 : ℝ, 0 ≤ b0 → 0 ≤ b1 →
+      0 ≤ b0 * (1 + A) * (D4 + D3 + D2 + N) + b1 * A4 * (D3 + N) := by
+    intro b0 b1 hb0 hb1
+    exact add_nonneg (mul_nonneg (mul_nonneg hb0 hA1) hbase)
+      (mul_nonneg (mul_nonneg hb1 hA4) htail)
   have hZgn : 0 ≤ Zg := by
-    have h0 := hG0 R hR
-    have h1 := hG1 R hR
-    have e1 : 0 ≤ G0 R * (1 + A) * (D4 + D3 + D2 + N) := by
-      have : 0 ≤ D4 + D3 + D2 + N := by linarith
-      have hA1 : 0 ≤ (1 : ℝ) + A := by linarith
-      exact mul_nonneg (mul_nonneg h0 hA1) this
-    have e2 : 0 ≤ G1 R * A4 * (D3 + N) := by
-      have : 0 ≤ D3 + N := by linarith
-      exact mul_nonneg (mul_nonneg h1 hA4) this
     rw [hZg]
-    linarith
+    exact hZnonneg (G0 R) (G1 R) (hG0 R hR) (hG1 R hR)
   have hZln : 0 ≤ Zl := by
-    have h0 := hL0 R hR
-    have h1 := hL1 R hR
-    have e1 : 0 ≤ L0 R * (1 + A) * (D4 + D3 + D2 + N) := by
-      have : 0 ≤ D4 + D3 + D2 + N := by linarith
-      have hA1 : 0 ≤ (1 : ℝ) + A := by linarith
-      exact mul_nonneg (mul_nonneg h0 hA1) this
-    have e2 : 0 ≤ L1 R * A4 * (D3 + N) := by
-      have : 0 ≤ D3 + N := by linarith
-      exact mul_nonneg (mul_nonneg h1 hA4) this
     rw [hZl]
-    linarith
+    exact hZnonneg (L0 R) (L1 R) (hL0 R hR) (hL1 R hR)
   have hZvn : 0 ≤ Zv := by
-    have h0 := hV0 R hR
-    have h1 := hV1 R hR
-    have e1 : 0 ≤ V0 R * (1 + A) * (D4 + D3 + D2 + N) := by
-      have : 0 ≤ D4 + D3 + D2 + N := by linarith
-      have hA1 : 0 ≤ (1 : ℝ) + A := by linarith
-      exact mul_nonneg (mul_nonneg h0 hA1) this
-    have e2 : 0 ≤ V1 R * A4 * (D3 + N) := by
-      have : 0 ≤ D3 + N := by linarith
-      exact mul_nonneg (mul_nonneg h1 hA4) this
     rw [hZv]
-    linarith
+    exact hZnonneg (V0 R) (V1 R) (hV0 R hR) (hV1 R hR)
   have hZan : 0 ≤ Za := by
-    have h0 := hW0 R hR
-    have h1 := hW1 R hR
-    have e1 : 0 ≤ W0 R * (1 + A) * (D4 + D3 + D2 + N) := by
-      have : 0 ≤ D4 + D3 + D2 + N := by linarith
-      have hA1 : 0 ≤ (1 : ℝ) + A := by linarith
-      exact mul_nonneg (mul_nonneg h0 hA1) this
-    have e2 : 0 ≤ W1 R * A4 * (D3 + N) := by
-      have : 0 ≤ D3 + N := by linarith
-      exact mul_nonneg (mul_nonneg h1 hA4) this
     rw [hZa]
-    linarith
+    exact hZnonneg (W0 R) (W1 R) (hW0 R hR) (hW1 R hR)
   have hZrn : 0 ≤ Zr := by
-    have h0 := hC0 R hR
-    have h1 := hC1 R hR
-    have e1 : 0 ≤ C0 R * (1 + A) * (D4 + D3 + D2 + N) := by
-      have : 0 ≤ D4 + D3 + D2 + N := by linarith
-      have hA1 : 0 ≤ (1 : ℝ) + A := by linarith
-      exact mul_nonneg (mul_nonneg h0 hA1) this
-    have e2 : 0 ≤ C1 R * A4 * (D3 + N) := by
-      have : 0 ≤ D3 + N := by linarith
-      exact mul_nonneg (mul_nonneg h1 hA4) this
     rw [hZr]
-    linarith
+    exact hZnonneg (C0 R) (C1 R) (hC0 R hR) (hC1 R hR)
   have hj1 : lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) ≤
       (2 * Zg) ^ 2 := by
     rw [jetSmul]
     have h4 : ((-2 : ℝ)) ^ 2 = 4 := by norm_num
     have he : (2 * Zg) ^ 2 = 4 * Zg ^ 2 := by ring
     rw [h4, he]
-    linarith [hXg]
+    exact mul_le_mul_of_nonneg_left hXg (by norm_num)
   have h12 : lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) ≤
       2 * ((2 * Zg) ^ 2 + Zl ^ 2) := by
     have hadd := jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) Y2
-    linarith [hj1, hXl, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add hj1 hXl) (by norm_num))
   have h123 : lowJetSq (I := I) (M := M) g 2
       (((-2 : ℝ) • Y1 + Y2) + Y3) ≤
       2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) := by
     have hadd := jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) Y3
-    linarith [h12, hXv, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h12 hXv) (by norm_num))
   have h1234 : lowJetSq (I := I) (M := M) g 2
       ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) ≤
       2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) + Za ^ 2) := by
     have hadd := jetAdd (I := I) (M := M) g 2
       (((-2 : ℝ) • Y1 + Y2) + Y3) Y4
-    linarith [h123, hXa, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h123 hXa) (by norm_num))
   have hfin : lowJetSq (I := I) (M := M) g 2
       (((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) + Y5) ≤
       2 * (2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) + Za ^ 2) +
         Zr ^ 2) := by
     have hadd := jetAdd (I := I) (M := M) g 2
       ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) Y5
-    linarith [h1234, hXr, hadd]
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h1234 hXr) (by norm_num))
   refine hfin.trans ?_
-  have h2g : (0 : ℝ) ≤ 2 * Zg := by linarith
+  have h2g : (0 : ℝ) ≤ 2 * Zg := mul_nonneg (by norm_num) hZgn
   have hsq : (2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2 ≤
       (2 * Zg + Zl + Zv + Za + Zr) ^ 2 := by
     have e1 := sqAdd2 (a := 2 * Zg) (b := Zl) h2g hZln
-    have e2 := sqAdd2 (a := 2 * Zg + Zl) (b := Zv) (by linarith) hZvn
-    have e3 := sqAdd2 (a := 2 * Zg + Zl + Zv) (b := Za) (by linarith) hZan
+    have e2 := sqAdd2 (a := 2 * Zg + Zl) (b := Zv) (add_nonneg h2g hZln) hZvn
+    have e3 := sqAdd2 (a := 2 * Zg + Zl + Zv) (b := Za)
+      (add_nonneg (add_nonneg h2g hZln) hZvn) hZan
     have e4 := sqAdd2 (a := 2 * Zg + Zl + Zv + Za) (b := Zr)
-      (by linarith) hZrn
-    linarith
+      (add_nonneg (add_nonneg (add_nonneg h2g hZln) hZvn) hZan) hZrn
+    linarith only [e1, e2, e3, e4]
   have hexp : 2 * (2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) +
         Za ^ 2) + Zr ^ 2) ≤
       16 * ((2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2) := by
     have p1 : (0 : ℝ) ≤ Zv ^ 2 := sq_nonneg _
     have p2 : (0 : ℝ) ≤ Za ^ 2 := sq_nonneg _
     have p3 : (0 : ℝ) ≤ Zr ^ 2 := sq_nonneg _
-    linarith
+    linarith only [p1, p2, p3]
   refine hexp.trans ?_
   have hmul : 16 * ((2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2) ≤
-      16 * (2 * Zg + Zl + Zv + Za + Zr) ^ 2 := by linarith
+      16 * (2 * Zg + Zl + Zv + Za + Zr) ^ 2 :=
+    mul_le_mul_of_nonneg_left hsq (by norm_num)
   refine hmul.trans (le_of_eq ?_)
   simp only [MB0, MB1]
   rw [hZg, hZl, hZv, hZa, hZr]
