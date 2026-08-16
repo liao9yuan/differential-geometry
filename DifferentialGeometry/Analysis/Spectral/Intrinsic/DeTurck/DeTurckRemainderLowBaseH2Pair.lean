@@ -6249,7 +6249,6 @@ private theorem ricciAA_h3_pair
   simpa only [Q, S] using
     pow_le_pow_left₀ (add_nonneg hx0 hy0) hxy 2
 
-set_option maxHeartbeats 6400000 in
 private theorem ricciDA_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6337,6 +6336,7 @@ private theorem ricciDA_h3_pair
   let Ap : ℝ := A
   have hAp : 0 ≤ Ap := by simpa only [Ap] using hA
   have hApSq : Ap ^ 2 = X := by simp only [Ap, X]
+  have hX : 0 ≤ X := by simp only [X]; exact sq_nonneg A
   have hT3i : lowJetSq (I := I) (M := M) g 3 T ≤ Ap ^ 2 := by
     simpa only [Ap] using hT3
   have hU3i : lowJetSq (I := I) (M := M) g 3 U ≤ Ap ^ 2 := by
@@ -6356,8 +6356,11 @@ private theorem ricciDA_h3_pair
         (Sd * (1 + Ap)) ^ 2 := by
     refine hdagU0.trans ?_
     rw [mul_pow, hSdSq]
-    exact mul_le_mul_of_nonneg_left
-      (by nlinarith [sq_nonneg Ap]) hKd
+    apply mul_le_mul_of_nonneg_left _ hKd
+    calc
+      1 + Ap ^ 2 ≤ 1 + Ap ^ 2 + 2 * Ap :=
+        le_add_of_nonneg_right (mul_nonneg (by norm_num) hAp)
+      _ = (1 + Ap) ^ 2 := by ring
   have hdagD0 :=
     hdagD gT gU T U hT hU hTtie hUtie
       hδ_le hδ0 hδT hδ_le hδ0 hδU
@@ -6397,12 +6400,13 @@ private theorem ricciDA_h3_pair
   have hx0 : 0 ≤ x :=
     mul_nonneg
       (mul_nonneg
-        (mul_nonneg (mul_nonneg hSg (hBd R hR)) hAp) (by linarith))
+        (mul_nonneg (mul_nonneg hSg (hBd R hR)) hAp)
+          (add_nonneg (by norm_num) hAp))
       hD3
   have hy0 : 0 ≤ y :=
-    mul_nonneg (mul_nonneg (mul_nonneg hSg hSd) (by linarith)) hD3
+    mul_nonneg (mul_nonneg (mul_nonneg hSg hSd) (add_nonneg zero_le_one hAp)) hD3
   have hz0 : 0 ≤ z :=
-    mul_nonneg (mul_nonneg hSu (by linarith)) hAp
+    mul_nonneg (mul_nonneg hSu (add_nonneg zero_le_one hAp)) hAp
   have hGcomb :
       appCcRS (I := I) (M := M) g 0 3 4
           (LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
@@ -6644,14 +6648,15 @@ private theorem ricciDA_h3_pair
         mul_le_mul_of_nonneg_left (add_le_add hpa hpb) (by norm_num)
       _ = (2 * (u + v)) ^ 2 := by ring
   have hApLe : Ap ≤ (1 + X) / 2 := by
-    nlinarith [sq_nonneg (Ap - 1)]
+    rw [← hApSq]
+    nlinarith only [sq_nonneg (Ap - 1)]
   have hfac1 : Ap * (2 + Ap) ≤ 2 * (1 + X) := by
     rw [show Ap * (2 + Ap) = 2 * Ap + X by rw [← hApSq]; ring]
-    nlinarith
-  have hfac2 : 1 + Ap ≤ 2 * (1 + X) := by nlinarith
+    linarith only [hApLe]
+  have hfac2 : 1 + Ap ≤ 2 * (1 + X) := by linarith only [hApLe, hX]
   have hfac3 : (1 + Ap) * Ap ≤ 2 * (1 + X) := by
     rw [show (1 + Ap) * Ap = Ap + X by rw [← hApSq]; ring]
-    nlinarith
+    linarith only [hApLe, hX]
   have hxlin : x ≤ 2 * Sg * Bd R * (1 + X) * D3 := by
     calc
       x = Sg * Bd R * (Ap * (2 + Ap)) * D3 := by simp only [x]; ring
