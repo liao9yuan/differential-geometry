@@ -3307,7 +3307,6 @@ private theorem inputSymmH2
   norm_num
   nlinarith
 
-set_option maxHeartbeats 4800000 in
 private theorem ricciAAPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3467,7 +3466,7 @@ private theorem ricciAAPairH2
       (sq_nonneg _)
   have hy0 : 0 ≤ y :=
     mul_nonneg
-      (mul_nonneg (hβ R hR) (add_nonneg (by linarith) hAp))
+      (mul_nonneg (hβ R hR) (add_nonneg zero_le_one hAp))
       (add_nonneg (add_nonneg hD3 hD3) (mul_nonneg hAp hD3))
   have hterm1 :
       lowJetSq (I := I) (M := M) g 2
@@ -3507,23 +3506,27 @@ private theorem ricciAAPairH2
       simp only [y, β, mul_pow, hCsSq]
       ring
     rw [← hx, ← hy]
-    linarith
+    rw [mul_add]
+    exact add_le_add
+      (mul_le_mul_of_nonneg_left hterm1 (by norm_num))
+      (mul_le_mul_of_nonneg_left hterm2 (by norm_num))
   refine hsum.trans ?_
   have hxy : x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 :=
     sqAdd2 (a := x) (b := y) hx0 hy0
   refine hxy.trans ?_
   have hApLe : Ap ≤ (1 + X) / 2 := by
-    nlinarith [sq_nonneg (Ap - 1)]
+    rw [← hApSq]
+    nlinarith only [sq_nonneg (Ap - 1)]
   have hfac1 : (1 + Ap) ^ 2 ≤ 2 * (1 + X) := by
     calc
       (1 + Ap) ^ 2 = 1 + 2 * Ap + Ap ^ 2 := by ring
       _ = 1 + 2 * Ap + X := by rw [hApSq]
-      _ ≤ 2 * (1 + X) := by nlinarith
+      _ ≤ 2 * (1 + X) := by linarith only [hApLe]
   have hfac2 : (1 + Ap) * (2 + Ap) ≤ 4 * (1 + X) := by
     calc
       (1 + Ap) * (2 + Ap) = 2 + 3 * Ap + Ap ^ 2 := by ring
       _ = 2 + 3 * Ap + X := by rw [hApSq]
-      _ ≤ 4 * (1 + X) := by nlinarith
+      _ ≤ 4 * (1 + X) := by linarith only [hApLe, hX]
   have hxlin :
       x ≤ 2 * α R * N + 2 * α R * Cj * R * A4 * N := by
     calc
@@ -3554,8 +3557,8 @@ private theorem ricciAAPairH2
           (add_nonneg
             (mul_nonneg (by norm_num) (hα R hR))
             (mul_nonneg (by norm_num) (hβ R hR)))
-          (by linarith))
-        (by linarith))
+          (add_nonneg zero_le_one hA))
+        (add_nonneg (add_nonneg hD3 hD2) hN))
       (mul_nonneg
         (mul_nonneg
           (add_nonneg
@@ -3564,18 +3567,28 @@ private theorem ricciAAPairH2
             (mul_nonneg
               (mul_nonneg (mul_nonneg (by norm_num) (hβ R hR)) hCj) hR))
           hA4)
-        (by linarith))
+        (add_nonneg hD3 hN))
   have hlin : x + y ≤ Z := by
     have hlo :
         2 * α R * N + 4 * β R * D3 ≤
           B0 R * (1 + A) * (D3 + D2 + N) := by
       have hbase : D3 ≤ D3 + D2 + N := by
-        linarith
+        calc
+          D3 ≤ D3 + (D2 + N) :=
+            le_add_of_nonneg_right (add_nonneg hD2 hN)
+          _ = D3 + D2 + N := by ring
       have hbaseN : N ≤ D3 + D2 + N := by
-        linarith
+        calc
+          N ≤ D2 + N := le_add_of_nonneg_left hD2
+          _ ≤ D3 + (D2 + N) := le_add_of_nonneg_left hD3
+          _ = D3 + D2 + N := by ring
       have hfac :
           D3 + D2 + N ≤ (1 + A) * (D3 + D2 + N) := by
-        nlinarith [mul_nonneg hA (by linarith : 0 ≤ D3 + D2 + N)]
+        calc
+          D3 + D2 + N = 1 * (D3 + D2 + N) := (one_mul _).symm
+          _ ≤ (1 + A) * (D3 + D2 + N) :=
+            mul_le_mul_of_nonneg_right
+              (le_add_of_nonneg_right hA) (add_nonneg (add_nonneg hD3 hD2) hN)
       have hN :
           2 * α R * N ≤
             2 * α R * ((1 + A) * (D3 + D2 + N)) := by
@@ -3615,7 +3628,16 @@ private theorem ricciAAPairH2
               hA4)
           hN
       simp only [B1]
-      nlinarith only [hc1, hc2]
+      calc
+        2 * α R * Cj * R * A4 * N +
+            4 * β R * Cj * R * A4 * D3 ≤
+          2 * α R * Cj * R * A4 * N +
+              4 * β R * Cj * R * A4 * D3 +
+            (2 * α R * Cj * R * A4 * D3 +
+              4 * β R * Cj * R * A4 * N) :=
+          le_add_of_nonneg_right (add_nonneg hc1 hc2)
+        _ = (2 * α R * Cj * R + 4 * β R * Cj * R) * A4 * (D3 + N) := by
+          ring
     calc
       x + y ≤
           (2 * α R * N + 2 * α R * Cj * R * A4 * N) +
