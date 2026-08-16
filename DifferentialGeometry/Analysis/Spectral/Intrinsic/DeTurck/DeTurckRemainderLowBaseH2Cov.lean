@@ -30,6 +30,26 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance (x : M) :
+    ContinuousAdd (TangentSpace I x →L[ℝ] TangentSpace I x) :=
+  ContinuousLinearMap.topologicalAddGroup.toContinuousAdd
+
+private lemma half_sq_le_one {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) :
+    (s / 2) ^ 2 ≤ 1 := by
+  nlinarith
+
+private lemma unit_interval_sq_le_one {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) :
+    s ^ 2 ≤ 1 := by
+  nlinarith
+
+private lemma one_le_one_add_sq {A : ℝ} (hA : 0 ≤ A) :
+    1 ≤ (1 + A) ^ 2 := by
+  nlinarith
+
+private lemma sq_le_one_add_sq {A : ℝ} (hA : 0 ≤ A) :
+    A ^ 2 ≤ (1 + A) ^ 2 := by
+  nlinarith
+
 omit [NeZero (Module.finrank ℝ E)] in
 theorem domH2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -811,7 +831,7 @@ theorem r4BddH2
   set P : SmoothCcTensor g 0 2 := s • T with hcP
   have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
     Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) := unit_interval_sq_le_one hs.1 hs.2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -867,7 +887,7 @@ theorem r4BddH2
         (-1 : ℝ) • lrQuadF (I := I) (M := M) g gm := by
     rw [hgm, lieCovR4_eq (I := I) (M := M) g T hδT hδZ s]
     module
-  have hs22 : (s / 2) ^ 2 ≤ 1 := by nlinarith [hs.1, hs.2]
+  have hs22 : (s / 2) ^ 2 ≤ 1 := half_sq_le_one hs.1 hs.2
   have hu0 : 0 ≤ lowJetSq (I := I) (M := M) g 2
       (lrCurvF (I := I) (M := M) g T) := jetNn (I := I) (M := M) g _
   have hfin : 2 * (Cc * A ^ 2 +
@@ -931,7 +951,6 @@ theorem r4BddH2
       linarith
     _ ≤ D R * (1 + A) ^ 4 := hfin
 
-set_option maxHeartbeats 3200000 in
 theorem r4PairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1006,7 +1025,7 @@ theorem r4PairH2
   set Q : SmoothCcTensor g 0 2 := s • U with hcQ
   have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
     Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
-  have hs2 : s ^ 2 ≤ (1 : ℝ) := by nlinarith [hs.1, hs.2]
+  have hs2 : s ^ 2 ≤ (1 : ℝ) := unit_interval_sq_le_one hs.1 hs.2
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -1080,20 +1099,18 @@ theorem r4PairH2
     (jetMono (I := I) (M := M) g (by norm_num : (2 : ℕ) ≤ 3) (P - Q)).trans hPQ3
   have hTU2 : lowJetSq (I := I) (M := M) g 2 (T - U) ≤ D3 ^ 2 :=
     (jetMono (I := I) (M := M) g (by norm_num : (2 : ℕ) ≤ 3) (T - U)).trans hTU3
-
   set pl2 : ℝ := (1 + A) ^ 2 with hpl2
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
-    nlinarith
+    exact one_le_one_add_sq hA
   have hpl20 : 0 ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : A ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith
+    exact sq_le_one_add_sq hA
   have hd0 : (0 : ℝ) ≤ D3 ^ 2 := sq_nonneg _
   have hquart : pl2 * (pl2 * D3 ^ 2) = (1 + A) ^ 4 * D3 ^ 2 := by
     rw [hpl2]
     ring
-
   have hCFd : lowJetSq (I := I) (M := M) g 2
       (lrCurvF (I := I) (M := M) g T -
         lrCurvF (I := I) (M := M) g U) ≤ Cc * D3 ^ 2 := by
@@ -1123,7 +1140,6 @@ theorem r4PairH2
       hδ_le hδ0 hδP hδQ R A D3 D3 hR hA hD3 hD3
       hQ2 hP3 hPQ2 hPQ3).trans ?_
     exact pairFold3 hpl21 hplA2 hd0 le_rfl
-
   have hQFd : lowJetSq (I := I) (M := M) g 2
       (lrQuadF (I := I) (M := M) g gmT -
         lrQuadF (I := I) (M := M) g gmU) ≤
@@ -1177,7 +1193,6 @@ theorem r4PairH2
           Ma R * (Bt R) ^ 2 * ((1 + A) ^ 4 * D3 ^ 2)) :=
         mul_le_mul_of_nonneg_left (add_le_add e1 e2) hCq
       _ = Cq * Kq R * ((1 + A) ^ 4 * D3 ^ 2) := hsum
-
   have hdecomp : lieCovR4 (I := I) (M := M) g T hδT hδZ s -
       lieCovR4 (I := I) (M := M) g U hδU hδZ s =
       (-(s / 2) : ℝ) • (lrCurvF (I := I) (M := M) g T -
@@ -1187,7 +1202,7 @@ theorem r4PairH2
     rw [hgmT, hgmU, lieCovR4_eq (I := I) (M := M) g T hδT hδZ s,
       lieCovR4_eq (I := I) (M := M) g U hδU hδZ s]
     module
-  have hs22 : (s / 2) ^ 2 ≤ 1 := by nlinarith [hs.1, hs.2]
+  have hs22 : (s / 2) ^ 2 ≤ 1 := half_sq_le_one hs.1 hs.2
   have hcf0 : 0 ≤ lowJetSq (I := I) (M := M) g 2
       (lrCurvF (I := I) (M := M) g T -
         lrCurvF (I := I) (M := M) g U) := jetNn (I := I) (M := M) g _
