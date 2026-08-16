@@ -3654,7 +3654,6 @@ private theorem ricciAAPairH2
       _ = Z := rfl
   exact pow_le_pow_left₀ (add_nonneg hx0 hy0) hlin 2
 
-set_option maxHeartbeats 6400000 in
 private theorem ricciDAPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3784,8 +3783,11 @@ private theorem ricciDAPairH2
         (Sd * (1 + Ap)) ^ 2 := by
     refine hdagU0.trans ?_
     rw [mul_pow, hSdSq]
-    exact mul_le_mul_of_nonneg_left
-      (by nlinarith [sq_nonneg Ap]) hKd
+    apply mul_le_mul_of_nonneg_left _ hKd
+    calc
+      1 + Ap ^ 2 ≤ 1 + Ap ^ 2 + 2 * Ap :=
+        le_add_of_nonneg_right (mul_nonneg (by norm_num) hAp)
+      _ = (1 + Ap) ^ 2 := by ring
   have hdagD0 :=
     hdagD gT gU T U hT hU hTtie hUtie
       hδ_le hδ0 hδT hδ_le hδ0 hδU
@@ -3827,16 +3829,16 @@ private theorem ricciDAPairH2
       (mul_nonneg
         (mul_nonneg
           (mul_nonneg hSg (hBd R hR)) hAp)
-          (by linarith))
+          (add_nonneg (by norm_num) hAp))
       hD3
   have hy0 : 0 ≤ y :=
     mul_nonneg
       (mul_nonneg
         (mul_nonneg hSg hSd)
-        (by linarith))
+        (add_nonneg zero_le_one hAp))
       hD3
   have hz0 : 0 ≤ z :=
-    mul_nonneg (mul_nonneg hSu (by linarith)) hAp
+    mul_nonneg (mul_nonneg hSu (add_nonneg zero_le_one hAp)) hAp
   have hGcomb :
       appCcRS (I := I) (M := M) g 0 3 4
           (LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
@@ -4088,15 +4090,16 @@ private theorem ricciDAPairH2
         mul_le_mul_of_nonneg_left (add_le_add hpa hpb) (by norm_num)
       _ = (2 * (u + v)) ^ 2 := by ring
   have hApLe : Ap ≤ (1 + X) / 2 := by
-    nlinarith [sq_nonneg (Ap - 1)]
+    rw [← hApSq]
+    nlinarith only [sq_nonneg (Ap - 1)]
   have hfac1 : Ap * (2 + Ap) ≤ 2 * (1 + X) := by
     rw [show Ap * (2 + Ap) = 2 * Ap + X by rw [← hApSq]; ring]
-    nlinarith
+    linarith only [hApLe]
   have hfac2 : 1 + Ap ≤ 2 * (1 + X) := by
-    nlinarith
+    linarith only [hApLe, hX]
   have hfac3 : (1 + Ap) * Ap ≤ 2 * (1 + X) := by
     rw [show (1 + Ap) * Ap = Ap + X by rw [← hApSq]; ring]
-    nlinarith
+    linarith only [hApLe, hX]
   have hxlin :
       x ≤ 2 * Sg * Bd R * (1 + X) * D3 := by
     calc
@@ -4176,7 +4179,7 @@ private theorem ricciDAPairH2
   have hZ : 0 ≤ Z := by
     exact add_nonneg
       (mul_nonneg
-        (mul_nonneg (hK R hR) (by linarith))
+        (mul_nonneg (hK R hR) (add_nonneg zero_le_one hA))
         (add_nonneg hD3 hD2))
       (mul_nonneg
         (mul_nonneg
@@ -4188,7 +4191,11 @@ private theorem ricciDAPairH2
       calc
         D3 ≤ D3 + D2 := le_add_of_nonneg_right hD2
         _ ≤ (1 + A) * (D3 + D2) := by
-          nlinarith [mul_nonneg hA (add_nonneg hD3 hD2)]
+          calc
+            D3 + D2 = 1 * (D3 + D2) := (one_mul _).symm
+            _ ≤ (1 + A) * (D3 + D2) :=
+              mul_le_mul_of_nonneg_right
+                (le_add_of_nonneg_right hA) (add_nonneg hD3 hD2)
     simpa only [mul_assoc] using
       mul_le_mul_of_nonneg_left hs (hK R hR)
   have hscale : 2 * (u + v) ≤ Z := by
