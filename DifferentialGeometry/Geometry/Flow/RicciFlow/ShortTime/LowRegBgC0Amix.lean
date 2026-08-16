@@ -21,6 +21,26 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
+private lemma le_square_one_add (x : ℝ) :
+    x ≤ (1 + x) ^ 2 := by
+  nlinarith only [sq_nonneg x]
+
+private lemma second_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD3 : 0 ≤ D3) (hD2 : 0 ≤ D2)
+    (hA : 0 ≤ A) (hN : 0 ≤ N) :
+    D2 ≤ D3 + D2 + A * D2 + N := by
+  nlinarith only [hD3, hN, mul_nonneg hA hD2]
+
+private lemma first_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD2 : 0 ≤ D2) (hA : 0 ≤ A) (hN : 0 ≤ N) :
+    D3 ≤ D3 + D2 + A * D2 + N := by
+  nlinarith only [hD2, hN, mul_nonneg hA hD2]
+
+private lemma middle_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD3 : 0 ≤ D3) (hN : 0 ≤ N) :
+    D2 + A * D2 ≤ D3 + D2 + A * D2 + N := by
+  linarith only [hD3, hN]
+
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -51,7 +71,6 @@ theorem pairScaleSq (p a b c d e f : ℝ) :
       (p * (a * b + e * f) * c * d) ^ 2 := by
   ring
 
-set_option maxHeartbeats 6400000 in
 theorem amixHalfPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -201,7 +220,7 @@ theorem amixHalfPairH2
       (add_nonneg (add_nonneg hD3 hD2) (mul_nonneg hA hD2))
   have hD2le : D2 ≤ D := by
     dsimp only [D]
-    nlinarith [mul_nonneg hA hD2]
+    exact second_le_four_term_sum D3 D2 A N hD3 hD2 hA hN
   have hρ2p_le : ρ ≤ ρ2p := (min_le_left _ _).trans (min_le_left _ _)
   have hρ2b_le : ρ ≤ ρ2b := (min_le_left _ _).trans (min_le_right _ _)
   have hρ3p_le : ρ ≤ ρ3p :=
@@ -255,10 +274,10 @@ theorem amixHalfPairH2
     appCcRS (I := I) (M := M) g 3 4 2 T2U Z3U
   have hCp_le : Cp ≤ FP ^ 2 := by
     dsimp only [FP]
-    nlinarith [sq_nonneg Cp]
+    exact le_square_one_add Cp
   have hJm_le : Jm ≤ M1 ^ 2 := by
     dsimp only [M1]
-    nlinarith [sq_nonneg Jm]
+    exact le_square_one_add Jm
   have hPrT : lowJetSq (I := I) (M := M) g 2 PrT ≤ (FP * R) ^ 2 := by
     calc
       lowJetSq (I := I) (M := M) g 2 PrT ≤
@@ -383,10 +402,10 @@ theorem amixHalfPairH2
   have hM0le : M0 ≤ (B0m R + B1m R) * D := by
     have hD3le : D3 ≤ D := by
       dsimp only [D]
-      nlinarith [mul_nonneg hA hD2]
+      exact first_le_four_term_sum D3 D2 A N hD2 hA hN
     have hrestle : D2 + A * D2 ≤ D := by
       dsimp only [D]
-      linarith
+      exact middle_le_four_term_sum D3 D2 A N hD3 hN
     calc
       M0 = B0m R * D3 + B1m R * (D2 + A * D2) := by
         simp only [M0]
@@ -403,7 +422,7 @@ theorem amixHalfPairH2
         R A D2 D3 hR hA hD2 hD3 hU2 hT3 hTU2 hTU3
   have hfr3_le : fr ^ 3 ≤ FM ^ 2 := by
     dsimp only [FM]
-    nlinarith [pow_nonneg hfr 3]
+    exact le_square_one_add (fr ^ 3)
   have hExT : lowJetSq (I := I) (M := M) g 2 ExT ≤
       (SM R * (1 + A)) ^ 2 := by
     calc
@@ -512,7 +531,7 @@ theorem amixHalfPairH2
         calc
           DM R * S1 R = DM R * S1 R * 1 := by ring
           _ ≤ DM R * S1 R * (1 + A) :=
-            mul_le_mul_of_nonneg_left (by linarith : (1 : ℝ) ≤ 1 + A)
+            mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hA)
               (mul_nonneg (hDM R hR) (hS1 R hR))
       have hfirst : DM R * S1 R * D ≤ DM R * S1 R * (1 + A) * D :=
         mul_le_mul_of_nonneg_right hbase hD

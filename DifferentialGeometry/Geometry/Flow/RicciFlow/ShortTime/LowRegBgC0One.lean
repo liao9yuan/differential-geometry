@@ -21,6 +21,30 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
+private lemma weighted_three_term_le_product_sum
+    (l0 l1 D3 D2 A N : ℝ)
+    (hl0 : 0 ≤ l0) (hl1 : 0 ≤ l1) (hD3 : 0 ≤ D3)
+    (hD2 : 0 ≤ D2) (hA : 0 ≤ A) (hN : 0 ≤ N) :
+    l0 * D3 + l1 * D2 + l1 * A * D2 ≤
+      (l0 + l1) * (D3 + D2 + A * D2 + N) := by
+  nlinarith only [mul_nonneg hl0 hD2,
+    mul_nonneg hl0 (mul_nonneg hA hD2), mul_nonneg hl0 hN,
+    mul_nonneg hl1 hD3, mul_nonneg hl1 hN]
+
+private lemma mul_le_mul_one_add
+    (l A D : ℝ) (hl : 0 ≤ l) (hA : 0 ≤ A) (hD : 0 ≤ D) :
+    l * D ≤ l * (1 + A) * D := by
+  calc
+    l * D = (l * 1) * D := by ring
+    _ ≤ (l * (1 + A)) * D :=
+      mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hA) hl) hD
+
+private lemma add_le_four_term_sum
+    (D3 D2 A N : ℝ) (hD3 : 0 ≤ D3) (hD2 : 0 ≤ D2) (hA : 0 ≤ A) :
+    D2 + N ≤ D3 + D2 + A * D2 + N := by
+  nlinarith only [hD3, mul_nonneg hA hD2]
+
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -935,7 +959,6 @@ theorem qbaScaleSq (p l o b d a q : ℝ) :
       (p * (l * o + b * d) * a * q) ^ 2 := by
   ring
 
-set_option maxHeartbeats 3200000 in
 theorem qbaOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1032,14 +1055,11 @@ theorem qbaOnePairH2
       (mul_nonneg (mul_nonneg (hL1 R hR) hA) hD2)
   have hXD : X ≤ Ld R * D := by
     simp only [X, Ld, D]
-    nlinarith [mul_nonneg (hL0 R hR) hD2,
-      mul_nonneg (hL0 R hR) (mul_nonneg hA hD2),
-      mul_nonneg (hL0 R hR) hN,
-      mul_nonneg (hL1 R hR) hD3,
-      mul_nonneg (hL1 R hR) hN]
+    exact weighted_three_term_le_product_sum (L0 R) (L1 R) D3 D2 A N
+      (hL0 R hR) (hL1 R hR) hD3 hD2 hA hN
   have hXDA : X ≤ Ld R * (1 + A) * D := by
     refine hXD.trans ?_
-    nlinarith [mul_nonneg (mul_nonneg (hLd R hR) hA) hD]
+    exact mul_le_mul_one_add (Ld R) A D (hLd R hR) hA hD
   have hLD : lowJetSq (I := I) (M := M) g 2 (LT - LU) ≤
       (Ld R * (1 + A) * D) ^ 2 := by
     have h0 : lowJetSq (I := I) (M := M) g 2 (LT - LU) ≤ X ^ 2 := by
@@ -1052,14 +1072,14 @@ theorem qbaOnePairH2
       simpa only [LU] using hlb gU U hU hUtie hδ_le hδ0 hδU hδZ
         R A hR hA hU2 hU3
     exact h0.trans (pow_le_pow_left₀ (mul_nonneg (hBl R hR) hA)
-      (mul_le_mul_of_nonneg_left (by linarith : A ≤ 1 + A) (hBl R hR)) 2)
+      (mul_le_mul_of_nonneg_left (le_add_of_nonneg_left zero_le_one) (hBl R hR)) 2)
   have hoT : lowJetSq (I := I) (M := M) g 2 OT ≤ (Bo R) ^ 2 := by
     simpa only [OT] using hob gT T hT hTtie R hR hT2 hTnob
   have hop0 := hop gT gU T U hT hU hTtie hUtie hTnop hUnop
     R D2 N hR hD2 hN hT2 hU2 hTU2 hTUn
   have hsmall : D2 + N ≤ D := by
     simp only [D]
-    nlinarith [mul_nonneg hA hD2]
+    exact add_le_four_term_sum D3 D2 A N hD3 hD2 hA
   have hoD : lowJetSq (I := I) (M := M) g 2 (OT - OU) ≤
       (Bod R * D) ^ 2 := by
     have h0 : lowJetSq (I := I) (M := M) g 2 (OT - OU) ≤

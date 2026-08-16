@@ -21,6 +21,25 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
+private lemma mul_le_one_add_mul_sum
+    (R D N : ℝ) (hR : 0 ≤ R) (hD : 0 ≤ D) (hN : 0 ≤ N) :
+    N * R ≤ (1 + R) * (D + N) := by
+  calc
+    N * R ≤ (D + N) * R :=
+      mul_le_mul_of_nonneg_right (le_add_of_nonneg_left hD) hR
+    _ ≤ (D + N) * (1 + R) :=
+      mul_le_mul_of_nonneg_left (le_add_of_nonneg_left zero_le_one) (add_nonneg hD hN)
+    _ = (1 + R) * (D + N) := mul_comm _ _
+
+private lemma le_one_add_mul_sum
+    (R D N : ℝ) (hR : 0 ≤ R) (hD : 0 ≤ D) (hN : 0 ≤ N) :
+    D ≤ (1 + R) * (D + N) := by
+  calc
+    D ≤ D + N := le_add_of_nonneg_right hN
+    _ = 1 * (D + N) := (one_mul _).symm
+    _ ≤ (1 + R) * (D + N) :=
+      mul_le_mul_of_nonneg_right (le_add_of_nonneg_right hR) (add_nonneg hD hN)
+
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -390,7 +409,6 @@ theorem curvZero_h2
   simp only [K]
   exact le_of_eq (by ring)
 
-set_option maxHeartbeats 1600000 in
 theorem curvZeroPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -636,9 +654,9 @@ theorem curvZeroPairH2
       _ = x ^ 2 + y ^ 2 := by rw [← hxSq, ← hySq]; ring
       _ ≤ (x + y) ^ 2 := sqAdd2 hx hy
   have hF1 : N * R ≤ (1 + R) * (D2 + N) := by
-    nlinarith [mul_nonneg hR hD2]
+    exact mul_le_one_add_mul_sum R D2 N hR hD2 hN
   have hF2 : D2 ≤ (1 + R) * (D2 + N) := by
-    nlinarith [mul_nonneg hR hD2, mul_nonneg hR hN]
+    exact le_one_add_mul_sum R D2 N hR hD2 hN
   have hxy : x + y ≤ B * (1 + R) * (D2 + N) := by
     calc
       x + y ≤ S * Cp * ((1 + R) * (D2 + N)) +
