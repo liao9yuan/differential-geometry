@@ -2124,7 +2124,6 @@ theorem wXi_sub_h2
       simp only [K]
       ring
 
-set_option maxHeartbeats 1600000 in
 theorem wXi_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2181,14 +2180,14 @@ theorem wXi_pair_h1
     exact mul_nonneg
       (mul_nonneg
         (mul_nonneg (mul_nonneg (by norm_num) hCr) hKs)
-        (by nlinarith [sq_nonneg R]))
+        (by positivity))
       (add_nonneg hKk hKc)
   have hQ1 : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q1 R := by
     intro R hR
     exact mul_nonneg
       (mul_nonneg
         (mul_nonneg (mul_nonneg (by norm_num) hCr) hKs)
-        (by nlinarith [sq_nonneg R]))
+        (by positivity))
       hKc
   refine ⟨B0, B1, fun R hR => Real.sqrt_nonneg _,
     fun R hR => Real.sqrt_nonneg _, ?_⟩
@@ -2265,7 +2264,7 @@ theorem wXi_pair_h1
           hslot gU U hU hUtie hδU_le hδU0 hδU
       _ ≤ Ks * (1 + R ^ 2) :=
         mul_le_mul_of_nonneg_left
-          (by linarith) hKs
+          (by simpa only [add_comm] using add_le_add_left hU2 1) hKs
   have hJT3 : JT ≤ A ^ 2 := by
     simpa only [JT] using hT3
   have hJD2 : JD ≤ D2 ^ 2 := by
@@ -2273,11 +2272,15 @@ theorem wXi_pair_h1
   have hpart :
       Kk + Kc * (1 + JT) ≤
         Kk + Kc * (1 + A ^ 2) := by
-    have hmul := mul_le_mul_of_nonneg_left hJT3 hKc
-    linarith
+    calc
+      Kk + Kc * (1 + JT) = Kc * (JT + 1) + Kk := by ring
+      _ ≤ Kc * (A ^ 2 + 1) + Kk :=
+        add_le_add_left
+          (mul_le_mul_of_nonneg_left (add_le_add_left hJT3 1) hKc) Kk
+      _ = Kk + Kc * (1 + A ^ 2) := by ring
   have hpart0 : 0 ≤ Kk + Kc * (1 + A ^ 2) := by
     exact add_nonneg hKk
-      (mul_nonneg hKc (by nlinarith [sq_nonneg A]))
+      (mul_nonneg hKc (by positivity))
   have hinnerA :
       2 * (Kk + Kc * (1 + JT)) * JD ≤
         2 * (Kk + Kc * (1 + A ^ 2)) * D2 ^ 2 := by
@@ -2292,7 +2295,7 @@ theorem wXi_pair_h1
   have hfactor :
       0 ≤ Cr * (Ks * (1 + R ^ 2)) :=
     mul_nonneg hCr
-      (mul_nonneg hKs (by nlinarith [sq_nonneg R]))
+      (mul_nonneg hKs (by positivity))
   have hout :
       lowJetSq (I := I) (M := M) g 1
           (wXi (I := I) (M := M) g gT g_bg -
@@ -3359,7 +3362,15 @@ private theorem ricciKer_zero
   rw [ricciKer_eq (I := I) (M := M) g g,
     connIns_zero (I := I) (M := M) g, hzero]
 
-set_option maxHeartbeats 1600000 in
+private theorem twenty_two_sq_le_five_sq (x : ℝ) :
+    22 * x ^ 2 ≤ (5 * x) ^ 2 := by
+  nlinarith [sq_nonneg x]
+
+private theorem twice_sq_sum_le_double_sum_sq
+    {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    2 * (x ^ 2 + y ^ 2) ≤ (2 * (x + y)) ^ 2 := by
+  nlinarith [mul_nonneg hx hy]
+
 theorem ricci1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3496,7 +3507,8 @@ theorem ricci1_pair_h2
         apply mul_le_mul_of_nonneg_left _ (by norm_num)
         simpa only [N] using hpD
       _ ≤ (5 * Cp * N) ^ 2 := by
-        nlinarith [sq_nonneg (Cp * N)]
+        simpa only [mul_assoc] using
+          twenty_two_sq_le_five_sq (Cp * N)
   have hTrU :
       lowJetSq (I := I) (M := M) g 2 TrU ≤
         (5 * Cb) ^ 2 := by
@@ -3513,7 +3525,7 @@ theorem ricci1_pair_h2
         four_h2 (I := I) (M := M) g _
       _ ≤ 22 * Cb ^ 2 :=
         mul_le_mul_of_nonneg_left hpU (by norm_num)
-      _ ≤ (5 * Cb) ^ 2 := by nlinarith [sq_nonneg Cb]
+      _ ≤ (5 * Cb) ^ 2 := twenty_two_sq_le_five_sq Cb
   have hU2 :
       lowJetSq (I := I) (M := M) g 2 U ≤ R0 ^ 2 := by
     calc
@@ -3612,8 +3624,13 @@ theorem ricci1_pair_h2
       (mul_nonneg (hK1 0 (by norm_num)) hA)
   have hamp :
       K0 0 * A + K1 0 * DT + K1 0 * A * DT ≤ YT := by
-    simp only [YT, Y0]
-    nlinarith
+    calc
+      K0 0 * A + K1 0 * DT + K1 0 * A * DT ≤
+          K0 0 * A + K1 0 * A + K1 0 * A * R0 :=
+        add_le_add (add_le_add le_rfl hmid) hlast
+      _ = YT := by
+        simp only [YT, Y0]
+        ring
   have hamp0 :
       0 ≤ K0 0 * A + K1 0 * DT + K1 0 * A * DT :=
     add_nonneg
@@ -3679,8 +3696,13 @@ theorem ricci1_pair_h2
         B0 * D3 + B1 * N + B1 * A * N := by
     have hextra : 0 ≤ H0 * (5 * Cp * Y0 * N) :=
       by positivity
-    simp only [Z1, Z2, B0, B1, H, XD, YT, X0, X1, Y0]
-    nlinarith
+    calc
+      2 * (Z1 + Z2) ≤
+          2 * (Z1 + Z2) + 2 * (H0 * (5 * Cp * Y0 * N)) :=
+        le_add_of_nonneg_right (mul_nonneg (by norm_num) hextra)
+      _ = B0 * D3 + B1 * N + B1 * A * N := by
+        simp only [Z1, Z2, B0, B1, H, XD, YT, X0, X1, Y0]
+        ring
   have hlin0 : 0 ≤ 2 * (Z1 + Z2) :=
     mul_nonneg (by norm_num) (add_nonneg hZ1 hZ2)
   rw [ricci1_sub_eq (I := I) (M := M) g gT gU]
@@ -3692,8 +3714,8 @@ theorem ricci1_pair_h2
       jet_add1 (I := I) (M := M) g 2 V1 V2
     _ ≤ 2 * (Z1 ^ 2 + Z2 ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hV1 hV2) (by norm_num)
-    _ ≤ (2 * (Z1 + Z2)) ^ 2 := by
-      nlinarith [mul_nonneg hZ1 hZ2]
+    _ ≤ (2 * (Z1 + Z2)) ^ 2 :=
+      twice_sq_sum_le_double_sum_sq hZ1 hZ2
     _ ≤ (B0 * D3 + B1 * N + B1 * A * N) ^ 2 :=
       pow_le_pow_left₀ hlin0 hlin 2
 
@@ -4600,7 +4622,16 @@ theorem revSlot_bdd_h2
     _ = (C * (1 + R)) ^ 2 := by
       rw [mul_pow, hCsq]
 
-set_option maxHeartbeats 1800000 in
+private theorem one_add_sq_mul_sq_le_add_mul_sq
+    {A D : ℝ} (hA : 0 ≤ A) :
+    (1 + A ^ 2) * D ^ 2 ≤ (D + A * D) ^ 2 := by
+  nlinarith [mul_nonneg hA (sq_nonneg D)]
+
+private theorem sq_add_sq_le_add_sq
+    {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
+  nlinarith [mul_nonneg hx hy]
+
 theorem mcd_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -4710,7 +4741,7 @@ theorem mcd_pair_h2
         S ^ 2 := by
     have hscalar :
         (1 + A ^ 2) * D2 ^ 2 ≤ (D2 + A * D2) ^ 2 := by
-      nlinarith [mul_nonneg hA (sq_nonneg D2)]
+      exact one_add_sq_mul_sq_le_add_mul_sq hA
     calc
       lowJetSq (I := I) (M := M) g 2 (T - U) *
           lowJetSq (I := I) (M := M) g 2
@@ -4764,7 +4795,8 @@ theorem mcd_pair_h2
         ring
       _ ≤ Z ^ 2 := by
         dsimp only [Z]
-        nlinarith [mul_nonneg (mul_nonneg hH hS) (mul_nonneg hH hY)]
+        exact sq_add_sq_le_add_sq
+          (mul_nonneg hH hS) (mul_nonneg hH hY)
   rw [mcd_sub_eq (I := I) (M := M) g gT gU T U hTtie hUtie]
   change lowJetSq (I := I) (M := M) g 2 (WD + CD) ≤ _
   calc
@@ -4774,8 +4806,8 @@ theorem mcd_pair_h2
       jet_add1 (I := I) (M := M) g 2 WD CD
     _ ≤ 2 * (X ^ 2 + Z ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hWD hCD) (by norm_num)
-    _ ≤ (2 * (X + Z)) ^ 2 := by
-      nlinarith [mul_nonneg hX hZ]
+    _ ≤ (2 * (X + Z)) ^ 2 :=
+      twice_sq_sum_le_double_sum_sq hX hZ
     _ = (B0 R * D3 + B1 R * D2 + B1 R * A * D2) ^ 2 := by
       simp only [B0, B1, Z, S, Y, X]
       ring
@@ -5369,7 +5401,6 @@ private theorem psiLeft_sub_h2
     rw [dom_sub, raise_sub]]
   exact raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0 _
 
-set_option maxHeartbeats 2400000 in
 private theorem psi_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5591,7 +5622,7 @@ private theorem psi_pair_h2
   have hZ1 : 0 ≤ Z1 :=
     mul_nonneg
       (mul_nonneg hH
-        (mul_nonneg (hMb R0 hR0) (by linarith)))
+        (mul_nonneg (hMb R0 hR0) (add_nonneg (by norm_num) hA)))
       (mul_nonneg hCs hN)
   have hXD : 0 ≤ XD :=
     add_nonneg
@@ -5648,13 +5679,17 @@ private theorem psi_pair_h2
       jet_add1 (I := I) (M := M) g 2 V1 V2
     _ ≤ 2 * (Z1 ^ 2 + Z2 ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hV1 hV2) (by norm_num)
-    _ ≤ (2 * (Z1 + Z2)) ^ 2 := by
-      nlinarith [mul_nonneg hZ1 hZ2]
+    _ ≤ (2 * (Z1 + Z2)) ^ 2 :=
+      twice_sq_sum_le_double_sum_sq hZ1 hZ2
     _ = (B0 * D3 + B1 * N + B1 * A * N) ^ 2 := by
       simp only [B0, B1, Z1, Z2, XD]
       ring
 
-set_option maxHeartbeats 1200000 in
+private theorem twice_scaled_sq_add_scaled_sq_le
+    (a b c Q : ℝ) (h : 2 * (a ^ 2 + b ^ 2) ≤ c ^ 2) :
+    2 * ((a * Q) ^ 2 + (b * Q) ^ 2) ≤ (c * Q) ^ 2 := by
+  nlinarith [sq_nonneg Q]
+
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet14
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -5712,7 +5747,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A12 Z3
       _ ≤ 2 * ((2 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA12 h3) (by norm_num)
-      _ ≤ (4 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (4 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          2 1 4 Q (by norm_num)
   have hA1234 :
       lowJetSq (I := I) (M := M) g 2 A1234 ≤ (6 * Q) ^ 2 := by
     calc
@@ -5723,7 +5760,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A123 Z4
       _ ≤ 2 * ((4 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA123 h4) (by norm_num)
-      _ ≤ (6 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (6 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          4 1 6 Q (by norm_num)
   have hA12345 :
       lowJetSq (I := I) (M := M) g 2 A12345 ≤ (9 * Q) ^ 2 := by
     calc
@@ -5734,7 +5773,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A1234 Z5
       _ ≤ 2 * ((6 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA1234 h5) (by norm_num)
-      _ ≤ (9 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (9 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          6 1 9 Q (by norm_num)
   have hA1 :
       lowJetSq (I := I) (M := M) g 2 A1 ≤ (13 * Q) ^ 2 := by
     calc
@@ -5745,7 +5786,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A12345 Z6
       _ ≤ 2 * ((9 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA12345 h6) (by norm_num)
-      _ ≤ (13 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (13 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          9 1 13 Q (by norm_num)
   have hA78 :
       lowJetSq (I := I) (M := M) g 2 A78 ≤ (2 * Q) ^ 2 := by
     calc
@@ -5767,7 +5810,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A78 Z9
       _ ≤ 2 * ((2 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA78 h9) (by norm_num)
-      _ ≤ (4 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (4 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          2 1 4 Q (by norm_num)
   have hA78910 :
       lowJetSq (I := I) (M := M) g 2 A78910 ≤ (6 * Q) ^ 2 := by
     calc
@@ -5778,7 +5823,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A789 Z10
       _ ≤ 2 * ((4 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA789 h10) (by norm_num)
-      _ ≤ (6 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (6 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          4 1 6 Q (by norm_num)
   have hA7891011 :
       lowJetSq (I := I) (M := M) g 2 A7891011 ≤
         (9 * Q) ^ 2 := by
@@ -5790,7 +5837,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A78910 Z11
       _ ≤ 2 * ((6 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA78910 h11) (by norm_num)
-      _ ≤ (9 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (9 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          6 1 9 Q (by norm_num)
   have hA2 :
       lowJetSq (I := I) (M := M) g 2 A2 ≤ (13 * Q) ^ 2 := by
     calc
@@ -5801,7 +5850,9 @@ private theorem jet14
                 jet_sub (I := I) (M := M) g 2 A7891011 Z12
       _ ≤ 2 * ((9 * Q) ^ 2 + Q ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hA7891011 h12) (by norm_num)
-      _ ≤ (13 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (13 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          9 1 13 Q (by norm_num)
   have hO1 :
       lowJetSq (I := I) (M := M) g 2 O1 ≤ (19 * Q) ^ 2 := by
     calc
@@ -5812,7 +5863,9 @@ private theorem jet14
                 jet_add1 (I := I) (M := M) g 2 Z0 A1
       _ ≤ 2 * (Q ^ 2 + (13 * Q) ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add h0 hA1) (by norm_num)
-      _ ≤ (19 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (19 * Q) ^ 2 := by
+        simpa using twice_scaled_sq_add_scaled_sq_le
+          1 13 19 Q (by norm_num)
   have hO2 :
       lowJetSq (I := I) (M := M) g 2 O2 ≤ (33 * Q) ^ 2 := by
     calc
@@ -5823,7 +5876,8 @@ private theorem jet14
                 jet_add1 (I := I) (M := M) g 2 O1 A2
       _ ≤ 2 * ((19 * Q) ^ 2 + (13 * Q) ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hO1 hA2) (by norm_num)
-      _ ≤ (33 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+      _ ≤ (33 * Q) ^ 2 :=
+        twice_scaled_sq_add_scaled_sq_le 19 13 33 Q (by norm_num)
   change lowJetSq (I := I) (M := M) g 2 (O2 + Z13) ≤ _
   calc
     lowJetSq (I := I) (M := M) g 2 (O2 + Z13) ≤
@@ -5832,7 +5886,9 @@ private theorem jet14
       jet_add1 (I := I) (M := M) g 2 O2 Z13
     _ ≤ 2 * ((33 * Q) ^ 2 + Q ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hO2 h13) (by norm_num)
-    _ ≤ (47 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
+    _ ≤ (47 * Q) ^ 2 := by
+      simpa using twice_scaled_sq_add_scaled_sq_le
+        33 1 47 Q (by norm_num)
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connSec_self_h2
