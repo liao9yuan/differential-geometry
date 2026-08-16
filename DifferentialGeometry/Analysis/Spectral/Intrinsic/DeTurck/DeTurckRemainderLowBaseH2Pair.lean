@@ -9109,7 +9109,6 @@ private theorem amix_h3_pair
     _ = (4 * Bp R * (1 + A) ^ 2 * (D3 + N)) ^ 2 := by
       ring
 
-set_option maxHeartbeats 6400000 in
 private theorem selfLow_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9170,7 +9169,14 @@ private theorem selfLow_h3_pair
     have hVn := hV R hR
     have hWn := hW R hR
     simp only [B]
-    linarith
+    exact mul_nonneg (by norm_num)
+      (add_nonneg
+        (add_nonneg
+          (add_nonneg
+            (add_nonneg (mul_nonneg (by norm_num) hGn)
+              (mul_nonneg (by norm_num) hLn))
+            (mul_nonneg (by norm_num) hVn))
+          (mul_nonneg (by norm_num) hWn)) hC)
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 D3 N hR hA hD2 hD3 hN hT2 hU2 hT3 hU3
     hTU2 hTU3 hTn hUn hTUn s hs
@@ -9208,7 +9214,9 @@ private theorem selfLow_h3_pair
   let Zv : ℝ := 2 * V R * F
   let Za : ℝ := 2 * W R * F
   let Zr : ℝ := C * F
-  have hS : 0 ≤ S := by simp only [S]; linarith
+  have hS : 0 ≤ S := by
+    simp only [S]
+    exact add_nonneg (add_nonneg hD3 hD2) hN
   have hF : 0 ≤ F :=
     mul_nonneg (add_nonneg (by norm_num) (sq_nonneg A)) hS
   have hZgn : 0 ≤ Zg := mul_nonneg (hG R hR) hF
@@ -9217,11 +9225,20 @@ private theorem selfLow_h3_pair
   have hZan : 0 ≤ Za := mul_nonneg (mul_nonneg (by norm_num) (hW R hR)) hF
   have hZrn : 0 ≤ Zr := mul_nonneg hC hF
   have hfac : (1 + A) ^ 2 ≤ 2 * (1 + A ^ 2) := by
-    nlinarith [sq_nonneg (A - 1)]
-  have hpart : D3 + N ≤ S := by simp only [S]; linarith
+    nlinarith only [sq_nonneg (A - 1)]
+  have hpart : D3 + N ≤ S := by
+    simp only [S]
+    calc
+      D3 + N ≤ D3 + (D2 + N) :=
+        add_le_add (le_refl D3) (le_add_of_nonneg_left hD2)
+      _ = D3 + D2 + N := by ring
   have hfull : S ≤ F := by
     simp only [F]
-    nlinarith [mul_nonneg (sq_nonneg A) hS]
+    calc
+      S = 1 * S := (one_mul S).symm
+      _ ≤ (1 + A ^ 2) * S :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_right (sq_nonneg A)) hS
   have hinflate : ∀ K : ℝ, 0 ≤ K →
       K * (1 + A) ^ 2 * (D3 + N) ≤ 2 * K * F := by
     intro K hK
@@ -9229,7 +9246,7 @@ private theorem selfLow_h3_pair
       K * (1 + A) ^ 2 * (D3 + N) ≤
           K * (2 * (1 + A ^ 2)) * (D3 + N) :=
         mul_le_mul_of_nonneg_right
-          (mul_le_mul_of_nonneg_left hfac hK) (by linarith)
+          (mul_le_mul_of_nonneg_left hfac hK) (add_nonneg hD3 hN)
       _ ≤ K * (2 * (1 + A ^ 2)) * S :=
         mul_le_mul_of_nonneg_left hpart
           (mul_nonneg hK (mul_nonneg (by norm_num)
@@ -9246,7 +9263,7 @@ private theorem selfLow_h3_pair
             lieRefoldQ lieRefoldEps s)) ≤ Zl ^ 2 := by
     refine hXl0.trans (pow_le_pow_left₀
       (mul_nonneg (mul_nonneg (hL R hR)
-        (sq_nonneg (1 + A))) (by linarith)) ?_ 2)
+        (sq_nonneg (1 + A))) (add_nonneg hD3 hN)) ?_ 2)
     simpa only [Zl] using hinflate (L R) (hL R hR)
   have hXv : lowJetSq (I := I) (M := M) g 2
       (lc0VB (I := I) (M := M) g
@@ -9255,7 +9272,7 @@ private theorem selfLow_h3_pair
           (realizedFam (I := I) g U 0 hδU hδZ s)) ≤ Zv ^ 2 := by
     refine hXv0.trans (pow_le_pow_left₀
       (mul_nonneg (mul_nonneg (hV R hR)
-        (sq_nonneg (1 + A))) (by linarith)) ?_ 2)
+        (sq_nonneg (1 + A))) (add_nonneg hD3 hN)) ?_ 2)
     simpa only [Zv] using hinflate (V R) (hV R hR)
   have hXa : lowJetSq (I := I) (M := M) g 2
       (lc0AMix (I := I) (M := M) g
@@ -9264,7 +9281,7 @@ private theorem selfLow_h3_pair
           (realizedFam (I := I) g U 0 hδU hδZ s) g) ≤ Za ^ 2 := by
     refine hXa0.trans (pow_le_pow_left₀
       (mul_nonneg (mul_nonneg (hW R hR)
-        (sq_nonneg (1 + A))) (by linarith)) ?_ 2)
+        (sq_nonneg (1 + A))) (add_nonneg hD3 hN)) ?_ 2)
     simpa only [Za] using hinflate (W R) (hW R hR)
   have hXr : lowJetSq (I := I) (M := M) g 2
       (lc0Riem (I := I) (M := M) g
@@ -9316,14 +9333,16 @@ private theorem selfLow_h3_pair
     have hadd := jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) Y2
     have hY2 : lowJetSq (I := I) (M := M) g 2 Y2 ≤ Zl ^ 2 := by
       simpa only [Y2, gmT, gmU] using hXl
-    linarith
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add hj1 hY2) (by norm_num))
   have h123 : lowJetSq (I := I) (M := M) g 2
       (((-2 : ℝ) • Y1 + Y2) + Y3) ≤
       2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) := by
     have hadd := jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) Y3
     have hY3 : lowJetSq (I := I) (M := M) g 2 Y3 ≤ Zv ^ 2 := by
       simpa only [Y3, gmT, gmU] using hXv
-    linarith
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h12 hY3) (by norm_num))
   have h1234 : lowJetSq (I := I) (M := M) g 2
       ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) ≤
       2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) + Za ^ 2) := by
@@ -9331,7 +9350,8 @@ private theorem selfLow_h3_pair
       (((-2 : ℝ) • Y1 + Y2) + Y3) Y4
     have hY4 : lowJetSq (I := I) (M := M) g 2 Y4 ≤ Za ^ 2 := by
       simpa only [Y4, gmT, gmU] using hXa
-    linarith
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h123 hY4) (by norm_num))
   have hfin : lowJetSq (I := I) (M := M) g 2
       (((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) + Y5) ≤
       2 * (2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) + Za ^ 2) +
@@ -9340,21 +9360,33 @@ private theorem selfLow_h3_pair
       ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) Y5
     have hY5 : lowJetSq (I := I) (M := M) g 2 Y5 ≤ Zr ^ 2 := by
       simpa only [Y5, gmT, gmU] using hXr
-    linarith
+    exact hadd.trans
+      (mul_le_mul_of_nonneg_left (add_le_add h1234 hY5) (by norm_num))
   refine hfin.trans ?_
   have h2g : (0 : ℝ) ≤ 2 * Zg := mul_nonneg (by norm_num) hZgn
   have hsq : (2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2 ≤
       (2 * Zg + Zl + Zv + Za + Zr) ^ 2 := by
     have e1 := sqAdd2 (a := 2 * Zg) (b := Zl) h2g hZln
-    have e2 := sqAdd2 (a := 2 * Zg + Zl) (b := Zv) (by linarith) hZvn
-    have e3 := sqAdd2 (a := 2 * Zg + Zl + Zv) (b := Za) (by linarith) hZan
+    have e2 := sqAdd2 (a := 2 * Zg + Zl) (b := Zv) (add_nonneg h2g hZln) hZvn
+    have e3 := sqAdd2 (a := 2 * Zg + Zl + Zv) (b := Za)
+      (add_nonneg (add_nonneg h2g hZln) hZvn) hZan
     have e4 := sqAdd2 (a := 2 * Zg + Zl + Zv + Za) (b := Zr)
-      (by linarith) hZrn
-    linarith
+      (add_nonneg (add_nonneg (add_nonneg h2g hZln) hZvn) hZan) hZrn
+    calc
+      (2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2 ≤
+          (2 * Zg + Zl) ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2 :=
+        add_le_add
+          (add_le_add (add_le_add e1 (le_refl (Zv ^ 2))) (le_refl (Za ^ 2)))
+          (le_refl (Zr ^ 2))
+      _ ≤ (2 * Zg + Zl + Zv) ^ 2 + Za ^ 2 + Zr ^ 2 :=
+        add_le_add (add_le_add e2 (le_refl (Za ^ 2))) (le_refl (Zr ^ 2))
+      _ ≤ (2 * Zg + Zl + Zv + Za) ^ 2 + Zr ^ 2 :=
+        add_le_add e3 (le_refl (Zr ^ 2))
+      _ ≤ (2 * Zg + Zl + Zv + Za + Zr) ^ 2 := e4
   have hexp : 2 * (2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) +
         Za ^ 2) + Zr ^ 2) ≤
       16 * ((2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2) := by
-    nlinarith [sq_nonneg Zv, sq_nonneg Za, sq_nonneg Zr]
+    nlinarith only [sq_nonneg Zv, sq_nonneg Za, sq_nonneg Zr]
   refine hexp.trans ?_
   refine (mul_le_mul_of_nonneg_left hsq (by norm_num)).trans (le_of_eq ?_)
   simp only [B, Zg, Zl, Zv, Za, Zr, F, S]
