@@ -10037,13 +10037,12 @@ private theorem grad_shift_lip
     _ ≤ ‖iteratedCovGrad (I := I) g 0 2 0 W‖ ^ 2 +
         (‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2 +
           ‖iteratedCovGrad (I := I) g 0 2 2 W‖ ^ 2) := by
-      linarith [h0]
+      exact le_add_of_nonneg_left h0
     _ = lowJetSq (I := I) (M := M) g 2 W := by
       simp only [lowJetSq, Finset.sum_range_succ,
         Finset.sum_range_zero, zero_add]
       ring
 
-set_option maxHeartbeats 3200000 in
 theorem a1Sub_lo_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -10101,7 +10100,7 @@ theorem a1Sub_lo_tame
   set K : ℝ := 2 * Ca + 2 * Cb with hKdef
   have hK0 : 0 ≤ K := by
     rw [hKdef]
-    linarith [hCa, hCb]
+    exact add_nonneg (mul_nonneg (by norm_num) hCa) (mul_nonneg (by norm_num) hCb)
   let Bq : ℝ → ℝ := fun R => K * Bq0 R
   let B0 : ℝ := Real.sqrt K * B0c
   let B1 : ℝ := Real.sqrt K * B1c
@@ -10194,18 +10193,31 @@ theorem a1Sub_lo_tame
         jet_add_lip (I := I) (M := M) g 1 _ _
       _ ≤ 2 * (Ca * (Bq0 R * X) * lowJetSq (I := I) (M := M) g 2 V +
           Cb * M1 * lowJetSq (I := I) (M := M) g 2 V) := by
-        linarith [hL, hRt]
+        exact mul_le_mul_of_nonneg_left (add_le_add hL hRt) (by norm_num)
       _ ≤ Q * lowJetSq (I := I) (M := M) g 2 V := by
         rw [hQdef, hKdef]
         have hjV := jet_nonneg_lip (I := I) (M := M) (m := 2) g V
-        have e1 : (0 : ℝ) ≤ Ca * M1 *
-            lowJetSq (I := I) (M := M) g 2 V :=
-          mul_nonneg (mul_nonneg hCa hM1n) hjV
-        have e2 : (0 : ℝ) ≤ Cb * (Bq0 R * X) *
-            lowJetSq (I := I) (M := M) g 2 V :=
-          mul_nonneg (mul_nonneg hCb
-            (mul_nonneg (hBq0 R hR) hX0)) hjV
-        nlinarith [hjV, e1, e2]
+        have hp : 0 ≤ Bq0 R * X := mul_nonneg (hBq0 R hR) hX0
+        have hsum : Ca * (Bq0 R * X) + Cb * M1 ≤
+            (Ca + Cb) * (Bq0 R * X + M1) := by
+          calc
+            Ca * (Bq0 R * X) + Cb * M1 ≤
+                Ca * (Bq0 R * X) + Cb * M1 +
+                  (Ca * M1 + Cb * (Bq0 R * X)) :=
+              le_add_of_nonneg_right
+                (add_nonneg (mul_nonneg hCa hM1n) (mul_nonneg hCb hp))
+            _ = (Ca + Cb) * (Bq0 R * X + M1) := by ring
+        calc
+          2 * (Ca * (Bq0 R * X) * lowJetSq (I := I) (M := M) g 2 V +
+              Cb * M1 * lowJetSq (I := I) (M := M) g 2 V) =
+              2 * (Ca * (Bq0 R * X) + Cb * M1) *
+                lowJetSq (I := I) (M := M) g 2 V := by ring
+          _ ≤ 2 * ((Ca + Cb) * (Bq0 R * X + M1)) *
+                lowJetSq (I := I) (M := M) g 2 V :=
+            mul_le_mul_of_nonneg_right
+              (mul_le_mul_of_nonneg_left hsum (by norm_num)) hjV
+          _ = (2 * Ca + 2 * Cb) * (Bq0 R * X + M1) *
+                lowJetSq (I := I) (M := M) g 2 V := by ring
   have hfin := hspec D Q hQ0 hcore W
   refine hfin.trans ?_
   have hQle : Real.sqrt Q ≤ Real.sqrt
@@ -10231,19 +10243,24 @@ theorem a1Sub_lo_tame
         have h2 : B1c * A * Nrm ≤ B1c * A * N :=
           mul_le_mul_of_nonneg_left (by rw [hNrm]; exact hTUn)
             (mul_nonneg hB1c hA)
-        linarith
+        exact add_le_add (add_le_add le_rfl h1) h2
       have hnn : 0 ≤ B0c * D3 + B1c * Nrm + B1c * A * Nrm := by
         have : 0 ≤ Nrm := by rw [hNrm]; exact norm_nonneg _
         have h1 : 0 ≤ B0c * D3 := mul_nonneg hB0c hD3
         have h2 : 0 ≤ B1c * Nrm := mul_nonneg hB1c this
         have h3 : 0 ≤ B1c * A * Nrm :=
           mul_nonneg (mul_nonneg hB1c hA) this
-        linarith
+        exact add_nonneg (add_nonneg h1 h2) h3
       exact pow_le_pow_left₀ hnn hle 2
     simp only [Bq]
     rw [hexp, ← hXdef]
-    have := mul_le_mul_of_nonneg_left hM1le hK0
-    nlinarith [this, hK0, mul_nonneg (hBq0 R hR) hX0]
+    calc
+      K * (Bq0 R * X + M1) = K * (Bq0 R * X) + K * M1 := mul_add _ _ _
+      _ ≤ K * (Bq0 R * X) +
+          K * (B0c * D3 + B1c * N + B1c * A * N) ^ 2 :=
+        add_le_add_right (mul_le_mul_of_nonneg_left hM1le hK0) _
+      _ = K * Bq0 R * X +
+          K * (B0c * D3 + B1c * N + B1c * A * N) ^ 2 := by ring
   calc
     Cs * Real.sqrt Q *
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) W‖ ≤
