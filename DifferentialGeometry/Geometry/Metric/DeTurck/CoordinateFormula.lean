@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.VectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.CoordinateComponents
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -31,11 +31,11 @@ lemma chartBasisVecFiber_eq_chartParallelExtend_on_baseSet
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (j : Fin (Module.finrank ℝ E)) :
-    ∀ b' ∈ (trivializationAt E (TangentSpace I) α).baseSet,
+    ∀ b',
       chartBasisVecFiber (I := I) α j b' =
         chartParallelExtend (I := I) α b
           (chartBasisVecFiber (I := I) α j b) b' := by
-  intro b' _hb'
+  intro b'
   unfold chartParallelExtend
   change (trivializationAt E (TangentSpace I) α).symm b' ((chartModelBasis E) j) =
     trivFromE (I := I) α b'
@@ -66,7 +66,7 @@ lemma chartBasisVecFiber_eventuallyEq_chartParallelExtend
     hopen.mem_nhds hb_base
   refine Filter.eventually_of_mem hbase_nhds ?_
   intro b' hb'
-  exact chartBasisVecFiber_eq_chartParallelExtend_on_baseSet (I := I) α hb_base j b' hb'
+  exact chartBasisVecFiber_eq_chartParallelExtend_on_baseSet (I := I) α hb_base j b'
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_mdifferentiableAt

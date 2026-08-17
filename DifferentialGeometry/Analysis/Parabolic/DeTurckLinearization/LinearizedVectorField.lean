@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.CoordinateComponents
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLinearization
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

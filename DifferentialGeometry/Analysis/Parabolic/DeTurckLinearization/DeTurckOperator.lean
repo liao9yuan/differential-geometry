@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.LieDerivative.Basic
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.VectorField
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 

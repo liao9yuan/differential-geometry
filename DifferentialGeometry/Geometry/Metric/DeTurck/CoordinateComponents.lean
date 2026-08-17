@@ -1,6 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbol
-import DifferentialGeometry.Geometry.Operator.HessianTrace
-open DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -43,7 +41,7 @@ omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [Boundary
             chartChristoffel (I := I) g' α a b k y) := rfl
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-@[simp] theorem chartDeTurckVFComp_self
+theorem chartDeTurckVFComp_self
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (y : E) :
     chartDeTurckVFComp (I := I) g g α k y = 0 := by

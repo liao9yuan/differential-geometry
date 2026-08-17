@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifPalatiniJet1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvaturePack
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
-import DifferentialGeometry.Geometry.Flow.ConnectionDifference
+import DifferentialGeometry.Geometry.Connection.ConnectionDifference
 
 set_option autoImplicit false
 

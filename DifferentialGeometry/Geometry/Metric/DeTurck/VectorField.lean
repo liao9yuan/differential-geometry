@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorFieldSmooth
+import DifferentialGeometry.Geometry.Metric.DeTurck.Smoothness
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 

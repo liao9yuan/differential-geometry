@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
-import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.VectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.VectorField
 import DifferentialGeometry.Geometry.Metric.LieDerivative.Basic
 
 open DifferentialGeometry.Geometry.Curvature

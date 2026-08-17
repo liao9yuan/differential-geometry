@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.LieDerivative.Cartan
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
+import DifferentialGeometry.Geometry.Metric.DeTurck.VectorField
 import DifferentialGeometry.Bundle.VectorFieldPushforward
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import Mathlib.Analysis.Calculus.Deriv.Basic

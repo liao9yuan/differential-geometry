@@ -1,5 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
-open DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Geometry.Metric.DeTurck.CoordinateComponents
 open DifferentialGeometry.Geometry.Operator
 
 
