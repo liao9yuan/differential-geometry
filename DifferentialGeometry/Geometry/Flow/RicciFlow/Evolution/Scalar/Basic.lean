@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Contractions
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.RicciNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import Mathlib.Algebra.Order.Chebyshev
@@ -100,6 +100,7 @@ theorem msm110_ch6_1_scalar_curvature_evolution
   scalar_curvature_evolution
     (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
 
+omit [SigmaCompactSpace M] in
 theorem scalarEvolOfSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

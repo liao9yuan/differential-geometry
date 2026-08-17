@@ -195,11 +195,10 @@ private theorem localFrame_mdiffAt
   (hframe.contMDiffAt hu hx i).mdifferentiableAt one_ne_zero
 
 omit [Fintype Idx] [DecidableEq Idx] in
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connectionDiffVectorInFrame_symm
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
@@ -213,10 +212,10 @@ private theorem connectionDiffVectorInFrame_symm
     localFrame_mdiffAt (I := I) frame hframe hu hx j
   have hvar_torsion :=
     DifferentialGeometry.Geometry.Connection.torsion_free_apply
-      (I := I) (hS.leviCivita.2 ⟨var, hvar⟩) (hX := hfi) (hY := hfj)
+      (I := I) ((SolutionOn.leviCivita (I := I) S).2 ⟨var, hvar⟩) (hX := hfi) (hY := hfj)
   have hbase_torsion :=
     DifferentialGeometry.Geometry.Connection.torsion_free_apply
-      (I := I) (hS.leviCivita.2 ⟨base, hbase⟩) (hX := hfi) (hY := hfj)
+      (I := I) ((SolutionOn.leviCivita (I := I) S).2 ⟨base, hbase⟩) (hX := hfi) (hY := hfj)
   have hdiff :
       (S.family.connection var (frame j) x) (frame i x) -
           (S.family.connection var (frame i) x) (frame j x) =
@@ -240,11 +239,10 @@ private theorem connectionDiffVectorInFrame_symm
         rw [hdiff, sub_self]
 
 omit [Fintype Idx] [DecidableEq Idx] in
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connectionDiffLoweredInFrame_symm
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
@@ -254,14 +252,13 @@ private theorem connectionDiffLoweredInFrame_symm
       connectionDiffLoweredInFrame (I := I) S frame metricTime base var x j i l := by
   unfold connectionDiffLoweredInFrame
   rw [connectionDiffVectorInFrame_symm
-    (I := I) S hS frame hframe hu hx hbase hvar i j]
+    (I := I) S frame hframe hu hx hbase hvar i j]
 
 omit [Fintype Idx] [DecidableEq Idx] in
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
@@ -279,7 +276,7 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
     localFrame_mdiffAt (I := I) frame hframe hu hx b
   have hmc :=
     DifferentialGeometry.Geometry.Connection.metric_compatible_apply
-      (I := I) (hS.leviCivita.1 ⟨var, hvar⟩)
+      (I := I) ((SolutionOn.leviCivita (I := I) S).1 ⟨var, hvar⟩)
       (frame d) (frame a) (frame b) hfd hfa hfb
   unfold metricCovDerivCompInFrameAtBase connectionDiffLoweredInFrame
     connectionDiffVectorInFrame
@@ -297,11 +294,10 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
   ring
 
 omit [Fintype Idx] [DecidableEq Idx] in
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem finiteDifferenceKoszulInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
@@ -311,17 +307,17 @@ theorem finiteDifferenceKoszulInFrame
       finiteDifferenceKoszulRHSInFrame (I := I) S frame base var x i j l := by
   rw [finiteDifferenceKoszulRHSInFrame]
   rw [metricCovDerivCompInFrameAtBase_eq_connectionDiff
-    (I := I) S hS frame hframe hu hx hvar i j l]
+    (I := I) S frame hframe hu hx hvar i j l]
   rw [metricCovDerivCompInFrameAtBase_eq_connectionDiff
-    (I := I) S hS frame hframe hu hx hvar j i l]
+    (I := I) S frame hframe hu hx hvar j i l]
   rw [metricCovDerivCompInFrameAtBase_eq_connectionDiff
-    (I := I) S hS frame hframe hu hx hvar l i j]
+    (I := I) S frame hframe hu hx hvar l i j]
   have hji := connectionDiffLoweredInFrame_symm
-    (I := I) S hS frame hframe hu hx (metricTime := var) hbase hvar j i l
+    (I := I) S frame hframe hu hx (metricTime := var) hbase hvar j i l
   have hli := connectionDiffLoweredInFrame_symm
-    (I := I) S hS frame hframe hu hx (metricTime := var) hbase hvar l i j
+    (I := I) S frame hframe hu hx (metricTime := var) hbase hvar l i j
   have hlj := connectionDiffVectorInFrame_symm
-    (I := I) S hS frame hframe hu hx hbase hvar l j
+    (I := I) S frame hframe hu hx hbase hvar l j
   have hsym1 :
       (S.family.metric var).inner x (frame j x)
           (connectionDiffVectorInFrame (I := I) S frame base var x i l) =
@@ -747,11 +743,10 @@ theorem metricCovDerivDerivativeComponents_of_ricciFlow
     ring
 
 omit [Fintype Idx] [DecidableEq Idx] in
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem variableMetricConnectionDiffDerivative_of_metricCovDeriv
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u)
@@ -790,9 +785,9 @@ theorem variableMetricConnectionDiffDerivative_of_metricCovDeriv
     refine hR.congr ?_ ?_
     · intro s hs
       exact finiteDifferenceKoszulInFrame
-        (I := I) S hS frame hframe hu hx htcarrier hs i j l
+        (I := I) S frame hframe hu hx htcarrier hs i j l
     · exact finiteDifferenceKoszulInFrame
-        (I := I) S hS frame hframe hu hx htcarrier htcarrier i j l
+        (I := I) S frame hframe hu hx htcarrier htcarrier i j l
   have hHalf :
       HasDerivWithinAt
         (fun s : Real =>

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Certification
+import DifferentialGeometry.Geometry.Operator.TensorHeat
 import DifferentialGeometry.Geometry.Operator.Operators
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature

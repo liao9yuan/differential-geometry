@@ -1,7 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
+import DifferentialGeometry.Geometry.Operator.TensorHeat
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false

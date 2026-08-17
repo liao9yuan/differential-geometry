@@ -616,7 +616,7 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
       (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
     simpa [DifferentialGeometry.Analysis.Parabolic.spacetimeSlab] using
       (SolutionOn.scalar_continuousOn (I := I) (M := M) S
-        hS.isSolution hS.scalarSTCont T
+        hS.scalarSTCont T
         (by
           intro t ht
           rw [hD]

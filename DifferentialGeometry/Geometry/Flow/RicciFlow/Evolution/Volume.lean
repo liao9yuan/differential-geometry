@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import DifferentialGeometry.Geometry.Curvature.Realized.Curvature
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.RicciFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Defs
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 

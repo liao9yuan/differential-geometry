@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Components
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -134,7 +134,6 @@ theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
 
 noncomputable def coordInv
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) :
     Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M
@@ -146,7 +145,6 @@ noncomputable def coordInv
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvReal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) (t : Real) :
     Tensor0SBundle.MetricInverseInBasis_gen
@@ -159,7 +157,6 @@ theorem coordInvReal
 
 noncomputable def coordRoughRic
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M)
     (nabla2Ric : Real -> M ->
@@ -177,7 +174,6 @@ noncomputable def coordRoughRic
 
 noncomputable def coordNab2Ric
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) :
     Real -> M ->
@@ -316,6 +312,7 @@ structure IsSmoothSolutionOn
 
 namespace IsSmoothSolutionOn
 
+omit [SigmaCompactSpace M] in
 theorem toIsSolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -323,6 +320,7 @@ theorem toIsSolutionOn
     IsSolutionOn (I := I) S :=
   hS.isSolution
 
+omit [SigmaCompactSpace M] in
 theorem scalarCont
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -330,6 +328,7 @@ theorem scalarCont
     ScalarSTContOn (I := I) (M := M) S :=
   hS.scalarSTCont
 
+omit [SigmaCompactSpace M] in
 theorem scalarReg
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}

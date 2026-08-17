@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Basic
+import DifferentialGeometry.Geometry.Operator.TensorHeat
 import Mathlib.Tactic.Ring
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
@@ -7,6 +8,7 @@ set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
 open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section

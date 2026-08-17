@@ -157,6 +157,7 @@ theorem tailFrameSpaceReg
   exact hderiv.congr_deriv heq
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailCoordFrameReg
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.RicciNorm
 import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasure
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 open DifferentialGeometry.PDE.RicciFlow

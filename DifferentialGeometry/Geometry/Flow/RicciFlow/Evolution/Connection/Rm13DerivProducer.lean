@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovDerivProducer
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.RicciNorm
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 
@@ -23,7 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem rm13Deriv_of_solution
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -74,7 +74,7 @@ theorem rm13Deriv_of_solution
       D.carrier
       (t : Real) :=
   christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
-    (I := I) S hS
+    (I := I) S
     (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
       (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a
         b))

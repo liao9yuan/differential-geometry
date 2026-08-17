@@ -51,6 +51,7 @@ omit [SigmaCompactSpace M] in
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem conjCoeff_joint
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
@@ -69,6 +70,7 @@ noncomputable def conjCoeffRev
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem conjCoeff_rev
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

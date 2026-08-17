@@ -35,6 +35,7 @@ variable {u : Set M}
 
 section CoordinateFrameRicciEvolution
 
+omit [SigmaCompactSpace M] in
 theorem coordNab2Reg
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -51,6 +52,7 @@ theorem coordNab2Reg
         mdiffAt := coordNablaRegOn (I := I) S x₀ }
   · exact coordNab2On (I := I) S x₀
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvSymmOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -569,7 +571,7 @@ theorem coordCommAt
       · exact rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)
       · have htf :=
           DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
-            (I := I) (lcAt_regular (I := I) S hS t)
+            (I := I) (lcAt_regular (I := I) S t)
         simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
     have hRicTrace13 :
         ∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,

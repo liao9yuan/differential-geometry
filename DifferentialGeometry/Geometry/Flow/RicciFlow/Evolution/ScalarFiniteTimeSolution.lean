@@ -131,7 +131,7 @@ theorem flow_end_le
         (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) U) := by
     intro U _hU hUT
     simpa [DifferentialGeometry.Integral.Connection.spacetimeSlab] using
-      SolutionOn.scalar_continuousOn (I := I) (M := M) S hS hSmooth.scalarSTCont U
+      SolutionOn.scalar_continuousOn (I := I) (M := M) S hSmooth.scalarSTCont U
         (fun t ht => ⟨ht.1, lt_of_le_of_lt ht.2 hUT⟩)
   have hevol : ScalarEvolutionEquationOn
       (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 T hT)

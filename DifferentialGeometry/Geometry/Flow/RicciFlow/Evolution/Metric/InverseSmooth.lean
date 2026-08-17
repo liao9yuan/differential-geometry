@@ -457,6 +457,7 @@ theorem hasFDerivAt_clmInv
   simpa [ContinuousLinearMap.inverse_equiv, ContinuousLinearEquiv.toUnit] using
     (hasFDerivAt_ringInverse (ContinuousLinearEquiv.toUnit e))
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvCLM_eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -509,6 +510,7 @@ theorem coordFrameGramCLM_spacetimeSmooth
   intro j _hj
   exact (coordMetricSmooth (I := I) S hS x0 i j).smul contMDiffOn_const
 
+omit [SigmaCompactSpace M] in
 theorem coordFrameGInvCLM_spacetimeSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -570,6 +572,7 @@ theorem coordFrameGInvCLM_spacetimeSmooth
   exact
     (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
 
+omit [SigmaCompactSpace M] in
 theorem coordInvSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -632,6 +635,7 @@ theorem coordFrameGramCLM_contOn
   intro j _hj
   exact (coordMetricContOn (I := I) S hS x0 i j).smul continuousOn_const
 
+omit [SigmaCompactSpace M] in
 theorem coordFrameGInvCLM_contOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -686,6 +690,7 @@ theorem coordFrameGInvCLM_contOn
   · exact (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
   · exact (coordInvCLM_eq (I := I) S x0 (x := p.2) hp.2 p.1).symm
 
+omit [SigmaCompactSpace M] in
 theorem coordInvContOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -722,6 +727,7 @@ theorem coordInvContOn
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
 
+omit [SigmaCompactSpace M] in
 theorem coordInvSmoothAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -745,6 +751,7 @@ noncomputable def coordInvDt
   fun t x i j =>
     derivWithin (fun s : Real => coordInv (I := I) S x0 s x i j) D.carrier t
 
+omit [SigmaCompactSpace M] in
 theorem coordInvDerivLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

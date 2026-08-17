@@ -65,11 +65,10 @@ structure ConnectionVariationBlackBoxInFrameOn
     MetricCovDerivDerivativeIsRicciFlowInFrame metricCovDerivDt nablaRic
 
 omit [Fintype Idx] [DecidableEq Idx] in
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem variableMetricConnectionDiffDerivative_of_blackBox
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u)
@@ -78,14 +77,13 @@ theorem variableMetricConnectionDiffDerivative_of_blackBox
     VariableMetricConnectionDiffDerivativeInFrameOnLocal
       (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
   variableMetricConnectionDiffDerivative_of_metricCovDeriv
-    (I := I) S hS frame hframe hu hbb.metricCovDerivDt nablaRic
+    (I := I) S frame hframe hu hbb.metricCovDerivDt nablaRic
     hbb.metricCovDerivDerivative hbb.metricCovDerivRicciFlow
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolution_of_blackBox
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -99,7 +97,7 @@ theorem christoffelEvolution_of_blackBox
     ChristoffelEvolutionEquationInFrameOn
       (I := I) S gInv frame hframe nablaRic :=
   christoffelEvolution_of_metricFrameTimeRegularity
-    (I := I) S hS gInv gInvDt frame hframe hu
+    (I := I) S gInv gInvDt frame hframe hu
     hbb.metricCovDerivDt nablaRic hmetricFrame
     hbb.metricCovDerivDerivative hbb.metricCovDerivRicciFlow
 

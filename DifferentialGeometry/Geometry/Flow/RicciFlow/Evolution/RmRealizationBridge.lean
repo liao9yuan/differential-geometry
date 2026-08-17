@@ -431,7 +431,7 @@ theorem rm04_ricciIdentityAt
   have htor : (S.family.connection (t : Real)).torsion x = 0 := by
     have htf :=
       DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
-        (I := I) (lcAt_regular (I := I) S hS t)
+        (I := I) (lcAt_regular (I := I) S t)
     simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
   exact DifferentialGeometry.Tensor.RicciIdentity.tensor0S_ricciIdentity_of_torsionFree
     (I := I) (S.family.connection (t : Real)) hcov (S.base.rm13 (t : Real))
@@ -459,7 +459,7 @@ theorem nablaRm04_ricciIdentityAt
   have htor : (S.family.connection (t : Real)).torsion x = 0 := by
     have htf :=
       DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
-        (I := I) (lcAt_regular (I := I) S hS t)
+        (I := I) (lcAt_regular (I := I) S t)
     simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
   exact DifferentialGeometry.Tensor.RicciIdentity.tensor0S_ricciIdentity_of_torsionFree
     (I := I) (S.family.connection (t : Real)) hcov (S.base.rm13 (t : Real))

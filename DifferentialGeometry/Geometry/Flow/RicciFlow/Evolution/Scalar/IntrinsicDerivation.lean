@@ -90,6 +90,7 @@ private def nabla2RicField
     3 (S.family.connection t) (nablaRicField (I := I) S t) x
 
 omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem coordNab2Ric_eq_nabla2RicField
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -296,6 +297,7 @@ theorem coordNab2Ric_eq_nabla2RicField
   unfold DifferentialGeometry.PDE.RicciFlow.ricciSecondCovDerivCompInFrame
   ring
 
+omit [SigmaCompactSpace M] in
 theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

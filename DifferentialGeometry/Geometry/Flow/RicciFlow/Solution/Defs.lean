@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 
 open DifferentialGeometry.Analysis

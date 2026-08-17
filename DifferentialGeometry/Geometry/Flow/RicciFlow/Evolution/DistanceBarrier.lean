@@ -892,7 +892,8 @@ private theorem calabi_core_of_sol
     exact hvSupport_t y
   · exact hrho0_x.trans hr.symm
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M]
+  [SigmaCompactSpace M] [T2Space M] in
 private theorem CalabiFlowCore.scale
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

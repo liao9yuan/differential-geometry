@@ -120,7 +120,7 @@ private def solNabla2Ric
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (solNablaRic (I := I) S t) x
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem coordNab2_eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
@@ -300,7 +300,7 @@ private theorem hessVar_apply {x : M}
         N (fun i ↦ vec4 (I := I) A B C D (permBDAC i))) = _
   rw [hAC, hADBC, hBA, hBCA, hBDAC]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem gammaLower_eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -697,7 +697,7 @@ private theorem rm04Var_of_solution
         intro p _hp
         have hcurv :=
           christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
-            (I := I) S hS rhs x₀ hvar hmix t
+            (I := I) S rhs x₀ hvar hmix t
             (m 0) (m 1) (m 2) p
         have hmetricDt := metricCompInFrame_timeDeriv
           (I := I) S hS frame t x₀ (m 3) p

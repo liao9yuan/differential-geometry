@@ -24,11 +24,10 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -53,14 +52,13 @@ theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
     (connectionVariationLoweredRHSFromMetricVariationInFrame metricCovDerivDt)
     hinv
     (connectionVariationPairing_of_metricVariation
-      (I := I) S hS frame hframe hu pairDt metricCovDerivDt
+      (I := I) S frame hframe hu pairDt metricCovDerivDt
       hpair hvarDiff hmetric hunique)
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolution_of_metricFrameTimeRegularity
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -93,7 +91,7 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
       VariableMetricConnectionDiffDerivativeInFrameOnLocal
         (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
     variableMetricConnectionDiffDerivative_of_metricCovDeriv
-      (I := I) S hS frame hframe hu metricCovDerivDt nablaRic
+      (I := I) S frame hframe hu metricCovDerivDt nablaRic
       hmetric hmetricRicci
   have hRhs :
       HasDerivWithinAt rhs target D.carrier (t : Real) := by
@@ -144,11 +142,10 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem gammaEvolOfInv
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -180,7 +177,7 @@ theorem gammaEvolOfInv
       VariableMetricConnectionDiffDerivativeInFrameOnLocal
         (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
     variableMetricConnectionDiffDerivative_of_metricCovDeriv
-      (I := I) S hS frame hframe hu metricCovDerivDt nablaRic
+      (I := I) S frame hframe hu metricCovDerivDt nablaRic
       hmetric hmetricRicci
   have hRhs :
       HasDerivWithinAt rhs target D.carrier (t : Real) := by
@@ -230,11 +227,10 @@ theorem gammaEvolOfInv
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem gammaEvolLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -266,7 +262,7 @@ theorem gammaEvolLocal
       VariableMetricConnectionDiffDerivativeInFrameOnLocal
         (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
     variableMetricConnectionDiffDerivative_of_metricCovDeriv
-      (I := I) S hS frame hframe hu metricCovDerivDt nablaRic
+      (I := I) S frame hframe hu metricCovDerivDt nablaRic
       hmetric hmetricRicci
   have hRhs :
       HasDerivWithinAt rhs target D.carrier (t : Real) := by
@@ -336,7 +332,7 @@ theorem christoffelEvolution_of_spacetimeSmoothMetric
     ChristoffelEvolutionEquationInFrameOn
       (I := I) S gInv frame hframe nablaRic :=
   christoffelEvolution_of_metricFrameTimeRegularity
-    (I := I) S hS gInv gInvDt frame hframe hu
+    (I := I) S gInv gInvDt frame hframe hu
     (fun t x d a b => (-2 : Real) * nablaRic t x d a b)
     nablaRic
     hreg.toMetricFrameTimeRegularityInFrameOnLocal
@@ -384,11 +380,10 @@ theorem evol_christoffel_inFrame
     (christoffelEvolutionRHSInFrame_eq_coordinates_rhs
       (M := M) gInv nablaRic (t : Real) x i j k)
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolution_of_ricciFlowMetricVariation
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -414,7 +409,7 @@ theorem christoffelEvolution_of_ricciFlowMetricVariation
   christoffelEvolutionEquationInFrameOn_of_pairing_local
     (I := I) S gInv frame hframe nablaRic hinv
     (connectionVariationPairing_of_ricciFlow
-      (I := I) S hS frame hframe hu pairDt metricCovDerivDt nablaRic
+      (I := I) S frame hframe hu pairDt metricCovDerivDt nablaRic
       hpair hvarDiff hmetric hmetricRicci hunique)
 
 omit [SigmaCompactSpace M] [T2Space M] in

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.RicciFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Defs
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
@@ -6,7 +6,7 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Coordinate
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.Bochner
+import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerTensor
 import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureTensor
 import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureProducers
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasis
@@ -185,7 +185,7 @@ omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompac
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M]
     [T2Space M] in
-@[simp] theorem timeShift_base_metric
+theorem timeShift_base_metric
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).base.metric s = S.base.metric (s + τ) := by
@@ -296,7 +296,7 @@ theorem timeShift_initial_metric {D : DifferentialGeometry.Geometry.Curvature.Re
   simp [DifferentialGeometry.Geometry.Curvature.RealTimeInterval.timeShift, sub_add_cancel]
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem timeShift_self_initial_metric
+theorem timeShift_self_initial_metric
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     (S.timeShift D.initial).family.metric 0 = S.family.metric D.initial := by
@@ -343,7 +343,6 @@ def ricciGradSq
 
 def flowG
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real where
   metric := S.base.metric
@@ -357,7 +356,7 @@ def flowG
 
 def ricciNormLap
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
+    [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     Real -> M -> Real :=
   fun t x =>
@@ -374,7 +373,7 @@ def ricciPair04 {x : M}
 
 def ricciReact
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
+    [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) : Real -> M -> Real :=
   fun t x =>
     -inner0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x)
@@ -410,14 +409,13 @@ structure IsSolutionOn
         DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (ricciNorm (I := I) S t) y) x
 
-namespace IsSolutionOn
+namespace SolutionOn
 
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivita
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    {S : SolutionOn (I := I) (M := M) D}
-    (_hS : IsSolutionOn (I := I) S) :
+    (S : SolutionOn (I := I) (M := M) D) :
     DifferentialGeometry.Geometry.Connection.IsLeviCivitaFamilyOn (I := I) S.family := by
   constructor
   · intro t
@@ -426,7 +424,7 @@ theorem leviCivita
     exact DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
       (I := I) (S.base.metric (t : Real))
 
-end IsSolutionOn
+end SolutionOn
 
 structure ScalarSTContOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -566,11 +564,10 @@ end CanonicalRicciRegularOn
 
 namespace SolutionOn
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_continuousOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (_hS : IsSolutionOn (I := I) S)
     (hreg : ScalarSTContOn (I := I) (M := M) S)
     (T : Real)
     (hT : Set.Icc 0 T ⊆ D.carrier) :
@@ -754,7 +751,7 @@ theorem isRealizedRicciFlowSolutionOn_of_isSolutionOn
   exact
     { smoothMetric := hS.smoothMetric
       smoothConnection := hS.smoothConnection
-      leviCivita := hS.leviCivita
+      leviCivita := SolutionOn.leviCivita (I := I) S
       equation := hS.equation }
 
 

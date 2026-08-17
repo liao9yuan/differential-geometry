@@ -2,7 +2,7 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.Algebra.ProperAction.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureProducers
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.RicciNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.LocalPinching
@@ -129,6 +129,7 @@ def ham3Scalar
   DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalarSTCont
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0) :
@@ -568,6 +569,7 @@ def ham3ScalarLap
       (ham3Scalar (I := I) P t) x
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalarRegular
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -620,6 +622,7 @@ noncomputable def ham3RescaledSol
     (hsel.1 i) (hsel.2.2.1 i)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_tracefree_display
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -702,7 +705,7 @@ def Ham3PinchingFixed
             P.S.ricci)
           P.S.scalar T delta
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem Ham3PinchingFixed.toVarying
     {g0 : SmoothRiemannianMetric I M}
     {P : Ham3FiniteTimeFlow (I := I) (M := M) g0} {omega : Real}
@@ -771,6 +774,7 @@ private theorem scaled_pinch_le
   exact hmain.trans (by simpa using mul_le_mul_of_nonneg_left hrpow hcoef)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_tracefree_bound0
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -951,6 +955,7 @@ structure Ham3Compactness
   noncollapse : Ham3Noncollapse (I := I) P Q hsel kappa ham3_r0
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_initial_continuous
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0) :
@@ -996,6 +1001,7 @@ theorem ham3_scalar_initial_continuous
   exact (hfun ▸ hmdiff.continuousAt)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_ricci_pos0
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1023,6 +1029,7 @@ theorem ham3_ricci_pos0
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hpos0
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_initial_pos
     (hdim : Module.finrank Real E = 3)
     {omega : Real} (h0ω : 0 < omega)
@@ -1054,6 +1061,7 @@ theorem ham3_scalar_initial_pos
       hdimx hpos0
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_initial_scalar_minimum
     [CompactSpace M] [Nonempty M]
     (hdim : Module.finrank Real E = 3)
@@ -1073,6 +1081,7 @@ theorem ham3_initial_scalar_minimum
   exact ⟨c0, hmin, ham3_scalar_initial_pos (I := I) (M := M) hdim h0ω hpos P hD⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_slab_continuousOn
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1089,7 +1098,7 @@ theorem ham3_scalar_slab_continuousOn
   simpa [ham3Scalar, DifferentialGeometry.Analysis.Parabolic.spacetimeSlab] using
     DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_continuousOn
       (I := I) (M := M) (ham3Solution (I := I) P)
-      P.isSmooth.isSolution hreg
+      hreg
       T
       (by
         intro t ht
@@ -1097,6 +1106,7 @@ theorem ham3_scalar_slab_continuousOn
         exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_evolution_equation
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1133,6 +1143,7 @@ theorem ham3_scalar_evolution_equation
   simpa [ham3Scalar, ham3ScalarLap, ham3RicNormSq, ham3Solution] using h
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_laplacian_realizes_heat
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0) (T : Real) :
@@ -1150,6 +1161,7 @@ theorem ham3_scalar_laplacian_realizes_heat
         rfl)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_wmp_regularity
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1180,6 +1192,7 @@ theorem ham3_scalar_wmp_regularity
     ham3_scalarRegular (I := I) (M := M) P c0 K T hsubset hden
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_sq_le_three_ric_normSq
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
@@ -1222,6 +1235,7 @@ theorem ham3_scalar_sq_le_three_ric_normSq
     using h
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_slab_lipschitz
     [CompactSpace M]
     {omega : Real}
@@ -1296,6 +1310,7 @@ theorem ham3_scalar_slab_lipschitz
   exact Classical.choose_spec (hExists T hT hTω hPole) t ht
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_family_package
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1364,6 +1379,7 @@ theorem ham3_scalar_family_package
     exact hK T hT hTω hPole
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_finite_time
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1477,6 +1493,7 @@ private theorem scalar_gt_of_rm {A R rm : Real}
   nlinarith
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_scalar_cont_slab
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1571,6 +1588,7 @@ theorem ham3_scalar_blowup
     exact lt_of_le_of_lt (le_of_not_gt hA) hRpos
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_point_select
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -1941,6 +1959,7 @@ theorem ham3_rescaled_ric_nonneg
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hraw
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scalar_pos
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
@@ -2218,6 +2237,7 @@ theorem ham3_rm_bound
   exact le_trans hRmScalar hscaled
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_r0_window
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2235,6 +2255,7 @@ theorem ham3_r0_window
   · exact hsright
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scale_atTop
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2263,6 +2284,7 @@ theorem ham3_scale_atTop
     (lt_of_mul_lt_mul_right (lt_of_le_of_lt hprod_i hlt) h0omega.le)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_scale_decay
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2292,6 +2314,7 @@ theorem ham3_scale_decay
   simpa only [mul_zero] using tendsto_const_nhds.mul hpow
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_radius_event
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2331,6 +2354,7 @@ theorem ham3_radius_event
     _ <= Real.sqrt (ham3BlowupScale (I := I) P Q i) * rho := hmul
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ham3_rm_control
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2487,6 +2511,7 @@ theorem limit_mid_regular
   constructor <;> nlinarith
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem limit_ric_nonneg
     (g0 : SmoothRiemannianMetric I M)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2500,6 +2525,7 @@ theorem limit_ric_nonneg
   exact htransfer hreal hric
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem limit_base_scalar_one
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2596,6 +2622,7 @@ theorem limit_scalar_nonneg
   nlinarith
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem limit_inherit
     (g0 : SmoothRiemannianMetric I M)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2636,6 +2663,7 @@ theorem limit_inherit
     hricTransfer, hpinchTransfer, hnonneg, hbase, hscalarPos⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem limit_tracefree_decay
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2698,6 +2726,7 @@ theorem limit_tracefree_zero_of_decay
   exact tracefree_zero_of_decay (I := I) (M := M) hdim (hdecay t ht)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem limit_tracefree_zero
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}

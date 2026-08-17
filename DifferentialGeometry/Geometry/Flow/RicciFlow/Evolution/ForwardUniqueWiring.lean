@@ -101,15 +101,15 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem fuRm04_eq {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     rm04Fam (I := I) (D := D) (solOfMetric (I := I) g) = fuRm04 (I := I) g := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem fuLapRm_eq {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     rm04LapFam (I := I) (D := D) (solOfMetric (I := I) g) = fuLapRm (I := I) g := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem fuBRm_eq {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     rm04BFam (I := I) (D := D) (solOfMetric (I := I) g) = fuBRm (I := I) g := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 theorem fuRicUp_eq {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     ricUpFam (I := I) (D := D) (solOfMetric (I := I) g) = fuRicUp (I := I) g := rfl
 
@@ -122,7 +122,7 @@ theorem fuRm04_real (g : Real → SmoothRiemannianMetric I M)
           (coordBasisAt (I := I) y k) (coordBasisAt (I := I) y l)) :=
   rm04Fam_real (I := I) (D := refD) (solOfMetric (I := I) g) r y i j k l
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem fuLapRm_real (g : Real → SmoothRiemannianMetric I M)
     (r : Real) (y : M) (i j k l : CoordinateIdx (𝕜 := Real) E) :
     fuLapRm (I := I) g r y i j k l =
@@ -130,7 +130,7 @@ theorem fuLapRm_real (g : Real → SmoothRiemannianMetric I M)
         (frameVec4 (I := I) (fun m z => coordBasisAt (I := I) z m) y i j k l) :=
   rm04LapFam_real (I := I) (D := refD) (solOfMetric (I := I) g) r y i j k l
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 private theorem fuInv_real (g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     MetricInverseInBasis_gen (I := I) (g t) x (coordBasisAt (I := I) x)
@@ -145,7 +145,7 @@ private theorem fuInv_real (g : Real → SmoothRiemannianMetric I M)
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [CompactSpace M] in
 theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (gN t) (coordBasisAt (I := I) x)
@@ -199,7 +199,7 @@ theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
   rw [hcomp, hB i j k l, hB i j l k, hB i k j l, hB i l j k]
 
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (gN t) (coordBasisAt (I := I) x)
@@ -231,7 +231,7 @@ theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
   simp only [riemann04RicciDriftInFrame, hUp, fuRm04_real, basis]
 
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem fuSpeed_low (g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowerTri (I := I) (metricTensorField (I := I) (g t) x)
@@ -263,7 +263,7 @@ theorem fuSpeed_low (g : Real → SmoothRiemannianMetric I M)
   simp only [frameVec4]
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [CompactSpace M] in
 private theorem fuB_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
@@ -287,7 +287,7 @@ private theorem fuB_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [lowOfComp_eval, lowOfComp_eval]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem fuDrift_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)

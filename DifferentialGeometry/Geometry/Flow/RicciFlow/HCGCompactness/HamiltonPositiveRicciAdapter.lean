@@ -92,6 +92,7 @@ private noncomputable def ham3Start
   max (ham3WinStart (I := I) P Q hwindow) (ham3BufStart (I := I) P Q hsel)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3Start_spec
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -106,6 +107,7 @@ private theorem ham3Start_spec
       (le_trans (Nat.le_max_left _ _) hi) s hs h0
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3Buf_spec
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -120,6 +122,7 @@ private theorem ham3Buf_spec
       (le_trans (Nat.le_max_right _ _) hi)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_car_subset
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -168,6 +171,7 @@ private theorem ham3_car_subset
   exact ⟨hlo, hhi⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_reg_subset
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -284,6 +288,7 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_shi_car
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -333,6 +338,7 @@ private theorem ham3_shi_car
   exact ⟨hlo, hhi⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_shi_reg
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -382,6 +388,7 @@ private theorem ham3_shi_reg
   exact ⟨hlo, hhi⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_shi_rm
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -441,6 +448,7 @@ private theorem ham3_shi_rm
       field_simp [ne_of_gt hscale]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ham3_ball_rm
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1996,7 +2004,7 @@ noncomputable def ham3SourceLink
       DifferentialGeometry.PDE.RicciFlow.paraTime,
       ham3RescaledScalar, ham3RescaledTime, ham3Scalar, ham3Solution]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem Ham3SourceLink.realizes
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2043,6 +2051,7 @@ def HamCGH
          Ham3PinchTransfer (I := I) (M := M) P Q hsel Lh)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem baseScalarConv_of_smoothCGH
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
@@ -2653,6 +2662,7 @@ theorem ham3_main_hcg
   exact ⟨hconst, (ham3_equiv (I := I) (M := M) hM).1 hconst⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem toHam3Exists
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)

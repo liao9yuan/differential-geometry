@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Basic
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false

@@ -37,6 +37,7 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+omit [SigmaCompactSpace M] in
 theorem revGram_smooth
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -92,6 +93,7 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+omit [SigmaCompactSpace M] in
 theorem revTrace_eq
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -202,6 +204,7 @@ theorem revScalar_time
     ring
   simpa only [Function.comp_apply, G] using hcomp.congr_deriv hderiv
 
+omit [SigmaCompactSpace M] in
 theorem revGradSq_time
     [I.Boundaryless]
     {D Dr : RealTimeInterval}

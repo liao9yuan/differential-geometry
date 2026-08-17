@@ -174,7 +174,7 @@ theorem christoffelEvolution_of_solution
         (fun y : M => ricciCompInFrame (I := I) S frame t y a b) x) :
     ChristoffelEvolutionEquationInFrameOn (I := I) S gInv frame hframe
       (fun t x d a b => ricciCovDerivCompInFrame (I := I) S frame t x d a b) :=
-  christoffelEvolution_of_blackBox (I := I) S hS gInv gInvDt frame hframe hu
+  christoffelEvolution_of_blackBox (I := I) S gInv gInvDt frame hframe hu
     (fun t x d a b => ricciCovDerivCompInFrame (I := I) S frame t x d a b)
     hmetricFrame
     (connectionVariationBlackBox_of_solution (I := I) S hS frame hSmooth hFdiff hFtdiff)

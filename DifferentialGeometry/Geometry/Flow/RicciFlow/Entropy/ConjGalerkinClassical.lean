@@ -52,7 +52,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] in
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rev_gram_smooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -98,7 +98,7 @@ private theorem rev_gram_smooth
   rfl
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] in
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rev_trace_eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1888,6 +1888,7 @@ theorem heatpot_of_gallim
       ⟨hs.1, hs.2.trans htau'P⟩
     simpa only [reverseFamily] using hpde s hsP x
 
+omit [SigmaCompactSpace M] in
 theorem heatpot_exists
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1914,6 +1915,7 @@ theorem heatpot_exists
   · simpa only [u] using hpot
   · simpa only [u] using galLim_initial (I := I) (M := M) hlim
 
+omit [SigmaCompactSpace M] in
 theorem conj_heat_exists
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

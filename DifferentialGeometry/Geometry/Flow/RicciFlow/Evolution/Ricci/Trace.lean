@@ -235,20 +235,21 @@ def RicciSymmetricInFrameOnRegular
     ricciCompInFrame (I := I) S frame (t : Real) x i j =
       ricciCompInFrame (I := I) S frame (t : Real) x j i
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcAt_regular
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) :
     DifferentialGeometry.Geometry.Connection.IsLeviCivita (I := I)
       (S.family.connection (t : Real)) (S.family.metric (t : Real)) := by
   constructor
   · simpa [DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt,
       DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.metricAt] using
-      hS.leviCivita.1 (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
+      (SolutionOn.leviCivita (I := I) S).1
+        (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
   · simpa [DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt] using
-      hS.leviCivita.2 (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
+      (SolutionOn.leviCivita (I := I) S).2
+        (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
 
 private theorem rm04Realizes_regular
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -293,7 +294,7 @@ theorem rm04OutputSkew_regular
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
     (DifferentialGeometry.Geometry.Connection.metricCompatible_of_isLeviCivita
-      (I := I) (lcAt_regular (I := I) S hS t))
+      (I := I) (lcAt_regular (I := I) S t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
@@ -319,7 +320,7 @@ theorem rm04FirstBianchi_regular
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
     (DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
-      (I := I) (lcAt_regular (I := I) S hS t))
+      (I := I) (lcAt_regular (I := I) S t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
@@ -346,7 +347,7 @@ theorem rm04PairSymm_regular
   exact DifferentialGeometry.Geometry.Connection.rm04PairSymm_ofLC
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
-    (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
+    (lcAt_regular (I := I) S t) (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
 theorem rm04InputSkew_regular_first_two

@@ -90,6 +90,7 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     hreg.nondegenerateGram
     hreg.uniqueTimeDerivatives
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -106,6 +107,7 @@ theorem coordInvLocal
   · simpa [coordInv, metricCompInFrame,
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).2
 
+omit [SigmaCompactSpace M] in
 theorem coordInvEvol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

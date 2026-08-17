@@ -199,6 +199,7 @@ theorem scalarEvolOfSol
           (t : Real) := by
   exact scalarEvolution_of_isSolution (I := I) S hS
 
+omit [SigmaCompactSpace M] in
 theorem invEvolOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -230,6 +231,7 @@ theorem ricciEvolOfSol
       (t : Real) := by
   exact coordRicciEvol (I := I) S hS x0 t i j
 
+omit [SigmaCompactSpace M] in
 theorem invSymmOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -261,6 +263,7 @@ theorem ricciSymmOfSol
       (fun a b => coordInv (I := I) S x0 t x0 a b) hinv i j
   simpa [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt] using hsym
 
+omit [SigmaCompactSpace M] in
 theorem coordNab2_can
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -539,6 +542,7 @@ theorem coordNab2_can
           rw [hcorr]
           ring
 
+omit [SigmaCompactSpace M] in
 theorem coordRough_can
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -615,6 +619,7 @@ theorem coordRough_can
             fin_cases q <;> rfl
           rw [hinput, hnab2 a b i j]
 
+omit [SigmaCompactSpace M] in
 theorem ricciLapOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -46,11 +46,10 @@ def christoffelVariationCovDerivCoordAt
       DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I) cov x₀ dir j a *
         gammaDt t x₀ i a k)
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem christoffelCoordAt_symm_of_isSolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
     DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I)
@@ -60,7 +59,8 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
   have htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I)
       (S.family.connection (t : Real)) := by
     simpa [DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt] using
-      hS.leviCivita.2 (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
+      (SolutionOn.leviCivita (I := I) S).2
+        (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
   have hzero :
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k x₀
           ((S.family.connection (t : Real)).torsion x₀
@@ -128,11 +128,10 @@ private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
     coordinateFrameAt_mem (I := I) x₀
   simpa [DifferentialGeometry.Geometry.Curvature.christoffelCoordAt] using hvar t x₀ hx₀ i j k
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (rhs :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
@@ -258,7 +257,7 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
           DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I)
             (S.family.connection (t : Real)) x₀ b a c := by
     intro a b c
-    exact christoffelCoordAt_symm_of_isSolutionOn (I := I) S hS t x₀ a b c
+    exact christoffelCoordAt_symm_of_isSolutionOn (I := I) S t x₀ a b c
   let Γ : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> Real :=
     fun a b c =>
@@ -279,11 +278,10 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     covDChristoffelVariation] using
     (christoffel_curv_variation_algebra Γ A dA hΓsymm i k j m)
 
-omit [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (rhs :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
@@ -324,7 +322,7 @@ theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
         (t : Real) := by
     exact HasDerivWithinAt.fun_sum fun k _ =>
       christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
-        (I := I) S hS rhs x₀ hvar hmix t k i j k
+        (I := I) S rhs x₀ hvar hmix t k i j k
   refine hsum.congr_deriv ?_
   simp [ricciVariationFromConnectionRHSInFrame, Finset.sum_sub_distrib]
 
@@ -365,7 +363,7 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
   subst x
   have hderiv :=
     christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
-      (I := I) S hS rhs x₀ hvar hmix t i j
+      (I := I) S rhs x₀ hvar hmix t i j
   have hricci :
       ∀ s : Real, s ∈ D.carrier ->
         ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ i j =

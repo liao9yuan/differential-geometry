@@ -341,7 +341,8 @@ private def solNab2Ric
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (solNabRic (I := I) S t) x
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [SigmaCompactSpace M] in
 private theorem coordNab2Eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
@@ -746,7 +747,7 @@ theorem ricRicciIdAt
   have htor : (S.family.connection (t : Real)).torsion x = 0 := by
     have htf :=
       DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
-        (I := I) (lcAt_regular (I := I) S hS t)
+        (I := I) (lcAt_regular (I := I) S t)
     simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
   have h20 :
       DifferentialGeometry.Tensor.RicciIdentity.Nabla20SRealizesAt (I := I) 2
@@ -1054,7 +1055,8 @@ theorem rm04EvolFam
         if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 3) = l from rfl]
     using h
 
-omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 theorem rm04LapFam_real
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

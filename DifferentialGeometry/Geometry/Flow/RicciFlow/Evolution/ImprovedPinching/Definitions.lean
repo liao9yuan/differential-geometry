@@ -1,6 +1,6 @@
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Tactic.FieldSimp
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.RicciNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarGradient

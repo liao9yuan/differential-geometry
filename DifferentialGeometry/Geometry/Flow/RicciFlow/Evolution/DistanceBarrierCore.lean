@@ -449,7 +449,8 @@ structure ScaledDistSupport
         (I := I) (flowG (I := I) S) T
         (fun _ y => (0 : TangentSpace I y)) rho t x
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [SigmaCompactSpace M] [T2Space M] in
 theorem ScaledDistSupport.toResult
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -925,7 +926,8 @@ private theorem calabi_core_of_sol
     exact hvSupport_t y
   · exact hrho0_x.trans hr.symm
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [SigmaCompactSpace M] [T2Space M] in
 private theorem CalabiFlowCore.scale
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

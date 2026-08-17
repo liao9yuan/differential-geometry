@@ -5,8 +5,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.PDE.RicciFlow
+namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -239,7 +238,6 @@ theorem tensorHeatWithDrift2QuadMetricAt_eq
         nablaA (Fin.cons (X x) (vec2 v v)) := by
   simp [tensorHeatWithDrift2QuadMetricAt]
 
-@[simp]
 theorem tensorHeatWithDrift2QuadMetricAt_zero_drift
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -280,7 +278,6 @@ theorem heatQuad_eq_parts
       laplacian + drift := by
   rw [tensorHeatWithDrift2QuadMetricAt_eq, hlap, hdrift]
 
-@[simp]
 theorem tensorHeatWithDrift2QuadMetricAt_zero
     (g : SmoothRiemannianMetric I M)
     (X : (x : M) -> TangentSpace I x)
@@ -321,7 +318,6 @@ theorem tensorHeatWithDrift2QuadAt_eq
         nablaA (Fin.cons (X x) (vec2 v v)) := by
   exact tensorHeatWithDrift2QuadMetricAt_eq (I := I) (G.metric t) X nabla2A nablaA v
 
-@[simp]
 theorem tensorHeatWithDrift2QuadAt_zero
     (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -338,4 +334,4 @@ theorem tensorHeatWithDrift2QuadAt_zero
 
 end
 
-end DifferentialGeometry.PDE.RicciFlow
+end DifferentialGeometry.Geometry.Operator

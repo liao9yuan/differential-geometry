@@ -264,6 +264,7 @@ structure ScalarLowerBoundWMPRegularity
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x
 
+omit [SigmaCompactSpace M] in
 theorem scalarRegOfSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Basic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 
@@ -478,7 +478,7 @@ abbrev raisedRicciCompInFrame
     (ricciTwoTensorField (I := I) S) gInv frame t x i j
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem raisedRicciCompInFrame_apply
+theorem raisedRicciCompInFrame_apply
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -594,7 +594,7 @@ abbrev ricciNormSqInFrame
     (ricciTwoTensorField (I := I) S) gInv frame
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem ricciNormSqInFrame_apply
+theorem ricciNormSqInFrame_apply
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -660,7 +660,7 @@ abbrev roughLapRicciInnerInFrame
     roughLapRic (ricciTwoTensorField (I := I) S) gInv frame
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem roughLapRicciInnerInFrame_apply
+theorem roughLapRicciInnerInFrame_apply
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
@@ -704,7 +704,7 @@ abbrev nablaRicciNormSqInFrame
   DifferentialGeometry.Geometry.Curvature.nablaRicciNormSqInFrame (M := M) nablaRic gInv
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem nablaRicciNormSqInFrame_apply
+theorem nablaRicciNormSqInFrame_apply
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (t : Real) (x : M) :
