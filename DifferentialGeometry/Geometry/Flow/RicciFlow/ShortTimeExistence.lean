@@ -156,6 +156,8 @@ theorem ricci_flow_short_time_existence
       · exact h_interior t ⟨h0, ht.2⟩ x v w
   exact h_construct
 
+-- #print axioms DifferentialGeometry.PDE.RicciFlow.ricci_flow_short_time_existence
+
 theorem short_time_joint
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

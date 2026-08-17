@@ -2728,6 +2728,8 @@ theorem hamilton_positive_ricci
     rw [hM.2.2.2]; norm_num⟩
   exact HCGCompactness.ham3_main_hcg (I := I) (M := M) hM hpos
 
+-- #print axioms DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci.hamilton_positive_ricci
+
 end HamiltonPositiveRicci
 end RicciFlow
 end PDE
