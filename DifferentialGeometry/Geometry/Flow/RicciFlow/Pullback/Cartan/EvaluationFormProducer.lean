@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
+import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import Mathlib.Analysis.Calculus.Deriv.Basic
@@ -159,7 +159,7 @@ theorem pullback_eval_form_chain_hasDerivAt
     rw [hG', hL']; ring
   rwa [hval] at hkey
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem pullback_metric_chain_rule_of_slots
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -187,7 +187,7 @@ theorem pullback_metric_chain_rule_of_slots
     (pullback_eval_form_chain_hasDerivAt g_fam Φ_fam t x v w B' a' b' G' L'
       hB ha hb hG' hL')
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem pullback_metric_chain_rule_of_slots_total
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
+import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 noncomputable section
@@ -23,13 +23,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem pull_symm_cancel
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     Diffeomorph.pullbackMetric
         (Diffeomorph.pullbackMetric g Φ.symm) Φ = g := by
   rw [Diffeomorph.pullbackMetric_trans, Φ.self_trans_symm,
     Diffeomorph.pullbackMetric_refl]
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiff_push
     (g h : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (u v : TangentSpace I x) :
@@ -55,12 +56,12 @@ theorem connDiff_push
         (Φ x) :=
     hpushSmooth.mdifferentiableAt (by simp)
   have hnatG :=
-    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise
+    LeviCivita_covariantDerivative_pullback_pointwise
       (I := I) (Diffeomorph.pullbackMetric g Φ.symm) Φ v hσ
   have hcancel := pull_symm_cancel (I := I) g Φ
   rw [hcancel] at hnatG
   have hnatH :=
-    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise
+    LeviCivita_covariantDerivative_pullback_pointwise
       (I := I) h Φ v hσ
   have htgt := connDiff_apply (I := I)
     (Diffeomorph.pullbackMetric g Φ.symm) h hpush

@@ -18,7 +18,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem Diffeomorph.pbMetric_symm
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     Diffeomorph.pullbackMetric
@@ -26,7 +26,7 @@ theorem Diffeomorph.pbMetric_symm
   rw [Diffeomorph.pullbackMetric_trans, Φ.symm_trans_self,
     Diffeomorph.pullbackMetric_refl]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem Diffeomorph.pbMetric_self
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     Diffeomorph.pullbackMetric
@@ -135,7 +135,9 @@ theorem joint_symm_smoothOn
     contMDiffAt_snd.comp q hG_at
   simpa only [Function.comp_apply, G] using hsnd.contMDiffWithinAt
 
-omit [SigmaCompactSpace M]
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
   [T2Space M]
   [BoundarylessManifold I M] in
 theorem symm_gauge_vel
@@ -272,6 +274,7 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.DeTurck
 
 omit [CompactSpace M]
+  [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
 @[simp] theorem gauge_vel_refl
     (g g_bg : SmoothRiemannianMetric I M) (x : M) :
@@ -281,7 +284,7 @@ omit [CompactSpace M]
       deTurckVF (I := I) g g_bg x := by
   rw [Diffeomorph.pullbackMetric_refl, Diffeomorph.pushforward_refl]
 
-omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem ricci_pullback_DT
     (g_RF : ℝ → SmoothRiemannianMetric I M)
     (g_bg : SmoothRiemannianMetric I M)
@@ -341,7 +344,7 @@ theorem ricci_pullback_DT
     t ht x v w
   have h_total := deTurck_evalForm_chain_hasDerivWithinAt (I := I) g_RF Φ_fam
     t (le_of_lt ht.1) x v w _ _ h_metric h_push hQ'
-  have h_ric := ricci_tensor_pullback_natural_under_diffeomorphism
+  have h_ric := DifferentialGeometry.Geometry.Curvature.ricciTensor_pullback
     (I := I) (g_RF t) (Φ_fam t) x v w
   have h_lie :
       lieDerivMetric (I := I)

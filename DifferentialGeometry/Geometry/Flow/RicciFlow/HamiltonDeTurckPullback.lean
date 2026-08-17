@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRHS
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTensor
+import DifferentialGeometry.Geometry.Metric.Pullback
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciNaturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow
@@ -77,6 +77,7 @@ theorem deTurck_pushforward_slot_hasDerivWithinAt
   (variational_flow_feeds_cartan_witness (I := I) (g_DT t)
     (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w hv_raw hw_raw).hasDerivWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurck_pullback_eval_value_hasDerivWithinAt
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -113,7 +114,7 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
   have h_cancel : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_DT := by ring
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
-    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v
+    exact (DifferentialGeometry.Geometry.Curvature.ricciTensor_pullback (I := I) (g_DT t) (Φ_fam t) x v
       w).symm
   have h_value : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_fam := by
     rw [h_cancel, h_ric_nat]
@@ -126,6 +127,7 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
     exact h_value.symm
   exact pullbackMetric_inner_hasDerivWithinAt_of_eval (I := I) g_DT Φ_fam x v w h_eval'
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hamilton_deturck_pullback_solves_ricci_flow
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
@@ -164,6 +166,7 @@ theorem hamilton_deturck_pullback_solves_ricci_flow
   exact deTurck_pullback_eval_value_hasDerivWithinAt (I := I)
     g_bg g_DT Φ_fam t x v w (h_total_eval t ht x v w)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hamiltonDeTurck_pullback_ricciFlow_family
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)

@@ -3,17 +3,15 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-namespace DifferentialGeometry.PDE.RicciFlow.Pullback
+namespace DifferentialGeometry
 
 open Bundle
 open scoped Manifold ContDiff
 
 noncomputable def Diffeomorph.pushforward
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M]
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (W : ∀ x : M, TangentSpace I x) :
     ∀ x : M, TangentSpace I x :=
@@ -21,10 +19,8 @@ noncomputable def Diffeomorph.pushforward
 
 theorem Diffeomorph.pushforward_image
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M]
     (Φ : M ≃ₘ⟮I, I⟯ M) (W : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ W (Φ x) =
       mfderiv I I (Φ : M → M) x (W x) := by
@@ -41,10 +37,8 @@ theorem Diffeomorph.pushforward_image
 
 theorem Diffeomorph.mfderiv_symm_self
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M]
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (Φ.symm : M → M) (Φ x)
         (mfderiv I I (Φ : M → M) x v) = v := by
@@ -65,10 +59,8 @@ theorem Diffeomorph.mfderiv_symm_self
 
 theorem Diffeomorph.mfderiv_self_symm
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M]
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (w : TangentSpace I (Φ x)) :
     mfderiv I I (Φ : M → M) x
         (mfderiv I I (Φ.symm : M → M) (Φ x) w) = w := by
@@ -96,10 +88,8 @@ theorem Diffeomorph.mfderiv_self_symm
 
 @[simp] theorem Diffeomorph.pushforward_refl
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M]
     (W : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward (Diffeomorph.refl I M ∞) W x = W x := by
   simpa only [Diffeomorph.coe_refl, id_eq, mfderiv_id,
@@ -107,4 +97,4 @@ theorem Diffeomorph.mfderiv_self_symm
     (Diffeomorph.pushforward_image (I := I)
       (Diffeomorph.refl I M ∞) W x)
 
-end DifferentialGeometry.PDE.RicciFlow.Pullback
+end DifferentialGeometry

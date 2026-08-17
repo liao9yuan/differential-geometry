@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
+import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTensor
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciNaturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
@@ -31,6 +31,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasDerivAt_deTurck_pullback_eval_form
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (g_bg : SmoothRiemannianMetric I M)
@@ -94,7 +95,7 @@ theorem hasDerivAt_deTurck_pullback_eval_form
     ring
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
-    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v
+    exact (DifferentialGeometry.Geometry.Curvature.ricciTensor_pullback (I := I) (g_DT t) (Φ_fam t) x v
       w).symm
   have h_value :
       (((-2 : ℝ) * R_DT + L) + Lpush) = (-2 : ℝ) * R_fam := by

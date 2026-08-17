@@ -1,7 +1,6 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
+import DifferentialGeometry.Geometry.Metric.Pullback
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
-open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -13,7 +12,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+variable [SigmaCompactSpace M] [T2Space M]
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_eq_inner_mfderiv

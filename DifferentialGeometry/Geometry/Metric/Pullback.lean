@@ -289,4 +289,50 @@ theorem Diffeomorph.mfderiv_contMDiff
     ContMDiff I I ∞ (Φ : M → N) :=
   Φ.contMDiff
 
+omit [FiniteDimensional ℝ E] in
+theorem bilinear_comp_self_contMDiff :
+    ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
+        ContinuousLinearMap.bilinearComp p.1 p.2 p.2) := by
+  have hfst : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => p.1) :=
+    contMDiff_fst
+  have hsnd : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => p.2) :=
+    contMDiff_snd
+  have hflipDiff : ContDiff ℝ ∞
+      ((ContinuousLinearMap.flipₗᵢ ℝ E E ℝ) :
+        (E →L[ℝ] E →L[ℝ] ℝ) → (E →L[ℝ] E →L[ℝ] ℝ)) :=
+    (ContinuousLinearMap.flipₗᵢ ℝ E E ℝ).contDiff
+  have h1 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => p.1.comp p.2) :=
+    hfst.clm_comp hsnd
+  have h2 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => (p.1.comp p.2).flip) := by
+    have hcomp := hflipDiff.comp_contMDiff h1
+    simpa [ContinuousLinearMap.coe_flipₗᵢ, Function.comp_def] using hcomp
+  have h3 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
+        (p.1.comp p.2).flip.comp p.2) := h2.clm_comp hsnd
+  have h4 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
+        ((p.1.comp p.2).flip.comp p.2).flip) := by
+    have hcomp := hflipDiff.comp_contMDiff h3
+    simpa [ContinuousLinearMap.coe_flipₗᵢ, Function.comp_def] using hcomp
+  exact h4
+
 end DifferentialGeometry

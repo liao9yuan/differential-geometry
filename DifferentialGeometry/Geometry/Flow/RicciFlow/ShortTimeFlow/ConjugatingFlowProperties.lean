@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
+import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.CutoffExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
@@ -538,6 +538,7 @@ theorem flow_slot_pos
     lieDerivMetric_smul_vectorField]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem conjugating_flow_flat_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -669,7 +670,7 @@ theorem conjugating_flow_orbit_pushforward_continuity_data
       (fun s : ℝ => (Φ_fam s : M → M) y) (fun s : ℝ => mfderiv I I (Φ_fam s : M → M) y u)
       ⟨hs₀.1, hs₀.2⟩ (horbit y |>.continuousWithinAt hs₀) hchartRepDiff
 
-omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem conjugating_flow_t0_continuity_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (hT : 0 < T) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -1324,7 +1325,7 @@ theorem conjugating_flow_pullback_jointGram_data
         rw [(extChartAt I α).left_inv hsr0]
       rw [hgramEq]
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem conjugating_flow_pullback_jointGram_onesided
     (g_DT : ℝ → SmoothRiemannianMetric I M)

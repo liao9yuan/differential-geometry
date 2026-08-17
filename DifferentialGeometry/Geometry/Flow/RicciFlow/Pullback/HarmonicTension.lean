@@ -1,8 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
+import DifferentialGeometry.Geometry.Metric.Pullback
+import DifferentialGeometry.Bundle.VectorFieldPushforward
 import DifferentialGeometry.Geometry.Metric.Defs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

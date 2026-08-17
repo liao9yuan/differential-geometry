@@ -1,9 +1,8 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.LeviCivita
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.MLieBracket
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
+import DifferentialGeometry.Geometry.Metric.Pullback
+import DifferentialGeometry.Bundle.VectorFieldLieBracket
+import DifferentialGeometry.Bundle.VectorFieldPushforward
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
+import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
 open DifferentialGeometry.Geometry.Curvature
@@ -23,6 +22,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
     (g : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M)
@@ -60,11 +60,12 @@ theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
   have hY_mdiff : MDifferentiableAt I I.tangent
       (fun y : M => (TotalSpace.mk' E y (Y y) : TangentBundle I M)) x :=
     (hY_smooth x).mdifferentiableAt hinfty
-  rw [LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ v
+  rw [LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ v
     hY_mdiff,
-      LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ w
+      LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ w
         hY_mdiff]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem assemble_lie_deriv_naturality
     (g : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M)

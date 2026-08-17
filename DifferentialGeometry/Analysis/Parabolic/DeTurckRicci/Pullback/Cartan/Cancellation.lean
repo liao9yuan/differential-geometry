@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
+import DifferentialGeometry.Bundle.VectorFieldPushforward
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add

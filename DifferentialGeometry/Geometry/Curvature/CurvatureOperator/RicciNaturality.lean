@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.MLieBracket
+import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
+import DifferentialGeometry.Bundle.VectorFieldLieBracket
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
@@ -8,7 +8,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.Pullback
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle
 open scoped Manifold ContDiff
@@ -24,7 +24,8 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 private lemma infty_ne_zero_ricci : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_eval_at_image
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ Y (Φ x) = mfderiv I I (⇑Φ) x (Y x) := by
@@ -37,7 +38,8 @@ private lemma pushforward_eval_at_image
     ((mfderiv I I (⇑Φ) (Φ.symm (Φ x))) (Y (Φ.symm (Φ x))))).trans ?_
   rw [hbase]
 
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_eval
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (b : M) :
     Diffeomorph.pushforward Φ Y b = mfderiv I I (⇑Φ) (Φ.symm b) (Y (Φ.symm b)) := by
@@ -79,7 +81,8 @@ private lemma mfderiv_compose_symm
   have := congrArg (fun f : TangentSpace I (Φ x) →L[ℝ] TangentSpace I (Φ x) => f w) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_eq_mpullback_symm_global
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
     (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
@@ -117,6 +120,7 @@ private lemma pushforward_eq_mpullback_symm_global
     ((mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)))
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pushforward_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) {Y : ∀ x : M, TangentSpace I x}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
@@ -140,6 +144,7 @@ private lemma pushforward_contMDiff
     (f := ⇑Φ.symm) (m := (∞ : WithTop ℕ∞)) (n := (∞ : WithTop ℕ∞))
     hY hΦsymm_smooth hinv (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pushforward_covApply_eq
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     {Y Z : ∀ x : M, TangentSpace I x}
@@ -166,10 +171,11 @@ private lemma pushforward_covApply_eq
   rw [hLHS_eval, hRHS_pf_Y]
   have hZ_at : MDifferentiableAt I I.tangent (T% Z) y :=
     (hZ y).mdifferentiableAt (by simp)
-  have hchain := LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ
+  have hchain := LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ
     (Y y) hZ_at
   rw [hchain, hb]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannSec_pullback_pointwise
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     {X Y Z : ∀ x : M, TangentSpace I x} {x : M}
@@ -197,7 +203,7 @@ private lemma riemannSec_pullback_pointwise
   have hterm1 : mfderiv I I (⇑Φ) x (cov₁.toFun (covApply cov₁ Y Z) x (X x))
       = cov₂.toFun (Diffeomorph.pushforward Φ (covApply cov₁ Y Z)) (Φ x)
           (mfderiv I I (⇑Φ) x (X x)) :=
-    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (X x)
+    LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ (X x)
       hcovYZ_at
   have hcovXZ_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov₁ X Z)) := by
     have hZ_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% Z) := by simpa using hZ
@@ -208,13 +214,13 @@ private lemma riemannSec_pullback_pointwise
   have hterm2 : mfderiv I I (⇑Φ) x (cov₁.toFun (covApply cov₁ X Z) x (Y x))
       = cov₂.toFun (Diffeomorph.pushforward Φ (covApply cov₁ X Z)) (Φ x)
           (mfderiv I I (⇑Φ) x (Y x)) :=
-    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (Y x)
+    LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ (Y x)
       hcovXZ_at
   have hZ_at : MDifferentiableAt I I.tangent (T% Z) x :=
     (hZ x).mdifferentiableAt (by simp)
   have hterm3 : mfderiv I I (⇑Φ) x (cov₁.toFun Z x (mlieBracket I X Y x))
       = cov₂.toFun Z' (Φ x) (mfderiv I I (⇑Φ) x (mlieBracket I X Y x)) := by
-    have h := LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ
+    have h := LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ
       (mlieBracket I X Y x) hZ_at
     exact h
   rw [hterm1, hterm2, hterm3]
@@ -236,11 +242,12 @@ private lemma riemannSec_pullback_pointwise
   have hbracket_nat :
       mlieBracket I X' Y' (Φ x) = Diffeomorph.pushforward Φ (mlieBracket I X Y) (Φ x) := by
     rw [hX'_def, hY'_def]
-    exact mlie_bracket_pullback_naturality (I := I) Φ X Y (Φ x) hX_at hY_at
+    exact Diffeomorph.pushforward_mlieBracket (I := I) Φ X Y (Φ x) hX_at hY_at
   have hbracket_eq : mfderiv I I (⇑Φ) x (mlieBracket I X Y x) = mlieBracket I X' Y' (Φ x) := by
     rw [← hbracket_pf, hbracket_nat]
   rw [hcovYZ_eq, hcovXZ_eq, hX_eval, hY_eval, hbracket_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannOp_pullback_pointwise
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w u : TangentSpace I x) :
@@ -275,6 +282,7 @@ private lemma riemannOp_pullback_pointwise
       pushforward_eval_at_image (I := I) Φ V x,
       pushforward_eval_at_image (I := I) Φ W x]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ricciEndo_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
@@ -293,7 +301,8 @@ private lemma ricciEndo_conjugation
   rw [← riemannOp_pullback_pointwise (I := I) g Φ x v w Z]
   rw [mfderiv_symm_compose (I := I) Φ x]
 
-theorem ricciTensor_pullback_conjugation
+omit [NeZero (Module.finrank ℝ E)] in
+theorem ricciTensor_pullback
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
     ricciTensor (I := I) (Diffeomorph.pullbackMetric g Φ) x v w
@@ -343,4 +352,4 @@ theorem ricciTensor_pullback_conjugation
   rw [← hconj]
   exact LinearMap.trace_conj' F e.toLinearEquiv.symm
 
-end DifferentialGeometry.PDE.RicciFlow.Pullback
+end DifferentialGeometry.Geometry.Curvature

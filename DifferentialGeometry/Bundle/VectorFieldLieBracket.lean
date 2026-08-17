@@ -1,8 +1,8 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
+import DifferentialGeometry.Bundle.VectorFieldPushforward
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
 
-namespace DifferentialGeometry.PDE.RicciFlow.Pullback
+namespace DifferentialGeometry
 
 open Bundle
 open scoped Manifold ContDiff
@@ -44,6 +44,7 @@ private lemma mfderiv_self_comp_symm
   rw [mfderiv_id] at hchain
   exact hchain.symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma pushforward_eq_mpullback_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (V : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ V x = VectorField.mpullback I I (⇑Φ.symm) V x := by
@@ -62,7 +63,8 @@ private lemma pushforward_eq_mpullback_symm
   exact eqRec_heq (φ := fun z => TangentSpace I z) (Φ.apply_symm_apply x)
     ((mfderiv I I (⇑Φ) (Φ.symm x)) (V (Φ.symm x)))
 
-theorem mlie_bracket_pullback_naturality
+omit [NeZero (Module.finrank ℝ E)] in
+theorem Diffeomorph.pushforward_mlieBracket
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (X Y : ∀ x : M, TangentSpace I x)
     (x : M)
@@ -90,4 +92,4 @@ theorem mlie_bracket_pullback_naturality
     convert h2 using 1
   exact (VectorField.mpullback_mlieBracket hX hY hΦsymm_smooth hn).symm
 
-end DifferentialGeometry.PDE.RicciFlow.Pullback
+end DifferentialGeometry

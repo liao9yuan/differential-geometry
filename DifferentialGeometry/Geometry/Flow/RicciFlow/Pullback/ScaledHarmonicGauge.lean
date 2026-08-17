@@ -55,7 +55,7 @@ omit [FiniteDimensional ℝ E]
     transportScalar (I := I) r Φ (Φ x) = r x := by
   simp only [trScalar_apply, Diffeomorph.symm_apply_apply]
 
-omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem ricci_pullback_drift
     (g_RF : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -113,7 +113,7 @@ theorem ricci_pullback_drift
     t ht x v w
   have h_total := deTurck_evalForm_chain_hasDerivWithinAt (I := I) g_RF Φ_fam
     t (le_of_lt ht.1) x v w _ _ h_metric h_push hQ'
-  have h_ric := ricci_tensor_pullback_natural_under_diffeomorphism
+  have h_ric := DifferentialGeometry.Geometry.Curvature.ricciTensor_pullback
     (I := I) (g_RF t) (Φ_fam t) x v w
   have h_lie :
       lieDerivMetric (I := I)
@@ -157,7 +157,7 @@ theorem ricci_pullback_drift
     exact pullback_metric_evaluation_formula (I := I) (g_RF s) (Φ_fam s) x v w
   rwa [hcurve]
 
-omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem fixed_pullback_drift
     (q : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

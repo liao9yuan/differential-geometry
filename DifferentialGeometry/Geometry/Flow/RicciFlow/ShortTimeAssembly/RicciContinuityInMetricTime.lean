@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTensor
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciNaturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
@@ -1062,7 +1062,7 @@ private lemma ricci_moving_chart_sum
 
 end MovingPushforwardAux
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem gfam_inner_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (_hT : 0 < T)
@@ -1178,7 +1178,7 @@ theorem gfam_inner_continuous_on
     exact hsum s hb hsr
   · exact hsum s₀ hbase0 hsrc0
 
-omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem ricci_gfam_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (_hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
@@ -1206,7 +1206,7 @@ theorem ricci_gfam_continuous_on
           (mfderiv I I (Φ_fam s : M → M) x v)
           (mfderiv I I (Φ_fam s : M → M) x w) := by
     funext s
-    exact ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT s) (Φ_fam s) x v w
+    exact DifferentialGeometry.Geometry.Curvature.ricciTensor_pullback (I := I) (g_DT s) (Φ_fam s) x v w
   rw [hnat]
   intro s₀ hs₀
   set α : M := (Φ_fam s₀ : M → M) x with hα
