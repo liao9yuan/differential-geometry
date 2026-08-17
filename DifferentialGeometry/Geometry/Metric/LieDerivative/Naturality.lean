@@ -1,10 +1,8 @@
 import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Bundle.VectorFieldLieBracket
 import DifferentialGeometry.Bundle.VectorFieldPushforward
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Cartan
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
 open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
@@ -52,9 +50,9 @@ theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
         (mfderiv I I (⇑Φ) x w)
       + g.inner (Φ x) (mfderiv I I (⇑Φ) x v) ((LeviCivita (I := I) g)
         (Diffeomorph.pushforward Φ Y) (Φ x) (mfderiv I I (⇑Φ) x w))
-  rw [pullback_metric_evaluation_formula (I := I) g Φ x
+  rw [Diffeomorph.pullbackMetric_inner (I := I) g Φ x
         ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x v) w,
-      pullback_metric_evaluation_formula (I := I) g Φ x v
+      Diffeomorph.pullbackMetric_inner (I := I) g Φ x v
         ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x w)]
   have hinfty : (∞ : WithTop ℕ∞) ≠ 0 := by decide
   have hY_mdiff : MDifferentiableAt I I.tangent
@@ -64,25 +62,5 @@ theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
     hY_mdiff,
       LeviCivita_covariantDerivative_pullback_pointwise (I := I) g Φ w
         hY_mdiff]
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem assemble_lie_deriv_naturality
-    (g : SmoothRiemannianMetric I M)
-    (Φ : M ≃ₘ⟮I, I⟯ M)
-    (Y : ∀ x : M, TangentSpace I x)
-    (hY_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x)))
-    (hPush_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x
-        (Diffeomorph.pushforward Φ Y x))) :
-    ∀ x : M, ∀ v w : TangentSpace I x,
-      lieDerivMetric (I := I) (Diffeomorph.pullbackMetric g Φ)
-          ⟨Y, hY_smooth⟩ x v w
-        = lieDerivMetric (I := I) g
-            ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
-              (mfderiv I I Φ x v) (mfderiv I I Φ x w) :=
-  fun x v w =>
-    lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise g Φ Y hY_smooth
-      hPush_smooth x v w
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback

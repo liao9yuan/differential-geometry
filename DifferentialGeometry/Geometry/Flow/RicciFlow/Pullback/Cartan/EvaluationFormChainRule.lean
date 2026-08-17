@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormProducer
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
+import DifferentialGeometry.Geometry.Metric.Pullback.DerivativeDecomposition
 import Mathlib.Analysis.Calculus.Deriv.Comp
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.FDeriv.Prod

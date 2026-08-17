@@ -1,10 +1,5 @@
-import DifferentialGeometry.Geometry.Metric.Pullback
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
-import Mathlib.Analysis.Calculus.Deriv.Add
-import Mathlib.Analysis.Calculus.Deriv.Basic
-import Mathlib.Analysis.Calculus.Deriv.Mul
+import DifferentialGeometry.Geometry.Metric.Pullback.EvaluationDerivative
+import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -12,24 +7,12 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
-open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-theorem pullback_metric_evaluation_formula
-    (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
-    (x : M) (v w : TangentSpace I x) :
-    (Diffeomorph.pullbackMetric g Φ).inner x v w
-      = g.inner (Φ x) (mfderiv I I Φ x v) (mfderiv I I Φ x w) := by
-  change Diffeomorph.pullbackInner g Φ x v w
-      = g.inner (Φ x) (mfderiv I I Φ x v) (mfderiv I I Φ x w)
-  unfold Diffeomorph.pullbackInner
-  simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
     [T2Space M] [BoundarylessManifold I M] in

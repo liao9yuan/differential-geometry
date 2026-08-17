@@ -1,1 +1,0 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric

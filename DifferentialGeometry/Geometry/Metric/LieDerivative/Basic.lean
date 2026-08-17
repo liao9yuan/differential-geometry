@@ -1,6 +1,5 @@
-import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
-open DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

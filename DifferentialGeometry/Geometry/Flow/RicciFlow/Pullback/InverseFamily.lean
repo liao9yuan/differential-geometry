@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
+import DifferentialGeometry.Geometry.Metric.Pullback.DerivativeDecomposition
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
 open DifferentialGeometry.Geometry.Curvature
@@ -381,7 +381,7 @@ theorem ricci_pullback_DT
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w)) := by
     funext s
-    exact pullback_metric_evaluation_formula (I := I) (g_RF s) (Φ_fam s) x v w
+    exact Diffeomorph.pullbackMetric_inner (I := I) (g_RF s) (Φ_fam s) x v w
   rwa [hcurve]
 
 end Gauge

@@ -154,7 +154,7 @@ theorem ricci_pullback_drift
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w)) := by
     funext s
-    exact pullback_metric_evaluation_formula (I := I) (g_RF s) (Φ_fam s) x v w
+    exact Diffeomorph.pullbackMetric_inner (I := I) (g_RF s) (Φ_fam s) x v w
   rwa [hcurve]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
@@ -220,7 +220,7 @@ theorem fixed_pullback_drift
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w)) := by
     funext s
-    exact pullback_metric_evaluation_formula (I := I) q (Φ_fam s) x v w
+    exact Diffeomorph.pullbackMetric_inner (I := I) q (Φ_fam s) x v w
   rwa [hcurve]
 
 omit [CompactSpace M]

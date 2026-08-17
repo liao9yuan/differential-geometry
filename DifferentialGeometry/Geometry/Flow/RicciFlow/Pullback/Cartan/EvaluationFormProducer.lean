@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.Pullback
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
+import DifferentialGeometry.Geometry.Metric.Pullback.DerivativeDecomposition
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul

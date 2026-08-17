@@ -1,10 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.Pullback
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
+import DifferentialGeometry.Geometry.Metric.Pullback.DerivativeDecomposition
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciNaturality
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Naturality
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import Mathlib.Analysis.Calculus.Deriv.Basic

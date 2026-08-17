@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.Pullback
 import Mathlib.Analysis.Calculus.Deriv.Basic
-import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 

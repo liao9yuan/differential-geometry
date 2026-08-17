@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

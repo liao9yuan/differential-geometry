@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Basic
 import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
@@ -11,8 +11,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.GlobalFlowOnClosed
 import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciNaturality
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Naturality
+import DifferentialGeometry.Geometry.Metric.Pullback.DerivativeDecomposition
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatInteriorRicciFlowPde

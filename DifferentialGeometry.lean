@@ -2450,7 +2450,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFCha
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeChartFrameIdentity
-import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricTrace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
@@ -2910,8 +2909,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Canc
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormProducer
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ComponentRestrict
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ConnAddD2Blocks
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ConnAddHessian
@@ -2931,10 +2928,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicPrincipal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicStateMass
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.InverseFamily
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.NearIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ScaledHarmonicGauge
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.Bianchi
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.Bochner
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.RicciFlow
@@ -3037,6 +3032,9 @@ import DifferentialGeometry.Geometry.Metric.DistanceTent
 import DifferentialGeometry.Geometry.Metric.FiberExpansion
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Basic
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Cartan
+import DifferentialGeometry.Geometry.Metric.LieDerivative.Naturality
 import DifferentialGeometry.Geometry.Metric.LipschitzGradient
 import DifferentialGeometry.Geometry.Metric.LocalIsometryRigidity
 import DifferentialGeometry.Geometry.Metric.MetricBallMonotone
@@ -3049,6 +3047,8 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Geometry.Metric.Polarization
 import DifferentialGeometry.Geometry.Metric.Pullback
+import DifferentialGeometry.Geometry.Metric.Pullback.DerivativeDecomposition
+import DifferentialGeometry.Geometry.Metric.Pullback.EvaluationDerivative
 import DifferentialGeometry.Geometry.Metric.PullbackCross
 import DifferentialGeometry.Geometry.Metric.RiemannianMetric
 import DifferentialGeometry.Geometry.Metric.Scaling
@@ -3799,9 +3799,7 @@ import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanUpper
 import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
-import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Metric.MetricBounds
