@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 set_option autoImplicit false
 
 noncomputable section
@@ -250,7 +249,6 @@ theorem hasDerivAt_componentVec3
     simpa using hconst.clm_apply hpi
   simpa [componentVec3, L, PiLp.coe_symm_continuousLinearEquiv] using hL
 
-
 theorem hasDerivWithinAt_componentVec3
     [finiteIdx : Finite Idx]
     (A A' : Real -> Idx -> Idx -> Idx -> Real) {s : Set Real} {t : Real}
@@ -398,7 +396,6 @@ theorem gammaL2_le_initial_add
       (hcombo s hs))
     (mul_le_mul_of_nonneg_left (hRic s hs) (by norm_num : (0 : Real) <= 3))
 
-
 theorem gammaL2_le_initial_add_within
     (Gamma dGamma nablaRic : Real -> Idx -> Idx -> Idx -> Real)
     {a b R : Real}
@@ -427,7 +424,6 @@ theorem gammaL2_le_initial_add_within
     (DifferentialGeometry.Geometry.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
       (hcombo s hs))
     (mul_le_mul_of_nonneg_left (hRic s hs) (by norm_num : (0 : Real) <= 3))
-
 
 theorem gammaL2_le_initial_add_on_subset
     (Gamma dGamma nablaRic : Real -> Idx -> Idx -> Idx -> Real)

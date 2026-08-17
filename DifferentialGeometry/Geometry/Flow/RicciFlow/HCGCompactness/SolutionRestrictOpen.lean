@@ -173,7 +173,7 @@ theorem metricRm04_restrictOpen_eval
   exact metricRm04StdAt_restrictOpen (I := I) g U x (slots 0) (slots 1) (slots 2) (slots 3)
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 def solutionOn_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
@@ -347,7 +347,6 @@ theorem metricVariationEquation_restrictOpen
     exact ricciTensor_restrictOpen (I := I) (S.base.metric (t : ℝ)) U x X Y
   rw [hric]
   exact hS.equation t (x : M) X Y
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in

@@ -11,19 +11,19 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormWeightedCovIBP
-open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
 open MeasureTheory Set Filter Topology
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.Geometry.Curvature
+
 namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
-
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
@@ -45,6 +45,8 @@ section GeneralValenceRS
 open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla
     DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMultilinear
 
+def gnStepConst (n k : ℕ) : ℝ :=
+  max (2 * ((k : ℝ) - 1) + Real.sqrt (n : ℝ)) 1
 
 private lemma real_two_mul_add_nonneg {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     0 ≤ 2 * a + b := by linarith
@@ -54,32 +56,32 @@ private lemma real_le_mul_add_one {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
 
 theorem secondOrderInterp_lpFiberJet_fin_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :
-    ∃ K' : ℝ, 1 ≤ K' ∧
+    ∃ K' : ℝ, K' = gnStepConst (Module.finrank ℝ E) k ∧ 1 ≤ K' ∧
       ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g r m) (i : ℕ), 1 ≤ i → i + 1 < k →
         ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
               ((covGrad (I := I) (M := M) g r m w).toSection x)) ^ ((k : ℝ) / (i + 1))
-            ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^
-              (((i : ℝ) + 1) / (2 * k))) ^ 2 ≤
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 1) / (2 * k))) ^ 2 ≤
           K' *
             ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x)) ^ ((k : ℝ) / i)
-                ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^
-                  ((i : ℝ) / (2 * k))) *
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))) *
             ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1 + 1) x
                   ((covGrad (I := I) (M := M) g r (m + 1)
                     (covGrad (I := I) (M := M) g r m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
-                ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^
                   (((i : ℝ) + 2) / (2 * k))) := by
   classical
   have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
-  refine ⟨max (max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1) 1, ?_, ?_⟩
-  · exact le_trans (le_max_right _ _) (le_max_left _ _)
+  refine ⟨gnStepConst (Module.finrank ℝ E) k, rfl, ?_, ?_⟩
+  · rw [gnStepConst]
+    exact le_max_right _ _
   intro m w i hi1 hreg_lt
-  set μ : MeasureTheory.Measure M :=
-    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
-    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set K' : ℝ := max (max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1) 1
-    with hK'def
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set K' : ℝ := gnStepConst (Module.finrank ℝ E) k with hK'def
+  have hK'_nn : 0 ≤ K' := by
+    rw [hK'def, gnStepConst]
+    exact le_trans zero_le_one (le_max_right _ _)
   set a : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x)
     with ha_def
   set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
@@ -204,7 +206,8 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
         exact real_le_mul_add_one hkR.le hiR.le
       have hDk : D ≤ 2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) := by
         rw [hD_def]; linarith
-      exact le_trans hDk (le_trans (le_max_left _ _) (le_max_left _ _))
+      rw [hK'def, gnStepConst]
+      exact le_trans hDk (le_max_left _ _)
     rw [hLHS_sq]
     rcases eq_or_lt_of_le hIb_nn with hIb0 | hIbpos
     · rw [← hIb0, Real.zero_rpow (by rw [hinvp]; positivity)]
@@ -224,31 +227,32 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
         _ = K' * Aw * C := by ring
   · exfalso; omega
 
-
 theorem secondOrderInterp_lpFiberJet_sup_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :
-    ∃ K' : ℝ, 1 ≤ K' ∧
+    ∃ K' : ℝ, K' = gnStepConst (Module.finrank ℝ E) k ∧ 1 ≤ K' ∧
       ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g r m) (A : ℝ), 0 ≤ A →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) ≤ A ^ 2) →
         ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
               ((covGrad (I := I) (M := M) g r m w).toSection x)) ^ ((k : ℝ) / 1)
-            ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((1 : ℝ) /
-              (2 * k))) ^ 2 ≤
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((1 : ℝ) / (2 * k))) ^ 2 ≤
           K' * A *
             ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1 + 1) x
                   ((covGrad (I := I) (M := M) g r (m + 1)
                     (covGrad (I := I) (M := M) g r m w)).toSection x)) ^ ((k : ℝ) / 2)
-                ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^
-                  ((2 : ℝ) / (2 * k))) := by
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((2 : ℝ) / (2 * k))) := by
   classical
   have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
-  refine ⟨max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1, le_max_right _ _, ?_⟩
+  refine ⟨gnStepConst (Module.finrank ℝ E) k, rfl, ?_, ?_⟩
+  · rw [gnStepConst]
+    exact le_max_right _ _
   intro m w A hA hsup
-  set μ : MeasureTheory.Measure M :=
-    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
-    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set K' : ℝ := max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1 with hK'def
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set K' : ℝ := gnStepConst (Module.finrank ℝ E) k with hK'def
+  have hK'_nn : 0 ≤ K' := by
+    rw [hK'def, gnStepConst]
+    exact le_trans zero_le_one (le_max_right _ _)
   set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
     ((covGrad (I := I) (M := M) g r m w).toSection x) with hb_def
   set c : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r (m + 1 + 1) x
@@ -342,7 +346,9 @@ theorem secondOrderInterp_lpFiberJet_sup_rs
           ← hC_def] at hH
       rw [hJ_def]
       exact hH
-  have hcoef_le : D ≤ K' := by rw [hD_def]; exact le_max_left _ _
+  have hcoef_le : D ≤ K' := by
+    rw [hD_def, hK'def, gnStepConst]
+    exact le_max_left _ _
   have hAC_nn : 0 ≤ A * C := mul_nonneg hA hC_nn
   have hsum_k : (1 : ℝ) / k + ((k : ℝ) - 1) / k = 1 := by
     rw [← add_div, show (1 : ℝ) + ((k : ℝ) - 1) = (k : ℝ) from by ring, div_self (ne_of_gt hkR)]

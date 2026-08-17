@@ -35,7 +35,7 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
-    (hdt : InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt)
+    (hdt : InvMetricDerivLocal (D := D) gInv gInvDt u)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hunique : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)) :
@@ -68,7 +68,7 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
         simpa [metricCompInFrame] using
           (S.family.metric (t : Real)).symm x (frame a x) (frame b x))
       j
-  exact (hdt t x i j).congr_deriv hsolve
+  exact (hdt t x hx i j).congr_deriv hsolve
 
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_metricFrameTimeRegularity
@@ -277,7 +277,6 @@ theorem evol_inverse_metric_inFrame
     inverseMetricEvolutionEquationInFrame_apply
       (I := I) (S := S) (gInv := gInv) (frame := frame) hEq t x hx i j
   simpa [inverseMetricEvolutionRHSInFrame] using h
-
 
 end Components
 

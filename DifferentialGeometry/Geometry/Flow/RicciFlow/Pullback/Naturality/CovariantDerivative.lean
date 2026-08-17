@@ -1,7 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.LeviCivita
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
 open DifferentialGeometry.Geometry.Connection
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

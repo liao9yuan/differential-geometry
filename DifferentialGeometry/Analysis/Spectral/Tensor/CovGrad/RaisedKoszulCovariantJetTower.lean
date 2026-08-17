@@ -6,7 +6,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -499,6 +498,9 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
   rw [rfns_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ (1 + i) x]
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
+
+alias rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq :=
+  riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
 
 private lemma fiberNormSqComponent_sq_iteratedCovGrad_raisedKoszul_le_koszul_rfns
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)

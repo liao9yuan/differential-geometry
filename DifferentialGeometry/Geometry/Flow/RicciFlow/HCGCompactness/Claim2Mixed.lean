@@ -210,7 +210,6 @@ theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
       ih (fun i hi => hF i (Finset.mem_insert_of_mem hi)) y hy n,
       Finset.sum_insert hbs]
 
-
 omit [DecidableEq Idx] in
 theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
     (F : ι → (Fin r → Idx) → Real) :
@@ -442,6 +441,7 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
                     (mul_nonneg (Nat.cast_nonneg _) (hCA0 c))
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem claim2_geom

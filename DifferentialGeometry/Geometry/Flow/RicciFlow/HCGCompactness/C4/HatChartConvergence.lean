@@ -362,6 +362,5 @@ theorem properExpDist
     exact hed
   exact (ENNReal.ofReal_eq_ofReal_iff dist_nonneg (Real.sqrt_nonneg _)).mp hofReal
 
-
 end HCGCompactness
 end DifferentialGeometry

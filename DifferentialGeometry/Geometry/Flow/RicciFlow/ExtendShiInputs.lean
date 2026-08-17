@@ -23,7 +23,7 @@ open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -211,7 +211,6 @@ private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀
     _ ≤ Ci a := hCi a b hb
     _ ≤ ∑ a' : Fin (Module.finrank ℝ E), Ci a' :=
         Finset.single_le_sum (fun i _ => (hCi_pos i).le) (Finset.mem_univ a)
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in

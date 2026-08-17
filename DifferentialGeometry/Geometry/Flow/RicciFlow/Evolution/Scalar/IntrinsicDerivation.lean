@@ -28,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
 private theorem sum_swap_four_local
     {Idx : Type*} [Fintype Idx] {R : Type*} [AddCommMonoid R]
     (F : Idx -> Idx -> Idx -> Idx -> R) :
@@ -51,7 +50,6 @@ private theorem sum_swap_four_local
             _ = ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, F i j a b := by
                   rw [Finset.sum_comm]
 
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connSmoothInf
@@ -61,7 +59,6 @@ private theorem connSmoothInf
       (S.family.connection t) (∞ : WithTop ℕ∞) := by
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -74,7 +71,6 @@ private theorem isMetricCompatibleSol
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
-
 private def nablaRicField
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -84,7 +80,6 @@ private def nablaRicField
     2 (S.family.connection t) (S.ricci t)
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
-
 
 private def nabla2RicField
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

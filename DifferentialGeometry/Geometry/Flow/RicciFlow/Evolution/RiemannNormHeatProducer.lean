@@ -15,7 +15,6 @@ section ComponentAlgebra
 
 variable {Idx : Type*} [Fintype Idx]
 
-
 def compNormSq4 (R : Idx → Idx → Idx → Idx → Real) : Real :=
   ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx, (R a b c d) ^ 2
 
@@ -27,7 +26,6 @@ theorem compNormSq4_nonneg (R : Idx → Idx → Idx → Idx → Real) :
   refine Finset.sum_nonneg fun c _ => ?_
   refine Finset.sum_nonneg fun d _ => ?_
   exact sq_nonneg _
-
 
 theorem sq_le_compNormSq4
     (R : Idx → Idx → Idx → Idx → Real) (a b c d : Idx) :
@@ -56,7 +54,6 @@ theorem sq_le_compNormSq4
         Finset.sum_nonneg fun _ _ =>
           Finset.sum_nonneg fun _ _ => sq_nonneg _) (Finset.mem_univ a)
   exact le_trans hd (le_trans hc (le_trans hb ha))
-
 
 theorem abs_le_sqrt_compNormSq4
     (R : Idx → Idx → Idx → Idx → Real) (a b c d : Idx) :
@@ -113,7 +110,6 @@ def rmReactionDown (R : Idx → Idx → Idx → Idx → Real) : Real :=
       (bTensorDown R a b c d - bTensorDown R a b d c +
         bTensorDown R a c b d - bTensorDown R a d b c)
 
-
 private theorem abs_four_bracket_le (w x y z : Real) :
     |w - x + y - z| ≤ |w| + |x| + |y| + |z| := by
   refine abs_le.mpr ⟨?_, ?_⟩
@@ -127,7 +123,6 @@ private theorem abs_four_bracket_le (w x y z : Real) :
     have hy := le_abs_self y
     have hz := neg_abs_le z
     linarith
-
 
 private theorem abs_bracket_le
     (R : Idx → Idx → Idx → Idx → Real) (a b c d : Idx) :
@@ -150,7 +145,6 @@ private theorem abs_bracket_le
           ((Fintype.card Idx : Real) ^ 2 * compNormSq4 R) := by
           gcongr
     _ = 4 * ((Fintype.card Idx : Real) ^ 2 * compNormSq4 R) := by ring
-
 
 theorem rpow_three_halves_eq_mul_sqrt {x : Real} (hx : 0 ≤ x) :
     x ^ (3 / 2 : Real) = x * Real.sqrt x := by
@@ -254,7 +248,6 @@ def rmReactionInFrame
           uhlenbeckBTensorInFrame gInv (solutionRm04CompInFrame (I := I) Rm04 frame) t x a c b d -
           uhlenbeckBTensorInFrame gInv (solutionRm04CompInFrame (I := I) Rm04 frame) t x a d b c)
 
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem raisedRm04CompInFrame_orthonormal
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
@@ -270,7 +263,6 @@ private theorem raisedRm04CompInFrame_orthonormal
   unfold InverseMetricOrthonormalAt at horth
   simp only [horth]
   simp [Finset.mem_univ]
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormSqInFrame_eq_compNormSq4
@@ -291,7 +283,6 @@ theorem rm04NormSqInFrame_eq_compNormSq4
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [raisedRm04CompInFrame_orthonormal (I := I) Rm04 gInv frame t x horth a b c d]
   ring
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem uhlenbeckBTensorInFrame_orthonormal
@@ -348,7 +339,6 @@ private theorem uhlenbeckBTensorInFrame_orthonormal
             rw [if_neg (fun h => hfr h.symm)]
             ring
           · intro h; exact absurd (Finset.mem_univ f) h
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem rmReactionInFrame_eq_rmReactionDown

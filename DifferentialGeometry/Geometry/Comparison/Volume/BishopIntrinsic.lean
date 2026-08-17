@@ -242,7 +242,7 @@ private theorem intrVel_smul
   exact hvel
 
 omit [T2Space (TangentBundle I M)] in
-private theorem intrJacobi_perp_ne
+theorem intrJacobi_perp_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) {t : Real}

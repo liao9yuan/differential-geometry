@@ -177,12 +177,14 @@ structure ConvOut
       SmoothRiemannianMetric I P.M)
     (bf : BumpFamily (I := I) Φ) (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     (β ψ : Real) where
+
   φ : Nat -> Nat
   hφ : StrictMono φ
   gInf : letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : IsManifold I ∞ P.M := P.smooth
     Real -> SmoothRiemannianMetric I P.M
+
   conv : letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : T2Space P.M := P.t2
@@ -193,6 +195,7 @@ structure ConvOut
         forall t, t ∈ Set.Icc β ψ ->
           metricDerivNormSupOn (I := I) K p
             (gSeqExt (I := I) Φ R bf hsrc htgt (φ k) t) (gInf t) R < ε
+
   convPt : letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : T2Space P.M := P.t2
@@ -205,6 +208,29 @@ structure ConvOut
             (gSeqExt (I := I) Φ R bf hsrc htgt (φ k) t) (gInf t) R x < ε
 
 namespace ConvOut
+
+noncomputable def restrict
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ c d : Real}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (hsub : Set.Icc c d ⊆ Set.Icc β ψ) :
+    ConvOut (I := I) Φ R bf hsrc htgt c d where
+  φ := co.φ
+  hφ := co.hφ
+  gInf := co.gInf
+  conv := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.conv K hK p ε hε
+    exact ⟨k₀, fun k hk t ht => hk₀ k hk t (hsub ht)⟩
+  convPt := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hK p ε hε
+    exact ⟨k₀, fun k hk t ht a ha x hx =>
+      hk₀ k hk t (hsub ht) a ha x hx⟩
 
 noncomputable def comp_subseq
     {R : letI : TopologicalSpace P.M := P.topology

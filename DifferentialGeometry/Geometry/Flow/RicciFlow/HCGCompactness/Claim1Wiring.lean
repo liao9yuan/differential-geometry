@@ -68,6 +68,7 @@ theorem frame_e_mdiffOn
   (e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE).contMDiffOn d
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem tensorComp_mdiffOn {r : ℕ}
@@ -121,6 +122,7 @@ theorem akCompField_mdiffOn [Finite Idx]
     (lcChrist_e_mdiffOn e₀ gRef basisE (k 0) (k 1) (k 2))
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem gCompField_mdiffOn
@@ -274,6 +276,7 @@ private theorem chr_eq_chartChr {u : Set M}
       DifferentialGeometry.Coordinates.christoffelSymbolInFrame cov frame hframe x i j k := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem koszulComp_at
@@ -571,6 +574,7 @@ theorem compL2_tower_eq
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem claim1_geom

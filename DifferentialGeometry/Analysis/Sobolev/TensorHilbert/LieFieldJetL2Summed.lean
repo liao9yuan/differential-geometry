@@ -38,30 +38,30 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-private def kOutPerm0312 : Equiv.Perm (Fin 4) :=
+private def lieJetKOutPerm0312 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
 
-private def kOutPerm0213 : Equiv.Perm (Fin 4) :=
+private def lieJetKOutPerm0213 : Equiv.Perm (Fin 4) :=
   ⟨![0, 2, 1, 3], ![0, 2, 1, 3], by decide, by decide⟩
 
-private def kOutPerm2301 : Equiv.Perm (Fin 4) :=
+private def lieJetKOutPerm2301 : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
-private def kOutPerm1302 : Equiv.Perm (Fin 4) :=
+private def lieJetKOutPerm1302 : Equiv.Perm (Fin 4) :=
   ⟨![1, 3, 0, 2], ![2, 0, 3, 1], by decide, by decide⟩
 
-private def kOutPerm1203 : Equiv.Perm (Fin 4) :=
+private def lieJetKOutPerm1203 : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
 
-private def kInPerm102 : Equiv.Perm (Fin 3) :=
+private def lieJetKInPerm102 : Equiv.Perm (Fin 3) :=
   ⟨![1, 0, 2], ![1, 0, 2], by decide, by decide⟩
 
-private def kInPerm120 : Equiv.Perm (Fin 3) :=
+private def lieJetKInPerm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [SigmaCompactSpace M] in
-private theorem slotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d : ℕ}
+private theorem lieJetSlotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d ℝ E)
@@ -79,36 +79,36 @@ private theorem slotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d 
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
 
-private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
+private def lieJetSlotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
     SmoothCcTensor g₀ d d where
   toSection :=
     { toFun := fun x : M =>
         (show Tensor0SBundle.TensorRSSpace d d I x from slotPermCLM (I := I) ρ x)
-      contMDiff_toFun := slotPermCcFib_contMDiff (I := I) (M := M) g₀ ρ }
+      contMDiff_toFun := lieJetSlotPermCcFib_contMDiff (I := I) (M := M) g₀ ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
-private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
+private theorem lieJetKernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I)
-            (M := M) g₀ kOutPerm0312)
-            (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm102
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I)
+            (M := M) g₀ lieJetKOutPerm0312)
+            (connDiffContrInsertionField (I := I) g₀ g₁)) lieJetKInPerm102
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I)
-              (M := M) g₀ kOutPerm0213)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120
-        + ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I)
-          (M := M) g₀ kOutPerm2301)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I)
+              (M := M) g₀ lieJetKOutPerm0213)
+              (connDiffContrInsertionField (I := I) g₀ g₁)) lieJetKInPerm120
+        + ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I)
+          (M := M) g₀ lieJetKOutPerm2301)
             (connDiffContrInsertionField (I := I) g₀ g₁)
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I)
-              (M := M) g₀ kOutPerm1302)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm102
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I)
+              (M := M) g₀ lieJetKOutPerm1302)
+              (connDiffContrInsertionField (I := I) g₀ g₁)) lieJetKInPerm102
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I)
-              (M := M) g₀ kOutPerm1203)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120) := by
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I)
+              (M := M) g₀ lieJetKOutPerm1203)
+              (connDiffContrInsertionField (I := I) g₀ g₁)) lieJetKInPerm120) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -118,7 +118,7 @@ private theorem armOuter_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁))).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
@@ -126,11 +126,11 @@ private theorem armOuter_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)
   refine riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
     (I := I) (M := M) g₀ 3 4 σ
     (connDiffContrInsertionField (I := I) g₀ g₁)
-    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁))
     (fun y d => ?_) q x
   have hy : (show Tensor0SBundle.Tensor0SSpace 3 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I y from
-      (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
         (connDiffContrInsertionField (I := I) g₀ g₁)).toSection y) d =
       slotPermCLM (I := I) σ y
         ((show Tensor0SBundle.Tensor0SSpace 3 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I y from
@@ -142,13 +142,13 @@ private theorem armFull_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) := by
   rw [riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 4
-    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁)) ρ q x]
   exact armOuter_rfns_eq (I := I) (M := M) g₀ g₁ σ q x
 
@@ -160,20 +160,20 @@ private lemma c3_norm_eq_of_sq_eq {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
 private theorem armOuter_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 q
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
           (connDiffContrInsertionField (I := I) g₀ g₁))‖ =
       ‖iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁)‖ := by
   refine c3_norm_eq_of_sq_eq (norm_nonneg _) (norm_nonneg _) ?_
   rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
           (connDiffContrInsertionField (I := I) g₀ g₁))),
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁))]
   have hpt : (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁))).toSection x)) =
       (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
@@ -185,7 +185,7 @@ private theorem armFull_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)) (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 q
         (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)‖ =
       ‖iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁)‖ := by
   refine c3_norm_eq_of_sq_eq (norm_nonneg _) (norm_nonneg _) ?_
@@ -193,14 +193,14 @@ private theorem armFull_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q
         (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)),
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁))]
   have hpt : (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (lieJetSlotPermCc (I := I) (M := M) g₀ σ)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)).toSection x)) =
       (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
@@ -226,14 +226,14 @@ private theorem lie_normSq_le_25 (g₀ g₁ : SmoothRiemannianMetric I M) (i : �
       (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)‖ ≤
       5 * ‖iteratedCovGrad (I := I) g₀ 3 4 i
         (connDiffContrInsertionField (I := I) g₀ g₁)‖ := by
-    rw [kernelField_eq_neg_arm_combination (I := I) g₀ g₁, iteratedCovGrad_neg, norm_neg,
+    rw [lieJetKernelField_eq_neg_arm_combination (I := I) g₀ g₁, iteratedCovGrad_neg, norm_neg,
       iteratedCovGrad_add, iteratedCovGrad_add, iteratedCovGrad_add, iteratedCovGrad_add]
     exact c3_norm_five_le
-      (armFull_norm_eq (I := I) (M := M) g₀ g₁ kOutPerm0312 kInPerm102 i)
-      (armFull_norm_eq (I := I) (M := M) g₀ g₁ kOutPerm0213 kInPerm120 i)
-      (armOuter_norm_eq (I := I) (M := M) g₀ g₁ kOutPerm2301 i)
-      (armFull_norm_eq (I := I) (M := M) g₀ g₁ kOutPerm1302 kInPerm102 i)
-      (armFull_norm_eq (I := I) (M := M) g₀ g₁ kOutPerm1203 kInPerm120 i)
+      (armFull_norm_eq (I := I) (M := M) g₀ g₁ lieJetKOutPerm0312 lieJetKInPerm102 i)
+      (armFull_norm_eq (I := I) (M := M) g₀ g₁ lieJetKOutPerm0213 lieJetKInPerm120 i)
+      (armOuter_norm_eq (I := I) (M := M) g₀ g₁ lieJetKOutPerm2301 i)
+      (armFull_norm_eq (I := I) (M := M) g₀ g₁ lieJetKOutPerm1302 lieJetKInPerm102 i)
+      (armFull_norm_eq (I := I) (M := M) g₀ g₁ lieJetKOutPerm1203 lieJetKInPerm120 i)
   have hsq := pow_le_pow_left₀ (norm_nonneg (iteratedCovGrad (I := I) g₀ 3 4 i
     (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁))) h5 2
   calc ‖iteratedCovGrad (I := I) g₀ 3 4 i

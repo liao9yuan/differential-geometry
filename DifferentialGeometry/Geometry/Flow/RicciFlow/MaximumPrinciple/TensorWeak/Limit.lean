@@ -14,7 +14,6 @@ open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -188,7 +187,6 @@ theorem barrierLimitClosure_of_continuous
   intro t ht
   exact hP ht
 
-
 structure TensorWMPCore
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -241,7 +239,6 @@ structure TensorWMPRegularityOn
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
 
 namespace TensorWMPRegularityOn
-
 
 def toCore
     {G : Real -> SmoothRiemannianMetric I M}
@@ -370,7 +367,6 @@ structure TensorWMPSectionReg
 
 namespace TensorWMPSectionCore
 
-
 omit [IsManifold I 2 M] in
 theorem ofCompact
     [CompactSpace M] [T2Space M]
@@ -423,7 +419,6 @@ theorem ofCompact
   metricQuadCont := hMetric
   tensorQuadCont := hTensor
   barrierFixedContinuous := hFixed
-
 
 omit [IsManifold I 2 M] in
 theorem ofTotal
@@ -483,7 +478,6 @@ theorem ofTotal
         (hTensor delta t0 hdelta hsub))
     hFixed
 
-
 omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [T2Space M]
@@ -532,7 +526,6 @@ theorem ofSmoothMetric
         (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed
 
-
 omit [IsManifold I 2 M] in
 theorem toRaw
     {G : Real -> SmoothRiemannianMetric I M}
@@ -560,7 +553,6 @@ theorem toRaw
 end TensorWMPSectionCore
 
 namespace TensorWMPSectionReg
-
 
 def toCore
     {G : Real -> SmoothRiemannianMetric I M}

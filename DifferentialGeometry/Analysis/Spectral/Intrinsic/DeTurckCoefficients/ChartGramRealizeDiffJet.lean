@@ -181,7 +181,12 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
       iteratedFDerivWithin_const_smul_apply
         (((hcd_ab.add hcd_ba).contDiffWithinAt hy).of_le (by exact_mod_cast le_top))
         hs_open.uniqueDiffOn hy]
-    refine (norm_smul_le _ _).trans ?_
+    refine (norm_smul_le (1 / 2 : ℝ)
+      (iteratedFDerivWithin ℝ m
+        (fun x : E =>
+          tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] x +
+          tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] x)
+        s y : ContinuousMultilinearMap ℝ (fun _ : Fin m => E) ℝ)).trans ?_
     rw [Real.norm_eq_abs, show |(1 / 2 : ℝ)| = 1 / 2 from by norm_num]
     refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
     have hadd_reshape :

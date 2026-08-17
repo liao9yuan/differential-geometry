@@ -55,7 +55,6 @@ private theorem mul_paraTime_eq {τ R s : Real} (hR : R ≠ 0) :
   unfold paraTime
   field_simp [hR]
 
-
 def paraInterval
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) (τ R : Real) (_hR : 0 < R)
     (hτ : τ ∈ D.carrier) : DifferentialGeometry.Geometry.Curvature.RealTimeInterval where
@@ -172,13 +171,11 @@ def paraFamily
     SolutionFamily (I := I) (M := M) where
   metric s := scaleMetric (I := I) R hR (G.metric (paraTime τ R s))
 
-
 def paraBackFamily
     (G : SolutionFamily (I := I) (M := M)) (τ R : Real) (hR : 0 < R) :
     SolutionFamily (I := I) (M := M) where
   metric t := scaleMetric (I := I) R⁻¹ (inv_pos.mpr hR)
     (G.metric (paraBack τ R t))
-
 
 def paraSolution
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -530,7 +527,6 @@ theorem metricFamilySmooth_para
     simpa [SolutionOn.family, paraSolution, paraFamily, scaleMetric_inner,
       smul_eq_mul] using hscale
 
-
 omit [SigmaCompactSpace M] in
 theorem connectionFamilySmooth_para
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -544,7 +540,6 @@ theorem connectionFamilySmooth_para
     DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt]
     using lcConnectionSmooth (I := I)
       ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
-
 
 omit [SigmaCompactSpace M] in
 theorem leviCivita_para
@@ -562,7 +557,6 @@ theorem leviCivita_para
       DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt]
       using DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (I := I) ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
-
 
 omit [SigmaCompactSpace M] in
 theorem metricVariation_para
@@ -602,7 +596,6 @@ theorem metricVariation_para
           DifferentialGeometry.Geometry.Curvature.metricRicciAt,
           DifferentialGeometry.Geometry.Curvature.metricCov]
         field_simp [ne_of_gt hR]))
-
 
 omit [SigmaCompactSpace M] in
 theorem paraSol
@@ -842,11 +835,9 @@ theorem para_paraBack_ricci
       DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric,
     paraBack_time (τ := τ) (R := R) (s := s) (ne_of_gt hR)]
 
-
 def ParaScalarDisplay
     (scalar scalarR : Real -> M -> Real) (τ R : Real) : Prop :=
   forall s x, scalarR s x = R⁻¹ * scalar (paraTime τ R s) x
-
 
 def ParaTracefreeNormSqDisplay
     (q qR : Real -> M -> Real) (τ R : Real) : Prop :=

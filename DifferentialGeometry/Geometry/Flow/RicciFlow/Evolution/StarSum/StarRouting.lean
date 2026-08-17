@@ -24,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 def tfPos (k : ℕ) (q : Fin (4 + (k + 1))) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) → Fin ((4 + (k + 1)) + 2 * (2 + 0)) := fun a =>
@@ -34,7 +35,6 @@ def tfPos (k : ℕ) (q : Fin (4 + (k + 1))) :
   else if a.val = k + 6 then ⟨4, by omega⟩
   else if a.val = k + 7 then ⟨4 + q.val, by have := q.isLt; omega⟩
   else ⟨3, by omega⟩
-
 
 def sigmaCurvPos (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
@@ -195,7 +195,6 @@ def tf0 (k : ℕ) :
   else if a.val = k + 7 then ⟨1, by omega⟩
   else ⟨3, by omega⟩
 
-
 def sigmaCurv0 (k : ℕ) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tf0 k) (by
@@ -205,14 +204,12 @@ def sigmaCurv0 (k : ℕ) :
     simp only [tf0] at hab
     split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
 
-
 theorem sigmaCurv0_cast_val (k : ℕ) (p : Fin (4 + (k + 1))) :
     ((sigmaCurv0 k) (Fin.castAdd (4 + 0) p)).val
       = if p.val = 0 then 2 else 4 + p.val := by
   have hplt := p.isLt
   simp only [sigmaCurv0, Equiv.ofBijective_apply, tf0, Fin.val_castAdd]
   split_ifs <;> first | rfl | omega
-
 
 theorem sigmaCurv0_nat_val (k : ℕ) (p : Fin (4 + 0)) :
     ((sigmaCurv0 k) (Fin.natAdd (4 + (k + 1)) p)).val
@@ -317,7 +314,6 @@ def tfDiffA (k : ℕ) (q : Fin (4 + k)) :
       ⟨3, by omega⟩
     else
       ⟨a.val, by omega⟩
-
 
 def sigmaDiffA (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
@@ -465,7 +461,6 @@ def tfDiffB (k : ℕ) (q : Fin (4 + k)) :
       ⟨3, by omega⟩
     else
       ⟨a.val, by omega⟩
-
 
 def sigmaDiffB (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 0) + (4 + (k + 1))) + 2 * 0) ≃
@@ -625,7 +620,6 @@ def tfRic1 (k : ℕ) (q : Fin (4 + k)) :
     else if a.val = 5 + q.val then ⟨3, by omega⟩
     else ⟨a.val, by omega⟩
 
-
 def sigmaRic1 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
@@ -750,7 +744,6 @@ theorem slotRic1
       exact Fin.ext hidx
   rw [hL, hR]
 
-
 def tfRic2 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) →
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
@@ -762,7 +755,6 @@ def tfRic2 (k : ℕ) (q : Fin (4 + k)) :
     else if a.val = 4 then ⟨1, by omega⟩
     else if a.val = 5 + q.val then ⟨3, by omega⟩
     else ⟨a.val, by omega⟩
-
 
 def sigmaRic2 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
@@ -888,7 +880,6 @@ theorem slotRic2
       exact Fin.ext hidx
   rw [hL, hR]
 
-
 def tfRic3 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) →
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
@@ -900,7 +891,6 @@ def tfRic3 (k : ℕ) (q : Fin (4 + k)) :
     else if a.val = 4 then ⟨1, by omega⟩
     else if a.val = 5 + q.val then ⟨3, by omega⟩
     else ⟨a.val, by omega⟩
-
 
 def sigmaRic3 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃

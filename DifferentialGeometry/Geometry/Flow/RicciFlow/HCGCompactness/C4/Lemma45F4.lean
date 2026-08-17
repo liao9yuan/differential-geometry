@@ -34,7 +34,6 @@ noncomputable def lemma45CorConst (q₂ p : ℕ) : Real :=
       (4 ^ (2 + p)) c)
     p q₂
 
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem corConst_nonneg (q₂ p : ℕ) : 0 ≤ lemma45CorConst (E := E) q₂ p := by
   apply lemma45Const_nonneg

@@ -526,12 +526,10 @@ def pinchDriftTerm
           (quotField (M := M) (tfRicNormSq scalar ricciNormSq)
             scalar (1 : Real) (2 - epsilon) t) x)
 
-
 def pinchSquareTerm
     (scalar coupleSq : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real :=
   fun t x => -2 / scalar t x ^ (4 - epsilon) * coupleSq t x
-
 
 def pinchGradTerm
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
@@ -539,7 +537,6 @@ def pinchGradTerm
   fun t x =>
     -epsilon * (1 - epsilon) / scalar t x ^ (4 - epsilon) *
       tfRicNormSq scalar ricciNormSq t x * gradScalarNormSq t x
-
 
 def pinchReactTerm
     (scalar ricciNormSq Q : Real -> M -> Real)
@@ -558,7 +555,6 @@ def pinchBookRHS
       pinchSquareTerm scalar coupleSq epsilon t x +
       pinchGradTerm scalar ricciNormSq gradScalarNormSq epsilon t x +
       pinchReactTerm scalar ricciNormSq Q epsilon t x
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchDrift_exp

@@ -435,7 +435,6 @@ private lemma deTurckVF_trivSnd_eq_chartModelBasis_sum
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_jointDet {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
@@ -450,7 +449,6 @@ private lemma continuousOn_jointDet {s : Set (ℝ × E)}
   refine continuousOn_finset_sum _ (fun σ _ => ?_)
   refine (continuousOn_const).mul ?_
   exact continuousOn_finset_prod _ (fun i _ => hA (σ i) i)
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_jointAdjugate {s : Set (ℝ × E)}
@@ -474,7 +472,6 @@ private lemma continuousOn_jointAdjugate {s : Set (ℝ × E)}
       funext p; rw [Matrix.updateRow_ne hij]
     rw [hcongr]; exact hA i j
 
-
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
@@ -489,7 +486,6 @@ private lemma continuousOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     simp [Ring.inverse_eq_inv', Matrix.smul_apply, smul_eq_mul]
   rw [hexp]
   exact ((continuousOn_jointDet hA).inv₀ hdet).mul (continuousOn_jointAdjugate hA a b)
-
 
 omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -519,7 +515,6 @@ private lemma chartInvGramOnE_joint_continuousOn
       rw [this]
       exact chartGramMatrix_det_pos (I := I) (g_DT p.1) α hbase
     exact ne_of_gt hpos
-
 
 omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -556,7 +551,6 @@ private lemma chartChristoffel_joint_continuousOn
   refine continuousOn_finset_sum _ (fun l _ => ?_)
   refine ContinuousOn.mul (chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 k l) ?_
   exact ((h_partial i l j).add (h_partial j l i)).sub (h_partial l i j)
-
 
 omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -637,7 +631,6 @@ private lemma chartDeTurckVFComp_joint_continuousOn_M
   have hcomp := hE.comp hΦ hmaps
   exact hcomp
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_mul_eq {f h : E → ℝ} {y : E}
     (l : Fin (Module.finrank ℝ E))
@@ -687,13 +680,11 @@ private lemma partialDeriv_chartInvGramOnE_joint_continuousOn
   · exact chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 b p'
   · exact h_partial l a b
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_const_mul_eq {f : E → ℝ} {y : E} (c : ℝ)
     (l : Fin (Module.finrank ℝ E)) (hf : DifferentiableAt ℝ f y) :
     partialDeriv (E := E) l (fun x => c * f x) y = c * partialDeriv (E := E) l f y := by
   unfold partialDeriv; rw [fderiv_const_mul hf]; simp
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_finset_sum_eq {ι : Type*} (t : Finset ι)
@@ -703,7 +694,6 @@ private lemma partialDeriv_finset_sum_eq {ι : Type*} (t : Finset ι)
       = ∑ i ∈ t, partialDeriv (E := E) l (F i) y := by
   unfold partialDeriv
   rw [fderiv_fun_sum hF]; simp
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_add_eq {f h : E → ℝ} {y : E}
@@ -1199,7 +1189,6 @@ theorem deturck_vf_chartFrame_continuity_data
   · exact fderiv_chartDeTurckVFComp_joint_continuousOn (I := I) g_DT g_bg α T
       (h_gram_E α) (fun l i j => h_partial_E α l i j)
       (fun m l i j => h_partial2_E α m l i j) k
-
 
 end DeTurckVFSmoothnessKeystone
 

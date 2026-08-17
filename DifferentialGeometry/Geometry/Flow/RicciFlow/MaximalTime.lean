@@ -42,7 +42,6 @@ def SolutionAgreesOn
       S.family.connection t = Shat.family.connection t ∧
         S.ricci t = Shat.ricci t
 
-
 def ExtendsPastEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
     (S : SolutionOn (I := I) (M := M)
@@ -55,7 +54,6 @@ def ExtendsPastEndpoint
           hwide),
         IsSolutionOn (I := I) Shat ∧
           SolutionAgreesOn (I := I) S Shat (Set.Ico alpha omega)
-
 
 def IsMaximalAtEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
@@ -87,7 +85,6 @@ theorem rm04Realizes_metric
       (S.base.metric (t : Real))
       (metricCov (I := I) (M := M) (S.base.metric (t : Real)))
       (metricCov_smooth (I := I) (M := M) (S.base.metric (t : Real))))
-
 
 def curvatureNormSq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -173,8 +170,9 @@ theorem extends_of_rmBounded
   obtain ⟨hell, hcov⟩ := extendInputs_of_soln (I := I) hdim _hS
     (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric hbound_can
   obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
-    ricci_flow_interior_restart (I := I) g_fam hαω hell hcov
-  have ht1 : alpha ≤ t_star := ht_star.1
+    ricci_flow_interior_restart (I := I) hdim g_fam hαω hell hcov
+  have ht0 : alpha < t_star := ht_star.1
+  have ht1 : alpha ≤ t_star := ht_star.1.le
   have ht2 : t_star < omega := ht_star.2
   have hsmooth_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
     chartGram_smooth_of_soln (I := I) _hS x₀ i j
@@ -187,11 +185,11 @@ theorem extends_of_rmBounded
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (rr (p.1 - t_star)) x₀ p.2 i j)
-        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
     intro x₀ i j
     have hmaps : Set.MapsTo (fun q : ℝ × M => ((q.1 - t_star, q.2) : ℝ × M))
-        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
-        (Set.Ioo (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
+        (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
       fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
     have h := (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
     exact h
@@ -229,9 +227,9 @@ theorem extends_of_rmBounded
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
-        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
     fun x₀ i j => (hsmooth_left x₀ i j).mono
-      (Set.prod_mono (Set.Ioo_subset_Ioo ht1 le_rfl) (le_refl _))
+      (Set.prod_mono (fun s hs => ⟨lt_of_lt_of_le ht0 hs.1, hs.2⟩) (le_refl _))
   have h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M =>
@@ -247,7 +245,10 @@ theorem extends_of_rmBounded
         h1smooth h1cont h2smooth h2cont h1pde h2pde h0 s hs).symm
   obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
     extend_construction_of_restart (I := I) g_fam hαω hleft hsmooth_left hcont_left
-      ht1 ht2 hreach rr hrr_smooth hrr_cont hrr_pde hagree_overlap
+      ht1 ht2 hreach rr
+      (fun x₀ i j => (hrr_smooth x₀ i j).mono
+        (Set.prod_mono Set.Ioo_subset_Ico_self (le_refl _)))
+      hrr_cont hrr_pde hagree_overlap
   have hwide : alpha < omega + ε := by linarith
   let Shat : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen alpha (omega + ε)
@@ -308,7 +309,6 @@ theorem formsSing_of_maximal
     FormsSingularityAt (I := I) S := by
   rcases hRmEx with ⟨Rm04, hRm⟩
   exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hdim hS hmax hRm⟩
-
 
 theorem formsSing_of_maximal_metric
     {alpha omega : Real} {hαω : alpha < omega}

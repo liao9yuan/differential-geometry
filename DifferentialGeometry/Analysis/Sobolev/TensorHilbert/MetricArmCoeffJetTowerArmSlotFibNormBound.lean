@@ -14,7 +14,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
-
 noncomputable section
 
 
@@ -137,6 +136,11 @@ def bilinearSlotInsertCLM (s : ℕ) (x : M)
         rw [armCurryCLM_add, curry_symm_add_aux]
       map_smul' := fun c D => by
         rw [armCurryCLM_smul, curry_symm_smul_aux]; rfl }
+
+abbrev armSlotFib (s : ℕ) (x : M)
+    (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x :=
+  bilinearSlotInsertCLM (I := I) (M := M) s x Arm
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in

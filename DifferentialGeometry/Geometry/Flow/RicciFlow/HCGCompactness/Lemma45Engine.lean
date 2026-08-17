@@ -31,7 +31,6 @@ noncomputable def claim1MulConst (C0 KR L : Real) (m : ℕ) : Real :=
     max C0 0 * (max KR 0 * L +
       ∑ c : Fin n, (n.choose c : Real) * C c c.isLt * L)
 
-
 theorem claim1MulConst_eq (C0 KR L : Real) (m : ℕ) :
     claim1MulConst C0 KR L m =
       max C0 0 * (max KR 0 * L +
@@ -308,7 +307,6 @@ theorem corrSlotMap_bijective {r' : ℕ} (s : Fin (r' + 1)) :
   rw [Fintype.bijective_iff_injective_and_card]
   exact ⟨corrSlotMap_injective s, by simp [Fintype.card_fin]; omega⟩
 
-
 def corrSlotEquiv {r' : ℕ} (s : Fin (r' + 1)) : Fin (2 + r') ≃ Fin (r' + 1 + 1) :=
   Equiv.ofBijective (corrSlotMap s) (corrSlotMap_bijective s)
 
@@ -398,7 +396,6 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     exact (hf a (Finset.mem_insert_self a t)).add
       (ih fun i hi => hf i (Finset.mem_insert_of_mem hi))
 
-
 omit [DecidableEq Idx] in
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -410,7 +407,6 @@ theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
     (s : Fin r) (n : Fin (r + 1) → Idx) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrCorrField D X s y n) u :=
   contMDiffOn_finsetSum' Finset.univ _ (fun p _ => (hD _ _ p).mul (hX _))
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
@@ -430,7 +426,6 @@ theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
     funext z k; ring
   rw [h, iterCovComp_smul hu frame chr 0 _ hframe hchr (fun _ => contMDiffOn_const) a y hy n,
     zero_mul]
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
@@ -463,7 +458,6 @@ theorem iterCovComp_finsetSum {ι : Type*} {r : ℕ} {u : Set M} (hu : IsOpen u)
           (fun i hi => hf i (Finset.mem_insert_of_mem hi) m)) a y hy n,
       ih (fun i hi m => hf i (Finset.mem_insert_of_mem hi) m) y hy n,
       Finset.sum_insert hb]
-
 
 omit [DecidableEq Idx] in
 private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
@@ -518,7 +512,6 @@ theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
   refine le_trans (le_of_eq h1) (le_trans hP (le_of_eq ?_))
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [compL2_iterCovComp_compReindex (slotRotEquiv s) frame chrH X (k - c) x]
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
@@ -1059,7 +1052,6 @@ theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
 
-
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_koszul_mul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1252,7 +1244,6 @@ theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     eps heps0 heps1 p (fun c hc z hz => hBb c hc z hz) hx p 0 ρ hρ0 hρp (by omega)
   rw [zero_add] at h
   simpa only [B] using h
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in

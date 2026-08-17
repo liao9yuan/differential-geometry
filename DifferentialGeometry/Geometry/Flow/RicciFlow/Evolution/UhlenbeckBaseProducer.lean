@@ -696,7 +696,6 @@ theorem rmBaseDeriv_basis
   intro slots _
   exact (hD (slots 0) (slots 1) (slots 2) (slots 3)).mul_const _
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem connSmoothSol
@@ -706,7 +705,6 @@ theorem connSmoothSol
       (S.family.connection t) (∞ : WithTop ℕ∞) := by
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -734,6 +732,7 @@ theorem ricNablaRealizes
     2 (S.family.connection t) (S.ricci t) _
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem knTermRealizes
@@ -774,6 +773,7 @@ theorem knTermRealizes
         (S.family.metric t) (metricCompatSol (I := I) S t)))
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem knScalRealizes
@@ -836,7 +836,6 @@ set_option backward.isDefEq.respectTransparency false
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
-
 private noncomputable def knRicT
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
@@ -847,7 +846,6 @@ private noncomputable def knRicT
     (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
       (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
       (S.ricci t) (metricTensorField (I := I) (S.family.metric t)))
-
 
 private noncomputable def knScalT
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -918,7 +916,6 @@ theorem ric2NablaRealizes
   totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (2 + 1) (S.family.connection t) _ _
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem duNablaRealizes
@@ -935,7 +932,6 @@ theorem duNablaRealizes
           1 (S.family.connection t) (connSmoothSol (I := I) S t) _)) :=
   totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     1 (S.family.connection t) _ _
-
 
 private noncomputable def knRicD
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -958,7 +954,6 @@ private noncomputable def knRicD
         (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
           (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1)
           (S.ricci t) 0))
-
 
 private noncomputable def knScalD
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1321,6 +1316,7 @@ private theorem rm04Nab2Kn_eq
     (nablaKRm04Field_realizes (I := I) S t 1)
 
 open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Integral.Connection in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceRicWit
@@ -1899,7 +1895,6 @@ open DifferentialGeometry.Dim3Reaction
 
 variable {N : Type*}
 
-
 theorem uhlBt_eq_bt
     (gInv : MatrixComp N (Fin 3)) (Rm04c : FourComp N (Fin 3))
     (R : Fin 3 -> Fin 3 -> Real) (t : Real) (x : N)
@@ -1910,7 +1905,6 @@ theorem uhlBt_eq_bt
   unfold uhlenbeckBTensorInFrame Bt
   simp only [horth, hcomp, Fin.sum_univ_three, Fin.isValue, Fin.reduceEq, reduceIte,
     one_mul, zero_mul, mul_zero, mul_one, add_zero, zero_add]
-
 
 theorem uhlDrift_eq_drift
     (Rup : MatrixComp N (Fin 3)) (Rm04c : FourComp N (Fin 3))

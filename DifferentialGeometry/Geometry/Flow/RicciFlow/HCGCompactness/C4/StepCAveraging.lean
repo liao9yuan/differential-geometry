@@ -239,7 +239,6 @@ theorem unifTwoIdDataSelf {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
       refine ⟨N, fun k hk l hl x hx hμx => ?_⟩
       exact hN k hk l hl x hx ((hdata k l x hx).2 i hμx))
 
-
 theorem eqn_local (x : X)
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -278,7 +277,6 @@ theorem eqn_local (x : X)
   simpa [centerAverage] using
     centerOfMass.expInv_eqn_local (I := I) (g := g) (μ := μ x) (pts := pts x)
       (join := join) (p := p x) (r := r x) (h x) hdiffSummands hsrc
-
 
 theorem eqn_local_on {s : Set X} {qstar : X → M}
     (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))

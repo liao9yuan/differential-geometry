@@ -102,7 +102,6 @@ private theorem metricInverseInBasis_of_solution_frame
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
 
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricInverseInBasis_of_local
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -205,7 +204,6 @@ theorem connCurvOfSol
   exact DifferentialGeometry.Geometry.Curvature.connection_curvature_coord_of_christoffel
     (I := I) (S.family.connection s) htop x₀
 
-
 omit [SigmaCompactSpace M] in
 theorem rm13OfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -218,7 +216,6 @@ theorem rm13OfSol
     SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric s)).h_rm13
 
-
 omit [SigmaCompactSpace M] in
 theorem ricciTraceOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -229,7 +226,6 @@ theorem ricciTraceOfSol
   intro s _hs
   simpa [SolutionOn.ricci_eq, SolutionFamily.ricci, SolutionFamily.rm13] using
     (metricCurvData (I := I) (M := M) (S.base.metric s)).h_ricci13
-
 
 def RicciSymmetricInFrameOnRegular
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -275,7 +271,6 @@ private theorem rm04Realizes_regular
     (S.family.connection (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
     (hRm13 t) (hLower t)
 
-
 theorem rm04OutputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -301,7 +296,6 @@ theorem rm04OutputSkew_regular
       (I := I) (lcAt_regular (I := I) S hS t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
-
 
 theorem rm04FirstBianchi_regular
     [IsManifold I (∞ + 1) M]
@@ -329,7 +323,6 @@ theorem rm04FirstBianchi_regular
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-
 theorem rm04PairSymm_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -355,7 +348,6 @@ theorem rm04PairSymm_regular
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
     (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
-
 
 theorem rm04InputSkew_regular_first_two
     [IsManifold I (∞ + 1) M]

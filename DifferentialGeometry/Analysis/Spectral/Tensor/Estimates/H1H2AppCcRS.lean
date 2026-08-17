@@ -390,6 +390,172 @@ private theorem rs_l6_l3_l2
   rw [← fiber_rs_lp2 (I := I) (M := M) g p c Y]
   exact hreal
 
+theorem appRS_h1_of
+    (g : SmoothRiemannianMetric I M) (p r c : ℕ)
+    (Cpt CΦ CG : ℝ) (hCpt : 0 ≤ Cpt) (hCΦ : 0 ≤ CΦ) (hCG : 0 ≤ CG)
+    (hpt : ∀ (W : SmoothCcTensor g p r) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g p r x
+          (W.toSection x) ≤
+        Cpt ^ 2 * (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2))
+    (hΦ6 : ∀ S : SmoothCcTensorH1 g r c,
+      lpNorm (rsFiberFun g r c S.toCcTensor) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CΦ * ‖S‖)
+    (hG3 : ∀ S : SmoothCcTensorH1 g p (r + 1),
+      lpNorm (rsFiberFun g p (r + 1) S.toCcTensor) 3
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CG * ‖S‖) :
+    ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r) (A B : ℝ),
+      0 ≤ A → 0 ≤ B →
+      (∑ j ∈ Finset.range 2,
+        ‖iteratedCovGrad (I := I) g r c j Φ‖ ^ 2) ≤ A ^ 2 →
+      (∑ j ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2) ≤ B ^ 2 →
+      ‖(⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+          SmoothCcTensorH1 g p c)‖ ≤
+        (Cpt + (Cpt + Real.sqrt (Module.finrank ℝ E) * CΦ * CG)) * A * B := by
+  classical
+  let sd : ℝ := Real.sqrt (Module.finrank ℝ E)
+  let Ks : ℝ := sd * CΦ * CG
+  let K : ℝ := Cpt + (Cpt + Ks)
+  intro Φ W A B hA hB hΦjet hWjet
+  let G : SmoothCcTensor g p (r + 1) :=
+    covGrad (I := I) (M := M) g p r W
+  let Y : SmoothCcTensor g p c :=
+    appCcRS (I := I) (M := M) g p r c Φ W
+  have hΦsq :
+      ‖Φ‖ ^ 2 + ‖covGrad (I := I) (M := M) g r c Φ‖ ^ 2 ≤ A ^ 2 := by
+    simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+      iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hΦjet
+  have hΦ0 : ‖Φ‖ ≤ A := by
+    nlinarith [sq_nonneg ‖covGrad (I := I) (M := M) g r c Φ‖,
+      norm_nonneg Φ]
+  have hΦ1 : ‖covGrad (I := I) (M := M) g r c Φ‖ ≤ A := by
+    nlinarith [sq_nonneg ‖Φ‖,
+      norm_nonneg (covGrad (I := I) (M := M) g r c Φ)]
+  have hΦH1 : ‖(⟨Φ⟩ : SmoothCcTensorH1 g r c)‖ ≤ A := by
+    have hsq : ‖(⟨Φ⟩ : SmoothCcTensorH1 g r c)‖ ^ 2 ≤ A ^ 2 := by
+      rw [h1_norm_sq_jet (I := I) (M := M) g r c Φ]
+      exact hΦsq
+    nlinarith [norm_nonneg (⟨Φ⟩ : SmoothCcTensorH1 g r c)]
+  have hWsup : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g p r x
+          (W.toSection x) ≤ (Cpt * B) ^ 2 := by
+    intro x
+    calc
+      _ ≤ Cpt ^ 2 * (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2) := hpt W x
+      _ ≤ Cpt ^ 2 * B ^ 2 :=
+        mul_le_mul_of_nonneg_left hWjet (sq_nonneg Cpt)
+      _ = (Cpt * B) ^ 2 := by ring
+  have hGsq :
+      ‖G‖ ^ 2 + ‖covGrad (I := I) (M := M) g p (r + 1) G‖ ^ 2 ≤ B ^ 2 := by
+    calc
+      _ ≤ ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2 := by
+        dsimp [G]
+        simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+          iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
+        nlinarith [sq_nonneg ‖W‖]
+      _ ≤ B ^ 2 := hWjet
+  have hGH1 : ‖(⟨G⟩ : SmoothCcTensorH1 g p (r + 1))‖ ≤ B := by
+    have hsq : ‖(⟨G⟩ : SmoothCcTensorH1 g p (r + 1))‖ ^ 2 ≤ B ^ 2 := by
+      rw [h1_norm_sq_jet (I := I) (M := M) g p (r + 1) G]
+      exact hGsq
+    nlinarith [norm_nonneg (⟨G⟩ : SmoothCcTensorH1 g p (r + 1))]
+  have hΦ6' :
+      lpNorm (rsFiberFun g r c Φ) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CΦ * A := by
+    calc
+      _ ≤ CΦ * ‖(⟨Φ⟩ : SmoothCcTensorH1 g r c)‖ := by
+        simpa only [rsFiberFun] using
+          hΦ6 (⟨Φ⟩ : SmoothCcTensorH1 g r c)
+      _ ≤ CΦ * A := mul_le_mul_of_nonneg_left hΦH1 hCΦ
+  have hG3' :
+      lpNorm (rsFiberFun g p (r + 1) G) 3
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CG * B := by
+    calc
+      _ ≤ CG * ‖(⟨G⟩ : SmoothCcTensorH1 g p (r + 1))‖ := by
+        simpa only [rsFiberFun] using
+          hG3 (⟨G⟩ : SmoothCcTensorH1 g p (r + 1))
+      _ ≤ CG * B := mul_le_mul_of_nonneg_left hGH1 hCG
+  have hslot6 :
+      lpNorm (rsFiberFun g (r + 1) (c + 1)
+          (slotExtend (I := I) (M := M) g r c Φ)) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+        sd * (CΦ * A) := by
+    rw [rsFiber_slotExtend (I := I) (M := M) g r c Φ 6]
+    exact mul_le_mul_of_nonneg_left hΦ6' (Real.sqrt_nonneg _)
+  have hY0 : ‖Y‖ ≤ Cpt * A * B := by
+    have h0 := rs_l2_right
+      (I := I) (M := M) g p r c Φ W
+      (Cpt * B) (mul_nonneg hCpt hB) hWsup
+    dsimp [Y]
+    calc
+      _ ≤ ‖Φ‖ * (Cpt * B) := h0
+      _ ≤ A * (Cpt * B) :=
+        mul_le_mul_of_nonneg_right hΦ0 (mul_nonneg hCpt hB)
+      _ = Cpt * A * B := by ring
+  have hcross :
+      ‖appCcRS (I := I) (M := M) g p r (c + 1)
+          (covGrad (I := I) (M := M) g r c Φ) W‖ ≤ Cpt * A * B := by
+    have hc := rs_l2_right
+      (I := I) (M := M) g p r (c + 1)
+      (covGrad (I := I) (M := M) g r c Φ) W
+      (Cpt * B) (mul_nonneg hCpt hB) hWsup
+    calc
+      _ ≤ ‖covGrad (I := I) (M := M) g r c Φ‖ * (Cpt * B) := hc
+      _ ≤ A * (Cpt * B) :=
+        mul_le_mul_of_nonneg_right hΦ1 (mul_nonneg hCpt hB)
+      _ = Cpt * A * B := by ring
+  have hslot :
+      ‖appCcRS (I := I) (M := M) g p (r + 1) (c + 1)
+          (slotExtend (I := I) (M := M) g r c Φ) G‖ ≤ Ks * A * B := by
+    have hp := rs_l6_l3_l2 (I := I) (M := M) g p (r + 1) (c + 1)
+      (slotExtend (I := I) (M := M) g r c Φ) G
+    calc
+      _ ≤ lpNorm (rsFiberFun g (r + 1) (c + 1)
+              (slotExtend (I := I) (M := M) g r c Φ)) 6
+              (riemannianVolumeMeasure (I := I) (M := M) g) *
+            lpNorm (rsFiberFun g p (r + 1) G) 3
+              (riemannianVolumeMeasure (I := I) (M := M) g) := hp
+      _ ≤ (sd * (CΦ * A)) * (CG * B) :=
+        mul_le_mul hslot6 hG3' lpNorm_nonneg
+          (mul_nonneg (Real.sqrt_nonneg _)
+            (mul_nonneg hCΦ hA))
+      _ = Ks * A * B := by dsimp [Ks, sd]; ring
+  have hY1 :
+      ‖covGrad (I := I) (M := M) g p c Y‖ ≤
+        (Cpt + Ks) * A * B := by
+    rw [show covGrad (I := I) (M := M) g p c Y =
+        appCcRS (I := I) (M := M) g p r (c + 1)
+            (covGrad (I := I) (M := M) g r c Φ) W +
+          appCcRS (I := I) (M := M) g p (r + 1) (c + 1)
+            (slotExtend (I := I) (M := M) g r c Φ) G by
+      dsimp [Y, G]
+      exact covGrad_appCcRS_eq (I := I) (M := M) g p r c Φ W]
+    calc
+      _ ≤ ‖appCcRS (I := I) (M := M) g p r (c + 1)
+              (covGrad (I := I) (M := M) g r c Φ) W‖ +
+            ‖appCcRS (I := I) (M := M) g p (r + 1) (c + 1)
+              (slotExtend (I := I) (M := M) g r c Φ) G‖ := norm_add_le _ _
+      _ ≤ Cpt * A * B + Ks * A * B := add_le_add hcross hslot
+      _ = (Cpt + Ks) * A * B := by ring
+  have hYH1 : ‖(⟨Y⟩ : SmoothCcTensorH1 g p c)‖ ≤ ‖Y‖ +
+      ‖covGrad (I := I) (M := M) g p c Y‖ := by
+    have hsq : ‖(⟨Y⟩ : SmoothCcTensorH1 g p c)‖ ^ 2 =
+        ‖Y‖ ^ 2 + ‖covGrad (I := I) (M := M) g p c Y‖ ^ 2 :=
+      h1_norm_sq_jet (I := I) (M := M) g p c Y
+    have hprod : 0 ≤ ‖Y‖ * ‖covGrad (I := I) (M := M) g p c Y‖ :=
+      mul_nonneg (norm_nonneg _) (norm_nonneg _)
+    refine le_of_sq_le_sq ?_ (add_nonneg (norm_nonneg _) (norm_nonneg _))
+    rw [hsq]
+    nlinarith
+  change ‖(⟨Y⟩ : SmoothCcTensorH1 g p c)‖ ≤ _
+  calc
+    _ ≤ ‖Y‖ + ‖covGrad (I := I) (M := M) g p c Y‖ := hYH1
+    _ ≤ Cpt * A * B + (Cpt + Ks) * A * B := add_le_add hY0 hY1
+    _ = K * A * B := by dsimp [K, Ks, sd]; ring
+
 theorem appRS_h1_h2_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -561,6 +727,199 @@ theorem appRS_h1_h2_h1
     _ ≤ ‖Y‖ + ‖covGrad (I := I) (M := M) g p c Y‖ := hYH1
     _ ≤ Cpt * A * B + (Cpt + Ks) * A * B := add_le_add hY0 hY1
     _ = K * A * B := by dsimp [K]; ring
+
+theorem appRS_h2_of
+    (g : SmoothRiemannianMetric I M) (p r c : ℕ)
+    (Cpt CG CW : ℝ) (hCpt : 0 ≤ Cpt) (hCG : 0 ≤ CG) (hCW : 0 ≤ CW)
+    (hpt : ∀ (Φ : SmoothCcTensor g r c) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g r c x
+          (Φ.toSection x) ≤
+        Cpt ^ 2 * (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g r c j Φ‖ ^ 2))
+    (hG6 : ∀ S : SmoothCcTensorH1 g r (c + 1),
+      lpNorm (rsFiberFun g r (c + 1) S.toCcTensor) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CG * ‖S‖)
+    (hW3 : ∀ S : SmoothCcTensorH1 g p r,
+      lpNorm (rsFiberFun g p r S.toCcTensor) 3
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CW * ‖S‖) :
+    ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r) (A B : ℝ),
+      0 ≤ A → 0 ≤ B →
+      (∑ j ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g r c j Φ‖ ^ 2) ≤ A ^ 2 →
+      (∑ j ∈ Finset.range 2,
+        ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2) ≤ B ^ 2 →
+      ‖(⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+          SmoothCcTensorH1 g p c)‖ ≤
+        (Cpt + (CG * CW + Real.sqrt (Module.finrank ℝ E) * Cpt)) * A * B := by
+  classical
+  let sd : ℝ := Real.sqrt (Module.finrank ℝ E)
+  let Kcross : ℝ := CG * CW
+  let Kslot : ℝ := sd * Cpt
+  intro Φ W A B hA hB hΦjet hWjet
+  let GΦ : SmoothCcTensor g r (c + 1) :=
+    covGrad (I := I) (M := M) g r c Φ
+  let GW : SmoothCcTensor g p (r + 1) :=
+    covGrad (I := I) (M := M) g p r W
+  let Y : SmoothCcTensor g p c :=
+    appCcRS (I := I) (M := M) g p r c Φ W
+  have hΦsup : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g r c x
+          (Φ.toSection x) ≤ (Cpt * A) ^ 2 := by
+    intro x
+    calc
+      _ ≤ Cpt ^ 2 * (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g r c j Φ‖ ^ 2) := hpt Φ x
+      _ ≤ Cpt ^ 2 * A ^ 2 :=
+        mul_le_mul_of_nonneg_left hΦjet (sq_nonneg Cpt)
+      _ = (Cpt * A) ^ 2 := by ring
+  have hW0 : ‖W‖ ≤ B := by
+    have h0 : ‖W‖ ^ 2 ≤ B ^ 2 := by
+      calc
+        _ ≤ ∑ j ∈ Finset.range 2,
+            ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2 := by
+          simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+            iteratedCovGrad_zero, iteratedCovGrad_succ]
+          exact le_add_of_nonneg_right (sq_nonneg _)
+        _ ≤ B ^ 2 := hWjet
+    nlinarith [norm_nonneg W]
+  have hGW0 : ‖GW‖ ≤ B := by
+    have h0 : ‖GW‖ ^ 2 ≤ B ^ 2 := by
+      calc
+        _ ≤ ∑ j ∈ Finset.range 2,
+            ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2 := by
+          dsimp only [GW]
+          simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+            iteratedCovGrad_zero, iteratedCovGrad_succ]
+          exact le_add_of_nonneg_left (sq_nonneg _)
+        _ ≤ B ^ 2 := hWjet
+    nlinarith [norm_nonneg GW]
+  have hGΦsq :
+      ‖GΦ‖ ^ 2 + ‖covGrad (I := I) (M := M) g r (c + 1) GΦ‖ ^ 2 ≤
+        A ^ 2 := by
+    calc
+      _ ≤ ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g r c j Φ‖ ^ 2 := by
+        dsimp only [GΦ]
+        simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+          iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
+        nlinarith [sq_nonneg ‖Φ‖]
+      _ ≤ A ^ 2 := hΦjet
+  have hGΦH1 : ‖(⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))‖ ≤ A := by
+    have hsq : ‖(⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))‖ ^ 2 ≤ A ^ 2 := by
+      rw [h1_norm_sq_jet (I := I) (M := M) g r (c + 1) GΦ]
+      exact hGΦsq
+    nlinarith [norm_nonneg (⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))]
+  have hWsq :
+      ‖W‖ ^ 2 + ‖covGrad (I := I) (M := M) g p r W‖ ^ 2 ≤ B ^ 2 := by
+    simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+      iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hWjet
+  have hWH1 : ‖(⟨W⟩ : SmoothCcTensorH1 g p r)‖ ≤ B := by
+    have hsq : ‖(⟨W⟩ : SmoothCcTensorH1 g p r)‖ ^ 2 ≤ B ^ 2 := by
+      rw [h1_norm_sq_jet (I := I) (M := M) g p r W]
+      exact hWsq
+    nlinarith [norm_nonneg (⟨W⟩ : SmoothCcTensorH1 g p r)]
+  have hGΦ6' :
+      lpNorm (rsFiberFun g r (c + 1) GΦ) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CG * A := by
+    calc
+      _ ≤ CG * ‖(⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))‖ := by
+        simpa only [rsFiberFun] using
+          hG6 (⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))
+      _ ≤ CG * A := mul_le_mul_of_nonneg_left hGΦH1 hCG
+  have hW3' :
+      lpNorm (rsFiberFun g p r W) 3
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤ CW * B := by
+    calc
+      _ ≤ CW * ‖(⟨W⟩ : SmoothCcTensorH1 g p r)‖ := by
+        simpa only [rsFiberFun] using
+          hW3 (⟨W⟩ : SmoothCcTensorH1 g p r)
+      _ ≤ CW * B := mul_le_mul_of_nonneg_left hWH1 hCW
+  have hslotSup : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g (r + 1) (c + 1) x
+          ((slotExtend (I := I) (M := M) g r c Φ).toSection x) ≤
+        (sd * (Cpt * A)) ^ 2 := by
+    intro x
+    rw [rfns_slotExtend_eq (I := I) (M := M) g r c Φ x]
+    have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
+    calc
+      (Module.finrank ℝ E : ℝ) *
+          riemannianFiberNormSq (I := I) (M := M) g r c x
+            (Φ.toSection x)
+          ≤ (Module.finrank ℝ E : ℝ) * (Cpt * A) ^ 2 :=
+        mul_le_mul_of_nonneg_left (hΦsup x) hfr
+      _ = (sd * (Cpt * A)) ^ 2 := by
+        rw [show (Module.finrank ℝ E : ℝ) = sd ^ 2 by
+          symm
+          simp only [sd, Real.sq_sqrt hfr]]
+        ring
+  have hY0 : ‖Y‖ ≤ Cpt * A * B := by
+    have h0 := rs_l2_left
+      (I := I) (M := M) g p r c Φ W
+      (Cpt * A) (mul_nonneg hCpt hA) hΦsup
+    dsimp only [Y]
+    calc
+      _ ≤ (Cpt * A) * ‖W‖ := h0
+      _ ≤ (Cpt * A) * B :=
+        mul_le_mul_of_nonneg_left hW0 (mul_nonneg hCpt hA)
+      _ = Cpt * A * B := by ring
+  have hcross :
+      ‖appCcRS (I := I) (M := M) g p r (c + 1) GΦ W‖ ≤
+        Kcross * A * B := by
+    have hp := rs_l6_l3_l2 (I := I) (M := M) g p r (c + 1) GΦ W
+    calc
+      _ ≤ lpNorm (rsFiberFun g r (c + 1) GΦ) 6
+            (riemannianVolumeMeasure (I := I) (M := M) g) *
+          lpNorm (rsFiberFun g p r W) 3
+            (riemannianVolumeMeasure (I := I) (M := M) g) := hp
+      _ ≤ (CG * A) * (CW * B) :=
+        mul_le_mul hGΦ6' hW3' lpNorm_nonneg (mul_nonneg hCG hA)
+      _ = Kcross * A * B := by dsimp only [Kcross]; ring
+  have hslot :
+      ‖appCcRS (I := I) (M := M) g p (r + 1) (c + 1)
+          (slotExtend (I := I) (M := M) g r c Φ) GW‖ ≤
+        Kslot * A * B := by
+    have hs := rs_l2_left
+      (I := I) (M := M) g p (r + 1) (c + 1)
+      (slotExtend (I := I) (M := M) g r c Φ) GW
+      (sd * (Cpt * A))
+      (mul_nonneg (Real.sqrt_nonneg _) (mul_nonneg hCpt hA)) hslotSup
+    calc
+      _ ≤ (sd * (Cpt * A)) * ‖GW‖ := hs
+      _ ≤ (sd * (Cpt * A)) * B :=
+        mul_le_mul_of_nonneg_left hGW0
+          (mul_nonneg (Real.sqrt_nonneg _) (mul_nonneg hCpt hA))
+      _ = Kslot * A * B := by dsimp only [Kslot, sd]; ring
+  have hY1 :
+      ‖covGrad (I := I) (M := M) g p c Y‖ ≤
+        (Kcross + Kslot) * A * B := by
+    rw [show covGrad (I := I) (M := M) g p c Y =
+        appCcRS (I := I) (M := M) g p r (c + 1) GΦ W +
+          appCcRS (I := I) (M := M) g p (r + 1) (c + 1)
+            (slotExtend (I := I) (M := M) g r c Φ) GW by
+      dsimp only [Y, GΦ, GW]
+      exact covGrad_appCcRS_eq (I := I) (M := M) g p r c Φ W]
+    calc
+      _ ≤ ‖appCcRS (I := I) (M := M) g p r (c + 1) GΦ W‖ +
+          ‖appCcRS (I := I) (M := M) g p (r + 1) (c + 1)
+            (slotExtend (I := I) (M := M) g r c Φ) GW‖ := norm_add_le _ _
+      _ ≤ Kcross * A * B + Kslot * A * B := add_le_add hcross hslot
+      _ = (Kcross + Kslot) * A * B := by ring
+  have hYH1 : ‖(⟨Y⟩ : SmoothCcTensorH1 g p c)‖ ≤
+      ‖Y‖ + ‖covGrad (I := I) (M := M) g p c Y‖ := by
+    have hsq : ‖(⟨Y⟩ : SmoothCcTensorH1 g p c)‖ ^ 2 =
+        ‖Y‖ ^ 2 + ‖covGrad (I := I) (M := M) g p c Y‖ ^ 2 :=
+      h1_norm_sq_jet (I := I) (M := M) g p c Y
+    refine le_of_sq_le_sq ?_ (add_nonneg (norm_nonneg _) (norm_nonneg _))
+    rw [hsq]
+    nlinarith [mul_nonneg (norm_nonneg Y)
+      (norm_nonneg (covGrad (I := I) (M := M) g p c Y))]
+  change ‖(⟨Y⟩ : SmoothCcTensorH1 g p c)‖ ≤ _
+  calc
+    _ ≤ ‖Y‖ + ‖covGrad (I := I) (M := M) g p c Y‖ := hYH1
+    _ ≤ Cpt * A * B + (Kcross + Kslot) * A * B := add_le_add hY0 hY1
+    _ = (Cpt + (CG * CW + Real.sqrt (Module.finrank ℝ E) * Cpt)) * A * B := by
+      dsimp only [Kcross, Kslot, sd]
+      ring
 
 theorem appRS_h2_h1_h1
     (hDim : Module.finrank ℝ E = 3)

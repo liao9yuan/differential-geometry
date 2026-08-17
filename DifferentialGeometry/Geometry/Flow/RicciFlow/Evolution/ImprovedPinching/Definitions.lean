@@ -31,11 +31,9 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
 abbrev Tensor02Fam : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x
-
 
 def metric02
     (G : Real -> SmoothRiemannianMetric I M) :
@@ -48,7 +46,6 @@ theorem metric02_apply
     (t : Real) (x : M) (v : Fin 2 -> TangentSpace I x) :
     metric02 (I := I) G t x v = (G t).inner x (v 0) (v 1) := by
   simp [metric02]
-
 
 def tfRic
     (G : Real -> SmoothRiemannianMetric I M)
@@ -86,7 +83,6 @@ abbrev tfRicNormSq
     (scalar ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
   tracefreeRicciNormSqOf scalar ricciNormSq
 
-
 omit [TopologicalSpace M] in
 theorem tfRicNormSq_compat
     (scalar ricciNormSq : Real -> M -> Real) (t : Real) (x : M) :
@@ -101,7 +97,6 @@ def pinchP
 def cubicQAt (scalar ricciNormSq ricciTraceCube : Real) : Real :=
   2 * ricciNormSq ^ 2 + scalar ^ 4 -
     5 * scalar ^ 2 * ricciNormSq + 4 * scalar * ricciTraceCube
-
 
 def cubicQ
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
@@ -189,7 +184,6 @@ theorem react3_diag (l1 l2 l3 : Real) :
   simp [Fin.sum_univ_three]
   ring
 
-
 theorem curv3_diag_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
       DifferentialGeometry.Geometry.Curvature.stdRmDiag3 l1 l2 l3 i k j l *
@@ -215,7 +209,6 @@ theorem curv3_neg_eq (l1 l2 l3 : Real) :
       DifferentialGeometry.Geometry.Curvature.delta3
   simp [Fin.sum_univ_three]
   ring
-
 
 def diagReact3
     (l1 l2 l3 : Real -> M -> Real) : Real -> M -> Real :=
@@ -243,7 +236,6 @@ theorem diagReact3_eq
       ricciReact3 (l1 t x) (l2 t x) (l3 t x) := by
   exact react3_diag (l1 t x) (l2 t x) (l3 t x)
 
-
 theorem tfRel_eigen (l1 l2 l3 : Real)
     (hR : DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 ≠ 0) :
     4 * ricciReact3 l1 l2 l3 -
@@ -267,7 +259,6 @@ theorem tfRel_eigen (l1 l2 l3 : Real)
     simpa [DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3] using hR
   field_simp [hR']
   ring_nf
-
 
 def tfRicReactRel
     (scalar ricciNormSq tfNormSq Q reaction : Real -> M -> Real) : Prop :=
@@ -442,7 +433,6 @@ theorem canon3_frame_neg
     curv3_frame_neg (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
   ring
 
-
 def ricciNormAt {x : M}
     (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
@@ -459,13 +449,11 @@ def curvRicAt {x : M}
       DifferentialGeometry.Geometry.Curvature.ricciCompAt (I := I) basis Ric i j *
         DifferentialGeometry.Geometry.Curvature.ricciCompAt (I := I) basis Ric k l
 
-
 def reactAt {x : M}
     (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Geometry.Curvature.Tensor04At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
   -curvRicAt (I := I) Ric Rm04 basis
-
 
 def ricciCubeAt {x : M}
     (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x)
@@ -596,7 +584,6 @@ theorem ricciCubeInv_diag {x : M}
       show T (T (T (basis 2))) = (l3 ^ 3) • basis 2 by
         simpa [LinearMap.comp_apply] using hT2c]
   simp [DifferentialGeometry.Geometry.Curvature.delta3, horth 0 0, horth 1 1, horth 2 2]
-
 
 def ricciCube
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

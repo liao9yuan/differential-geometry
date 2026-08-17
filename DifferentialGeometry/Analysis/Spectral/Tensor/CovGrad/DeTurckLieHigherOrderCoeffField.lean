@@ -1759,8 +1759,8 @@ private theorem deTurckLieEndoDerivation_realizedFam_apply_jointContMDiffOn
     (Λ := fun p : M × ℝ =>
       deTurckLieWEndo (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1) hΛ
     (A := fun p : M × ℝ => Y p.1) hY
-  have h1 := slotInsertEndo1Field_apply_jointContMDiffOn (I := I) (M := M) (d := 0)
-    (S := realizedSmallSet (δ := δ) (δ' := δ')) g₀
+  have h1 := slotInsertEndo1Field_apply_jointContMDiffOn (I := I) (M := M) (d := 0) g₀
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
     (Λ := fun p : M × ℝ =>
       deTurckLieWEndo (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1) hΛ
     (A := fun p : M × ℝ => Y p.1) hY

@@ -48,7 +48,6 @@ omit [NeZero (Module.finrank Real E)] in
   unfold normalBump
   exact indicator_of_notMem hq _
 
-
 omit [T2Space M] in
 omit [NeZero (Module.finrank Real E)] in
 theorem normalBump_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
@@ -105,7 +104,6 @@ theorem normalBump_tsupport (g : SmoothRiemannianMetric I M) (p : M)
     exact Metric.ball_subset_closedBall hv
   refine ⟨ψ q, hvball, ?_⟩
   exact ψ.toPartialEquiv.left_inv hqsrc
-
 
 theorem normalBump_src (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E))
@@ -172,7 +170,6 @@ omit [NeZero (Module.finrank Real E)] in
     quadNormal g p f q = 0 := by
   unfold quadNormal
   exact indicator_of_notMem hq _
-
 
 omit [T2Space M] in
 omit [NeZero (Module.finrank Real E)] in
@@ -298,7 +295,6 @@ noncomputable def normalRaw (g : SmoothRiemannianMetric I M) (p : ι → M)
   if i = i0 then normalBump g (p i0) (f i0) q
   else (1 - normalBump g (p i0) cut q) * normalBump g (p i) (f i) q
 
-
 omit [T2Space M] in
 omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalRaw_same (g : SmoothRiemannianMetric I M) (p : ι → M)
@@ -329,7 +325,6 @@ theorem normalRaw_contMDiff (g : SmoothRiemannianMetric I M) (p : ι → M)
   · rw [normalRaw_of_ne g p cut f i0 i hi]
     exact (contMDiff_const.sub (normalBump_contMDiff g (p i0) cut hcut)).mul
       (normalBump_contMDiff g (p i) (f i) (hf i))
-
 
 omit [T2Space M] in
 omit [NeZero (Module.finrank Real E)] in

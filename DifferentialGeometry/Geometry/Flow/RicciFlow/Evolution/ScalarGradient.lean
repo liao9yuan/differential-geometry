@@ -35,11 +35,9 @@ def ScalarAndRicciNormSquaredEvolutionOn
   ∀ (t : Real) (x : M),
     scalar t x ^ 2 = scalarSqRhs t x ∧ ricciNormSq t x = ricciNormSqRhs t x
 
-
 def ScalarSquaredEvolutionOn
     (scalar scalarSqRhs : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M), scalar t x ^ 2 = scalarSqRhs t x
-
 
 def RicciNormSquaredEvolutionOn
     (ricciNormSq ricciNormSqRhs : Real -> M -> Real) : Prop :=

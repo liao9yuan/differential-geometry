@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiHigher
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
-import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
@@ -2146,6 +2146,7 @@ private theorem GfunCut_space_diff
 namespace BernsteinTower
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem estimate_cutoff_at
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2508,6 +2509,7 @@ theorem estimate_cutoff_at
       exact hlimit.trans hfinal
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem estimate_barrier_at
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2832,6 +2834,7 @@ theorem estimate_barrier_at
       exact hlimit.trans hfinal
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem estimate_of_cutoff
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2845,6 +2848,7 @@ theorem estimate_of_cutoff
 omit [NeZero (Module.finrank Real E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+
 theorem estimate_complete
     [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

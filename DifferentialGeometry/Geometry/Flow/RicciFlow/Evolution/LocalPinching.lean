@@ -12,7 +12,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
 def CurvatureEigenvaluesOrdered
     (lambda mu nu : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M), nu t x ≤ mu t x ∧ mu t x ≤ lambda t x
@@ -20,7 +19,6 @@ def CurvatureEigenvaluesOrdered
 def RicciPinchingPreservedOn
     (lambda mu nu : Real -> M -> Real) (C : Real) : Prop :=
   ∀ (t : Real) (x : M), lambda t x ≤ C * (nu t x + mu t x)
-
 
 def RicciPinchingPreservedInequalityOn
     (lambda mu nu : Real -> M -> Real) (C : Real) : Prop :=
@@ -46,7 +44,6 @@ def PinchingDecayWeightOn
     (_lambda _mu _nu weight : Real -> M -> Real) (delta : Real) : Prop :=
   ∀ (t : Real) (x : M), 0 < delta ∧ 0 ≤ weight t x
 
-
 def RicciPinchingImprovesOn
     (lambda mu nu weight : Real -> M -> Real) (C : Real) : Prop :=
   ∀ (t : Real) (x : M),
@@ -57,18 +54,15 @@ def PinchingImprovesFunctionEvolutionOn
     (f rhs : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M), f t x ≤ rhs t x
 
-
 def HamiltonTracefreePinchingEstimateOn
     (tracefreeRmNormSq scalar weight : Real -> M -> Real) (C : Real) : Prop :=
   ∀ (t : Real) (x : M),
     tracefreeRmNormSq t x / scalar t x ^ 2 ≤ C * weight t x
 
-
 def pinchingP (lambda mu nu : Real) : Real :=
   lambda ^ 2 * (mu - nu) ^ 2 +
     mu ^ 2 * (lambda - nu) ^ 2 +
     nu ^ 2 * (lambda - mu) ^ 2
-
 
 def PinchingPFormulaOn
     (lambda mu nu P : Real -> M -> Real) : Prop :=

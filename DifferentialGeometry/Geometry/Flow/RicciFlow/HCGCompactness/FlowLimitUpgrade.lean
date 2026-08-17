@@ -60,6 +60,7 @@ structure FlowLimitData
   maps : PointedCGHMaps (I := I) X (L.atTime 0) mc.subseq
   scalar : ScalarPullbackTendsto (I := I) maps
   ricciNorm : RicNormPullback (I := I) maps
+
   hσsrc : forall k : Nat,
     letI : TopologicalSpace (L.atTime 0).M := L.topology
     IsSigmaCompact (maps.source k)
@@ -72,6 +73,7 @@ structure FlowLimitData
     letI : ChartedSpace H (SourceDomain (I := I) maps k) := sourceDomCharted (I := I) maps k
     letI : IsManifold I ∞ (SourceDomain (I := I) maps k) := sourceDomSmooth (I := I) maps k
     Real -> SmoothRiemannianMetric I (SourceDomain (I := I) maps k)
+
   conv : forall K : Set (L.atTime 0).M,
     forall _hK : letI : TopologicalSpace (L.atTime 0).M := L.topology; IsCompact K,
     forall p : Nat,
@@ -112,6 +114,25 @@ theorem toConclusion
   flowLimit_upgrade (I := I) X (mc.compSubseq d.φ d.hφ) d.data
 
 end FlowUpgradeData
+
+structure FlowUpgrade
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))) where
+  φ : Nat -> Nat
+  hφ : StrictMono φ
+  data : FlowLimitData (I := I) X (mc.compSubseq φ hφ)
+
+namespace FlowUpgrade
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+theorem toConclusion
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    {mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))}
+    (d : FlowUpgrade (I := I) X mc) :
+    CompactnessConclusion (I := I) X :=
+  flowLimit_upgrade (I := I) X (mc.compSubseq d.φ d.hφ) d.data
+
+end FlowUpgrade
 
 end HCGCompactness
 end DifferentialGeometry

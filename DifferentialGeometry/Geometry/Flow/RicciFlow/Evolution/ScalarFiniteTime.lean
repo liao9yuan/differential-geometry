@@ -17,10 +17,10 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [T2Space M]
+variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 def scalarBlowupTime (n c0 : Real) : Real :=
   n / (2 * c0)
-
 
 def ScalarBoundedAboveOnSlab (scalar : Real -> M -> Real) (T : Real) : Prop :=
   exists B : Real, forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, scalar t x <= B
@@ -135,7 +135,7 @@ end InitialScalarMinimum
 
 namespace ScalarBoundedAboveOnSlab
 
-omit [T2Space M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem of_continuousOn
     [CompactSpace M]
     {scalar : Real -> M -> Real} {T : Real}
@@ -159,7 +159,7 @@ theorem of_continuousOn
 
 end ScalarBoundedAboveOnSlab
 
-omit [CompleteSpace E] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -206,7 +206,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       hinit (hF_lip T hT_pos hT_omega hT_blow)
   exact hbound T ⟨le_of_lt hT_pos, le_rfl⟩ x
 
-omit [CompleteSpace E] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -261,7 +261,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     (M := M) hn hc0 hlower hbounded
   exact hnot hle
 
-omit [CompleteSpace E] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

@@ -28,11 +28,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
 abbrev volumeTraceFrame :
     Fin (Module.finrank Real E) → (x : M) → TangentSpace I x :=
   fun i x => chartBasisVecFiber (I := I) x i x
-
 
 abbrev volumeTraceInvMetricComponents
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) :
@@ -85,7 +83,6 @@ theorem traceTimeDerivMetricAt_eq_trace_metric_derivative
   simpa [metricFamilyForMeasure, DifferentialGeometry.Geometry.Curvature.metricTimeDerivative,
     chartGramMatrix_apply]
     using h.symm
-
 
 private theorem chartGramMatrix_inv_symm
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) (x : M)

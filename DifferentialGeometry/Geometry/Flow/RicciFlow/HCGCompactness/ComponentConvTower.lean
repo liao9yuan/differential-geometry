@@ -819,7 +819,6 @@ private theorem engine_input_family
   exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
     hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
 
-
 theorem exists_chart_engineInput_family
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -847,7 +846,6 @@ theorem exists_chart_engineInput_family
   apply engine_input_family gRef gSeq x₀ Vfam ?_ hK₀ hK₀chart
   intro p r Kc hKc hKchart
   exact metricComp_iteratedFDeriv_le (I := I) gRef gSeq hbdd x₀ hKc hKchart (Vfam p) r
-
 
 theorem engine_input_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -880,7 +878,6 @@ theorem engine_input_refs
     metricComp_iter_refs (I := I) gRef gSeq hbdd x₀ hKc hKchart (Vfam p) r
   refine ⟨Mr, hMr0, fun k y hy => ?_⟩
   exact hMr k y hy
-
 
 theorem exists_chart_refs
     (gBase : SmoothRiemannianMetric I M)

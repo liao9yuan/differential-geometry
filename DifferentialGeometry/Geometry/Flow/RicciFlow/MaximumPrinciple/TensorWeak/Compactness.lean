@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -383,7 +382,6 @@ structure TensorStrictCert
       (Set.Icc t0 (t0 + delta)) ->
     ∀ d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0,
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
-
 
 def TensorStrictCertSlab
     (G : Real -> SmoothRiemannianMetric I M)

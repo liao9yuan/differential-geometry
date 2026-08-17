@@ -1208,6 +1208,110 @@ theorem kappaSelf_h2
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 2 P‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] in
+private theorem coeffJets_domDomCongr_sub
+    (g : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
+    domDomCongrSection (I := I) g σ (A - B) =
+      domDomCongrSection (I := I) g σ A -
+        domDomCongrSection (I := I) g σ B := by
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g
+  intro x
+  have hsub : ∀ (P Q : SmoothCcTensor g 0 s),
+      unitModel (I := I) (M := M) g s (P - Q) x =
+        unitModel (I := I) (M := M) g s P x -
+          unitModel (I := I) (M := M) g s Q x := by
+    intro P Q
+    simp only [unitModel]
+    rw [SmoothCcTensor.toSection_sub]
+    rfl
+  rw [domDomCongrSection_unitModel, hsub A B]
+  rw [hsub
+    (domDomCongrSection (I := I) g σ A)
+    (domDomCongrSection (I := I) g σ B)]
+  rw [domDomCongrSection_unitModel, domDomCongrSection_unitModel]
+  apply ContinuousMultilinearMap.ext
+  intro v
+  simp only [ContinuousMultilinearMap.sub_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+theorem symm_grad3_sub
+    (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
+    symmSCovGrad3 (I := I) (M := M) g (T - U) =
+      symmSCovGrad3 (I := I) (M := M) g T -
+        symmSCovGrad3 (I := I) (M := M) g U := by
+  rw [symmSCovGrad3_def, symmSCovGrad3_def, symmSCovGrad3_def,
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.symmS_sub,
+    DifferentialGeometry.Analysis.Spectral.covGrad_sub]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+theorem koszul_covec_sub
+    (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
+    koszulCovecCc (I := I) g (T - U) =
+      koszulCovecCc (I := I) g T - koszulCovecCc (I := I) g U := by
+  unfold koszulCovecCc
+  rw [symm_grad3_sub g T U]
+  rw [coeffJets_domDomCongr_sub, coeffJets_domDomCongr_sub,
+    coeffJets_domDomCongr_sub]
+  module
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem kappa_self_pair_h2
+    (g gT gU : SmoothRiemannianMetric I M)
+    (T U : SmoothCcTensor g 0 2)
+    (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+      gT.inner x u v =
+        g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
+    (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+      gU.inner x u v =
+        g.inner x u v + ccTensorBilinSymm (I := I) g U x u v) :
+    (∑ i ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g 0 3 i
+          (lc0Kappa (I := I) (M := M) g gT g -
+            lc0Kappa (I := I) (M := M) g gU g)‖ ^ 2) ≤
+      10 * (∑ j ∈ Finset.range 4,
+        ‖iteratedCovGrad (I := I) g 0 2 j (T - U)‖ ^ 2) := by
+  have hsub :
+      lc0Kappa (I := I) (M := M) g gT g -
+          lc0Kappa (I := I) (M := M) g gU g =
+        domDomCongrSection (I := I) g (finRotate 3).symm
+          (koszulCovecCc (I := I) g (T - U)) := by
+    rw [lc0Kappa_self_eq_koszulCovecCc (I := I) (M := M) g gT T hTtie,
+      lc0Kappa_self_eq_koszulCovecCc (I := I) (M := M) g gU U hUtie,
+      ← coeffJets_domDomCongr_sub, ← koszul_covec_sub g T U]
+  rw [hsub]
+  have hterm : ∀ i ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 0 3 i
+        (domDomCongrSection (I := I) g (finRotate 3).symm
+          (koszulCovecCc (I := I) g (T - U)))‖ ^ 2 ≤
+        10 * ‖iteratedCovGrad (I := I) g 0 2 (i + 1) (T - U)‖ ^ 2 := by
+    intro i _hi
+    have hperm :
+        ‖iteratedCovGrad (I := I) g 0 3 i
+          (domDomCongrSection (I := I) g (finRotate 3).symm
+            (koszulCovecCc (I := I) g (T - U)))‖ ^ 2 =
+          ‖iteratedCovGrad (I := I) g 0 3 i
+            (koszulCovecCc (I := I) g (T - U))‖ ^ 2 := by
+      rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
+      exact MeasureTheory.integral_congr_ae
+        (Filter.Eventually.of_forall fun x =>
+          riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
+            (I := I) (M := M) g (finRotate 3).symm
+            (koszulCovecCc (I := I) g (T - U)) i x)
+    rw [hperm]
+    exact koszul_l2_succ (I := I) (M := M) g (T - U) i
+  have hsum := Finset.sum_le_sum hterm
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+    Nat.reduceAdd] at hsum ⊢
+  nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 0 (T - U)‖,
+    sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 1 (T - U)‖,
+    sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 2 (T - U)‖,
+    sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 3 (T - U)‖]
+
 theorem pbLow_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1277,6 +1381,76 @@ theorem pbLow_h2
         (lc0FixCd (I := I) (M := M) g₀ gB) (fun _ => rfl) i
   rw [heq]
   simpa only [B] using hout
+
+theorem pbLow_h2_mul
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ gB : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (P : SmoothCcTensor g₀ 0 2) (A : ℝ), 0 ≤ A →
+        (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) ≤ A ^ 2 →
+        (∑ i ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 0 3 i
+            (lc0PbLow (I := I) (M := M) g₀ P g₀ gB)‖ ^ 2) ≤
+          (C * A) ^ 2 := by
+  classical
+  obtain ⟨Ca, hCa, hprod⟩ := appRS_h2_h2_h2
+    (I := I) (M := M) hDim g₀ 1 1 2
+  let SF : ℝ := ∑ j ∈ Finset.range 3,
+    ‖iteratedCovGrad (I := I) g₀ 1 2 j
+      (lc0FixCd (I := I) (M := M) g₀ gB)‖ ^ 2
+  have hSF : 0 ≤ SF := Finset.sum_nonneg fun _ _ => sq_nonneg _
+  let AF : ℝ := Real.sqrt SF
+  have hAF : 0 ≤ AF := Real.sqrt_nonneg _
+  have hAFsq : SF = AF ^ 2 := by
+    simp only [AF, Real.sq_sqrt hSF]
+  let C : ℝ := Ca * AF
+  refine ⟨C, mul_nonneg hCa hAF, ?_⟩
+  intro P A hA hP
+  let W : SmoothCcTensor g₀ 1 1 :=
+    cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+      (ccTensor02Symm (I := I) (M := M) g₀ P)
+  have hWterm : ∀ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g₀ 1 1 j W‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
+    intro j _hj
+    have hraise :
+        ‖iteratedCovGrad (I := I) g₀ 1 1 j W‖ ^ 2 =
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j
+            (ccTensor02Symm (I := I) (M := M) g₀ P)‖ ^ 2 := by
+      rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
+      exact MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => by
+        simpa only [W] using
+          (riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
+            (I := I) (M := M) g₀ 0
+            (ccTensor02Symm (I := I) (M := M) g₀ P) j x))
+    rw [hraise]
+    have hs := norm_iteratedCovGrad_tensorSymmetrization_le
+      (I := I) (M := M) g₀ P j
+    nlinarith [norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j
+      (ccTensor02Symm (I := I) (M := M) g₀ P)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j P)]
+  have hW : (∑ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g₀ 1 1 j W‖ ^ 2) ≤ A ^ 2 :=
+    (Finset.sum_le_sum hWterm).trans hP
+  have hout := hprod (lc0FixCd (I := I) (M := M) g₀ gB) W AF A
+    hAF hA (by simpa only [SF] using hAFsq.le) hW
+  have heq : (∑ i ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g₀ 0 3 i
+        (lc0PbLow (I := I) (M := M) g₀ P g₀ gB)‖ ^ 2) =
+      ∑ i ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g₀ 1 2 i
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 2
+            (lc0FixCd (I := I) (M := M) g₀ gB) W)‖ ^ 2 := by
+    apply Finset.sum_congr rfl
+    intro i _hi
+    simpa only [W] using
+      lc0b_normSq_icg_pbLow_eq (I := I) (M := M) g₀ P g₀ gB
+        (lc0FixCd (I := I) (M := M) g₀ gB) (fun _ => rfl) i
+  rw [heq]
+  simpa only [C] using hout
 
 theorem kappaBg_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -2241,6 +2415,72 @@ theorem rhs0_h1_of_aux
     abel
   rw [hrhs, Real.sq_sqrt hinside]
   simpa only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, add_zero] using hsum
+
+theorem rhs0_h1_parts
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ δ' : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s Br Bd Bt : ℝ)
+    (hRic : (∑ i ∈ Finset.range 2,
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2) ≤ Br ^ 2)
+    (hDLa : (∑ i ∈ Finset.range 2,
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (deTurckLieDLaCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2) ≤ Bd ^ 2)
+    (hTail : (∑ i ∈ Finset.range 2,
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (deTurckLieDLbCoeffField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg +
+          lieCorr0Field (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2) ≤ Bt ^ 2) :
+    (∑ i ∈ Finset.range 2,
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (rhsLow0Coeff (I := I) (M := M) g₀ g_bg T T' hδ hδ' s)‖ ^ 2) ≤
+      (Real.sqrt (4 * (4 * Br ^ 2 + Bd ^ 2 + Bt ^ 2))) ^ 2 := by
+  let Ric : SmoothCcTensor g₀ 2 2 :=
+    linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s)
+  let DLa : SmoothCcTensor g₀ 2 2 :=
+    deTurckLieDLaCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+  let Tail : SmoothCcTensor g₀ 2 2 :=
+    deTurckLieDLbCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg +
+      lieCorr0Field (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+  have hzero : (∑ i ∈ Finset.range 2,
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (0 : SmoothCcTensor g₀ 2 2)‖ ^ 2) ≤ (0 : ℝ) ^ 2 := by
+    have hz : ∀ i : ℕ,
+        iteratedCovGrad (I := I) g₀ 2 2 i (0 : SmoothCcTensor g₀ 2 2) = 0 := by
+      intro i
+      induction i with
+      | zero => rfl
+      | succ i hi => rw [iteratedCovGrad_succ, hi, covGrad_zero]
+    simp only [hz, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact le_rfl
+  have hsum := jet_add4 (I := I) (M := M) g₀ 2 2 2 Ric DLa Tail
+    (0 : SmoothCcTensor g₀ 2 2) Br Bd Bt 0
+    (by simpa only [Ric] using hRic) (by simpa only [DLa] using hDLa)
+    (by simpa only [Tail] using hTail) hzero
+  have hinside : 0 ≤ 4 * (4 * Br ^ 2 + Bd ^ 2 + Bt ^ 2) := by
+    positivity
+  have hrhs : rhsLow0Coeff (I := I) (M := M) g₀ g_bg T T' hδ hδ' s =
+      (-2 : ℝ) • Ric + ((DLa + Tail) + (0 : SmoothCcTensor g₀ 2 2)) := by
+    simp only [rhsLow0Coeff, linearizedRicciConnDiffOrder0Coeff,
+      Ric, DLa, Tail, add_zero]
+    rw [← deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
+    abel
+  rw [hrhs, Real.sq_sqrt hinside]
+  simpa only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
+    add_zero] using hsum
 
 theorem rhs1_h2_of_aux
     (g₀ g_bg : SmoothRiemannianMetric I M)

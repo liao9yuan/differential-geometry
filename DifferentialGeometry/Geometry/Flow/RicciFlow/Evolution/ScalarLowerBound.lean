@@ -31,14 +31,12 @@ def scalarLowerBarrier (n c0 : Real) (t : Real) : Real :=
     scalarLowerBarrier n c0 0 = c0 := by
   simp [scalarLowerBarrier]
 
-
 def scalarLowerReaction (n : Real) (a _t : Real) : Real :=
   (2 / n) * a ^ 2
 
 theorem scalarLowerReaction_apply (n a t : Real) :
     scalarLowerReaction n a t = (2 / n) * a ^ 2 := by
   rfl
-
 
 theorem scalarLowerBarrier_hasDerivWithinAt
     (s : Set Real) (n c0 t : Real)
@@ -183,7 +181,6 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
         (uniqueDiffOn_Icc hT t ht) hn (ne_of_gt (hden t ht)))
     (fun x => by simpa using hinit x) hF_lip
 
-
 theorem scalar_curvature_positive_of_lower_barrier
     {n c0 t Rtx : Real}
     (hbound : scalarLowerBarrier n c0 t <= Rtx)
@@ -196,7 +193,6 @@ theorem scalar_curvature_positive_of_lower_barrier
 
 def InitialScalarLowerBound (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
   forall x : M, c0 <= scalar 0 x
-
 
 def InitialScalarMinimum (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
   exists x0 : M, scalar 0 x0 = c0 /\ InitialScalarLowerBound (M := M) scalar c0

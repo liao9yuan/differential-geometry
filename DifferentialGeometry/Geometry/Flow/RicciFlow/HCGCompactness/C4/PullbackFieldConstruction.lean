@@ -98,6 +98,5 @@ theorem exists_pullbackField
   rw [Tensor0SBundle.metricTensorField_apply]
   exact hGinner x hx (v 0) (v 1)
 
-
 end HCGCompactness
 end DifferentialGeometry

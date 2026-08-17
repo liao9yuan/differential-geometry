@@ -1,3 +1,4 @@
+
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Bundle.ClmSectionSmooth
 import DifferentialGeometry.Geometry.Metric.MetricExistence
@@ -24,7 +25,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInner_nonneg
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -33,7 +33,6 @@ theorem metricInner_nonneg
   by_cases hv : v = 0
   · simp [hv]
   · exact (g.pos x v hv).le
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_mono

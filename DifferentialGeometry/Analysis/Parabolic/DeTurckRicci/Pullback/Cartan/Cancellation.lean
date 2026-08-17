@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 namespace DifferentialGeometry

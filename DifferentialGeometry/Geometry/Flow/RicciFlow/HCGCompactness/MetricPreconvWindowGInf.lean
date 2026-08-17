@@ -281,7 +281,6 @@ theorem netFullDiag
   choose gNet hgNet using hPphi
   exact ⟨phi, hphi, gNet, fun n => (hgNet n).1, fun n => (hgNet n).2⟩
 
-
 omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -304,7 +303,6 @@ theorem normSq0S_neg
     Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x s basis hinv T]
   refine Finset.sum_congr rfl fun slots _ => ?_
   simp [Tensor0SBundle.component0S_apply]
-
 
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -616,7 +614,6 @@ theorem windowGInf
     windowOfNet (I := I) K beta psiT p gSeq gInf gRef phi hphi L hL hgLip hInfLip e he
       hdense (fun n eps heps => hfull (e n) (he n) eps heps)
   exact ⟨phi', hphi', gInf, hwin⟩
-
 
 omit [Module.Finite ℝ E] in
 theorem windowGInfOut

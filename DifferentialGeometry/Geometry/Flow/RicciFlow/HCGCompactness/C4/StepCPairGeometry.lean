@@ -13,14 +13,14 @@ namespace HCGCompactness
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
+omit [CompleteSpace E] in
 theorem NetLimitData.sigmaBall_nesting
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

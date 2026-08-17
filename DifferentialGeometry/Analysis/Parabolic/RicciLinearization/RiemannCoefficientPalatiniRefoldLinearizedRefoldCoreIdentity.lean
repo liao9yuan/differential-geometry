@@ -23,7 +23,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -154,8 +153,7 @@ theorem bdLiePairTraceFamily_appCc_eq_familySecondGradient
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T)
       ((q 2).trans (Equiv.swap (0 : Fin 4) 1))]
 
-omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] in
 private lemma lrRealizedFam_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -173,9 +171,7 @@ private lemma lrRealizedFam_zero (g₀ : SmoothRiemannianMetric I M)
     rw [hz, add_zero]
   · rw [realizedFam, dif_neg h]
 
-
-omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma lrKoszulCovec_congr {g g' : SmoothRiemannianMetric I M} (h : g = g')
     (S : SmoothCcTensor g 0 2) (S' : SmoothCcTensor g' 0 2)
     (hs : HEq S S') (x : M) (u ζ : TangentSpace I x) :
@@ -183,9 +179,7 @@ private lemma lrKoszulCovec_congr {g g' : SmoothRiemannianMetric I M} (h : g = g
   subst h
   rw [eq_of_heq hs]
 
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
@@ -215,7 +209,6 @@ private lemma lrSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
   have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
-
 
 private lemma lrConnDiff_linearization (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -258,7 +251,6 @@ private lemma lrConnDiff_linearization (g₀ : SmoothRiemannianMetric I M)
         (realizedFam (I := I) g₀ T 0 hδ hδZ s) x
           (linearizedKoszulCovec (I := I) g₀ T x u ζ) := hkey
 
-
 private lemma lrConnDiff_inner (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -274,7 +266,6 @@ private lemma lrConnDiff_inner (g₀ : SmoothRiemannianMetric I M)
     map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
     DifferentialGeometry.Geometry.Operator.inner_metricSharp]
 
-
 private def linearizedKoszulTensor (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 3 :=
   (1 / 2 : ℝ) •
@@ -285,8 +276,7 @@ private def linearizedKoszulTensor (g₀ : SmoothRiemannianMetric I M) (T : Smoo
       - domDomCongrSection (I := I) g₀ (Equiv.swap (1 : Fin 3) 2)
         (covGrad (I := I) (M := M) g₀ 0 2 T))
 
-omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma lrKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (z u ζ : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (linearizedKoszulTensor (I := I) (M := M) g₀ T) x ![z, u, ζ] =
@@ -312,8 +302,7 @@ private lemma lrKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     fin_cases i <;> rfl
   rw [h1, h2, h3]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrUnitEval_tsmdiffAt (g : SmoothRiemannianMetric I M) (n : ℕ)
     (W : SmoothCcTensor g 0 n) (x : M) :
     TensorSectionMDiffAt (I := I) n
@@ -349,17 +338,14 @@ private lemma lrUnitModel_covGrad_eval (g : SmoothRiemannianMetric I M) (n : ℕ
       (LeviCivita (I := I) g) x (v 0)]
   rw [map_zero, sub_zero]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
-    [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrExtDerivFun_apply_scalar (f : M → ℝ) {x : M} (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   rfl
 
-
-omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma lrCovDerivConnDiff_self_zero (g₀ : SmoothRiemannianMetric I M)
     (x : M) (v0 p q : TangentSpace I x) :
     covDerivConnDiff (I := I) g₀ g₀
@@ -405,7 +391,6 @@ private lemma lrCovDerivConnDiff_self_zero (g₀ : SmoothRiemannianMetric I M)
   rw [bdConnDiff_self_apply (I := I) (M := M) g₀ x, bdConnDiff_self_apply (I := I) (M := M) g₀ x,
     zero_smul]
   simp
-
 
 private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -727,15 +712,15 @@ private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
     rw [hE2, hQL3, hQL2, hQ0, hQ1]
     linear_combination hE3
 
-
 def connDiffGmLoweredTensor (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 3
     (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (fullRaisedEndoField (I := I) (M := M) gm g₀))
     (domDomCongrSection (I := I) g₀ (finRotate 3) (connDiffLoweredCc (I := I) g₀ gm))
 
+abbrev lrOmegaHat := @connDiffGmLoweredTensor
+
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffGmLoweredTensor (I := I) (M := M) g₀ gm) x m =
@@ -792,12 +777,10 @@ private lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
   exact bdG0_inner_lambda (I := I) (M := M) g₀ gm x
     (PDE.DeTurck.connDiff (I := I) gm g₀ x (m 1) (m 2)) (m 0)
 
-
 def connDiffQuadraticPairedTensor (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
     (armSlotEndoCc (I := I) (M := M) g₀ 2 (connDiffEndo (I := I) (M := M) g₀ gm))
     (connDiffGmLoweredTensor (I := I) (M := M) g₀ gm)
-
 
 def connDiffQuadraticComposedTensor (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 4
@@ -805,10 +788,12 @@ def connDiffQuadraticComposedTensor (g₀ gm : SmoothRiemannianMetric I M) : Smo
     (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 3) 1)
       (connDiffGmLoweredTensor (I := I) (M := M) g₀ gm))
 
+abbrev lrQB := @connDiffQuadraticPairedTensor
+
+abbrev lrQA := @connDiffQuadraticComposedTensor
+
 set_option backward.isDefEq.respectTransparency false in
-omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma lrArmSlotTuple (g₀ gm : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     (Function.update (Matrix.vecTail (fun k : Fin 4 => (m k : E))) 0
@@ -838,8 +823,7 @@ private lemma lrArmSlotTuple (g₀ gm : SmoothRiemannianMetric I M) (x : M)
     rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ gm) x m =
@@ -871,8 +855,7 @@ private lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     Matrix.cons_val_two, Matrix.tail_cons]
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma lrQA_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ gm) x m =
@@ -933,7 +916,6 @@ def lrPermC : Equiv.Perm (Fin 4) :=
    fun i => (![2, 1, 3, 0] : Fin 4 → Fin 4) i,
    by decide, by decide⟩
 
-
 def connDiffQuadraticCurvatureTerm (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1)
     (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ gm)
@@ -947,9 +929,11 @@ def connDiffQuadraticCurvatureTerm (g₀ gm : SmoothRiemannianMetric I M) : Smoo
     + domDomCongrSection (I := I) g₀ lrPermC
       (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ gm)
 
+abbrev lrQuadF (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+  connDiffQuadraticCurvatureTerm (I := I) (M := M) g₀ gm
+
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma lrQuadF_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticCurvatureTerm (I := I) (M := M) g₀ gm) x m =
@@ -1015,19 +999,21 @@ private def lrSigmaW2 : Equiv.Perm (Fin 6) :=
    fun i => (![1, 3, 2, 4, 0, 5] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-
 def riemannLoweredContractionA (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW1
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
-
 def riemannLoweredContractionB (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW2
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
+
+abbrev lrRiemW1 := @riemannLoweredContractionA
+
+abbrev lrRiemW2 := @riemannLoweredContractionB
 
 set_option backward.isDefEq.respectTransparency false in
 omit [SigmaCompactSpace M] in
@@ -1197,12 +1183,15 @@ private lemma lrRiemW2_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
       (m 1 : E), (m 3 : E)]]
   rfl
 
-
 def riemannCurvatureCoeffField (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 4 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (riemannLoweredContractionA (I := I) (M := M) g₀) T
     + ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
       (riemannLoweredContractionB (I := I) (M := M) g₀) T
+
+abbrev lrCurvF (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
+    SmoothCcTensor g₀ 0 4 :=
+  riemannCurvatureCoeffField (I := I) (M := M) g₀ T
 
 set_option backward.isDefEq.respectTransparency false in
 omit [SigmaCompactSpace M] in
@@ -1323,8 +1312,7 @@ private lemma lrVec2_upd_one {F : Type*} (a b z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrTensor0sClmExtUnit {s : ℕ} {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x}
     (h : φ (unitZeroSec (I := I) (M := M) x) = ψ (unitZeroSec (I := I) (M := M) x)) :
@@ -1333,8 +1321,7 @@ private lemma lrTensor0sClmExtUnit {s : ℕ} {x : M}
   ext D
   rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D, map_smul, map_smul, h]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrCoeff_eq_unitScalarRSLift (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (x : M) :
     (P.toSection x : TensorRSSpace 0 2 I x) =
@@ -1351,7 +1338,6 @@ private lemma lrCoeff_eq_unitScalarRSLift (g₀ : SmoothRiemannianMetric I M)
     apply lrTensor0sClmExtUnit (I := I) (M := M)
     rw [unitScalarRSLift_apply_unit]
   exact h
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lrRIC (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -1499,8 +1485,7 @@ private lemma lrRIC (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀
         (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d) from
     hAPtoModel ![c, riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d]]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrUnitEval_ddc_rel (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
     (σ : Equiv.Perm (Fin n)) (W : SmoothCcTensor g₀ 0 n) (y : M) :
     (show Tensor0SSpace n I y from
@@ -1517,7 +1502,6 @@ private lemma lrUnitEval_ddc_rel (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
     rw [domDomCongrSection_unitModel]
   rw [unitModel, unitModel] at h
   exact h
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lrCovGrad_ddc_unitModel (g₀ : SmoothRiemannianMetric I M)
@@ -1559,8 +1543,7 @@ private lemma lrCovGrad_ddc_unitModel (g₀ : SmoothRiemannianMetric I M)
     Matrix.tail_cons _ _]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrTsec_rel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
       smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
@@ -1587,7 +1570,6 @@ private lemma lrTsec_rel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor
     exact hTsymm y (v 0) (v 1)
   rw [unitModel] at h
   exact h
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lrCovGradT_argswap (g₀ : SmoothRiemannianMetric I M)
@@ -1667,7 +1649,6 @@ private lemma lrCgTsec_rel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTens
   rw [unitModel] at h
   exact h
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lrICG2_argswap (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
@@ -1736,7 +1717,6 @@ private lemma lrICG2_argswap (g₀ : SmoothRiemannianMetric I M)
   funext i
   fin_cases i <;> rfl
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lrCovGradKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (w0 w1 w2 w3 : TangentSpace I x) :
@@ -1786,7 +1766,6 @@ private lemma lrCovGradKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     funext k
     fin_cases k <;> rfl]
 
-
 def lrR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
@@ -1795,6 +1774,24 @@ def lrR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ :
   (-(s / 2) : ℝ) • riemannCurvatureCoeffField (I := I) (M := M) g₀ T
     - connDiffQuadraticCurvatureTerm (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
 
+abbrev lieCovR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (s : ℝ) : SmoothCcTensor g₀ 0 4 :=
+  lrR4 (I := I) (M := M) g₀ T hδ hδZ s
+
+theorem lieCovR4_eq (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (s : ℝ) :
+    lieCovR4 (I := I) (M := M) g₀ T hδ hδZ s =
+      (-(s / 2) : ℝ) • lrCurvF (I := I) (M := M) g₀ T
+        - lrQuadF (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) :=
+  rfl
 
 private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1839,7 +1836,7 @@ private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
       ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [hR4, lrQuadF_unitModel_apply (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T 0 hδ hδZ s) x ![v0, v1, pf, qf],
-    lrCurvF_unitModel_apply (I := I) (M := M) g₀ T x ![v0, v1, pf, qf]]
+    lrCurvF_unitModel_apply g₀ T x ![v0, v1, pf, qf]]
   rw [lrKernel_inner (I := I) (M := M) g₀ T hδ_lt hδ hδZ hTsymm hs x v0 v1 pf qf,
     lrKernel_inner (I := I) (M := M) g₀ T hδ_lt hδ hδZ hTsymm hs x v1 v0 pf qf]
   rw [lrCovGradKT_unitModel (I := I) (M := M) g₀ T x v0 v1 pf qf,
@@ -1869,7 +1866,6 @@ private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three]
   linear_combination (s / 2) * hric + (s / 2) * hswap
-
 
 theorem lrArm_sub_family_eq_pairTrace (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -2414,6 +2410,34 @@ theorem lrArm_sub_family_eq_pairTrace (g₀ : SmoothRiemannianMetric I M)
   simp only [Finset.sum_add_distrib, ← Finset.mul_sum]
   ring
 
+theorem lieCov_residual (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      smoothCcTensorBilinForm (I := I) g₀ T x v w =
+        smoothCcTensorBilinForm (I := I) g₀ T x w v)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    deTurckLieCovDerivArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀ -
+      deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M)
+        g₀ T hδ hδZ
+          ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+            Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 *
+              Equiv.swap (0 : Fin 4) 1,
+            Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+          ![(-1 : ℝ), -1, 1] s =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (lieCovPair (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (lieCovR4 (I := I) (M := M) g₀ T hδ hδZ s))) := by
+  simpa only [lieCovPair, lieCovSigma, lieCovR4] using
+    lrArm_sub_family_eq_pairTrace (I := I) (M := M)
+      g₀ T hδ_lt hδ hδZ hTsymm hs
 
 end TensorSpectral
 end Parabolic

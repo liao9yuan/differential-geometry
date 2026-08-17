@@ -33,7 +33,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem hmfSpecPush_cd
@@ -143,6 +143,7 @@ private theorem hmfSpecPush_cd
     exact hφ
 
 omit [CompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem hmfRaisedFrame_cd
     (q h : SmoothRiemannianMetric I M)
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
@@ -248,7 +249,7 @@ private theorem hmfSpecFrozen_cd
   exact hc.mul (ContMDiffWithinAt.sum (fun i _ ↦ hterm i p hp))
 
 omit [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] [SigmaCompactSpace M] in
 private theorem hmfDens_eq_frozen
     (q h : SmoothRiemannianMetric I M) (Φ : M → M)
     (x₀ : M) {y : M}
@@ -511,7 +512,7 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
   exact hcomp.trans hgoal
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem hmfUnitLift
     (q : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor q 0 1) (x : M) :
@@ -550,7 +551,7 @@ private theorem hmfUnitLift
     _ = (S.toSection x) c := congrArg (S.toSection x) hc.symm
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem hmfChartInv
     (q : SmoothRiemannianMetric I M) (x : M) :
     MetricInverseInBasis (I := I) q x (chartModelBasis E)
@@ -571,7 +572,7 @@ private theorem hmfChartInv
     simpa only [Matrix.mul_apply, gramMatrixAt_apply, Matrix.one_apply] using hij
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem hmfCovInner
     (q : SmoothRiemannianMetric I M) (x : M)
     (α β : Tensor0SSpace 1 I x) :
@@ -647,7 +648,7 @@ private theorem hmfCovInner
           (Tensor0SSpace.toModel α) (Tensor0SSpace.toModel β) := htensor.symm
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem hmfMassPt
     (q : SmoothRiemannianMetric I M)
     (U V : SmoothCcTensor q 0 1) (x : M) :

@@ -24,7 +24,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
 omit [SigmaCompactSpace M] in
 theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -112,7 +111,7 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
         (fun l _hl =>
           by
             have hprod :=
-              (hmetricFrame.inverseMetricDerivative t x k l).mul
+              (hmetricFrame.inverseMetricDerivative t x hx k l).mul
                 (hDiff t x hx i j l)
             refine hprod.congr_deriv ?_
             simp))
@@ -435,7 +434,6 @@ theorem christoffelEvolution_of_koszul
     (I := I) S gInv frame hframe nablaRic hinv
     (connectionVariationPairing_of_koszul
       (I := I) S frame pairDt nablaRic hdt hkoszul)
-
 
 end Components
 

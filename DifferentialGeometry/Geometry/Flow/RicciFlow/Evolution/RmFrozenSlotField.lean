@@ -47,6 +47,7 @@ private theorem freezeAllButSlots_apply
   · simp [freezeAllButSlots, Function.update_of_ne hi]
 
 set_option backward.isDefEq.respectTransparency false in
+
 noncomputable def freezeAllBut04Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -371,7 +372,6 @@ theorem rmFrozenSlotField_apply_vec
     rmFrozenSlotField (I := I) S t q Y x (fun _ : Fin 1 => W) =
       S.base.rm04 t x (Function.update (fun i : Fin 4 => Y i x) q W) :=
   freezeAllBut04Field_apply_vec (I := I) (M := M) (S.base.rm04 t) q Y x W
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in

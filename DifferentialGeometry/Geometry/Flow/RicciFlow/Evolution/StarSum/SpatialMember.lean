@@ -506,6 +506,7 @@ def commStarField
   (-1 : Real) • (TA + TB + TC)
 
 set_option backward.isDefEq.respectTransparency false in
+
 private theorem commStarField_data
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)

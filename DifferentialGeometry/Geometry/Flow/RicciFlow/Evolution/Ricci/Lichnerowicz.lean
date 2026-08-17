@@ -170,7 +170,6 @@ def tensorOneUpCompInFrame
     (t : Real) (x : M) (i k : Idx) : Real :=
   ∑ a : Idx, gInv t x k a * h t x i a
 
-
 def ricciLeftActionCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -181,7 +180,6 @@ def ricciLeftActionCompInFrame
   ∑ k : Idx,
     ricciOneUpCompInFrame (I := I) S gInv frame t x i k *
       h t x k j
-
 
 def ricciRightActionCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -208,7 +206,6 @@ def lichnerowiczRHSInFrame
         hRaised t x k l) -
     ricciLeftActionCompInFrame (I := I) S gInv frame h t x i j -
     ricciRightActionCompInFrame (I := I) S gInv frame h t x i j
-
 
 def RicciLichnerowiczEquationInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -244,7 +241,6 @@ def RicciLichnerowiczSpecializesInFrame
       ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (t : Real) x i j
 
-
 def RicciSymmetricInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -274,7 +270,7 @@ theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i)
     (t : Real) (x : M) (i j : Idx) :
     ricciRightActionCompInFrame (I := I) S gInv frame
         (ricciCompInFrame (I := I) S frame) t x i j =
@@ -466,7 +462,7 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i) :
     RicciLichnerowiczSpecializesInFrame
       (I := I) S Rm04 gInv frame roughLapRic :=
   ricciLichnerowiczSpecializesInFrame_of_actions
@@ -488,7 +484,7 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hRic : RicciSymmetricInFrameOnRegular (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i) :
     RicciLichnerowiczSpecializesInFrame
       (I := I) S Rm04 gInv frame roughLapRic := by
   refine ricciLichnerowiczSpecializesInFrame_of_actions
@@ -585,7 +581,7 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i) :
     RicciLichnerowiczEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic :=
   ricciLichnerowiczEquationInFrame_of_ricciEvolution

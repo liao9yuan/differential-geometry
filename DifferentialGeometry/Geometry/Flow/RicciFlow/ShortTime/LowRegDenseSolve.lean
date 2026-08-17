@@ -22,7 +22,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -124,7 +124,8 @@ theorem coreN_outer
                 ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
                   (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ := by
   obtain ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, hcore⟩ :=
-    coreN_tame (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
+    coreN_tame (E := E) (H := H) (I := I) (M := M)
+      hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   refine ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, ?_⟩
   intro Q R hQ hQρ hR hRQ hrealQ x y
   let xQ0 : lowerState (I := I) (M := M) g₀ 1 Q :=

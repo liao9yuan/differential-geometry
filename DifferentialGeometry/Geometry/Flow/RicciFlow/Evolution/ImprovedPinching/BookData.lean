@@ -20,7 +20,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
 def scalGradSq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -32,7 +31,6 @@ def scalGradSq
         (S.scalar t) x)
       (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) (flowG (I := I) S) t
         (S.scalar t) x)
-
 
 def tfLapBook
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -69,7 +67,6 @@ noncomputable def ricciNormDuSec
     (by
       exact DifferentialGeometry.Geometry.Curvature.norm02_smooth (I := I) (M := M)
         (S.base.metric t) (S.ricci t))
-
 
 def pinchCoupleSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -186,7 +183,6 @@ theorem pinchEvol_solSec
         DifferentialGeometry.Geometry.Curvature.norm02_smooth (I := I) (M := M)
           (S.base.metric (t : Real)) (S.ricci (t : Real))
     exact hf.contMDiffAt.mdifferentiableAt (by simp)
-
 
 omit [Module.Finite ℝ E] in
 theorem ricciSym_can
@@ -652,7 +648,6 @@ theorem tfNonneg_sol
     ring
   rw [htf]
   exact DifferentialGeometry.Geometry.Curvature.tracefreeRicciEigenNormSq3_nonneg l1 l2 l3
-
 
 omit [Module.Finite ℝ E] in
 theorem tfDiff_sol

@@ -30,7 +30,6 @@ theorem compNormSq5_nonneg (T : Idx → Idx → Idx → Idx → Idx → Real) :
   refine Finset.sum_nonneg fun d _ => ?_
   exact sq_nonneg _
 
-
 theorem sq_le_compNormSq5
     (T : Idx → Idx → Idx → Idx → Idx → Real) (m a b c d : Idx) :
     (T m a b c d) ^ 2 ≤ compNormSq5 T := by
@@ -68,7 +67,6 @@ theorem sq_le_compNormSq5
             Finset.sum_nonneg fun _ _ => sq_nonneg _) (Finset.mem_univ m)
   exact le_trans hd (le_trans hc (le_trans hb (le_trans ha hm)))
 
-
 theorem abs_le_sqrt_compNormSq5
     (T : Idx → Idx → Idx → Idx → Idx → Real) (m a b c d : Idx) :
     |T m a b c d| ≤ Real.sqrt (compNormSq5 T) := by
@@ -83,7 +81,6 @@ theorem compNormSqMulti_nonneg {r : ℕ} (A : (Fin r → Idx) → Real) :
   unfold compNormSqMulti
   exact Finset.sum_nonneg fun m _ => sq_nonneg _
 
-
 theorem sq_le_compNormSqMulti {r : ℕ}
     (A : (Fin r → Idx) → Real) (m : Fin r → Idx) :
     (A m) ^ 2 ≤ compNormSqMulti A := by
@@ -91,7 +88,6 @@ theorem sq_le_compNormSqMulti {r : ℕ}
   unfold compNormSqMulti
   exact Finset.single_le_sum (f := fun m' : Fin r → Idx => (A m') ^ 2)
     (fun i _ => sq_nonneg _) (Finset.mem_univ m)
-
 
 theorem abs_le_sqrt_compNormSqMulti {r : ℕ}
     (A : (Fin r → Idx) → Real) (m : Fin r → Idx) :

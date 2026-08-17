@@ -65,6 +65,32 @@ theorem norm_toFun_sub_init_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Set.Icc (0
   · filter_upwards with s using norm_nonneg _
   · exact HasSubset.Subset.eventuallyLE Ioc_subset_Icc_self
 
+theorem state_le_of_sqrt_floor (u : timeH1 X T) (hinit : u.init = 0) {B : ℝ}
+    (hfloor : Real.sqrt T * ‖u.deriv‖ ≤ B) :
+    ∀ t ∈ Set.Icc (0 : ℝ) T, ‖u.toFun t‖ ≤ B := by
+  intro t ht
+  calc ‖u.toFun t‖
+      = ‖u.toFun t - u.init‖ := by rw [hinit, sub_zero]
+    _ ≤ Real.sqrt t * ‖u.deriv‖ := u.norm_toFun_sub_init_le ht
+    _ ≤ Real.sqrt T * ‖u.deriv‖ :=
+        mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg _)
+    _ ≤ B := hfloor
+
+theorem norm_le_of_ae_le (u : timeH1 X T) (hT : 0 < T) {R : ℝ}
+    (hae : ∀ᵐ t ∂timeMeasure T, ‖u.toFun t‖ ≤ R) :
+    ∀ t ∈ Set.Icc (0 : ℝ) T, ‖u.toFun t‖ ≤ R := by
+  intro t ht
+  have hnorm_cont : ContinuousOn (fun s => ‖u.toFun s‖) (Set.Icc (0 : ℝ) T) :=
+    continuous_norm.comp_continuousOn u.continuousOn_toFun
+  have hmin_cont : ContinuousOn (fun s => min ‖u.toFun s‖ R) (Set.Icc (0 : ℝ) T) :=
+    hnorm_cont.inf continuousOn_const
+  have hmin : (fun s => min ‖u.toFun s‖ R)
+      =ᵐ[(volume : Measure ℝ).restrict (Set.Icc (0 : ℝ) T)] fun s => ‖u.toFun s‖ := by
+    filter_upwards [hae] with s hs using min_eq_left hs
+  exact min_eq_left_iff.mp
+    (MeasureTheory.Measure.eqOn_Icc_of_ae_eq (μ := (volume : Measure ℝ)) hT.ne hmin
+      hmin_cont hnorm_cont ht)
+
 end timeH1
 
 end TimeSobolev

@@ -122,19 +122,16 @@ theorem averagedCInf_id {U : Set E'} {V : Set (P × Q)} (hU : IsOpen U) (hV : Is
 noncomputable def normWeights {ι : Type*} [Fintype ι] (num : ι → E' → ℝ) (i : ι) (z : E') : ℝ :=
   num i z / ∑ j, num j z
 
-
 omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem normWeights_sum {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {z : E'}
     (hne : (∑ j, num j z) ≠ 0) : ∑ i, normWeights num i z = 1 := by
   simp only [normWeights, ← Finset.sum_div]
   exact div_self hne
 
-
 omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem normWeights_nonneg {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {z : E'}
     (hnn : ∀ j, 0 ≤ num j z) (i : ι) : 0 ≤ normWeights num i z :=
   div_nonneg (hnn i) (Finset.sum_nonneg fun j _ => hnn j)
-
 
 omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem normWeights_pos {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {z : E'}
@@ -145,7 +142,6 @@ theorem normWeights_pos {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {z :
   simpa only [Finset.mem_univ, true_and] using
     (Finset.sum_pos_iff_of_nonneg
       (fun i (_hi : i ∈ Finset.univ) => normWeights_nonneg hnn i)).mp hpos
-
 
 omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem num_ne_of_weight_ne {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {i : ι} {z : E'}
@@ -164,7 +160,6 @@ theorem normWeights_delta {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {z
   refine ⟨?_, fun j hj => ?_⟩
   · simp [normWeights, hsum, div_self hne]
   · simp [normWeights, hzero j hj]
-
 
 theorem normWeights_contDiffOn {ι : Type*} [Fintype ι] {U : Set E'} {num : ι → E' → ℝ}
     (hnum : ∀ i, ContDiffOn ℝ (∞ : WithTop ℕ∞) (num i) U)
@@ -639,7 +634,7 @@ theorem averagedTargets₂ {ι : Type*} [Fintype ι] {F' : Type*} [NormedAddComm
 
 end CloseIdEngine
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
@@ -727,10 +722,40 @@ theorem hlocHinj_of_chartNeumann
     (hneu₀ : ∀ z ∈ (extChartAt I₀ x₀) '' U, ‖ContinuousLinearMap.id ℝ E₀ -
         fderiv ℝ (writtenInExtChartAt I₀ I₀ x₀ F) z‖ ≤ ε) :
     IsLocalDiffeomorphOn I₀ I₀ (∞ : WithTop ℕ∞) F U ∧ Set.InjOn F U := by
-  refine ⟨hlocOn_of_chartNeumann_infty hU hf hneu, ?_⟩
-  refine Coordinates.injOn_of_writtenInExtChart (I := I₀) (J := I₀) x₀ hUsub ?_
-  exact Coordinates.injOn_of_fderiv_near_id hconv hε
-    (chartRep_differentiableAt x₀ hU hUsub hf hFsub) hneu₀
+  have hloc : IsLocalDiffeomorphOn I₀ I₀ (∞ : WithTop ℕ∞) F U :=
+    Coordinates.contMDiffOn_isLocalDiffeomorphOn_infty hU hf
+      (fun y hy => Coordinates.isInvertible_of_norm_id_sub_lt (hneu y hy))
+  have hdiff : ∀ z ∈ (extChartAt I₀ x₀) '' U,
+      DifferentiableAt ℝ (writtenInExtChartAt I₀ I₀ x₀ F) z := by
+    rintro z ⟨y, hy, rfl⟩
+    have hyz : (extChartAt I₀ x₀).symm (extChartAt I₀ x₀ y) = y :=
+      PartialEquiv.left_inv _ (hUsub hy)
+    have h1 : ContMDiffAt 𝓘(ℝ, E₀) I₀ (∞ : WithTop ℕ∞) ((extChartAt I₀ x₀).symm)
+        (extChartAt I₀ x₀ y) :=
+      (contMDiffOn_extChartAt_symm x₀).contMDiffAt
+        ((isOpen_extChartAt_target x₀).mem_nhds ((extChartAt I₀ x₀).map_source (hUsub hy)))
+    have h2 : ContMDiffAt I₀ I₀ (∞ : WithTop ℕ∞) F
+        ((extChartAt I₀ x₀).symm (extChartAt I₀ x₀ y)) := by
+      rw [hyz]
+      exact hf.contMDiffAt (hU.mem_nhds hy)
+    have h3 : ContMDiffAt I₀ 𝓘(ℝ, E₀) (∞ : WithTop ℕ∞) (extChartAt I₀ (F x₀))
+        (F ((extChartAt I₀ x₀).symm (extChartAt I₀ x₀ y))) := by
+      rw [hyz]
+      exact (contMDiffOn_extChartAt (I := I₀) (x := F x₀)
+        (n := (∞ : WithTop ℕ∞))).contMDiffAt
+        ((chartAt H₀ (F x₀)).open_source.mem_nhds
+          (extChartAt_source (I := I₀) (F x₀) ▸ hFsub y hy))
+    have hcomp : ContMDiffAt 𝓘(ℝ, E₀) 𝓘(ℝ, E₀) (∞ : WithTop ℕ∞)
+        (writtenInExtChartAt I₀ I₀ x₀ F) (extChartAt I₀ x₀ y) :=
+      (h3.comp _ h2).comp _ h1
+    have hcd : ContDiffAt ℝ (∞ : WithTop ℕ∞) (writtenInExtChartAt I₀ I₀ x₀ F)
+        (extChartAt I₀ x₀ y) := contMDiffAt_iff_contDiffAt.mp hcomp
+    exact hcd.differentiableAt (by exact_mod_cast (by simp : (⊤ : ℕ∞) ≠ 0))
+  have hinjChart : Set.InjOn (writtenInExtChartAt I₀ I₀ x₀ F)
+      ((extChartAt I₀ x₀) '' U) :=
+    Coordinates.injOn_of_fderiv_near_id hconv hε hdiff hneu₀
+  exact ⟨hloc, Coordinates.injOn_of_writtenInExtChart (I := I₀) (J := I₀)
+    x₀ hUsub hinjChart⟩
 
 section CmDiag
 
@@ -889,23 +914,17 @@ theorem normSq0S_ortho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     Finset.sum_ite_eq, Finset.mem_univ, if_true]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] [T2Space M'] [T2Space (TangentBundle I M')] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
 theorem sqrtNormSq_le_of_comp
-    {E₀ : Type uE} [NormedAddCommGroup E₀] [NormedSpace ℝ E₀]
-    [FiniteDimensional ℝ E₀] [NeZero (Module.finrank ℝ E₀)] [CompleteSpace E₀]
-    {H₀ : Type uH} [TopologicalSpace H₀]
-    {I₀ : ModelWithCorners ℝ E₀ H₀} [I₀.Boundaryless]
-    {M₀ : Type u} [TopologicalSpace M₀] [ChartedSpace H₀ M₀]
-    [IsManifold I₀ ∞ M₀] [T2Space M₀] [T2Space (TangentBundle I₀ M₀)]
-    [SigmaCompactSpace M₀] [ConnectedSpace M₀] [T3Space M₀]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (g : SmoothRiemannianMetric I₀ M₀) (x : M₀)
-    (basis : Module.Basis Idx Real (TangentSpace I₀ x))
+    (g : SmoothRiemannianMetric I M') (x : M')
+    (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : ∀ i j : Idx, g.inner x (basis i) (basis j) = if i = j then (1 : ℝ) else 0)
-    (A : Tensor0SBundle.Tensor0SSpace 2 I₀ x) {c : ℝ} (hc : 0 ≤ c)
+    (A : Tensor0SBundle.Tensor0SSpace 2 I x) {c : ℝ} (hc : 0 ≤ c)
     (hcomp : ∀ i j : Idx,
       |A (fun a : Fin 2 => if a = 0 then basis i else basis j)| ≤ c) :
-    Real.sqrt (Tensor0SBundle.normSq0S (I := I₀) g x 2 A) ≤ (Fintype.card Idx : ℝ) * c := by
-  rw [normSq0S_ortho (I := I₀) g x basis hON A]
+    Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2 A) ≤ (Fintype.card Idx : ℝ) * c := by
+  rw [normSq0S_ortho (I := I) g x basis hON A]
   have hsum : ∑ i : Idx, ∑ j : Idx,
       (A (fun a : Fin 2 => if a = 0 then basis i else basis j)) ^ 2
         ≤ ((Fintype.card Idx : ℝ) * c) ^ 2 := by
@@ -1145,6 +1164,7 @@ theorem exists_gON_bd (g : SmoothRiemannianMetric I M') (x : M')
     sq_nonneg (‖(basis i : TangentSpace I x)‖ * Real.sqrt cLow - 1)]
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M'] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
 theorem pullbackErrNorm
     [Module.Finite ℝ E]
     {N' : Type u} [TopologicalSpace N'] [ChartedSpace H N'] [IsManifold I ∞ N']
@@ -1182,7 +1202,7 @@ theorem pullbackErrNorm
       ≤ (Fintype.card (Fin (Module.finrank ℝ (TangentSpace I y))) : ℝ)
         * (((‖gn.inner (F y)‖ * ε * (2 + ε)) + η)
             * ((Real.sqrt cLow)⁻¹ * (Real.sqrt cLow)⁻¹)) := by
-    refine (sqrtNormSq_le_of_comp (I₀ := I) gk y basis hON _ hc0 ?_)
+    refine (sqrtNormSq_le_of_comp (I := I) gk y basis hON _ hc0 ?_)
     intro i j
     have h := pullbackErrComp (I := I) gk gn hpb hG hev hA hB (basis i) (basis j)
     refine h.trans ?_
@@ -1280,47 +1300,39 @@ open scoped Topology Manifold ContDiff
 
 variable {M'' : Type u} [TopologicalSpace M''] [ChartedSpace H M''] [IsManifold I ∞ M'']
   [T2Space M''] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M'']
-  [ConnectedSpace M''] [T3Space M''] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M'']
+  [ConnectedSpace M''] [T3Space M'']
   [MetricSpace M''] [Nonempty M'']
 variable {N'' : Type u} [TopologicalSpace N''] [ChartedSpace H N''] [IsManifold I ∞ N'']
   [T2Space N''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N'']
   [ConnectedSpace N''] [T3Space N''] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N'']
 
+set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M''] [ConnectedSpace M''] [T3Space M''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N''] [ConnectedSpace N''] [T3Space N''] in
 theorem stepB1_of_bounds
-    {E₀ : Type uE} [NormedAddCommGroup E₀] [NormedSpace ℝ E₀]
-    [FiniteDimensional ℝ E₀] [NeZero (Module.finrank ℝ E₀)] [CompleteSpace E₀]
-    {H₀ : Type uH} [TopologicalSpace H₀]
-    {I₀ : ModelWithCorners ℝ E₀ H₀} [I₀.Boundaryless]
-    {M₀ : Type u} [TopologicalSpace M₀] [ChartedSpace H₀ M₀]
-    [IsManifold I₀ ∞ M₀] [T2Space M₀] [SigmaCompactSpace M₀]
-    [IsManifold I₀ ((∞ : WithTop ℕ∞) + 1) M₀] [MetricSpace M₀] [Nonempty M₀]
-    {N₀ : Type u} [TopologicalSpace N₀] [ChartedSpace H₀ N₀]
-    [IsManifold I₀ ∞ N₀] [T2Space N₀] [SigmaCompactSpace N₀]
-    [IsManifold I₀ ((∞ : WithTop ℕ∞) + 1) N₀]
-    (g : SmoothRiemannianMetric I₀ M₀) (h : SmoothRiemannianMetric I₀ N₀)
-    (Ok : M₀) (Oℓ : N₀) (r ε : ℝ) (p : ℕ) (U : Set M₀)
+    (g : SmoothRiemannianMetric I M'') (h : SmoothRiemannianMetric I N'')
+    (Ok : M'') (Oℓ : N'') (r ε : ℝ) (p : ℕ) (U : Set M'')
     (hU : IsOpen U) (hOkU : Ok ∈ U) (hKU : Metric.closedBall Ok r ⊆ U)
-    (F : M₀ → N₀)
-    (hloc : IsLocalDiffeomorphOn I₀ I₀ (∞ : WithTop ℕ∞) F U)
+    (F : M'' → N'')
+    (hloc : IsLocalDiffeomorphOn I I (∞ : WithTop ℕ∞) F U)
     (hinj : Set.InjOn F U) (hbase : F Ok = Oℓ)
     (heps : 0 < ε) (heps1 : ε < 1)
-    (hpbF : PullbackMetricTensorData (I := I₀) F h)
-    (hsmoothF : ContMDiffOn I₀ I₀ (∞ : WithTop ℕ∞) F (Metric.closedBall Ok r))
+    (hpbF : PullbackMetricTensorData (I := I) F h)
+    (hsmoothF : ContMDiffOn I I (∞ : WithTop ℕ∞) F (Metric.closedBall Ok r))
     (hc0F : ∀ x ∈ Metric.closedBall Ok r,
-      metricTensorErrorNorm (I := I₀) hpbF.pullback g x ≤ ε)
+      metricTensorErrorNorm (I := I) hpbF.pullback g x ≤ ε)
     (hcovF : ∀ a : ℕ, 1 ≤ a → a ≤ p → ∀ x ∈ Metric.closedBall Ok r,
-      tensor02CovDerivNormWith (I := I₀) a hpbF.pullback g g x ≤ ε)
-    (hpbR : PullbackMetricTensorData (I := I₀) (Function.invFunOn F U) g)
-    (hsmoothR : ContMDiffOn I₀ I₀ (∞ : WithTop ℕ∞) (Function.invFunOn F U)
+      tensor02CovDerivNormWith (I := I) a hpbF.pullback g g x ≤ ε)
+    (hpbR : PullbackMetricTensorData (I := I) (Function.invFunOn F U) g)
+    (hsmoothR : ContMDiffOn I I (∞ : WithTop ℕ∞) (Function.invFunOn F U)
       (F '' Metric.closedBall Ok r))
     (hc0R : ∀ y ∈ F '' Metric.closedBall Ok r,
-      metricTensorErrorNorm (I := I₀) hpbR.pullback h y ≤ ε)
+      metricTensorErrorNorm (I := I) hpbR.pullback h y ≤ ε)
     (hcovR : ∀ a : ℕ, 1 ≤ a → a ≤ p → ∀ y ∈ F '' Metric.closedBall Ok r,
-      tensor02CovDerivNormWith (I := I₀) a hpbR.pullback h h y ≤ ε) :
-    ∃ Phi : PartialDiffeomorph I₀ I₀ M₀ N₀ (∞ : WithTop ℕ∞),
+      tensor02CovDerivNormWith (I := I) a hpbR.pullback h h y ≤ ε) :
+    ∃ Phi : PartialDiffeomorph I I M'' N'' (∞ : WithTop ℕ∞),
       Metric.closedBall Ok r ⊆ Phi.source ∧
       Phi Ok = Oℓ ∧
-      Nonempty (BookApproxIsoPartialData (I := I₀) (Metric.closedBall Ok r) ε p Phi g h) :=
+      Nonempty (BookApproxIsoPartialData (I := I) (Metric.closedBall Ok r) ε p Phi g h) :=
   stepB1_glue g h Ok Oℓ r ε p U hU hOkU hKU F hloc hinj hbase
     (preApproxIsoDataOn_of_bounds (Metric.closedBall Ok r) ε p F g h hpbF heps heps1 hsmoothF
       hc0F hcovF)
@@ -1330,6 +1342,8 @@ theorem stepB1_of_bounds
 omit [Module.Finite ℝ E] in
 omit [T2Space (TangentBundle I M'')] [ConnectedSpace M''] [T3Space M'']
     [T2Space (TangentBundle I N'')] [ConnectedSpace N''] [T3Space N''] in
+omit [FiniteDimensional ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M''] [ConnectedSpace M''] [T3Space M''] [T2Space (TangentBundle I N'')] [SigmaCompactSpace N''] [ConnectedSpace N''] [T3Space N''] in
 theorem stepB1_zero
     [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M'') (h : SmoothRiemannianMetric I N'')
@@ -1527,13 +1541,24 @@ theorem normLowerOfSepExp
   apply normLowerOfSep (J' := J') Y x heq hseg _ hcurve hend hderiv
   simpa only [one_smul] using hlam
 
+end General
+
+section IntrinsicSequence
+
+variable {F : Type uE} [NormedAddCommGroup F]
+variable [InnerProductSpace Real F] [FiniteDimensional Real F]
+variable [NeZero (Module.finrank Real F)] [CompleteSpace F]
+variable {G : Type uH} [TopologicalSpace G]
+variable {J' : ModelWithCorners Real F G} [J'.Boundaryless]
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 theorem seqChartNorm_ge
     {Z : PointedRiemannianSeq.{u, uE, uH} (I := J')}
     (hd : InjRadiusDecayInput (I := J') Z) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := J') (Z.obj k)) (k : Nat) {α : Nat}
-    (hα : α ≠ 0) {c : (Z.obj k).M} (hc : seqCenter hd D P k α = some c)
+    (hα : α ≠ 0) {c : (Z.obj k).M}
+    (hc : seqCenter (I := J') (X := Z) hd D P k α = some c)
     {U : Set F} (heq : NormalCoordMetricEquivOn (I := J') (Z.obj k) c U) :
     letI : TopologicalSpace (Z.obj k).M := (Z.obj k).topology
     letI : ChartedSpace G (Z.obj k).M := (Z.obj k).charted
@@ -1582,12 +1607,12 @@ theorem seqChartNorm_ge
       (I := J') (Z.obj k).metric c hbase
   have hsep : ENNReal.ofReal (hd.lambda D 0) ≤
       Manifold.riemannianEDist J' c (Z.obj k).basepoint := by
-    have h := seqCenter_edist_ge hd hD P k hα hc
+    have h := seqCenter_edist_ge (I := J') (X := Z) hd hD P k hα hc
     simpa [PointedRiemannianManifold.emetricSpace] using h
   rw [← hexp] at hsep
   exact normLowerOfSepExp (J' := J') (Z.obj k) c heq hseg hsub hsep
 
-end General
+end IntrinsicSequence
 
 variable {F : Type uE} [NormedAddCommGroup F]
 variable [InnerProductSpace Real F] [FiniteDimensional Real F]
@@ -1755,7 +1780,8 @@ theorem seqFramedChartNorm_ge
     {Z : PointedRiemannianSeq.{u, uE, uH} (I := J')}
     (hd : InjRadiusDecayInput (I := J') Z) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := J') (Z.obj k)) (k : Nat) {α : Nat}
-    (hα : α ≠ 0) {c : (Z.obj k).M} (hc : seqCenter hd D P k α = some c)
+    (hα : α ≠ 0) {c : (Z.obj k).M}
+    (hc : seqCenter (I := J') (X := Z) hd D P k α = some c)
     {U : Set F} (heq : FramedCoordMetricEquivOn (I := J') (Z.obj k) c U) :
     letI : TopologicalSpace (Z.obj k).M := (Z.obj k).topology
     letI : ChartedSpace G (Z.obj k).M := (Z.obj k).charted
@@ -1800,7 +1826,7 @@ theorem seqFramedChartNorm_ge
       (Z.obj k).metric c).right_inv hbase
   have hsep : ENNReal.ofReal (hd.lambda D 0) ≤
       Manifold.riemannianEDist J' c (Z.obj k).basepoint := by
-    have h := seqCenter_edist_ge hd hD P k hα hc
+    have h := seqCenter_edist_ge (I := J') (X := Z) hd hD P k hα hc
     simpa [PointedRiemannianManifold.emetricSpace] using h
   rw [← hexp] at hsep
   exact normLowerOfSepFramedExp (J' := J') (Z.obj k) c heq hseg hsub hsep

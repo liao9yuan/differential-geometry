@@ -26,7 +26,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-      [T2Space M]
+      [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGram_buffer_bnd
@@ -77,7 +77,7 @@ omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [I.Boundaryless]
   [T2Space M]
-  in
+  [SigmaCompactSpace M] in
 theorem gramD_buffer_bnd
     {ι : Type*}
     (gSeq : ι → SmoothRiemannianMetric I M)
@@ -126,7 +126,7 @@ theorem gramD_buffer_bnd
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [T2Space M]
-  in
+  [SigmaCompactSpace M] in
 theorem invGramD_buffer_bnd
     {ι : Type*}
     (gSeq : ι → SmoothRiemannianMetric I M)
@@ -164,7 +164,7 @@ omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [I.Boundaryless]
   [T2Space M]
-  in
+  [SigmaCompactSpace M] in
 theorem invGram_fderiv_bnd
     {ι : Type*}
     (gSeq : ι → SmoothRiemannianMetric I M)
@@ -207,7 +207,7 @@ theorem invGram_fderiv_bnd
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [T2Space M]
-  in
+  [SigmaCompactSpace M] in
 theorem invGram_freeze_lip
     {ι : Type*}
     (gSeq : ι → SmoothRiemannianMetric I M)

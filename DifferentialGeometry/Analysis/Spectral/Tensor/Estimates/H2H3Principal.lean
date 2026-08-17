@@ -53,6 +53,103 @@ private theorem grad_icg2_norm
       (iteratedCovGrad (I := I) g 0 s 2 U)),
     norm_nonneg (iteratedCovGrad (I := I) g 0 s 3 U)]
 
+omit [NeZero (Module.finrank ℝ E)] in
+theorem appCc_grad_of_grid
+    (g : SmoothRiemannianMetric I M) (s c : ℕ) (Cg : ℝ) (hCg : 0 ≤ Cg)
+    (Φ : SmoothCcTensor g (s + 2) c) (V : SmoothCcTensor g 0 (s + 1))
+    (A B : ℝ) (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (hgridInt : MeasureTheory.Integrable
+      (fun x => ∑ i ∈ Finset.range 3,
+        riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
+            ((iteratedCovGrad (I := I) g (s + 2) c i Φ).toSection x) *
+          ∑ l ∈ Finset.range (3 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
+              ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+        (I := I) (M := M) g))
+    (hgridBd :
+      (∫ x, (∑ i ∈ Finset.range 3,
+          riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
+              ((iteratedCovGrad (I := I) g (s + 2) c i Φ).toSection x) *
+            ∑ l ∈ Finset.range (3 - i),
+              riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
+                ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x))
+        ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+          (I := I) (M := M) g)) ≤
+        Cg * A ^ 2 * B ^ 2) :
+    ‖operatorFieldApply (I := I) (M := M) g (s + 2) (c + 1)
+        (covGrad (I := I) (M := M) g (s + 2) c Φ)
+        (covGrad (I := I) (M := M) g 0 (s + 1) V)‖ ≤
+      Real.sqrt Cg * A * B := by
+  classical
+  let grid : M → ℝ := fun x =>
+    ∑ i ∈ Finset.range 3,
+      riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
+          ((iteratedCovGrad (I := I) g (s + 2) c i Φ).toSection x) *
+        ∑ l ∈ Finset.range (3 - i),
+          riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
+            ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x)
+  have hgrid_int' : MeasureTheory.Integrable grid
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+        (I := I) (M := M) g) := by
+    simpa [grid] using hgridInt
+  have hgrid_bound' :
+      (∫ x, grid x ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+        (I := I) (M := M) g)) ≤ Cg * A ^ 2 * B ^ 2 := by
+    simpa [grid] using hgridBd
+  have hcross : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + 1) x
+          ((covGrad (I := I) (M := M) g (s + 2) c Φ).toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 2) x
+          ((covGrad (I := I) (M := M) g 0 (s + 1) V).toSection x) ≤
+        grid x := by
+    intro x
+    let f : ℕ → ℝ := fun i =>
+      riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
+        ((iteratedCovGrad (I := I) g (s + 2) c i Φ).toSection x)
+    let q : ℕ → ℝ := fun l =>
+      riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
+        ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x)
+    have hf : ∀ i, 0 ≤ f i := fun i =>
+      riemannianFiberNormSq_nonneg
+        (I := I) (M := M) g (s + 2) (c + i) x _
+    have hq : ∀ l, 0 ≤ q l := fun l =>
+      riemannianFiberNormSq_nonneg
+        (I := I) (M := M) g 0 ((s + 1) + l) x _
+    have hinner : q 1 ≤ ∑ l ∈ Finset.range (3 - 1), q l :=
+      Finset.single_le_sum (fun l _ => hq l) (by norm_num)
+    have houter :
+        f 1 * (∑ l ∈ Finset.range (3 - 1), q l) ≤
+          ∑ i ∈ Finset.range 3,
+            f i * ∑ l ∈ Finset.range (3 - i), q l :=
+      Finset.single_le_sum
+        (f := fun i => f i * ∑ l ∈ Finset.range (3 - i), q l)
+        (fun i _ => mul_nonneg (hf i) (Finset.sum_nonneg (fun l _ => hq l)))
+        (by norm_num)
+    have hpick : f 1 * q 1 ≤
+        ∑ i ∈ Finset.range 3,
+          f i * ∑ l ∈ Finset.range (3 - i), q l :=
+      (mul_le_mul_of_nonneg_left hinner (hf 1)).trans houter
+    simpa [grid, f, q, iteratedCovGrad_succ] using hpick
+  let Z : SmoothCcTensor g 0 (c + 1) :=
+    operatorFieldApply (I := I) (M := M) g (s + 2) (c + 1)
+      (covGrad (I := I) (M := M) g (s + 2) c Φ)
+      (covGrad (I := I) (M := M) g 0 (s + 1) V)
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (c + 1) x
+          (Z.toSection x) ≤ grid x := by
+    intro x
+    dsimp [Z]
+    exact (riemannianFiberNormSq_compRS_le_mul
+      (I := I) (M := M) g 0 (s + 2) (c + 1) x _ _).trans (hcross x)
+  have hsq := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g 0 (c + 1) Z grid hgrid_int' hpt
+  have hsq' : ‖Z‖ ^ 2 ≤ Cg * A ^ 2 * B ^ 2 := hsq.trans hgrid_bound'
+  change ‖Z‖ ≤ Real.sqrt Cg * A * B
+  refine le_of_sq_le_sq ?_ (by positivity)
+  rw [mul_pow, mul_pow, Real.sq_sqrt hCg]
+  simpa [mul_assoc] using hsq'
+
 theorem appCc_grad_l2
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

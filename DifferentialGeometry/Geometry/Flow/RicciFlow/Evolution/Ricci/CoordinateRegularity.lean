@@ -1260,7 +1260,6 @@ theorem coordGammaSmoothInf
     exact coordGammaForm (I := I) S x₀ p.1 hp i j k
   exact hmodel.congr_of_eventuallyEq heq
 
-
 theorem coordGammaSmoothAt
     [I.Boundaryless]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

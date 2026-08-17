@@ -46,7 +46,6 @@ theorem nablaKRmFrozenSlotField_apply_vec
       nablaKRm04Field (I := I) S t k x (Function.update (fun i : Fin (4 + k) => Y i x) q W) :=
   freezeAllBut0SField_apply_vec (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y x W
 
-
 def nablaKRmNablaFrozenSlotField
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -77,6 +76,7 @@ theorem nablaKRmNablaFrozenSlotField_realizes
       (nablaKRmFrozenSlotField (I := I) S t k q Y))
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn

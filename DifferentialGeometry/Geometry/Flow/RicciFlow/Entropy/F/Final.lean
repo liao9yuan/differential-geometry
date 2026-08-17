@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Producer
 
-
 set_option autoImplicit false
 
 open DifferentialGeometry.Geometry.Connection

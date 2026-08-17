@@ -21,7 +21,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 open Bundle MeasureTheory Set Filter
@@ -60,6 +59,8 @@ def deTurckSmoothRemainderTensorHs (g₀ g_bg : SmoothRiemannianMetric I M) (a :
     smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀
       (a : ℝ) (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+
+abbrev deTurckSmoothN := @deTurckSmoothRemainderTensorHs
 
 @[simp] theorem deTurckSmoothN_coeff (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
@@ -417,7 +418,6 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted_of_symm
       ≤ Ccov * (max Cb2 Cb1 * (Dm * H2 + H1)) :=
         mul_le_mul_of_nonneg_left hstep hCcov_nn
     _ = Ccov * max Cb2 Cb1 * (Dm * H2 + H1) := by ring
-
 
 theorem smoothRemainderDiff_ballLipschitz_sobolev_dataWeighted_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -1077,7 +1077,6 @@ theorem deTurckSobolevNHa2_smoothEmbed_eq (g₀ g_bg : SmoothRiemannianMetric I 
           (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S) := by
     rw [deTurckSobolevNonlinearity, deTurckSobolevNonlinearity, dif_pos h, dif_pos h, hrecS]
   rw [hNeq, hSeq]
-
 
 theorem exists_norm_smoothCcToTensorHs_symmS_le (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ T : SmoothCcTensor g₀ 0 2,
@@ -2029,6 +2028,25 @@ theorem deTurckSobolevNonlinearitySymm_mixed_lipschitz_pointwise
   have := hmem
   rw [Set.mem_setOf_eq, hlhs_def, hrhs_def] at this
   simpa only [hJ_def] using this
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+theorem ccTensorBilinSymm_symmS_apply (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T) x v w =
+      ccTensorBilinSymm (I := I) g₀ T x v w := by
+  rw [ccTensorBilinSymm_apply, ccTensorBilin_symmS, ccTensorBilin_symmS,
+    ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
+  ring
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+theorem gFibreOpBound_symmS (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T)) δ := by
+  intro x v w
+  rw [ccTensorBilinSymm_symmS_apply (I := I) (M := M) g₀ T x v w]
+  exact hδ x v w
 
 end DifferentialGeometry.Analysis.Spectral
 

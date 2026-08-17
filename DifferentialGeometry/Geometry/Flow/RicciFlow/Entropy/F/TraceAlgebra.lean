@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.GeometryFormulaCor
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -67,7 +66,6 @@ theorem connTraceAction_coord
     DifferentialGeometry.Tensor.RSTensor.connTraceField_coord (I := I) g A x₀ hx p
   rw [hcoeff]
   exact smul_eq_mul ..
-
 
 def connTraceRawDiv
     (g : SmoothRiemannianMetric I M)
@@ -606,7 +604,6 @@ theorem weightedTrace_of_raw
     _ = connTraceRawDiv (I := I) g A x -
           connTraceAction (I := I) g A potential x := by
         rw [← hraw x, ← haction]
-
 
 end GeometryFormula510
 

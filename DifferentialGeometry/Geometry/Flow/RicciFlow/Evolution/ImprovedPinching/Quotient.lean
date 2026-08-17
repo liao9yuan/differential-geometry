@@ -23,7 +23,6 @@ def quotField
     Real -> M -> Real :=
   fun t x => phi t x ^ alpha * psi t x ^ (-beta)
 
-
 def quotLap
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi : Real -> M -> Real) (alpha beta : Real) :
@@ -106,7 +105,6 @@ theorem quotHeatRHSDiv_eq
   rw [h0, h1, h2]
   simp [div_eq_mul_inv]
   ring_nf
-
 
 def QuotientEvolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -228,7 +226,6 @@ theorem quotHeat_at
     rw [hAB_lap, hA_lap, hB_lap, hgradA, hgradB, hphiLap, hpsiLap]
     simp [A, B, tt, smul_eq_mul]
     ring_nf
-
 
 omit [Module.Finite ℝ E] in
 theorem quotHeat
@@ -589,7 +586,6 @@ theorem quotHeat1_book
     phi psi phiLap psiLap phiHeat psiHeat beta
     hphiDt hpsiDt hphiLap hpsiLap hphiDiff hpsiDiff
     hphiNonneg hpsiPos hgradPhi hgradPsi hgradPsiPow
-
 
 omit [Module.Finite ℝ E] in
 theorem quotHeatDiv

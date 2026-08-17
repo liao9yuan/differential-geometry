@@ -199,9 +199,19 @@ theorem phiMet_symm_zero
 
 noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 :=
-  Classical.choose
-    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlot_sub_eq_curv
-      (I := I) (M := M) g₀)
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurvCoeff
+    (I := I) (M := M) g₀
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
+@[simp] theorem gradSwapCurv_apply (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    (gradSwapCurvCoeff (I := I) (M := M) g₀).toSection x =
+      (show TensorRSSpace 2 4 I x from
+        TensorRSSpace.ofCLM
+          (DifferentialGeometry.Geometry.Curvature.slotFreeCurvOpFib
+            (I := I) (M := M) g₀ 2 x)) :=
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurv_apply
+    (I := I) (M := M) g₀ x
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
@@ -210,9 +220,8 @@ theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
         - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection (I := I)
             g₀ (Equiv.swap (0 : Fin 4) 1) (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
       ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S :=
-  Classical.choose_spec
-    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlot_sub_eq_curv
-      (I := I) (M := M) g₀) S
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurv_spec
+    (I := I) (M := M) g₀ S
 
 noncomputable def phiMetCurvCoeff
     (g₀ g_bg g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 2 :=

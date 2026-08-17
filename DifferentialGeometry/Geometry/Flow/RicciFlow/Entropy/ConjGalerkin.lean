@@ -700,6 +700,7 @@ theorem galPert_bdd_on
   exact (hC ⟨t, ht, rfl⟩).trans (le_max_left _ _)
 
 set_option backward.isDefEq.respectTransparency false in
+
 theorem gal_exists_on
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) {tau : Real} (htau : 0 < tau) (htau_one : tau ≤ 1)
@@ -824,6 +825,7 @@ theorem gal_time_mono
     exact hV.deriv t ⟨ht.1, ht.2.trans_le hle⟩ i hi
 
 set_option backward.isDefEq.respectTransparency false in
+
 theorem scalar_gal_exists
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
@@ -24,7 +27,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -81,19 +84,91 @@ noncomputable def curvCovDeriv
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           curvCovDerivStep (I := I) g k A)
 
+omit [SigmaCompactSpace M] in
+theorem curvCovDeriv_succ
+    (g : SmoothRiemannianMetric I M) (k : Nat) :
+    curvCovDeriv (I := I) (M := M) g (k + 1) =
+      curvCovDerivStep (I := I) g k
+        (curvCovDeriv (I := I) (M := M) g k) :=
+  rfl
+
+section PointwiseCurvature
+
+variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless]
+
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+theorem curvZero_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) :
+    curvCovDeriv (I := I) (M := M) g 0 x
+        (DifferentialGeometry.Geometry.Curvature.vec4 (I := I) X Y Z W) =
+      g.inner x W
+        (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
+          x X Y Z) := by
+  rw [show curvCovDeriv (I := I) (M := M) g 0 =
+      DifferentialGeometry.Geometry.Curvature.metricRm04 (I := I) (M := M) g from rfl]
+  rw [DifferentialGeometry.Geometry.Curvature.metricRm04_apply]
+  change
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At
+        g
+        (DifferentialGeometry.Geometry.Curvature.metricCov (I := I) (M := M) g)
+        (DifferentialGeometry.Geometry.Curvature.metricCov_smooth
+          (I := I) (M := M) g) x
+        (DifferentialGeometry.Geometry.Curvature.vec4 (I := I) X Y Z W) =
+      _
+  rw [DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At_apply_const]
+  letI :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (DifferentialGeometry.Geometry.Curvature.metricCov
+          (I := I) (M := M) g) ∞ :=
+    DifferentialGeometry.Geometry.Connection.LeviCivita_isContMDiff
+      (I := I) (M := M) g
+  rw [DifferentialGeometry.riemannCurvatureAux_tangentConst_eq_riemannOp
+    (DifferentialGeometry.Geometry.Curvature.metricCov (I := I) (M := M) g)
+    (DifferentialGeometry.Geometry.Curvature.metricCov_smooth
+      (I := I) (M := M) g) x X Y Z]
+  rfl
+
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+theorem curvOne_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (D X Y Z W : TangentSpace I x) :
+    curvCovDeriv (I := I) (M := M) g 1 x
+        (DifferentialGeometry.Geometry.Curvature.vec5 (I := I) D X Y Z W) =
+      g.inner x W
+        (DifferentialGeometry.Integral.Connection.nablaRiemannOp
+          (I := I) g x D X Y Z) := by
+  simpa [curvCovDeriv, curvCovDerivStep,
+    DifferentialGeometry.Geometry.Curvature.metricCov,
+    DifferentialGeometry.Geometry.Curvature.metricRm04] using
+    (DifferentialGeometry.Integral.Connection.nablaRm04_apply
+      (I := I) g x D X Y Z W)
+
+end PointwiseCurvature
 
 noncomputable def curvDerivNormSq
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Tensor0SBundle.normSq0S (I := I) g x (k + 4)
     (curvCovDeriv (I := I) (M := M) g k x)
 
-
 noncomputable def curvDerivNorm
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt (curvDerivNormSq (I := I) (M := M) k g x)
 
-end FixedMetric
+omit [SigmaCompactSpace M] in
+theorem curv_apply_le
+    (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
+    (v : Fin (k + 4) -> TangentSpace I x) :
+    |curvCovDeriv (I := I) (M := M) g k x v| <=
+      curvDerivNorm (I := I) (M := M) k g x *
+        ∏ a : Fin (k + 4), Real.sqrt (g.inner x (v a) (v a)) := by
+  simpa [curvDerivNorm, curvDerivNormSq] using
+    (Tensor0SBundle.abs_apply_le_norm0S (I := I) g x (k + 4)
+      (curvCovDeriv (I := I) (M := M) g k x) v)
 
+end FixedMetric
 
 def HasCurvDerivBound
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (k : Nat)
@@ -104,6 +179,193 @@ def HasCurvDerivBound
   letI : SigmaCompactSpace X.M := X.sigmaCompact
   letI : T2Space X.M := X.t2
   forall x : X.M, curvDerivNorm (I := I) k X.metric x <= C
+
+namespace HasCurvDerivBound
+
+private theorem sqrt_le_of_sq_le_mul {q A : Real}
+    (hq : 0 <= q) (hA : 0 <= A) (h : q ^ 2 <= A * q) :
+    q <= A := by
+  rcases hq.eq_or_lt with hq0 | hqpos
+  · rw [← hq0]
+    exact hA
+  · exact le_of_mul_le_mul_right (by simpa [pow_two] using h) hqpos
+
+omit [FiniteDimensional ℝ E] in
+private theorem inner_self_nonneg
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] (g : SmoothRiemannianMetric I M)
+    (x : M) (v : TangentSpace I x) :
+    0 <= g.inner x v v := by
+  rcases eq_or_ne v 0 with hv | hv
+  · rw [hv]
+    simp
+  · exact le_of_lt (g.pos x v hv)
+
+theorem apply_le
+    (X : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    {k : Nat} {C : Real}
+    (hX : HasCurvDerivBound (I := I) X k C) :
+    letI : TopologicalSpace X.M := X.topology
+    letI : ChartedSpace H X.M := X.charted
+    letI : IsManifold I ∞ X.M := X.smooth
+    letI : SigmaCompactSpace X.M := X.sigmaCompact
+    letI : T2Space X.M := X.t2
+    ∀ (x : X.M) (v : Fin (k + 4) -> TangentSpace I x),
+      |curvCovDeriv (I := I) (M := X.M) X.metric k x v| <=
+        C * ∏ a : Fin (k + 4),
+          Real.sqrt (X.metric.inner x (v a) (v a)) := by
+  letI : TopologicalSpace X.M := X.topology
+  letI : ChartedSpace H X.M := X.charted
+  letI : IsManifold I ∞ X.M := X.smooth
+  letI : SigmaCompactSpace X.M := X.sigmaCompact
+  letI : T2Space X.M := X.t2
+  intro x v
+  calc
+    |curvCovDeriv (I := I) (M := X.M) X.metric k x v| <=
+        curvDerivNorm (I := I) (M := X.M) k X.metric x *
+          ∏ a : Fin (k + 4),
+            Real.sqrt (X.metric.inner x (v a) (v a)) :=
+      curv_apply_le (I := I) X.metric k x v
+    _ <= C * ∏ a : Fin (k + 4),
+          Real.sqrt (X.metric.inner x (v a) (v a)) :=
+      mul_le_mul_of_nonneg_right (hX x)
+        (Finset.prod_nonneg fun _ _ => Real.sqrt_nonneg _)
+
+section PointwiseCurvature
+
+variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless]
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+theorem riemannOp_le
+    (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    {C : Real} (hP : HasCurvDerivBound (I := I) P 0 C) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    letI : T2Space P.M := P.t2
+    ∀ (x : P.M) (X Y Z : TangentSpace I x),
+      let R :=
+        DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita
+            (I := I) P.metric) x X Y Z
+      Real.sqrt (P.metric.inner x R R) <=
+        C * Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : T2Space P.M := P.t2
+  intro x X Y Z
+  let R :=
+    DifferentialGeometry.Geometry.Curvature.riemannOp
+      (DifferentialGeometry.Geometry.Connection.LeviCivita
+        (I := I) P.metric) x X Y Z
+  let q := Real.sqrt (P.metric.inner x R R)
+  let A :=
+    C * Real.sqrt (P.metric.inner x X X) *
+      Real.sqrt (P.metric.inner x Y Y) *
+      Real.sqrt (P.metric.inner x Z Z)
+  have hC : 0 <= C := by
+    exact (Real.sqrt_nonneg
+      (curvDerivNormSq (I := I) (M := P.M) 0 P.metric x)).trans (hP x)
+  have hA : 0 <= A := by
+    dsimp [A]
+    positivity
+  have hRR : 0 <= P.metric.inner x R R :=
+    inner_self_nonneg (I := I) P.metric x R
+  have hbound := apply_le (I := I) P hP x
+    (DifferentialGeometry.Geometry.Curvature.vec4 (I := I) X Y Z R)
+  rw [curvZero_apply] at hbound
+  have hprod :
+      (∏ a : Fin 4,
+          Real.sqrt (P.metric.inner x
+            (DifferentialGeometry.Geometry.Curvature.vec4
+              (I := I) X Y Z R a)
+            (DifferentialGeometry.Geometry.Curvature.vec4
+              (I := I) X Y Z R a))) =
+        Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) * q := by
+    simp [DifferentialGeometry.Geometry.Curvature.vec4,
+      Fin.prod_univ_succ, q, mul_assoc]
+  rw [hprod, abs_of_nonneg hRR] at hbound
+  have hquad : q ^ 2 <= A * q := by
+    rw [show q ^ 2 = P.metric.inner x R R from by
+      exact Real.sq_sqrt hRR]
+    simpa [A, mul_assoc] using hbound
+  exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+theorem nablaRiemannOp_le
+    (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    {C : Real} (hP : HasCurvDerivBound (I := I) P 1 C) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    letI : T2Space P.M := P.t2
+    ∀ (x : P.M) (D X Y Z : TangentSpace I x),
+      let R :=
+        DifferentialGeometry.Integral.Connection.nablaRiemannOp
+          (I := I) P.metric x D X Y Z
+      Real.sqrt (P.metric.inner x R R) <=
+        C * Real.sqrt (P.metric.inner x D D) *
+          Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : T2Space P.M := P.t2
+  intro x D X Y Z
+  let R :=
+    DifferentialGeometry.Integral.Connection.nablaRiemannOp
+      (I := I) P.metric x D X Y Z
+  let q := Real.sqrt (P.metric.inner x R R)
+  let A :=
+    C * Real.sqrt (P.metric.inner x D D) *
+      Real.sqrt (P.metric.inner x X X) *
+      Real.sqrt (P.metric.inner x Y Y) *
+      Real.sqrt (P.metric.inner x Z Z)
+  have hC : 0 <= C := by
+    exact (Real.sqrt_nonneg
+      (curvDerivNormSq (I := I) (M := P.M) 1 P.metric x)).trans (hP x)
+  have hA : 0 <= A := by
+    dsimp [A]
+    positivity
+  have hRR : 0 <= P.metric.inner x R R :=
+    inner_self_nonneg (I := I) P.metric x R
+  have hbound := apply_le (I := I) P hP x
+    (DifferentialGeometry.Geometry.Curvature.vec5 (I := I) D X Y Z R)
+  rw [curvOne_apply] at hbound
+  have hprod :
+      (∏ a : Fin 5,
+          Real.sqrt (P.metric.inner x
+            (DifferentialGeometry.Geometry.Curvature.vec5
+              (I := I) D X Y Z R a)
+            (DifferentialGeometry.Geometry.Curvature.vec5
+              (I := I) D X Y Z R a))) =
+        Real.sqrt (P.metric.inner x D D) *
+          Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) * q := by
+    simp [DifferentialGeometry.Geometry.Curvature.vec5,
+      Fin.prod_univ_succ, q, mul_assoc]
+  rw [hprod, abs_of_nonneg hRR] at hbound
+  have hquad : q ^ 2 <= A * q := by
+    rw [show q ^ 2 = P.metric.inner x R R from by
+      exact Real.sq_sqrt hRR]
+    simpa [A, mul_assoc] using hbound
+  exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
+
+end PointwiseCurvature
+
+end HasCurvDerivBound
 
 theorem rm04Bound_of_curv0
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) {C : Real}
@@ -151,7 +413,6 @@ structure SeqBoundedGeometry
 
 namespace SeqBoundedGeometry
 
-
 def subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hX : SeqBoundedGeometry (I := I) X) (f : Nat -> Nat) :
@@ -176,7 +437,6 @@ theorem rm04Bound_of_seq
       (I := I) (M := (X.obj i).M) (X.obj i).metric (hX.C 0) :=
   rm04Bound_of_curv0 (I := I) (X.obj i) (hX.bound i 0)
 
-
 def HasSpacetimeCurvBound
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D) (C : Real) : Prop :=
@@ -197,7 +457,6 @@ def HasSpacetimeCurvDerivBound
   forall t : Real, t ∈ D.carrier ->
     forall x : F.M, curvDerivNorm (I := I) k (F.S.family.metric t) x <= C
 
-
 structure SpacetimeCurvBound
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   C : Real
@@ -209,6 +468,21 @@ structure FlowDerivBounds
   C : Nat -> Real
   nonneg : forall k : Nat, 0 <= C k
   bound : forall i k : Nat, HasSpacetimeCurvDerivBound (I := I) (X.term i) k (C k)
+
+namespace FlowDerivBounds
+
+def at_time
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    (h : FlowDerivBounds (I := I) X) {t : Real} (ht : t ∈ X.D.carrier) :
+    SeqBoundedGeometry (I := I) (X.atTime (I := I) t) where
+  C := h.C
+  nonneg := h.nonneg
+  bound := by
+    intro i k
+    simpa [HasSpacetimeCurvDerivBound, HasCurvDerivBound,
+      PointedFlowSeq.atTime, PointedFlowData.atTime] using h.bound i k t ht
+
+end FlowDerivBounds
 
 structure FlowDerivativeInput
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where

@@ -123,7 +123,7 @@ theorem open_upgrade_of_raw
              (srcMetric (I := I) Phi hsrc htgt k 0)
              (resSrc (I := I) Phi hsrc k mc.limit.metric)
              (refRes (I := I) Phi mc.limit.metric hsrc k) < eps)) :
-    exists d : FlowUpgradeData (I := I) X mc,
+    exists d : FlowUpgrade (I := I) X mc,
       forall t : Real, t ∈ X.D.carrier ->
         MetricComplete (I := I) (d.data.L.atTime (I := I) t) := by
   letI : TopologicalSpace mc.limit.M := mc.limit.topology

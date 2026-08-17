@@ -24,7 +24,7 @@ theorem solutionComp_of_mc
     [FiniteDimensional Real E]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
-    (hflow : FlowUpgradeData (I := I) X mc) :
+    (hflow : FlowUpgrade (I := I) X mc) :
     CompactnessConclusion (I := I) X :=
   hflow.toConclusion
 

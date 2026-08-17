@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Geodesic.ChartRegularity
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Exponential.Defs
+
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -1719,6 +1720,26 @@ theorem intrinsicGeodesic_smul
   rw [hΓrep_def] at h1
   simp only [mul_one, hφ_def] at h1
   exact h1.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem intrGeo_smul_apply
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (u : TangentSpace I p) (c s : ℝ) :
+    intrinsicGeodesic (I := I) g hEnorm p (c • u) s =
+      intrinsicGeodesic (I := I) g hEnorm p u (c * s) := by
+  calc
+    intrinsicGeodesic (I := I) g hEnorm p (c • u) s =
+        intrinsicGeodesic (I := I) g hEnorm p (s • (c • u)) 1 :=
+      (intrinsicGeodesic_smul (I := I) g hEnorm p (c • u) s).symm
+    _ = intrinsicGeodesic (I := I) g hEnorm p ((c * s) • u) 1 := by
+      rw [smul_smul, mul_comm]
+    _ = intrinsicGeodesic (I := I) g hEnorm p u (c * s) :=
+      intrinsicGeodesic_smul (I := I) g hEnorm p u (c * s)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

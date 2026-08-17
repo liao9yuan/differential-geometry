@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -119,7 +119,8 @@ theorem rem_h1_tame
   obtain ⟨Z0, Z1, hZ0, hZ1, hzero⟩ :=
     rhs0_path_tame (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   obtain ⟨O0, O1, hO0, hO1, hone⟩ :=
-    rhs1_path_tame (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
+    rhs1_path_tame (E := E) (H := H) (I := I) (M := M)
+      hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   let B0 : ℝ → ℝ := fun R => Clow + Ccoef * (Z0 R + O0 R)
   let B1 : ℝ → ℝ := fun R => Ccoef * (Z1 R + O1 R)
   have hB0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R := by

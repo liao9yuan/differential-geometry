@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 open DifferentialGeometry.Geometry.Curvature
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -35,7 +34,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M]
-
 
 omit [BoundarylessManifold I M] in
 theorem deturck_nemytskii_operator_hs_lipschitz_of_l2coeff_lipschitz

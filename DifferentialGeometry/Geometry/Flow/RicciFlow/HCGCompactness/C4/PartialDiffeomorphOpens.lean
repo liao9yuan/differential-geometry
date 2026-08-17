@@ -156,7 +156,6 @@ noncomputable def PartialDiffeomorph.opensMap
     (hUV : (Φ : M → N) '' (U : Set M) ⊆ (V : Set N)) : U → V :=
   fun x => ⟨(Φ : M → N) x, hUV ⟨x, x.2, rfl⟩⟩
 
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensMap_isOpenEmb
@@ -174,7 +173,6 @@ theorem PartialDiffeomorph.opensMap_isOpenEmb
       (Opens.inclusion hWV : W → V) ∘ F := rfl
   rw [hfun]
   exact hinc.comp F.toHomeomorph.isOpenEmbedding
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
@@ -225,7 +223,6 @@ theorem PartialDiffeomorph.opensMap_mfderiv
   have happ := DFunLike.congr_fun (h1.symm.trans h2) v
   simpa only [F, ContinuousLinearMap.comp_apply,
     mfderiv_subtype_val (I := I) V (F p), mfderiv_subtype_val (I := I) U p] using happ
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
@@ -341,7 +338,6 @@ noncomputable def PartialDiffeomorph.liftTargetOpen
         (Φ.open_target.mem_nhds (htarget.symm ▸ Set.mem_univ u))
     exact (hΦAt.comp y hinvAt).contMDiffWithinAt
 
-
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
@@ -350,7 +346,6 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] in
     (htarget : Φ.target = Set.univ) :
     (PartialDiffeomorph.liftTargetOpen Φ htarget).source = Φ.source := rfl
 
-
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
@@ -358,7 +353,6 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] in
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) :
     (PartialDiffeomorph.liftTargetOpen Φ htarget).target = (U : Set N) := rfl
-
 
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in

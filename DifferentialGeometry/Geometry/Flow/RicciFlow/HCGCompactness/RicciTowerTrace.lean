@@ -29,6 +29,7 @@ variable [T2Space M] [SigmaCompactSpace M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [SigmaCompactSpace M] in
 theorem exists_ric_trace
     (g : SmoothRiemannianMetric I M)

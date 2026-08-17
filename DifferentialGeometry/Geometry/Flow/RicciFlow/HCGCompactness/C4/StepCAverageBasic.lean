@@ -40,7 +40,6 @@ theorem metricEnorm (g : SmoothRiemannianMetric I M) :
     (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
       (I := I) g x v)
 
-
 noncomputable def centerAverage (g : SmoothRiemannianMetric I M)
     {X : Type uX} {ι : Type} [Fintype ι] (μ : X → ι → ℝ)
     (pts : X → ι → M) (join : M → M → ℝ → M) (p : X → M) (r : X → ℝ)
@@ -233,7 +232,6 @@ structure WeightDataOn (s : Set X) (U : ι → Set X) (μ : X → ι → ℝ) : 
   sum_one : ∀ x ∈ s, ∑ i : ι, μ x i = 1
   active_mem : ∀ x ∈ s, ∀ i : ι, μ x i ≠ 0 → x ∈ U i
 
-
 theorem WeightDataOn.comp {Y : Type uY} {s : Set Y} {U : Set X}
     {R : ι → Set X} {μ : X → ι → ℝ} {f : Y → X}
     (h : WeightDataOn U R μ) (hf : Set.MapsTo f s U) :
@@ -347,7 +345,6 @@ theorem inputOfFillSelf {qstar : X -> M} (x : X)
     hμ_nonneg hμ_pos hstrict
   simpa using hr
 
-
 theorem mem (x : X) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -403,7 +400,6 @@ theorem eq_of_all_eq {qstar : X → M} (x : X)
           (join := join) (p := p x) (r := r x) (h x) (qstar := qstar x)
           (by norm_num) hnear
   exact dist_eq_zero.mp (le_antisymm hdist dist_nonneg)
-
 
 theorem dist_le {qstar : X → M} {ε : ℝ} (x : X) (hε : 0 ≤ ε)
     (hnear :

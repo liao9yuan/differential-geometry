@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
+
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
@@ -159,6 +161,24 @@ theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMe
   apply ContMDiffSection.ext
   intro x
   simp only [appCc_toSection]
+  rw [← ContinuousLinearMap.comp_assoc, ← ContinuousLinearMap.comp_assoc,
+    cometricDoubleTraceFib_comp_slotExtend_two_eq (I := I) g₀ b s Φ x]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+theorem cometricTrace_appCcRS (g₀ : SmoothRiemannianMetric I M) (r b s : ℕ)
+    (Φ : SmoothCcTensor g₀ b s) (V : SmoothCcTensor g₀ r (b + 2)) :
+    ccOperatorFieldComp (I := I) (M := M) g₀ r (s + 2) s
+        (cometricDoubleTraceField (I := I) g₀ s)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ r (b + 2) (s + 2)
+          (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g₀ b s Φ)) V) =
+      ccOperatorFieldComp (I := I) (M := M) g₀ r b s Φ
+        (ccOperatorFieldComp (I := I) (M := M) g₀ r (b + 2) b
+          (cometricDoubleTraceField (I := I) g₀ b) V) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  simp only [appCcRS_toSection]
   rw [← ContinuousLinearMap.comp_assoc, ← ContinuousLinearMap.comp_assoc,
     cometricDoubleTraceFib_comp_slotExtend_two_eq (I := I) g₀ b s Φ x]
 

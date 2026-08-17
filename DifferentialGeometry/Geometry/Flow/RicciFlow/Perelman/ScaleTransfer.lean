@@ -24,7 +24,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable [T2Space M] [SigmaCompactSpace M]
 
-
 def paraFlowTime
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -41,7 +40,6 @@ def paraFlowTime
 namespace Perelman
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-
 
 def paraBall
     (S : SolutionOn (I := I) (M := M) D)
@@ -78,7 +76,6 @@ theorem paraBall_set
   unfold FlowMetricBall.set
   simpa only [paraFlowTime_coe] using
     paraBall_setAt (I := I) S tau R hR htau s B (s : Real)
-
 
 omit [CompleteSpace E] in
 theorem paraBall_volume
@@ -148,7 +145,6 @@ private theorem paraWindow
   unfold paraTime
   constructor <;> linarith
 
-
 omit [SigmaCompactSpace M] in
 theorem paraBall_rm
     (S : SolutionOn (I := I) (M := M) D)
@@ -204,7 +200,6 @@ def backBall
   center := B.center
   radius := B.radius / Real.sqrt R
   radius_pos := div_pos B.radius_pos (Real.sqrt_pos.2 hR)
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M]
     [SigmaCompactSpace M] in
@@ -357,7 +352,6 @@ theorem backBall_para
       simp only [paraBall, backBall]
       congr
       field_simp [ne_of_gt (Real.sqrt_pos.2 hR)]
-
 
 omit [SigmaCompactSpace M] in
 theorem paraBall_rm_iff

@@ -32,6 +32,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [BoundarylessManifold I M] [ConnectedSpace M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
 
 @[reducible] private noncomputable def hmfRiemBundle
     (q : SmoothRiemannianMetric I M) :
@@ -64,7 +65,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [CompactSpace M]
-  [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M] [SigmaCompactSpace M]
   [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -118,7 +119,7 @@ noncomputable def hmfAdd
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] [SigmaCompactSpace M] in
 @[simp] theorem hmfUnknown_zero
     (q : SmoothRiemannianMetric I M) (x : M) :
     hmfUnknown (I := I) q (0 : SmoothCcTensor q 0 1) x = 0 := by

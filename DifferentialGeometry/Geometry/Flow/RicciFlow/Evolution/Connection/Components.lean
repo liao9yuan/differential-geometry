@@ -42,13 +42,11 @@ def christoffelVariationLoweredRHSInFrame
     (t : Real) (x : M) (i j l : Idx) : Real :=
   -nablaRic t x i j l - nablaRic t x j i l + nablaRic t x l i j
 
-
 def nablaRicLastRaisedInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv t x k l * nablaRic t x i j l
-
 
 def nablaRicDirectionRaisedInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -827,7 +825,6 @@ theorem variableMetricConnectionDiffDerivative_of_metricCovDeriv
     hmetricRicci (t : Real) x j i l,
     hmetricRicci (t : Real) x l i j]
   ring
-
 
 end Components
 

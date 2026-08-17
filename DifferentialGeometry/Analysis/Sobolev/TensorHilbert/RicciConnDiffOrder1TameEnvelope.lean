@@ -7,7 +7,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -38,7 +37,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
@@ -58,7 +56,6 @@ theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric
   refine hCK.congr (fun x => ?_)
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -122,7 +119,6 @@ omit [SigmaCompactSpace M] in
         linearizedRicciConnDiffOrder1CLM (I := I) x
           ((connDiffSection (I := I) g₁ g₀).toSection x)) := rfl
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
@@ -144,6 +140,15 @@ def fourTraceSwap13Perm : Equiv.Perm (Fin 4) :=
 
 def fourTraceDoubleTranspositionPerm : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
+
+abbrev fourTraceArgPerm0231 : Equiv.Perm (Fin 4) :=
+  fourTraceCyclePerm123
+
+abbrev fourTraceArgPerm0321 : Equiv.Perm (Fin 4) :=
+  fourTraceSwap13Perm
+
+abbrev fourTraceArgPerm2301 : Equiv.Perm (Fin 4) :=
+  fourTraceDoubleTranspositionPerm
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
@@ -179,7 +184,6 @@ private lemma ricciArmPrincipalCoeffPure_sub_doubleTrace_clm
   have hcast : (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁).toSection x
       = (cometricDoubleTraceField (I := I) g₁ 2).toSection x := rfl
   rw [hcast, cometricDoubleTraceField_toSection, cometricDoubleTraceField_toSection]
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS
@@ -245,7 +249,6 @@ private lemma fourTrace_sq_add_tame {u v A D T : ℝ}
     (hu2 : u ^ 2 ≤ A * T) (hv2 : v ^ 2 ≤ D * T) :
     (u + v) ^ 2 ≤ (2 * A + 2 * D) * T := by
   nlinarith [sq_nonneg (u - v)]
-
 
 theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -674,19 +677,19 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
       _ ≤ 4 * (2 * aL q + 2 * KD q) * (1 + ∑ j ∈ Finset.range (q + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := hprod
 
-private def kOutPerm0312 : Equiv.Perm (Fin 4) :=
+def kOutPerm0312 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
 
-private def kOutPerm0213 : Equiv.Perm (Fin 4) :=
+def kOutPerm0213 : Equiv.Perm (Fin 4) :=
   ⟨![0, 2, 1, 3], ![0, 2, 1, 3], by decide, by decide⟩
 
-private def kOutPerm2301 : Equiv.Perm (Fin 4) :=
+def kOutPerm2301 : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
-private def kOutPerm1302 : Equiv.Perm (Fin 4) :=
+def kOutPerm1302 : Equiv.Perm (Fin 4) :=
   ⟨![1, 3, 0, 2], ![2, 0, 3, 1], by decide, by decide⟩
 
-private def kOutPerm1203 : Equiv.Perm (Fin 4) :=
+def kOutPerm1203 : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
 
 private def kernelInnerSlotSwap01Perm : Equiv.Perm (Fin 3) :=
@@ -694,6 +697,10 @@ private def kernelInnerSlotSwap01Perm : Equiv.Perm (Fin 3) :=
 
 private def kernelInnerSlotCyclePerm : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
+
+def kInPerm102 : Equiv.Perm (Fin 3) := kernelInnerSlotSwap01Perm
+
+def kInPerm120 : Equiv.Perm (Fin 3) := kernelInnerSlotCyclePerm
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
@@ -715,7 +722,7 @@ private theorem slotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d 
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
 
-private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
+def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
     SmoothCcTensor g₀ d d where
   toSection :=
     { toFun := fun x : M =>
@@ -769,7 +776,7 @@ omit [SigmaCompactSpace M] in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
-private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
           (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
@@ -922,6 +929,7 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
 def connDiffContrInsertionReindexPerm : Equiv.Perm (Fin 3) :=
   ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
 
+def coreInPerm201 : Equiv.Perm (Fin 3) := connDiffContrInsertionReindexPerm
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1012,7 +1020,6 @@ theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
     funext j
     fin_cases j <;> rfl
   exact hL.trans hR.symm
-
 
 theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1269,7 +1276,6 @@ theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
             (1 + ∑ j ∈ Finset.range (l + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) :=
           mul_nonneg hK_nn (by linarith [hwin2_nn l])
-
 
 theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

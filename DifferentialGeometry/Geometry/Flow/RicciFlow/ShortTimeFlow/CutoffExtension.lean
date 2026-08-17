@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

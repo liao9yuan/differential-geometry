@@ -671,6 +671,37 @@ end MetricEquiv
 
 section PointwiseCS
 
+private theorem exists_onFrame
+    (g : SmoothMetric_gen I M) (x : M) :
+    ∃ basis :
+        Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
+          (TangentSpace I x),
+      ∀ i j,
+        g.inner x (basis i) (basis j) =
+          if i = j then (1 : Real) else 0 := by
+  classical
+  let D := (tangentMetricData_gen (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x)
+      _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let basis := (stdOrthonormalBasis Real (TangentSpace I x)).toBasis
+  refine ⟨basis, ?_⟩
+  intro i j
+  let ob := stdOrthonormalBasis Real (TangentSpace I x)
+  have hinner :
+      Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+    MetricFiberData.toCore_inner D (ob i) (ob j)
+  change g.inner x (ob.toBasis i) (ob.toBasis j) =
+    if i = j then (1 : Real) else 0
+  rw [← TangentMetricData_gen.inner_eq_gen
+    (tangentMetricData_gen (I := I) g x) (ob.toBasis i) (ob.toBasis j)]
+  change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+  rw [← hinner]
+  exact ob.inner_eq_ite i j
+
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
@@ -765,6 +796,16 @@ theorem abs_apply_le_sqrt_normSq0S [Finite Idx]
     Finset.sum_nonneg fun _ _ => sq_nonneg _)]
   refine Finset.prod_congr rfl fun a _ => ?_
   rw [hPar a]
+
+theorem abs_apply_le_norm0S
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (T : Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
+    |T v| <=
+      Real.sqrt (normSq0S (I := I) g x s T) *
+        ∏ a : Fin s, Real.sqrt (g.inner x (v a) (v a)) := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_onFrame (I := I) g x
+  exact abs_apply_le_sqrt_normSq0S (I := I) g x s basis hON T v
 
 end PointwiseCS
 

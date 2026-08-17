@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -66,7 +65,6 @@ def RicciHessianVariationWeightedDivergenceInFrame
     ricciHessianVariation x i j =
       weightedDivergenceTerm x i j + shiftedHessianTerm x i j
 
-
 def ricciHessianVariationInFrame
     (ricciVariation hessianVariation : M -> Idx -> Idx -> Real) :
     M -> Idx -> Idx -> Real :=
@@ -80,7 +78,6 @@ def christoffelWeightedDivergenceInFrame
   fun x i j =>
     (∑ p : Idx, nablaChristoffelVariation x p p i j) -
       ∑ p : Idx, christoffelVariation x p i j * gradPotential x p
-
 
 def shiftedHessianInFrame
     (hessianPotentialVariationDirection metricTraceHessianHalf :
@@ -119,7 +116,6 @@ theorem ricciHessianWeightedDivergence_of_ricci_hessian
   simp [christoffelWeightedDivergenceInFrame, shiftedHessianInFrame,
     sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
 
-
 def RicciHessianWeightedDensityVariationInFrame
     (weightedVariation weightedDivergenceTerm shiftedHessianTerm
       ricciHessian : M -> Idx -> Idx -> Real)
@@ -155,7 +151,6 @@ theorem ricciHessianWeightedDensity_of_divergence
   intro x i j
   rfl
 
-
 def metricVariationRicciHessContractInFrame
     (metricVariation ricciHessian : M -> Idx -> Idx -> Real) : M -> Real :=
   fun x =>
@@ -166,7 +161,6 @@ def inverseMetricVariationContractionTermInFrame
     (metricVariation ricciHessian : M -> Idx -> Idx -> Real) : M -> Real :=
   fun x => -metricVariationRicciHessContractInFrame metricVariation ricciHessian x
 
-
 theorem inverseMetricVariationContractionTerm_eq_neg
     (metricVariation ricciHessian : M -> Idx -> Idx -> Real) :
     inverseMetricVariationContractionTermInFrame metricVariation ricciHessian =
@@ -174,7 +168,6 @@ theorem inverseMetricVariationContractionTerm_eq_neg
         ricciHessian x := rfl
 
 end Formula510
-
 
 def fFunctionalFormula510Integrand
     (scalarCurvature lapPotential gradPotentialNormSq
@@ -185,7 +178,6 @@ def fFunctionalFormula510Integrand
     -metricVariationRicciHess x +
       (metricVariationTrace x / 2 - potentialVariation x) *
         (2 * lapPotential x - gradPotentialNormSq x + scalarCurvature x)
-
 
 def FFunctionalFormula510 [MeasurableSpace M] (weightedMeasure : Measure M)
     (firstVariation : Real)
@@ -466,7 +458,6 @@ theorem formula510_of_ints [MeasurableSpace M]
     exact hdiv_int.add (hshift_int.sub hcorr_int)
   · exact rem510_integral_zero hdiv_int hshift_int hcorr_int
       hdiv_zero hshift
-
 
 end
 

@@ -3,7 +3,6 @@ open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -325,7 +324,6 @@ private theorem compFun_center
   rw [componentRS]
   simp [hconst, component0S, coordinateFrameAt_basis_apply]
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
 private theorem gInvFun_center
@@ -359,7 +357,6 @@ private theorem symmetric_trace_sum_mul
   rw [mul_comm]
   congr 1
   exact Finset.sum_congr rfl fun p _ => hΓ p l p
-
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in

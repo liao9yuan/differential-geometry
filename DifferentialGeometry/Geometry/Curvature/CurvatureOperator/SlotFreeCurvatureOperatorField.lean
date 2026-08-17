@@ -464,6 +464,10 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
         rw [hU, ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm).map_smul]
         rfl }
 
+abbrev slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
+    Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
+  curvatureOperatorOnTensorFib (I := I) (M := M) g s x
+
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma slotFreeCurvOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)

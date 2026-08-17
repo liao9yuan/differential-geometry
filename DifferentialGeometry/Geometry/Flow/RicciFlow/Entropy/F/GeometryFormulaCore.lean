@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
-
 set_option autoImplicit false
 
 open DifferentialGeometry.Geometry.Connection

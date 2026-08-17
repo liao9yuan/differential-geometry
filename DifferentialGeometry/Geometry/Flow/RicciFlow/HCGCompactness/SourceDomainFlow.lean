@@ -21,6 +21,88 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
+noncomputable def sourceFlowOf
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq) (k : Nat)
+    (hσsrc : letI : TopologicalSpace P.M := P.topology; IsSigmaCompact (Φ.source k))
+    (hσtgt :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      SolutionOn (I := I) (M := (X.term (subseq k)).M) D) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+    letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+    letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+      sourceDomSigmaOf (I := I) Φ k hσsrc
+    letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+      IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
+      change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+      infer_instance
+    SolutionOn (I := I) (M := SourceDomain (I := I) Φ k) D := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : T2Space (X.term (subseq k)).M := (X.term (subseq k)).t2
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : IsManifold I 1 (X.term (subseq k)).M :=
+    IsManifold.of_le (I := I) (M := (X.term (subseq k)).M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (X.term (subseq k)).M :=
+    IsManifold.of_le (I := I) (M := (X.term (subseq k)).M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M := by
+    change IsManifold I ∞ (X.term (subseq k)).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).sigmaCompact
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k hσsrc
+  letI : SigmaCompactSpace ↥(targetOpen (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k hσtgt
+  letI : T2Space ↥(targetOpen (I := I) Φ k) := targetDomT2 (I := I) Φ k
+  letI : IsManifold I 1 ↥(targetOpen (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := ↥(targetOpen (I := I) Φ k)) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥(targetOpen (I := I) Φ k) := by
+    change IsManifold I ∞ ↥(targetOpen (I := I) Φ k)
+    infer_instance
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+  letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) := targetDomSmooth (I := I) Φ k
+  letI : IsManifold I 1 (TargetDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := TargetDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (TargetDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (TargetDomain (I := I) Φ k)
+    infer_instance
+  letI : SigmaCompactSpace (TargetDomain (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k hσtgt
+  letI : T2Space (TargetDomain (I := I) Φ k) := targetDomT2 (I := I) Φ k
+  exact
+    DifferentialGeometry.PDE.RicciFlow.solutionOn_pullback (I := I)
+      (solutionOn_restrictOpen (I := I) S (targetOpen (I := I) Φ k))
+      (sourceTargetDiff (I := I) Φ k)
+
 noncomputable def sourceFlow
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -92,6 +174,114 @@ noncomputable def sourceFlow
   exact
     DifferentialGeometry.PDE.RicciFlow.solutionOn_pullback (I := I)
       (solutionOn_restrictOpen (I := I) (X.term (subseq k)).S (targetOpen (I := I) Φ k))
+      (sourceTargetDiff (I := I) Φ k)
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem isSoln_sourceFlowOf
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq) (k : Nat)
+    (hσsrc : letI : TopologicalSpace P.M := P.topology; IsSigmaCompact (Φ.source k))
+    (hσtgt :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      SolutionOn (I := I) (M := (X.term (subseq k)).M) D)
+    (hS :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : T2Space (X.term (subseq k)).M :=
+        (X.term (subseq k)).t2
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      letI : SigmaCompactSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).sigmaCompact
+      IsSolutionOn (I := I) S) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+    letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+    letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+      sourceDomSigmaOf (I := I) Φ k hσsrc
+    letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+      IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
+      change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+      infer_instance
+    IsSolutionOn (I := I) (sourceFlowOf (I := I) Φ k hσsrc hσtgt S) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : T2Space (X.term (subseq k)).M := (X.term (subseq k)).t2
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : IsManifold I 1 (X.term (subseq k)).M :=
+    IsManifold.of_le (I := I) (M := (X.term (subseq k)).M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (X.term (subseq k)).M :=
+    IsManifold.of_le (I := I) (M := (X.term (subseq k)).M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M := by
+    change IsManifold I ∞ (X.term (subseq k)).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).sigmaCompact
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+  letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (SourceDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+    infer_instance
+  letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k hσsrc
+  letI : SigmaCompactSpace ↥(targetOpen (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k hσtgt
+  letI : T2Space ↥(targetOpen (I := I) Φ k) := targetDomT2 (I := I) Φ k
+  letI : IsManifold I 1 ↥(targetOpen (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := ↥(targetOpen (I := I) Φ k)) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥(targetOpen (I := I) Φ k) := by
+    change IsManifold I ∞ ↥(targetOpen (I := I) Φ k)
+    infer_instance
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+  letI : T2Space (TargetDomain (I := I) Φ k) := targetDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) := targetDomSmooth (I := I) Φ k
+  letI : IsManifold I 1 (TargetDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := TargetDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (TargetDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := TargetDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (TargetDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (TargetDomain (I := I) Φ k)
+    infer_instance
+  letI : SigmaCompactSpace (TargetDomain (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k hσtgt
+  exact
+    DifferentialGeometry.PDE.RicciFlow.isSolutionOn_pullback (I := I)
+      (solutionOn_restrictOpen (I := I) S (targetOpen (I := I) Φ k))
+      (isSolutionOn_restrictOpen (I := I) S hS (targetOpen (I := I) Φ k))
       (sourceTargetDiff (I := I) Φ k)
 
 omit [NeZero (Module.finrank ℝ E)] in

@@ -37,7 +37,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-
 noncomputable def galLimExt
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -54,7 +53,6 @@ noncomputable def galLimExt
     Real → tensorHs (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0 (m : Real) :=
   Set.IccExtend hτ (galLimPath hlim m)
-
 
 @[simp] theorem galLimExt_mem
     {D : RealTimeInterval}
@@ -99,7 +97,6 @@ theorem galLimExt_inc
   funext i
   simp only [tensorHsInclusion_coeff_apply, galLimHs]
 
-
 theorem galLimExt_cont
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -115,7 +112,6 @@ theorem galLimExt_cont
       S T tau u0 V phi ulim) (m : Nat) :
     Continuous (galLimExt hτ hlim m) := by
   exact Continuous.Icc_extend' (galLimPath_cont hlim m)
-
 
 noncomputable def galLimVel
     {D : RealTimeInterval}
@@ -579,7 +575,6 @@ theorem galLimVel_lift
   · intro t
     simp only [w, W, galLimVelCan, q]
 
-
 theorem galLimVel_coeff
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -956,7 +951,6 @@ theorem galLim_mode_deriv
   refine hsum.congr_of_eventuallyEq ?_
   filter_upwards [Icc_mem_nhds ht.1 ht.2] with r hr
   simpa only [c, f, q] using galLim_mode_ftc hτ hlim r hr i
-
 
 theorem galLim_mode_c1
     {D : RealTimeInterval}

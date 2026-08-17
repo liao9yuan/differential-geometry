@@ -13,7 +13,7 @@ namespace Curvature
 open Bundle Manifold MeasureTheory Set Filter
 open DifferentialGeometry.Geometry.Connection
 open scoped Manifold ContDiff Topology
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]

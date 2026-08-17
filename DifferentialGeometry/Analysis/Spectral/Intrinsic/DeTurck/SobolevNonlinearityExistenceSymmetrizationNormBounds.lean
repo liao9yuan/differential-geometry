@@ -124,6 +124,13 @@ theorem norm_iteratedCovGrad_tensorSymmetrization_le (g₀ : SmoothRiemannianMet
   have hnn : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ := norm_nonneg _
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
+theorem norm_iteratedCovGrad_symmS_le (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T)‖ ≤
+      ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ :=
+  norm_iteratedCovGrad_tensorSymmetrization_le (I := I) (M := M) g₀ T k
+
 end DifferentialGeometry.Analysis.Spectral
 
 end

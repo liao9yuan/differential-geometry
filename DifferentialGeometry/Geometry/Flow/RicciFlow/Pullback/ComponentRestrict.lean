@@ -24,7 +24,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-  [T2Space M]
+  [T2Space M] [SigmaCompactSpace M]
 
 noncomputable def compRestrict
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) :
@@ -33,7 +33,7 @@ noncomputable def compRestrict
   exact fun t => (g t).restrictOpen (I := I) (connCompOpen (I := I) p)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
-  [BoundarylessManifold I M] [T2Space M] in
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem compBase_mem
     (p : M) (x₀ y : connCompOpen (I := I) p)
     (hy : y ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -44,7 +44,7 @@ private theorem compBase_mem
 
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M]
-  in
+  [SigmaCompactSpace M] in
 theorem compRestrict_init
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (p : M) (a : ℝ)
     (h₀ : g₁ a = g₂ a) :
@@ -54,7 +54,7 @@ theorem compRestrict_init
     (fun g : SmoothRiemannianMetric I M =>
       g.restrictOpen (I := I) (connCompOpen (I := I) p)) h₀
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem compRestrict_smooth
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -87,7 +87,7 @@ theorem compRestrict_smooth
     (chartGram_open (I := I) (g q.1) (connCompOpen (I := I) p) x₀ q.2
       hsource i j)
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem compRestrict_cont
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
     (hcont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -137,7 +137,7 @@ theorem compRestrict_pde
     ricciTensor_restrictOpen] using hpde t ht (x : M) v w
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M]
-  [BoundarylessManifold I M] [T2Space M] in
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem metric_ext
     (g h : SmoothRiemannianMetric I M)
     (hinner : ∀ (x : M) (v w : TangentSpace I x),
@@ -151,7 +151,7 @@ private theorem metric_ext
   subst hi
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem eq_of_compRestrict
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     (hcomp : ∀ p : M,

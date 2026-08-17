@@ -62,7 +62,6 @@ namespace CenterInput
 variable {g : SmoothRiemannianMetric I M} {ι : Type} [Fintype ι]
   {μ : ι → ℝ} {pts : ι → M} {join : M → M → ℝ → M} {p : M} {r : ℝ}
 
-
 theorem exists_cm (h : CenterInput (I := I) g μ pts join p r) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -81,7 +80,6 @@ theorem exists_cm (h : CenterInput (I := I) g μ pts join p r) :
 
 end CenterInput
 
-
 noncomputable def centerOfMass (g : SmoothRiemannianMetric I M)
     {ι : Type} [Fintype ι] (μ : ι → ℝ) (pts : ι → M)
     (join : M → M → ℝ → M) (p : M) (r : ℝ)
@@ -98,7 +96,6 @@ namespace centerOfMass
 variable {g : SmoothRiemannianMetric I M} {ι : Type} [Fintype ι]
   {μ : ι → ℝ} {pts : ι → M} {join : M → M → ℝ → M} {p : M} {r : ℝ}
   (h : CenterInput (I := I) g μ pts join p r)
-
 
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem grad_half_self (q : M)
@@ -138,7 +135,6 @@ theorem grad_half_self (q : M)
     exact NormalCoordinates.normalChartAt_centre (I := I) g q
   rw [hgrad0, hchart0, neg_zero]
 
-
 theorem mem :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -152,7 +148,6 @@ theorem mem :
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact (Classical.choose_spec h.exists_cm).1
-
 
 theorem min :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -170,7 +165,6 @@ theorem min :
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact (Classical.choose_spec h.exists_cm).2.1
-
 
 theorem unique :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -412,7 +406,6 @@ noncomputable def eqnRadius : ℝ :=
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   Classical.choose (grad_halfSqDist (I := I) g h.enorm
     (centerOfMass (I := I) g μ pts join p r h))
-
 
 theorem eqnRadius_pos : 0 < eqnRadius (I := I) h := by
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=

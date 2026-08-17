@@ -44,6 +44,12 @@ theorem curvOpField_apply_eq_pureRGenuineDiffOp
   (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g)
     s S).symm
 
+theorem appCc_curvOpField_eq_pureRGenuineDiffOp
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+  curvOpField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+
 noncomputable def genuineDiffCurvSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=

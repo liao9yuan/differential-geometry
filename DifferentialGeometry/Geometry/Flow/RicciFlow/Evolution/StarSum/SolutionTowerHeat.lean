@@ -46,7 +46,7 @@ private theorem localFrame_reindex
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable [I.Boundaryless]
 variable [IsManifold I ∞ M] [IsManifold I 2 M]
-variable [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
+variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
 def towerSolConst (k : Nat) : Real :=
   2 * Real.sqrt (Fintype.card (Fin (4 + k) -> Fin 3) : Real) *

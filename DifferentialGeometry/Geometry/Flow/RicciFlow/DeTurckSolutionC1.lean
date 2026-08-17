@@ -80,5 +80,4 @@ theorem deturck_vf_continuous_in_c1_input
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
         (Set.Ico (0 : ℝ) T) := h_pointwise_vf
 
-
 end DifferentialGeometry.PDE.RicciFlow

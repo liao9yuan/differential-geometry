@@ -3,7 +3,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -98,6 +97,9 @@ theorem riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
   rw [hsec]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g r (s + i) x τ _
 
+alias rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr :=
+  riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
+
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -113,8 +115,26 @@ theorem riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.reindexCoeffGen_toSection,
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen]
 
+alias rfns_iteratedCovGrad_reindexCoeffGen_eq :=
+  riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
+
 end Spectral
 end Analysis
 end DifferentialGeometry
+
+namespace DifferentialGeometry.Integral.Connection
+
+alias exists_iteratedCovGrad_rs_toModel_domDomCongr :=
+  DifferentialGeometry.Analysis.Spectral.exists_iteratedCovGrad_rs_toModel_domDomCongr
+alias riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr :=
+  DifferentialGeometry.Analysis.Spectral.riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
+alias rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr :=
+  DifferentialGeometry.Analysis.Spectral.riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
+alias riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq :=
+  DifferentialGeometry.Analysis.Spectral.riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
+alias rfns_iteratedCovGrad_reindexCoeffGen_eq :=
+  DifferentialGeometry.Analysis.Spectral.riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
+
+end DifferentialGeometry.Integral.Connection
 
 end

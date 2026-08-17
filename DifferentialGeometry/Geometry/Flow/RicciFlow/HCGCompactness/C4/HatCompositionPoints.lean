@@ -20,7 +20,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E]
-  [NormedSpace Real E] [FiniteDimensional Real E]
+[InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -31,8 +31,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace NetLimitData
 
-omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 theorem hatSrcPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -162,8 +161,7 @@ theorem hatSrcPtsOfComp
           (A gamma) (Ainf gamma) (hB gamma) (hA gamma) (hBcont gamma)
           (hAcont gamma) (hid gamma) hKimg (hKU gamma) (hKV gamma) δ hδ)
 
-omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 theorem hatSuppPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -508,8 +506,7 @@ theorem hatPtsCasesComp
       (NetLimitData.hatCageSrcCases (I := I) (X := X) hd P L pb r n center hR)
       hVopen hB hA hBcont hAcont hid hKU hKV
 
-omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 theorem hatChartPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

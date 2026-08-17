@@ -303,7 +303,6 @@ theorem multilinear_prod_opNorm_le {n : ℕ}
   · exact (M.le_opNorm m).trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hprod0)
   · exact (N.le_opNorm m).trans (mul_le_mul_of_nonneg_right (le_max_right _ _) hprod0)
 
-
 theorem norm_iteratedFDeriv_id_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (i : ℕ) (hi : 1 ≤ i) (x : P) :
     ‖iteratedFDeriv ℝ i (fun p : P => p) x‖ ≤ 1 := by
@@ -375,7 +374,6 @@ theorem norm_iteratedFDeriv_graphComp_le {P : Type*} [NormedAddCommGroup P] [Nor
 end AbstractOneBound
 
 section CmBounds
-
 
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal

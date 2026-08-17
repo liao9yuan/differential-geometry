@@ -38,7 +38,6 @@ section Fields
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 def nablaRm04NormSqIntrinsic
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Real -> M -> Real :=

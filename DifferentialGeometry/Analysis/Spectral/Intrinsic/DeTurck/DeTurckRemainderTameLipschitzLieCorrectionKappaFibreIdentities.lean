@@ -188,7 +188,8 @@ lemma lc0b_KLift_fiber_21 (g₀ : SmoothRiemannianMetric I M)
     rw [show (Fin.tail m : Fin 2 → E) = Fin.cons (m 1) (fun _ : Fin 1 => m 2) from by
       funext k
       fin_cases k <;> rfl]
-    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 1 x _ D1 (m 1) (fun _ : Fin 1 => m 2)]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 1 x _ D1 (m 1)
+      (fun _ : Fin 1 => m 2)]
     rw [lc0b_curry_zero (I := I) (M := M) x D1 (m 1)]
     rw [lc0b_clm_unit_smul (I := I) (M := M) x 1 _ _]
     rw [← hκ, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
@@ -397,4 +398,3 @@ end LieCorr0BoundsAll
 end DifferentialGeometry.Analysis.Spectral
 
 end
-

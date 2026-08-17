@@ -10,7 +10,6 @@ open scoped BigOperators
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-
 def covD2 (Γ : ι → ι → Real) (g dg : ι → ι → Real) (i j : ι) : Real :=
   dg i j - (∑ p : ι, Γ p i * g p j) - (∑ p : ι, Γ p j * g i p)
 

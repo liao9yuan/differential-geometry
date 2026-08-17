@@ -30,7 +30,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-      [BoundarylessManifold I M] [T2Space M]
+      [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 theorem rem_h0_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)

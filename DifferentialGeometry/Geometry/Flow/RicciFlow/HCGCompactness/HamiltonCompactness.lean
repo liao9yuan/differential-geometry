@@ -1,5 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.SolutionCompactnessInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessUncondH6
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldCanon
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
+
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
@@ -14,7 +18,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -30,7 +34,7 @@ theorem compactnessSol_cond
         ((X.atZero (I := I)).obj k).topology
       ConnectedSpace ((X.atZero (I := I)).obj k).M)
     (hderiv : FlowDerivativeInput (I := I) X)
-    (hflow : FlowUpgradeData (I := I) X
+    (hflow : FlowUpgrade (I := I) X
       (MetricCompactnessInputs.metricCompactness (I := I)
         inp hcomplete0 hderiv.at_zero_geom hflowInj hconn)) :
     CompactnessConclusion (I := I) X :=
@@ -59,7 +63,39 @@ theorem compactnessSol
     exact h0
   have hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)) :=
     hcomplete.at_time hzero
-  sorry
+  let hgeom0 : SeqBoundedGeometry (I := I) (X.atZero (I := I)) :=
+    CurvBoundInput.atZeroGeomOpen (I := I) h0 X hD hcomplete hcurv
+  have hconn0 : ∀ k : Nat,
+      letI : TopologicalSpace ((X.atZero (I := I)).obj k).M :=
+        ((X.atZero (I := I)).obj k).topology
+      ConnectedSpace ((X.atZero (I := I)).obj k).M := by
+    intro k
+    simpa [PointedFlowSeq.atZero] using hconn k
+  let seed : MetricCompactSeed (I := I) (X.atZero (I := I)) :=
+    metricSeedOfBG (I := I) (X.atZero (I := I))
+      hcomplete0 hgeom0 hinj hconn0
+  have hd : Nonempty (H6NormalData (I := I) (X.atZero (I := I)) seed.decay) :=
+    exists_h6NormalData (I := I) (X.atZero (I := I))
+      hcomplete0 hconn0 hgeom0 seed.decay seed.realizes
+  let canon : StepDCanon (I := I) (X.atZero (I := I)) :=
+    seed.metricCanonH6 (Classical.choice hd) hcomplete0 hconn0
+  obtain ⟨d, hcompleteL⟩ :=
+    open_upgrade_canon (I := I) canon h0 hD hcomplete hcurv
+  let mc' : MetricCompactnessConclusion (I := I) (X.atZero (I := I)) :=
+    canon.mc.compSubseq d.φ d.hφ
+  refine ⟨d.data.L, mc'.subseq, mc'.strictMono, ?_, hcompleteL⟩
+  exact ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
+    d.data.maps d.data.scalar d.data.ricciNorm d.data.hσsrc d.data.hσtgt
+    d.data.refMetric
+    (letI : TopologicalSpace d.data.L.M := d.data.L.topology
+     letI : ChartedSpace H d.data.L.M := d.data.L.charted
+     letI : IsManifold I ∞ d.data.L.M := d.data.L.smooth
+     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.data.L.M := by
+       change IsManifold I ∞ d.data.L.M
+       infer_instance
+     letI : SigmaCompactSpace d.data.L.M := d.data.L.sigmaCompact
+     letI : T2Space d.data.L.M := d.data.L.t2
+     d.data.L.S.family.metric) d.data.conv⟩
 
 end HCGCompactness
 end DifferentialGeometry

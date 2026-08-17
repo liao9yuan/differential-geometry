@@ -9,7 +9,6 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -284,6 +283,9 @@ theorem contMDiffOn_clm_section_of_pointwise_joint_manifold_time
     rw [h_lf]
     rw [Trivialization.continuousLinearMapAt_apply]
     exact congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₂) hx₂) _
+
+alias contMDiffOn_clm_section_of_pointwise_jointMR :=
+  contMDiffOn_clm_section_of_pointwise_joint_manifold_time
 
 end RicciLinearization
 end DeTurck

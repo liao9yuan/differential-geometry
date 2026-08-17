@@ -306,13 +306,13 @@ private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M
     rw [h]
   rw [hlam]
 
-private noncomputable def symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
+noncomputable def symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) (t : ℝ) : ℝ :=
   (1 / 2 : ℝ) * (φ i t + ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
     swapEigenCoeff (I := I) (M := M) g₀ i j * φ j t)
 
-private lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
+lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} {n : WithTop ℕ∞}
     (hφ : ∀ i, ContDiff ℝ n (φ i)) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     ContDiff ℝ n (symmCoeffPath (I := I) (M := M) g₀ φ i) := by
@@ -320,7 +320,7 @@ private lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
   exact contDiff_const.mul ((hφ i).add
     (ContDiff.sum fun j _ => contDiff_const.mul (hφ j)))
 
-private lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
+lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (X : SmoothCcTensor g₀ 0 2) {t : ℝ}
     (hX : ∀ j, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
@@ -354,7 +354,7 @@ private lemma iteratedDeriv_finsetSum_const_mul {ι' : Type*} (s : Finset ι')
     congr 1
     exact iteratedDeriv_const_mul_field (c b) (f b)
 
-private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
+lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
     (hφ : ∀ j, ContDiff ℝ (k : ℕ) (φ j))
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) (t : ℝ) :
@@ -367,7 +367,7 @@ private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     ((ContDiff.sum fun j _ => contDiff_const.mul (hφ j)).contDiffAt),
     iteratedDeriv_finsetSum_const_mul _ _ _ k hφ t]
 
-private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
+lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
     {d : ℝ} (hd_pos : 0 < d)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
     (hφ : ∀ j, ContDiff ℝ (k : ℕ) (φ j)) (τ : ℝ)
@@ -464,7 +464,7 @@ private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           add_le_add (mul_le_mul_of_nonneg_left h1 (by norm_num))
             (mul_le_mul_of_nonneg_left h2 (by norm_num))
 
-private theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetric I M)
+theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetric I M)
     {d₂ : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hmass0 : ∀ σ : ℝ, 0 ≤ σ →

@@ -13,7 +13,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -31,7 +31,7 @@ theorem solutionComp_cond
         ((X.atZero (I := I)).obj k).topology
       ConnectedSpace ((X.atZero (I := I)).obj k).M)
     (hderiv : FlowDerivativeInput (I := I) X)
-    (hflow : FlowUpgradeData (I := I) X
+    (hflow : FlowUpgrade (I := I) X
       (MetricCompactnessInputs.metricCompactness (I := I)
         inp hcomplete0 hderiv.at_zero_geom hinj hconn)) :
     CompactnessConclusion (I := I) X :=

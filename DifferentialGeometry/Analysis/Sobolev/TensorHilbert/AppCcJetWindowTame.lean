@@ -11,6 +11,8 @@ noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
     ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+  ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Sobolev
@@ -139,6 +141,12 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
   exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ
     W B hB hW
+
+abbrev appCc_l2_le_of_pointwise_fiberNormSq_bound_left :=
+  @operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
+
+abbrev appCc_l2_le_of_pointwise_fiberNormSq_bound_right :=
+  @operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -1090,7 +1098,6 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
     _ ≤ Real.sqrt (Ktot * (1 + H ^ 2)) := Real.sqrt_le_sqrt hnorm_sq
     _ = Real.sqrt Ktot * Real.sqrt (1 + H ^ 2) := Real.sqrt_mul hKtot_nn _
     _ ≤ Real.sqrt Ktot * (1 + H) := mul_le_mul_of_nonneg_left hsqrt_le (Real.sqrt_nonneg _)
-
 
 theorem appCc_jet_l2Sq_le
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)

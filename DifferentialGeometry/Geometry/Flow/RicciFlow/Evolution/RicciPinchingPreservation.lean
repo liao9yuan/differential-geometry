@@ -286,7 +286,6 @@ theorem pinchLipFamilyContinuousOnSet
       hric3 hneg
   simpa [pinchLipSec, tensor0SField_smulByFun_apply] using hsum
 
-
 theorem pinchLip_tangentBundle_cont
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} {K : Set Real}
     [SigmaCompactSpace M] [T2Space M]
@@ -410,7 +409,6 @@ theorem tensorEval_contOn
     b hb T hT V hV
   simpa [P, b, T, V, Tensor0SSpace.toModel,
     tensor0SSpace_continuousLinearEquiv_apply] using hEval
-
 
 theorem pinchEval_contOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -736,7 +734,6 @@ def toInput
 
 end RicciWMPData
 
-
 structure PinchWMPData
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
@@ -772,7 +769,6 @@ structure PinchWMPData
   spatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S
 
 namespace PinchWMPData
-
 
 def toInput
     {G : Real -> SmoothRiemannianMetric I M}
@@ -1032,7 +1028,6 @@ def toPinchWMPData
 
 end PinchFlowWMPData
 
-
 theorem ricci_nonneg_wmp_raw
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -1051,7 +1046,6 @@ theorem ricci_nonneg_wmp_raw
   exact hamilton_tensor_wmp (I := I) (M := M) (G := G) (S := Ric)
     (X := X) (N := N) (nabla2S := nabla2Ric) (nablaS := nablaRic)
     hT hreg hparabolic hnull hinit
-
 
 theorem ricci_nonneg_wmp
     [I.Boundaryless] [T2Space M]
@@ -1094,7 +1088,6 @@ theorem ricci_nonneg_sol
   exact tensor_wmp (I := I) (M := M) (RicciWMPData.toInput
     (I := I) (M := M) data hT)
 
-
 theorem ricci_pinch_wmp_raw
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -1122,7 +1115,6 @@ theorem ricci_pinch_wmp_raw
     (S := pinchTensor (I := I) (M := M) G Ric scalar delta)
     (X := X) (N := N) (nabla2S := nabla2S) (nablaS := nablaS)
     hT hreg hparabolic hnull hinit
-
 
 theorem ricci_pinch_wmp
     [I.Boundaryless] [T2Space M]
@@ -1154,7 +1146,6 @@ theorem ricci_pinch_wmp
   simpa [PinchPres, hS] using hsec
 
 namespace PinchWMPData
-
 
 theorem preserve
     [I.Boundaryless] [T2Space M]
@@ -1287,7 +1278,6 @@ theorem ricci_nonneg_sol_closed
   exact (by
     simpa [PinchPres, pinchTensor] using hpinch t ht x v)
 
-
 theorem pinch_init_wmp
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1310,7 +1300,6 @@ theorem pinch_init_wmp
   refine ⟨delta, hdelta0, hdelta13, ?_⟩
   exact data.preserve (I := I) (M := M) hT
     (le_of_lt hdelta0) hdelta13 hpinch0
-
 
 theorem pinch_init_wmp_lt
     [I.Boundaryless] [T2Space M]
@@ -1543,7 +1532,6 @@ theorem strict_pinch_pos
     (pinchInit_pos (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) D hpos hscalar)
     hdata
-
 
 theorem strict_pinch_pos_lt
     [I.Boundaryless]

@@ -28,7 +28,6 @@ omit [DecidableEq Idx] in
         A (Fin.snoc (fun i : Fin p => idx (Fin.castAdd q i)) c) *
           B (Fin.snoc (fun j : Fin q => idx (Fin.natAdd p j)) c) := rfl
 
-
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem castAdd_append {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (i : Fin p) : (Fin.append aPart bPart) (Fin.castAdd q i) = aPart i := by
@@ -47,7 +46,6 @@ private theorem castAdd_ne_natAdd {p q : ℕ} (i : Fin p) (j : Fin q) :
   have := i.isLt
   omega
 
-
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_append_castAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (i : Fin p) (v : Idx) :
@@ -61,7 +59,6 @@ private theorem update_append_castAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart
     · rw [Function.update_of_ne (fun he => h (Fin.castAdd_injective _ _ he)),
         Fin.append_left, Function.update_of_ne h]
   · rw [Fin.append_right, Function.update_of_ne (castAdd_ne_natAdd i j').symm, Fin.append_right]
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_append_natAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)

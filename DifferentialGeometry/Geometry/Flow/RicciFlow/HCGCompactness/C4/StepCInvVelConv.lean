@@ -17,7 +17,7 @@ namespace HCGCompactness
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -25,20 +25,23 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 theorem invVelSub_conv_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
     (kn ln : Nat → Nat) {S : Set E} (hS : IsOpen S)
     (weightInf : E → Fin (inp.pack.A r) → Real)
+    {chart : NormalChartFamily (I := I) X}
     (hcfgC : ∀ m, ContDiffOn Real (∞ : WithTop ℕ∞)
-      (stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m)) S)
+      (stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m)
+        (chart := chart)) S)
     (hcfgInfC : ContDiffOn Real (∞ : WithTop ℕ∞)
       (fun z => (weightInf z,
         fun _ : Fin (inp.pack.A r) => z)) S)
     (hcfg : MapCInfConvOnCompacts S
-      (fun m => stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m))
+      (fun m => stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m)
+        (chart := chart))
       (fun z => (weightInf z, fun _ : Fin (inp.pack.A r) => z)))
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (eInf : OpenPartialHomeomorph (E × E) (E × E))
@@ -54,25 +57,25 @@ theorem invVelSub_conv_on
     (hmap : ∀ᶠ m in atTop, ∀ q, q ∈ D →
       ∀ gamma : Fin (inp.pack.A r),
         (q.2, (stageCfgSub inp P L hr phi hphi alpha
-          (kn m) (ln m) q.1).2 gamma) ∈ V)
+          (kn m) (ln m) q.1 (chart := chart)).2 gamma) ∈ V)
     (hmapInf : ∀ q, q ∈ D → (q.2, q.1) ∈ V) :
     MapCInfConvOnCompacts D
       (fun m q => invVelSum (e m)
         (stageCfgSub inp P L hr phi hphi alpha
-          (kn m) (ln m) q.1).1
+          (kn m) (ln m) q.1 (chart := chart)).1
         (stageCfgSub inp P L hr phi hphi alpha
-          (kn m) (ln m) q.1).2 q.2)
+          (kn m) (ln m) q.1 (chart := chart)).2 q.2)
       (fun q => invVelSum eInf
         (weightInf q.1) (fun _ => q.1) q.2) := by
   have hcfgD : MapCInfConvOnCompacts D
       (fun m q => stageCfgSub inp P L hr phi hphi alpha
-        (kn m) (ln m) q.1)
+        (kn m) (ln m) q.1 (chart := chart))
       (fun q => (weightInf q.1,
         fun _ : Fin (inp.pack.A r) => q.1)) :=
     hcfg.precomp hD hS contDiff_fst.contDiffOn hfst hcfgC hcfgInfC
   have hcfgDC : ∀ m, ContDiffOn Real (∞ : WithTop ℕ∞)
       (fun q : E × E => stageCfgSub inp P L hr phi hphi alpha
-        (kn m) (ln m) q.1) D :=
+        (kn m) (ln m) q.1 (chart := chart)) D :=
     fun m => (hcfgC m).comp contDiff_fst.contDiffOn hfst
   have hcfgInfDC : ContDiffOn Real (∞ : WithTop ℕ∞)
       (fun q : E × E => (weightInf q.1,
@@ -85,7 +88,7 @@ theorem invVelSub_conv_on
     (ι := Fin (inp.pack.A r)) (U := D) (V := V)
     (e := e) (eInf := eInf)
     (cfg := fun m q => stageCfgSub inp P L hr phi hphi alpha
-      (kn m) (ln m) q.1)
+      (kn m) (ln m) q.1 (chart := chart))
     (cfgInf := fun q => (weightInf q.1,
       fun _ : Fin (inp.pack.A r) => q.1))
     (ctr := fun _ : Nat => fun q : E × E => q.2)
@@ -102,13 +105,16 @@ theorem invVelSub_conv
     (alpha : LiveSlot L inp.pack r)
     (kn ln : Nat → Nat) {S : Set E} (hS : IsOpen S)
     (weightInf : E → Fin (inp.pack.A r) → Real)
+    {chart : NormalChartFamily (I := I) X}
     (hcfgC : ∀ m, ContDiffOn Real (∞ : WithTop ℕ∞)
-      (stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m)) S)
+      (stageCfgSub inp.toCore P L hr phi hphi alpha (kn m) (ln m)
+        (chart := chart)) S)
     (hcfgInfC : ContDiffOn Real (∞ : WithTop ℕ∞)
       (fun z => (weightInf z,
         fun _ : Fin (inp.pack.A r) => z)) S)
     (hcfg : MapCInfConvOnCompacts S
-      (fun m => stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m))
+      (fun m => stageCfgSub inp.toCore P L hr phi hphi alpha (kn m) (ln m)
+        (chart := chart))
       (fun z => (weightInf z, fun _ : Fin (inp.pack.A r) => z)))
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (eInf : OpenPartialHomeomorph (E × E) (E × E))
@@ -124,22 +130,23 @@ theorem invVelSub_conv
       ∀ (D : Set (E × E)), IsOpen D →
         MapsTo (fun q : E × E => q.1) D S →
         (∀ m q, q ∈ D → ∀ gamma : Fin (inp.pack.A r),
-          (q.2, (stageCfgSub inp P L hr phi hphi alpha
-            (kn m) (ln m) q.1).2 gamma) ∈ Metric.ball 0 delta0) →
+          (q.2, (stageCfgSub inp.toCore P L hr phi hphi alpha
+            (kn m) (ln m) q.1 (chart := chart)).2 gamma) ∈
+              Metric.ball 0 delta0) →
         (∀ q, q ∈ D → (q.2, q.1) ∈ Metric.ball 0 delta0) →
         MapCInfConvOnCompacts D
           (fun m q => invVelSum (e (nn m))
-            (stageCfgSub inp P L hr phi hphi alpha
-              (kn m) (ln m) q.1).1
-            (stageCfgSub inp P L hr phi hphi alpha
-              (kn m) (ln m) q.1).2 q.2)
+            (stageCfgSub inp.toCore P L hr phi hphi alpha
+              (kn m) (ln m) q.1 (chart := chart)).1
+            (stageCfgSub inp.toCore P L hr phi hphi alpha
+              (kn m) (ln m) q.1 (chart := chart)).2 q.2)
       (fun q => invVelSum eInf
             (weightInf q.1) (fun _ => q.1) q.2) := by
   rcases hinvData with ⟨delta0, hdelta0, heC, heInfC, hinv⟩
   refine ⟨delta0, hdelta0, ?_⟩
   intro D hD hfst hmap hmapInf
   have he := hinv.comp_tendsto_atTop hnn
-  exact invVelSub_conv_on inp P L hr phi hphi alpha kn ln hS weightInf
+  exact invVelSub_conv_on inp.toCore P L hr phi hphi alpha kn ln hS weightInf
     hcfgC hcfgInfC hcfg (fun m => e (nn m)) eInf Metric.isOpen_ball
     (Filter.Eventually.of_forall fun m => heC (nn m)) heInfC he hD hfst
     (Filter.Eventually.of_forall hmap) hmapInf
@@ -209,8 +216,9 @@ theorem HasDiagPairConv.exists_invVel_on
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (hpair : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     {ι : Type} [Fintype ι]
     {S K : Set E} {V : Set (E × E)}
     (hS : IsOpen S) (hK : IsCompact K) (hV : IsOpen V)
@@ -287,8 +295,9 @@ theorem HasDiagPairConv.exists_invVel_tube
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (hpair : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     {ι : Type} [Fintype ι]
     {S K : Set E} (hS : IsOpen S) (hK : IsCompact K)
     {mu : E → ι → Real}

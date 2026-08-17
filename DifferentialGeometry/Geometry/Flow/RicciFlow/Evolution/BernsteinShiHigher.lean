@@ -20,8 +20,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [T2Space M]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E]
-    [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [T2Space M] in
 theorem mdifferentiableAt_finset_sum_smul
     {ι : Type*} (s : Finset ι) (f : ι -> M -> Real) (c : ι -> Real) (y : M)
     (hf : ∀ i ∈ s, MDifferentiableAt I 𝓘(Real, Real) (f i) y) :
@@ -467,6 +466,7 @@ structure BernsteinTower
   hLap : ∀ k : ℕ, ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
     DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
       (fun _y : M => (0 : TangentSpace I _y)) (w k t) x = wLap k t x
+
   hw_cont : ∀ k : ℕ, ContinuousOn (fun p : Real × M => w k p.1 p.2)
     (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)
   hw_space : ∀ k : ℕ, ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ y : M,

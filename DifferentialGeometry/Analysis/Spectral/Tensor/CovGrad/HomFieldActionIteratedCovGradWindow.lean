@@ -3,7 +3,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 
@@ -27,7 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M) (r m c : ℕ)
@@ -122,7 +120,6 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
           (homTensorRSCovGradSec (I := I) (M := M) g r (m + i) (c + k) (D i))
           (iteratedCovGrad g r m i W)) k]
       abel
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetric I M)
@@ -227,7 +224,6 @@ private theorem riemannianFiberNormSq_congr_of_heq (g : SmoothRiemannianMetric I
   subst h
   rw [eq_of_heq hYZ]
 
-
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
@@ -239,6 +235,15 @@ theorem riemannianFiberNormSq_iteratedCovGrad_comp (g : SmoothRiemannianMetric I
   riemannianFiberNormSq_congr_of_heq (I := I) (M := M) g r
     (by omega : (s + j) + i = s + (j + i))
     (iteratedCovGrad_comp_heq (I := I) (M := M) g r s j S i) x
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+theorem rfns_iteratedCovGrad_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
+    (S : SmoothCcTensor g r s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g r ((s + j) + i) x
+        ((iteratedCovGrad g r (s + j) i (iteratedCovGrad g r s j S)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r (s + (j + i)) x
+        ((iteratedCovGrad g r s (j + i) S).toSection x) :=
+  riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g r s j i S x
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -252,7 +257,6 @@ private theorem riemannianFiberNormSq_iteratedCovGrad_order_congr (g : SmoothRie
   rfl
 
 end NormedIteratedCovGrad
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appFullSec_on_jet_iteratedCovGrad_window_bound (g : SmoothRiemannianMetric I M)

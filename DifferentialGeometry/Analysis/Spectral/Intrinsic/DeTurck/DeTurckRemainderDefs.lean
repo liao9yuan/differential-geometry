@@ -72,6 +72,19 @@ def smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
         (SmoothCcTensor.toL2 T) i :=
   rfl
 
+theorem finiteEigenComboHs_eq (g₀ : SmoothRiemannianMetric I M)
+    (F : Finset (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2))
+    (c : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2 → ℝ) (σ : ℝ) :
+    finiteEigenComboHs (I := I) (M := M) g₀ F c σ =
+      smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (finiteEigenCombo (I := I) (M := M) g₀ F c) := by
+  refine tensorHs.ext ?_
+  funext i
+  rw [finiteEigenComboHs_coeff_eq, smoothCcToTensorHs_coeff,
+    ← SmoothCcTensor.toL2_apply]
+
 def deTurckArmFibreConst (n : ℕ) : ℝ := Real.sqrt ((n : ℝ) ^ 3)
 
 lemma deTurckArmFibreConst_nonneg (n : ℕ) : 0 ≤ deTurckArmFibreConst n :=

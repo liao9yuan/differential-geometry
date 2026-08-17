@@ -61,7 +61,6 @@ def factorPointed (S : SmoothSeqSystem I A) (O₀ : A 0)
   basepoint := S.toSeqSystem.F (Nat.zero_le k) O₀
   metric := g k
 
-
 def factorSeq (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) :
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
@@ -90,7 +89,6 @@ noncomputable def limitCGMapsOf (S : SmoothSeqSystem I A) (O₀ : A 0)
   source_exhausts := rangeExhausts S
   base_mem k := ⟨S.toSeqSystem.F (Nat.zero_le k) O₀, S.toSeqSystem.incl_comp (Nat.zero_le k) O₀⟩
   basepoint_map k := S.invIncl_incl_le (Nat.zero_le k) O₀
-
 
 noncomputable def limitCGMaps (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) :
@@ -342,7 +340,6 @@ theorem exists_first_exit
     · exact interior_subset (hbefore s ⟨hs.1, lt_of_le_of_ne hs.2 hst⟩)
   · rw [frontier, hK.closure_eq]
     exact ⟨htK, htNot⟩
-
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]

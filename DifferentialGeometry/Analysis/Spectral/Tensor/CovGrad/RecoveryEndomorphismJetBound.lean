@@ -4,7 +4,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -312,6 +311,9 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
+alias rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq :=
+  riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
+
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -494,7 +496,7 @@ private lemma omRecoverEndoCc_eq_idEndo_add_raise
   rw [htie]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-private lemma rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
+theorem rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 1 x
         ((sharpFlatEndoCc (I := I) g₀ g₀).toSection x) ≤
       (Module.finrank ℝ E : ℝ) ^ 2 := by

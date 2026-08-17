@@ -141,6 +141,7 @@ theorem one_le_segImult (n : ℕ) (q r0 m : ℝ) : 1 ≤ segImult n q r0 m := by
   unfold segImult; omega
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

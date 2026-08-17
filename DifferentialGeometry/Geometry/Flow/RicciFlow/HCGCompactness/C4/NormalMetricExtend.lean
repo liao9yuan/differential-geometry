@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricKoszul
+import DifferentialGeometry.Geometry.Exponential.NormalBallMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
 import DifferentialGeometry.Geometry.Metric.BumpExtend
 import DifferentialGeometry.Geometry.Metric.MetricExistence
@@ -272,7 +273,6 @@ noncomputable def normalCut
   have hR : 0 < R := expMapC2Radius_pos (I := I) Y.metric x
   exact ⟨R / 4, R / 2, by positivity, by linarith⟩
 
-
 theorem normalCut_smooth
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -285,7 +285,6 @@ theorem normalCut_smooth
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact (normalCut (I := I) Y x).contDiff.contMDiff
-
 
 theorem normalCut_range
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (z : E) :
@@ -319,7 +318,6 @@ theorem normalCut_supp
     have hR := expMapC2Radius_pos (I := I) Y.metric x
     linarith)
 
-
 theorem normalCut_one
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -336,7 +334,6 @@ theorem normalCut_one
   intro z hz
   apply (normalCut (I := I) Y x).one_of_mem_closedBall
   exact Metric.ball_subset_closedBall hz
-
 
 theorem normalInner_sub
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -455,7 +452,6 @@ theorem normalTotal_inner
           (fun q hq ↦ normalCut_one (I := I) Y x hq) hsub z hz v w
     _ = normalCoordMetric (I := I) Y x z v w :=
       normalMetric_inner (I := I) Y x ⟨z, hsub hz⟩ v w
-
 
 theorem normalTotal_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :

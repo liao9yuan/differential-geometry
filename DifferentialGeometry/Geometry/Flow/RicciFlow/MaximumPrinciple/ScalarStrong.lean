@@ -8,7 +8,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
-open Bundle Set Tensor0SBundle
+open Bundle Set DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Curvature

@@ -5,7 +5,6 @@ open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -138,7 +137,6 @@ theorem firstNullKernel_left
           exact (eval02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 d.v w).symm
     _ = 0 := hkernel w
 
-
 omit [IsManifold I 2 M] in
 theorem firstNullKernel_right
     {G : Real -> SmoothRiemannianMetric I M}
@@ -266,7 +264,6 @@ private theorem deriv_nonpos_of_nonneg_left
         (m - t) (1 : Real))
   rw [hlin, hderiv_eq] at hnonneg_deriv
   exact nonpos_of_mul_nonneg_right hnonneg_deriv (sub_neg.mpr hmt)
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem firstNullTime_nonpos
@@ -1315,7 +1312,6 @@ private theorem nabla2Eval_hess
       extDerivFun (I := I) phi x ((cov (fun y : M => Y y) x) (X x)) := hprod
     _ = nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y x) := hnabla_phi.symm
     _ = Hess x (vec2 (I := I) (X x) (Y x)) := (hHess X (Y x)).symm
-
 
 theorem nabla2Eval_hess_slots
     [T2Space M]

@@ -23,7 +23,6 @@ def scalarSqLap
     Real -> M -> Real :=
   fun t x => 2 * scalar t x * scalarLap t x + 2 * gradScalarNormSq t x
 
-
 omit [Module.Finite ℝ E] in
 theorem sqLap_at
     [FiniteDimensional Real E]
@@ -112,13 +111,11 @@ theorem sqLap_realizes
     _ = DifferentialGeometry.Geometry.Curvature.heatOperator (I := I) G t
           (fun y : M => scalar t y ^ 2) x := rfl
 
-
 def tfLap
     (scalar scalarLap gradScalarNormSq ricciNormLap : Real -> M -> Real) :
     Real -> M -> Real :=
   fun t x => ricciNormLap t x -
     scalarSqLap scalar scalarLap gradScalarNormSq t x / 3
-
 
 def scalarSqHeatOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -150,7 +147,6 @@ theorem sqHeat_of_scalar
     simp [pow_two]
   · simp [scalarSqLap]
     ring
-
 
 def tfRicHeatOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

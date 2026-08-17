@@ -98,7 +98,6 @@ theorem iterCov_shift [FiniteDimensional Real E]
       simp only [shiftEquiv]
       rw [iterCov_succ, ih, covStep_domDomCongr, ← iterCov_succ]
 
-
 def frontExtendIter {s s' : ℕ} (e : Fin s ≃ Fin s') : (m : ℕ) → Fin (s + m) ≃ Fin (s' + m)
   | 0 => e
   | (m + 1) => frontExtendEquiv (frontExtendIter e m)
@@ -122,7 +121,6 @@ theorem iterCov_domDomCongr [FiniteDimensional Real E] {s s' : ℕ}
   | succ m ih =>
       simp only [frontExtendIter]
       rw [iterCov_succ, ih, covStep_domDomCongr, ← iterCov_succ]
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in

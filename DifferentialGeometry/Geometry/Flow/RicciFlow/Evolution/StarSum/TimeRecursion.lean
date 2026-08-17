@@ -26,6 +26,7 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -223,6 +224,7 @@ private theorem traceOrthoEq
     (metricInverseInBasis_identity_of_orthonormal (I := I) g basis horth) T tail
 
 set_option backward.isDefEq.respectTransparency false in
+
 def gammaStarCost (k : ℕ) : Real :=
   9 * (12 + 3 * k)
 
@@ -480,6 +482,7 @@ theorem resStarNext_cost
   simp only [abs_neg, abs_one, one_mul, rmResidualCost]
 
 set_option backward.isDefEq.respectTransparency false in
+
 theorem resStarNext_spec
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
@@ -821,6 +824,7 @@ theorem resStarSucc
     baseDt chrDt hrm hchr hchrId hswap Tk hTk hIH
 
 set_option backward.isDefEq.respectTransparency false in
+
 def resStarCost : ℕ → Real
   | 0 => 108
   | k + 1 => 2 * resStarCost k + commStarCost 3 k + gammaStarCost k

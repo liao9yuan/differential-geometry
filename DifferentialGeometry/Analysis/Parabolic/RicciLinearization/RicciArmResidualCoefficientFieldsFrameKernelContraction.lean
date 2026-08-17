@@ -20,7 +20,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -103,7 +102,6 @@ def curvatureRefoldMonomialFrameContraction (Gs : Π b : M, Tensor0SSpace 4 I b)
         ![(B a x : E), (B b x : E)]).smulRight
       (tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x (B a x) (B b x)
         (tensorRank4PermuteCLM (I := I) (M := M) x σ (Gs x)))
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -423,6 +421,11 @@ def curvatureRefoldMonomialOrthonormalFrameBiContraction (g₁ : SmoothRiemannia
   curvatureRefoldMonomialFrameContraction (I := I) (M := M) Gs σ
     (smoothOrthoFrame (I := I) g₁ x) x
 
+def refoldKernelContractionMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
+    (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  curvatureRefoldMonomialOrthonormalFrameBiContraction (I := I) (M := M) g₁ Gs σ x
+
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
 theorem refoldKernelContractionMonomialBiContrFib_eq_fixedFrame_on_nbhd
@@ -540,7 +543,6 @@ def refoldKernelContractionField (g₀ g₁ : SmoothRiemannianMetric I M)
       + refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₂
       - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₃
       - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₄)
-
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem refoldKernelContractionField_toSection_eq_kernelFib_sum
@@ -745,7 +747,6 @@ theorem refoldKernelContractionField_self (g₀ : SmoothRiemannianMetric I M)
       (iteratedCovGrad (I := I) g₀ 0 2 2
         (metricDifferenceCcTensor (I := I) (M := M) g₀ g₀)) σ₁ σ₂ σ₃ σ₄ = 0 := by
   rw [metricDifferenceCcTensor_self, refoldKernelContractionField_zero_weight]
-
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem appCc_refoldKernelContractionField

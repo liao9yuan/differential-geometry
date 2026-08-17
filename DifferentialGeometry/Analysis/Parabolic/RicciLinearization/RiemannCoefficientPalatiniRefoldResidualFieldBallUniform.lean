@@ -256,7 +256,7 @@ theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : Smooth
             (Csob * R) ^ 2 := by
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) (E := E) g₀ a ha_super
   refine ⟨Csob, hCsob_nn, ?_⟩
   intro T R hR hball x
   have hball0 : ∀ j : ℕ, j ≤ a + 2 →
@@ -319,7 +319,7 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
   obtain ⟨CP, hCP_nn, hCP⟩ := bdPairTraceOp_tgrid (I := I) (M := M) g₀ hδ₁_lt
   obtain ⟨C4, hC4_nn, hC4⟩ := bdPureDT_tgrid (I := I) (M := M) g₀ 4 hδ₁_lt
   obtain ⟨Csob1, hCsob1_nn, hcap1⟩ :=
-    exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (I := I) (M := M) g₀ a ha_super
+    exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (I := I) (M := M) (E := E) g₀ a ha_super
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
   have hfr_nn : 0 ≤ fr := Nat.cast_nonneg _
   set ZB : ℝ := fr * (fr * (fr *
@@ -937,7 +937,7 @@ theorem exists_sobolevConst_riemannianFiberNormSq_T_le_sq (g₀ : SmoothRiemanni
             (Csob * R) ^ 2 := by
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) (E := E) g₀ a ha_super
   refine ⟨Csob, hCsob_nn, ?_⟩
   intro T R hR hball x
   have hball0 : ∀ j : ℕ, j ≤ a + 2 →
@@ -994,7 +994,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
   obtain ⟨CP, hCP_nn, hCP⟩ := bdPairTraceOp_tgrid (I := I) (M := M) g₀ hδ₁_lt
   obtain ⟨Csob, hCsob_nn, hTcapAll⟩ :=
-    exists_sobolevConst_riemannianFiberNormSq_T_le_sq (I := I) (M := M) g₀ a ha_super
+    exists_sobolevConst_riemannianFiberNormSq_T_le_sq (I := I) (M := M) (E := E) g₀ a ha_super
   obtain ⟨KD4, hKD4_nn, hKD4⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 6 4
       (cometricDoubleTraceField (I := I) g₀ 4)

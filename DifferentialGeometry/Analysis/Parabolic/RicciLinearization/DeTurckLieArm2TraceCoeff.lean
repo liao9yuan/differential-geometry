@@ -324,6 +324,169 @@ theorem deTurckLieArm2PrincipalCoeff_realizedFam_jointSmooth (g₀ : SmoothRiema
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) (δ := δ) (δ' := δ') :=
   deTurckLieArm2PrincipalCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ' g_bg
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
+      appCc (I := I) (M := M) g r s Φ₁ W - appCc (I := I) (M := M) g r s Φ₂ W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((appCc (I := I) (M := M) g r s Φ₁ W - appCc (I := I) (M := M) g r s Φ₂ W).toSection x) =
+      (appCc (I := I) (M := M) g r s Φ₁ W).toSection x -
+        (appCc (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection, appCc_toSection]
+  rw [show ((Φ₁ - Φ₂).toSection x : TensorRSSpace r s I x) = Φ₁.toSection x - Φ₂.toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [ContinuousLinearMap.sub_comp]
+
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+private lemma appCc_add_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s (Φ₁ + Φ₂) W =
+      appCc (I := I) (M := M) g r s Φ₁ W + appCc (I := I) (M := M) g r s Φ₂ W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((appCc (I := I) (M := M) g r s Φ₁ W +
+      appCc (I := I) (M := M) g r s Φ₂ W).toSection x) =
+      (appCc (I := I) (M := M) g r s Φ₁ W).toSection x +
+        (appCc (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection, appCc_toSection]
+  rw [show ((Φ₁ + Φ₂).toSection x : TensorRSSpace r s I x) =
+      Φ₁.toSection x + Φ₂.toSection x from by
+    rw [SmoothCcTensor.toSection_add]; rfl]
+  rw [ContinuousLinearMap.add_comp]
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
+    (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
+      unitModel (I := I) (M := M) g₀ 2 S x v + unitModel (I := I) (M := M) g₀ 2 S' x v := by
+  simp only [unitModel]
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+    ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply]
+
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
+    (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2 (S - S') x v =
+      unitModel (I := I) (M := M) g₀ 2 S x v - unitModel (I := I) (M := M) g₀ 2 S' x v := by
+  simp only [unitModel]
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+    (σ : Equiv.Perm (Fin 4)) (D : SmoothCcTensor g₀ 0 4) (x : M)
+    (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2
+          (deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ) D) x v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g₀ 4 D x)
+          (Fin.cons (cometricLmodel (I := I) g₁ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) v)) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          D.toSection x)) (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ).toSection x)
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          D.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [deTurckLieTraceCoeff_toSection]
+  rw [show (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (show Tensor0SBundle.TensorRSSpace 4 2 I x from deTurckLieTraceFib (I := I) g₁ σ x))
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          D.toSection x) (unitTensor (I := I) (M := M) x)) =
+      deTurckLieTraceFib (I := I) g₁ σ x
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          D.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [deTurckLieTraceFib, ContinuousLinearMap.comp_apply, domDomCongrFibPerm_apply,
+    cometricDoubleTraceFib_toModel, Tensor0SSpace.toModel_ofModel, modelDoubleTrace_apply]
+  simp only [unitModel]
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+private theorem traceHessianCoeff_appCc_eq_local
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2
+          (traceHessianCoeff (I := I) (M := M) g₀ g₁) W) x v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        ContinuousMultilinearMap.domDomCongr traceHessianSlotPerm
+            (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace 4 I x from W.toSection x)
+                (unitTensor (I := I) (M := M) x)))
+            (Fin.cons (cometricLmodel (I := I) g₁ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)))
+              (Fin.cons ((Module.finBasis ℝ E) k) v)) := by
+  change unitModel (I := I) (M := M) g₀ 2
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
+        (traceHessianCoeff (I := I) (M := M) g₀ g₁) W) x v = _
+  exact traceHessianCoeff_apply_eq (I := I) (M := M) g₀ g₁ W x v
+
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+theorem deTurckLieArm2PrincipalCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (D : SmoothCcTensor g₀ 0 4) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2
+          (deTurckLieArm2PrincipalCoeff (I := I) g₀ g₁ g_bg) D) x v =
+      ((∑ k : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 4 D x
+            ![v 0,
+              cometricLmodel (I := I) g₁ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)),
+              v 1, (Module.finBasis ℝ E) k])
+        + ∑ k : Fin (Module.finrank ℝ E),
+            unitModel (I := I) (M := M) g₀ 4 D x
+              ![v 1,
+                cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)),
+                v 0, (Module.finBasis ℝ E) k])
+      - ∑ k : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 4 D x
+            ![v 0, v 1,
+              cometricLmodel (I := I) g₁ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)),
+              (Module.finBasis ℝ E) k] := by
+  rw [deTurckLieArm2PrincipalCoeff, appCc_sub_left_local, appCc_add_left_local,
+    unitModel_sub2_apply_local, unitModel_add2_apply_local,
+    deTurckLieTraceCoeff_appCc_eq, deTurckLieTraceCoeff_appCc_eq,
+    traceHessianCoeff_appCc_eq_local]
+  congr 1
+  · congr 1
+    · refine Finset.sum_congr rfl fun k _ => ?_
+      rw [ContinuousMultilinearMap.domDomCongr_apply]
+      exact congrArg (fun t : Fin 4 → E => unitModel (I := I) (M := M) g₀ 4 D x t)
+        (by funext i; fin_cases i <;> rfl)
+    · refine Finset.sum_congr rfl fun k _ => ?_
+      rw [ContinuousMultilinearMap.domDomCongr_apply]
+      exact congrArg (fun t : Fin 4 → E => unitModel (I := I) (M := M) g₀ 4 D x t)
+        (by funext i; fin_cases i <;> rfl)
+  · refine Finset.sum_congr rfl fun k _ => ?_
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    exact congrArg (fun t : Fin 4 → E => unitModel (I := I) (M := M) g₀ 4 D x t)
+      (by funext i; fin_cases i <;> rfl)
+
+
 end TensorSpectral
 end Parabolic
 end Analysis

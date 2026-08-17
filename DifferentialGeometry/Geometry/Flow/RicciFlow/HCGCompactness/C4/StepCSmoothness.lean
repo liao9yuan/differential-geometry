@@ -332,7 +332,6 @@ theorem implicitSol_contDiffAt
     change zp.1 = (invF ((0 : E), zp.2)).1
     rw [hzp]
 
-
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
     [T3Space M] in
 theorem chartCm_hasStrictFDerivAt

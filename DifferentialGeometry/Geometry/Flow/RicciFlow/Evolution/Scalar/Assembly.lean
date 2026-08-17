@@ -22,7 +22,6 @@ section TraceRoute
 
 variable {Idx : Type*} [Fintype Idx]
 
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

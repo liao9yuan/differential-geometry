@@ -216,7 +216,6 @@ lemma exists_gm_symm_pos
       ge_of_tendsto (hev x v v) (Filter.Eventually.of_forall (fun m => hcle (φ m) x v))
     exact lt_of_lt_of_le (mul_pos hc (gRef.pos x v hv)) hle
 
-
 omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in

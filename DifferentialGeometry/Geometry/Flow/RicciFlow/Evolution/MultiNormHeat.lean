@@ -55,7 +55,6 @@ def MultiLevelTimeDerivOn {r : ℕ}
       D.carrier
       (t : Real)
 
-
 def MultiNormSqDef {r : ℕ}
     (level : Real -> M -> (Fin r → Idx) → Real)
     (normSq : Real -> M -> Real) : Prop :=

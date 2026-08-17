@@ -11,7 +11,6 @@ open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 omit [DecidableEq Idx] in
 theorem covDerivStepComp_add {r : ℕ}
     (extA extB : (Fin r → Idx) → Idx → Real)
@@ -36,7 +35,6 @@ theorem covDerivStepComp_add {r : ℕ}
     refine Finset.sum_congr rfl fun p _ => by ring
   rw [hsum]
   ring
-
 
 omit [DecidableEq Idx] in
 theorem covDerivStepComp_smul {r : ℕ} (c : Real)

@@ -43,7 +43,6 @@ private theorem componentRS_eq_gen
     Tensor0SBundle.componentRS (I := I) basis T upper lower =
       Tensor0SBundle.componentRS_gen (I := I) basis T upper lower := rfl
 
-
 def localFrameOneOfInf
     {Idx : Type*} {u : Set M}
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -64,7 +63,6 @@ def MetricUniformEquivalentOn
         C⁻¹ * gRef.inner x v v <= h.inner x v v /\
           h.inner x v v <= C * gRef.inner x v v
 
-
 def MetricUniformEquivalentOnWindow
     (K : Set M) (β ψ : Real)
     (gRef : SmoothRiemannianMetric I M)
@@ -72,7 +70,6 @@ def MetricUniformEquivalentOnWindow
     (B : Real -> Real) : Prop :=
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     MetricUniformEquivalentOn (I := I) K gRef (gSeq i t) (B t)
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_le
@@ -97,7 +94,6 @@ theorem metricUniformEquivalentOn_of_le
         (hEq.2 x hx v).1
     · exact le_trans (hEq.2 x hx v).2
         (mul_le_mul_of_nonneg_right hCC' hgin_nonneg)
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_mono
@@ -207,7 +203,6 @@ def MetricCovDerivOrderBoundOnWindow
     (a : Nat) (C : Real) : Prop :=
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     MetricCovDerivOrderBoundOn (I := I) K a (gSeq i t) gRef C
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_mono
@@ -1295,7 +1290,6 @@ theorem metricCovDeriv_one_component_eq_metricCovAtBase
   unfold DifferentialGeometry.Geometry.Connection.metricCovAtBase lcMetricFamily
   ring
 
-
 omit [SigmaCompactSpace M] in
 theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
     {Idx : Type*} [Fintype Idx] {u : Set M}
@@ -2258,7 +2252,6 @@ theorem connDiffBasisSymm
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (basis a)) (basis b) := by
           simp [covH, covG, hX, hY]
-
 
 omit [SigmaCompactSpace M] in
 theorem connDiffCompSymm

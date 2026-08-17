@@ -10,7 +10,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1868,6 +1867,9 @@ theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGri
   exact riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ j 1 1 2
     (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) x
+
+alias rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le :=
+  riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
 
 theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)

@@ -400,7 +400,6 @@ noncomputable def solnRicField
     (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) (S.family.metric t))
 
-
 noncomputable def solnEvolField
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :

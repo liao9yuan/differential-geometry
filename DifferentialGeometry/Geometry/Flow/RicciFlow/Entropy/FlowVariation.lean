@@ -92,7 +92,6 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-
 theorem revTrace_eq
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}

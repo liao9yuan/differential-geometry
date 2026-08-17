@@ -3,7 +3,6 @@ import Mathlib.Tactic.Ring
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -76,7 +75,6 @@ theorem barrierDerivs
   · intro t
     exact hS.second t
 
-
 def SmallBarrierEps (epsilon : Real) : Prop :=
   0 < epsilon ∧ epsilon ≤ 1
 
@@ -122,7 +120,6 @@ theorem rawSym2_nonneg
       (rawSym2 (I := I) (M := M) A) x := by
   intro v
   simpa using hA v
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_bilin
@@ -184,7 +181,6 @@ theorem null_of_symm
     (rawSym2_bilin (I := I) (M := M) hbilin)
     (rawSym2_nonneg (I := I) (M := M) hA) v (by simpa using hv)
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem raw_quad_add_smul_eq
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -245,7 +241,6 @@ theorem psd_null_left_raw
       (mul_neg_of_neg_of_pos (neg_lt_zero.mpr hc_sq_pos) hq2_pos)
       hden_sq_pos
   exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem psd_null_right_raw
@@ -338,7 +333,6 @@ def TensorParabolicInequalityWithDriftOn
         tensorHeatWithDrift2QuadMetricAt (I := I) (G t) (X t)
             (nabla2S t x) (nablaS t x) v +
           N t (G t) (S t) x v v ≤ timeDeriv t x v)
-
 
 def TensorParabolicStrictInequalityWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)

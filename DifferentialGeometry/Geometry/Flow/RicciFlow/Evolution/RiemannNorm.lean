@@ -94,7 +94,6 @@ def raisedRm04DerivRHSInFrame
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x d s)
       (rm04Dt t x p q r s)
 
-
 def rm04NormDerivRHSInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -125,7 +124,6 @@ def Rm04NormRawDerivativeEquationOn
       D.carrier
       (t : Real)
 
-
 def roughLapRm04InnerInFrame
     (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
@@ -136,7 +134,6 @@ def roughLapRm04InnerInFrame
     ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
       roughLapRm04 t x a b c d *
         raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d
-
 
 def nablaRm04NormSqInFrame
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -162,7 +159,6 @@ def Rm04NormDerivativeSimplifiesInFrame
     rm04NormDerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
         (t : Real) x =
       2 * roughLapInner (t : Real) x + reaction (t : Real) x
-
 
 def Rm04NormTimeDerivativeComponentsOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

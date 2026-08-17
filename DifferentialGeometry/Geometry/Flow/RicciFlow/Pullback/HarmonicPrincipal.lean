@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
+import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyVolumeVariation
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjointPairing
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTowerRaisedEndoCovariantDerivativeBound
@@ -163,6 +164,7 @@ noncomputable def hmfPrincipal
       (unitZeroSec (I := I) (M := M) x))
 
 omit [CompactSpace M] [SigmaCompactSpace M] in
+omit [CompactSpace M] in
 theorem hmfPrincipal_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 1) (x : M) :
     hmfPrincipal (I := I) g₀ S x =
@@ -1596,6 +1598,7 @@ theorem hmfEdge_coercive
     (δ := (1 / 4 : ℝ)) (by norm_num) (by norm_num) (hop t ht) u
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] in
 theorem connAdd_lap_vert
     (g₀ : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n)
     (S : SmoothCcTensor g₀ 0 1) :

@@ -279,7 +279,6 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     covDChristoffelVariation] using
     (christoffel_curv_variation_algebra Γ A dA hΓsymm i k j m)
 
-
 omit [SigmaCompactSpace M] in
 theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

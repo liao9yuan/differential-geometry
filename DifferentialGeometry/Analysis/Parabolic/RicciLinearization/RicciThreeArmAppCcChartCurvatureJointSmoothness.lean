@@ -12,7 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
@@ -23,7 +23,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
 
 noncomputable section
 
@@ -59,7 +58,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 lemma appCc_smul_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -76,7 +74,6 @@ lemma appCc_smul_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.smul_comp]
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_smul_local (g₀ : SmoothRiemannianMetric I M)
@@ -86,7 +83,6 @@ lemma unitModel_smul_local (g₀ : SmoothRiemannianMetric I M)
   simp only [unitModel]
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -98,7 +94,6 @@ private lemma unitModel_add2_local (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
@@ -106,7 +101,6 @@ lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
       unitModel (I := I) (M := M) g₀ 2 S x v + unitModel (I := I) (M := M) g₀ 2 S' x v := by
   rw [unitModel_add2_local, ContinuousMultilinearMap.add_apply]
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma continuousBilinearMap_basis_expand
@@ -166,6 +160,15 @@ lemma continuousBilinearMap_basis_expand
     rw [Fin.prod_univ_two]; rfl
   rw [hbasis, hprod]
 
+omit [NeZero (Module.finrank ℝ E)] in
+lemma cmm_two_basis_expand
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
+    (v : Fin 2 → E) :
+    f v =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          f ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  continuousBilinearMap_basis_expand f v
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -185,7 +188,6 @@ def linearizedRicciThreeArmHcont (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
   ∀ x : M, ContinuousOn
     (fun t : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x))
     (realizedSmallSet (δ := δ) (δ' := δ'))
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in

@@ -19,6 +19,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
+open DifferentialGeometry.Integral.Connection
 
 theorem sqrt_sum_sq_add_le {ι : Type*} [Fintype ι] (a b : ι → Real) :
     Real.sqrt (∑ i, (a i + b i) ^ 2) ≤
@@ -142,7 +143,6 @@ theorem metricDerivNorm_triangle
     (sub_add_sub_cancel _ _ _).symm
   rw [htel]
   exact sqrtNormSq0S_add_le (I := I) gRef x (a + 2) _ _
-
 
 omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]

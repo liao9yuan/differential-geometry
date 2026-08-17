@@ -19,7 +19,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E]
-  [NormedSpace Real E] [FiniteDimensional Real E]
+[InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -30,8 +30,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace NetLimitData
 
-omit [Module.Finite ℝ E] in
-omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem unifHatIdOn
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -274,6 +273,7 @@ theorem unifHatIdOn
 
 omit [Module.Finite ℝ E] in
 omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem unifHatIdSelfOn
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

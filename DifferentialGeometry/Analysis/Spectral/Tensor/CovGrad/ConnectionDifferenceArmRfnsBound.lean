@@ -5,7 +5,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -163,6 +162,9 @@ theorem riemannianFiberNormSq_sharpFlatEndoCc_le_of_lt_one
         simp only [Fintype.card_fun, Fintype.card_fin, pow_one]
         rw [← hnE]
         ring
+
+abbrev rfns_sharpFlatEndoCc_le_of_lt_one :=
+  @riemannianFiberNormSq_sharpFlatEndoCc_le_of_lt_one
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -397,6 +399,9 @@ theorem riemannianFiberNormSq_raisedKoszul_le_of_lt_one
         rw [show (Real.sqrt ((n : ℝ) ^ 3) * ((1 + δ₀) * C₀)) ^ 2 * G ^ 2
             = Real.sqrt ((n : ℝ) ^ 3) ^ 2 * (((1 + δ₀) * C₀) ^ 2 * G ^ 2) from by ring]
         rw [hsq]
+
+alias rfns_raisedKoszul_le_of_lt_one :=
+  riemannianFiberNormSq_raisedKoszul_le_of_lt_one
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma fiberNormSqComponent_covGrad_raisedKoszul

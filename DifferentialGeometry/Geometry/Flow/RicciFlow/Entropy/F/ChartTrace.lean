@@ -4,7 +4,6 @@ open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -45,7 +44,6 @@ private theorem coordinateFrameAt_coeff_one_eq
     congr 1
   unfold IsLocalFrameOn.coeff
   rw [dif_pos hx, dif_pos hx, hbasis]
-
 
 def gInvFun
     (g : SmoothRiemannianMetric I M)

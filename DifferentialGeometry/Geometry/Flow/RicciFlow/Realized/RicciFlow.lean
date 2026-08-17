@@ -28,7 +28,6 @@ def MetricVariationEquation
   forall (t : Time) (x : M) (X Y : TangentSpace I x),
     metricTimeDerivative td G t x X Y = (-2 : Real) * Ric t x X Y
 
-
 theorem metric_dt_eq_neg_two_ricci_of_metricVariationEquation
     (td : TimeDerivativeData Real A Time)
     (G : MetricConnectionFamily (I := I) (M := M) Time)
@@ -90,7 +89,6 @@ def MetricVariationEquationOnRaw
       ((-2 : Real) * Ric (t : Real) x X Y)
       D.carrier
       (t : Real)
-
 
 structure RealizedRicciFlowCandidateOn (D : RealTimeInterval) where
   family : MetricConnectionFamilyOn (I := I) (M := M) D

@@ -149,6 +149,7 @@ structure IteratedRmTowerOn
     (w wLap : ℕ → Real → M → Real) : Prop where
   wDef : ∀ (k : ℕ) (t : Real) (x : M),
     w k t x = compNormSqMulti (level k t x)
+
   heatEq : ∀ (k : ℕ)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x : M),
@@ -157,6 +158,7 @@ structure IteratedRmTowerOn
         (-2 * w (k + 1) (t : Real) x +
           towerReactionMulti (level · (t : Real) x) (star · (t : Real) x) k))
       D.carrier (t : Real)
+
   starBound : ∀ (k : ℕ) (t : Real) (x : M),
     ∀ j ∈ Finset.range (k + 1), ∀ m : Fin (4 + k) → Idx,
       |star k t x j m| ≤

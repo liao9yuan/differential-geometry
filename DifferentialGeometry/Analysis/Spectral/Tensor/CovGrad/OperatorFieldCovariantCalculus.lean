@@ -105,6 +105,10 @@ def operatorFieldApply (g : SmoothRiemannianMetric I M) (r s : ℕ)
       contMDiff_toFun := appCcFib_contMDiff (I := I) (M := M) g r s Φ W }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+abbrev appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) : SmoothCcTensor g 0 s :=
+  operatorFieldApply g r s Φ W
+
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
@@ -599,5 +603,71 @@ theorem covGrad_operatorFieldApply_eq (g : SmoothRiemannianMetric I M) (r s : �
 end Spectral
 end Analysis
 end DifferentialGeometry
+
+namespace DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.TensorMultilinear
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M]
+
+set_option backward.isDefEq.respectTransparency false in
+def slotExtendPointwise (r s : ℕ) (x : M)
+    (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
+    Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace (r + 1) I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D =>
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
+          (A.comp ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) D))
+      map_add' := fun D₁ D₂ => by
+        rw [map_add (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x),
+          ContinuousLinearMap.comp_add, map_add
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
+      map_smul' := fun c D => by
+        rw [map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x),
+          ContinuousLinearMap.comp_smul, map_smul
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
+        rfl }
+
+abbrev slotExtendFib (r s : ℕ) (x : M)
+    (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
+    Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
+  slotExtendPointwise r s x A
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp] lemma slotExtendFib_apply (r s : ℕ) (x : M)
+    (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x)
+    (D : Tensor0SSpace (r + 1) I x) :
+    slotExtendPointwise (I := I) (M := M) r s x A D =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
+        (A.comp ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) D)) := by
+  rw [slotExtendPointwise, LinearMap.coe_toContinuousLinearMap']
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+lemma slotExtendFib_apply_eval (r s : ℕ) (x : M)
+    (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x)
+    (D : Tensor0SSpace (r + 1) I x) (v0 : E) (vs : Fin s → E) :
+    Tensor0SSpace.toModel
+        (slotExtendPointwise (I := I) (M := M) r s x A D) (Fin.cons v0 vs) =
+      Tensor0SSpace.toModel
+        (A ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) D v0)) vs := by
+  rw [← tensor0S_curry_apply_eval (I := I) (M := M) (n := s)
+    (slotExtendPointwise (I := I) (M := M) r s x A D) v0 vs]
+  have hcurry : tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+      (slotExtendPointwise (I := I) (M := M) r s x A D) =
+      A.comp ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) D) := by
+    rw [slotExtendFib_apply, ContinuousLinearEquiv.apply_symm_apply]
+  rw [hcurry]
+  rfl
+
+alias covGrad_appCc_eq :=
+  DifferentialGeometry.Analysis.Spectral.covGrad_operatorFieldApply_eq
+
+end DifferentialGeometry.Integral.Connection
 
 end

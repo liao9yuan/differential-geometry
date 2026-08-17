@@ -14,9 +14,7 @@ open scoped BigOperators
 variable {M : Type*}
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 abbrev MatrixComp (M : Type*) (Idx : Type*) := Real -> M -> Idx -> Idx -> Real
-
 
 abbrev FourComp (M : Type*) (Idx : Type*) :=
   Real -> M -> Idx -> Idx -> Idx -> Idx -> Real
@@ -52,7 +50,6 @@ def RicciEndomorphismCompatibleInFrame
     (∑ i : Idx, ∑ l : Idx, ∑ k : Idx,
         v i * w l * ricciOneUp t x l k * metricComp t x i k) =
       (∑ i : Idx, ∑ j : Idx, v i * w j * Ric t x i j)
-
 
 def movingFrameGramInFrame
     (metricComp frameComp : MatrixComp M Idx)
@@ -174,7 +171,6 @@ private theorem gramMetric_eq_neg_two_ric
   classical
   simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
-
 omit [DecidableEq Idx] in
 theorem evolvingFrameGram_constant_of_ricciFlow
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -251,7 +247,6 @@ theorem evolvingFrameGram_constant_of_ricciFlow
       _ = 0 := by ring
   simpa [movingFrameGramInFrame, τ, hzero] using hsum
 
-
 def MovingFrameOrthonormalInFrame
     (metricComp frameComp : MatrixComp M Idx)
     (t : Real) (x : M) : Prop :=
@@ -276,12 +271,10 @@ def BundleIsomorphismODEInFrameOn
     (iota ricciOneUp : Real -> M -> Idx -> Idx -> Real) : Prop :=
   FrameRicciODEInFrameOn (D := D) iota ricciOneUp
 
-
 def uhlenbeckPullbackMetricCompInFrame
     (metricComp iota : Real -> M -> Idx -> Idx -> Real)
     (t : Real) (x : M) (a b : Idx) : Real :=
   movingFrameGramInFrame metricComp iota t x a b
-
 
 def UhlenbeckPullbackMetricComponents
     (metricComp iota hComp : MatrixComp M Idx) : Prop :=
@@ -310,14 +303,12 @@ def uhlenbeckPullbackRmInFrame
     iota t x a i * iota t x b j * iota t x c k * iota t x d l *
       Rm04 t x i j k l
 
-
 def UhlenbeckPullbackRmComponents
     (iota : MatrixComp M Idx)
     (Rm04 pulledRm : FourComp M Idx) : Prop :=
   forall (t : Real) (x : M) (a b c d : Idx),
     pulledRm t x a b c d =
       uhlenbeckPullbackRmInFrame iota Rm04 t x a b c d
-
 
 def uhlenbeckBTensorInFrame
     (hInv : MatrixComp M Idx)
@@ -326,7 +317,6 @@ def uhlenbeckBTensorInFrame
   ∑ e : Idx, ∑ g : Idx, ∑ f : Idx, ∑ r : Idx,
     hInv t x e g * hInv t x f r *
       pulledRm t x a e b f * pulledRm t x c g d r
-
 
 def UhlenbeckBTensorComponents
     (hInv : MatrixComp M Idx)
@@ -350,7 +340,6 @@ def UhlenbeckLaplacianPullbackComponents
         iota t x a i * iota t x b j * iota t x c k * iota t x d l *
           roughLapRm04 t x i j k l
 
-
 def riemann04RicciDriftInFrame
     (ricciOneUp : MatrixComp M Idx)
     (Rm04 : FourComp M Idx)
@@ -359,7 +348,6 @@ def riemann04RicciDriftInFrame
     (∑ p : Idx, ricciOneUp t x j p * Rm04 t x i p k l) +
     (∑ p : Idx, ricciOneUp t x k p * Rm04 t x i j p l) +
     (∑ p : Idx, ricciOneUp t x l p * Rm04 t x i j k p)
-
 
 private def iotaDotInFrame
     (iota ricciOneUp : MatrixComp M Idx)
@@ -400,7 +388,6 @@ private theorem sum4_derivProduct5RHS_eq
         A i * B j * C k * D l * DZ i j k l) := by
   classical
   simp [derivProduct5RHS_eq, Finset.sum_add_distrib, add_assoc]
-
 
 private def uhlenbeckPullbackRmDerivRHSInFrame
     (iota : MatrixComp M Idx)
@@ -689,7 +676,6 @@ private theorem iotaDrift_eq_pullbackDrift
             Finset.sum_add_distrib, Finset.mul_sum, mul_add, add_assoc,
             mul_left_comm, mul_comm]
 
-
 def Riemann04BTensorWithRicciDriftEvolutionInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (Rm04 roughLapRm04 B : FourComp M Idx)
@@ -704,7 +690,6 @@ def Riemann04BTensorWithRicciDriftEvolutionInFrameOn
         riemann04RicciDriftInFrame ricciOneUp Rm04 (t : Real) x i j k l)
       D.carrier
       (t : Real)
-
 
 def uhlenbeckCurvatureEvolutionRHSInFrame
     (roughLapD B : FourComp M Idx)
@@ -949,7 +934,6 @@ private theorem pullbackDerivRHS_eq_evolutionRHS
           rw [hL, hQ]
           simp [uhlenbeckCurvatureEvolutionRHSInFrame]
 
-
 omit [DecidableEq Idx] in
 theorem uhlenbeckCurvatureEvolutionInFrameOn_of_ricciFlow
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -999,14 +983,12 @@ variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 abbrev solutionMetricCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     MatrixComp M Idx :=
   metricCompInFrame (I := I) S frame
-
 
 abbrev solutionRicciCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1022,7 +1004,6 @@ abbrev solutionRicciOneUpInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     MatrixComp M Idx :=
   ricciOneUpCompInFrame (I := I) S gInv frame
-
 
 def solutionRm04CompInFrame
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
@@ -1044,7 +1025,6 @@ theorem metricCompRicciFlowInFrameOn_of_solution
       (solutionRicciCompInFrame (I := I) S frame) := by
   intro t x i j
   exact metricCompInFrame_hasDerivWithinAt (I := I) S hS frame t x i j
-
 
 abbrev BundleIsomorphismODEInSolutionFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.Operators
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -227,7 +226,6 @@ theorem tensor_wmp_of_barrier_limit
           ht0 ht0T hreg hparabolic)
         hnull hinit_t0)
 
-
 omit [IsManifold I 2 M] in
 theorem wmp_of_cert
     {G : Real -> SmoothRiemannianMetric I M}
@@ -321,7 +319,6 @@ structure TensorWMPInput
   hmc : ∀ t : Real,
     DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (cov t) (G t)
   spatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S
-
 
 theorem tensor_wmp
     [I.Boundaryless] [T2Space M]

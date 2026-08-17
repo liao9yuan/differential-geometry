@@ -737,8 +737,7 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
         (8 * KcL i + 8 * diagonalGridGrowthFactor
           (E := E) i * cPer * KcL i + 8 * CLT i) * W := by ring
 
-theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_topSeparated_le
-    (g₀ g_bg : SmoothRiemannianMetric I M)
+theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_topSeparated_le (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -932,6 +931,28 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
             _ = (fr * (fr * CX l)) * antidiagonalTupleGridPartialSum b (l + 3) := by ring)))
       (le_of_eq (by rw [hCfield_def, hW_def])))) ?_
   exact le_of_eq (by ring)
+
+theorem rfns_iCG_dLaField_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
+          Ktop * appCcGdiag (E := E) i * appCcGdiag (E := E) i *
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) +
+          Kc i * dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 3) := by
+  simpa only [deTurckLieDLaCoeffField, appCcGdiag, dLaGridWin] using
+    riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_topSeparated_le
+      (I := I) (M := M) g₀ g_bg hδ₀
 
 end DLaGridBrick
 

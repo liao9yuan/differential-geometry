@@ -23,7 +23,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -90,6 +89,9 @@ def armPairTraceSlotPerm6 : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![1, 3, 4, 5, 0, 2] : Fin 6 → Fin 6) i,
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
+
+abbrev lieCovSigma : Equiv.Perm (Fin 6) :=
+  armPairTraceSlotPerm6
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -478,6 +480,9 @@ def armPairTraceOpCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 2)
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
 
+abbrev lieCovPair (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 6 2 :=
+  armPairTraceOpCc (I := I) (M := M) g₀ g₁
+
 set_option backward.isDefEq.respectTransparency false in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma bdPairTraceOp_apply_toModel (g₀ gm : SmoothRiemannianMetric I M)
@@ -805,6 +810,13 @@ lemma bdSlotInsertZero_fullRaisedRev_eq_omRecover
   rw [cotangentToDual_g0FlatCLM]
   rw [g₁.symm x w (inverseMetricSharpFib (I := I) g₀ x om)]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+theorem fullRev0_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
+    slotInsertEndoCc (I := I) (M := M) g₀ 0
+        (fullRaisedEndoField (I := I) (M := M) g₁ g₀) =
+      omRecoverEndoCc (I := I) g₀ g₁ :=
+  bdSlotInsertZero_fullRaisedRev_eq_omRecover (I := I) (M := M) g₀ g₁
+
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (metricComparisonEndo gInvRaisedEndo_apply
   inverseMetricSharpFib_g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM) in
 set_option backward.isDefEq.respectTransparency false in
@@ -931,6 +943,18 @@ private lemma bdOmRecover_eq_idEndo_add_raise
       ccTensorBilinSymm (I := I) g₀ T x (inverseMetricSharpFib (I := I) g₀ x om) w from by
     rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
     ring]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+theorem omRecover_add
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
+    omRecoverEndoCc (I := I) g₀ g₁ =
+      slotInsertEndoCc (I := I) (M := M) g₀ 0
+          (fullRaisedEndoField (I := I) (M := M) g₀ g₀) +
+        cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+          (symmS (I := I) (M := M) g₀ T) := by
+  exact bdOmRecover_eq_idEndo_add_raise (I := I) (M := M) g₀ g₁ T htie
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma bdRfns_iCG_symmS_le (g₀ : SmoothRiemannianMetric I M)
@@ -1180,16 +1204,18 @@ def connDiffEndo (g₀ gc : SmoothRiemannianMetric I M) :
       (fun x : M => PDE.DeTurck.connDiff (I := I) gc g₀ x)
       (fun V0 W => PDE.DeTurck.connDiff_contMDiff (I := I) gc g₀ V0.contMDiff W.contMDiff)⟩
 
+abbrev bdConnPair := @connDiffEndo
+
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
-private lemma bdConnPair_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
+lemma bdConnPair_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
     connDiffEndo (I := I) (M := M) g₀ gc x = PDE.DeTurck.connDiff (I := I) gc g₀ x := rfl
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
-private lemma bdConnDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannianMetric I M) :
+lemma bdConnDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       armSlotEndoCc (I := I) (M := M) g₀ 0 (connDiffEndo (I := I) (M := M) g₀ g₁) := by
   apply SmoothCcTensor.ext
@@ -1586,6 +1612,116 @@ lemma bdArmSlot2_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x :
     (armSlotEndoCc (I := I) (M := M) g₀ 0 (connDiffEndo (I := I) (M := M) g₀ g₁)) j x) ?_
   refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
   rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+private lemma bdArmSlot_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
+      (fun x : M =>
+        TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))) :
+    armSlotEndoCc (I := I) (M := M) g₀ s (A - B) =
+      armSlotEndoCc (I := I) (M := M) g₀ s A -
+        armSlotEndoCc (I := I) (M := M) g₀ s B := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  change armSlotFib (I := I) (M := M) s x ((A - B) x) D =
+    armSlotFib (I := I) (M := M) s x (A x) D -
+      armSlotFib (I := I) (M := M) s x (B x) D
+  rw [show (A - B) x = A x - B x by
+    rw [ContMDiffSection.coe_sub]
+    rfl]
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [armSlotFib_apply_eval]
+  change _ =
+    Tensor0SSpace.toModel (armSlotFib (I := I) (M := M) s x (A x) D) v -
+      Tensor0SSpace.toModel (armSlotFib (I := I) (M := M) s x (B x) D) v
+  rw [armSlotFib_apply_eval, armSlotFib_apply_eval]
+  rw [ContinuousLinearMap.sub_apply, slotInsertEndoFib_sub_left,
+    ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+
+private lemma bdArmSlot2_sub_le
+    (g₀ : SmoothRiemannianMetric I M)
+    (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
+      (fun x : M =>
+        TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
+    (S : SmoothCcTensor g₀ 1 2)
+    (hAS : armSlotEndoCc (I := I) (M := M) g₀ 0 A = S)
+    (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (armSlotEndoCc (I := I) (M := M) g₀ 2 A)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j S).toSection x) := by
+  rw [bdArmSlotEndoCc_two_eq_reindex_slotExtend (I := I) (M := M) g₀ A]
+  rw [rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+    (I := I) (M := M) g₀ 3 4
+    (Equiv.swap (0 : Fin 3) 1) armSlotEndoCcReindexPerm4
+    (slotExtend (I := I) (M := M) g₀ 2 3
+      (armSlotEndoCc (I := I) (M := M) g₀ 1 A)) j x]
+  refine le_trans (rfns_iteratedCovGrad_slotExtend_le
+    (I := I) (M := M) g₀ 2 3
+    (armSlotEndoCc (I := I) (M := M) g₀ 1 A) j x) ?_
+  rw [pow_two, mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+  rw [bdArmSlotEndoCc_one_eq_reindex_slotExtend (I := I) (M := M) g₀ A]
+  rw [rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+    (I := I) (M := M) g₀ 2 3
+    (Equiv.swap (0 : Fin 2) 1) (finRotate 3).symm
+    (slotExtend (I := I) (M := M) g₀ 1 2
+      (armSlotEndoCc (I := I) (M := M) g₀ 0 A)) j x]
+  refine le_trans (rfns_iteratedCovGrad_slotExtend_le
+    (I := I) (M := M) g₀ 1 2
+    (armSlotEndoCc (I := I) (M := M) g₀ 0 A) j x) ?_
+  refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
+  rw [hAS]
+
+def lieCovArm2 (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 4 :=
+  armSlotEndoCc (I := I) (M := M) g₀ 2
+    (connDiffEndo (I := I) (M := M) g₀ g₁)
+
+theorem lieCovArm2_l2 (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+  simpa only [lieCovArm2] using
+    bdArmSlot2_rfns_le (I := I) (M := M) g₀ g₁ j x
+
+theorem lieCovArm2_sub_l2
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (lieCovArm2 (I := I) (M := M) g₀ g₁ -
+            lieCovArm2 (I := I) (M := M) g₀ g₂)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffSection (I := I) g₁ g₀ -
+              connDiffSection (I := I) g₂ g₀)).toSection x) := by
+  let A := connDiffEndo (I := I) (M := M) g₀ g₁ -
+    connDiffEndo (I := I) (M := M) g₀ g₂
+  have hA :
+      armSlotEndoCc (I := I) (M := M) g₀ 0 A =
+        connDiffSection (I := I) g₁ g₀ - connDiffSection (I := I) g₂ g₀ := by
+    dsimp only [A]
+    rw [bdArmSlot_sub]
+    rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁,
+      ← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₂]
+  rw [show lieCovArm2 (I := I) (M := M) g₀ g₁ -
+      lieCovArm2 (I := I) (M := M) g₀ g₂ =
+        armSlotEndoCc (I := I) (M := M) g₀ 2 A by
+    dsimp only [A, lieCovArm2]
+    rw [bdArmSlot_sub]]
+  exact bdArmSlot2_sub_le (I := I) (M := M) g₀ A _ hA j x
 
 private noncomputable def bdKernelCLM (gA gB : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -3066,7 +3202,7 @@ private theorem bdXd_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
   rw [hswap]
   linarith [hhalf]
 
-private theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
+theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -3290,7 +3426,6 @@ private theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRieman
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
-
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -3342,7 +3477,6 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelo
     have hK_nn : 0 ≤ C i * ∑ k ∈ Finset.range (i + 2), Kg k :=
       mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k)
     nlinarith [hwin_nn, hK_nn]
-
 
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -3432,6 +3566,115 @@ def deTurckLieCovDerivRefoldPairTraceFamily (g₀ : SmoothRiemannianMetric I M)
               (((q i).trans (Equiv.swap (0 : Fin 4) 1)).trans
                 (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3))
               (iteratedCovGrad (I := I) g₀ 0 2 2 T))))))
+
+def lieBgPerm : Fin 3 → Equiv.Perm (Fin 4) :=
+  ![bdSigma2, bdSigma3, bdSigma4]
+
+def lieBgLow (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+  (-1 : ℝ) • bdFixLoweredCc (I := I) (M := M) g₀ g_bg g₀
+    + domDomCongrSection (I := I) g₀ (lieBgPerm 0)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    - domDomCongrSection (I := I) g₀ (lieBgPerm 1)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    - domDomCongrSection (I := I) g₀ (lieBgPerm 2)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    - domDomCongrSection (I := I) g₀ (lieBgPerm 0)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g₁))
+    + domDomCongrSection (I := I) g₀ (lieBgPerm 1)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    + domDomCongrSection (I := I) g₀ (lieBgPerm 2)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private theorem lieBg_dom_sub
+    (g : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
+    domDomCongrSection (I := I) g σ (A - B) =
+      domDomCongrSection (I := I) g σ A -
+        domDomCongrSection (I := I) g σ B := by
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g
+  intro x
+  have hsub : ∀ (P Q : SmoothCcTensor g 0 s),
+      unitModel (I := I) (M := M) g s (P - Q) x =
+        unitModel (I := I) (M := M) g s P x -
+          unitModel (I := I) (M := M) g s Q x := by
+    intro P Q
+    simp only [unitModel]
+    rw [SmoothCcTensor.toSection_sub]
+    rfl
+  rw [domDomCongrSection_unitModel, hsub A B]
+  rw [hsub
+    (domDomCongrSection (I := I) g σ A)
+    (domDomCongrSection (I := I) g σ B)]
+  rw [domDomCongrSection_unitModel, domDomCongrSection_unitModel]
+  apply ContinuousMultilinearMap.ext
+  intro v
+  simp only [ContinuousMultilinearMap.sub_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+theorem lieBgLow_sub
+    (g₀ gT gU g_bg : SmoothRiemannianMetric I M) :
+    lieBgLow (I := I) (M := M) g₀ gT g_bg -
+        lieBgLow (I := I) (M := M) g₀ gU g_bg =
+      (-1 : ℝ) • domDomCongrSection (I := I) g₀ (lieBgPerm 0)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ gT -
+            connDiffLoweredCc (I := I) g₀ gU))
+      + domDomCongrSection (I := I) g₀ (lieBgPerm 1)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ gT -
+            lieCovArm2 (I := I) (M := M) g₀ gU)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+      + domDomCongrSection (I := I) g₀ (lieBgPerm 2)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ gT -
+            lieCovArm2 (I := I) (M := M) g₀ gU)
+          (connDiffLoweredCc (I := I) g₀ g_bg)) := by
+  rw [lieBgLow, lieBgLow]
+  simp only [appCcRS_sub_right, appCcRS_sub_left, lieBg_dom_sub]
+  module
+
+def lieBgCore (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+  let half := appCcRS (I := I) (M := M) g₀ 0 4 4
+    (slotInsertEndoCc (I := I) (M := M) g₀ 3
+      (fullRaisedEndoField (I := I) (M := M) g₁ g₀))
+    (lieBgLow (I := I) (M := M) g₀ g₁ g_bg)
+  domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1) half + half
+
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem lieBgCore_eq_canonical
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    lieBgCore (I := I) (M := M) g₀ g₁ g_bg =
+      deTurckArmCoeffDiffCc (I := I) (M := M) g₀ g₁ g_bg := by
+  rfl
+
+theorem dlaBg_eq
+    (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
+    deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg -
+        deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g₀ =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (lieCovPair (I := I) (M := M) g₀ g₁)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (lieBgCore (I := I) (M := M) g₀ g₁ g_bg))) := by
+  rw [lieCovPair, lieCovSigma, lieBgCore_eq_canonical]
+  exact bdCovDerivArmDiff_eq_pairTrace (I := I) (M := M) g₀ g_bg g₁
+
+abbrev dlaBg_grid := @bdCovDerivArmDiff_pointwise_gridWindow
 
 end TensorSpectral
 end Parabolic

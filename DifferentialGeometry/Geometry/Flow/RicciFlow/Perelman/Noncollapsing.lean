@@ -24,6 +24,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 variable [IsManifold I 1 M]
 variable [T2Space M] [SigmaCompactSpace M]
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 structure FlowMetricBall (S : SolutionOn (I := I) (M := M) D)
     (time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) where
@@ -35,20 +36,18 @@ namespace FlowMetricBall
 
 variable {S : SolutionOn (I := I) (M := M) D}
 variable {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
+variable {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D}
 
 def setAt (B : FlowMetricBall S time) (t : Real) : Set M :=
   {x : M | DifferentialGeometry.riemannianEDistOf
     (I := I) (S.base.metric t) B.center x < ENNReal.ofReal B.radius}
 
-
 def set (B : FlowMetricBall S time) : Set M :=
   B.setAt (time : Real)
-
 
 def volume (B : FlowMetricBall S time) : ℝ≥0∞ :=
   DifferentialGeometry.Integral.Measure.volumeMeasureOn
     (I := I) (M := M) S.family time B.set
-
 
 def rmNormSq (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) : Real :=
   Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x)
@@ -62,10 +61,8 @@ def IsKappaNoncollapsed (kappa : Real) (B : FlowMetricBall S time) : Prop :=
   0 < kappa ∧
     ENNReal.ofReal kappa * ENNReal.ofReal B.radius ^ Module.finrank Real E ≤ B.volume
 
-
 def Nested (small large : FlowMetricBall S time) : Prop :=
   small.set ⊆ large.set
-
 
 theorem volume_mono {small large : FlowMetricBall S time} (h : small.Nested large) :
     small.volume ≤ large.volume := by

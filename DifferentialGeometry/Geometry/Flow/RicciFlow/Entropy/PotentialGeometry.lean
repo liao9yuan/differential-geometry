@@ -57,7 +57,6 @@ theorem potential_grad
   congr 1
   ring
 
-
 theorem potential_grad_sq
     (g : SmoothRiemannianMetric I M) (n : Nat) {tau : Real}
     {u : M -> Real} (hu : ContMDiff I 𝓘(Real, Real) ∞ u)

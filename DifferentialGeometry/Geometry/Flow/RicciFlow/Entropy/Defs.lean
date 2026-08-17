@@ -19,10 +19,8 @@ variable {M : Type*}
 def perelmanDensityPrefactor (n : Nat) (tau : Real) : Real :=
   Real.rpow (4 * Real.pi * tau) (-(n : Real) / 2)
 
-
 def perelmanDensity (n : Nat) (tau : Real) (potential : M -> Real) : M -> Real :=
   fun x => perelmanDensityPrefactor n tau * Real.exp (-(potential x))
-
 
 def perelmanWeightedMeasure [MeasurableSpace M] (mu : Measure M) (n : Nat)
     (tau : Real) (potential : M -> Real) : Measure M :=
@@ -37,7 +35,6 @@ def wFunctional [MeasurableSpace M] (mu : Measure M) (n : Nat) (tau : Real)
     (scalarCurvature gradPotentialNormSq potential : M -> Real) : Real :=
   ∫ x, wEntropyBracket n tau scalarCurvature gradPotentialNormSq potential x
     ∂(perelmanWeightedMeasure mu n tau potential)
-
 
 theorem wFunctional_eq_integral [MeasurableSpace M] (mu : Measure M) (n : Nat)
     (tau : Real) (scalarCurvature gradPotentialNormSq potential : M -> Real) :

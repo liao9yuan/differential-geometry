@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.PointwiseDeriv
 open DifferentialGeometry.Geometry.Curvature
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

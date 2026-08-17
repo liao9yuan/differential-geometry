@@ -45,7 +45,6 @@ def ConnectionVariationPairingEquationInFrameOn
       D.carrier
       (t : Real)
 
-
 def ConnectionVariationPairingEquationInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

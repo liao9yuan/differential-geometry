@@ -124,7 +124,7 @@ theorem exists_sobolev_pointwise_bound_zero_order (g₀ : SmoothRiemannianMetric
             (Csob * R) ^ 2 := by
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) (E := E) g₀ a ha_super
   refine ⟨Csob, hCsob_nn, ?_⟩
   intro T R hR hball x
   have hball0 : ∀ j : ℕ, j ≤ a + 2 →
@@ -174,7 +174,7 @@ theorem exists_sobolev_pointwise_bound_first_order (g₀ : SmoothRiemannianMetri
             (Csob * R) ^ 2 := by
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) (E := E) g₀ a ha_super
   refine ⟨Csob, hCsob_nn, ?_⟩
   intro T R hR hball x
   have hball0 : ∀ j : ℕ, j ≤ a + 2 →

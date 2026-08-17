@@ -125,7 +125,6 @@ theorem mfderiv_symm_apply
   rw [h2] at hli
   exact hli.symm
 
-
 def solutionOn_pullback [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := N) D) (Φ : M ≃ₘ⟮I, I⟯ N) :
@@ -475,7 +474,6 @@ theorem isSolutionOn_pullback
         SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
     exact DifferentialGeometry.Geometry.Operator.gradientFun_mdiffAt (I := I)
       ((solutionOn_pullback (I := I) S Φ).family.metric t) hsmooth x
-
 
 end RicciFlow
 end PDE

@@ -44,7 +44,6 @@ def SolSwapData
       (fun r y => (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) r) p') y
         (fun a : Fin (p' + 2) => V a y))
 
-
 structure SolCovData
     (β ψ t0 : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -70,7 +69,6 @@ structure SolCovData
           metricCovDerivNorm (I := I) r (gSeq i t0) gRef x <= initC r) /\
         (forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius)
 
-
 structure SolLipData
     (K : Set M) (β ψ : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -94,7 +92,6 @@ structure SolLipData
         0 <= CN /\
         MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a CN
 
-
 structure SolLip0Data
     (K : Set M) (beta psiT : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -113,7 +110,6 @@ structure SolLip0Data
       Real.sqrt
         (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x 2
           (ricCovTower (I := I) (gSeq i t) (gSeq i t) 0 x)) <= KShi0
-
 
 def SolLowData
     (beta psiT : Real)
@@ -140,7 +136,6 @@ inductive SolWindowData : Type _ where
       (Hlip : SolLipData (I := I) K beta psiT p gSeq gRef D S)
       (hlow : SolLowData (I := I) beta psiT gSeq gRef)
 
-
 inductive WindowMetricPreconvConclusion : Type _ where
   | intro
       (K : Set M) (beta psiT : Real) (p : Nat)
@@ -158,7 +153,6 @@ private lemma metricTensorField_eq_metricTensor0S
       metricTensor0S (I := I) g x := by
   ext v
   rw [Tensor0SBundle.metricTensorField_apply, metricTensor0S_apply]
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
@@ -211,7 +205,6 @@ theorem covZeroBdd
     rw [metricTensorField_eq_metricTensor0S]
   rw [hcov]
   exact le_trans hcomp (by rw [hself])
-
 
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
@@ -316,7 +309,6 @@ theorem hgLip0Sol
               exact mul_le_mul_of_nonneg_left
                 (mul_le_mul_of_nonneg_left hshi (Real.sqrt_nonneg _)) (by norm_num))
     s hs t ht x hx
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -437,7 +429,6 @@ theorem winGInfOfSol
   exact windowGInfOut (E := E) (H := H) (I := I) (M := M)
     hne K hK beta psiT p gSeq gRef e he hdense
     L hL hgLip (covBddAllSol (I := I) hS hmet hreg Hcov) hlow'
-
 
 noncomputable def winGInfOfData (hne : Nonempty M)
     (W : SolWindowData (I := I) (M := M)) :

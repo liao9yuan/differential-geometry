@@ -106,6 +106,20 @@ def edgeQuadArm (g g1 g_bg : SmoothRiemannianMetric I M)
     (edgeQuad0 (I := I) (M := M) g g1 g_bg)
     (edgeQuad1 (I := I) (M := M) g g1 g_bg) W
 
+theorem edgeLow0_split
+    (g g1 g_bg : SmoothRiemannianMetric I M) :
+    let A0 :=
+      (-2 : Real) •
+          linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g g1 +
+        (deTurckLieCoeffField (I := I) (M := M) g g1 g_bg +
+          lieCorr0Field (I := I) (M := M) g g1 g_bg)
+    A0 + phiMetCurvCoeff (I := I) g g_bg g1 =
+      edgeCarry0 (I := I) (M := M) g g_bg +
+        edgeQuad0 (I := I) (M := M) g g1 g_bg := by
+  dsimp only
+  simp only [edgeCarry0, edgeQuad0]
+  abel
+
 theorem edgeTop_split
     (g g_bg g1 : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) :

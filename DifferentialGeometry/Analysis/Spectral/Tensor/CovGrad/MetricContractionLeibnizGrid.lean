@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
-
 noncomputable section
 
 
@@ -29,7 +28,6 @@ variable [CompleteSpace E]
 
 section RankCast
 
-
 omit [BoundarylessManifold I M] [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem covGrad_heq_congr_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
@@ -49,7 +47,6 @@ private theorem iteratedCovGrad_covGrad_comm_heq_db (g : SmoothRiemannianMetric 
       rw [iteratedCovGrad_succ (g := g) (r := r) (s := s + 1) (j := k) (covGrad g r s X)]
       rw [iteratedCovGrad_succ (g := g) (r := r) (s := s) (j := k + 1) X]
       exact covGrad_heq_congr_db g r (by omega : (s + 1) + k = s + (k + 1)) ih
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
@@ -75,6 +72,9 @@ def castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h :
     (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ W
 
+abbrev castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
+  castCcTensorRank g r h W
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -478,7 +478,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
     ‖castCcTensorRank g r h W‖ = ‖W‖ := by
   subst h
   rfl
-
 
 end DiffBilinOp
 

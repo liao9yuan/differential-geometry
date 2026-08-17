@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
-
 noncomputable section
 
 open Bundle

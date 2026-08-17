@@ -11,14 +11,12 @@ open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 def compL2Sq {r : ℕ} (T : (Fin r → Idx) → Real) : Real :=
   ∑ idx : Fin r → Idx, (T idx) ^ 2
 
 omit [DecidableEq Idx] in
 theorem compL2Sq_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2Sq T :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
-
 
 omit [DecidableEq Idx] in
 private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
@@ -35,7 +33,6 @@ private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
     (Fintype.sum_prod_type (fun gc : (Fin p → Idx) × Idx => F (Fin.snoc gc.1 gc.2))).symm]
   exact Fintype.sum_equiv e F (fun gc => F (Fin.snoc gc.1 gc.2))
     (fun f => by simp only [e, Equiv.coe_fn_mk, Fin.snoc_init_self])
-
 
 omit [DecidableEq Idx] in
 private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real) :
@@ -95,7 +92,6 @@ theorem compL2Sq_contrTail_le {p q : ℕ}
           rw [compL2Sq, compL2Sq, sum_snoc_split (F := fun f => A f ^ 2),
             sum_snoc_split (F := fun f => B f ^ 2)]
 
-
 def compL2 {r : ℕ} (T : (Fin r → Idx) → Real) : Real := Real.sqrt (compL2Sq T)
 
 omit [DecidableEq Idx] in
@@ -120,12 +116,10 @@ theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin
     simp [Equiv.arrowCongr_apply, Equiv.symm_symm]
   rw [hfun]
 
-
 omit [DecidableEq Idx] in
 theorem compL2_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
     compL2 (fun idx : Fin r' → Idx => T (fun i => idx (e i))) = compL2 T := by
   rw [compL2, compL2, compL2Sq_comp_equiv]
-
 
 omit [DecidableEq Idx] in
 theorem compL2_contrTail_le {p q : ℕ}
@@ -133,7 +127,6 @@ theorem compL2_contrTail_le {p q : ℕ}
     compL2 (contrTail A B) ≤ compL2 A * compL2 B := by
   rw [compL2, compL2, compL2, ← Real.sqrt_mul (compL2Sq_nonneg A)]
   exact Real.sqrt_le_sqrt (compL2Sq_contrTail_le A B)
-
 
 omit [DecidableEq Idx] in
 theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
@@ -164,7 +157,6 @@ theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     _ = compL2 T + compL2 U :=
           Real.sqrt_sq (add_nonneg (compL2_nonneg T) (compL2_nonneg U))
 
-
 omit [DecidableEq Idx] in
 theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
     compL2 (fun idx => -T idx) = compL2 T := by
@@ -178,7 +170,6 @@ theorem compL2_sub_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
   have h := compL2_add_le T (fun idx => -U idx)
   rw [compL2_neg] at h
   simpa only [sub_eq_add_neg] using h
-
 
 omit [DecidableEq Idx] in
 theorem compL2_smul {r : ℕ} (c : Real) (T : (Fin r → Idx) → Real) :

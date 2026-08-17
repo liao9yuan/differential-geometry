@@ -13,6 +13,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
@@ -20,7 +21,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -93,6 +94,94 @@ theorem lowRegN_on_smooth
   have hx := lowRegN_on_core (I := I) (M := M) g₀ g_bg hR hδ hreal hcore x
   unfold coreN at hx
   simpa only [u, x, hrep] using hx
+
+theorem lowRegSeedMass
+    (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
+    (hR : 0 < R) (hδ : δ < 1)
+    (hreal : ∀ P : SmoothCcTensor g₀ 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) P‖ ≤ R →
+        metricCauchySchwarzBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+    (hcore : Continuous (coreN (I := I) (M := M) g₀ g_bg hδ hreal)) :
+    ∃ Cseed : ℕ → ℝ, (∀ n, 0 ≤ Cseed n) ∧
+      ∀ (n : ℕ) (F : Finset
+          (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2)),
+        ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
+            ((lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
+              ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩).coeff i) ^ 2 ≤
+          Cseed n ^ 2 := by
+  classical
+  have hzero_embed :
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) =
+        smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+          (0 : SmoothCcTensor g₀ 0 2) := by
+    refine tensorHs.ext ?_
+    funext i
+    rw [tensorHs.zero_coeff, smoothCcToTensorHs_coeff,
+      show SmoothCcTensor.toL2 (0 : SmoothCcTensor g₀ 0 2) = 0 from map_zero _,
+      tensorL2Coeff_eq_inner, inner_zero_right]
+  have hS : ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+      (smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+        (0 : SmoothCcTensor g₀ 0 2))‖ ≤ R := by
+    rw [← hzero_embed]
+    simpa only [map_zero, norm_zero] using hR.le
+  have hsub : (⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩ :
+        lowerState (I := I) (M := M) g₀ 1 R) =
+      ⟨smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+        (0 : SmoothCcTensor g₀ 0 2), hS⟩ := Subtype.ext hzero_embed
+  have hN := lowRegN_on_smooth (I := I) (M := M) g₀ g_bg hR hδ hreal hcore
+    (0 : SmoothCcTensor g₀ 0 2) hS
+  refine ⟨fun n => ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ)
+      (deTurckSmoothRemainder (I := I) g₀ g_bg
+        (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+        (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+          (0 : SmoothCcTensor g₀ 0 2) hS)))‖,
+    fun n => norm_nonneg _, ?_⟩
+  intro n F
+  have hcoeff : ∀ i, (lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
+        ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩).coeff i =
+      (ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg
+          (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+            (0 : SmoothCcTensor g₀ 0 2) hS)))).coeff i := by
+    intro i
+    rw [hsub, hN, deTurckSmoothN_coeff, ccTensorToHs_coeff]
+  have hbridge : ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg
+          (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+            (0 : SmoothCcTensor g₀ 0 2) hS))) =
+      smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg
+          (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+            (0 : SmoothCcTensor g₀ 0 2) hS))) :=
+    tensorHs.ext (funext (fun _ => rfl))
+  calc ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
+        ((lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
+          ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩).coeff i) ^ 2
+      = ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
+          ((ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg
+              (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+              (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+                (0 : SmoothCcTensor g₀ 0 2) hS)))).coeff i) ^ 2 :=
+        Finset.sum_congr rfl (fun i _ => by rw [hcoeff i])
+    _ ≤ ‖ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg
+            (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+            (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+              (0 : SmoothCcTensor g₀ 0 2) hS)))‖ ^ 2 :=
+        cc_partial_le_norm (I := I) (M := M) g₀ 2 (n : ℝ) _ F
+    _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg
+            (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+            (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+              (0 : SmoothCcTensor g₀ 0 2) hS)))‖ ^ 2 := by rw [hbridge]
 
 theorem lowReg_force_smooth
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}

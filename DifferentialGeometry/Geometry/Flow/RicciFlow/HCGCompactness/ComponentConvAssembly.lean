@@ -98,7 +98,6 @@ theorem exists_framePairs_diag
   obtain ⟨Φinf, hΦinf⟩ := hconv (i, j) (Finset.mem_univ _)
   exact ⟨Φinf, hΦinf⟩
 
-
 theorem exists_pairs_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -226,7 +225,6 @@ theorem framePairs_pinned
     exact tendsto_nhds_unique hseq hlim
   rw [hpin] at hΦinf
   exact hΦinf
-
 
 theorem pairs_pinned_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -373,7 +371,6 @@ theorem exists_tower_conv
       (fun k => Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k))))
       (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
       hUKc Finset.univ frame hspan hpairsU V) a V
-
 
 theorem exists_tower_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -708,7 +705,6 @@ private theorem exists_patch_core
   refine ⟨(Finset.range (p + 1)).sup k0fn, fun k hk a ha z hz => ?_⟩
   exact hk0fn a ha k (le_trans (Finset.le_sup (Finset.mem_range.2 (Nat.lt_succ_of_le ha))) hk) z hz
 
-
 theorem exists_uniform_patch
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -724,7 +720,6 @@ theorem exists_uniform_patch
   apply exists_patch_core (I := I) gRef gSeq ?_ φ₀ gInf hconv x
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_conv (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
-
 
 theorem exists_patch_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -801,7 +796,6 @@ theorem metricPreconvInf (hne : Nonempty M)
   simpa only [Function.comp_apply] using
     hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
       (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
-
 
 theorem metricCInf_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)

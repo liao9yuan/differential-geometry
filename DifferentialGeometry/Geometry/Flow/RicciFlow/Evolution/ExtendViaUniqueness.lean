@@ -1,5 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueWiring
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgBootstrap
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGaugeRemoval
+
 open DifferentialGeometry.Analysis.Sobolev.CSupTensor
     DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
@@ -15,17 +19,18 @@ open Bundle Set Filter
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry
 open DifferentialGeometry.PDE
-
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-    [I.Boundaryless] [T2Space M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
+theorem ricci_flow_unif_existence (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M) :
     ∀ Λ : ℝ, 1 ≤ Λ → ∃ τ₀ : ℝ, 0 < τ₀ ∧
       ∀ g₀ : SmoothRiemannianMetric I M,
         (∀ x : M, ∀ v : TangentSpace I x,
@@ -35,7 +40,7 @@ theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
           (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
             ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
               (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
-              (Set.Ioo (0 : ℝ) τ₀ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+              (Set.Ico (0 : ℝ) τ₀ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
           (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
             ContinuousOn
               (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
@@ -43,22 +48,33 @@ theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
           (∀ t ∈ Set.Ico (0 : ℝ) τ₀, ∀ x : M, ∀ v w : TangentSpace I x,
             HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
               ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
-  sorry
+  intro Λ hΛ
+  obtain ⟨T, hT, hDTclass⟩ :=
+    IntrinsicSpectral.lowreg_dt_unif (I := I) (M := M) hDim gBase hΛ
+  refine ⟨T, hT, ?_⟩
+  intro g₀ hcomp hcov
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ := by
+    exact ⟨hΛ, fun x _hx v => hcomp x v⟩
+  obtain ⟨g_DT, hDT, hJ⟩ := hDTclass g₀ hEq hcov
+  obtain ⟨Φ_fam, hΦ0, hΦflow, g_RF, hpull, hinit, hsmooth, hcont, hpde⟩ :=
+    ricci_gauge_of_dt (I := I) g₀ gBase g_DT hDT hJ
+  exact ⟨g_RF, hinit, hsmooth, hcont, hpde⟩
 
 theorem ricci_flow_interior_restart
-    (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (_hαω : α < omega)
+    (hDim : Module.finrank ℝ E = 3)
+    (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     (hell : ∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₁ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₁ omega,
       ∀ x : M, ∀ v : TangentSpace I x,
         Λ⁻¹ * (g_fam α).inner x v v ≤ (g_fam s).inner x v v ∧
           (g_fam s).inner x v v ≤ Λ * (g_fam α).inner x v v)
     (hcov : ∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₂ omega,
       ∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a (g_fam s) (g_fam α) C) :
-    ∃ t_star : ℝ, t_star ∈ Set.Ico α omega ∧ ∃ TT : ℝ, omega < t_star + TT ∧
+    ∃ t_star : ℝ, t_star ∈ Set.Ioo α omega ∧ ∃ TT : ℝ, omega < t_star + TT ∧
       ∃ rr : ℝ → SmoothRiemannianMetric I M, rr 0 = g_fam t_star ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
           ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
             (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
-            (Set.Ioo (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+            (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
           ContinuousOn
             (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
@@ -66,7 +82,7 @@ theorem ricci_flow_interior_restart
         (∀ t ∈ Set.Ico (0 : ℝ) TT, ∀ x : M, ∀ v w : TangentSpace I x,
           HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
             ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
-  have hbox := ricci_flow_unif_existence (I := I) (g_fam α)
+  have hbox := ricci_flow_unif_existence (I := I) hDim (g_fam α)
   obtain ⟨Λ₁, hΛ₁, t₁, ht₁, hell'⟩ := hell
   obtain ⟨Λ₂, hΛ₂, t₂, ht₂, hcov'⟩ := hcov
   set Λ : ℝ := max Λ₁ Λ₂ with hΛdef
@@ -75,15 +91,21 @@ theorem ricci_flow_interior_restart
   have hΛ : 1 ≤ Λ := le_trans hΛ₁ hΛ₁le
   have hΛ₁pos : 0 < Λ₁ := lt_of_lt_of_le zero_lt_one hΛ₁
   obtain ⟨τ₀, hτ₀, hexist⟩ := hbox Λ hΛ
-  set t_star : ℝ := max (max t₁ t₂) (omega - τ₀ / 2) with hts_def
+  set t_star : ℝ := max (max t₁ t₂) (max (omega - τ₀ / 2) ((α + omega) / 2)) with hts_def
   have ht1_le : t₁ ≤ t_star := le_trans (le_max_left t₁ t₂) (le_max_left _ _)
   have ht2_le : t₂ ≤ t_star := le_trans (le_max_right t₁ t₂) (le_max_left _ _)
-  have hstar_lt : t_star < omega := max_lt (max_lt ht₁.2 ht₂.2) (by linarith)
-  have hstar_mem_αω : t_star ∈ Set.Ico α omega := ⟨le_trans ht₁.1 ht1_le, hstar_lt⟩
+  have hstar_lt : t_star < omega :=
+    max_lt (max_lt ht₁.2 ht₂.2) (max_lt (by linarith) (by linarith))
+  have hα_lt : α < t_star := by
+    have hle : (α + omega) / 2 ≤ t_star := by
+      rw [hts_def]; exact le_trans (le_max_right _ _) (le_max_right _ _)
+    linarith
+  have hstar_mem_αω : t_star ∈ Set.Ioo α omega := ⟨hα_lt, hstar_lt⟩
   have hstar_mem_1 : t_star ∈ Set.Ico t₁ omega := ⟨ht1_le, hstar_lt⟩
   have hstar_mem_2 : t_star ∈ Set.Ico t₂ omega := ⟨ht2_le, hstar_lt⟩
   have hreach : omega < t_star + τ₀ := by
-    have hge : omega - τ₀ / 2 ≤ t_star := by rw [hts_def]; exact le_max_right _ _
+    have hge : omega - τ₀ / 2 ≤ t_star := by
+      rw [hts_def]; exact le_trans (le_max_left _ _) (le_max_right _ _)
     linarith
   have hell_star : ∀ x : M, ∀ v : TangentSpace I x,
       Λ⁻¹ * (g_fam α).inner x v v ≤ (g_fam t_star).inner x v v ∧
@@ -102,12 +124,13 @@ theorem ricci_flow_interior_restart
   obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hcov_star
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
+omit [SigmaCompactSpace M] in
 theorem ricci_flow_forward_unique
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
@@ -115,7 +138,7 @@ theorem ricci_flow_forward_unique
     (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
@@ -128,9 +151,12 @@ theorem ricci_flow_forward_unique
         ((-2 : ℝ) * ricciTensor (I := I) (g₂ t) x v w) (Set.Ici a) t)
     (h0 : g₁ a = g₂ a) :
     ∀ t ∈ Set.Ico a b, g₁ t = g₂ t := by
-  sorry
+  exact forward_unique_of_gram (I := I) g₁ g₂ hab
+    h1smooth h1cont h2smooth h2cont h1pde h2pde h0
+    (fuSlab_of_gram (I := I) g₁ g₂ h1smooth h2smooth h1pde h2pde)
+    (energyEdgeCont (I := I) g₁ g₂ hab h1smooth h2smooth)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem extend_construction_of_restart
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (_hαω : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -326,8 +352,7 @@ private theorem expBounds_of_logDiff {fa fb R : ℝ}
     calc fb = (fb / fa) * fa := by field_simp
       _ ≤ Real.exp R * fa := mul_le_mul_of_nonneg_right hratio_upper hfa.le
 
-omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem metricEquiv_of_ricBound
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     {K : ℝ} (hK : 0 ≤ K)

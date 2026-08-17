@@ -45,7 +45,6 @@ def RicciVariationFormulaInFrameOn
       D.carrier
       (t : Real)
 
-
 def RicciVariationFormulaInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

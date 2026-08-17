@@ -51,7 +51,6 @@ theorem scalarTimeOfSol
     DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t := by
   exact hS.scalarTime ht hK x
 
-
 omit [SigmaCompactSpace M] in
 theorem scalarRegOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -179,7 +178,6 @@ theorem ricciRegOfSol
       ricci_norm_space := hS.ricciNormSpace
       ricci_norm_grad := hS.ricciNormGrad }
 
-
 theorem scalarEvolOfSol
     [I.Boundaryless]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -211,7 +209,6 @@ theorem invEvolOfSol
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   exact coordInvEvol (I := I) S hS x0
-
 
 theorem ricciEvolOfSol
     [I.Boundaryless]
@@ -245,7 +242,6 @@ theorem invSymmOfSol
   simpa [coordInv] using
     DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric t) x0
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x0) i j
-
 
 theorem ricciSymmOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

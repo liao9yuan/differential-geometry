@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Producers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocalMetrics
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtoms
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.LiveCenterScale
+
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -117,32 +119,6 @@ theorem quadBump_conv
     (mapCInfConv_const (U := (Set.univ : Set Real)) f)
     hqc hqinfc (fun _ => hf.contDiffOn) hf.contDiffOn
     (Set.mapsTo_univ _ _) (fun _ => Set.mapsTo_univ _ _)
-
-theorem mapCInf_apply {ι Q : Type*} [Fintype ι]
-    [NormedAddCommGroup Q] [NormedSpace Real Q]
-    {U : Set X} (hU : IsOpen U)
-    {u : Nat -> X -> (ι -> Q)} {uinf : X -> (ι -> Q)}
-    (hu : MapCInfConvOnCompacts U u uinf)
-    (huc : forall k, ContDiffOn Real (∞ : WithTop ℕ∞) (u k) U)
-    (huinfc : ContDiffOn Real (∞ : WithTop ℕ∞) uinf U) (i : ι) :
-    MapCInfConvOnCompacts U (fun k x => u k x i) (fun x => uinf x i) := by
-  intro K hK hKU p epsilon hepsilon
-  obtain ⟨k0, hk0⟩ := hu K hK hKU p epsilon hepsilon
-  refine ⟨k0, fun k hk r hr x hx => ?_⟩
-  have hxU : x ∈ U := hKU hx
-  have hle : ((r : ℕ∞) : WithTop ℕ∞) <= (∞ : WithTop ℕ∞) := by
-    exact_mod_cast le_top
-  have hcd : forall j : ι, ContDiffAt Real (r : ℕ∞)
-      (fun y => u k y j - uinf y j) x := by
-    intro j
-    exact (((contDiffOn_pi.mp (huc k) j).sub (contDiffOn_pi.mp huinfc j)).contDiffAt
-      (hU.mem_nhds hxU)).of_le hle
-  have hbase := hk0 k hk r hr x hx
-  simp only [mapDerivNorm] at hbase ⊢
-  change ‖iteratedFDeriv Real r (fun y j => u k y j - uinf y j) x‖ <= epsilon at hbase
-  rw [iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi] at hbase
-  exact (norm_le_pi_norm (fun j =>
-    iteratedFDeriv Real r (fun y => u k y j - uinf y j) x) i).trans hbase
 
 theorem quadPiBump_conv {ι : Type*} [Fintype ι]
     [FiniteDimensional Real V]
@@ -314,7 +290,7 @@ open scoped Manifold
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -373,101 +349,26 @@ theorem stepCAtom_readout
           (normalTransition (I := I) Y beta gamma z)) := by
   exact quadNormal_readout (I := I) Y beta gamma (stepCBump lam hlam) hsrc
 
-noncomputable def stepCAtomChart
+noncomputable def stepCAtomOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
-    (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
+    (lam : Real) (hlam : 0 < lam) (c : NormalChartAt (I := I) Y beta)
+    (z : E) : Real :=
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  stepCAtom Y gamma lam hlam (expMapDiffeo (I := I) Y.metric beta z)
+  stepCAtom Y gamma lam hlam (c.hom z)
 
-noncomputable def seqCenterD
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat) : (X.obj (L.φ k)).M :=
-  (seqCenter hd D P (L.φ k) gamma).getD (X.obj (L.φ k)).basepoint
+noncomputable def stepCAtomChart
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
+    (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
+  stepCAtomOn (I := I) Y beta gamma lam hlam
+    (legacyBallChart (I := I) Y beta) z
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenterD_dist_eq
+noncomputable def seqAtomOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat) :
-    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-    seqRadius hd D P (L.φ k) gamma =
-      dist (seqCenterD hd P L k gamma) (X.obj (L.φ k)).basepoint := by
-  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-  haveI : ProperSpace (X.obj (L.φ k)).M := (P (L.φ k)).proper
-  unfold seqRadius seqCenterD seqCenter OrderedNet.netRadius
-  cases OrderedNet.netCenter (X.obj (L.φ k)).basepoint (hd.lambda D)
-      (hd.lambda_continuous D) gamma <;> simp
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-@[simp] theorem seqCenterD_subseq
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
-    (k gamma : Nat) :
-    seqCenterD hd P (L.subseq hψ) k gamma = seqCenterD hd P L (ψ k) gamma := rfl
-
-def LiveSlot
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
-    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :=
-  {gamma : Fin (pb.A r) // L.alive (gamma : Nat) = true}
-
-noncomputable instance liveSlotFintype
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
-    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :
-    Fintype (LiveSlot L pb r) := by
-  letI : Finite (LiveSlot L pb r) :=
-    Finite.of_injective (fun gamma : LiveSlot L pb r => gamma.1) Subtype.val_injective
-  exact Fintype.ofFinite (LiveSlot L pb r)
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenterD_some
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat)
-    (h : (seqCenter hd D P (L.φ k) gamma).isSome = true) :
-    seqCenter hd D P (L.φ k) gamma = some (seqCenterD hd P L k gamma) := by
-  cases hc : seqCenter hd D P (L.φ k) gamma with
-  | none => simp [hc] at h
-  | some c => simp [seqCenterD, hc]
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenterD_live
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) (hgamma : L.alive gamma = true) :
-    ∀ᶠ k in Filter.atTop,
-      seqCenter hd D P (L.φ k) gamma = some (seqCenterD hd P L k gamma) :=
-  (L.alive_eventually gamma).mono fun k hk =>
-    seqCenterD_some hd P L k gamma (hk.trans hgamma)
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenter_dead
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) (hgamma : L.alive gamma = false) :
-    ∀ᶠ k in Filter.atTop, seqCenter hd D P (L.φ k) gamma = none :=
-  (L.alive_eventually gamma).mono fun k hk => by
-    cases hc : seqCenter hd D P (L.φ k) gamma with
-    | none => rfl
-    | some c => simp [hc, hgamma] at hk
-
-noncomputable def seqAtomChart
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
@@ -480,9 +381,34 @@ noncomputable def seqAtomChart
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   seqAtom hd hD P L pb r k gamma
-    (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+    ((chart (L.φ k) (beta k)).hom z)
 
-omit [NeZero (Module.finrank ℝ E)] in
+noncomputable def seqAtomChart
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    (k : Nat) (z : E) : Real :=
+  seqAtomOn (I := I) (legacyChartFamily (I := I) X)
+    hd hD P L pb r beta gamma k z
+
+omit [CompleteSpace E] in
+@[simp] theorem seqAtomOn_subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    {ψ : Nat -> Nat} (hψ : StrictMono ψ) (k : Nat) :
+    seqAtomOn (I := I) chart hd hD P (L.subseq hψ) pb r
+        (fun j => beta (ψ j)) gamma k =
+      seqAtomOn (I := I) chart hd hD P L pb r beta gamma (ψ k) := by
+  unfold seqAtomOn
+  simp only [seqAtom_subseq]
+  rfl
+
 @[simp] theorem seqAtomChart_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -493,14 +419,37 @@ omit [NeZero (Module.finrank ℝ E)] in
     seqAtomChart (I := I) hd hD P (L.subseq hψ) pb r
         (fun j => beta (ψ j)) gamma k =
       seqAtomChart (I := I) hd hD P L pb r beta gamma (ψ k) := by
-  unfold seqAtomChart seqAtom
-  simp only [NetLimitData.subseq, NetLimitData.lamInf, Function.comp_apply]
-  funext z
-  cases hcenter : seqCenter hd D P (L.φ (ψ k)) (gamma : Nat) with
-  | none =>
-      change (0 : Real) = 0
-      rfl
-  | some c => congr
+  exact seqAtomOn_subseq (I := I) (legacyChartFamily (I := I) X)
+    hd hD P L pb r beta gamma hψ k
+
+theorem seqAtomOn_smooth
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    {U : Set E}
+    (hUx :
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (chart (L.φ k) (beta k)).radius) :
+    ContDiffOn Real (∞ : WithTop ℕ∞)
+      (seqAtomOn (I := I) chart hd hD P L pb r beta gamma k) U := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  rw [← contMDiffOn_iff_contDiffOn]
+  simpa only [seqAtomOn] using
+    (seqAtom_contMDiff (I := I) hd hD P L pb r k hgp gamma).comp_contMDiffOn
+      ((chart (L.φ k) (beta k)).smooth_to.mono hUx)
 
 theorem seqAtomChart_smooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -527,16 +476,16 @@ theorem seqAtomChart_smooth
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   rw [← contMDiffOn_iff_contDiffOn]
-  simpa only [seqAtomChart] using
+  simpa only [seqAtomChart, seqAtomOn, legacyChart_apply] using
     (seqAtom_contMDiff (I := I) hd hD P L pb r k hgp gamma).comp_contMDiffOn
       ((expMapDiffeo_contMDiffOn_expBall (I := I) (X.obj (L.φ k)) (beta k)).mono hUx)
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtom_live_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
     {U : Set E} (hU : IsOpen U) {ainf : E -> Real}
     (hgamma : L.alive (gamma : Nat) = true)
@@ -555,11 +504,21 @@ theorem seqAtom_live_conv
   letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
-  simpa only [seqAtomChart, stepCAtomChart] using congrFun
-    (seqAtom_some hd hD P L pb r k gamma hk)
-    (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  let q := expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z
+  have hR : 4 * L.lamInf (gamma : Nat) <
+      expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        (seqCenterD hd P L k (gamma : Nat)) :=
+    hgp k gamma (seqCenterD hd P L k (gamma : Nat)) hk
+  change seqAtom hd hD P L pb r k gamma q =
+    stepCAtom (X.obj (L.φ k)) (seqCenterD hd P L k (gamma : Nat))
+      (L.lamInf (gamma : Nat))
+      (hd.lambda_pos hD (L.rInf (gamma : Nat))) q
+  rw [seqAtom_some hd hD P L pb r k gamma hk]
+  exact (stepCAtom_eq_dist (I := I) (X.obj (L.φ k)) (P (L.φ k))
+    (L.lamInf (gamma : Nat))
+    (hd.lambda_pos hD (L.rInf (gamma : Nat))) hR).symm
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtom_dead_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -576,7 +535,8 @@ theorem seqAtom_dead_conv
   refine hzero.congr_eventually hU ?_ fun _ _ => rfl
   filter_upwards [seqCenter_dead hd P L (gamma : Nat) hgamma] with k hk
   intro z _hz
-  simp [seqAtomChart, seqAtom_none hd hD P L pb r k gamma hk]
+  simp [seqAtomChart, seqAtomOn,
+    seqAtom_none hd hD P L pb r k gamma hk]
 
 theorem atom_disjoint_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -610,14 +570,14 @@ theorem atom_disjoint_conv
   apply hdisjointK
   exact L.binter_of_mem_hat hd hD P pb r k (hsourceK hz)
     (seqAtom_mem_hat hd hD P L pb r k hgpK gamma (by
-      simpa only [seqAtomChart] using hne))
+      simpa only [seqAtomChart, seqAtomOn, legacyChart_apply] using hne))
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtoms_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) {U : Set E} (hU : IsOpen U)
     (ainf : Fin (pb.A r) -> E -> Real)
     (hlive : ∀ gamma : Fin (pb.A r), L.alive (gamma : Nat) = true ->
@@ -636,10 +596,9 @@ theorem seqAtoms_conv
         seqAtom_dead_conv (I := I) hd hD P L pb r beta gamma hU hgamma
   | true =>
       simpa only [hgamma, ↓reduceIte] using
-        seqAtom_live_conv (I := I) hd hD P L pb r beta gamma hU hgamma
+        seqAtom_live_conv (I := I) hd hD P L pb r hgp beta gamma hU hgamma
           (hlive gamma hgamma)
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (center : ι -> forall k : Nat, (X.obj k).M)
@@ -675,7 +634,7 @@ theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     (fun _ => contDiffOn_const) hginf (hJc i) (hJinfc i)
     i (stepCBump (lam i) (hlam i)) (stepCBump (lam i) (hlam i)).contDiff
   refine hraw.congr hU (fun k z hz => ?_) (fun _ _ => rfl)
-  simpa only [stepCAtomChart] using
+  simpa only [stepCAtomChart, stepCAtomOn, legacyChart_apply] using
     (stepCAtom_readout (I := I) (X.obj k) (beta k) (center i k)
       (lam i) (hlam i) (hsrc i k z hz))
 
@@ -758,7 +717,6 @@ theorem existsMetric0Univ {ι : Type*} [Fintype ι]
     exists_cInf_subseq_on isOpen_univ g0 hsmooth hbdd
   simpa only [g0] using ⟨phi, gInf, hphi, hginf, hconv⟩
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem existsLiveMetric0
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -782,7 +740,6 @@ theorem existsLiveMetric0
   refine ⟨psi, gInf, hpsi, hginf, ?_⟩
   simpa only [X', c, PointedRiemannianSeq.subseq] using hconv
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem liveMetric0_equiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)

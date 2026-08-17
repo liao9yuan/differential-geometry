@@ -14,9 +14,12 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
+variable {H : Type uH} [TopologicalSpace H]
+
+section MetricCompactnessCore
+
 variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
-variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
@@ -1306,6 +1309,15 @@ structure MetricCompactnessConclusion
   maps : PointedRiemannianCGMaps (I := I) X limit subseq
   convergence : PointedRiemannianCGConverges (I := I) X limit subseq maps
 
+end MetricCompactnessCore
+
+section IntrinsicInjectivityEndpoint
+
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {I : ModelWithCorners Real E H}
+variable [I.Boundaryless]
+
 def metricCompactness
     [I.Boundaryless]
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
@@ -1314,6 +1326,8 @@ def metricCompactness
     (_hinj : BaseInjBound (I := I) X) :
     MetricCompactnessConclusion (I := I) X := by
   sorry
+
+end IntrinsicInjectivityEndpoint
 
 end HCGCompactness
 end DifferentialGeometry

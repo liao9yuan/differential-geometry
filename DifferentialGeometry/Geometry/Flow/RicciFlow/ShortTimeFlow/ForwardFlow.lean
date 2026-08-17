@@ -42,7 +42,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M]
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [T2Space M] in
 private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
@@ -156,7 +155,6 @@ private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
       (f := fun s : ℝ => (TotalSpace.mk' E (c (Φ s x)) (P s) : TangentBundle 𝓘(ℝ, E) E))
       htm_at hpath
   exact (hRHScont.congr hrecon.symm).continuousWithinAt
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] in

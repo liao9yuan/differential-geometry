@@ -15,7 +15,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -73,6 +72,11 @@ def smoothCcTensorBilinForm (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (bilinFormToModel E).symm (ccTensorModel (I := I) g T x)
+
+abbrev ccTensorBilin (g : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g 0 2) (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  smoothCcTensorBilinForm (I := I) g T x
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in

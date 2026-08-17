@@ -38,7 +38,6 @@ def PreApproxIsoDataOn.mono [T2Space N] [SigmaCompactSpace N]
   cov_deriv_small := fun a h1 h2 x hx =>
     le_trans (D.cov_deriv_small a h1 h2 x (hK hx)) hε
 
-
 def BookApproxIsoPartialData.mono [T2Space N] [SigmaCompactSpace N]
     {K K' : Set M} {ε ε' : ℝ} {p : ℕ}
     {Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
@@ -63,7 +62,6 @@ def PreApproxIsoDataOn.monoP [T2Space N] [SigmaCompactSpace N]
   c0_small := D.c0_small
   cov_deriv_small := fun a h1 h2 x hx =>
     D.cov_deriv_small a h1 (le_trans h2 hp) x hx
-
 
 def BookApproxIsoPartialData.monoP [T2Space N] [SigmaCompactSpace N]
     {K : Set M} {ε : ℝ} {p p' : ℕ}

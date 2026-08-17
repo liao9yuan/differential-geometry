@@ -187,7 +187,6 @@ theorem ricciHeat_of_data
       h.timeDeriv
       h.laplacian
 
-
 omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem ricciPair04_apply {x : M}

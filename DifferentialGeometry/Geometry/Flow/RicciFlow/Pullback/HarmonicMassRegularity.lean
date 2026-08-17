@@ -24,7 +24,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
 
 private local instance : MeasurableSpace M := borel M
 
@@ -211,7 +211,7 @@ theorem hmfSpecMassPt_cd
       (hmfBilin_eq_sum ι
         (hmfSpecMassPt (I := I) (M := M) q S p.1 p.2)))
 
-omit [CompactSpace M] [T2Space M]
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
   [ConnectedSpace M] in
 private theorem continuous_slice_of_continuousOn_prod
     {V W : Type*} [TopologicalSpace V] [TopologicalSpace W]
@@ -226,7 +226,7 @@ private theorem continuous_slice_of_continuousOn_prod
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [BoundarylessManifold I M] [ConnectedSpace M] in
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem mdifferentiable_coeff_slice
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     (F : V → M → M) {R : ℝ}
@@ -265,7 +265,7 @@ theorem hmfSpecMassPt_continuous
     hmass.continuousOn hu
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
-  [I.Boundaryless] [CompactSpace M] [T2Space M]
+  [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem partialFderiv_cont
     {V W : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
@@ -312,7 +312,7 @@ private theorem partialFderiv_cont
   exact hD'.continuousAt.continuousWithinAt
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
-  [I.Boundaryless] [T2Space M]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem point_lip_cball
     {V W : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]

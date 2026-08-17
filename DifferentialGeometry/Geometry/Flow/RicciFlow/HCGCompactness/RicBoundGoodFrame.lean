@@ -75,7 +75,6 @@ theorem gramInv_inverse
           Finset.sum_congr rfl fun k _ => by rw [hco]
       _ = if i = j then 1 else 0 := h
 
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem gramInv_symm
@@ -638,6 +637,7 @@ theorem sqrt_tower_le_compL2
             (frameComp0S (I := I) T frame) j y)) from rfl, hsq]
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
     [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in

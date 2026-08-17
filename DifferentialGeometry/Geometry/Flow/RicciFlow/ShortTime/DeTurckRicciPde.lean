@@ -39,7 +39,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-      [I.Boundaryless] [T2Space M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 theorem deturck_metric_pde_interior
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (a : ℕ)
@@ -130,6 +130,7 @@ theorem deturck_metric_pde_interior
   rw [hmatch] at hpush
   exact hpush
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deturck_metric_pde_at_zero

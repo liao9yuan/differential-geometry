@@ -54,7 +54,6 @@ theorem normalQuarter_sub
   rw [normalExpPD_source]
   exact normalInner_sub (I := I) Y x
 
-
 def normalQuarterImage
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -101,7 +100,6 @@ noncomputable def normalQuarterDiffeo
   letI : LocallyCompactSpace (normalQuarter (I := I) Y x) :=
     (normalQuarter (I := I) Y x).2.locallyCompactSpace
   infer_instance
-
 
 @[implicit_reducible] noncomputable def normalQuarterImageSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :

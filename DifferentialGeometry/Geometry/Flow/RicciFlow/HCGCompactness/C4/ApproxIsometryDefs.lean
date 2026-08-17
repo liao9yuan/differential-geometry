@@ -46,7 +46,6 @@ structure PullbackMetricTensorData
           (mfderiv I I Phi x (v 0))
           (mfderiv I I Phi x (v 1))
 
-
 noncomputable def metricTensorErrorNorm
     (A :
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -71,7 +70,6 @@ noncomputable def tensor02CovDeriv
     A
     (fun a Aprev =>
       metricCovDerivStep (I := I) gRef a Aprev)
-
 
 noncomputable def tensor02CovDerivNormWith
     (a : Nat)
@@ -183,7 +181,6 @@ def PreApproxIsoSep.toBook
   cov_deriv_small := fun a h1 h2 x hx =>
     le_trans (D.cov_small a h1 h2 x hx) hcov
 
-
 structure BookApproxIsoSep
     (K : Set M) (c0 cov : Real) (p : Nat)
     (Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
@@ -228,7 +225,6 @@ def BookApproxIsoPartialData.toSep
   forward := D.forward.toSep
   reverse := D.reverse.toSep
 
-
 def PreApproxIsoSep.mono
     {K K' : Set M} {c0 c0' cov cov' : Real} {p : Nat} {Phi : M -> N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
@@ -243,7 +239,6 @@ def PreApproxIsoSep.mono
   c0_small := fun x hx => le_trans (D.c0_small x (hK hx)) hc0
   cov_small := fun a h1 h2 x hx =>
     le_trans (D.cov_small a h1 h2 x (hK hx)) hcov
-
 
 def BookApproxIsoSep.mono
     {K K' : Set M} {c0 c0' cov cov' : Real} {p : Nat}
@@ -349,7 +344,6 @@ def ConnDiffEpsBoundOn
       forall x : M, x ∈ K ->
         connDiffDerivNorm (I := I) g k Dk x <= C * eps
 
-
 def ConnDiffEpsBoundsBelow
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (K : Set M) (eps : Real)
@@ -388,7 +382,6 @@ def connDiffEpsConst_three
   | 0 => 12
   | 1 => connDiffOneConst (Fin (Module.finrank Real E))
   | _ => connDiffTwoConst (Fin (Module.finrank Real E))
-
 
 def connDiffCoeff (eps : Real) : Real :=
   (3 / 2 : Real) * (Real.sqrt ((1 + eps) ^ 3) * eps)

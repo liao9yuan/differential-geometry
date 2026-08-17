@@ -783,7 +783,6 @@ def RicciContractedCommutatorsInFrame
         contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j
 
-
 def RicciContractedCommutatorsInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

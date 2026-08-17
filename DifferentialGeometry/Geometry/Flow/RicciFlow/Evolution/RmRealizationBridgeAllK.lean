@@ -28,6 +28,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 section Field
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 def nablaKRm04Field
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -78,6 +79,7 @@ end Field
 section Bridge
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -217,6 +219,7 @@ end Bridge
 section RicciIdentity
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in

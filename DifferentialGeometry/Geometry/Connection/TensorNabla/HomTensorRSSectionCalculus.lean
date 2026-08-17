@@ -86,6 +86,11 @@ noncomputable def homTensorRSFieldApply (g : SmoothRiemannianMetric I M) (r a c 
       c :=
   homTensorRSApply (I := I) (M := M) g r a c (fun x : M => Q x) Q.contMDiff W
 
+noncomputable abbrev appFullSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (Q : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) :
+    SmoothCcTensor g r c :=
+  homTensorRSFieldApply (I := I) (M := M) g r a c Q W
+
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     in
@@ -203,12 +208,10 @@ theorem covGrad_appFullSec_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
           (covGrad (I := I) (M := M) g r a W) :=
   covGrad_appFullRS_eq (I := I) (M := M) g r a c (fun x : M => Q x) Q.contMDiff W
 
-
 def castHomTensorRSFieldTgt {c c' : ℕ} (r a : ℕ) (h : c = c')
     (Q : HomTensorRSField (E := E) (M := M) r a c I) :
     HomTensorRSField (E := E) (M := M) r a c' I :=
   h ▸ Q
-
 
 def castHomTensorRSFieldSrc {a a' : ℕ} (r c : ℕ) (h : a = a')
     (Q : HomTensorRSField (E := E) (M := M) r a c I) :

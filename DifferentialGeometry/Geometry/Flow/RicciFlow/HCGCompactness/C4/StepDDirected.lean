@@ -25,7 +25,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 section Chain
 
-
 noncomputable def PartialDiffeomorph.refl (M : Type u) [TopologicalSpace M]
     [ChartedSpace H M] [IsManifold I ∞ M] :
     PartialDiffeomorph I I M M (∞ : WithTop ℕ∞) where
@@ -59,7 +58,6 @@ noncomputable def chainComp' {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf 
       PartialDiffeomorph.trans (E := E) (H := H) (I := I) (M := Mf j)
         (N := Mf (j + 1)) (P := Mf m) (Ψ j) (ih (j + 1) m (by omega)))
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
@@ -69,7 +67,6 @@ theorem chainComp_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf 
       = (Ψ (j + l) : Mf (j + l) → Mf (j + l + 1))
           ((chainComp (I := I) (Mf := Mf) Ψ j l : Mf j → Mf (j + l)) x) :=
   rfl
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_base {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
@@ -134,7 +131,6 @@ theorem chainComp_add_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j
                 ((chainComp (I := I) (Mf := Mf) Ψ j a : Mf j → Mf (j + a)) x)) := by
               rw [ih]
 
-
 noncomputable def chainCompAssoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -151,7 +147,6 @@ private theorem targetCast_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace
   subst h
   rfl
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainAssoc_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
@@ -162,7 +157,6 @@ theorem chainAssoc_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
   simpa only [chainCompAssoc] using
     targetCast_source (I := I) (Nat.add_assoc j a b).symm
       (chainComp (I := I) (Mf := Mf) Ψ j (a + b))
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainCompAssoc_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
@@ -183,7 +177,6 @@ theorem chainCompAssoc_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf 
   rw [cast_apply]
   exact chainComp_add_apply (I := I) (Mf := Mf) Ψ j a b x
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainCompAssoc_eq {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
@@ -195,7 +188,6 @@ theorem chainCompAssoc_eq {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
         (chainComp (I := I) (Mf := Mf) Ψ (j + a) b) : Mf j → Mf ((j + a) + b)) := by
   funext x
   exact chainCompAssoc_apply (I := I) (Mf := Mf) Ψ j a b x
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp'_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
@@ -251,7 +243,6 @@ theorem chainComp'_snoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
         intro a ha; subst ha; rfl
       rw [hcast (j + (l + 1)) (by omega)]
       simp only [eqRec_eq_cast]
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_eq_right {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
@@ -407,13 +398,11 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsMan
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [T2Space N] [IsManifold I ∞ N]
   [SigmaCompactSpace N]
 
-
 noncomputable def PreApproxIsoDataOn.congr_eq {K : Set M} {ε : ℝ} {p : ℕ} {F F' : M → N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (D : PreApproxIsoDataOn (I := I) K ε p F g h) (hEq : F' = F) :
     PreApproxIsoDataOn (I := I) K ε p F' g h :=
   D.congr (fun _ _ => Filter.EventuallyEq.of_eq hEq)
-
 
 noncomputable def PreApproxIsoSep.congr {K : Set M} {c0 cov : ℝ} {p : ℕ} {F F' : M → N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
@@ -431,13 +420,11 @@ noncomputable def PreApproxIsoSep.congr {K : Set M} {c0 cov : ℝ} {p : ℕ} {F 
   c0_small := D.c0_small
   cov_small := D.cov_small
 
-
 noncomputable def PreApproxIsoSep.congr_eq {K : Set M} {c0 cov : ℝ} {p : ℕ} {F F' : M → N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (D : PreApproxIsoSep (I := I) K c0 cov p F g h) (hEq : F' = F) :
     PreApproxIsoSep (I := I) K c0 cov p F' g h :=
   D.congr (fun _ _ => Filter.EventuallyEq.of_eq hEq)
-
 
 noncomputable def PreApproxIsoSep.congr_set {K K' : Set M} {c0 cov : ℝ} {p : ℕ}
     {F : M → N} {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
@@ -445,7 +432,6 @@ noncomputable def PreApproxIsoSep.congr_set {K K' : Set M} {c0 cov : ℝ} {p : �
     PreApproxIsoSep (I := I) K' c0 cov p F g h := by
   subst hK
   exact D
-
 
 noncomputable def BookApproxIsoPartialData.ofParts {K : Set M} {ε : ℝ} {p : ℕ}
     {Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
@@ -458,7 +444,6 @@ noncomputable def BookApproxIsoPartialData.ofParts {K : Set M} {ε : ℝ} {p : �
   forward := forward
   reverse := reverse
 
-
 noncomputable def BookApproxIsoSep.ofParts {K : Set M} {c0 cov : ℝ} {p : ℕ}
     {Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
@@ -470,7 +455,6 @@ noncomputable def BookApproxIsoSep.ofParts {K : Set M} {c0 cov : ℝ} {p : ℕ}
   forward := forward
   reverse := reverse
 
-
 noncomputable def BookApproxIsoSep.congr_set {K K' : Set M} {c0 cov : ℝ} {p : ℕ}
     {Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
@@ -478,7 +462,6 @@ noncomputable def BookApproxIsoSep.congr_set {K K' : Set M} {c0 cov : ℝ} {p : 
     BookApproxIsoSep (I := I) K' c0 cov p Φ g h := by
   subst hK
   exact D
-
 
 theorem image_eq_of_fun_eq {α β : Type*} {s : Set α} {f g : α → β} (h : f = g) :
     f '' s = g '' s := by
@@ -512,6 +495,7 @@ end DataTransport
 section ReflData
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] in
 theorem tensor02CovDeriv_metric_zero {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
@@ -698,13 +682,11 @@ theorem two_pow_lt_openRad (j l : ℕ) :
     _ < (2 : ℝ) ^ j * (1 + (1 / 2 : ℝ) ^ (l + 1)) :=
       mul_lt_mul_of_pos_left (by linarith) hpow
 
-
 theorem openRad_pos (j l : ℕ) :
     0 < (2 : ℝ) ^ j * (1 + (1 / 2 : ℝ) ^ (l + 1)) := by
   have hpow : 0 < (2 : ℝ) ^ j := by positivity
   have htail : 0 < (1 / 2 : ℝ) ^ (l + 1) := by positivity
   nlinarith [mul_pos hpow (by linarith : (0 : ℝ) < 1 + (1 / 2 : ℝ) ^ (l + 1))]
-
 
 theorem openRad_succ_lt (j l : ℕ) :
     (2 : ℝ) ^ j * (1 + (1 / 2 : ℝ) ^ (l + 2))
@@ -717,10 +699,8 @@ theorem openRad_succ_lt (j l : ℕ) :
   rw [hsplit]
   nlinarith
 
-
 def midRad (j l : ℕ) : ℝ :=
   (2 : ℝ) ^ j * (1 + (((1 / 2 : ℝ) ^ (l + 1) + (1 / 2 : ℝ) ^ (l + 2)) / 2))
-
 
 theorem openRad_next_lt_mid (j l : ℕ) :
     (2 : ℝ) ^ j * (1 + (1 / 2 : ℝ) ^ (l + 2)) < midRad j l := by
@@ -733,7 +713,6 @@ theorem openRad_next_lt_mid (j l : ℕ) :
   rw [hsplit]
   nlinarith
 
-
 theorem midRad_lt_openRad (j l : ℕ) :
     midRad j l < (2 : ℝ) ^ j * (1 + (1 / 2 : ℝ) ^ (l + 1)) := by
   have hpow : 0 < (2 : ℝ) ^ j := by positivity
@@ -744,7 +723,6 @@ theorem midRad_lt_openRad (j l : ℕ) :
   refine mul_lt_mul_of_pos_left ?_ hpow
   rw [hsplit]
   nlinarith
-
 
 theorem midRad_le_step (j l : ℕ) :
     midRad j l ≤ (2 : ℝ) ^ (j + 1) := by
@@ -767,7 +745,6 @@ theorem midRad_le_step (j l : ℕ) :
       rw [pow_succ']
       ring
 
-
 theorem midRad_le_mid0 (j l : ℕ) :
     midRad j l ≤ midRad j 0 := by
   have hpow : 0 ≤ (2 : ℝ) ^ j := by positivity
@@ -779,13 +756,11 @@ theorem midRad_le_mid0 (j l : ℕ) :
   refine mul_le_mul_of_nonneg_left ?_ hpow
   nlinarith
 
-
 theorem half_pow_succ_le_half (j : ℕ) :
     (1 / 2 : ℝ) ^ (j + 1) ≤ 1 / 2 := by
   have hpow : (1 / 2 : ℝ) ^ (j + 1) ≤ (1 / 2 : ℝ) ^ 1 :=
     pow_le_pow_of_le_one (by norm_num) (by norm_num) (by omega)
   simpa using hpow
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
@@ -804,7 +779,6 @@ theorem properMetric_isOpen_ball
   rw [ProperMetricOn.top_eq Y P] at hb
   exact hb
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem properMetric_mem_ball_self
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -815,7 +789,6 @@ theorem properMetric_mem_ball_self
   letI : MetricSpace Y.M := P.ms
   exact Metric.mem_ball_self hr
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem properMetric_ball_nonempty
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -825,12 +798,10 @@ theorem properMetric_ball_nonempty
        Metric.ball x r) :=
   ⟨⟨x, properMetric_mem_ball_self (I := I) Y P x hr⟩⟩
 
-
 theorem nonempty_opens_mk {M : Type u} {t : TopologicalSpace M}
     {s : Set M} (hs : @IsOpen M t s) (hne : Nonempty s) :
     Nonempty (⟨s, hs⟩ : @TopologicalSpace.Opens M t) :=
   hne
-
 
 def properMetricOpenBall
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -841,7 +812,6 @@ def properMetricOpenBall
     Metric.ball x r),
     properMetric_isOpen_ball (I := I) Y P x r⟩
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem properMetricOpenBall_nonempty
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -851,7 +821,6 @@ theorem properMetricOpenBall_nonempty
   dsimp [properMetricOpenBall]
   exact nonempty_opens_mk (properMetric_isOpen_ball (I := I) Y P x r)
     (properMetric_ball_nonempty (I := I) Y P x hr)
-
 
 theorem imageRad_lt_step {a : ℝ} (j l : ℕ) (ha0 : 0 < a) (ha2 : a ≤ 1 / 2) :
     Real.sqrt (1 + a) * ((2 : ℝ) ^ j * (1 + (1 / 2 : ℝ) ^ (l + 2)))
@@ -883,7 +852,6 @@ theorem imageRad_lt_step {a : ℝ} (j l : ℕ) (ha0 : 0 < a) (ha2 : a ≤ 1 / 2)
     _ < 2 * (2 : ℝ) ^ j := by nlinarith
     _ = (2 : ℝ) ^ (j + 1) := by rw [pow_succ']
     _ ≤ (2 : ℝ) ^ (j + l + 1) := hpow_mono
-
 
 theorem imageMid_lt_step {a : ℝ} (j l : ℕ) (ha0 : 0 < a) (ha2 : a ≤ 1 / 2) :
     Real.sqrt (1 + a) * midRad j l < (2 : ℝ) ^ (j + l + 1) := by
@@ -927,7 +895,6 @@ theorem imageMid_lt_openRad {a : ℝ} (j l : ℕ) (ha0 : 0 < a) (ha2 : a ≤ 1 /
     simpa using imageMid_lt_step j 0 ha0 ha2
   exact lt_trans (lt_of_le_of_lt hle_mid0 hlt_step) (two_pow_lt_openRad (j + 1) l)
 
-
 def nextTol (a δ B : ℝ) : ℝ :=
   max (a / (1 - a) + δ * B) (δ / (1 - δ) + a * B)
 
@@ -950,10 +917,8 @@ theorem nextTol_pos {a δ B : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hδ0 : 0 < δ)
 def sepFeed (c0 cov : ℝ) : ℝ :=
   max (c0 / (1 - c0)) cov
 
-
 def sepNextC0 (c0 cov δ : ℝ) : ℝ :=
   c0 + δ * (1 + sepFeed c0 cov)
-
 
 def sepNextCov (c0 cov δ B : ℝ) : ℝ :=
   sepFeed c0 cov + δ * B
@@ -1780,7 +1745,6 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
       exact ⟨⟨by simpa [Rnext] using hLeftOpen⟩, fun m hm => by
         cases hm
         exact ⟨by simpa [Rnext] using hRightOpen⟩⟩
-
 
 end Endpoint
 

@@ -163,7 +163,7 @@ noncomputable def flowUpgrade_of_open
     (ricciNorm : RicNormPullback (I := I)
       (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
         PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
-    FlowUpgradeData (I := I) X mc := by
+    FlowUpgrade (I := I) X mc := by
   have hL0 : L.atTime (I := I) 0 = mc.limit := hPL.trans hPlim
   subst hPL
   letI : TopologicalSpace L.M := L.topology

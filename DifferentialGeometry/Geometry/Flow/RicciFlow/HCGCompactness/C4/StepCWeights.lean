@@ -16,12 +16,10 @@ noncomputable def cutRaw {X : Type uX} {ι : Type uι} [DecidableEq ι]
     (cut : X → ℝ) (a : ι → X → ℝ) (i0 i : ι) (x : X) : ℝ :=
   if i = i0 then a i0 x else (1 - cut x) * a i x
 
-
 @[simp] theorem cutRaw_same {X : Type uX} {ι : Type uι} [DecidableEq ι]
     (cut : X → ℝ) (a : ι → X → ℝ) (i0 : ι) (x : X) :
     cutRaw cut a i0 i0 x = a i0 x := by
   rw [cutRaw, if_pos rfl]
-
 
 theorem cutRaw_of_ne {X : Type uX} {ι : Type uι} [DecidableEq ι]
     (cut : X → ℝ) (a : ι → X → ℝ) (i0 i : ι) (x : X) (hi : i ≠ i0) :
@@ -38,7 +36,6 @@ theorem cutRaw_nonneg {X : Type uX} {ι : Type uι} [DecidableEq ι]
     exact hnn i0
   · rw [cutRaw_of_ne cut a i0 i x hi]
     exact mul_nonneg (sub_nonneg.mpr hcut.2) (hnn i)
-
 
 theorem num_ne_of_cut_ne {X : Type uX} {ι : Type uι} [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 i : ι} {x : X}
@@ -80,7 +77,6 @@ theorem cutRaw_sum_pos {X : Type uX} {ι : Type uι} [Fintype ι] [DecidableEq �
     (fun j (_hj : j ∈ Finset.univ) => cutRaw_nonneg hcut hnn j)).2
       ⟨i, Finset.mem_univ i, hi⟩
 
-
 theorem cutRaw_delta {X : Type uX} {ι : Type uι} [DecidableEq ι]
     {cut : X → ℝ} {a : ι → X → ℝ} {i0 : ι} {x : X}
     (hcut : cut x = 1) :
@@ -88,7 +84,6 @@ theorem cutRaw_delta {X : Type uX} {ι : Type uι} [DecidableEq ι]
       ∀ i, i ≠ i0 → cutRaw cut a i0 i x = 0 := by
   refine ⟨cutRaw_same cut a i0 x, fun i hi => ?_⟩
   rw [cutRaw_of_ne cut a i0 i x hi, hcut, sub_self, zero_mul]
-
 
 noncomputable def rawWeights {X : Type uX} {ι : Type uι} [Fintype ι]
     (a : ι → X → ℝ) (x : X) (i : ι) : ℝ :=
@@ -99,7 +94,6 @@ theorem rawWeights_sum {X : Type uX} {ι : Type uι} [Fintype ι]
     ∑ i, rawWeights a x i = 1 := by
   simp only [rawWeights, ← Finset.sum_div]
   exact div_self hne
-
 
 theorem rawWeights_nonneg {X : Type uX} {ι : Type uι} [Fintype ι]
     {a : ι → X → ℝ} {x : X} (hnn : ∀ j, 0 ≤ a j x) (i : ι) :

@@ -161,7 +161,6 @@ theorem tensorHeatWithDrift0SAt_apply
         nablaA (Fin.cons (X x) tail) := by
   exact tensorHeatWithDrift0SMetricAt_apply (I := I) (G.metric t) X nabla2A nablaA tail
 
-
 def tensorHeatWithDrift2MetricAt
     (g : SmoothRiemannianMetric I M)
     (X : (x : M) -> TangentSpace I x)
@@ -188,7 +187,6 @@ theorem tensorHeatWithDrift2MetricAt_apply
         nablaA (Fin.cons (X x) v) := by
   simp [tensorHeatWithDrift2MetricAt]
 
-
 def tensorHeatWithDrift2At
     (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -214,7 +212,6 @@ theorem tensorHeatWithDrift2At_apply
       metricTraceFirstTwo0SAt (I := I) (G.metric t) nabla2A v +
         nablaA (Fin.cons (X x) v) := by
   exact tensorHeatWithDrift2MetricAt_apply (I := I) (G.metric t) X nabla2A nablaA v
-
 
 def tensorHeatWithDrift2QuadMetricAt
     (g : SmoothRiemannianMetric I M)
@@ -297,7 +294,6 @@ theorem tensorHeatWithDrift2QuadMetricAt_zero
   rw [tensorHeatWithDrift2QuadMetricAt_eq]
   rw [metricTraceFirstTwo0SAt_zero]
   simp
-
 
 def tensorHeatWithDrift2QuadAt
     (G : MetricConnectionFamily (I := I) (M := M) Time)

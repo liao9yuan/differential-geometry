@@ -30,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem solution_isMetricCompatible
@@ -526,7 +525,6 @@ theorem cotangentSharp_orthoBasis_expand'
   · intro j _ hj; rw [hoff i j (fun h => hj h.symm), zero_mul]
   · intro h; exact absurd (Finset.mem_univ i) h
 
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor05_vec5_sum_last
@@ -555,7 +553,6 @@ theorem tensor05_vec5_sum_last
         (coef e • vecs e)) from rfl]
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in

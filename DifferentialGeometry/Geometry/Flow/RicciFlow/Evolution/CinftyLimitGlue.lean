@@ -113,6 +113,7 @@ structure CinftyLimitData
       Tendsto (fun s : ℝ =>
         Integral.Measure.chartGramMatrix (I := I) (g_fam s) x₀ x i j) (𝓝[<] omega)
         (𝓝 (Integral.Measure.chartGramMatrix (I := I) limitMetric x₀ x i j))
+
   ricci_match :
     ∀ (x : M) (v w : TangentSpace I x),
       Tendsto
@@ -370,6 +371,7 @@ structure CinftyGlueData
           Integral.Measure.chartGramMatrix (I := I)
             (gluedFamily (I := I) g_fam r omega p.1) x₀ p.2 i j)
         (Set.Ioo α (omega + ε) ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
+
   gram_cont :
     ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
@@ -377,6 +379,7 @@ structure CinftyGlueData
           Integral.Measure.chartGramMatrix (I := I)
             (gluedFamily (I := I) g_fam r omega p.1) x₀ p.2 i j)
         (Set.Ico α (omega + ε) ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
+
   metric_match :
     ∀ x : M, ∀ v w : TangentSpace I x,
       Tendsto (fun s : ℝ => (g_fam s).inner x v w) (𝓝[<] omega)

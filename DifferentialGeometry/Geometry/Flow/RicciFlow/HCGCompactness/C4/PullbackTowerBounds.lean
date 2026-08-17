@@ -79,6 +79,7 @@ theorem covStep_zero (gRef : SmoothRiemannianMetric I M) (s : Nat)
   exact add_left_cancel h2
 
 set_option backward.isDefEq.respectTransparency false in
+
 theorem iterCov_metric_zero (g : SmoothRiemannianMetric I M) (a : Nat) :
     iterCov (I := I) g 2 (Tensor0SBundle.metricTensorField (I := I) g) (a + 1) = 0 := by
   induction a with
@@ -130,6 +131,7 @@ theorem covDOF_zero (gRef : SmoothRiemannianMetric I M) (a : Nat) :
   simpa using h
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [SigmaCompactSpace M] in
 theorem t02Norm_eq_iterCov [I.Boundaryless] {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -207,6 +209,7 @@ theorem inner_le_of_c0
   · nlinarith [abs_le.mp habs]
 
 set_option backward.isDefEq.respectTransparency false in
+
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sqrt_normSq_two_le
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}

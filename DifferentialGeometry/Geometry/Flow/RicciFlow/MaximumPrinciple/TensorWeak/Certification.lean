@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import DifferentialGeometry.Geometry.Operator.LaplacianMinimum
 open DifferentialGeometry.PDE.RicciFlow
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -166,7 +165,6 @@ theorem tensorBarrier_initial_positive
   have hbarrier : 0 < epsilon * (delta + t0 - t0) * (G t0).inner x v v :=
     mul_pos hcoeff hmetric
   exact add_pos_of_nonneg_of_pos hS hbarrier
-
 
 private theorem exists_small_delta
     {t0 T delta0 K : Real}

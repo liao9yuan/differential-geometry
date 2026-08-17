@@ -41,7 +41,6 @@ def CurvDerivBoundOnWindow
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     CurvDerivBoundOn (I := I) K p (gSeq i t) C
 
-
 def CurvDerivBoundsOnWindow
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -290,7 +289,6 @@ noncomputable def metricMixedDeriv
   iteratedDeriv (𝕜 := Real) (F := F) q
     (fun s : Real => metricCovDeriv (I := I) (h s) gRef p x) t
 
-
 noncomputable def metricMixedDerivNorm
     (p q : Nat) (h : Real -> SmoothRiemannianMetric I M)
     (gRef : SmoothRiemannianMetric I M) (x : M) (t : Real) : Real :=
@@ -307,7 +305,6 @@ theorem metricMixedDerivNorm_zero
       metricCovDerivNorm (I := I) p (h t) gRef x := by
   simp [metricMixedDerivNorm, metricMixedDeriv, metricCovDerivNorm]
 
-
 def MetricMixedDerivBoundOnWindow
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -316,7 +313,6 @@ def MetricMixedDerivBoundOnWindow
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     forall x : M, x ∈ K ->
       metricMixedDerivNorm (I := I) p q (gSeq i) gRef x t <= C
-
 
 def MetricMixedDerivBoundsOnWindow
     (K : Set M) (β ψ : Real)
@@ -329,7 +325,6 @@ def MetricMixedDerivBoundsOnWindow
         forall b : Nat, b <= q ->
           forall x : M, x ∈ K ->
             metricMixedDerivNorm (I := I) a b (gSeq i) gRef x t <= C p q
-
 
 omit [SigmaCompactSpace M] in
 theorem metricMixedWindow_of_pointwise
@@ -344,7 +339,6 @@ theorem metricMixedWindow_of_pointwise
     MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef p q C := by
   intro i t ht x hx
   exact hpoint i t ht x hx
-
 
 omit [SigmaCompactSpace M] in
 theorem metricMixedBoundsWindow_of_pointwise
@@ -363,7 +357,6 @@ theorem metricMixedBoundsWindow_of_pointwise
   intro i t ht p q a ha b hb x hx
   exact hpoint i t ht p q a ha b hb x hx
 
-
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSq0S_smul
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
@@ -377,7 +370,6 @@ theorem normSq0S_smul
     Tensor0SBundle.MetricFiberData.inner
   rw [((Tensor0SBundle.tensor0SMetricData (I := I) gRef x s).flat.map_smul c A)]
   simp [pow_two, mul_assoc]
-
 
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_smul
@@ -405,7 +397,6 @@ def MetricMixedDerivOneEvolutionOn
     metricMixedDeriv (I := I) p 1 (gSeq i) gRef x t =
       (-2 : Real) • nablaRic i t x
 
-
 omit [SigmaCompactSpace M] in
 theorem metricMixedDeriv_one_eq_of_evolution
     {K : Set M} {β ψ : Real}
@@ -421,7 +412,6 @@ theorem metricMixedDeriv_one_eq_of_evolution
     metricMixedDeriv (I := I) p 1 (gSeq i) gRef x t =
       (-2 : Real) • nablaRic i t x := by
   exact hmixed i x hx t ht
-
 
 def metricMixedOneConstant (Cpp Csp0 Cppp : Real) : Real :=
   2 * (Cpp * Csp0 + Cppp)
@@ -498,7 +488,6 @@ theorem metricMixedOneWindow_of_ric_bound
     unfold metricMixedOneConstant
     exact mul_le_mul_of_nonneg_left hric_sp (by norm_num : (0 : Real) <= 2)
   simpa [hnorm_eq] using hmain
-
 
 structure MetricAllTimesConclusion
     (K : Set M) (β ψ : Real)
@@ -1013,7 +1002,6 @@ def MetricMixedDerivLayerEvolutionOn
     metricMixedDeriv (I := I) p q (gSeq i) gRef x t =
       (-2 : Real) • layer i t x
 
-
 def metricMixedQConstant (Cpq : Real) : Real :=
   2 * Cpq
 
@@ -1065,7 +1053,6 @@ theorem metricMixedQWindow_of_evolution
     mul_le_mul_of_nonneg_left hlayer (by norm_num : (0 : Real) <= 2)
   simpa [hnorm, metricMixedQConstant] using hscaled
 
-
 omit [SigmaCompactSpace M] in
 theorem metricMixedZeroWindow_of_spatial
     {K : Set M} {β ψ : Real}
@@ -1079,14 +1066,12 @@ theorem metricMixedZeroWindow_of_spatial
   intro i t ht x hx
   simpa using h i t ht x hx
 
-
 noncomputable def metricMixedCumulativeConstant
     (D : Nat -> Nat -> Real) (p q : Nat) : Real :=
   (Finset.range (p + 1) ×ˢ Finset.range (q + 1)).sup' (by
     refine ⟨(0, 0), ?_⟩
     exact Finset.mem_product.mpr ⟨by simp, by simp⟩)
     (fun ab : Nat × Nat => D ab.1 ab.2)
-
 
 omit [SigmaCompactSpace M] in
 theorem metricMixedBoundsWindow_of_layerBounds
@@ -1130,7 +1115,6 @@ structure MetricAllTimesInput
     forall a b : Nat,
       MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef a b
         (layerC a b)
-
 
 noncomputable def metricAllTimes
     {K : Set M} {β ψ : Real}

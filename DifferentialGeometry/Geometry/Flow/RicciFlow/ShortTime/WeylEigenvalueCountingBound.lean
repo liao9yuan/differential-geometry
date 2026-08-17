@@ -21,7 +21,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-      [I.Boundaryless] [T2Space M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 theorem weyl_pointwise_diagonalKernel_bound_of_closed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.Basic
-import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
@@ -7,7 +7,6 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
 
 noncomputable section
 
@@ -34,6 +33,12 @@ def metricCauchySchwarzBound
     (δ : ℝ) : Prop :=
   ∀ (x : M) (v w : TangentSpace I x),
     |h x v w| ≤ δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)
+
+abbrev gFibreOpBound
+    (g : SmoothRiemannianMetric I M)
+    (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (δ : ℝ) : Prop :=
+  metricCauchySchwarzBound g h δ
 
 noncomputable def perturbedInner
     (g : SmoothRiemannianMetric I M)
@@ -100,6 +105,15 @@ theorem perturbedInner_pos_of_metricCauchySchwarzBound
   have hlb := perturbedInner_self_lower_bound (I := I) (M := M) g h hδ x v
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
+
+omit [Module.Finite ℝ E] in
+theorem perturbedInner_pos_of_gOpBound
+    (g : SmoothRiemannianMetric I M)
+    (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ)
+    (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
+    0 < perturbedInner g h x v v :=
+  perturbedInner_pos_of_metricCauchySchwarzBound g h hδ_lt hδ x v hv
 
 omit [Module.Finite ℝ E] in
 private lemma gSublevel_isVonNBounded
@@ -174,7 +188,7 @@ theorem perturbedInner_isVonNBounded
   exact (gSublevel_isVonNBounded (I := I) (M := M) g x hr_pos).subset hsub
 
 theorem perturbedInner_contMDiff
-    [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hsmooth : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -283,7 +297,7 @@ noncomputable def perturbedMetric
   rfl
 
 theorem exists_posDef_perturbation_radius
-    [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless]
+    [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) :
     ∃ δ : ℝ, 0 < δ ∧

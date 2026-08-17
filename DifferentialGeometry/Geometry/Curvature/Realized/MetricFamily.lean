@@ -604,3 +604,23 @@ omit [FiniteDimensional ℝ E] in
 end IntervalSmoothness
 
 end DifferentialGeometry.Geometry.Curvature
+
+namespace DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Curvature
+open scoped Manifold ContDiff
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {H : Type*} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+abbrev RealizedMetricFamily (Time : Type*) :=
+  DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
+    (I := I) (M := M) Time
+
+abbrev RealizedMetricFamilyOn (D : RealTimeInterval) :=
+  DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn
+    (I := I) (M := M) D
+
+end DifferentialGeometry.Integral.Connection

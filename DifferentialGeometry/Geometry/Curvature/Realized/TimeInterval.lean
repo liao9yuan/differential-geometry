@@ -525,3 +525,18 @@ def univ (t₀ : Real) : RealTimeInterval where
 end RealTimeInterval
 
 end DifferentialGeometry.Geometry.Curvature
+
+namespace DifferentialGeometry.Integral.Connection
+
+abbrev RealTimeInterval := DifferentialGeometry.Geometry.Curvature.RealTimeInterval
+
+namespace RealTimeInterval
+
+abbrev FlowTime (D : RealTimeInterval) :=
+  DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D
+
+abbrev RegularTime (D : RealTimeInterval) :=
+  DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D
+
+end RealTimeInterval
+end DifferentialGeometry.Integral.Connection
