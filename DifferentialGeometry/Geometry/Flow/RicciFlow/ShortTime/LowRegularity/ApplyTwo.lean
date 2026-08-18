@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Forc
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.LiftHfLo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.LiftNTerm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.LiftSmall
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RealizeTwo
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.CrossScaleCompatibility
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.ClassBounds
 
 noncomputable section

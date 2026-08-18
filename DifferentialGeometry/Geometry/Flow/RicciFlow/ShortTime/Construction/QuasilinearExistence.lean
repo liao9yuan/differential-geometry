@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.QuasilinearMetricShor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegSolutionJointlySmooth
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.RealizedSolution
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.MetricTensorIdentities
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckChartRegularityFromJoint
 open DifferentialGeometry.Analysis.Elliptic
 

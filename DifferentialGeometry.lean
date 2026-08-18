@@ -2602,8 +2602,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.Variatio
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.CoordinateRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.FrozenSlot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.Raising
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.Realization
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.IteratedRealization
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.CovariantDerivativeFields
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Curvature.IteratedCovariantDerivativeFields
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.EvolutionEquation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.IntrinsicDerivation
@@ -2933,7 +2933,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Regularity
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckChartRegularityFromJoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.InitialData
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.InteriorTimeRegularity
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.RealizedSolution
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.MetricTensorIdentities
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurck.RicciEquation
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Construction.DuhamelTimeDerivative
@@ -2954,7 +2954,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Forc
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.InsertH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.LieOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.PathLower
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Realize
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.SobolevMetricSmallness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RemainderH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Rhs0Tame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RhsOne
@@ -2967,8 +2967,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Construction.WeakP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Construction.WeakParabolic.Terms
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Construction.MildSolutionH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Construction.QuasilinearExistence
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Realization.Transport
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Realization.TransportCompatibility
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SpectralRepresentation.PointwiseEquation
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SpectralRepresentation.HighRegularityEvaluation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Regularity.C2Continuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.Construction.WeylEigenvalueCount
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.GaugeRecovery.BasepointMotion
@@ -3693,7 +3693,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Lift
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.LiftTwo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.PrincipalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RHSSymm
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RealizeTwo
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.CrossScaleCompatibility
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.EnergyLadder
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H5Energy
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H4Energy
@@ -3760,7 +3760,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Unif
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.PhiCurv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.PhiDevH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.PhiDevH3
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.RealizeRadius
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.MetricPerturbationRadius
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.RemainderH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.RicciOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Uniform.RhsConvex
