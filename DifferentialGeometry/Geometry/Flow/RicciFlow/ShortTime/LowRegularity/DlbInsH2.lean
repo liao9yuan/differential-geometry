@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.TraceH3Pairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H3CoefficientPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C0Zero
 
 noncomputable section

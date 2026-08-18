@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C0PairCurv
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing
 
 noncomputable section
 
@@ -83,7 +84,7 @@ theorem daWeightPairH2
     LowBaseInternal.fullSlot_bdd_h2 (I := I) (M := M) g
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   obtain ⟨Bed, hBed, hslotD⟩ :=
-    full_pair_h2 (I := I) (M := M) hDim g
+    full_raised_endo_field_pair_h2 (I := I) (M := M) hDim g
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   obtain ⟨C, hC, happ⟩ :=
     appRoot_h2 (I := I) (M := M) hDim g 0 2 2
@@ -305,7 +306,7 @@ theorem daOnePairH2
     dagLow_h2_rf (I := I) (M := M) hDim g
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   obtain ⟨Bd, hBd, hdagD⟩ :=
-    dag_pair_h2 (I := I) (M := M) hDim g
+    dag_low_op_pair_h2 (I := I) (M := M) hDim g
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   obtain ⟨Ca, hCa, happ⟩ :=
     appRoot_h2 (I := I) (M := M) hDim g 3 4 2

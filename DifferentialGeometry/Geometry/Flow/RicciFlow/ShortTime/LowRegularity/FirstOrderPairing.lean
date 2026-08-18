@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2Pairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing
 
 noncomputable section
 
@@ -121,7 +121,7 @@ theorem c1_pair_lip
           lowJetSq (I := I) (M := M) g 2 (AT.C1 - AU.C1) ≤
         (K R * (1 + A + A4) * (D4 + D3 + D2 + N)) ^ 2 := by
   obtain ⟨ρ0, C0f, C1f, hρ0, hC0f, hC1f, hc0⟩ :=
-    c0Diff_h2_tame (I := I) (M := M) hDim g
+    low_c0_diff_h2_tame (I := I) (M := M) hDim g
   obtain ⟨ρ1, E0, E1, hρ1, hE0, hE1, hc1⟩ :=
     c1Diff_tame (I := I) (M := M) hDim g
   refine ⟨min ρ0 ρ1, fun R => C0f R + C1f R + E0 + 2 * E1,

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2Pairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2Covariant
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.OperatorJetWindows
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TsRungs
 
@@ -59,7 +59,7 @@ private theorem grad_sq
     (I := I) (M := M) g r s i S x
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-private theorem grad_h2
+theorem low_jet_sq_cov_grad_two_le_three
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
     lowJetSq (I := I) (M := M) g 2
@@ -72,7 +72,7 @@ private theorem grad_h2
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 h2 ⊢
   rw [h0, h1, h2]
-  nlinarith [sq_nonneg ‖S‖]
+  nlinarith only [sq_nonneg ‖S‖]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet3_grad
@@ -89,7 +89,7 @@ private theorem jet3_grad
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 h2 ⊢
   rw [h0, h1, h2]
-  nlinarith [sq_nonneg
+  nlinarith only [sq_nonneg
     ‖iteratedCovGrad (I := I) g r s 1 S‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g r s 2 S‖]
 
@@ -170,7 +170,8 @@ theorem app_h3_tame
       _ ≤ C1 * lowJetSq (I := I) (M := M) g 3 Φ *
             lowJetSq (I := I) (M := M) g 2 W := by
         exact mul_le_mul_of_nonneg_right
-          (mul_le_mul_of_nonneg_left (grad_h2 (I := I) (M := M) g Φ) hC1) hW2
+          (mul_le_mul_of_nonneg_left
+            (low_jet_sq_cov_grad_two_le_three (I := I) (M := M) g Φ) hC1) hW2
       _ = C1 * X := by simp only [X]; ring
   have hQ2 : lowJetSq (I := I) (M := M) g 2 Q ≤ C2 * fr * Z := by
     calc
@@ -192,7 +193,8 @@ theorem app_h3_tame
             (covGrad (I := I) (M := M) g p r W))
       _ ≤ C2 * (fr * lowJetSq (I := I) (M := M) g 2 Φ) *
             lowJetSq (I := I) (M := M) g 3 W := by
-        exact mul_le_mul_of_nonneg_left (grad_h2 (I := I) (M := M) g W)
+        exact mul_le_mul_of_nonneg_left
+          (low_jet_sq_cov_grad_two_le_three (I := I) (M := M) g W)
           (mul_nonneg hC2 (mul_nonneg hfr hΦ2))
       _ = C2 * fr * Z := by simp only [Z]; ring
   have hgrad : lowJetSq (I := I) (M := M) g 2
@@ -282,7 +284,7 @@ private theorem endo_slot_jet
             (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖ ^ 2 := by
       rw [Finset.mul_sum]
 
-private theorem perturb_jet
+theorem symm_raise_endo_jet_le
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (D : SmoothCcTensor g 0 2)
     (hD : symmS (I := I) (M := M) g D = D) :
@@ -475,13 +477,15 @@ theorem inv_slot_pair_h3
     calc
       lowJetSq (I := I) (M := M) g 2 P ≤
           fr * lowJetSq (I := I) (M := M) g 2 (T - U) := by
-        simpa only [P, fr] using perturb_jet (I := I) (M := M) g 2 (T - U) hsymm
+        simpa only [P, fr] using
+          symm_raise_endo_jet_le (I := I) (M := M) g 2 (T - U) hsymm
       _ ≤ fr * D2 ^ 2 := mul_le_mul_of_nonneg_left hTU2 hfr
   have hP3 : lowJetSq (I := I) (M := M) g 3 P ≤ fr * D3 ^ 2 := by
     calc
       lowJetSq (I := I) (M := M) g 3 P ≤
           fr * lowJetSq (I := I) (M := M) g 3 (T - U) := by
-        simpa only [P, fr] using perturb_jet (I := I) (M := M) g 3 (T - U) hsymm
+        simpa only [P, fr] using
+          symm_raise_endo_jet_le (I := I) (M := M) g 3 (T - U) hsymm
       _ ≤ fr * D3 ^ 2 := mul_le_mul_of_nonneg_left hTU3 hfr
   have hH3 : 0 ≤ H3 := mul_nonneg hKh (by positivity)
   have hX2 : lowJetSq (I := I) (M := M) g 2 X ≤
@@ -659,7 +663,7 @@ private theorem insert_succ_l2
   rw [MeasureTheory.integral_const_mul, hint] at hsq
   exact hsq
 
-private theorem insert_succ_jet
+theorem slot_insert_endo_succ_jet_le
     (g : SmoothRiemannianMetric I M) (s m : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -780,7 +784,7 @@ theorem trace1_pair_h3
         lowJetSq (I := I) (M := M) g 2 D₂ ≤
             fr * lowJetSq (I := I) (M := M) g 2 D₁ := by
           simpa only [D₂, D₁, fr] using
-            insert_succ_jet (I := I) (M := M) g 1 2 Λ
+            slot_insert_endo_succ_jet_le (I := I) (M := M) g 1 2 Λ
         _ ≤ fr * (Bi R * Q) ^ 2 := mul_le_mul_of_nonneg_left hD₁2 hfr
     have hD₂3 : lowJetSq (I := I) (M := M) g 3 D₂ ≤
         fr * (Bi R * Q) ^ 2 := by
@@ -788,7 +792,7 @@ theorem trace1_pair_h3
         lowJetSq (I := I) (M := M) g 3 D₂ ≤
             fr * lowJetSq (I := I) (M := M) g 3 D₁ := by
           simpa only [D₂, D₁, fr] using
-            insert_succ_jet (I := I) (M := M) g 1 3 Λ
+            slot_insert_endo_succ_jet_le (I := I) (M := M) g 1 3 Λ
         _ ≤ fr * (Bi R * Q) ^ 2 := mul_le_mul_of_nonneg_left hD₁3 hfr
     have htrace :
         pureTrace (I := I) (M := M) g gT 1 -

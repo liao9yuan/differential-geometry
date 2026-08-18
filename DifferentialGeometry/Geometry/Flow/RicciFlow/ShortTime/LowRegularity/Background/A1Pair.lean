@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Back
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C0PairH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C1Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.FirstOrderPairing
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2Pairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing
 
 noncomputable section
 
@@ -776,7 +776,7 @@ theorem c0_bg_pair_h2
           (B0 R * D3 + B1 R * D2 + B1 R * A * D2 +
             B1 R * N + B1 R * A * N) ^ 2) := by
   obtain ⟨ρc, Bs, hρc, hBs, hc⟩ :=
-    c0_pair_h3 (I := I) (M := M) hDim g
+    low_c0_diff_h3_tame (I := I) (M := M) hDim g
   obtain ⟨ρb, B0, B1, hρb, hB0, hB1, hb⟩ :=
     bg0_pair_h2 (I := I) (M := M) hDim g gB
   refine ⟨min ρc ρb, Bs, B0, B1, lt_min hρc hρb,
@@ -1393,7 +1393,7 @@ theorem a1Hi_self_pair
           ((B R * (1 + A ^ 2) * (D3 + D2 + N)) ^ 2 +
             (O0 * D3 + O1 * N + O1 * A * N) ^ 2) := by
   obtain ⟨ρ0, B, hρ0, hB, hc0⟩ :=
-    c0_pair_h3 (I := I) (M := M) hDim g
+    low_c0_diff_h3_tame (I := I) (M := M) hDim g
   obtain ⟨ρ1, O0, O1, hρ1, hO0, hO1, hc1⟩ :=
     c1_bg_pair_h2 (I := I) (M := M) hDim g g
   obtain ⟨Ca, hCa, hop⟩ := a1_diff (I := I) (M := M) hDim g
