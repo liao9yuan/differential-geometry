@@ -26,6 +26,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
+private theorem fin_bijective_of_leftInverse {m n : ℕ} (f : Fin m → Fin n) (g : Fin n → Fin m)
+    (h : Function.LeftInverse g f) (hcard : m = n) : Function.Bijective f := by
+  rw [Fintype.bijective_iff_injective_and_card]
+  exact ⟨h.injective, by simpa only [Fintype.card_fin] using hcard⟩
+
 def tfPos (k : ℕ) (q : Fin (4 + (k + 1))) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) → Fin ((4 + (k + 1)) + 2 * (2 + 0)) := fun a =>
   if a.val = 0 then ⟨0, by omega⟩
@@ -39,12 +44,46 @@ def tfPos (k : ℕ) (q : Fin (4 + (k + 1))) :
 def sigmaCurvPos (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) ≃ Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tfPos k q) (by
-    have hqlt := q.isLt
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨fun a b hab => ?_, by simp only [Fintype.card_fin]⟩
-    apply Fin.ext
-    simp only [tfPos] at hab
-    split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
+    let inv : Fin ((4 + (k + 1)) + 2 * (2 + 0)) →
+        Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) := fun a =>
+      if a.val = 0 then ⟨0, by omega⟩
+      else if a.val = 1 then ⟨k + 5, by omega⟩
+      else if a.val = 2 then ⟨q.val, by have := q.isLt; omega⟩
+      else if a.val = 3 then ⟨k + 8, by omega⟩
+      else if a.val = 4 then ⟨k + 6, by omega⟩
+      else if a.val = 4 + q.val then ⟨k + 7, by omega⟩
+      else ⟨a.val - 4, by have := a.isLt; omega⟩
+    apply fin_bijective_of_leftInverse (tfPos k q) inv
+    · intro a
+      have hqlt := q.isLt
+      have hq1 : 4 + q.val ≠ 1 := by omega
+      have hq2 : 4 + q.val ≠ 2 := by omega
+      have hq3 : 4 + q.val ≠ 3 := by omega
+      have hq4 : 4 + q.val ≠ 4 := by omega
+      have hq5 : k + 5 ≠ q.val := by omega
+      have hq6 : k + 6 ≠ q.val := by omega
+      have hq7 : k + 7 ≠ q.val := by omega
+      apply Fin.ext
+      rcases eq_or_ne a.val 0 with h0 | h0
+      · simp [tfPos, inv, *]
+      rcases eq_or_ne a.val q.val with haq | haq
+      · simp [tfPos, inv, *]
+      by_cases hle : a.val ≤ k + 4
+      · have h40 : 4 + a.val ≠ 0 := by omega
+        have h41 : 4 + a.val ≠ 1 := by omega
+        have h42 : 4 + a.val ≠ 2 := by omega
+        have h43 : 4 + a.val ≠ 3 := by omega
+        have h44 : 4 + a.val ≠ 4 := by omega
+        have h4q : 4 + a.val ≠ 4 + q.val := by omega
+        simp [tfPos, inv, *]
+      rcases eq_or_ne a.val (k + 5) with h5 | h5
+      · simp [tfPos, inv, *]
+      rcases eq_or_ne a.val (k + 6) with h6 | h6
+      · simp [tfPos, inv, *]
+      rcases eq_or_ne a.val (k + 7) with h7 | h7
+      · simp [tfPos, inv, *]
+      · simp [tfPos, inv, *]; omega
+    · omega)
 
 theorem sigmaCurvPos_cast_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0)
     (p : Fin (4 + (k + 1))) :
@@ -319,11 +358,37 @@ def sigmaDiffA (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tfDiffA k q) (by
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨fun a b hab => ?_, by simp only [Fintype.card_fin]; omega⟩
-    apply Fin.ext
-    simp only [tfDiffA] at hab
-    split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
+    let inv : Fin ((4 + (k + 1)) + 2 * (2 + 0)) →
+        Fin (((4 + 1) + (4 + k)) + 2 * 0) := fun a =>
+      if a.val = 0 then ⟨0, by omega⟩
+      else if a.val = 1 then ⟨1, by omega⟩
+      else if a.val = 2 then ⟨4, by omega⟩
+      else if a.val = 3 then ⟨5 + q.val, by have := q.isLt; omega⟩
+      else if a.val = 4 then ⟨2, by omega⟩
+      else if a.val = 5 + q.val then ⟨3, by omega⟩
+      else ⟨a.val, by omega⟩
+    apply fin_bijective_of_leftInverse (tfDiffA k q) inv
+    · intro a
+      have hq0 : 5 + q.val ≠ 0 := by omega
+      have hq1 : 5 + q.val ≠ 1 := by omega
+      have hq2 : 5 + q.val ≠ 2 := by omega
+      have hq3 : 5 + q.val ≠ 3 := by omega
+      have hq4 : 5 + q.val ≠ 4 := by omega
+      apply Fin.ext
+      rcases eq_or_ne a.val 0 with h0 | h0
+      · simp [tfDiffA, inv, *]
+      rcases eq_or_ne a.val 1 with h1 | h1
+      · simp [tfDiffA, inv, *]
+      rcases eq_or_ne a.val 2 with h2 | h2
+      · simp [tfDiffA, inv, *]
+      rcases eq_or_ne a.val 3 with h3 | h3
+      · simp [tfDiffA, inv, *]
+      rcases eq_or_ne a.val 4 with h4 | h4
+      · simp [tfDiffA, inv, *]
+      rcases eq_or_ne a.val (5 + q.val) with hq | hq
+      · simp [tfDiffA, inv, *]
+      · simp [tfDiffA, inv, *]
+    · omega)
 
 @[simp]
 theorem sigmaDiffA_cast_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + 1)) :
@@ -466,11 +531,37 @@ def sigmaDiffB (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 0) + (4 + (k + 1))) + 2 * 0) ≃
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tfDiffB k q) (by
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨fun a b hab => ?_, by simp only [Fintype.card_fin]; omega⟩
-    apply Fin.ext
-    simp only [tfDiffB] at hab
-    split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
+    let inv : Fin ((4 + (k + 1)) + 2 * (2 + 0)) →
+        Fin (((4 + 0) + (4 + (k + 1))) + 2 * 0) := fun a =>
+      if a.val = 0 then ⟨0, by omega⟩
+      else if a.val = 1 then ⟨4, by omega⟩
+      else if a.val = 2 then ⟨3, by omega⟩
+      else if a.val = 3 then ⟨5 + q.val, by have := q.isLt; omega⟩
+      else if a.val = 4 then ⟨1, by omega⟩
+      else if a.val = 5 + q.val then ⟨2, by omega⟩
+      else ⟨a.val, by omega⟩
+    apply fin_bijective_of_leftInverse (tfDiffB k q) inv
+    · intro a
+      have hq0 : 5 + q.val ≠ 0 := by omega
+      have hq1 : 5 + q.val ≠ 1 := by omega
+      have hq2 : 5 + q.val ≠ 2 := by omega
+      have hq3 : 5 + q.val ≠ 3 := by omega
+      have hq4 : 5 + q.val ≠ 4 := by omega
+      apply Fin.ext
+      rcases eq_or_ne a.val 0 with h0 | h0
+      · simp [tfDiffB, inv, *]
+      rcases eq_or_ne a.val 1 with h1 | h1
+      · simp [tfDiffB, inv, *]
+      rcases eq_or_ne a.val 2 with h2 | h2
+      · simp [tfDiffB, inv, *]
+      rcases eq_or_ne a.val 3 with h3 | h3
+      · simp [tfDiffB, inv, *]
+      rcases eq_or_ne a.val 4 with h4 | h4
+      · simp [tfDiffB, inv, *]
+      rcases eq_or_ne a.val (5 + q.val) with hq | hq
+      · simp [tfDiffB, inv, *]
+      · simp [tfDiffB, inv, *]
+    · omega)
 
 @[simp]
 theorem sigmaDiffB_cast_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + 0)) :
@@ -624,11 +715,37 @@ def sigmaRic1 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tfRic1 k q) (by
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨fun a b hab => ?_, by simp only [Fintype.card_fin]; omega⟩
-    apply Fin.ext
-    simp only [tfRic1] at hab
-    split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
+    let inv : Fin ((4 + (k + 1)) + 2 * (2 + 0)) →
+        Fin (((4 + 1) + (4 + k)) + 2 * 0) := fun a =>
+      if a.val = 0 then ⟨1, by omega⟩
+      else if a.val = 1 then ⟨4, by omega⟩
+      else if a.val = 2 then ⟨3, by omega⟩
+      else if a.val = 3 then ⟨5 + q.val, by have := q.isLt; omega⟩
+      else if a.val = 4 then ⟨0, by omega⟩
+      else if a.val = 5 + q.val then ⟨2, by omega⟩
+      else ⟨a.val, by omega⟩
+    apply fin_bijective_of_leftInverse (tfRic1 k q) inv
+    · intro a
+      have hq0 : 5 + q.val ≠ 0 := by omega
+      have hq1 : 5 + q.val ≠ 1 := by omega
+      have hq2 : 5 + q.val ≠ 2 := by omega
+      have hq3 : 5 + q.val ≠ 3 := by omega
+      have hq4 : 5 + q.val ≠ 4 := by omega
+      apply Fin.ext
+      rcases eq_or_ne a.val 0 with h0 | h0
+      · simp [tfRic1, inv, *]
+      rcases eq_or_ne a.val 1 with h1 | h1
+      · simp [tfRic1, inv, *]
+      rcases eq_or_ne a.val 2 with h2 | h2
+      · simp [tfRic1, inv, *]
+      rcases eq_or_ne a.val 3 with h3 | h3
+      · simp [tfRic1, inv, *]
+      rcases eq_or_ne a.val 4 with h4 | h4
+      · simp [tfRic1, inv, *]
+      rcases eq_or_ne a.val (5 + q.val) with hq | hq
+      · simp [tfRic1, inv, *]
+      · simp [tfRic1, inv, *]
+    · omega)
 
 @[simp]
 theorem sigmaRic1_cast_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + 1)) :
@@ -760,11 +877,37 @@ def sigmaRic2 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tfRic2 k q) (by
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨fun a b hab => ?_, by simp only [Fintype.card_fin]; omega⟩
-    apply Fin.ext
-    simp only [tfRic2] at hab
-    split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
+    let inv : Fin ((4 + (k + 1)) + 2 * (2 + 0)) →
+        Fin (((4 + 1) + (4 + k)) + 2 * 0) := fun a =>
+      if a.val = 0 then ⟨1, by omega⟩
+      else if a.val = 1 then ⟨4, by omega⟩
+      else if a.val = 2 then ⟨3, by omega⟩
+      else if a.val = 3 then ⟨5 + q.val, by have := q.isLt; omega⟩
+      else if a.val = 4 then ⟨2, by omega⟩
+      else if a.val = 5 + q.val then ⟨0, by omega⟩
+      else ⟨a.val, by omega⟩
+    apply fin_bijective_of_leftInverse (tfRic2 k q) inv
+    · intro a
+      have hq0 : 5 + q.val ≠ 0 := by omega
+      have hq1 : 5 + q.val ≠ 1 := by omega
+      have hq2 : 5 + q.val ≠ 2 := by omega
+      have hq3 : 5 + q.val ≠ 3 := by omega
+      have hq4 : 5 + q.val ≠ 4 := by omega
+      apply Fin.ext
+      rcases eq_or_ne a.val 0 with h0 | h0
+      · simp [tfRic2, inv, *]
+      rcases eq_or_ne a.val 1 with h1 | h1
+      · simp [tfRic2, inv, *]
+      rcases eq_or_ne a.val 2 with h2 | h2
+      · simp [tfRic2, inv, *]
+      rcases eq_or_ne a.val 3 with h3 | h3
+      · simp [tfRic2, inv, *]
+      rcases eq_or_ne a.val 4 with h4 | h4
+      · simp [tfRic2, inv, *]
+      rcases eq_or_ne a.val (5 + q.val) with hq | hq
+      · simp [tfRic2, inv, *]
+      · simp [tfRic2, inv, *]
+    · omega)
 
 @[simp]
 theorem sigmaRic2_cast_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + 1)) :
@@ -896,11 +1039,37 @@ def sigmaRic3 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) ≃
       Fin ((4 + (k + 1)) + 2 * (2 + 0)) :=
   Equiv.ofBijective (tfRic3 k q) (by
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨fun a b hab => ?_, by simp only [Fintype.card_fin]; omega⟩
-    apply Fin.ext
-    simp only [tfRic3] at hab
-    split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
+    let inv : Fin ((4 + (k + 1)) + 2 * (2 + 0)) →
+        Fin (((4 + 1) + (4 + k)) + 2 * 0) := fun a =>
+      if a.val = 0 then ⟨1, by omega⟩
+      else if a.val = 1 then ⟨4, by omega⟩
+      else if a.val = 2 then ⟨0, by omega⟩
+      else if a.val = 3 then ⟨5 + q.val, by have := q.isLt; omega⟩
+      else if a.val = 4 then ⟨2, by omega⟩
+      else if a.val = 5 + q.val then ⟨3, by omega⟩
+      else ⟨a.val, by omega⟩
+    apply fin_bijective_of_leftInverse (tfRic3 k q) inv
+    · intro a
+      have hq0 : 5 + q.val ≠ 0 := by omega
+      have hq1 : 5 + q.val ≠ 1 := by omega
+      have hq2 : 5 + q.val ≠ 2 := by omega
+      have hq3 : 5 + q.val ≠ 3 := by omega
+      have hq4 : 5 + q.val ≠ 4 := by omega
+      apply Fin.ext
+      rcases eq_or_ne a.val 0 with h0 | h0
+      · simp [tfRic3, inv, *]
+      rcases eq_or_ne a.val 1 with h1 | h1
+      · simp [tfRic3, inv, *]
+      rcases eq_or_ne a.val 2 with h2 | h2
+      · simp [tfRic3, inv, *]
+      rcases eq_or_ne a.val 3 with h3 | h3
+      · simp [tfRic3, inv, *]
+      rcases eq_or_ne a.val 4 with h4 | h4
+      · simp [tfRic3, inv, *]
+      rcases eq_or_ne a.val (5 + q.val) with hq | hq
+      · simp [tfRic3, inv, *]
+      · simp [tfRic3, inv, *]
+    · omega)
 
 @[simp]
 theorem sigmaRic3_cast_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + 1)) :
