@@ -14,7 +14,6 @@ open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.Pullback

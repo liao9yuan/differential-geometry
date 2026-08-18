@@ -39,7 +39,6 @@ namespace Spectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation

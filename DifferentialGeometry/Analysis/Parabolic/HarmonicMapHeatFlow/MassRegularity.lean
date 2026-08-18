@@ -13,7 +13,6 @@ open scoped Manifold ENNReal NNReal Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Measure
 

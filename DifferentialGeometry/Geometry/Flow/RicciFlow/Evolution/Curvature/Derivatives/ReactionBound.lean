@@ -19,7 +19,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 
-open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

@@ -22,7 +22,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

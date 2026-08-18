@@ -21,7 +21,6 @@ open scoped Topology Manifold ContDiff
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-open DifferentialGeometry.Geometry.Operator
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]

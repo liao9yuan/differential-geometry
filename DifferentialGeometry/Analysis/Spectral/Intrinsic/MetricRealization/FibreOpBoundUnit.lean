@@ -12,7 +12,6 @@ open scoped Manifold ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Curvature

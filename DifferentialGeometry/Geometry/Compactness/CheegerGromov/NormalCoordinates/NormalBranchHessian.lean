@@ -27,7 +27,6 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup

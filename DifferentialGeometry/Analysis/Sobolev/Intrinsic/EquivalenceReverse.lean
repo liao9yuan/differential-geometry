@@ -27,7 +27,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 local notation "EuclN_E" =>

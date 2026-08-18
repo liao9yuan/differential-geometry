@@ -78,7 +78,6 @@ theorem ricciFromRm13At_rm04_first_trace_convention
 
 namespace Realized
 
-open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
@@ -113,7 +112,6 @@ end Realized
 namespace DimensionThree
 
 
-open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]

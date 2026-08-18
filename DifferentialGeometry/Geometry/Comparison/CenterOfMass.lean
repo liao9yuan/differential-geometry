@@ -21,7 +21,6 @@ namespace CenterOfMass
 
 open DifferentialGeometry.Integral.Measure
 
-open DifferentialGeometry.Geometry.Operator
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace

@@ -24,7 +24,6 @@ open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Analysis.ODE.Flow
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 
 section ChartPhaseVFLinearization
 

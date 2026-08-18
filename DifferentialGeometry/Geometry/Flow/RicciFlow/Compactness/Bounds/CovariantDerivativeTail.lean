@@ -16,7 +16,6 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open Bundle DifferentialGeometry.Tensor0SBundle
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow
 
 section ZeroOrder

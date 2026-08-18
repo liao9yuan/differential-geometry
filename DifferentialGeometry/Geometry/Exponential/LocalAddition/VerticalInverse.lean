@@ -10,7 +10,6 @@ open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 

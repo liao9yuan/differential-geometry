@@ -106,7 +106,6 @@ def nablaGammaDtFromNabla2RicInFrame
 
 section CoordinateConnectionVariation
 
-open DifferentialGeometry.Tensor.Coordinates
 
 section RaisedContractAlgebra
 

@@ -12,8 +12,6 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -27,10 +25,7 @@ namespace HCGCompactness
 
 open Bundle Set DifferentialGeometry.Tensor0SBundle
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff BigOperators Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]

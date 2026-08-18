@@ -16,7 +16,6 @@ open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff RealInnerProductSpace InnerProductSpace
 namespace DifferentialGeometry.Analysis.Spectral
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization

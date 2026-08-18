@@ -12,7 +12,6 @@ open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Analysis.Sobolev

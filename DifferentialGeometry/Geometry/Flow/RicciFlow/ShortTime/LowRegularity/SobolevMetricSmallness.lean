@@ -6,11 +6,9 @@ open DifferentialGeometry.Geometry.Curvature
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped ContDiff Manifold Topology
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Analysis.Spectral.MetricRealization
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

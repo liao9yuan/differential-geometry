@@ -16,7 +16,6 @@ namespace PDE
 namespace DeTurck
 
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

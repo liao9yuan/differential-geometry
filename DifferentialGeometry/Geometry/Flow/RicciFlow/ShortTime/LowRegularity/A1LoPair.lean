@@ -8,7 +8,6 @@ open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2

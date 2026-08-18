@@ -12,8 +12,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
-open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]

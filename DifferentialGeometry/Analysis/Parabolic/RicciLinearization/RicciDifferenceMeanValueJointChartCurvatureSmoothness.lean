@@ -23,14 +23,11 @@ namespace PDE
 namespace DeTurck
 namespace RicciLinearization
 
-open DifferentialGeometry
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
-open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

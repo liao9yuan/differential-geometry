@@ -19,7 +19,6 @@ namespace Perelman
 
 open DifferentialGeometry.Integral.Measure
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
 

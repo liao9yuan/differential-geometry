@@ -14,7 +14,6 @@ open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

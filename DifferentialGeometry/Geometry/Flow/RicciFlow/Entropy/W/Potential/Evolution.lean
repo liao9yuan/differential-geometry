@@ -12,7 +12,6 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 
-open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 universe u uE uH

@@ -18,7 +18,6 @@ open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
 
-open DifferentialGeometry.Geometry.Operator
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace

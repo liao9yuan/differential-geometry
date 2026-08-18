@@ -14,12 +14,10 @@ open scoped Bundle Manifold Topology ContDiff ENNReal NNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Spectral.MetricRealization

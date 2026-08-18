@@ -18,7 +18,6 @@ open Bundle DifferentialGeometry.Tensor0SBundle MeasureTheory Set Function
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.PDE.RicciFlow.Entropy
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 universe u uE uH

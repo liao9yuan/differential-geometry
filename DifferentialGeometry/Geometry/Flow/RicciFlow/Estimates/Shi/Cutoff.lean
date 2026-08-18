@@ -20,7 +20,6 @@ open Bundle Filter Set DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Laplacian
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Topology Bundle
 

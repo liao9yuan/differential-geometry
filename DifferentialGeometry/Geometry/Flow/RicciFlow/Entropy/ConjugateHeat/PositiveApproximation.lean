@@ -12,7 +12,6 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open MeasureTheory Filter
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Integration
 open DifferentialGeometry.Analysis.Laplacian

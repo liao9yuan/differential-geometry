@@ -23,7 +23,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 
 def connLaplacian_function [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}

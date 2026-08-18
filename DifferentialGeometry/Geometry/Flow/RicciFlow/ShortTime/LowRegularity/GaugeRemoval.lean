@@ -7,8 +7,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
-open DifferentialGeometry
-open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.Analysis.ODE

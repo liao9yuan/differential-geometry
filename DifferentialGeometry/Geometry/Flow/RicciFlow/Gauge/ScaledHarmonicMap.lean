@@ -11,7 +11,6 @@ open scoped Manifold ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck

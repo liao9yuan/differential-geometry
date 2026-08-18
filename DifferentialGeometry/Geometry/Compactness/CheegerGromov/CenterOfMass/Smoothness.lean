@@ -34,7 +34,7 @@ theorem cmSolution_hasStrictFDerivAt
 section ChartEquation
 
 open Set Bundle Manifold
-open scoped Topology Manifold ContDiff ENNReal
+open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -357,7 +357,7 @@ end ChartEquation
 section DiagExpIdentification
 
 open Set Bundle Manifold
-open scoped Topology Manifold ContDiff ENNReal
+open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 

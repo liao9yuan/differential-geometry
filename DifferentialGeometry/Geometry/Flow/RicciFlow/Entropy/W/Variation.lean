@@ -18,12 +18,10 @@ noncomputable section
 
 open Bundle Filter MeasureTheory DifferentialGeometry.Tensor0SBundle
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff Topology
 
 universe u uE uH

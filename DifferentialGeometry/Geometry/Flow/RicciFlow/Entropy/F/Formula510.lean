@@ -13,7 +13,6 @@ noncomputable section
 open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff

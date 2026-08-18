@@ -8,10 +8,8 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped ContDiff Manifold Topology BigOperators RealInnerProductSpace
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 variable

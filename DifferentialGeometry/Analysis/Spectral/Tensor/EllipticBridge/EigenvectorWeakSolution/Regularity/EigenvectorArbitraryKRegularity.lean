@@ -37,7 +37,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section Unconditional
 
-open DifferentialGeometry.Analysis.Spectral
 
 omit [CompleteSpace E] in
 private lemma resolventChartComponent_memWkp_of_componentFun

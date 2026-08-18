@@ -13,7 +13,6 @@ open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 
 noncomputable section
 
-open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
@@ -22,7 +21,6 @@ namespace Curvature
 
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian

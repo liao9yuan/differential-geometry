@@ -33,7 +33,6 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Sobolev
 
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation

@@ -16,7 +16,6 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization

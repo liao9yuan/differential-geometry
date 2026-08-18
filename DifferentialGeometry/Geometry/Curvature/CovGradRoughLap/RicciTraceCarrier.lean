@@ -25,7 +25,6 @@ namespace Curvature
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.TensorRSNabla

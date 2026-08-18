@@ -11,7 +11,6 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -52,10 +52,8 @@ section RealizePathJointSmoothness
 open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
-open DifferentialGeometry.Integral.Measure
 
 private local instance tensor0SModelNormedAddCommGroup_local {nn : ℕ} :
     NormedAddCommGroup (Tensor0SBundle.Tensor0SModel nn ℝ E) := inferInstance

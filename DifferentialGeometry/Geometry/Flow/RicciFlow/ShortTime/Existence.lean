@@ -27,13 +27,10 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
-open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry.Geometry.Operator
 
 theorem ricci_flow_short_time_existence
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

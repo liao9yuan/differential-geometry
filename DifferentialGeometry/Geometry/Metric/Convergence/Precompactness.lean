@@ -35,10 +35,8 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]

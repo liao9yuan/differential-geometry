@@ -19,7 +19,6 @@ open scoped Manifold ContDiff Topology BigOperators
 
 open DifferentialGeometry.Tensor0SBundle
 open Filter Topology Asymptotics
-open DifferentialGeometry.PDE.RicciFlow
 
 theorem hasDerivWithinAt_lim
     {s : Set Real} (hs : Convex Real s) {t : Real} (ht : t ∈ s)

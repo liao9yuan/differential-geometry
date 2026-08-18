@@ -16,7 +16,6 @@ namespace DifferentialGeometry.Analysis.Parabolic
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
@@ -54,11 +53,7 @@ noncomputable def deTurckRicciRHSChartSecondOrderPart
 
 section ReadOff
 
-open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
-open DifferentialGeometry.PDE.DeTurck.RicciLinearization
-open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
 variable [I.Boundaryless]
 

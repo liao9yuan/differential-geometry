@@ -18,7 +18,6 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]

@@ -10,13 +10,11 @@ open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped ContDiff Manifold Topology BigOperators
-open DifferentialGeometry
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 variable

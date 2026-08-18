@@ -7,7 +7,6 @@ open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

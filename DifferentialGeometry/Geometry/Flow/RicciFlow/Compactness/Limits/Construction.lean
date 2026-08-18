@@ -22,7 +22,6 @@ namespace PDE
 namespace RicciFlow
 
 
-open DifferentialGeometry.Geometry.Operator
 
 universe u uE uH
 

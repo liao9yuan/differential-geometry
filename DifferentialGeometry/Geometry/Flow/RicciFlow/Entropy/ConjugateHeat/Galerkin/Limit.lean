@@ -18,7 +18,6 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry.Integral.L2
 

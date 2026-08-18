@@ -36,7 +36,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section Unconditional
 
-open DifferentialGeometry.Analysis.Spectral
 
 namespace EigenvectorManifoldAggregateUnconditional
 

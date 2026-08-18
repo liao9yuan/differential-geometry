@@ -12,7 +12,6 @@ open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-open DifferentialGeometry
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
@@ -32,7 +31,6 @@ open DifferentialGeometry.Analysis.Spectral
    slotExtend smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap)
 open DifferentialGeometry.Analysis.Spectral.CurvatureCoefficientDifferenceJetTower
   (covGrad_slotExtend_toSection_rsDomDomCongr_b)
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 

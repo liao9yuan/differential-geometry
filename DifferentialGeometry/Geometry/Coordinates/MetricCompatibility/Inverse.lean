@@ -18,7 +18,6 @@ namespace DifferentialGeometry.Tensor.Coordinates
 noncomputable section
 
 open Bundle
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff BigOperators Topology
 

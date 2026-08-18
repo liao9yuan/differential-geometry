@@ -26,7 +26,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.HCGCompactness
 
 namespace DifferentialGeometry

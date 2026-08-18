@@ -14,7 +14,6 @@ namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry
 open VectorField
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

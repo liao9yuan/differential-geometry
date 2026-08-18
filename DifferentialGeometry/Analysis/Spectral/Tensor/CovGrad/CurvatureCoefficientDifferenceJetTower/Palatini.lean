@@ -22,7 +22,7 @@ namespace Spectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
   (gFibreOpBound ccTensorBilinSymm ccTensorBilin ccTensorBilin_apply ccTensorModel
     ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply ccTensorBilinSymm_symm)
@@ -46,8 +46,6 @@ open CurvatureCoefficientDifferenceJetTower
 
 section RiemannLoweredDifference
 
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Analysis.Spectral.DeTurck
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -1885,7 +1883,6 @@ section RiemannMixedBiContr
 
 set_option backward.isDefEq.respectTransparency false
 
-open DifferentialGeometry.Integral.DivergenceTheorem
 
 def riemannMixedKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) :

@@ -14,7 +14,6 @@ noncomputable section
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle DifferentialGeometry.Tensor0SBundle
-open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

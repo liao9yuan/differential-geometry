@@ -12,7 +12,6 @@ open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Spectral
 
 open scoped ContDiff Manifold Topology BigOperators
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

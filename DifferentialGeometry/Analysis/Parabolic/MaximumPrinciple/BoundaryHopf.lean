@@ -9,7 +9,6 @@ namespace DifferentialGeometry.Analysis.Parabolic
 noncomputable section
 
 open Bundle Set
-open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem

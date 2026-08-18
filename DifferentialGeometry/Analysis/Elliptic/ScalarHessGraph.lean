@@ -14,7 +14,6 @@ namespace Laplacian
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

@@ -10,9 +10,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Geometry.Connection
 open scoped Manifold ContDiff Topology Bundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

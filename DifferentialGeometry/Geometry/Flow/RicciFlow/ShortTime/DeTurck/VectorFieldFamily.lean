@@ -12,11 +12,8 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set
 open scoped Manifold ContDiff
-open DifferentialGeometry
-open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

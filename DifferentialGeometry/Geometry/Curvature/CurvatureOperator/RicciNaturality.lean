@@ -12,7 +12,6 @@ namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
 
 open VectorField
 

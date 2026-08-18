@@ -14,7 +14,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology BigOperators
-open DifferentialGeometry
 
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Tensor0SBundle

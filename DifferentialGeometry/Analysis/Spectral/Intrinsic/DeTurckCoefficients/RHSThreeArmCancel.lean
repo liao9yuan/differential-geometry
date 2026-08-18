@@ -17,11 +17,9 @@ open scoped Topology Manifold BigOperators ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization

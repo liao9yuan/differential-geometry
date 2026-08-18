@@ -18,10 +18,8 @@ open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry.Geometry.Connection
 
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor0SBundle
 

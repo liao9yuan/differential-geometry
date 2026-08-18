@@ -168,7 +168,6 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
 
 section Unconditional
 
-open DifferentialGeometry.Analysis.Spectral
 
 omit [CompleteSpace E] in
 private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem

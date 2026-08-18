@@ -1315,7 +1315,6 @@ private theorem rm04Nab2Kn_eq
   exact totalNabla0SRealizes_unique hsecond
     (nablaKRm04Field_realizes (I := I) S t 1)
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in

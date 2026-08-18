@@ -12,7 +12,6 @@ open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle DifferentialGeometry.Tensor0SBundle
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff
 

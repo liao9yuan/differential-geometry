@@ -209,8 +209,6 @@ end Analysis
 
 namespace HCGCompactness
 
-open Set
-open scoped ContDiff
 
 theorem MapCInfConvOnCompacts.paramTangentInit
     {P X : Type*}

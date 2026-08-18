@@ -607,7 +607,6 @@ end DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.Integral.Connection
 
-open DifferentialGeometry.Geometry.Curvature
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

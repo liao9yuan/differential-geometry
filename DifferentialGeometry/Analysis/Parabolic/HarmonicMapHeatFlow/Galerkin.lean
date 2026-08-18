@@ -11,9 +11,7 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Analysis.Calculus
-open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -23,13 +21,10 @@ open scoped Manifold Topology ContDiff ENNReal NNReal
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Spectral
 
 theorem coerciveODE_exists
     {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]

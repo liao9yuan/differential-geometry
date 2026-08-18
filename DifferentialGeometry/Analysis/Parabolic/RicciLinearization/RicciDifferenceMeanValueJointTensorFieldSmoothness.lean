@@ -24,7 +24,6 @@ namespace PDE
 namespace DeTurck
 namespace RicciLinearization
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

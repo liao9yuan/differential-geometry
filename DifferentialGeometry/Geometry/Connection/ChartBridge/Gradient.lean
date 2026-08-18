@@ -19,7 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 
 theorem gradient_eq_gradFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :

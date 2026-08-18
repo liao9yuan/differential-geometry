@@ -466,12 +466,11 @@ lemma norm_lt_exp_div
 
 section GaussVariation
 
-open Bundle Topology
+open Topology
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Variation
-open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompleteSpace E] in
 lemma gauss_t2Space_base (I : ModelWithCorners ℝ E H) [ChartedSpace H M]
@@ -1064,12 +1063,11 @@ end GaussVariation
 
 section GaussAssembly
 
-open Bundle Topology
+open Topology
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Variation
-open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 theorem mfderiv_exp_radial
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)

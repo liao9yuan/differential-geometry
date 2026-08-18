@@ -13,8 +13,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry
-open DifferentialGeometry.PDE
 
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

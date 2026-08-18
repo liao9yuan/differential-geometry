@@ -12,7 +12,6 @@ namespace RicciFlow
 namespace HamiltonPositiveRicci
 
 open scoped Manifold ContDiff
-open DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]

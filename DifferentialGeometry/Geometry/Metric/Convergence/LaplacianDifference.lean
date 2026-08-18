@@ -19,7 +19,6 @@ namespace HCGCompactness
 
 open Bundle
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold ContDiff Topology BigOperators
 

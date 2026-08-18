@@ -28,7 +28,6 @@ namespace HebeyBlock
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

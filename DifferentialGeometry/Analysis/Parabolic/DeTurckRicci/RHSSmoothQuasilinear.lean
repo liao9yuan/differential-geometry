@@ -18,7 +18,6 @@ namespace DifferentialGeometry.Analysis.Parabolic
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
 open DifferentialGeometry.PDE
 
 open DifferentialGeometry.Integral.Measure

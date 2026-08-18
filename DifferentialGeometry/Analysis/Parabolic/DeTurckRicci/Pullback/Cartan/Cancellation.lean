@@ -15,7 +15,6 @@ namespace Pullback
 
 open Bundle
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 
 open DifferentialGeometry.PDE.DeTurck

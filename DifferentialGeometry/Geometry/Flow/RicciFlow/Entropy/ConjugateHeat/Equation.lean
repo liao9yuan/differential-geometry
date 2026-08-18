@@ -17,7 +17,6 @@ noncomputable section
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow.Evolution.Volume
 open scoped Manifold ContDiff
 

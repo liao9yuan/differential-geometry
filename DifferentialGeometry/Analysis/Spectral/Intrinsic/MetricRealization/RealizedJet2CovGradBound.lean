@@ -17,9 +17,7 @@ namespace Analysis
 namespace Spectral
 namespace MetricRealization
 
-open DifferentialGeometry
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2

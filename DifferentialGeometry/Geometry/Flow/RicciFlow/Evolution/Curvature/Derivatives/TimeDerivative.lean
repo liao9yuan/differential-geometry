@@ -8,7 +8,6 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
-open DifferentialGeometry
 open scoped Manifold ContDiff BigOperators
 
 section StepDeriv

@@ -16,7 +16,6 @@ namespace DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 open Bundle
-open DifferentialGeometry.Geometry.Operator
 open scoped Bundle Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

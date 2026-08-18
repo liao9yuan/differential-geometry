@@ -17,8 +17,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry
-open DifferentialGeometry.PDE
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 

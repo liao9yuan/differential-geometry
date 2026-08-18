@@ -3,15 +3,6 @@ open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false

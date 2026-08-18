@@ -22,7 +22,7 @@ namespace Spectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.TensorRSNabla
 

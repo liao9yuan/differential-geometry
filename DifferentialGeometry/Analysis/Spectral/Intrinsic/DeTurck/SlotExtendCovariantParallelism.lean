@@ -15,7 +15,6 @@ namespace Analysis
 namespace Spectral
 namespace DeTurck
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.L2
 

@@ -16,7 +16,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Sobolev
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

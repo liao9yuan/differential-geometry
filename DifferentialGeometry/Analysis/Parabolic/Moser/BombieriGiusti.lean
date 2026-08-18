@@ -863,7 +863,6 @@ open Bundle Manifold
 open scoped ContDiff Manifold Topology
 
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Parabolic.Energy
 open DifferentialGeometry.Integral.DivergenceTheorem
 

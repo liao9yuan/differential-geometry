@@ -23,7 +23,6 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.ODE
-open DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry.Integral.L2
 

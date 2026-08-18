@@ -51,7 +51,6 @@ private lemma mu_mul_inv_pow_le_inv_pow
 
 section Unconditional
 
-open DifferentialGeometry.Analysis.Spectral
 
 omit [CompleteSpace E] in
 private lemma vec_norm_eq_one_local

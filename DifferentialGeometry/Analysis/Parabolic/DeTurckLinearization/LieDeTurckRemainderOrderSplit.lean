@@ -13,7 +13,6 @@ namespace DeTurck
 namespace DeTurckLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

@@ -270,7 +270,6 @@ section Gauge
 
 variable [CompactSpace M] [I.Boundaryless]
 
-open DifferentialGeometry
 open DifferentialGeometry.PDE.DeTurck
 
 omit [CompactSpace M]

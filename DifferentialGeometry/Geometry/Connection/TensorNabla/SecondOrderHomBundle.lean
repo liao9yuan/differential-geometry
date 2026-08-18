@@ -119,7 +119,6 @@ variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-open scoped ContDiff
 open CovariantDerivative
 
 noncomputable def homTensorRSCovariantDerivative (r a c : ℕ)

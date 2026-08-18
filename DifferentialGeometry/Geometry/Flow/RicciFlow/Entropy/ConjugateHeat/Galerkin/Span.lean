@@ -19,7 +19,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]

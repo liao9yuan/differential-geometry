@@ -10,10 +10,8 @@ open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

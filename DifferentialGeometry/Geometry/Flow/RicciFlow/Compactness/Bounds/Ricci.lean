@@ -24,7 +24,6 @@ open scoped Manifold ContDiff Topology
 open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 
-open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]

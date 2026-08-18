@@ -344,7 +344,6 @@ open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
-open DifferentialGeometry.Geometry.Operator
 
 section FiniteOrderAnisotropicReconstruction
 

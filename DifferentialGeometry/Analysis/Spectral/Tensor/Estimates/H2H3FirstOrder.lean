@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology BigOperators
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

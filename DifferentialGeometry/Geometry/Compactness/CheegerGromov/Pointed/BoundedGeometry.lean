@@ -9,10 +9,6 @@ open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false

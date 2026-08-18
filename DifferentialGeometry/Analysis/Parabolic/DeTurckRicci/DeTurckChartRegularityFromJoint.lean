@@ -25,13 +25,9 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators Pointwise
-open DifferentialGeometry
-open DifferentialGeometry.PDE
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

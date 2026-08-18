@@ -579,7 +579,7 @@ section Solution
 
 open Bundle DifferentialGeometry.Tensor0SBundle Set
 open DifferentialGeometry.Tensor.Coordinates
-open scoped Manifold ContDiff BigOperators Topology
+open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [InnerProductSpace Real E]

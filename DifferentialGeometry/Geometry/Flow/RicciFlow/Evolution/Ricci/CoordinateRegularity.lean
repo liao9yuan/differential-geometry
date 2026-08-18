@@ -28,7 +28,6 @@ variable {u : Set M}
 
 section CoordinateFrameRicciEvolution
 
-open DifferentialGeometry.Tensor.Coordinates
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvMdiff

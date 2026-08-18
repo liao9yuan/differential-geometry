@@ -35,55 +35,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Tensor.RicciIdentity
-open DifferentialGeometry.Tensor.RSTensor
-open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -96,8 +47,6 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Spectral
 
-open DifferentialGeometry
-open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Spectral.MetricRealization

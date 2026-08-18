@@ -14,7 +14,6 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Curvature.CovariantDerivative
 open DifferentialGeometry.Tensor0SBundle
 

@@ -35,7 +35,6 @@ theorem time_dependent_vf_globalflow_diffeomorph
 namespace DifferentialGeometry.Analysis.ODE
 
 open Bundle
-open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]

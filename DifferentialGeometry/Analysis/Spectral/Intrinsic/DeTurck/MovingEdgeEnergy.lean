@@ -33,7 +33,6 @@ namespace Spectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Spectral.MetricRealization

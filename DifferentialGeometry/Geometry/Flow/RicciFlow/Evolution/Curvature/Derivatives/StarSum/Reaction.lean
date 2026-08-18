@@ -114,7 +114,6 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
     tensor0SSpace_continuousLinearEquiv_apply] using h_eval
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-open DifferentialGeometry.Geometry.Operator
 def nablaKRmFrozenSlotSharpSection
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))

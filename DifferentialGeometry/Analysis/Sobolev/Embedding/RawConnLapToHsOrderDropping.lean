@@ -30,9 +30,7 @@ namespace DifferentialGeometry.Analysis.Sobolev
 
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
-open DifferentialGeometry
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
@@ -51,7 +49,6 @@ section RawConnLapOrderDrop
 
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
@@ -2091,7 +2088,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-open Bundle DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
 

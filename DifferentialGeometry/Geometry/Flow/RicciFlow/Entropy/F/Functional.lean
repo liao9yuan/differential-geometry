@@ -36,9 +36,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-open DifferentialGeometry.Tensor0SBundle
-open DifferentialGeometry.Tensor0SBundle
-open scoped Manifold ContDiff
 
 variable {M : Type*}
 

@@ -15,7 +15,6 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Spectral
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

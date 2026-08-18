@@ -26,15 +26,11 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
-open DifferentialGeometry
-open DifferentialGeometry.PDE
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -53,8 +49,6 @@ variable
 
 namespace RicciContInMetricAux
 
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
@@ -508,8 +502,6 @@ end RicciContInMetricAux
 
 namespace RicciContJointAux
 
-open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 variable (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))

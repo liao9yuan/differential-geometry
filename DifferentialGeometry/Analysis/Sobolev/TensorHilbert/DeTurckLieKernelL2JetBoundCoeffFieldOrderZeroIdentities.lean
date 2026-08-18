@@ -15,8 +15,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDiverg
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
@@ -28,7 +26,6 @@ open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Sobolev
 
-open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

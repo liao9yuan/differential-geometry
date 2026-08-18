@@ -12,7 +12,6 @@ namespace DifferentialGeometry.Integral.Measure
 noncomputable section
 
 open MeasureTheory
-open DifferentialGeometry.Integral.Measure
 open scoped Manifold Topology ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

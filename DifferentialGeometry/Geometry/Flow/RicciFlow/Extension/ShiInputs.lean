@@ -15,9 +15,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

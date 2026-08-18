@@ -15,8 +15,6 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -28,7 +26,6 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

@@ -359,8 +359,6 @@ namespace DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap
-open scoped Manifold Topology Bundle ContDiff BigOperators
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2

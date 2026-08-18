@@ -13,7 +13,6 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 
-open DifferentialGeometry.Geometry.Operator
 open Bundle
 open DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff

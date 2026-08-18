@@ -10,7 +10,6 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
 
 open DifferentialGeometry.PDE.DeTurck
 

@@ -16,8 +16,6 @@ namespace HCGCompactness
 open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
-open DifferentialGeometry.Geometry.Operator
-open DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 

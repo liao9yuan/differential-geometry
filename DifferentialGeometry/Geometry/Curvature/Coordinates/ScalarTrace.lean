@@ -11,7 +11,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 
 variable

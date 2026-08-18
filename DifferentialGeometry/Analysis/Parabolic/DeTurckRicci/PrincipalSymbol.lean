@@ -19,7 +19,6 @@ open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]

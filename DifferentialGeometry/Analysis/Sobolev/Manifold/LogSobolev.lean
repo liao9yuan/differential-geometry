@@ -11,7 +11,6 @@ noncomputable section
 open MeasureTheory Set
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Integration
 open scoped Manifold ContDiff ENNReal
 

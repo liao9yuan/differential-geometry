@@ -18,7 +18,6 @@ namespace Analysis
 namespace Spectral
 namespace MetricRealization
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Laplacian
 
 

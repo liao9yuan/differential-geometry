@@ -4,7 +4,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -16,7 +15,6 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Spectral
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Measure
@@ -1585,8 +1583,6 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-open DifferentialGeometry
-open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Measure

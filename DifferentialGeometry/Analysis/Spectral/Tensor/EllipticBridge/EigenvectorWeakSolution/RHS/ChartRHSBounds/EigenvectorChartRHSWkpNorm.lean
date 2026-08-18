@@ -65,7 +65,6 @@ private lemma eigenIdx_val_pos
 end MainBound
 
 section Unconditional
-open DifferentialGeometry.Analysis.Spectral
 
 section TermBoundsUnconditional
 

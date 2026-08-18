@@ -11,7 +11,6 @@ namespace DifferentialGeometry.Analysis.Spectral
 
 open scoped ContDiff Manifold Topology ENNReal
 open MeasureTheory
-open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 

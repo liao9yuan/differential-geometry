@@ -378,7 +378,7 @@ end AbstractOneBound
 section CmBounds
 
 open Set Bundle Manifold
-open scoped Topology Manifold ContDiff ENNReal
+open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 

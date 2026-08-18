@@ -16,7 +16,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open Set Filter Topology
-open Set Bundle Manifold
+open Bundle Manifold
 open scoped ContDiff Manifold Topology
 
 open DifferentialGeometry.Geometry.Riemannian

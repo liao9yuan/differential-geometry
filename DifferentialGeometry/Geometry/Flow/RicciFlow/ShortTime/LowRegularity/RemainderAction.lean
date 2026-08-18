@@ -24,7 +24,6 @@ namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

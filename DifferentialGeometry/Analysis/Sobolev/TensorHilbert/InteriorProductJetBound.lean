@@ -17,9 +17,7 @@ open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Integral.Connection
 
-open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

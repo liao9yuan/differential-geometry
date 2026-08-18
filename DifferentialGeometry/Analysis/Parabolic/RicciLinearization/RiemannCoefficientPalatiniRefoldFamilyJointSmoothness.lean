@@ -37,7 +37,6 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic
     DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral

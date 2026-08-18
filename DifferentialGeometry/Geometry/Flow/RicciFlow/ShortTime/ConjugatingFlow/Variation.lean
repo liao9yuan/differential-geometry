@@ -12,7 +12,6 @@ open scoped Topology Manifold ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry
 open DifferentialGeometry.PDE.DeTurck
 
 open DifferentialGeometry.Geometry.Riemannian.Variation

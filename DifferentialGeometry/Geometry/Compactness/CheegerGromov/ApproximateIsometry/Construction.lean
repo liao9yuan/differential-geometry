@@ -1298,8 +1298,7 @@ end CmDiag
 
 section StepB1Zero
 
-open Set Bundle Manifold
-open scoped Topology Manifold ContDiff
+open Set Manifold
 
 variable {M'' : Type u} [TopologicalSpace M''] [ChartedSpace H M''] [IsManifold I ∞ M'']
   [T2Space M''] [T2Space (TangentBundle I M'')] [SigmaCompactSpace M'']
@@ -1377,8 +1376,7 @@ end StepB1Zero
 
 section PathBridge
 
-open Set Bundle Manifold
-open scoped Topology Manifold ContDiff
+open Set Manifold
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
@@ -1838,8 +1836,7 @@ end PathBridge
 
 section CmInfty
 
-open Set Bundle Manifold
-open scoped Topology Manifold ContDiff
+open Set Manifold
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 

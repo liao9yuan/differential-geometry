@@ -15,10 +15,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Laplacian
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem

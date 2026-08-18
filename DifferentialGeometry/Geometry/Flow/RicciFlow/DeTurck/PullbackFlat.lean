@@ -12,11 +12,9 @@ namespace RicciFlow
 
 open Bundle Set
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry
 
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
-open DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

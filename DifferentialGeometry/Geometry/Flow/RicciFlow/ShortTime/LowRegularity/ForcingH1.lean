@@ -18,7 +18,6 @@ open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
@@ -26,7 +25,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 

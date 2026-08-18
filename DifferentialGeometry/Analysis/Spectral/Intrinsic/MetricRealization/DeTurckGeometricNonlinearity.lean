@@ -23,7 +23,6 @@ namespace Analysis
 namespace Spectral
 namespace MetricRealization
 
-open DifferentialGeometry
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -144,7 +143,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.TensorMultilinear DifferentialGeometry.Tensor0SBundle
 
 

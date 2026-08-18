@@ -17,7 +17,6 @@ namespace Spectral
 namespace DeTurckCoefficients
 
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck

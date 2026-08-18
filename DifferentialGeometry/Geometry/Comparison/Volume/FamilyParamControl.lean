@@ -15,7 +15,6 @@ open scoped Manifold ContDiff Topology
 namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 universe u uE uH

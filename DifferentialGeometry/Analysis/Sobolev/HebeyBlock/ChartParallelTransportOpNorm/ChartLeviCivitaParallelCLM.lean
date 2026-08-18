@@ -14,7 +14,6 @@ open scoped Manifold ContDiff Topology BigOperators
 namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Tensor.Tensor0SRiemannian

@@ -14,10 +14,8 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter MeasureTheory Set
 open scoped Manifold ContDiff Interval Topology
-open DifferentialGeometry
 open DifferentialGeometry.Analysis
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 

@@ -32,7 +32,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
 private local instance : MeasurableSpace E := borel E

@@ -20,7 +20,6 @@ namespace DeTurckCoefficients
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 

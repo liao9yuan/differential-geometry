@@ -2,14 +2,12 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCc
 open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped ContDiff Manifold Topology BigOperators
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 open DifferentialGeometry.Integral.L2

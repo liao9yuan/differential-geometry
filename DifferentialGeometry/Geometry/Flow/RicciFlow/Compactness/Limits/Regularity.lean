@@ -24,7 +24,6 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology BigOperators
 open Bundle
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn)

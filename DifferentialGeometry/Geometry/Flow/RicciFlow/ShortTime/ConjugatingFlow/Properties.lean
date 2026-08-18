@@ -14,13 +14,10 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
-open DifferentialGeometry
-open DifferentialGeometry.PDE
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.ODE
+open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry.Geometry.Operator
 
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

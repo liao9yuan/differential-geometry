@@ -10,7 +10,6 @@ open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Elliptic

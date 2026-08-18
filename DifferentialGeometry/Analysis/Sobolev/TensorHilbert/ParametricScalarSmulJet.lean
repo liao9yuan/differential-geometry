@@ -9,9 +9,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -26,7 +23,7 @@ namespace Sobolev
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

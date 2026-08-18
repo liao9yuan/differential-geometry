@@ -889,7 +889,6 @@ end NormalCoordMetricBoundInput
 
 section NormalChartInftySmooth
 
-open scoped Manifold ContDiff Topology
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [T2Space (TangentBundle I M)]

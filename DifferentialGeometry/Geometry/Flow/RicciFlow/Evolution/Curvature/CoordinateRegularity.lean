@@ -16,7 +16,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle
 open DifferentialGeometry.Analysis
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor.Coordinates

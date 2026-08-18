@@ -31,16 +31,13 @@ open scoped ENNReal Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
-open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian
-open DifferentialGeometry.Analysis.Parabolic DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

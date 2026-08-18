@@ -9,7 +9,6 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators NNReal
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral hiding TensorEigenIdx
