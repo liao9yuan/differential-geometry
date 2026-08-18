@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Gradient
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartProductFormula
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.GradientIdentities
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Tensor.RSTensor.Basis
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components

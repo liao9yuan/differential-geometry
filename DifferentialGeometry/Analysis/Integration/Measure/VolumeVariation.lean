@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs
 import DifferentialGeometry.Analysis.Integration.Measure.Family
-import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyRegularity
 
 open DifferentialGeometry.Geometry.Curvature
 

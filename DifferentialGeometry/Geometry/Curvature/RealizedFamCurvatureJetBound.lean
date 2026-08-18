@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
-import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorFiberNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PerturbedRiemannTensorJetBound
 
 noncomputable section

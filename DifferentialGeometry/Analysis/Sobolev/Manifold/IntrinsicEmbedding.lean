@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Integration.L2.Basic
-import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 open DifferentialGeometry.Geometry.Operator
 

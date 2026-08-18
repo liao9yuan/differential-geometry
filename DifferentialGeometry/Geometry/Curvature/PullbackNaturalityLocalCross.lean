@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 import DifferentialGeometry.Geometry.Metric.LocalPullback
-import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
+import DifferentialGeometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
 

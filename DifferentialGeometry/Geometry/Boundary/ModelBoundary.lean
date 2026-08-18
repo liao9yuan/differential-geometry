@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary
+import Mathlib.Init
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Topology.Maps.Basic

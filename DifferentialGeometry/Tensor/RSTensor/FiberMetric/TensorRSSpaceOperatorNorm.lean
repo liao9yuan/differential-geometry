@@ -1,1 +1,0 @@
-import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm

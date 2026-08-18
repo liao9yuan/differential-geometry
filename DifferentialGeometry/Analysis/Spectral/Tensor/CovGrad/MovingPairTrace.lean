@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Retag
-import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
-import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputSlotSymmetrization
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffPassZero
 
 noncomputable section
 

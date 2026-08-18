@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
-import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueClmSectionJointSmoothness
 
 noncomputable section
 

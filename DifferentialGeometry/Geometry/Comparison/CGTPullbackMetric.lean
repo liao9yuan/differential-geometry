@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoOpen
 import DifferentialGeometry.Geometry.Curvature.Rm04OperatorBound
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityLocalCross
 import DifferentialGeometry.Geometry.Metric.LocalPullback
-import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
+import DifferentialGeometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
 

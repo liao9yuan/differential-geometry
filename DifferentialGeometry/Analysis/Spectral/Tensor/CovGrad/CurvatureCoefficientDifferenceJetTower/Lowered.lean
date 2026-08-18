@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Grid
-import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffPassZero
 
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Sobolev

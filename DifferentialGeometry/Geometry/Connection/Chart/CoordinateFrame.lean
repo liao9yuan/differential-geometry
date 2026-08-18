@@ -1,4 +1,7 @@
-import DifferentialGeometry.Geometry.Connection.Chart.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
+import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+import Mathlib.Geometry.Manifold.MFDeriv.Tangent
+import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
