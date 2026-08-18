@@ -480,7 +480,7 @@ private theorem jet_add_lip
           pow_le_pow_left₀ (norm_nonneg _) htri 2
         _ ≤ 2 * (‖iteratedCovGrad (I := I) g r s q S‖ ^ 2 +
             ‖iteratedCovGrad (I := I) g r s q V‖ ^ 2) := by
-          nlinarith [sq_nonneg
+          nlinarith only [sq_nonneg
             (‖iteratedCovGrad (I := I) g r s q S‖ -
               ‖iteratedCovGrad (I := I) g r s q V‖)]
     _ = 2 * ((∑ q ∈ Finset.range (m + 1),
@@ -572,7 +572,7 @@ theorem c1Diff_tame
       rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
       exact hs.2
     have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-      nlinarith [hs.1, hs.2]
+      nlinarith only [hs.1, hs.2]
     have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
         ccTensorBilin (I := I) g P x u v =
           ccTensorBilin (I := I) g P x v u := by
@@ -1337,7 +1337,7 @@ theorem metricCorr_pair_h3
   have hPA : (1 + JT) * JT ≤ P := by
     have hJT1 : JT ≤ 1 + JT := by linarith
     have h1JT : 0 ≤ 1 + JT := by linarith
-    have h1U : 1 ≤ (1 + JU) ^ 2 := by nlinarith
+    have h1U : 1 ≤ (1 + JU) ^ 2 := by nlinarith only [hJU]
     calc
       (1 + JT) * JT ≤ (1 + JT) * (1 + JT) :=
         mul_le_mul_of_nonneg_left hJT1 h1JT
@@ -1452,10 +1452,10 @@ private theorem wXi_self_tame
     simpa only [J2] using
       jet_mono_lip (I := I) (M := M) g (by omega : 2 ≤ 3) T
   have hD2A : D2 ≤ A := by
-    nlinarith
+    nlinarith only [hD2sq, hJ23, hT3, hD2, hA]
   have hD2R : D2 ≤ R := by
     have : J2 ≤ R ^ 2 := by simpa only [J2] using hT2
-    nlinarith
+    nlinarith only [hD2sq, this, hD2, hR]
   have hZsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g (0 : SmoothCcTensor g 0 2) x u v =
         ccTensorBilin (I := I) g
@@ -1498,7 +1498,7 @@ private theorem wXi_self_tame
   have hlin :
       B0 0 * A + B1 0 * D2 + B1 0 * A * D2 ≤ B R * A := by
     simp only [B]
-    nlinarith
+    nlinarith only [hmid, hlast]
   have hlin0 :
       0 ≤ B0 0 * A + B1 0 * D2 + B1 0 * A * D2 :=
     add_nonneg
@@ -1635,10 +1635,10 @@ theorem lieArm2_bdd_h2
     simpa only [J2] using
       jet_mono_lip (I := I) (M := M) g (by omega : 2 ≤ 3) T
   have hD2A : D2 ≤ A := by
-    nlinarith
+    nlinarith only [hD2sq, hJ23, hT3, hD2, hA]
   have hD2R : D2 ≤ R := by
     have : J2 ≤ R ^ 2 := by simpa only [J2] using hT2
-    nlinarith
+    nlinarith only [hD2sq, this, hD2, hR]
   have hZsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g (0 : SmoothCcTensor g 0 2) x u v =
         ccTensorBilin (I := I) g
@@ -1694,7 +1694,7 @@ theorem lieArm2_bdd_h2
       mul_le_mul_of_nonneg_left hD2A hB10
     have hlast : B1 0 * A * D2 ≤ B1 0 * A * R :=
       mul_le_mul_of_nonneg_left hD2R (mul_nonneg hB10 hA)
-    nlinarith
+    nlinarith only [hmid, hlast]
   have hsplit :
       lieCovArm2 (I := I) (M := M) g gT =
         (lieCovArm2 (I := I) (M := M) g gT -
@@ -2340,7 +2340,7 @@ theorem lieOmega_pair_h1
         mul_le_mul_of_nonneg_left (add_le_add hFirst hSecond) hC
       _ ≤ C * (P * X + Q * A * D2) ^ 2 := by
         apply mul_le_mul_of_nonneg_left _ hC
-        nlinarith [mul_nonneg hPX hQAD]
+        nlinarith only [mul_nonneg hPX hQAD]
       _ = L ^ 2 := by
         simp only [L]
         rw [mul_pow, hHcSq]
@@ -2479,7 +2479,7 @@ private theorem weighted_two_term_le_weight_sum
     {C₀ C₁ X Y : ℝ} (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁)
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
     C₀ * X + C₁ * Y ≤ (C₀ + C₁) * (X + Y) := by
-  nlinarith [mul_nonneg hC₀ hY, mul_nonneg hC₁ hX]
+  nlinarith only [mul_nonneg hC₀ hY, mul_nonneg hC₁ hX]
 
 private theorem quad_pair_scalar
     {C₀ C₁ S x y : ℝ} (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁)
@@ -2488,47 +2488,47 @@ private theorem quad_pair_scalar
     2 * x + 2 * (2 * x +
       2 * (2 * y + 2 * (2 * y + 2 * (2 * (y + y))))) ≤
       384 * (C₀ + C₁) * S := by
-  nlinarith [mul_nonneg (add_nonneg hC₀ hC₁) hS]
+  nlinarith only [hx, hy, mul_nonneg (add_nonneg hC₀ hC₁) hS]
 
 private theorem sq_add_sq_le_sum_sq
     {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
     x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
-  nlinarith [mul_nonneg hx hy]
+  nlinarith only [mul_nonneg hx hy]
 
 private theorem quad_nested_le
     {K x y : ℝ} (hK : 0 ≤ K) (hx : x ≤ K) (hy : y ≤ K) :
     2 * x + 2 * (2 * x +
       2 * (2 * y + 2 * (2 * y + 2 * (2 * (y + y))))) ≤
       384 * K := by
-  nlinarith
+  nlinarith only [hK, hx, hy]
 
 private theorem sq_mul_sq_le_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
     A ^ 2 * A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
-  nlinarith
+  nlinarith only [sq_nonneg A, mul_nonneg hA (sq_nonneg A)]
 
 private theorem unit_interval_sq_le_one_lip
     {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) : s ^ 2 ≤ (1 : ℝ) := by
-  nlinarith
+  nlinarith only [h0, h1]
 
 private theorem half_sq_le_one_lip
     {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) : (s / 2) ^ 2 ≤ (1 : ℝ) := by
-  nlinarith
+  nlinarith only [h0, h1]
 
 private theorem sq_le_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
     A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
-  nlinarith
+  nlinarith only [sq_nonneg A, mul_nonneg hA (sq_nonneg A)]
 
 private theorem sq_le_one_add_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
     A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
-  nlinarith
+  nlinarith only [hA, sq_nonneg A, mul_nonneg hA (sq_nonneg A)]
 
 private theorem add_sq_le_one_add_add_sq_sq {A : ℝ} (hA : 0 ≤ A) :
     A + A ^ 2 ≤ (1 + A + A ^ 2) ^ 2 := by
-  nlinarith
+  nlinarith only [hA, sq_nonneg A, mul_nonneg hA (sq_nonneg A)]
 
 private theorem add_sq_le_two_sq (x y : ℝ) :
     (x + y) ^ 2 ≤ 2 * x ^ 2 + 2 * y ^ 2 := by
-  nlinarith [sq_nonneg (x - y)]
+  nlinarith only [sq_nonneg (x - y)]
 
 private theorem affine_pair_sq_le_weight_lip
     (b0 b1 A D pl u : ℝ)
@@ -2927,7 +2927,7 @@ private theorem r4_pair_h1
     exact hquad gmT gmU
   have hs2 : (s / 2) ^ 2 ≤ 1 := by
     obtain ⟨hs0, hs1⟩ := hs
-    nlinarith
+    exact half_sq_le_one_lip hs0 hs1
   set u : ℝ := lowJetSq (I := I) (M := M) g 1 CFd with hu
   set v : ℝ := lowJetSq (I := I) (M := M) g 1 QFd with hv
   have hu0 : 0 ≤ u := jet_nonneg_lip (I := I) (M := M) g _
@@ -2959,7 +2959,7 @@ private theorem r4_pair_h1
         rw [this, hv]
         exact hQF
       linarith
-    _ ≤ (2 * Cc + 2 * Cq) * (a + b) := by nlinarith [hCc, hCq, ha0, hb0]
+    _ ≤ (2 * Cc + 2 * Cq) * (a + b) := by nlinarith only [hCc, hCq, ha0, hb0]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem lcvPair_eq_lip
@@ -7291,7 +7291,7 @@ private theorem amix_pair_h1
         (Bh R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) +
           Bh R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)))) := by
       have := add_le_add hh1 hh2
-      nlinarith [this]
+      nlinarith only [this]
     _ = 16 * Bh R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
       ring
 
@@ -7342,7 +7342,7 @@ private theorem grad_h1_le_h2_lip
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 ⊢
   rw [h0, h1]
-  nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
+  nlinarith only [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
     sq_nonneg ‖S‖]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
@@ -7359,7 +7359,7 @@ private theorem grad_h2_le_h3_lip
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 h2 ⊢
   rw [h0, h1, h2]
-  nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
+  nlinarith only [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
     sq_nonneg ‖S‖]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
@@ -8398,17 +8398,17 @@ private theorem aaBlk_pair_h1
           (connDiffContrInsertionField (I := I) g gT -
             connDiffContrInsertionField (I := I) g gU) *
         lowJetSq (I := I) (M := M) g 2 ZT) := by
-    have h := hleft (connDiffContrInsertionField (I := I) g gT -
-      connDiffContrInsertionField (I := I) g gU) ZT
-    linarith [h]
+    simpa only [mul_assoc] using
+      hleft (connDiffContrInsertionField (I := I) g gT -
+        connDiffContrInsertionField (I := I) g gU) ZT
   have h2 : lowJetSq (I := I) (M := M) g 1
       (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)) ≤
       Cb * (lowJetSq (I := I) (M := M) g 2
           (connDiffContrInsertionField (I := I) g gU) *
         lowJetSq (I := I) (M := M) g 1 (ZT - ZU)) := by
-    have h := hright (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)
-    linarith [h]
+    simpa only [mul_assoc] using
+      hright (connDiffContrInsertionField (I := I) g gU) (ZT - ZU)
   have hY : lowJetSq (I := I) (M := M) g 1
       (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
           (connDiffContrInsertionField (I := I) g gT -
@@ -8423,9 +8423,9 @@ private theorem aaBlk_pair_h1
             (connDiffContrInsertionField (I := I) g gU) *
           lowJetSq (I := I) (M := M) g 1 (ZT - ZU))) := by
     refine (jet_add_lip (I := I) (M := M) g 1 _ _).trans ?_
-    linarith [h1, h2]
+    exact mul_le_mul_of_nonneg_left (add_le_add h1 h2) (by norm_num)
   have hstep := mul_le_mul_of_nonneg_left hY (mul_nonneg hCa hp0)
-  nlinarith [hstep,
+  nlinarith only [hstep,
     mul_nonneg (mul_nonneg (mul_nonneg hCa hp0) hCb) ha0,
     mul_nonneg (mul_nonneg (mul_nonneg hCa hp0) hCf) hb0]
 
@@ -8477,7 +8477,7 @@ private theorem aaKer_bdd_h2
   refine ⟨B, hB0, ?_⟩
   intro gT T hT hTtie δ hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3
   set pl2 : ℝ := (1 + A + A ^ 2) ^ 2 with hpl2
-  have hbase : (1 : ℝ) ≤ 1 + A + A ^ 2 := by nlinarith [hA, sq_nonneg A]
+  have hbase : (1 : ℝ) ≤ 1 + A + A ^ 2 := by nlinarith only [hA, sq_nonneg A]
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
     calc (1 : ℝ) = 1 ^ 2 := by norm_num
@@ -8485,7 +8485,7 @@ private theorem aaKer_bdd_h2
   have hpl20 : (0 : ℝ) ≤ pl2 := le_trans zero_le_one hpl21
   have hplA2 : A ^ 2 ≤ pl2 := by
     rw [hpl2]
-    nlinarith [hA, sq_nonneg A, mul_nonneg hA hA,
+    nlinarith only [hA, sq_nonneg A, mul_nonneg hA hA,
       mul_nonneg (mul_nonneg hA hA) hA]
   set CI2 : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * Bs R ^ 2 * pl2 with hCI2
   set VN : ℝ := (Module.finrank ℝ E : ℝ) * Bn R ^ 2 * pl2 with hVN
@@ -9086,8 +9086,8 @@ private theorem ricciAA_pair_h1
   set u : ℝ := D2 ^ 2 + N ^ 2 with hu
   have hu0 : (0 : ℝ) ≤ u := by rw [hu]; positivity
   have hW0 : (0 : ℝ) ≤ W := by rw [hW]; positivity
-  have hNu : N ^ 2 ≤ u := by rw [hu]; nlinarith [sq_nonneg D2]
-  have hDu : D2 ^ 2 ≤ u := by rw [hu]; nlinarith [sq_nonneg N]
+  have hNu : N ^ 2 ≤ u := by rw [hu]; nlinarith only [sq_nonneg D2]
+  have hDu : D2 ^ 2 ≤ u := by rw [hu]; nlinarith only [sq_nonneg N]
   have hftd : lowJetSq (I := I) (M := M) g 2
       (ricciCometricFourTraceCastG0 (I := I) g gT -
         ricciCometricFourTraceCastG0 (I := I) g gU) ≤
@@ -9641,7 +9641,7 @@ private theorem good_pair_h1
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
     exact hs.2
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hPsymm : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g P x u v =
         ccTensorBilin (I := I) g P x v u := by
@@ -10568,14 +10568,14 @@ theorem metricCorr_tame
         (H * S) ^ 2 + (H * Y) ^ 2 by
       rw [← hHsq]
       ring]
-    nlinarith [mul_nonneg (mul_nonneg hH hS0) (mul_nonneg hH hY0)]
+    nlinarith only [mul_nonneg (mul_nonneg hH hS0) (mul_nonneg hH hY0)]
   have hlin :
       H * S + H * Y ≤
         B0 R * D3 + B1 R * D2 + B1 R * A * D2 := by
     have hextra : 0 ≤ H * Bs R * D2 :=
       mul_nonneg (mul_nonneg hH (hBs R hR)) hD2
     simp only [S, Y, X, B0, B1]
-    nlinarith
+    nlinarith only [hextra]
   have hlin0 : 0 ≤ H * S + H * Y :=
     add_nonneg (mul_nonneg hH hS0) (mul_nonneg hH hY0)
   calc
@@ -10714,7 +10714,7 @@ theorem metricCorr_tame_h1
         (H * S) ^ 2 + (H * Y) ^ 2 by
       rw [← hHsq]
       ring]
-    nlinarith [mul_nonneg (mul_nonneg hH hS0) (mul_nonneg hH hY0)]
+    nlinarith only [mul_nonneg (mul_nonneg hH hS0) (mul_nonneg hH hY0)]
   have hlin :
       H * S + H * Y = B0 R * D2 + B1 R * A * D2 := by
     simp only [S, Y, X, B0, B1]
