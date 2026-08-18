@@ -5749,6 +5749,56 @@ private theorem riemH2Pair
     nlinarith [this]
   exact pow_le_pow_left₀ (mul_nonneg hC hN) hbig 2
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private theorem five_term_jet_sq_le
+    (g : SmoothRiemannianMetric I M)
+    (Y1 Y2 Y3 Y4 Y5 : SmoothCcTensor g 2 2)
+    (Z1 Z2 Z3 Z4 Z5 : ℝ)
+    (hZ1 : 0 ≤ Z1) (hZ2 : 0 ≤ Z2) (hZ3 : 0 ≤ Z3) (hZ4 : 0 ≤ Z4) (hZ5 : 0 ≤ Z5)
+    (hY1 : lowJetSq (I := I) (M := M) g 2 Y1 ≤ Z1 ^ 2)
+    (hY2 : lowJetSq (I := I) (M := M) g 2 Y2 ≤ Z2 ^ 2)
+    (hY3 : lowJetSq (I := I) (M := M) g 2 Y3 ≤ Z3 ^ 2)
+    (hY4 : lowJetSq (I := I) (M := M) g 2 Y4 ≤ Z4 ^ 2)
+    (hY5 : lowJetSq (I := I) (M := M) g 2 Y5 ≤ Z5 ^ 2) :
+    lowJetSq (I := I) (M := M) g 2 (((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) + Y5) ≤
+      (4 * (2 * Z1 + Z2 + Z3 + Z4 + Z5)) ^ 2 := by
+  have hj1 : lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) ≤ (2 * Z1) ^ 2 := by
+    rw [jetSmul]
+    have h4 : ((-2 : ℝ)) ^ 2 = 4 := by norm_num
+    have he : (2 * Z1) ^ 2 = 4 * Z1 ^ 2 := by ring
+    rw [h4, he]
+    exact mul_le_mul_of_nonneg_left hY1 (by norm_num)
+  have h12 : lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) ≤
+      2 * ((2 * Z1) ^ 2 + Z2 ^ 2) := by
+    exact (jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) Y2).trans
+      (mul_le_mul_of_nonneg_left (add_le_add hj1 hY2) (by norm_num))
+  have h123 : lowJetSq (I := I) (M := M) g 2 (((-2 : ℝ) • Y1 + Y2) + Y3) ≤
+      2 * (2 * ((2 * Z1) ^ 2 + Z2 ^ 2) + Z3 ^ 2) := by
+    exact (jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) Y3).trans
+      (mul_le_mul_of_nonneg_left (add_le_add h12 hY3) (by norm_num))
+  have h1234 : lowJetSq (I := I) (M := M) g 2 ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) ≤
+      2 * (2 * (2 * ((2 * Z1) ^ 2 + Z2 ^ 2) + Z3 ^ 2) + Z4 ^ 2) := by
+    exact (jetAdd (I := I) (M := M) g 2 (((-2 : ℝ) • Y1 + Y2) + Y3) Y4).trans
+      (mul_le_mul_of_nonneg_left (add_le_add h123 hY4) (by norm_num))
+  have hfin : lowJetSq (I := I) (M := M) g 2 (((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) + Y5) ≤
+      2 * (2 * (2 * (2 * ((2 * Z1) ^ 2 + Z2 ^ 2) + Z3 ^ 2) + Z4 ^ 2) + Z5 ^ 2) := by
+    exact (jetAdd (I := I) (M := M) g 2 ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) Y5).trans
+      (mul_le_mul_of_nonneg_left (add_le_add h1234 hY5) (by norm_num))
+  have h2g : (0 : ℝ) ≤ 2 * Z1 := mul_nonneg (by norm_num) hZ1
+  have hsq : (2 * Z1) ^ 2 + Z2 ^ 2 + Z3 ^ 2 + Z4 ^ 2 + Z5 ^ 2 ≤
+      (2 * Z1 + Z2 + Z3 + Z4 + Z5) ^ 2 := by
+    have e1 := sqAdd2 (a := 2 * Z1) (b := Z2) h2g hZ2
+    have e2 := sqAdd2 (a := 2 * Z1 + Z2) (b := Z3) (add_nonneg h2g hZ2) hZ3
+    have e3 := sqAdd2 (a := 2 * Z1 + Z2 + Z3) (b := Z4)
+      (add_nonneg (add_nonneg h2g hZ2) hZ3) hZ4
+    have e4 := sqAdd2 (a := 2 * Z1 + Z2 + Z3 + Z4) (b := Z5)
+      (add_nonneg (add_nonneg (add_nonneg h2g hZ2) hZ3) hZ4) hZ5
+    linarith only [e1, e2, e3, e4]
+  have hexp : 2 * (2 * (2 * (2 * ((2 * Z1) ^ 2 + Z2 ^ 2) + Z3 ^ 2) + Z4 ^ 2) + Z5 ^ 2) ≤
+      16 * ((2 * Z1) ^ 2 + Z2 ^ 2 + Z3 ^ 2 + Z4 ^ 2 + Z5 ^ 2) := by
+    linarith only [sq_nonneg Z3, sq_nonneg Z4, sq_nonneg Z5]
+  exact hfin.trans (hexp.trans ((mul_le_mul_of_nonneg_left hsq (by norm_num)).trans_eq (by ring)))
+
 theorem selfLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5916,62 +5966,8 @@ theorem selfLow_pair_h2
   have hZrn : 0 ≤ Zr := by
     rw [hZr]
     exact hZnonneg (C0 R) (C1 R) (hC0 R hR) (hC1 R hR)
-  have hj1 : lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) ≤
-      (2 * Zg) ^ 2 := by
-    rw [jetSmul]
-    have h4 : ((-2 : ℝ)) ^ 2 = 4 := by norm_num
-    have he : (2 * Zg) ^ 2 = 4 * Zg ^ 2 := by ring
-    rw [h4, he]
-    exact mul_le_mul_of_nonneg_left hXg (by norm_num)
-  have h12 : lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) ≤
-      2 * ((2 * Zg) ^ 2 + Zl ^ 2) := by
-    have hadd := jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1) Y2
-    exact hadd.trans
-      (mul_le_mul_of_nonneg_left (add_le_add hj1 hXl) (by norm_num))
-  have h123 : lowJetSq (I := I) (M := M) g 2
-      (((-2 : ℝ) • Y1 + Y2) + Y3) ≤
-      2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) := by
-    have hadd := jetAdd (I := I) (M := M) g 2 ((-2 : ℝ) • Y1 + Y2) Y3
-    exact hadd.trans
-      (mul_le_mul_of_nonneg_left (add_le_add h12 hXv) (by norm_num))
-  have h1234 : lowJetSq (I := I) (M := M) g 2
-      ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) ≤
-      2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) + Za ^ 2) := by
-    have hadd := jetAdd (I := I) (M := M) g 2
-      (((-2 : ℝ) • Y1 + Y2) + Y3) Y4
-    exact hadd.trans
-      (mul_le_mul_of_nonneg_left (add_le_add h123 hXa) (by norm_num))
-  have hfin : lowJetSq (I := I) (M := M) g 2
-      (((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) + Y5) ≤
-      2 * (2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) + Za ^ 2) +
-        Zr ^ 2) := by
-    have hadd := jetAdd (I := I) (M := M) g 2
-      ((((-2 : ℝ) • Y1 + Y2) + Y3) + Y4) Y5
-    exact hadd.trans
-      (mul_le_mul_of_nonneg_left (add_le_add h1234 hXr) (by norm_num))
-  refine hfin.trans ?_
-  have h2g : (0 : ℝ) ≤ 2 * Zg := mul_nonneg (by norm_num) hZgn
-  have hsq : (2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2 ≤
-      (2 * Zg + Zl + Zv + Za + Zr) ^ 2 := by
-    have e1 := sqAdd2 (a := 2 * Zg) (b := Zl) h2g hZln
-    have e2 := sqAdd2 (a := 2 * Zg + Zl) (b := Zv) (add_nonneg h2g hZln) hZvn
-    have e3 := sqAdd2 (a := 2 * Zg + Zl + Zv) (b := Za)
-      (add_nonneg (add_nonneg h2g hZln) hZvn) hZan
-    have e4 := sqAdd2 (a := 2 * Zg + Zl + Zv + Za) (b := Zr)
-      (add_nonneg (add_nonneg (add_nonneg h2g hZln) hZvn) hZan) hZrn
-    linarith only [e1, e2, e3, e4]
-  have hexp : 2 * (2 * (2 * (2 * ((2 * Zg) ^ 2 + Zl ^ 2) + Zv ^ 2) +
-        Za ^ 2) + Zr ^ 2) ≤
-      16 * ((2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2) := by
-    have p1 : (0 : ℝ) ≤ Zv ^ 2 := sq_nonneg _
-    have p2 : (0 : ℝ) ≤ Za ^ 2 := sq_nonneg _
-    have p3 : (0 : ℝ) ≤ Zr ^ 2 := sq_nonneg _
-    linarith only [p1, p2, p3]
-  refine hexp.trans ?_
-  have hmul : 16 * ((2 * Zg) ^ 2 + Zl ^ 2 + Zv ^ 2 + Za ^ 2 + Zr ^ 2) ≤
-      16 * (2 * Zg + Zl + Zv + Za + Zr) ^ 2 :=
-    mul_le_mul_of_nonneg_left hsq (by norm_num)
-  refine hmul.trans (le_of_eq ?_)
+  refine (five_term_jet_sq_le (I := I) (M := M) g Y1 Y2 Y3 Y4 Y5 Zg Zl Zv Za Zr
+    hZgn hZln hZvn hZan hZrn hXg hXl hXv hXa hXr).trans (le_of_eq ?_)
   simp only [MB0, MB1]
   rw [hZg, hZl, hZv, hZa, hZr]
   ring
