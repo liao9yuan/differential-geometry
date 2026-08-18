@@ -3368,7 +3368,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.C1Li
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.C2Lipschitz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.FixedPoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2Covariant
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing.C0Difference
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing.LowerOrderTerms
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing.MetricDifference
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing.RicciTerms
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2VectorBundle
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Lipschitz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Pairing
@@ -3390,6 +3393,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Diss
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Ladder
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.OperatorJetWindows
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H3CoefficientPairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.JetApplication
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PhiMetSelfBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegH2

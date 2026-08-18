@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Back
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C0PairH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C1Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.FirstOrderPairing
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.RicciDeTurckPairing.C0Difference
 
 noncomputable section
 

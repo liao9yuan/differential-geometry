@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.Background.C0Alg
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.C1Lipschitz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegularity.H2Covariant
 
 noncomputable section
 
