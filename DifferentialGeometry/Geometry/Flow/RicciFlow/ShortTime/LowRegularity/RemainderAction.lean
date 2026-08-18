@@ -594,7 +594,7 @@ private theorem daTrans_cap
     hδ_lt hδ hTδ hδZ s hs daPermA x
   have hB := daMono_cap (I := I) (M := M) g T hT
     hδ_lt hδ hTδ hδZ s hs daPermB x
-  nlinarith
+  nlinarith only [hA, hB]
 private theorem fullSlot_cap
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -674,7 +674,7 @@ private theorem fullSlot_cap
       g 3 3 x _ _) ?_
   have hbase := hK0b x
   dsimp only [K]
-  nlinarith
+  nlinarith only [hdiff, hbase]
 private theorem dagTop_cap
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -1071,7 +1071,7 @@ private theorem ricciTop_cap
     _ ≤ (2 * deTurckArmFibreConst (Module.finrank ℝ E) *
           (δ / (1 - δ))) ^ 2 * (1 + KD) ^ 2 := by
       apply mul_le_mul_of_nonneg_left _ (sq_nonneg _)
-      nlinarith
+      nlinarith only [hKD]
     _ = (K * (δ / (1 - δ))) ^ 2 := by
       simp only [K]
       ring
@@ -2810,7 +2810,7 @@ private theorem c2_cap
   have hr12 : r1 ≤ r2 := by
     have hb : 0 < 1 - δ := by linarith
     rw [div_le_div_iff₀ hb (sq_pos_of_pos hb)]
-    nlinarith [mul_nonneg (sq_nonneg δ) (le_of_lt hb)]
+    nlinarith only [mul_nonneg (sq_nonneg δ) (le_of_lt hb)]
   apply path_add_sub_cap (I := I) (M := M) g 4 hSI Φ Ψ C
     hΦ hΨ hKern x (Real.sqrt K0 * r2)
     (mul_nonneg (Real.sqrt_nonneg _) hr2)
@@ -2848,7 +2848,7 @@ private theorem c2_cap
         4 * riemannianFiberNormSq (I := I) (M := M) g 4 2 x
           ((ricciTop (I := I) (M := M) g gm T).toSection x) := by
             apply mul_le_mul_of_nonneg_right
-              (by nlinarith [hs.1, hs.2])
+              (by nlinarith only [hs.1, hs.2])
               (riemannianFiberNormSq_nonneg
                 (I := I) (M := M) g 4 2 x _)
       _ ≤ 4 * (KR * r2) ^ 2 := mul_le_mul_of_nonneg_left hR2 (by norm_num)
@@ -3995,7 +3995,7 @@ private theorem jet_add
           pow_le_pow_left₀ (norm_nonneg _) htri 2
         _ ≤ 2 * (‖iteratedCovGrad (I := I) g r s q S‖ ^ 2 +
             ‖iteratedCovGrad (I := I) g r s q T‖ ^ 2) := by
-          nlinarith [sq_nonneg
+          nlinarith only [sq_nonneg
             (‖iteratedCovGrad (I := I) g r s q S‖ -
               ‖iteratedCovGrad (I := I) g r s q T‖)]
     _ = 2 * ((∑ q ∈ Finset.range (m + 1),
@@ -4114,7 +4114,7 @@ private theorem fourtrace_h2_rf
         10 * lowJetSq (I := I) (M := M) g 2 F := by
     have h := jet_sub (I := I) (M := M) g 2 (R₁ + R₂) F
     have hF0 := jet_nonneg (I := I) (M := M) (m := 2) g F
-    nlinarith
+    nlinarith only [h, h12, hF0]
   have h1234 :
       lowJetSq (I := I) (M := M) g 2
           (R₁ + R₂ - F - R₃) ≤
@@ -4123,7 +4123,7 @@ private theorem fourtrace_h2_rf
       (R₁ + R₂ - F) R₃
     rw [hR₃] at h
     have hF0 := jet_nonneg (I := I) (M := M) (m := 2) g F
-    nlinarith
+    nlinarith only [h, h123, hF0]
   have hcomb :
       ricciCometricFourTraceCastG0 (I := I) g g₁ =
         ((1 : ℝ) / 2) • (R₁ + R₂ - F - R₃) := by
@@ -4137,7 +4137,7 @@ private theorem fourtrace_h2_rf
     ((1 : ℝ) / 2) ^ 2 *
         lowJetSq (I := I) (M := M) g 2 (R₁ + R₂ - F - R₃) ≤
       lowJetSq (I := I) (M := M) g 2 (R₁ + R₂ - F - R₃) := by
-        nlinarith
+        nlinarith only [hJ0]
     _ ≤ 22 * lowJetSq (I := I) (M := M) g 2 F := h1234
     _ ≤ 22 * (K₀ *
         (1 + lowJetSq (I := I) (M := M) g 2 P)) :=
@@ -5111,7 +5111,7 @@ private theorem grad_h2_le_h3
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 h2 ⊢
   rw [h0, h1, h2]
-  nlinarith [sq_nonneg ‖S‖]
+  nlinarith only [sq_nonneg ‖S‖]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet3_le_grad2
@@ -5128,7 +5128,7 @@ private theorem jet3_le_grad2
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 h2 ⊢
   rw [h0, h1, h2]
-  nlinarith [sq_nonneg
+  nlinarith only [sq_nonneg
     ‖iteratedCovGrad (I := I) g r s 1 S‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g r s 2 S‖]
 
@@ -6877,7 +6877,7 @@ private theorem ricciDA_act_tame
       B R * (1 + A ^ 2) * A ^ 2 := hraw
     _ ≤ B R * (A + A ^ 2) ^ 2 := by
       have hscalar : (1 + A ^ 2) * A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
-        nlinarith
+        nlinarith only [sq_nonneg A, mul_nonneg hA (sq_nonneg A)]
       simpa only [mul_assoc] using
         mul_le_mul_of_nonneg_left hscalar hB0
     _ = (D R * (A + A ^ 2)) ^ 2 := by
@@ -7012,7 +7012,7 @@ private theorem inputSymm_h2
       lowJetSq (I := I) (M := M) g 2
         (C + appCcRS (I := I) (M := M) g 2 2 2 C
           (ccSlotSwapField (I := I) (M := M) g)) := by
-      nlinarith
+      nlinarith only [hsum0]
     _ ≤ 2 * (lowJetSq (I := I) (M := M) g 2 C +
         lowJetSq (I := I) (M := M) g 2
           (appCcRS (I := I) (M := M) g 2 2 2 C
@@ -7405,7 +7405,7 @@ private theorem lc0Riem_act_tame
       Z * (1 + A ^ 2) * A ^ 2 := hraw
     _ ≤ Z * (A + A ^ 2) ^ 2 := by
       have hscalar : (1 + A ^ 2) * A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
-        nlinarith
+        nlinarith only [sq_nonneg A, mul_nonneg hA (sq_nonneg A)]
       simpa only [mul_assoc] using
         mul_le_mul_of_nonneg_left hscalar hZ
     _ = (D * (A + A ^ 2)) ^ 2 := by
@@ -9258,7 +9258,7 @@ theorem ricciDAOne_h2
     _ = L R * (1 + A ^ 2) := by simp only [L]; ring
     _ ≤ L R * (1 + A) ^ 2 := by
       apply mul_le_mul_of_nonneg_left _ (hL R hR)
-      nlinarith
+      nlinarith only [hA]
     _ = (B R * (1 + A)) ^ 2 := by
       rw [mul_pow, show B R ^ 2 = L R by
         simpa only [B] using Real.sq_sqrt (hL R hR)]
@@ -9324,9 +9324,9 @@ private theorem lieRefold2_h2
     apply congrArg (fun z : ℝ => s * z)
     simpa only [ccTensorBilin_apply] using hT x u v
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hR2one : R ^ 2 ≤ (1 : ℝ) := by
-    nlinarith
+    nlinarith only [hR0, hR1]
   have hP2one :
       lowJetSq (I := I) (M := M) g 2 P ≤ (1 : ℝ) ^ 2 := by
     rw [hcP, jet_smul]
@@ -9400,7 +9400,7 @@ private theorem lieRefold2_h2
             lowJetSq (I := I) (M := M) g 2 (U 1)) :=
         jet_add (I := I) (M := M) g 2 (U 0) (U 1)
       _ ≤ 4 * (Cm * Bp 1 * R ^ 2) := by
-        nlinarith [hU 0, hU 1]
+        nlinarith only [hU 0, hU 1]
   have hsum :
       lowJetSq (I := I) (M := M) g 2 (U 0 + U 1 + U 2) ≤
         10 * (Cm * Bp 1 * R ^ 2) := by
@@ -9410,7 +9410,7 @@ private theorem lieRefold2_h2
             lowJetSq (I := I) (M := M) g 2 (U 2)) :=
         jet_add (I := I) (M := M) g 2 (U 0 + U 1) (U 2)
       _ ≤ 10 * (Cm * Bp 1 * R ^ 2) := by
-        nlinarith [h01, hU 2]
+        nlinarith only [h01, hU 2]
   rw [hrefold, jet_smul]
   calc
     s ^ 2 * lowJetSq (I := I) (M := M) g 2 (U 0 + U 1 + U 2) ≤
@@ -9493,7 +9493,7 @@ private theorem ricciTop_h2
     calc
       _ ≤ Kf * (1 + lowJetSq (I := I) (M := M) g 2 P) :=
         hfull gm P hP htie hδ_le hδ0 hδ
-      _ ≤ 2 * Kf := by nlinarith
+      _ ≤ 2 * Kf := by nlinarith only [hP2, hKf]
   have hWeight :
       lowJetSq (I := I) (M := M) g 2
           (daWeight (I := I) (M := M) g gm T) ≤
@@ -9546,7 +9546,7 @@ private theorem ricciTop_h2
             (daTransMono (I := I) (M := M) g gm T daPermB)) :=
         jet_sub (I := I) (M := M) g 2 _ _
       _ ≤ 4 * (Km * R ^ 2) := by
-        nlinarith [hMono daPermA, hMono daPermB]
+        nlinarith only [hMono daPermA, hMono daPermB]
       _ = Kt * R ^ 2 := by simp only [Kt]; ring
   have hConn :
       lowJetSq (I := I) (M := M) g 2
@@ -9554,7 +9554,7 @@ private theorem ricciTop_h2
     calc
       _ ≤ Kc * (1 + lowJetSq (I := I) (M := M) g 2 P) :=
         hconn gm P hP htie hδ_le hδ0 hδ
-      _ ≤ 2 * Kc := by nlinarith
+      _ ≤ 2 * Kc := by nlinarith only [hP2, hKc]
   have hSlot :
       lowJetSq (I := I) (M := M) g 2
           (slotExtend (I := I) (M := M) g 3 3
@@ -9814,7 +9814,7 @@ private theorem fullRev_slot_h3
       B + lowJetSq (I := I) (M := M) g 3 P ≤
         (B + 1) *
           (1 + lowJetSq (I := I) (M := M) g 3 P) := by
-    nlinarith [mul_nonneg hB hP3]
+    nlinarith only [mul_nonneg hB hP3]
   calc
     lowJetSq (I := I) (M := M) g 3
         (slotInsertEndoCc (I := I) (M := M) g s
@@ -9904,7 +9904,7 @@ private theorem fullRev_slot_h2_low
       B + lowJetSq (I := I) (M := M) g 2 P ≤
         (B + 1) *
           (1 + lowJetSq (I := I) (M := M) g 2 P) := by
-    nlinarith [mul_nonneg hB hP2]
+    nlinarith only [mul_nonneg hB hP2]
   calc
     lowJetSq (I := I) (M := M) g 2
         (slotInsertEndoCc (I := I) (M := M) g s
@@ -10379,7 +10379,7 @@ private theorem lcvR4_h2_rf
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith
+    nlinarith only [hs0, hs1]
   have hPjet :
       lowJetSq (I := I) (M := M) g 3 P ≤
         lowJetSq (I := I) (M := M) g 3 T := by
@@ -10402,7 +10402,7 @@ private theorem lcvR4_h2_rf
     hp_raise (I := I) (M := M) g T (by omega : 1 ≤ 4)
       (hp_smul (I := I) (M := M) g T (-(s / 2) : ℝ) hC)
   have hscale : (-(s / 2) : ℝ) ^ 2 ≤ 1 := by
-    nlinarith
+    nlinarith only [hs0, hs1]
   have hscaleK : (-(s / 2) : ℝ) ^ 2 * Kc ≤ Kc := by
     calc
       (-(s / 2) : ℝ) ^ 2 * Kc ≤ 1 * Kc :=
@@ -10497,7 +10497,7 @@ private theorem lcvR4_h2_tame
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith
+    nlinarith only [hs0, hs1]
   have hP2 :
       lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 := by
     rw [show P = s • T by rfl, jet_smul]
@@ -10520,7 +10520,7 @@ private theorem lcvR4_h2_tame
     (hcurv T).trans
       (mul_le_mul_of_nonneg_left hT2A hKc)
   have hscale : (-(s / 2) : ℝ) ^ 2 ≤ 1 := by
-    nlinarith
+    nlinarith only [hs0, hs1]
   have hScaled :
       lowJetSq (I := I) (M := M) g 2
           ((-(s / 2) : ℝ) •
@@ -10548,10 +10548,10 @@ private theorem lcvR4_h2_tame
     mul_nonneg hA (sq_nonneg A)
   have hA2X : A ^ 2 ≤ X ^ 2 := by
     simp only [X]
-    nlinarith
+    nlinarith only [sq_nonneg A, hA3]
   have hA4X : A ^ 4 ≤ X ^ 2 := by
     simp only [X]
-    nlinarith [sq_nonneg A]
+    nlinarith only [sq_nonneg A, hA3]
   have hdom :
       2 * (Kc * A ^ 2 + (Dq R * A ^ 2) ^ 2) ≤
         Z R * X ^ 2 := by
@@ -10560,7 +10560,7 @@ private theorem lcvR4_h2_tame
     have hq :=
       mul_le_mul_of_nonneg_left hA4X (sq_nonneg (Dq R))
     simp only [Z]
-    nlinarith
+    nlinarith only [hc, hq]
   calc
     lowJetSq (I := I) (M := M) g 2
         (lcvR4 (I := I) (M := M) g T hδ hδZ s) ≤
@@ -10669,7 +10669,7 @@ private theorem lieCov_h2_rf
     apply congrArg (fun z : ℝ => s * z)
     simpa only [ccTensorBilin_apply] using hT x u v
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hPjet :
       lowJetSq (I := I) (M := M) g 3 P ≤
         lowJetSq (I := I) (M := M) g 3 T := by
@@ -10785,7 +10785,7 @@ private theorem lieCov_h2_tame
     apply congrArg (fun z : ℝ => s * z)
     simpa only [ccTensorBilin_apply] using hT x u v
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hP2 :
       lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 := by
     rw [hcP, jet_smul]
@@ -11064,7 +11064,7 @@ private theorem rhsSelf_act_tame
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hP2 :
       lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 := by
     rw [show P = s • T by rfl, jet_smul]
@@ -11312,7 +11312,7 @@ private theorem curvC0_act_tame
     (jet_mono (I := I) (M := M) g (by omega) T).trans hT3
   have hX :
       A ^ 2 ≤ (A + A ^ 2) ^ 2 := by
-    have hAX : A ≤ A + A ^ 2 := by nlinarith [sq_nonneg A]
+    have hAX : A ≤ A + A ^ 2 := by nlinarith only [sq_nonneg A]
     exact pow_le_pow_left₀ hA hAX 2
   calc
     lowJetSq (I := I) (M := M) g 2
@@ -11409,7 +11409,7 @@ private theorem grad_jet2
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 h2 ⊢
   rw [h0, h1, h2]
-  nlinarith [sq_nonneg ‖W‖]
+  nlinarith only [sq_nonneg ‖W‖]
 
 private theorem rhsOne_act_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -11493,7 +11493,7 @@ private theorem rhsOne_act_tame
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hP2 :
       lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 := by
     rw [show P = s • T by rfl, jet_smul]
@@ -11533,7 +11533,7 @@ private theorem rhsOne_act_tame
         simpa only [Φ, lowJetSq, Real.sq_sqrt hinside] using haux
       _ ≤ B ^ 2 := by
         simp only [B]
-        nlinarith [mul_nonneg hAr hAl, sq_nonneg Ar, sq_nonneg Al]
+        nlinarith only [mul_nonneg hAr hAl, sq_nonneg Ar, sq_nonneg Al]
   have hW :
       lowJetSq (I := I) (M := M) g 2 W ≤ A ^ 2 :=
     (grad_jet2 (I := I) (M := M) g T).trans hT3
@@ -11543,7 +11543,7 @@ private theorem rhsOne_act_tame
   have hBA :
       B * A ≤ (B0 R + B1 R) * X := by
     simp only [B, Ar, Al, B0, B1, X]
-    nlinarith [hBr0 R hR, hBr1 R hR, hBl0 R hR, hBl1 R hR,
+    nlinarith only [hBr0 R hR, hBr1 R hR, hBl0 R hR, hBl1 R hR,
       mul_nonneg (hBr0 R hR) hA, mul_nonneg (hBr1 R hR) hA,
       mul_nonneg (hBl0 R hR) hA, mul_nonneg (hBl1 R hR) hA]
   have hBX : 0 ≤ (B0 R + B1 R) * X :=
@@ -11777,7 +11777,7 @@ private theorem rhsSelf_h2_rf
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hPjet :
       lowJetSq (I := I) (M := M) g 3 P ≤
         lowJetSq (I := I) (M := M) g 3 T := by
@@ -12722,7 +12722,7 @@ private theorem rhsOne_h2_rf
       ring
     simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
   have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-    nlinarith [hs.1, hs.2]
+    nlinarith only [hs.1, hs.2]
   have hPjet :
       lowJetSq (I := I) (M := M) g 3 P ≤
         lowJetSq (I := I) (M := M) g 3 T := by
@@ -12844,7 +12844,7 @@ private theorem grad_jet1
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     Nat.reduceAdd] at h0 h1 ⊢
   rw [h0, h1]
-  nlinarith [sq_nonneg ‖W‖]
+  nlinarith only [sq_nonneg ‖W‖]
 
 omit [BoundarylessManifold I M] in
 theorem a1_h3_h2
@@ -12866,9 +12866,9 @@ theorem a1_h3_h2
   refine ⟨C, mul_nonneg (by norm_num) (add_nonneg hC0 hC1), ?_⟩
   intro A W B D hB hD hA hW
   have hA0 : lowJetSq (I := I) (M := M) g 2 A.C0 ≤ B ^ 2 := by
-    nlinarith [jet_nonneg (I := I) (M := M) (m := 2) g A.C1]
+    nlinarith only [hA, jet_nonneg (I := I) (M := M) (m := 2) g A.C1]
   have hA1 : lowJetSq (I := I) (M := M) g 2 A.C1 ≤ B ^ 2 := by
-    nlinarith [jet_nonneg (I := I) (M := M) (m := 2) g A.C0]
+    nlinarith only [hA, jet_nonneg (I := I) (M := M) (m := 2) g A.C0]
   have hW2 : lowJetSq (I := I) (M := M) g 2 W ≤ D ^ 2 :=
     (jet_mono (I := I) (M := M) g (by omega : 2 ≤ 3) W).trans hW
   have hGW : lowJetSq (I := I) (M := M) g 2
@@ -12892,7 +12892,7 @@ theorem a1_h3_h2
         (by simpa only [lowJetSq, Nat.reduceAdd] using hGW)
   have hcoef :
       2 * (C0 ^ 2 + C1 ^ 2) ≤ (2 * (C0 + C1)) ^ 2 := by
-    nlinarith [mul_nonneg hC0 hC1]
+    nlinarith only [mul_nonneg hC0 hC1]
   rw [LowBaseActionData.a1]
   calc
     lowJetSq (I := I) (M := M) g 2
@@ -12931,9 +12931,9 @@ theorem a1_h2_h1
   refine ⟨C, mul_nonneg (by norm_num) (add_nonneg hC0 hC1), ?_⟩
   intro A W B D hB hD hA hW
   have hA0 : lowJetSq (I := I) (M := M) g 2 A.C0 ≤ B ^ 2 := by
-    nlinarith [jet_nonneg (I := I) (M := M) (m := 2) g A.C1]
+    nlinarith only [hA, jet_nonneg (I := I) (M := M) (m := 2) g A.C1]
   have hA1 : lowJetSq (I := I) (M := M) g 2 A.C1 ≤ B ^ 2 := by
-    nlinarith [jet_nonneg (I := I) (M := M) (m := 2) g A.C0]
+    nlinarith only [hA, jet_nonneg (I := I) (M := M) (m := 2) g A.C0]
   have hW1 : lowJetSq (I := I) (M := M) g 1 W ≤ D ^ 2 :=
     (jet_mono (I := I) (M := M) g (by omega : 1 ≤ 2) W).trans hW
   have hGW : lowJetSq (I := I) (M := M) g 1
@@ -12975,7 +12975,7 @@ theorem a1_h2_h1
       iteratedCovGrad_zero, iteratedCovGrad_succ] using hsq
   have hcoef :
       2 * (C0 ^ 2 + C1 ^ 2) ≤ (2 * (C0 + C1)) ^ 2 := by
-    nlinarith [mul_nonneg hC0 hC1]
+    nlinarith only [mul_nonneg hC0 hC1]
   change lowJetSq (I := I) (M := M) g 1 (Y0 + Y1) ≤ _
   calc
     lowJetSq (I := I) (M := M) g 1 (Y0 + Y1) ≤
@@ -13132,7 +13132,7 @@ theorem c2_h2_small
       apply congrArg (fun z : ℝ => s * z)
       simpa only [ccTensorBilin_apply] using hT x u v
     have hs2 : s ^ 2 ≤ (1 : ℝ) := by
-      nlinarith [hs.1, hs.2]
+      nlinarith only [hs.1, hs.2]
     have hP2 :
         lowJetSq (I := I) (M := M) g 2 P ≤ 1 := by
       rw [hcP, jet_smul]
@@ -13142,7 +13142,7 @@ theorem c2_h2_small
           mul_le_of_le_one_left
             (jet_nonneg (I := I) (M := M) (m := 2) g T) hs2
         _ ≤ A0 ^ 2 := hT2
-        _ ≤ 1 := by nlinarith
+        _ ≤ 1 := by nlinarith only [hA0, hA1]
     have hL0 :=
       hlie T hT hδ_le hδ0 hδ hδZ A0 hA0 hA1 hT2 hs
     have hL :
@@ -13175,7 +13175,7 @@ theorem c2_h2_small
           4 * lowJetSq (I := I) (M := M) g 2
               (ricciTop (I := I) (M := M) g gm T) :=
           mul_le_mul_of_nonneg_right
-            (by nlinarith [hs.1, hs.2])
+            (by nlinarith only [hs.1, hs.2])
             (jet_nonneg (I := I) (M := M) (m := 2) g _)
         _ ≤ 4 * (Cr * A0) ^ 2 :=
           mul_le_mul_of_nonneg_left hRic0 (by norm_num)
@@ -13242,7 +13242,7 @@ theorem c2_h2_small
     simpa only [A, lowBaseData] using hJetRaw
   have hBC : B ≤ C := by
     dsimp only [C]
-    nlinarith [mul_nonneg hCpt hB]
+    nlinarith only [mul_nonneg hCpt hB]
   have hBCR : B * R ≤ C * R :=
     mul_le_mul_of_nonneg_right hBC hR0
   have hJetC :
@@ -13260,7 +13260,7 @@ theorem c2_h2_small
   have hpt := hpoint A.C2 x
   have hptfac : Cpt * B ≤ C := by
     dsimp only [C]
-    nlinarith
+    nlinarith only [hB]
   have hptfac0 : 0 ≤ Cpt * B := mul_nonneg hCpt hB
   calc
     riemannianFiberNormSq (I := I) (M := M) g 4 2 x
