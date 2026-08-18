@@ -55,7 +55,31 @@ private lemma unit_interval_sq_le_one {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1) :
 
 private lemma ten_mul_sq_le_four_mul_sq (K N : ℝ) :
     10 * (K * N) ^ 2 ≤ (4 * K * N) ^ 2 := by
-  nlinarith [sq_nonneg (K * N)]
+  calc
+    10 * (K * N) ^ 2 ≤ 16 * (K * N) ^ 2 :=
+      mul_le_mul_of_nonneg_right (by norm_num) (sq_nonneg (K * N))
+    _ = (4 * K * N) ^ 2 := by ring
+
+private lemma sq_add_sq_le_add_sq {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
+  calc
+    x ^ 2 + y ^ 2 ≤ x ^ 2 + y ^ 2 + 2 * x * y :=
+      le_add_of_nonneg_right (mul_nonneg (mul_nonneg (by norm_num) hx) hy)
+    _ = (x + y) ^ 2 := by ring
+
+private lemma two_mul_mul_sq_add_mul_sq_le
+    {K₁ K₂ N : ℝ} (hK₁ : 0 ≤ K₁) (hK₂ : 0 ≤ K₂) (hN : 0 ≤ N) :
+    2 * ((K₁ * N) ^ 2 + (K₂ * N) ^ 2) ≤
+      (2 * (K₁ + K₂) * N) ^ 2 := by
+  have h₁ : 0 ≤ K₁ * N := mul_nonneg hK₁ hN
+  have h₂ : 0 ≤ K₂ * N := mul_nonneg hK₂ hN
+  calc
+    2 * ((K₁ * N) ^ 2 + (K₂ * N) ^ 2) ≤
+        2 * (K₁ * N + K₂ * N) ^ 2 :=
+      mul_le_mul_of_nonneg_left (sq_add_sq_le_add_sq h₁ h₂) (by norm_num)
+    _ ≤ 4 * (K₁ * N + K₂ * N) ^ 2 :=
+      mul_le_mul_of_nonneg_right (by norm_num) (sq_nonneg _)
+    _ = (2 * (K₁ + K₂) * N) ^ 2 := by ring
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cc_toFun_ext
@@ -1379,10 +1403,14 @@ theorem invCoeff_h2_lip
       iteratedCovGrad_neg, norm_neg] using hOut
   have hC0C : C0 ≤ C := by
     dsimp only [C]
-    nlinarith [mul_nonneg hCpt hC0]
+    calc
+      C0 = 1 * C0 := by ring
+      _ ≤ (Cpt + 1) * C0 :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_left hCpt) hC0
   have hCptC : Cpt * C0 ≤ C := by
     dsimp only [C]
-    nlinarith
+    exact mul_le_mul_of_nonneg_right (le_add_of_nonneg_right zero_le_one) hC0
   have hjet :
       (∑ j ∈ Finset.range 3,
         ‖iteratedCovGrad (I := I) g 2 2 j D‖ ^ 2) ≤
@@ -1838,8 +1866,7 @@ private theorem pairTrace_h2_lip
       mul_le_mul_of_nonneg_left (add_le_add hQ₁ hQ₂) (by norm_num)
     _ ≤ (C * N) ^ 2 := by
       dsimp only [C]
-      nlinarith [sq_nonneg (K₁ * N - K₂ * N),
-        mul_nonneg (mul_nonneg hK₁ hN) (mul_nonneg hK₂ hN)]
+      exact two_mul_mul_sq_add_mul_sq_le hK₁ hK₂ hN
 
 private theorem pairTrace_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
@@ -2107,8 +2134,8 @@ private theorem curvMono_h2_lip
           K₂ * D ≤ (K₁ + K₂) * D :=
             mul_le_mul_of_nonneg_right
               (le_add_of_nonneg_left hK₁) hD
-          _ ≤ (K₁ + K₂) * (A * N + D) := by
-            nlinarith [mul_nonneg hK hx]
+          _ ≤ (K₁ + K₂) * (A * N + D) :=
+            mul_le_mul_of_nonneg_left (le_add_of_nonneg_left hx) hK
       have hs₁ := pow_le_pow_left₀
         (mul_nonneg hK₁ hx) h₁ 2
       have hs₂ := pow_le_pow_left₀
@@ -2669,8 +2696,7 @@ private theorem daWeight_pair_lip
         mul_le_mul_of_nonneg_left (add_le_add hQ₁ hQ₂) (by norm_num)
       _ ≤ (C * N) ^ 2 := by
         dsimp only [C]
-        nlinarith [sq_nonneg (K₁ * N - K₂ * N),
-          mul_nonneg (mul_nonneg hK₁ hN) (mul_nonneg hK₂ hN)]
+        exact two_mul_mul_sq_add_mul_sq_le hK₁ hK₂ hN
   have hend :
       c2JetSq (I := I) (M := M) g
           (LowBaseInternal.daWeight (I := I) (M := M) g gT T) ≤
@@ -3623,8 +3649,7 @@ private theorem ricciRad_pair
       _ ≤ 2 * ((K₁ * N) ^ 2 + (K₂ * N) ^ 2) :=
         mul_le_mul_of_nonneg_left (add_le_add hQ₁ hQ₂) (by norm_num)
       _ ≤ (2 * (K₁ + K₂) * N) ^ 2 := by
-        nlinarith [mul_nonneg hK₁ hN, mul_nonneg hK₂ hN,
-          sq_nonneg (K₁ * N - K₂ * N)]
+        exact two_mul_mul_sq_add_mul_sq_le hK₁ hK₂ hN
   calc
     (-2 : ℝ) ^ 2 * c2JetSq (I := I) (M := M) g (Q₁ + Q₂) ≤
         4 * (2 * (K₁ + K₂) * N) ^ 2 :=
@@ -4297,7 +4322,7 @@ theorem lowC2_sub
             TensorRSSpace.toModel
               ((LowBaseInternal.rhsSelfTop (I := I) (M := M)
                 g U hUδ hZδ s).toSection x))) := by
-      abel
+      exact sub_sub_sub_cancel_right _ _ (_ : TensorRSModel 4 2 ℝ E)
     _ = _ := hPair.trans hSub.symm
 
 private theorem kernel_h2_lip
@@ -4459,8 +4484,7 @@ private theorem kernel_h2_lip
         (K * N) ^ 2) := by
       gcongr
     _ = 10 * (K * N) ^ 2 := by ring
-    _ ≤ (4 * K * N) ^ 2 := by
-      nlinarith [sq_nonneg (K * N)]
+    _ ≤ (4 * K * N) ^ 2 := ten_mul_sq_le_four_mul_sq K N
     _ = (C * N) ^ 2 := by
       dsimp only [C]
 
@@ -4574,7 +4598,11 @@ theorem c2_pair_lip
       hdiff T U hδlt hTδ hUδ hZδ hT hU
   have hC0C : C0 ≤ C := by
     dsimp only [C]
-    nlinarith [mul_nonneg hCpt hC0]
+    calc
+      C0 = 1 * C0 := by ring
+      _ ≤ (Cpt + 1) * C0 :=
+        mul_le_mul_of_nonneg_right
+          (le_add_of_nonneg_left hCpt) hC0
   have hptC : Cpt * C0 ≤ C := by
     dsimp only [C]
     ring_nf
