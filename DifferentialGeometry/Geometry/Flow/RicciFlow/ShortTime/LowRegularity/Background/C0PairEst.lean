@@ -466,7 +466,10 @@ theorem vbOnePairH2
       lowJetSq (I := I) (M := M) g 2 (Z0T - Z0U) ≤
           (P0 * ((Ct1 * D) * Bc + Bt1 * (Cc * D))) ^ 2 := by
         simpa only [Z0T, Z0U] using hraw
-      _ = (D0 * D) ^ 2 := by simp only [D0]; ring
+      _ = (D0 * D) ^ 2 := by
+        apply congrArg (fun x : ℝ => x ^ 2)
+        simp only [D0]
+        ring
   have hZ1T : lowJetSq (I := I) (M := M) g 2 Z1T ≤ (S1 R) ^ 2 := by
     simpa only [Z1T, S1] using
       happ1 Rt Z0T R S0 hR hS0 hRt hZ0T
@@ -478,7 +481,10 @@ theorem vbOnePairH2
       lowJetSq (I := I) (M := M) g 2 (Z1T - Z1U) ≤
           (P1 * (D * S0 + R * (D0 * D))) ^ 2 := by
         simpa only [Z1T, Z1U] using hraw
-      _ = (D1 R * D) ^ 2 := by simp only [D1]; ring
+      _ = (D1 R * D) ^ 2 := by
+        apply congrArg (fun x : ℝ => x ^ 2)
+        simp only [D1]
+        ring
   have hZ2T : lowJetSq (I := I) (M := M) g 2 Z2T ≤
       (S2 R * (1 + A)) ^ 2 := by
     have hraw := happ2 VmT Z1T (SM R * (1 + A)) (S1 R)
@@ -487,7 +493,10 @@ theorem vbOnePairH2
       lowJetSq (I := I) (M := M) g 2 Z2T ≤
           (C2 * (SM R * (1 + A)) * S1 R) ^ 2 := by
         simpa only [Z2T] using hraw
-      _ = (S2 R * (1 + A)) ^ 2 := by simp only [S2]; ring
+      _ = (S2 R * (1 + A)) ^ 2 := by
+        apply congrArg (fun x : ℝ => x ^ 2)
+        simp only [S2]
+        ring
   have hZ2D : lowJetSq (I := I) (M := M) g 2 (Z2T - Z2U) ≤
       (D2c R * (1 + A) * D) ^ 2 := by
     let u : ℝ := P2 *
@@ -539,7 +548,10 @@ theorem vbOnePairH2
           (P3 * ((Ct2 * D) * (S2 R * (1 + A)) +
             Bt2 * (D2c R * (1 + A) * D))) ^ 2 := by
         simpa only [Z3T, Z3U] using hraw
-      _ = (D3c R * (1 + A) * D) ^ 2 := by simp only [D3c]; ring
+      _ = (D3c R * (1 + A) * D) ^ 2 := by
+        apply congrArg (fun x : ℝ => x ^ 2)
+        simp only [D3c]
+        ring
   have hcoreT : vbCore (I := I) (M := M) g gT T = Z3T := by rfl
   have hcoreU : vbCore (I := I) (M := M) g gU U = Z3U := by rfl
   have hvb :
@@ -555,6 +567,8 @@ theorem vbOnePairH2
         4 * (D3c R * (1 + A) * D) ^ 2 :=
       mul_le_mul_of_nonneg_left hZ3D (by norm_num)
     _ = (B R * (1 + A) * (D3 + D2 + A * D2 + N)) ^ 2 := by
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, ← mul_pow]
+      apply congrArg (fun x : ℝ => x ^ 2)
       simp only [B, D]
       ring
 

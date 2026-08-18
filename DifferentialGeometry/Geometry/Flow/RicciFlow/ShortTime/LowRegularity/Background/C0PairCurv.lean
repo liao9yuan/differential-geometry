@@ -413,7 +413,11 @@ theorem aaKerOnePairH2
   calc
     94 * Q ≤ 100 * Q := mul_le_mul_of_nonneg_right (by norm_num) hQ
     _ = (B R * (1 + A) * (D3 + D2 + A * D2 + N)) ^ 2 := by
-      simp only [B, Q, S, D]
+      rw [show (100 : ℝ) = 10 ^ 2 by norm_num]
+      change 10 ^ 2 * (L R * S) ^ 2 = _
+      rw [← mul_pow]
+      apply congrArg (fun x : ℝ => x ^ 2)
+      simp only [B, S, D]
       ring
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
