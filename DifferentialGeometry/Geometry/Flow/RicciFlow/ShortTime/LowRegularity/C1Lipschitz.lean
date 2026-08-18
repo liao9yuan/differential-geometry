@@ -2071,12 +2071,22 @@ theorem wXi_sub_h2
   have hY0 : 0 ≤ lowJetSq (I := I) (M := M) g 2 Y :=
     jet_nonneg (I := I) (M := M) g _
   have hk_up : Kk * JD ≤ Kk * (1 + JT) * JD := by
-    nlinarith [mul_nonneg hKk hJD, mul_nonneg hKk hJT]
+    calc
+      Kk * JD = Kk * 1 * JD := by ring
+      _ ≤ Kk * (1 + JT) * JD :=
+        mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hJT) hKk) hJD
   have hsum :
       lowJetSq (I := I) (M := M) g 2 X +
           lowJetSq (I := I) (M := M) g 2 Y ≤
         (Kk + Kc) * (1 + JT) * JD := by
-    nlinarith
+    calc
+      lowJetSq (I := I) (M := M) g 2 X +
+          lowJetSq (I := I) (M := M) g 2 Y ≤
+        Kk * JD + Kc * (1 + JT) * JD := add_le_add hX hY
+      _ ≤ Kk * (1 + JT) * JD + Kc * (1 + JT) * JD :=
+        add_le_add hk_up (le_refl _)
+      _ = (Kk + Kc) * (1 + JT) * JD := by ring
   have hinner :
       lowJetSq (I := I) (M := M) g 2 (X - Y) ≤
         2 * (Kk + Kc) * (1 + JT) * JD := by
@@ -2105,7 +2115,7 @@ theorem wXi_sub_h2
       _ ≤ Ks * (1 + JU) :=
         mul_le_mul_of_nonneg_left (by
           dsimp only [JU]
-          linarith) hKs
+          exact add_le_add (le_refl 1) hJU23) hKs
   have hslot0 :
       0 ≤ lowJetSq (I := I) (M := M) g 2
           (fullSlot3 (I := I) (M := M) g gU) :=
@@ -2130,6 +2140,28 @@ theorem wXi_sub_h2
     _ = K * (1 + JT) * (1 + JU) * JD := by
       simp only [K]
       ring
+
+private theorem sq_add_sq_le_add_sq
+    {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
+  calc
+    x ^ 2 + y ^ 2 ≤ x ^ 2 + y ^ 2 + 2 * x * y :=
+      le_add_of_nonneg_right (mul_nonneg (mul_nonneg (by norm_num) hx) hy)
+    _ = (x + y) ^ 2 := by ring
+
+private theorem add_sq_le_two_sq_add_sq (x y : ℝ) :
+    (x + y) ^ 2 ≤ 2 * x ^ 2 + 2 * y ^ 2 := by
+  calc
+    (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 :=
+      le_add_of_nonneg_right (sq_nonneg (x - y))
+    _ = 2 * x ^ 2 + 2 * y ^ 2 := by ring
+
+private theorem one_add_sq_le_sq_one_add {x : ℝ} (hx : 0 ≤ x) :
+    1 + x ^ 2 ≤ (1 + x) ^ 2 := by
+  calc
+    1 + x ^ 2 ≤ 1 + x ^ 2 + 2 * x :=
+      le_add_of_nonneg_right (mul_nonneg (by norm_num) hx)
+    _ = (1 + x) ^ 2 := by ring
 
 theorem wXi_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -2344,8 +2376,8 @@ theorem wXi_pair_h1
       (Q0 R + Q1 R * A ^ 2) * D2 ^ 2 := hout
     _ = (B0 R * D2) ^ 2 + (B1 R * A * D2) ^ 2 := by
       rw [add_mul, mul_pow, mul_pow, mul_pow, hB0sq, hB1sq]
-    _ ≤ (B0 R * D2 + B1 R * A * D2) ^ 2 := by
-      nlinarith [mul_nonneg ha0 hb0]
+    _ ≤ (B0 R * D2 + B1 R * A * D2) ^ 2 :=
+      sq_add_sq_le_add_sq ha0 hb0
 
 theorem wXi_sub_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -2558,8 +2590,14 @@ theorem wXi_sub_tame
         (B1 R * A * D2) ^ 2 := by
       rw [mul_pow, mul_pow, mul_pow, mul_pow, hB0sq, hB1sq]
     _ ≤ (B0 R * D3 + B1 R * D2 + B1 R * A * D2) ^ 2 := by
-      nlinarith [mul_nonneg ha0 hb0, mul_nonneg ha0 hc0,
-        mul_nonneg hb0 hc0]
+      calc
+        (B0 R * D3) ^ 2 + (B1 R * D2) ^ 2 +
+            (B1 R * A * D2) ^ 2 ≤
+          (B0 R * D3 + B1 R * D2) ^ 2 +
+            (B1 R * A * D2) ^ 2 :=
+          add_le_add (sq_add_sq_le_add_sq ha0 hb0) (le_refl _)
+        _ ≤ (B0 R * D3 + B1 R * D2 + B1 R * A * D2) ^ 2 :=
+          sq_add_sq_le_add_sq (add_nonneg ha0 hb0) hc0
 
 theorem connSec_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -4632,12 +4670,10 @@ theorem revSlot_bdd_h2
 private theorem one_add_sq_mul_sq_le_add_mul_sq
     {A D : ℝ} (hA : 0 ≤ A) :
     (1 + A ^ 2) * D ^ 2 ≤ (D + A * D) ^ 2 := by
-  nlinarith [mul_nonneg hA (sq_nonneg D)]
-
-private theorem sq_add_sq_le_add_sq
-    {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
-    x ^ 2 + y ^ 2 ≤ (x + y) ^ 2 := by
-  nlinarith [mul_nonneg hx hy]
+  calc
+    (1 + A ^ 2) * D ^ 2 ≤ (1 + A) ^ 2 * D ^ 2 :=
+      mul_le_mul_of_nonneg_right (one_add_sq_le_sq_one_add hA) (sq_nonneg D)
+    _ = (D + A * D) ^ 2 := by ring
 
 theorem mcd_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -4879,8 +4915,8 @@ theorem mcd_h2_bdd
   change lowJetSq (I := I) (M := M) g 2 (X + Y) ≤ _
   have hBsq : (B R) ^ 2 = Q R := by
     simpa only [B] using Real.sq_sqrt (hQ R hR)
-  have hscalar : 1 + A ^ 2 ≤ (1 + A) ^ 2 := by
-    nlinarith
+  have hscalar : 1 + A ^ 2 ≤ (1 + A) ^ 2 :=
+    one_add_sq_le_sq_one_add hA
   calc
     lowJetSq (I := I) (M := M) g 2 (X + Y) ≤
         2 * (lowJetSq (I := I) (M := M) g 2 X +
@@ -5007,7 +5043,12 @@ theorem mcd_pair_h1
       metricLowerCorr (I := I) (M := M) g gU g U)
   have hcross : (W0 R * D2 + W1 R * A * D2) ^ 2 ≤
       2 * (W0 R) ^ 2 * D2 ^ 2 + 2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2) := by
-    nlinarith [sq_nonneg (W0 R * D2 - W1 R * A * D2)]
+    calc
+      (W0 R * D2 + W1 R * A * D2) ^ 2 ≤
+          2 * (W0 R * D2) ^ 2 + 2 * (W1 R * A * D2) ^ 2 :=
+        add_sq_le_two_sq_add_sq _ _
+      _ = 2 * (W0 R) ^ 2 * D2 ^ 2 +
+          2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2) := by ring
   have hs0 : Real.sqrt (Q0 R) ^ 2 = Q0 R :=
     Real.sq_sqrt (hQ0 R hR)
   have hs1 : Real.sqrt (Q1 R) ^ 2 = Q1 R :=
@@ -5050,12 +5091,21 @@ theorem mcd_pair_h1
             R ^ 2 * (2 * (W0 R) ^ 2 * D2 ^ 2 +
               2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2))) := by
         refine mul_le_mul_of_nonneg_left ?_ hCc
-        have := mul_le_mul_of_nonneg_left hcross (sq_nonneg R)
-        linarith
-      have hcross' := hcross
-      simp only [Q0, Q1]
-      nlinarith [hexp, hcross', hCc, hKw, sq_nonneg D2, sq_nonneg A,
-        mul_nonneg (sq_nonneg A) (sq_nonneg D2)]
+        exact add_le_add (le_refl _)
+          (mul_le_mul_of_nonneg_left hcross (sq_nonneg R))
+      calc
+        2 * ((W0 R * D2 + W1 R * A * D2) ^ 2 +
+            Cc * (D2 ^ 2 * (Kw * (1 + A ^ 2)) +
+              R ^ 2 * (W0 R * D2 + W1 R * A * D2) ^ 2)) ≤
+          2 * ((2 * (W0 R) ^ 2 * D2 ^ 2 +
+              2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2)) +
+            Cc * (D2 ^ 2 * (Kw * (1 + A ^ 2)) +
+              R ^ 2 * (2 * (W0 R) ^ 2 * D2 ^ 2 +
+                2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2)))) :=
+          mul_le_mul_of_nonneg_left (add_le_add hcross hexp) (by norm_num)
+        _ = Q0 R * D2 ^ 2 + Q1 R * (A ^ 2 * D2 ^ 2) := by
+          simp only [Q0, Q1]
+          ring
     _ ≤ (Real.sqrt (Q0 R) * D2 + Real.sqrt (Q1 R) * (A * D2)) ^ 2 := by
       rw [hrhs]
       linarith [hcross0]
@@ -5336,7 +5386,8 @@ theorem fullSlot_pair_h1
         (B R) ^ 2 * (D2 ^ 2 * (1 + A) ^ 2) := by ring
     rw [h, hBsq]
   rw [hexp]
-  have hA2 : 1 + A ^ 2 ≤ (1 + A) ^ 2 := by nlinarith [hA]
+  have hA2 : 1 + A ^ 2 ≤ (1 + A) ^ 2 :=
+    one_add_sq_le_sq_one_add hA
   have hstep : Z * ((1 + R ^ 2) * ((1 + A ^ 2) * D2 ^ 2)) ≤
       Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) := by
     refine mul_le_mul_of_nonneg_left
@@ -5352,7 +5403,7 @@ theorem fullSlot_pair_h1
     Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) ≤
         Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) +
           Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) := by
-      linarith [hnn]
+      exact le_add_of_nonneg_right hnn
     _ = 2 * Z * (1 + R ^ 2) * (D2 ^ 2 * (1 + A) ^ 2) := by ring
 
 end LowBaseInternal
@@ -6107,8 +6158,8 @@ theorem lie1_pair_h2
         mul_le_mul_of_nonneg_left (add_le_add le_rfl hT3) hKw
       _ = Hw ^ 2 * (1 + A ^ 2) := by rw [hHwsq]
       _ ≤ Hw ^ 2 * (1 + A) ^ 2 := by
-        apply mul_le_mul_of_nonneg_left _ (sq_nonneg Hw)
-        nlinarith
+        exact mul_le_mul_of_nonneg_left
+          (one_add_sq_le_sq_one_add hA) (sq_nonneg Hw)
       _ = (Hw * (1 + A)) ^ 2 := by ring
   have hCD :
       lowJetSq (I := I) (M := M) g 2 (CT - CU) ≤ XC ^ 2 := by
@@ -6449,7 +6500,11 @@ theorem rhs1_pair_h2
       lowJetSq (I := I) (M := M) g 2 ((-2 : ℝ) • VR) ≤
         (2 * XR) ^ 2 := by
     rw [jet_smul1 (I := I) (M := M) g 2]
-    nlinarith
+    calc
+      (-2 : ℝ) ^ 2 * lowJetSq (I := I) (M := M) g 2 VR ≤
+          (-2 : ℝ) ^ 2 * XR ^ 2 :=
+        mul_le_mul_of_nonneg_left hVR (sq_nonneg _)
+      _ = (2 * XR) ^ 2 := by ring
   change lowJetSq (I := I) (M := M) g 2
       ((-2 : ℝ) • VR + VL) ≤ _
   calc
@@ -6461,7 +6516,14 @@ theorem rhs1_pair_h2
     _ ≤ 2 * ((2 * XR) ^ 2 + XL ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hRicS hVL) (by norm_num)
     _ ≤ (2 * (2 * XR + XL)) ^ 2 := by
-      nlinarith [sq_nonneg XR, sq_nonneg XL, mul_nonneg hXR hXL]
+      calc
+        2 * ((2 * XR) ^ 2 + XL ^ 2) ≤
+            2 * (2 * XR + XL) ^ 2 :=
+          mul_le_mul_of_nonneg_left
+            (sq_add_sq_le_add_sq (mul_nonneg (by norm_num) hXR) hXL) (by norm_num)
+        _ ≤ 4 * (2 * XR + XL) ^ 2 :=
+          mul_le_mul_of_nonneg_right (by norm_num) (sq_nonneg _)
+        _ = (2 * (2 * XR + XL)) ^ 2 := by ring
     _ = (B0 * D3 + B1 * N + B1 * A * N) ^ 2 := by
       simp only [B0, B1, XR, XL]
       ring
