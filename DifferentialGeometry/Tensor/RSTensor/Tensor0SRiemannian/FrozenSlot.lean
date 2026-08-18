@@ -6,7 +6,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Filter DifferentialGeometry
+open Bundle Filter
 open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor

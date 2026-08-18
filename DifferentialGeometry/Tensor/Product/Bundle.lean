@@ -11,7 +11,7 @@ open scoped TensorProduct
 noncomputable section
 
 open Bundle Set Topology
-open scoped Bundle TensorProduct
+open scoped Bundle
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 
@@ -30,8 +30,6 @@ variable [TopologicalSpace B]
 section
 section TensorFiberTopology
 
-open scoped TensorProduct
-open Bundle Set Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {B : Type*} [TopologicalSpace B]
@@ -90,8 +88,8 @@ section
 universe u𝕜 uB uF₁ uF₂ uE₁ uE₂
 namespace Bundle.TensorProduct
 
-open Bundle Set Topology Pretrivialization
-open scoped Manifold Bundle TensorProduct
+open Pretrivialization
+open scoped Manifold
 
 class TensorFiberTopologies
     (𝕜 : Type u𝕜) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -362,9 +360,8 @@ end Bundle.TensorProduct
 
 end
 
-open Bundle Set
 
-open scoped Manifold Topology Bundle TensorProduct
+open scoped Manifold
 
 section Smooth
 

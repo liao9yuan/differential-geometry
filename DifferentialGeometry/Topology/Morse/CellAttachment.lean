@@ -21,8 +21,7 @@ namespace CellAttachment
 
 namespace Real
 
-open Filter Set Function Polynomial
-open scoped Topology
+open Set Function Polynomial
 
 theorem smoothTransition_deriv_eq {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
     deriv Real.smoothTransition x =

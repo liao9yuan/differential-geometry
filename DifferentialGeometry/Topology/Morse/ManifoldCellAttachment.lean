@@ -17,7 +17,6 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 namespace DifferentialGeometry.Topology.Morse
 
 open Manifold
-open DifferentialGeometry.Topology
 open DifferentialGeometry.Topology.Handle
 open DifferentialGeometry.Topology.Homotopy
 open DifferentialGeometry.Analysis.ODE

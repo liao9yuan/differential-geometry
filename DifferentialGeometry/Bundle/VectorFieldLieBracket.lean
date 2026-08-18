@@ -6,7 +6,6 @@ namespace DifferentialGeometry
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry
 open VectorField
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

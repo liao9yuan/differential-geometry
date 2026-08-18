@@ -8,7 +8,6 @@ namespace Tensor0SBundle
 
 noncomputable section
 
-open DifferentialGeometry
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

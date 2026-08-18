@@ -305,7 +305,7 @@ end Bundle.continuousMultilinearMap
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set ContinuousLinearMap
+open Set ContinuousLinearMap
 
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
@@ -451,9 +451,7 @@ end Bundle.continuousMultilinearMap
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set ContinuousLinearMap
 
-open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace Bundle.continuousMultilinearMap
 

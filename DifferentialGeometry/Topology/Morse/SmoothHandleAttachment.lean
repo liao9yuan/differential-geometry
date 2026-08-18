@@ -3,7 +3,6 @@ import DifferentialGeometry.Topology.Morse.ManifoldCellAttachment
 namespace DifferentialGeometry.Topology.Morse
 
 open Manifold
-open DifferentialGeometry.Topology
 open DifferentialGeometry.Topology.Handle
 open DifferentialGeometry.Topology.Homotopy
 open DifferentialGeometry.Analysis.ODE
