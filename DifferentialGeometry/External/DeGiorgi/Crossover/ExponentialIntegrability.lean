@@ -9,8 +9,8 @@ John--Nirenberg and exponential-integrability machinery for the crossover produc
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set
-open scoped ENNReal NNReal Topology RealInnerProductSpace
+open MeasureTheory Metric Filter
+open scoped ENNReal
 
 namespace DeGiorgi
 

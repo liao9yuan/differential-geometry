@@ -165,4 +165,75 @@ The original `LICENSE`, `README.md` and `CITATION.cff` remain unmodified.
 **Change**: merged two isolated tactic bullets with their following tactic lines. This is a
 semantic-preserving source-style change; no statement, proof term or declaration was changed.
 
+### 2026-08-17 — namespace-opening cleanup
+
+**Files**:
+- `BallExtension.lean`
+- `BallExtension/ApproximationControl.lean`
+- `BallExtension/Core.lean`
+- `BallExtension/Geometry.lean`
+- `BallExtension/RoughInput.lean`
+- `BallExtension/SmoothApproximation.lean`
+- `BallExtension/SmoothCore.lean`
+- `BallExtensionEstimates.lean`
+- `Common.lean`
+- `Crossover/ExponentialIntegrability.lean`
+- `Crossover/LocalIntegrability.lean`
+- `Crossover/LogGradient.lean`
+- `Crossover/ProductBound.lean`
+- `Crossover/PublicEstimate.lean`
+- `DeGiorgiIteration/CutoffAdmissibility.lean`
+- `DeGiorgiIteration/Energy.lean`
+- `DeGiorgiIteration/Linfty.lean`
+- `DeGiorgiIteration/PreIteration.lean`
+- `DeGiorgiIteration/Recurrence.lean`
+- `Holder/LocalBounds.lean`
+- `Holder/OscillationDecay.lean`
+- `Holder/PublicEstimate.lean`
+- `LpFunctionToolkit.lean`
+- `MoserIteration/Constants.lean`
+- `MoserIteration/CutoffPrep/PreEstimate.lean`
+- `MoserIteration/CutoffPrep/Profiles.lean`
+- `MoserIteration/CutoffPrep/RegularizedEnergy.lean`
+- `MoserIteration/CutoffPrep/RegularizedWitnesses.lean`
+- `MoserIteration/Iteration.lean`
+- `MoserIteration/Linfty.lean`
+- `MoserIteration/Sequences.lean`
+- `Oscillation/BMO.lean`
+- `Oscillation/Campanato.lean`
+- `Oscillation/LocalJohnNirenberg.lean`
+- `Poincare.lean`
+- `PositivePart.lean`
+- `SobolevChainRule.lean`
+- `SobolevPoincare.lean`
+- `SobolevSpace/Approximation.lean`
+- `SobolevSpace/PositivePartPrelude.lean`
+- `SobolevSpace/WeakDerivatives.lean`
+- `SobolevSpace/Witnesses.lean`
+- `StampacchiaTruncation.lean`
+- `Supersolutions/Caccioppoli.lean`
+- `Supersolutions/ForwardIteration/Basics.lean`
+- `Supersolutions/ForwardIteration/Energy.lean`
+- `Supersolutions/ForwardIteration/Iteration.lean`
+- `Supersolutions/ForwardIteration/OneStep.lean`
+- `Supersolutions/InverseEnergy.lean`
+- `Supersolutions/InverseIteration.lean`
+- `Supersolutions/InverseOneStep.lean`
+- `Supersolutions/RegularizationSupport.lean`
+- `Supersolutions/TestFunctions.lean`
+- `Support/MeasureBounds.lean`
+- `UnitBallApproximationCore/Approximation.lean`
+- `UnitBallApproximationCore/Dilation.lean`
+- `UnitBallApproximationCore/Profiles.lean`
+- `UnitBallApproximationCore/Rescaling.lean`
+- `WeakFormulation/BilinearForm.lean`
+- `WeakFormulation/SmoothTests.lean`
+- `WeakFormulation/SolutionInterfaces.lean`
+- `WeakFormulation/WeightedEstimates.lean`
+- `WholeSpaceSobolev.lean`
+
+**Change**: removed namespace and notation-scope tokens that were not used by their files,
+retaining each opening whose removal prevented elaboration. This is a semantic-preserving lexical
+scope cleanup; no declaration, statement, or proof was changed.
+
 <!-- Add entries below as modifications occur. -->

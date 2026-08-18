@@ -11,8 +11,8 @@ canonical energy sequence to the Linfty endpoint theorems.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Topology Set Function Matrix
-open scoped ENNReal NNReal
+open MeasureTheory Metric Filter
+open scoped NNReal
 
 namespace DeGiorgi
 

@@ -12,7 +12,7 @@ cutoffs, culminating in the core inverse energy bound.
 
 noncomputable section
 
-open MeasureTheory Metric
+open MeasureTheory
 
 namespace DeGiorgi
 

@@ -21,8 +21,8 @@ Giorgi iteration.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Topology Set Function Matrix
-open scoped ENNReal NNReal
+open MeasureTheory Filter Topology
+open scoped ENNReal
 
 namespace DeGiorgi
 

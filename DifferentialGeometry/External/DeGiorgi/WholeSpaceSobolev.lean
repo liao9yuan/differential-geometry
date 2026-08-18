@@ -12,8 +12,8 @@ The main export is `DeGiorgi.sobolev_of_approx`.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set Function
-open scoped ENNReal NNReal Topology
+open MeasureTheory Filter
+open scoped ENNReal NNReal
 
 namespace DeGiorgi
 

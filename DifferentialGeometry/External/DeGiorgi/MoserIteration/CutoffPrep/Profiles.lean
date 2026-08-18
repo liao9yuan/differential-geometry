@@ -11,7 +11,7 @@ This module contains the smooth and exact-on-support scalar profile functions us
 
 noncomputable section
 
-open MeasureTheory Filter
+open MeasureTheory
 
 namespace DeGiorgi
 

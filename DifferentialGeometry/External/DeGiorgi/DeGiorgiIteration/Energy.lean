@@ -11,8 +11,8 @@ in the De Giorgi iteration.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Topology Set Function Matrix
-open scoped ENNReal NNReal
+open MeasureTheory Metric Filter
+open scoped NNReal
 
 namespace DeGiorgi
 

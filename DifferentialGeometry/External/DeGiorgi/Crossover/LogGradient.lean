@@ -17,8 +17,8 @@ which is the PDE input for the crossover estimate.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set
-open scoped ENNReal NNReal Topology RealInnerProductSpace
+open MeasureTheory Filter
+open scoped ENNReal
 
 namespace DeGiorgi
 

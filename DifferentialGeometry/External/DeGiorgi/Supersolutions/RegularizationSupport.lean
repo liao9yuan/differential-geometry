@@ -11,7 +11,7 @@ convergence lemmas used by both the forward and inverse supersolution arguments.
 
 noncomputable section
 
-open MeasureTheory Metric
+open MeasureTheory
 
 namespace DeGiorgi
 

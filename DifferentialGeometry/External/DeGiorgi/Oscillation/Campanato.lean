@@ -11,8 +11,8 @@ Holder regularity.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set
-open scoped ENNReal NNReal Topology
+open MeasureTheory Metric Filter Topology
+open scoped ENNReal NNReal
 
 namespace DeGiorgi
 

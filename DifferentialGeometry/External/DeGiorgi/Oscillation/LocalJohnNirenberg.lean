@@ -11,8 +11,8 @@ John-Nirenberg inequality.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set
-open scoped ENNReal NNReal Topology
+open MeasureTheory Metric Filter Topology Set
+open scoped ENNReal
 
 namespace DeGiorgi
 

@@ -9,7 +9,7 @@ Oscillation-decay machinery along dyadic balls for the Holder endpoint.
 
 noncomputable section
 
-open MeasureTheory Filter
+open MeasureTheory
 
 namespace DeGiorgi
 

@@ -11,8 +11,8 @@ preliminary iteration and covering lemmas.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set
-open scoped ENNReal NNReal Topology
+open MeasureTheory Metric
+open scoped NNReal
 
 namespace DeGiorgi
 

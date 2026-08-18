@@ -10,8 +10,8 @@ ball.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Topology Set Function Matrix
-open scoped ENNReal NNReal
+open MeasureTheory Metric Set
+open scoped ENNReal
 
 namespace DeGiorgi
 

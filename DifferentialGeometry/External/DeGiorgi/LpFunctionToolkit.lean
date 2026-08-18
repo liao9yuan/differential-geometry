@@ -45,8 +45,8 @@ Every step operates on bare functions. No `toLp`, no `coeFn_toLp`.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Topology Set Function
-open scoped ENNReal NNReal
+open MeasureTheory Filter
+open scoped ENNReal
 
 variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
 

@@ -10,7 +10,7 @@ basic algebraic lemmas that drive the Chapter 06 Moser iteration.
 
 noncomputable section
 
-open MeasureTheory Filter
+open MeasureTheory
 
 namespace DeGiorgi
 

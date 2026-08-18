@@ -11,8 +11,8 @@ quantitative error bounds for the smooth approximants.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Topology Set Function Matrix
-open scoped ENNReal NNReal RealInnerProductSpace
+open MeasureTheory Filter Topology Set
+open scoped ENNReal
 
 namespace DeGiorgi
 

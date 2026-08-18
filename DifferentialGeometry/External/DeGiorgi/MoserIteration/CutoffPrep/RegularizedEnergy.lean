@@ -11,7 +11,7 @@ including the exact-regularized main-ball bounds.
 
 noncomputable section
 
-open MeasureTheory Filter
+open MeasureTheory
 
 namespace DeGiorgi
 

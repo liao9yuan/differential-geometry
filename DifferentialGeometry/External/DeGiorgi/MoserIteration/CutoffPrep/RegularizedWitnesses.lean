@@ -11,7 +11,7 @@ witnesses used in the Chapter 06 energy argument.
 
 noncomputable section
 
-open MeasureTheory Filter
+open MeasureTheory
 
 namespace DeGiorgi
 

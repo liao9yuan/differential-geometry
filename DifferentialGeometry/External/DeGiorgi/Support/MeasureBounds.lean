@@ -12,7 +12,7 @@ Holder layers.
 
 noncomputable section
 
-open MeasureTheory Filter Metric
+open MeasureTheory
 
 namespace DeGiorgi
 

@@ -11,7 +11,7 @@ This module contains the anchor constants for the Chapter 06 Moser iteration.
 
 noncomputable section
 
-open MeasureTheory Filter
+open MeasureTheory
 
 namespace DeGiorgi
 

@@ -19,8 +19,8 @@ argument.
 
 noncomputable section
 
-open MeasureTheory Metric Filter Set
-open scoped ENNReal NNReal Topology RealInnerProductSpace
+open MeasureTheory
+open scoped ENNReal
 
 namespace DeGiorgi
 

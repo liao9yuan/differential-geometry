@@ -35,7 +35,7 @@ The proof has three steps:
 
 noncomputable section
 
-open MeasureTheory Metric
+open MeasureTheory
 
 namespace DeGiorgi
 
