@@ -930,7 +930,9 @@ theorem regularizedLog_smallBallAverage_step_le
                   ⨍ z in Metric.ball c ((1 / 48 : ℝ) / 2), v z ∂volume)
                 (⨍ z in Metric.ball c ((1 / 48 : ℝ) / 2), v z ∂volume -
                   ⨍ z in Metric.ball y (1 / 48 : ℝ), v z ∂volume)
-            simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using habs
+            simpa only [sub_eq_add_neg, add_assoc, add_left_comm, add_comm, add_neg_cancel, add_zero,
+              zero_add]
+              using habs
     _ ≤ (2 : ℝ) ^ d *
           (⨍ z in Metric.ball x (1 / 48 : ℝ),
             |v z - ⨍ w in Metric.ball x (1 / 48 : ℝ), v w ∂volume| ∂volume) +
@@ -1579,7 +1581,10 @@ theorem regularizedLog_smallBall_exp_average_le
                           ENNReal.ofReal (p * Real.exp (-(β / 2) * t)) by
                     funext t
                     ring]
-              rw [lintegral_const_mul'' _ (by measurability)]
+              have hreal : Measurable (fun t : ℝ => p * Real.exp (-(β / 2) * t)) :=
+                measurable_const.mul
+                  (Real.continuous_exp.measurable.comp (measurable_const.mul measurable_id))
+              rw [lintegral_const_mul'' _ hreal.ennreal_ofReal.aemeasurable]
   have hmajor_int :
       IntegrableOn (fun t : ℝ => p * Real.exp (-(β / 2) * t)) (Set.Ioi 0) volume := by
     have hneg : -(β / 2) < 0 := by linarith
