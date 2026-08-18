@@ -2,6 +2,7 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+import Mathlib.Geometry.Manifold.VectorField.Pullback
 
 namespace DifferentialGeometry
 
@@ -96,5 +97,67 @@ theorem Diffeomorph.mfderiv_self_symm
     ContinuousLinearMap.id_apply] using
     (Diffeomorph.pushforward_image (I := I)
       (Diffeomorph.refl I M ∞) W x)
+
+theorem Diffeomorph.pushforward_eq_mpullback_symm
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
+    (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x) =
+      (VectorField.mpullback I I (⇑Φ.symm) Y : ∀ x : M, TangentSpace I x) := by
+  funext z
+  have hinv :
+      (mfderiv I I (⇑Φ.symm) z).inverse = mfderiv I I (⇑Φ) (Φ.symm z) := by
+    apply ContinuousLinearMap.inverse_eq
+    · have hΦ : MDifferentiableAt I I (⇑Φ) (Φ.symm z) :=
+        Φ.mdifferentiable (by simp) _
+      have hΦsymm : MDifferentiableAt I I (⇑Φ.symm) (Φ (Φ.symm z)) := by
+        rw [Φ.apply_symm_apply]
+        exact Φ.symm.mdifferentiable (by simp) z
+      have hcomp : (⇑Φ.symm) ∘ (⇑Φ) = (id : M → M) := by
+        funext w
+        exact Φ.symm_apply_apply w
+      have hchain := mfderiv_comp (Φ.symm z) hΦsymm hΦ
+      rw [hcomp, mfderiv_id] at hchain
+      rw [Φ.apply_symm_apply] at hchain
+      exact hchain.symm
+    · have hΦsymm : MDifferentiableAt I I (⇑Φ.symm) z :=
+        Φ.symm.mdifferentiable (by simp) z
+      have hΦ : MDifferentiableAt I I (⇑Φ) (Φ.symm z) :=
+        Φ.mdifferentiable (by simp) _
+      have hcomp : (⇑Φ) ∘ (⇑Φ.symm) = (id : M → M) := by
+        funext w
+        exact Φ.apply_symm_apply w
+      have hchain := mfderiv_comp z hΦ hΦsymm
+      rw [hcomp, mfderiv_id] at hchain
+      exact hchain.symm
+  change (Φ.apply_symm_apply z) ▸
+      (mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)) =
+    (mfderiv I I (⇑Φ.symm) z).inverse (Y (Φ.symm z))
+  rw [hinv]
+  refine eq_of_heq ?_
+  exact eqRec_heq (φ := fun w => TangentSpace I w) (Φ.apply_symm_apply z)
+    ((mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)))
+
+theorem Diffeomorph.pushforward_contMDiff
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M]
+    (Φ : M ≃ₘ⟮I, I⟯ M) {Y : ∀ x : M, TangentSpace I x}
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (Diffeomorph.pushforward Φ Y)) := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  rw [Diffeomorph.pushforward_eq_mpullback_symm (I := I) Φ Y]
+  have hinv : ∀ x, (mfderiv I I (⇑Φ.symm) x).IsInvertible := by
+    intro x
+    refine ⟨Diffeomorph.mfderivToContinuousLinearEquiv Φ.symm (by simp) x, ?_⟩
+    exact Diffeomorph.mfderivToContinuousLinearEquiv_coe
+      (Φ := Φ.symm) (x := x) (by simp)
+  exact ContMDiff.mpullback_vectorField (I := I) (I' := I) (V := Y)
+    (f := ⇑Φ.symm) (m := (∞ : WithTop ℕ∞)) (n := (∞ : WithTop ℕ∞))
+    hY Φ.symm.contMDiff hinv (by simp)
 
 end DifferentialGeometry

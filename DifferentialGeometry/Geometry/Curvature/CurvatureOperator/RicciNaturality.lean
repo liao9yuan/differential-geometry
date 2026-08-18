@@ -81,68 +81,6 @@ private lemma mfderiv_compose_symm
   have := congrArg (fun f : TangentSpace I (Φ x) →L[ℝ] TangentSpace I (Φ x) => f w) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-private lemma pushforward_eq_mpullback_symm_global
-    (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
-    (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
-      = (VectorField.mpullback I I (⇑Φ.symm) Y : ∀ x : M, TangentSpace I x) := by
-  funext z
-  have hinv : (mfderiv I I (⇑Φ.symm) z).inverse = mfderiv I I (⇑Φ) (Φ.symm z) := by
-    apply ContinuousLinearMap.inverse_eq
-    · have hΦ : MDifferentiableAt I I (⇑Φ) (Φ.symm z) :=
-        Φ.mdifferentiable infty_ne_zero_ricci _
-      have hΦsymm : MDifferentiableAt I I (⇑Φ.symm) (Φ (Φ.symm z)) := by
-        have hap : Φ (Φ.symm z) = z := Φ.apply_symm_apply z
-        rw [hap]; exact Φ.symm.mdifferentiable infty_ne_zero_ricci z
-      have hcomp : (⇑Φ.symm) ∘ (⇑Φ) = (id : M → M) := by
-        funext w; exact Φ.symm_apply_apply w
-      have hchain := mfderiv_comp (Φ.symm z) hΦsymm hΦ
-      rw [hcomp, mfderiv_id] at hchain
-      have hap : Φ (Φ.symm z) = z := Φ.apply_symm_apply z
-      rw [hap] at hchain
-      exact hchain.symm
-    · have hΦsymm : MDifferentiableAt I I (⇑Φ.symm) z :=
-        Φ.symm.mdifferentiable infty_ne_zero_ricci z
-      have hΦ : MDifferentiableAt I I (⇑Φ) (Φ.symm z) :=
-        Φ.mdifferentiable infty_ne_zero_ricci _
-      have hcomp : (⇑Φ) ∘ (⇑Φ.symm) = (id : M → M) := by
-        funext w; exact Φ.apply_symm_apply w
-      have hchain := mfderiv_comp z hΦ hΦsymm
-      rw [hcomp, mfderiv_id] at hchain
-      exact hchain.symm
-  change (Φ.apply_symm_apply z) ▸
-      (mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z))
-    = (mfderiv I I (⇑Φ.symm) z).inverse (Y (Φ.symm z))
-  rw [hinv]
-  refine eq_of_heq ?_
-  exact eqRec_heq (φ := fun w => TangentSpace I w) (Φ.apply_symm_apply z)
-    ((mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)))
-
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma pushforward_contMDiff
-    (Φ : M ≃ₘ⟮I, I⟯ M) {Y : ∀ x : M, TangentSpace I x}
-    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
-    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (Diffeomorph.pushforward Φ Y)) := by
-  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  have hfun_eq := pushforward_eq_mpullback_symm_global (I := I) Φ Y
-  have hfun_total :
-      (fun z : M => (TotalSpace.mk' E z (Diffeomorph.pushforward Φ Y z) : TangentBundle I M))
-        = (fun z : M => (TotalSpace.mk' E z (VectorField.mpullback I I (⇑Φ.symm) Y z) :
-            TangentBundle I M)) := by
-    funext z; congr 1
-    exact congrFun hfun_eq z
-  rw [hfun_total]
-  have hΦsymm_smooth : ContMDiff I I (∞ : WithTop ℕ∞) (⇑Φ.symm) := Φ.symm.contMDiff
-  have hinv : ∀ x, (mfderiv I I (⇑Φ.symm) x).IsInvertible := by
-    intro x
-    refine ⟨(Diffeomorph.mfderivToContinuousLinearEquiv Φ.symm infty_ne_zero_ricci x), ?_⟩
-    exact Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Φ.symm) (x := x)
-      infty_ne_zero_ricci
-  exact ContMDiff.mpullback_vectorField (I := I) (I' := I) (V := Y)
-    (f := ⇑Φ.symm) (m := (∞ : WithTop ℕ∞)) (n := (∞ : WithTop ℕ∞))
-    hY hΦsymm_smooth hinv (by simp)
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma pushforward_covApply_eq
@@ -272,11 +210,11 @@ private lemma riemannOp_pullback_pointwise
         hU hV hW]
   rw [riemannSec_pullback_pointwise (I := I) g Φ hU hV hW]
   have hPushU : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (Diffeomorph.pushforward Φ U)) :=
-    pushforward_contMDiff (I := I) Φ hU
+    Diffeomorph.pushforward_contMDiff (I := I) Φ hU
   have hPushV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (Diffeomorph.pushforward Φ V)) :=
-    pushforward_contMDiff (I := I) Φ hV
+    Diffeomorph.pushforward_contMDiff (I := I) Φ hV
   have hPushW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (Diffeomorph.pushforward Φ W)) :=
-    pushforward_contMDiff (I := I) Φ hW
+    Diffeomorph.pushforward_contMDiff (I := I) Φ hW
   rw [← riemannOp_apply_smooth (cov := LeviCivita (I := I) g) hPushU hPushV hPushW]
   rw [pushforward_eval_at_image (I := I) Φ U x,
       pushforward_eval_at_image (I := I) Φ V x,

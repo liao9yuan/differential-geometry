@@ -79,7 +79,7 @@ theorem Diffeomorph.pushforward_mlieBracket
       (Diffeomorph.pushforward Φ V : ∀ x : M, TangentSpace I x)
         = (VectorField.mpullback I I (⇑Φ.symm) V : ∀ x : M, TangentSpace I x) := by
     intro V; funext z
-    exact pushforward_eq_mpullback_symm Φ V z
+    exact congrFun (pushforward_eq_mpullback_symm Φ V) z
   rw [hpf_eq X, hpf_eq Y, hpf_eq (mlieBracket I X Y)]
   have hΦsymm_smooth : ContMDiffAt I I ∞ (⇑Φ.symm) x := Φ.symm.contMDiffAt
   haveI : IsManifold I (minSmoothness ℝ (2 : WithTop ℕ∞)) M := by

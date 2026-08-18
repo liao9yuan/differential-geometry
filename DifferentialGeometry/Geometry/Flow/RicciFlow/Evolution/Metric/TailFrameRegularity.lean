@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovDerivProducer
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Restriction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovariantDerivative
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature

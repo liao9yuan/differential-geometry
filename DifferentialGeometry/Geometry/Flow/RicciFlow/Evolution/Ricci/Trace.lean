@@ -1,4 +1,7 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Components
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Pairing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christoffel
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Evolution
 import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarHessBound
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
+import DifferentialGeometry.Geometry.Metric.Convergence.LaplacianDifference
+import DifferentialGeometry.Geometry.Metric.Convergence.TimeLipschitz
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

@@ -124,6 +124,12 @@ def ricReactionContract {s : Nat}
           (∑ p : Idx, ∑ q : Idx, gInv (I0 b) p * gInv (J0 b) q * ric p q)) *
       cA I0 * cB J0
 
+def ricStarArray {s : ℕ}
+    (ric : Idx → Idx → Real) (cB : (Fin s → Idx) → Real) :
+    (Fin s → Idx) → Real :=
+  fun I0 => ∑ b : Fin s, ∑ e : Idx,
+    ric (I0 b) e * cB (Function.update I0 b e)
+
 theorem coordContractDt_eq_ricReactionContract {s : Nat}
     (gInv gInvDt ric : Idx -> Idx -> Real)
     (cA cB : (Fin s -> Idx) -> Real)

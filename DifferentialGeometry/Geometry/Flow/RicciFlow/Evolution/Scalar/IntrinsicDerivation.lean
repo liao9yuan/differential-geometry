@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.RmTrace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.EvolutionEquation
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Tensor.RSTensor

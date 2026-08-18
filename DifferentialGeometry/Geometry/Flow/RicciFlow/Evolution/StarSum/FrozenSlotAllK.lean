@@ -1,2 +1,0 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmFrozenSlotField
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.FrozenSlot

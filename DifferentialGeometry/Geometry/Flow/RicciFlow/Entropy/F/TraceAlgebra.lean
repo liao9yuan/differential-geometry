@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.GeometryFormulaCore
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.VariationFormula
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 

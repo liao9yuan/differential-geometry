@@ -1,6 +1,4 @@
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullbackFlat
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
