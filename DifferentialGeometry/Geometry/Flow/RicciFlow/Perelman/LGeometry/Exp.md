@@ -1,0 +1,57 @@
+# `Exp.lean`
+
+## Result
+
+`IsLRegCurveOn` records the nonsingular square-root-time equation with the
+Perelman normalization `A(0) = 2 • Z`.  `LRegCurveWitness` requires a solution
+on an open preconnected interval containing zero and the queried time.
+
+The maximal witnessed domain `lRegDomain` is open and preconnected.  The
+totalized `lRegCurve` returns the base point outside this domain, and
+`lRegWitness_eq` proves that any two witnesses with the same initial data agree
+on the intersection of their domains.  Consequently `lRegCurve_eqOn` identifies
+the totalized curve with every witness on its witness interval.
+
+The local-flow layer now exports the full maximal-domain smooth-dependence
+chain without adding a new solution class or a stronger consumer assumption:
+
+* `exists_lPhaseFlow` gives a jointly smooth phase flow near a regular phase
+  seed and keeps it inside the regular chart domain;
+* `exists_lPhaseAt` restarts that flow at an arbitrary absolute square-root
+  time, while `exists_lPhaseComp` supplies one common restart time on a compact
+  phase trajectory lying in a fixed chart;
+* `exists_lRegFamily` reconstructs a jointly smooth family of intrinsic
+  regularized L-curves for nearby initial tangent vectors on one common
+  square-root-time interval;
+* `lRegSol_eqOn` propagates arbitrary-time phase-state uniqueness, and
+  `lRegFamily_step` glues one restarted family to an existing family;
+* `lRegFamily_extend` uses an open/closure-stable good-time argument and the
+  compact uniform phase-flow radius to continue a common parameter family
+  across any compact segment of a witness;
+* `lRegCurve_smooth` identifies the continued family with the maximal
+  totalized curve at every point of its domain.  Consequently
+  `lRegJointDom_open` and `lRegCurve_smoothOn` give the joint open-domain API.
+
+`lExpDomain` is the nonnegative pullback of `lRegDomain` by `sqrt`, and `lExp`
+evaluates `lRegCurve` at square-root time.  `lExpPosDom` is its joint positive
+part; it is open, and `lExp_smoothOn` proves joint smoothness throughout it.
+`exists_lExpFamily` remains the useful uniform short-time box theorem, while
+the regularized `s`-family supplies the smooth extension through `s = 0`.
+The normalization remains `A(0) = 2 Z`; no ordinary exponential map is used
+to define `lExp`.
+
+## Verification and boundary
+
+Focused verification passed without warnings.  The file contains no `sorry`,
+`admit`, or new axiom.
+
+The full positive maximal-domain smoothness claim is now complete.  Smoothness
+at `tau = 0` is intentionally expressed through the regularized `s` variable:
+`sqrt` itself is not smooth at zero.  Pullback and parabolic-scaling naturality
+are now complete in `Naturality.lean` and `Scaling.lean`, so L3 is closed.  L4
+Jacobi work may use `lExp_smoothOn`, but must still keep zero-time arguments in
+the regularized formulation.
+
+`redVolume_anti` remains **0%**.  Dedicated L-geometry machinery is about
+**30--32%**; reusable generic prerequisites are about **75--80%**.  P2 remains
+below **1%**, and the whole Poincare program remains about **3--5%**.

@@ -1131,7 +1131,7 @@ private theorem IntrJetAtom.launchDeriv_eval
   | aTime n =>
       have hn := covFstIter_smooth (I := I) g f A hA n
       have hcomm :=
-        cov_commute_at (I := I) g f hf
+        cov_commute_global (I := I) g f hf
           (fun s v => covFstIter (I := I) g f n A s v) hn r t
       have hsum :
           covFst (I := I) g f
@@ -1169,7 +1169,7 @@ private theorem IntrJetAtom.launchDeriv_eval
   | bTime n =>
       have hn := covFstIter_smooth (I := I) g f B hB n
       have hcomm :=
-        cov_commute_at (I := I) g f hf
+        cov_commute_global (I := I) g f hf
           (fun s v => covFstIter (I := I) g f n B s v) hn r t
       have hsum :
           covFst (I := I) g f

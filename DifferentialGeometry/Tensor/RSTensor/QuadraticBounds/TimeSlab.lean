@@ -1,4 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
+import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -652,5 +653,71 @@ theorem timeSlabAbsQuadCont
     (𝕜 := Real) (I := I) (M := M) (P := P) (n := 2)
     b hb T hT v hv
   simpa [quad02, P, b, T, v] using hEval.abs
+
+/-- A continuous family of Riemannian metrics on a compact time interval has
+a uniform positive lower bound relative to any fixed reference metric. -/
+theorem metric_lower_icc
+    [CompactSpace M] [T2Space M]
+    (G : Real → SmoothRiemannianMetric I M) (t0 t1 : Real)
+    (gRef : SmoothRiemannianMetric I M)
+    (hquad :
+      Continuous
+        (metricTimeBundleQuad (I := I) (M := M) G (Set.Icc t0 t1))) :
+    ∃ c : Real, 0 < c ∧
+      ∀ t, t ∈ Set.Icc t0 t1 →
+        ∀ x (v : TangentSpace I x),
+          c * gRef.inner x v v ≤ (G t).inner x v v := by
+  classical
+  let K : Set Real := Set.Icc t0 t1
+  have hcompact :
+      IsCompact
+        (Set.univ :
+          Set (MetricUnitTangentTimeSlab (I := I) (M := M) G K)) := by
+    simpa only [K] using
+      metricUnitTimeSlab_icc_compact_of_bundle
+        (I := I) (M := M) G t0 t1 gRef hquad
+  have hcont :
+      Continuous
+        (fun p : MetricUnitTangentTimeSlab (I := I) (M := M) G K =>
+          |quad02 (I := I) (M := M)
+            (Tensor0SBundle.metricTensorField (I := I) gRef
+              (MetricUnitTangentTimeSlab.base (I := I) (M := M) p))
+            (MetricUnitTangentTimeSlab.vec (I := I) (M := M) p)|) := by
+    simpa [quad02, Tensor0SBundle.metricTensorField_apply,
+      MetricUnitTangentTimeSlab.base, MetricUnitTangentTimeSlab.vec,
+      MetricUnitTangentTimeSlab.bundlePoint] using
+      ((metricQuad_cont (I := I) (M := M) gRef).comp
+        (continuous_snd.comp continuous_subtype_val)).abs
+  obtain ⟨C, hC, hbound⟩ :=
+    compactUnitTimeSlab_absBound (I := I) (M := M) G
+      (fun _ x => Tensor0SBundle.metricTensorField (I := I) gRef x)
+      K hcompact hcont
+  have hC1 : 0 < C + 1 := by linarith
+  refine ⟨(C + 1)⁻¹, inv_pos.mpr hC1, ?_⟩
+  intro t ht x v
+  have href : 0 ≤ gRef.inner x v v := by
+    by_cases hv : v = 0
+    · subst v
+      simp
+    · exact (gRef.pos x v hv).le
+  have hGt : 0 ≤ (G t).inner x v v := by
+    by_cases hv : v = 0
+    · subst v
+      simp
+    · exact ((G t).pos x v hv).le
+  have hraw := hbound t (by simpa only [K] using ht) x v
+  have href_le : gRef.inner x v v ≤ C * (G t).inner x v v := by
+    simpa [quad02, Tensor0SBundle.metricTensorField_apply,
+      abs_of_nonneg href] using hraw
+  have hratio : (C + 1)⁻¹ * C ≤ 1 :=
+    (inv_mul_le_one₀ hC1).2 (by linarith)
+  calc
+    (C + 1)⁻¹ * gRef.inner x v v
+        ≤ (C + 1)⁻¹ * (C * (G t).inner x v v) :=
+      mul_le_mul_of_nonneg_left href_le (inv_pos.mpr hC1).le
+    _ = ((C + 1)⁻¹ * C) * (G t).inner x v v := by ring
+    _ ≤ 1 * (G t).inner x v v :=
+      mul_le_mul_of_nonneg_right hratio hGt
+    _ = (G t).inner x v v := one_mul _
 
 end DifferentialGeometry

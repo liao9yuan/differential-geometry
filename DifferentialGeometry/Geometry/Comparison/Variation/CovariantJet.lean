@@ -191,7 +191,7 @@ theorem covFst_add
       (chartRep_fst_diff (I := I) f W hW s t)
 
 omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
-theorem cov_commute_at
+theorem cov_commute_global
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
     (V : forall s t : Real, TangentSpace I (f s t))

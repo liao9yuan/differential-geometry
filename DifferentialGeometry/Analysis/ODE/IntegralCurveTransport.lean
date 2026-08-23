@@ -6,12 +6,12 @@ import Mathlib.Analysis.Calculus.Deriv.MeanValue
 noncomputable section
 
 open MeasureTheory
-open scoped Manifold Topology
+open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.Analysis.ODE
 
-variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
-variable {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {H : Type*} [TopologicalSpace H] {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable {I : ModelWithCorners ℝ E H}
 
 set_option backward.isDefEq.respectTransparency false in
@@ -70,7 +70,7 @@ theorem hasDerivAt_df_comp_integralCurve
   rwa [← hDlsmul]
 
 set_option backward.isDefEq.respectTransparency false in
-theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem hasDerivAt_f_comp_integralCurve [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
@@ -82,7 +82,7 @@ theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
   simpa [hval] using h
 
 set_option backward.isDefEq.respectTransparency false in
-theorem f_rate_bounds_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem f_rate_bounds_of_integralCurve [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
@@ -129,7 +129,7 @@ theorem f_rate_bounds_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
     linarith
   exact ⟨hle', hle⟩
 
-theorem f_rate_bounds_of_integralCurve_back [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem f_rate_bounds_of_integralCurve_back [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
@@ -187,7 +187,7 @@ theorem f_rate_bounds_of_integralCurve_back [IsManifold I (⊤ : WithTop ℕ∞)
   exact ⟨hle, hle'⟩
 
 set_option backward.isDefEq.respectTransparency false in
-theorem f_eq_sub_of_integralCurve_on_strip [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem f_eq_sub_of_integralCurve_on_strip [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     {a b : ℝ}
@@ -230,7 +230,7 @@ theorem f_eq_sub_of_integralCurve_on_strip [IsManifold I (⊤ : WithTop ℕ∞) 
   linarith
 
 set_option backward.isDefEq.respectTransparency false in
-theorem f_eq_sub_of_integralCurve_on_set [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem f_eq_sub_of_integralCurve_on_set [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (s : Set M)
@@ -287,7 +287,7 @@ theorem curveAt_integralCurve (v : (x : M) → TangentSpace I x)
   (Classical.choose_spec (hcomplete x)).2
 
 set_option backward.isDefEq.respectTransparency false in
-theorem f_eq_sub_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem f_eq_sub_of_integralCurve [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
@@ -309,7 +309,7 @@ theorem f_eq_sub_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
       rw [h2]
       ring
 
-theorem f_add_of_integralCurve_back [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem f_add_of_integralCurve_back [IsManifold I ∞ M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     {a b : ℝ}
@@ -360,7 +360,7 @@ theorem f_add_of_integralCurve_back [IsManifold I (⊤ : WithTop ℕ∞) M]
     exact hc
   linarith
 
-theorem integralCurve_eq_of_agree [IsManifold I (⊤ : WithTop ℕ∞) M] [BoundarylessManifold I M]
+theorem integralCurve_eq_of_agree [IsManifold I ∞ M] [BoundarylessManifold I M]
     [T2Space M]
     (v : (x : M) → TangentSpace I x)
     (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
@@ -368,7 +368,7 @@ theorem integralCurve_eq_of_agree [IsManifold I (⊤ : WithTop ℕ∞) M] [Bound
     {t₀ : ℝ} (h : γ t₀ = γ' t₀) : γ = γ' :=
   isMIntegralCurve_Ioo_eq_of_contMDiff_boundaryless hv hγ hγ' h
 
-theorem integralCurve_eq_of_agree_zero [IsManifold I (⊤ : WithTop ℕ∞) M] [BoundarylessManifold I M]
+theorem integralCurve_eq_of_agree_zero [IsManifold I ∞ M] [BoundarylessManifold I M]
     [T2Space M]
     (v : (x : M) → TangentSpace I x)
     (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
@@ -379,7 +379,7 @@ theorem integralCurve_eq_of_agree_zero [IsManifold I (⊤ : WithTop ℕ∞) M] [
 theorem curveAt_hcomplete_irrel {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    [IsManifold I ∞ M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 : WithTop ℕ∞)
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))

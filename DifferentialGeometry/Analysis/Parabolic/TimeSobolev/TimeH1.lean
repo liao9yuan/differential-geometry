@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import Mathlib.Analysis.InnerProductSpace.ProdL2
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.ContDiff
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
@@ -205,6 +206,65 @@ theorem continuousOn_toFun (u : timeH1 X T) :
 theorem continuousWithinAt_toFun (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ContinuousWithinAt u.toFun (Icc (0 : ℝ) T) t :=
   u.continuousOn_toFun t ht
+
+omit [CompleteSpace X] in
+private theorem deriv_memLp (hT : 0 ≤ T) (f : ℝ → X)
+    (hf : ContDiffOn ℝ 1 f (Icc (0 : ℝ) T)) :
+    MemLp (_root_.deriv f) 2 (timeMeasure T) := by
+  rcases hT.eq_or_lt with hT0 | hTpos
+  · subst T
+    rw [timeMeasure_eq_zero_of_nonpos le_rfl]
+    exact memLp_measure_zero
+  · let v : ℝ → X := derivWithin f (Icc (0 : ℝ) T)
+    have hv : ContinuousOn v (Icc (0 : ℝ) T) := by
+      simpa only [v] using
+        hf.continuousOn_derivWithin (uniqueDiffOn_Icc hTpos) le_rfl
+    have hmem : MemLp v 2 (timeMeasure T) :=
+      TimeSobolev.memLp_of_continuousOn hv
+    have hae : v =ᵐ[timeMeasure T] _root_.deriv f := by
+      unfold timeMeasure
+      rw [← restrict_Ioo_eq_restrict_Icc]
+      filter_upwards [self_mem_ae_restrict measurableSet_Ioo] with t ht
+      simpa only [v] using
+        derivWithin_of_mem_nhds (Icc_mem_nhds ht.1 ht.2)
+    exact MemLp.ae_eq hae hmem
+
+/-- A vector-valued `C¹` curve on a nonnegative compact time interval, viewed as time `H¹`. -/
+noncomputable def ofContDiffOn (hT : 0 ≤ T) (f : ℝ → X)
+    (hf : ContDiffOn ℝ 1 f (Icc (0 : ℝ) T)) : timeH1 X T :=
+  mk (f 0) ((deriv_memLp hT f hf).toLp (_root_.deriv f))
+
+/-- The time derivative of the `H¹` realization agrees almost everywhere with the derivative. -/
+theorem deriv_ofContDiffOn (hT : 0 ≤ T) (f : ℝ → X)
+    (hf : ContDiffOn ℝ 1 f (Icc (0 : ℝ) T)) :
+    (ofContDiffOn hT f hf).deriv =ᵐ[timeMeasure T] _root_.deriv f := by
+  simpa only [ofContDiffOn, deriv_mk] using
+    (deriv_memLp hT f hf).coeFn_toLp
+
+/-- The continuous representative of the `H¹` realization is the original `C¹` curve. -/
+theorem toFun_ofContDiffOn (hT : 0 ≤ T) (f : ℝ → X)
+    (hf : ContDiffOn ℝ 1 f (Icc (0 : ℝ) T)) :
+    EqOn (ofContDiffOn hT f hf).toFun f (Icc (0 : ℝ) T) := by
+  intro t ht
+  rw [toFun_apply, show (ofContDiffOn hT f hf).init = f 0 by
+    simp only [ofContDiffOn, init_mk]]
+  have hae := deriv_ofContDiffOn hT f hf
+  have hae' : (fun s ↦ (ofContDiffOn hT f hf).deriv s)
+      =ᵐ[volume.restrict (Icc (0 : ℝ) T)] _root_.deriv f := by
+    simpa only [timeMeasure] using hae
+  have hsub : uIoc (0 : ℝ) t ⊆ Icc (0 : ℝ) T := by
+    intro s hs
+    rw [uIoc_of_le ht.1] at hs
+    exact ⟨le_of_lt hs.1, le_trans hs.2 ht.2⟩
+  have hrestr : (fun s ↦ (ofContDiffOn hT f hf).deriv s)
+      =ᵐ[volume.restrict (uIoc (0 : ℝ) t)] _root_.deriv f :=
+    hae'.filter_mono (ae_mono (Measure.restrict_mono hsub le_rfl))
+  have hint : (∫ s in (0 : ℝ)..t, (ofContDiffOn hT f hf).deriv s)
+      = ∫ s in (0 : ℝ)..t, _root_.deriv f s :=
+    intervalIntegral.integral_congr_ae (ae_imp_of_ae_restrict hrestr)
+  rw [hint, intervalIntegral.integral_deriv_of_contDiffOn_Icc
+    (hf.mono (Icc_subset_Icc le_rfl ht.2)) ht.1]
+  abel
 
 theorem toFun_eq_trace0_add_integral (u : timeH1 X T) (t : ℝ) :
     u.toFun t = trace0 X T u + ∫ s in (0 : ℝ)..t, (timeDeriv X T u) s :=

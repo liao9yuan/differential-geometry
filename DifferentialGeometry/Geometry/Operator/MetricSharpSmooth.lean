@@ -1,9 +1,11 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
+import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 
 
 noncomputable section
 
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Connection
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
 
@@ -184,6 +186,33 @@ lemma metricSharpChartLocal_eq_metricSharp
   intro k _
   congr 1
   rw [inner_metricSharpChartLocal_chartBasis (I := I) g α cv hx k]
+
+/-- In a fixed chart trivialization, `metricSharp` is inverse-Gram matrix
+multiplication on the covector's chart-basis components. -/
+lemma trivToE_metricSharp
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
+    {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    DifferentialGeometry.Geometry.Connection.trivToE (I := I) α x
+        (metricSharp (I := I) g x (cv x)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        (∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g α x i j *
+            cv x (chartBasisVecFiber (I := I) α j x)) •
+          chartModelBasis E i := by
+  classical
+  rw [← metricSharpChartLocal_eq_metricSharp (I := I) g α cv hx]
+  unfold metricSharpChartLocal metricSharpChartCoeff
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [map_smul]
+  congr 1
+  change DifferentialGeometry.Geometry.Connection.trivToE (I := I) α x
+      (DifferentialGeometry.Geometry.Connection.trivFromE (I := I) α x
+        (chartModelBasis E i)) = chartModelBasis E i
+  exact DifferentialGeometry.Geometry.Connection.trivToE_trivFromE
+    (I := I) α hx _
 
 lemma metricSharpChartCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)

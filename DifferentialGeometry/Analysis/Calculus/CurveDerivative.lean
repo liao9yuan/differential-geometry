@@ -45,6 +45,85 @@ theorem deriv_comp_mfderiv_along
           (mfderiv 𝓘(ℝ, ℝ) I gamma t (1 : ℝ))) :=
   (hasDerivAt_comp_mfderiv_along I f gamma t hf hgamma).deriv
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
+/-- A jointly differentiable scalar family whose spatial slice vanishes near
+the base point has the same derivative along a moving curve as at the frozen
+base point. -/
+theorem hasDerivAt_diag0
+    {F : ℝ → M → ℝ} {alpha : ℝ → M} {s q : ℝ}
+    (hF : MDifferentiableAt ((𝓘(ℝ, ℝ)).prod I) 𝓘(ℝ, ℝ)
+      (fun p : ℝ × M => F p.1 p.2) (s, alpha s))
+    (halpha : MDifferentiableAt 𝓘(ℝ, ℝ) I alpha s)
+    (hzero : (fun x : M => F s x) =ᶠ[𝓝 (alpha s)] fun _ => 0)
+    (hfixed : HasDerivAt (fun r => F r (alpha s)) q s) :
+    HasDerivAt (fun r => F r (alpha r)) q s := by
+  let J : ℝ → ℝ × M := fun r => (r, alpha r)
+  have hJmd : MDifferentiableAt 𝓘(ℝ, ℝ) ((𝓘(ℝ, ℝ)).prod I) J s :=
+    mdifferentiableAt_id.prodMk halpha
+  have hJderiv :
+      (mfderiv 𝓘(ℝ, ℝ) ((𝓘(ℝ, ℝ)).prod I) J s) (1 : ℝ) =
+        ((1 : ℝ), (mfderiv 𝓘(ℝ, ℝ) I alpha s) (1 : ℝ)) := by
+    have hJhas : HasMFDerivAt 𝓘(ℝ, ℝ) ((𝓘(ℝ, ℝ)).prod I) J s
+        ((mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun r : ℝ => r) s).prod
+          (mfderiv 𝓘(ℝ, ℝ) I alpha s)) :=
+      HasMFDerivAt.prodMk mdifferentiableAt_id.hasMFDerivAt
+        halpha.hasMFDerivAt
+    rw [hJhas.mfderiv]
+    simp [mfderiv_eq_fderiv]
+    rfl
+  have hdiag0 : HasDerivAt (fun r => F r (alpha r))
+      (NormedSpace.fromTangentSpace (F s (alpha s))
+        (mfderiv ((𝓘(ℝ, ℝ)).prod I) 𝓘(ℝ, ℝ)
+          (fun p : ℝ × M => F p.1 p.2) (s, alpha s)
+          ((mfderiv 𝓘(ℝ, ℝ) ((𝓘(ℝ, ℝ)).prod I) J s) (1 : ℝ)))) s := by
+    rw [hasDerivAt_iff_hasFDerivAt]
+    have hcomp := hF.hasMFDerivAt.comp s hJmd.hasMFDerivAt
+    have hcomp' := hcomp.hasFDerivAt
+    convert hcomp' using 1
+    change ContinuousLinearMap.toSpanSingleton ℝ
+        (((mfderiv ((𝓘(ℝ, ℝ)).prod I) 𝓘(ℝ, ℝ)
+          (fun p : ℝ × M => F p.1 p.2) (s, alpha s)).comp
+          (mfderiv 𝓘(ℝ, ℝ) ((𝓘(ℝ, ℝ)).prod I) J s)) (1 : ℝ)) =
+        (mfderiv ((𝓘(ℝ, ℝ)).prod I) 𝓘(ℝ, ℝ)
+          (fun p : ℝ × M => F p.1 p.2) (s, alpha s)).comp
+          (mfderiv 𝓘(ℝ, ℝ) ((𝓘(ℝ, ℝ)).prod I) J s)
+    exact ContinuousLinearMap.toSpanSingleton_apply_map_one
+      (R₁ := ℝ) (M₂ := ℝ) _
+  have hspace : mfderiv I 𝓘(ℝ, ℝ) (F s) (alpha s) = 0 := by
+    simpa using hzero.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)).trans mfderiv_const
+  have hdec := mfderiv_prod_eq_add_apply
+    (I := 𝓘(ℝ, ℝ)) (I' := I) (I'' := 𝓘(ℝ, ℝ))
+    (f := fun p : ℝ × M => F p.1 p.2) (p := (s, alpha s))
+    (v := ((1 : ℝ), (mfderiv 𝓘(ℝ, ℝ) I alpha s) (1 : ℝ))) hF
+  have htime :
+      NormedSpace.fromTangentSpace (F s (alpha s))
+          (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ)
+            (fun r : ℝ => F r (alpha s)) s (1 : ℝ)) = q := by
+    have hd : deriv (fun r : ℝ => F r (alpha s)) s =
+        NormedSpace.fromTangentSpace (F s (alpha s))
+          (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ)
+            (fun r : ℝ => F r (alpha s)) s (1 : ℝ)) := by
+      rw [mfderiv_eq_fderiv]
+      change deriv (fun r : ℝ => F r (alpha s)) s =
+        (fderiv ℝ (fun r : ℝ => F r (alpha s)) s) (1 : ℝ)
+      rw [fderiv_apply_one_eq_deriv]
+    rw [← hd, hfixed.deriv]
+  apply hdiag0.congr_deriv
+  rw [hJderiv]
+  have hdec' := congrArg
+    (NormedSpace.fromTangentSpace (F s (alpha s))) hdec
+  rw [hspace] at hdec'
+  have hdec'' :
+      NormedSpace.fromTangentSpace (F s (alpha s))
+          (mfderiv ((𝓘(ℝ, ℝ)).prod I) 𝓘(ℝ, ℝ)
+            (fun p : ℝ × M => F p.1 p.2) (s, alpha s)
+            ((1 : ℝ), (mfderiv 𝓘(ℝ, ℝ) I alpha s) (1 : ℝ))) =
+        NormedSpace.fromTangentSpace (F s (alpha s))
+          (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ)
+            (fun r : ℝ => F r (alpha s)) s (1 : ℝ)) := by
+    simpa only [ContinuousLinearMap.zero_apply, add_zero] using hdec'
+  exact hdec''.trans htime
+
 theorem deriv_along_curve_eq
     (g : SmoothRiemannianMetric I M)
     {F : ℝ → M → ℝ}
