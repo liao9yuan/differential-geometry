@@ -202,6 +202,76 @@ theorem compact_subseq (u : ℕ → timeH1 Y T) {C : ℝ} (hu : ∀ n, ‖u n‖
     rw [hgfun]
     simpa only [Function.comp_apply, f, contRep_apply] using hgunif'
 
+private theorem compact_subseq_fin_aux {m : ℕ} (T : Fin m → ℝ)
+    (u : (i : Fin m) → ℕ → timeH1 Y (T i)) (C : Fin m → ℝ)
+    (hu : ∀ i n, ‖u i n‖ ≤ C i) :
+    ∃ (phi : ℕ → ℕ) (uLim : (i : Fin m) → timeH1 Y (T i)),
+      StrictMono phi ∧
+        (∀ i z, Tendsto (fun n => inner ℝ (u i (phi n)) z) atTop
+          (nhds (inner ℝ (uLim i) z))) ∧
+        (∀ i, TendstoUniformly
+          (fun n (t : Icc (0 : ℝ) (T i)) => (u i (phi n)).toFun t)
+          (fun t => (uLim i).toFun t) atTop) := by
+  induction m with
+  | zero =>
+      refine ⟨id, fun i => Fin.elim0 i, fun _ _ h => h, ?_, ?_⟩
+      · intro i
+        exact Fin.elim0 i
+      · intro i
+        exact Fin.elim0 i
+  | succ m ih =>
+      let T₀ : Fin m → ℝ := fun i => T i.castSucc
+      let u₀ : (i : Fin m) → ℕ → timeH1 Y (T₀ i) := fun i => u i.castSucc
+      let C₀ : Fin m → ℝ := fun i => C i.castSucc
+      have hu₀ : ∀ i n, ‖u₀ i n‖ ≤ C₀ i := fun i n => hu i.castSucc n
+      obtain ⟨phi₀, uLim₀, hphi₀, hweak₀, hunif₀⟩ := ih T₀ u₀ C₀ hu₀
+      let iLast : Fin (m + 1) := Fin.last m
+      let uLast : ℕ → timeH1 Y (T iLast) := fun n => u iLast (phi₀ n)
+      have huLast : ∀ n, ‖uLast n‖ ≤ C iLast := fun n => hu iLast (phi₀ n)
+      obtain ⟨psi, uLimLast, hpsi, hweakLast, hunifLast⟩ :=
+        compact_subseq uLast huLast
+      let phi : ℕ → ℕ := phi₀ ∘ psi
+      let uLim : (i : Fin (m + 1)) → timeH1 Y (T i) :=
+        fun i => Fin.lastCases uLimLast (fun j => uLim₀ j) i
+      refine ⟨phi, uLim, hphi₀.comp hpsi, ?_, ?_⟩
+      · intro i
+        refine Fin.lastCases ?_ (fun j => ?_) i
+        · intro z
+          simpa only [phi, uLast, iLast, Function.comp_apply, uLim,
+            Fin.lastCases_last] using hweakLast z
+        · intro z
+          have hz := (hweak₀ j z).comp hpsi.tendsto_atTop
+          simpa only [phi, u₀, T₀, Function.comp_apply, uLim,
+            Fin.lastCases_castSucc] using hz
+      · intro i
+        refine Fin.lastCases ?_ (fun j => ?_) i
+        · simpa only [phi, uLast, iLast, Function.comp_apply, uLim,
+            Fin.lastCases_last] using hunifLast
+        · intro V hV
+          have hVevent := hpsi.tendsto_atTop.eventually (hunif₀ j V hV)
+          simpa only [phi, u₀, T₀, Function.comp_apply, uLim,
+            Fin.lastCases_castSucc] using hVevent
+
+/-- Finitely many norm-bounded time-`H¹` families have one common subsequence
+whose derivatives converge weakly and whose continuous representatives converge
+uniformly in every member of the family. -/
+theorem compact_subseq_fin {m : ℕ} (T : Fin m → ℝ)
+    (u : (i : Fin m) → ℕ → timeH1 Y (T i)) (C : Fin m → ℝ)
+    (hu : ∀ i n, ‖u i n‖ ≤ C i) :
+    ∃ (phi : ℕ → ℕ) (uLim : (i : Fin m) → timeH1 Y (T i)),
+      StrictMono phi ∧
+        (∀ i (z : timeL2 Y (T i)),
+          Tendsto (fun n => inner ℝ (u i (phi n)).deriv z) atTop
+            (nhds (inner ℝ (uLim i).deriv z))) ∧
+        (∀ i, TendstoUniformly
+          (fun n (t : Icc (0 : ℝ) (T i)) => (u i (phi n)).toFun t)
+          (fun t => (uLim i).toFun t) atTop) := by
+  obtain ⟨phi, uLim, hphi, hweak, hunif⟩ := compact_subseq_fin_aux T u C hu
+  refine ⟨phi, uLim, hphi, ?_, hunif⟩
+  intro i z
+  have hz := hweak i (timeH1.mk 0 z)
+  simpa only [timeH1.inner_def, init_mk, deriv_mk, inner_zero_right, zero_add] using hz
+
 end Hilbert
 
 end timeH1

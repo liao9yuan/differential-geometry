@@ -31,6 +31,16 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 variable {D : RealTimeInterval}
 
+/-- Perelman's L-cost between two points is the infimum of raw L-lengths of
+square-root reparameterizations of global regularized `C¹` competitors. -/
+def lCost
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (x y : M) (tau : Real) : Real :=
+  sInf {r : Real | ∃ alpha : Real → M,
+    ContMDiff (modelWithCornersSelf Real Real) I 1 alpha ∧
+      alpha 0 = x ∧ alpha (Real.sqrt tau) = y ∧
+      lLength S T (sqrtReparam alpha) 0 tau = r}
+
 omit [InnerProductSpace Real E] in
 /-- The regularized L-index of the transverse field of a smooth fixed-endpoint
 variation is nonnegative when its regularized action has a local minimum. -/

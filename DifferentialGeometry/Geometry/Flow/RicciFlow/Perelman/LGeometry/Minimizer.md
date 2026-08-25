@@ -2,6 +2,11 @@
 
 ## Implemented surface
 
+`lCost` is the raw L-length infimum over square-root reparameterizations of
+global regularized `C¹` curves with fixed endpoints.  It selects the exact
+competitor category constructed by the direct-method modules without adding a
+new admissible-path structure.
+
 `lRegIndex_nonneg_var` proves nonnegativity for the transverse field of a
 supplied smooth fixed-endpoint variation when its parameterized regularized
 action has a genuine local minimum.
@@ -19,27 +24,21 @@ derivatives honestly rather than rewriting them from closed-interval equality.
 
 ## Verification and next frontier
 
-Focused verification passes without warnings. The arbitrary-field index
-nonnegativity theorem is complete. Compact-manifold existence of an actual
-L-minimizer is a separate L5 frontier. The generic tree already contains
-metric-valued absolute continuity, vector-valued `timeH1`, a weak-plus-uniform
-`timeH1.compact_subseq`, and the genuine WeakSpace lower-semicontinuity theorem
-`timeQuad_weak_lsc`. The L-specific `lAction_subseq` now also supplies a C0
-subsequence for every uniformly action-bounded family on a compact manifold,
-and `lAction_subseq_fix` preserves common endpoints. The generic adapters
-`timeH1.ofContDiffOn` and `chartTimeH1` realize a C1 curve first in a linear
-space and then in one fixed manifold chart.
+Focused verification passes without warnings.  The arbitrary-field index
+nonnegativity theorem and `lCost` are complete.  The subsequent direct-method,
+finite-node, classical Euler, and endpoint-extension modules now prove the
+compact positive-time endpoint `exists_lMinimizer`: an endpoint-honest
+`IsLRegCurveOn` whose square-root reparameterization realizes `lCost` and
+beats every global regularized C1 fixed-endpoint competitor.
 
-What remains is the geometric realization layer: a canonical manifold-valued
-H1/AC competitor representation, finite-chart localization and an overlap weak
-chain rule, identification of the assembled weak chart velocity with
-`lVelocity` and the moving quadratic action, and the Tonelli regularity
-upgrade. Until that representation is chosen, adding `IsLAdmissible` or a
-minimizer-existence wrapper would hide rather than solve the frontier.
+The theorem deliberately does not claim a broader AC or piecewise-C1
+competitor category.  The next L5 work is no longer existence: it is the
+unique-minimizing/cut-domain geometry and the measure-zero cut-locus statement
+needed to globalize reduced length.
 
 `redVolume_anti` remains unstated and unproved at **0%**;
 `lRegIndex_nonneg_var` and `lRegIndex_nonneg` are **100%**;
-`exists_lMinimizer` is **0%**, with its dedicated direct-method machinery about
-**35--45%**. Dedicated L-geometry machinery overall is approximately
-**68--72%**, reusable generic prerequisites are approximately **97--99%**, and
-the full Poincare program remains approximately **3--5%**.
+the compact global-regularized-C1 `exists_lMinimizer` is **100%**;
+`redVolume_anti` remains **0%**.  Dedicated minimizer machinery and reused
+generic prerequisites for this endpoint are **100%**.  P2 remains below 1%,
+and the full Poincare program remains approximately **3--5%**.

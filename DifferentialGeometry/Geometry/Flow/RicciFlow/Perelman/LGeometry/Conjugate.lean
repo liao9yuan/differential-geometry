@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Jacobi
 
 set_option autoImplicit false
@@ -28,6 +29,42 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 variable {D : RealTimeInterval}
+
+omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] in
+private theorem written_fderiv_inv
+    {f : E → M} {u : E}
+    (hf : MDifferentiableAt 𝓘(Real, E) I f u)
+    (hinv : (mfderiv 𝓘(Real, E) I f u).IsInvertible) :
+    (fderiv Real
+      (writtenInExtChartAt 𝓘(Real, E) I u f)
+      (extChartAt 𝓘(Real, E) u u)).IsInvertible := by
+  have hf' : HasMFDerivAt 𝓘(Real, E) I f u
+      (mfderiv 𝓘(Real, E) I f u) :=
+    hf.hasMFDerivAt
+  have hchart : HasMFDerivAt I 𝓘(Real, E) (extChartAt I (f u)) (f u)
+      (ContinuousLinearMap.id Real E) := by
+    have h :=
+      (mdifferentiableAt_extChartAt (I := I)
+        (mem_chart_source H (f u))).hasMFDerivAt
+    rw [mfderiv_extChartAt_self (I := I) (x := f u)] at h
+    exact h
+  have hcomp : HasMFDerivAt 𝓘(Real, E) 𝓘(Real, E)
+      ((extChartAt I (f u)) ∘ f) u
+      ((ContinuousLinearMap.id Real E).comp
+        (mfderiv 𝓘(Real, E) I f u)) :=
+    hchart.comp u hf'
+  rw [ContinuousLinearMap.id_comp] at hcomp
+  have hwritten : HasFDerivAt
+      (writtenInExtChartAt 𝓘(Real, E) I u f)
+      (mfderiv 𝓘(Real, E) I f u)
+      (extChartAt 𝓘(Real, E) u u) := by
+    simpa only [writtenInExtChartAt, extChartAt_self_eq,
+      modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
+      Function.comp_apply, id_eq] using hasMFDerivAt_iff_hasFDerivAt.mp hcomp
+  rw [hwritten.fderiv]
+  exact hinv
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [SigmaCompactSpace M] in
@@ -120,5 +157,69 @@ theorem lExpDeriv_surj
       mfderiv 𝓘(Real, E) I (fun W : E => lExp S T x W tau) Z V := by
   exact LinearMap.surjective_of_injective
     (lExpDeriv_inj S T x Z tau hdom hconj)
+
+omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
+/-- At a positive-domain point that is not L-conjugate, the fixed-time
+L-exponential map is a smooth local diffeomorphism in its initial tangent. -/
+theorem lExp_localDiffeo
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (T : Real) (x : M) (Z : TangentSpace I x) (tau : Real)
+    (hdom : (Z, tau) ∈ lExpPosDom S T x)
+    (hconj : ¬ IsLConj S T x Z tau) :
+    IsLocalDiffeomorphAt 𝓘(Real, E) I ∞
+      (fun W : E => lExp S T x W tau) Z := by
+  let f : E → M := fun W => lExp S T x W tau
+  let U : Set E := (fun W : E => (W, tau)) ⁻¹' lExpPosDom S T x
+  have hpair : ContMDiff 𝓘(Real, E)
+      (𝓘(Real, E).prod 𝓘(Real, Real)) ∞
+      (fun W : E => (W, tau)) :=
+    contMDiff_id.prodMk contMDiff_const
+  have hUopen : IsOpen U :=
+    (lExpPosDom_open S hS T x).preimage hpair.continuous
+  have hZU : Z ∈ U := hdom
+  have hfU : ContMDiffOn 𝓘(Real, E) I ∞ f U := by
+    apply (lExp_smoothOn S hS T x).comp hpair.contMDiffOn
+    intro W hW
+    exact hW
+  have hfinj : Function.Injective (mfderiv 𝓘(Real, E) I f Z) := by
+    simpa only [f] using lExpDeriv_inj S T x Z tau hdom hconj
+  have hfsurj : Function.Surjective (mfderiv 𝓘(Real, E) I f Z) := by
+    simpa only [f] using lExpDeriv_surj S T x Z tau hdom hconj
+  let Df : E ≃L[Real] E :=
+    ContinuousLinearEquiv.ofBijective (mfderiv 𝓘(Real, E) I f Z)
+      (LinearMap.ker_eq_bot.mpr hfinj)
+      (LinearMap.range_eq_top.mpr hfsurj)
+  have hDinv : (mfderiv 𝓘(Real, E) I f Z).IsInvertible := by
+    refine ⟨Df, ?_⟩
+    rfl
+  have hfZ : MDifferentiableAt 𝓘(Real, E) I f Z :=
+    (hfU.contMDiffAt (hUopen.mem_nhds hZU)).mdifferentiableAt
+      (by simp)
+  have hfdinv := written_fderiv_inv (I := I) hfZ hDinv
+  obtain ⟨Psi, hZPsi, hPsiU, hEqPsi⟩ :=
+    DifferentialGeometry.Coordinates.isLocalDiffeomorphAt_of_contMDiffOn'
+      (I := 𝓘(Real, E)) (J := I) (n := 1) le_rfl
+      (by exact_mod_cast (WithTop.one_ne_top : (1 : ℕ∞) ≠ ⊤))
+      hUopen hZU (hfU.of_le (by exact_mod_cast le_top)) hfdinv
+  have hfPsi : ContMDiffOn 𝓘(Real, E) I ∞ f Psi.source :=
+    hfU.mono hPsiU
+  have hinvPsi : ∀ W ∈ Psi.source,
+      (fderiv Real
+        (writtenInExtChartAt 𝓘(Real, E) I W f)
+        (extChartAt 𝓘(Real, E) W W)).IsInvertible := by
+    intro W hW
+    have hloc : IsLocalDiffeomorphAt 𝓘(Real, E) I 1 f W :=
+      ⟨Psi, hW, hEqPsi⟩
+    have hmfdinv : (mfderiv 𝓘(Real, E) I f W).IsInvertible :=
+      ⟨hloc.mfderivToContinuousLinearEquiv one_ne_zero,
+        hloc.mfderivToContinuousLinearEquiv_coe one_ne_zero⟩
+    have hfW : MDifferentiableAt 𝓘(Real, E) I f W :=
+      (hfPsi.contMDiffAt (Psi.open_source.mem_nhds hW)).mdifferentiableAt
+        (by simp)
+    exact written_fderiv_inv (I := I) hfW hmfdinv
+  obtain ⟨Phi, hZPhi, _hPhiPsi, hEqPhi⟩ :=
+    DifferentialGeometry.Coordinates.hlocAt_infty'
+      (I := 𝓘(Real, E)) (J := I) Psi.open_source hZPsi hfPsi hinvPsi
+  exact ⟨Phi, hZPhi, hEqPhi⟩
 
 end DifferentialGeometry.PDE.RicciFlow.Perelman

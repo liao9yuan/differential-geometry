@@ -117,6 +117,107 @@ theorem scalar_joint
   rfl
 
 omit [SigmaCompactSpace M] in
+/-- The scalar curvature written in a fixed chart is jointly smooth in regular
+time and the interior chart variable. -/
+theorem chartScalFun_smooth
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (alpha : M) :
+    ContDiffOn Real ∞
+      (fun q : Real × E =>
+        S.scalar q.1 ((extChartAt I alpha).symm q.2))
+      (D.regular ×ˢ interior (extChartAt I alpha).target) := by
+  intro q hq
+  let x := (extChartAt I alpha).symm q.2
+  have hscalar : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+      (fun z : Real × M => S.scalar z.1 z.2) (q.1, x) :=
+    (scalar_joint (I := I) S hS).contMDiffAt
+      ((D.regular_isOpen.prod isOpen_univ).mem_nhds
+        ⟨hq.1, Set.mem_univ x⟩)
+  have hsymm : ContMDiffAt 𝓘(Real, E) I ∞
+      (extChartAt I alpha).symm q.2 :=
+    ((contMDiffOn_extChartAt_symm (I := I) alpha) q.2
+      (interior_subset hq.2)).contMDiffAt
+        (Filter.mem_of_superset (isOpen_interior.mem_nhds hq.2)
+          interior_subset)
+  have hmap : ContMDiffAt (𝓘(Real, Real).prod 𝓘(Real, E))
+      (𝓘(Real, Real).prod I) ∞
+      (fun z : Real × E => (z.1, (extChartAt I alpha).symm z.2)) q :=
+    contMDiffAt_fst.prodMk (hsymm.comp q contMDiffAt_snd)
+  have hcomp := hscalar.comp q hmap
+  have hdiff : ContDiffAt Real ∞
+      (fun z : Real × E =>
+        S.scalar z.1 ((extChartAt I alpha).symm z.2)) q := by
+    rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod,
+      ← chartedSpaceSelf_prod]
+    simpa only [Function.comp_apply] using hcomp
+  exact hdiff.contDiffWithinAt
+
+/-- The spatial differential of scalar curvature in a fixed chart, obtained by
+restricting the full spacetime derivative to spatial directions. -/
+noncomputable def chartScalCov
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (alpha : M) (q : Real × E) : E →L[Real] Real :=
+  (fderiv Real
+    (fun z : Real × E =>
+      S.scalar z.1 ((extChartAt I alpha).symm z.2)) q).comp
+    (ContinuousLinearMap.inr Real Real E)
+
+omit [SigmaCompactSpace M] in
+/-- The fixed-chart scalar covector is jointly smooth on regular spacetime
+inside the chart target. -/
+theorem chartScalCov_smooth
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (alpha : M) :
+    ContDiffOn Real ∞ (chartScalCov (I := I) S alpha)
+      (D.regular ×ˢ interior (extChartAt I alpha).target) := by
+  let U : Set (Real × E) :=
+    D.regular ×ˢ interior (extChartAt I alpha).target
+  have hU : IsOpen U := D.regular_isOpen.prod isOpen_interior
+  have hfun := chartScalFun_smooth (I := I) S hS alpha
+  have hfd : ContDiffOn Real ∞
+      (fderiv Real (fun z : Real × E =>
+        S.scalar z.1 ((extChartAt I alpha).symm z.2))) U :=
+    hfun.fderiv_of_isOpen hU (by rw [ENat.coe_top_add_one])
+  have hcomp := ((ContinuousLinearMap.compL Real E (Real × E) Real).flip
+    (ContinuousLinearMap.inr Real Real E)).contDiff.comp_contDiffOn hfd
+  simpa only [chartScalCov, U] using hcomp
+
+omit [SigmaCompactSpace M] in
+/-- The canonical chart scalar covector is the ordinary spatial derivative of
+the fixed-time scalar-curvature chart representative. -/
+theorem chartScalCov_eq
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (alpha : M)
+    {t : Real} {y : E} (ht : t ∈ D.regular)
+    (hy : y ∈ interior (extChartAt I alpha).target) :
+    chartScalCov (I := I) S alpha (t, y) =
+      fderiv Real (scalarOnE (I := I) alpha (S.scalar t)) y := by
+  let G : Real × E → Real := fun z =>
+    S.scalar z.1 ((extChartAt I alpha).symm z.2)
+  have hG : DifferentiableAt Real G (t, y) :=
+    ((chartScalFun_smooth (I := I) S hS alpha).contDiffAt
+      ((D.regular_isOpen.prod isOpen_interior).mem_nhds ⟨ht, hy⟩)).differentiableAt
+        (by simp)
+  have hpair : HasFDerivAt (fun z : E => ((t, z) : Real × E))
+      (ContinuousLinearMap.inr Real Real E) y :=
+    (hasFDerivAt_const (x := y) (c := t)).prodMk (hasFDerivAt_id y)
+  have hslice := hG.hasFDerivAt.comp y hpair
+  rw [chartScalCov]
+  exact hslice.fderiv.symm
+
+omit [SigmaCompactSpace M] in
+/-- Evaluation of the chart scalar covector agrees with evaluation of the
+ordinary spatial derivative. -/
+theorem chartScalCov_apply
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (alpha : M)
+    {t : Real} {y : E} (ht : t ∈ D.regular)
+    (hy : y ∈ interior (extChartAt I alpha).target) (w : E) :
+    chartScalCov (I := I) S alpha (t, y) w =
+      fderiv Real (scalarOnE (I := I) alpha (S.scalar t)) y w := by
+  rw [chartScalCov_eq (I := I) S hS alpha ht hy]
+
+omit [SigmaCompactSpace M] in
 /-- In fixed chart coordinates, the spatial differential of scalar curvature
 on a regular Ricci-flow spacetime is jointly smooth in time and position. -/
 theorem chartScalarDeriv

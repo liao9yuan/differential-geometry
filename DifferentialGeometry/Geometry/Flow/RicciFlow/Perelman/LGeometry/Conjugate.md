@@ -14,18 +14,27 @@ vanishing at square-root time `sqrt tau`.  At a positive-domain nonconjugate
 point, `lExpDeriv_inj` gives injectivity and `lExpDeriv_surj` uses equal finite
 dimension to give surjectivity.
 
+`lExp_localDiffeo` is the first checked L5 cut-domain producer.  It restricts
+the jointly smooth positive-time L-exponential map to a fixed-time initial-
+tangent slice, converts the nonconjugate differential bijection to the native
+coordinate inverse-function-theorem hypothesis, and upgrades the resulting
+local `C1` branch to a smooth local diffeomorphism.  No inverse branch or
+cut-domain object is added as separate data.
+
 ## Verification and frontier
 
-Focused verification passes without warnings.  The module contains no
+Focused verification passes without warnings after the local-diffeomorphism
+addition.  The module contains no
 `sorry`, `admit`, new axiom, reference-tree import, or additional foundational
 interface.
 
-No first-conjugate-time infimum or index-positivity statement is introduced
-here.  The next mathematical frontier is the endpoint-zero regularized
-index/second-variation layer: the current dynamic Green and second-variation
-theorems require a strictly positive lower backward-time endpoint, whereas
-this conjugacy API is based at backward time zero.
+The remaining cut-domain work is global rather than an inverse-function-
+theorem gap: relate an attained minimizer to the totalized `lRegCurve`/`lExp`,
+prove minimizing-prefix and first-cut alternatives, then obtain the open
+star-shaped minimizing domain and the measure-zero cut image.  None of those
+claims is assumed by this module.
 
 Honest progress remains: `redVolume_anti` is unstated and unproved (0%);
-the broader L4 phase is about 75--80%; dedicated L-geometry machinery is about
-50--55%; reusable generic prerequisites are about 90%.
+the compact global-regularized-C1 minimizer endpoint is complete (100%); this
+local L5 producer is complete (100%), while the global cut-domain stage is
+about 5%; reusable generic prerequisites for this local producer are complete.

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 import Mathlib.Analysis.InnerProductSpace.Positive
 import Mathlib.Analysis.LocallyConvex.WeakSpace
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Topology.Semicontinuity.Basic
 
 set_option autoImplicit false
@@ -23,6 +24,37 @@ noncomputable def timeQuad
     (hC : ∀ᵐ t ∂timeMeasure T, ‖A t‖ ≤ (C : ℝ))
     (u : timeL2 X T) : ℝ :=
   inner ℝ (timeOp A hA C hC u) u
+
+/-- The pointwise density of the time quadratic form is integrable on the time interval. -/
+theorem timeQuad_int
+    (A : ℝ → X →L[ℝ] X)
+    (hA : AEStronglyMeasurable A (timeMeasure T))
+    (C : NNReal)
+    (hC : ∀ᵐ t ∂timeMeasure T, ‖A t‖ ≤ (C : ℝ))
+    (hT : 0 ≤ T)
+    (u : timeL2 X T) :
+    IntervalIntegrable (fun t ↦ inner ℝ (A t (u t)) (u t)) volume 0 T := by
+  rw [intervalIntegrable_iff_integrableOn_Icc_of_le hT]
+  change Integrable (fun t ↦ inner ℝ (A t (u t)) (u t)) (timeMeasure T)
+  refine (L2.integrable_inner (timeOp A hA C hC u) u).congr ?_
+  filter_upwards [timeOp_apply_ae A hA C hC u] with t ht
+  rw [ht]
+
+/-- The time quadratic form is the interval integral of its pointwise quadratic density. -/
+theorem timeQuad_eq_integral
+    (A : ℝ → X →L[ℝ] X)
+    (hA : AEStronglyMeasurable A (timeMeasure T))
+    (C : NNReal)
+    (hC : ∀ᵐ t ∂timeMeasure T, ‖A t‖ ≤ (C : ℝ))
+    (hT : 0 ≤ T)
+    (u : timeL2 X T) :
+    timeQuad A hA C hC u =
+      ∫ t in (0 : ℝ)..T, inner ℝ (A t (u t)) (u t) := by
+  rw [timeQuad, inner_def, intervalIntegral.integral_of_le hT,
+    ← integral_Icc_eq_integral_Ioc]
+  apply integral_congr_ae
+  filter_upwards [timeOp_apply_ae A hA C hC u] with t ht
+  rw [ht]
 
 private theorem timeOp_nonneg
     (A : ℝ → X →L[ℝ] X)

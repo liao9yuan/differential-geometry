@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
+import Mathlib.Analysis.Calculus.Deriv.Comp
 import Mathlib.Analysis.InnerProductSpace.ProdL2
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.ContDiff
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
@@ -377,6 +378,39 @@ theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
       MeasureTheory.ae_eq_bot.mpr (timeMeasure_eq_zero_of_nonpos (le_of_lt hT))
     rw [Filter.eventually_iff, hbot]
     exact Filter.mem_bot
+
+/-- If two time-`H¹` curves have representatives related by a differentiable map on a
+set containing the first curve, then their weak derivatives satisfy the chain rule almost
+everywhere. -/
+theorem chain_ae
+    {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
+    (u : timeH1 X T) (v : timeH1 Y T) {f : X → Y} {s : Set X}
+    (A : ℝ → X →L[ℝ] Y)
+    (hf : ∀ t ∈ Icc (0 : ℝ) T,
+      HasFDerivWithinAt f (A t) s (u.toFun t))
+    (hu : MapsTo u.toFun (Icc (0 : ℝ) T) s)
+    (hval : EqOn v.toFun (f ∘ u.toFun) (Icc (0 : ℝ) T)) :
+    v.deriv =ᵐ[timeMeasure T]
+      fun t ↦ A t (u.deriv t) := by
+  have hmem : ∀ᵐ t ∂(timeMeasure T), t ∈ Ioo (0 : ℝ) T := by
+    unfold timeMeasure
+    rw [← restrict_Ioo_eq_restrict_Icc]
+    exact ae_restrict_mem measurableSet_Ioo
+  filter_upwards [u.ae_hasDerivWithinAt_toFun,
+    v.ae_hasDerivWithinAt_toFun, hmem] with t hut hvt ht
+  have htIcc : t ∈ Icc (0 : ℝ) T := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+  have hIcc : Icc (0 : ℝ) T ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
+  have hut' : HasDerivAt u.toFun (u.deriv t) t := hut.hasDerivAt hIcc
+  have hvt' : HasDerivAt v.toFun (v.deriv t) t := hvt.hasDerivAt hIcc
+  have hmaps : ∀ᶠ r in 𝓝 t, u.toFun r ∈ s := by
+    filter_upwards [hIcc] with r hr
+    exact hu hr
+  have hcomp : HasDerivAt (f ∘ u.toFun) (A t (u.deriv t)) t :=
+    (hf t htIcc).comp_hasDerivAt t hut' hmaps
+  have heq : v.toFun =ᶠ[𝓝 t] f ∘ u.toFun := by
+    filter_upwards [hIcc] with r hr
+    exact hval hr
+  exact hvt'.unique (hcomp.congr_of_eventuallyEq heq)
 
 theorem norm_toFun_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.toFun t‖ ≤ ‖trace0 X T u‖ + Real.sqrt T * ‖timeDeriv X T u‖ := by

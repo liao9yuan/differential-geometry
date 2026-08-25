@@ -1,6 +1,10 @@
 import DifferentialGeometry.Analysis.Calculus.ArzelaAscoli
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.ChartTimeH1
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.KineticChart
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RegAction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ScalarCompact
+import DifferentialGeometry.Geometry.Operator.MetricFamilyGramWeak
 
 set_option autoImplicit false
 
@@ -13,6 +17,7 @@ open scoped ENNReal Manifold ContDiff Topology
 
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Riemannian
+open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
 universe u uE uH
 
@@ -156,6 +161,125 @@ theorem lAction_subseq_fix
         (𝓝 (g ⟨b, hab, le_rfl⟩)) := by
       simpa only [hfixb] using hlim
     exact tendsto_nhds_unique hlim' tendsto_const_nhds
+
+variable {F : Type uE} [NormedAddCommGroup F] [InnerProductSpace Real F]
+  [FiniteDimensional Real F]
+variable {HF : Type uH} [TopologicalSpace HF]
+variable {J : ModelWithCorners Real F HF} [J.Boundaryless]
+variable {N : Type u} [UniformSpace N] [ChartedSpace HF N]
+  [IsManifold J ∞ N] [CompactSpace N]
+variable {D' : RealTimeInterval}
+
+/-- A common full-action upper bound gives a common fixed-chart kinetic upper
+bound without exposing the scalar lower constant or integrability hypotheses. -/
+private theorem lChartKin_bound
+    (S : SolutionOn (I := J) (M := N) D')
+    (hMet : MetricFamilySmoothOn (I := J) (M := N) D' S.family.metric)
+    (hSc : ScalarSTContOn (I := J) (M := N) S)
+    (T a b : Real) (hab : a ≤ b)
+    (p : N) (alpha : Nat → Real → N)
+    (u : Nat → timeH1 F (b - a))
+    (hsrc : ∀ n, MapsTo (alpha n) (Icc a b) (chartAt HF p).source)
+    (hrep : ∀ n, EqOn (u n).toFun
+      (fun r ↦ extChartAt J p (alpha n (a + r))) (Icc (0 : Real) (b - a)))
+    (hdiff : ∀ n, ∀ᵐ r ∂timeMeasure (b - a),
+      MDifferentiableAt (modelWithCornersSelf Real Real) J (alpha n) (a + r))
+    {A : Real} (hact : ∀ n, lRegAction S T (alpha n) a b ≤ A)
+    (hreg : ∀ s ∈ Icc a b, T - s ^ 2 ∈ D'.regular) :
+    ∃ B : Real, ∀ n,
+      (∫ r in (0 : Real)..b - a, (1 / 2 : Real) * inner Real
+        (chartGramOp (I := J) S.family p
+          (T - (a + r) ^ 2, (u n).toFun r) ((u n).deriv r))
+        ((u n).deriv r)) ≤ B := by
+  let kin : Nat → Real := fun n ↦ ∫ s in a..b, (1 / 2 : Real) *
+    (S.base.metric (T - s ^ 2)).inner (alpha n s)
+      (lVelocity (I := J) (alpha n) s) (lVelocity (I := J) (alpha n) s)
+  let pot : Nat → Real := fun n ↦
+    ∫ s in a..b, 2 * s ^ 2 * S.scalar (T - s ^ 2) (alpha n s)
+  have hcont (n : Nat) : ContinuousOn (alpha n) (Icc a b) :=
+    curve_cont_local J p (alpha n) (u n) hab (hsrc n) (hrep n)
+  have hcarrier : ∀ s ∈ Icc a b, T - s ^ 2 ∈ D'.carrier :=
+    fun s hs ↦ D'.regular_subset (hreg s hs)
+  have hkinInt (n : Nat) : IntervalIntegrable
+      (fun s ↦ (1 / 2 : Real) *
+        (S.base.metric (T - s ^ 2)).inner (alpha n s)
+          (lVelocity (I := J) (alpha n) s)
+          (lVelocity (I := J) (alpha n) s)) volume a b :=
+    lKinetic_int_local S hMet T (alpha n) p a b hab (u n)
+      (hsrc n) (hrep n) (hdiff n) hreg
+  have hpotInt (n : Nat) : IntervalIntegrable
+      (fun s ↦ 2 * s ^ 2 * S.scalar (T - s ^ 2) (alpha n s)) volume a b :=
+    lScalar_int (I := J) S hSc T a b (alpha n) (by
+      simpa only [uIcc_of_le hab] using hcarrier) (by
+      simpa only [uIcc_of_le hab] using hcont n)
+  have hsplit (n : Nat) :
+      lRegAction S T (alpha n) a b = kin n + pot n := by
+    simpa only [lRegAction, lRegLag, kin, pot] using
+      intervalIntegral.integral_add (hkinInt n) (hpotInt n)
+  obtain ⟨C, hC⟩ := lScalar_lower (I := J) S hSc T a b (by
+    simpa only [uIcc_of_le hab] using hcarrier)
+  have hpotLower (n : Nat) : C * (b - a) ≤ pot n := by
+    have hmono := intervalIntegral.integral_mono_on hab
+      intervalIntegrable_const (hpotInt n) (fun s hs ↦
+        hC s (by simpa only [uIcc_of_le hab] using hs) (alpha n s))
+    rw [intervalIntegral.integral_const] at hmono
+    simpa only [pot, smul_eq_mul, mul_comm] using hmono
+  refine ⟨A - C * (b - a), fun n ↦ ?_⟩
+  have hkinBound : kin n ≤ A - C * (b - a) := by
+    have ha := hact n
+    rw [hsplit n] at ha
+    linarith [ha, hpotLower n]
+  have heq :
+      (∫ r in (0 : Real)..b - a, (1 / 2 : Real) * inner Real
+        (chartGramOp (I := J) S.family p
+          (T - (a + r) ^ 2, (u n).toFun r) ((u n).deriv r))
+        ((u n).deriv r)) = kin n := by
+    simpa only [kin, ContinuousLinearMap.smul_apply, real_inner_smul_left] using
+      (lKinetic_local S T (alpha n) p a b hab (u n)
+        (hsrc n) (hrep n) (hdiff n)).symm
+  rw [heq]
+  exact hkinBound
+
+/-- On one fixed chart interval, a uniform bound for the full regularized
+L-action produces a subsequence with weakly convergent chart derivatives and
+uniformly convergent chart representatives. -/
+theorem lChartH1_subseq
+    (S : SolutionOn (I := J) (M := N) D')
+    (hMet : MetricFamilySmoothOn (I := J) (M := N) D' S.family.metric)
+    (hSc : ScalarSTContOn (I := J) (M := N) S)
+    (T a b : Real) (hab : a ≤ b)
+    (p : N) (alpha : Nat → Real → N)
+    (u : Nat → timeH1 F (b - a))
+    (hsrc : ∀ n, MapsTo (alpha n) (Icc a b) (chartAt HF p).source)
+    (hrep : ∀ n, EqOn (u n).toFun
+      (fun r ↦ extChartAt J p (alpha n (a + r))) (Icc (0 : Real) (b - a)))
+    (hdiff : ∀ n, ∀ᵐ r ∂timeMeasure (b - a),
+      MDifferentiableAt (modelWithCornersSelf Real Real) J (alpha n) (a + r))
+    {K : Set F} (hKc : IsCompact K)
+    (hKchart : K ⊆ interior (extChartAt J p).target)
+    (huK : ∀ n (r : Icc (0 : Real) (b - a)), (u n).toFun r.1 ∈ K)
+    {A : Real} (hact : ∀ n, lRegAction S T (alpha n) a b ≤ A)
+    (hreg : ∀ s ∈ Icc a b, T - s ^ 2 ∈ D'.regular) :
+    ∃ (phi : Nat → Nat) (uLim : timeH1 F (b - a)),
+      StrictMono phi ∧
+        (∀ z : timeL2 F (b - a),
+          Tendsto (fun n ↦ inner Real (u (phi n)).deriv z) atTop
+            (nhds (inner Real uLim.deriv z))) ∧
+        TendstoUniformly
+          (fun n (r : Icc (0 : Real) (b - a)) ↦ (u (phi n)).toFun r.1)
+          (fun r ↦ uLim.toFun r.1) atTop := by
+  obtain ⟨B, hchart⟩ := lChartKin_bound (J := J) S hMet hSc T a b hab
+    p alpha u hsrc hrep hdiff hact hreg
+  have hba : 0 ≤ b - a := sub_nonneg.mpr hab
+  have hτc : ContinuousOn (fun r : Real ↦ T - (a + r) ^ 2)
+      (Icc (0 : Real) (b - a)) :=
+    (continuous_const.sub ((continuous_const.add continuous_id).pow 2)).continuousOn
+  have hτreg : MapsTo (fun r : Real ↦ T - (a + r) ^ 2)
+      (Icc (0 : Real) (b - a)) D'.regular := by
+    intro r hr
+    exact hreg (a + r) ⟨le_add_of_nonneg_right hr.1, by linarith [hr.2]⟩
+  exact chartH1_subseq (I := J) hMet p hba
+    (fun r : Real ↦ T - (a + r) ^ 2) hτc hτreg hKc hKchart u huK hchart
 
 end DifferentialGeometry.PDE.RicciFlow.Perelman
 

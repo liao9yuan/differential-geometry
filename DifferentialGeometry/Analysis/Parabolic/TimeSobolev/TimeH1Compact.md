@@ -10,10 +10,22 @@ maps. A norm-bounded sequence has one strict-mono subsequence and a limit in
 - the canonical continuous representatives converge uniformly on
   `Set.Icc 0 T`.
 
+`compact_subseq_fin` performs the same extraction simultaneously for a finite
+family whose interval lengths may depend on the finite index. It returns one
+common strict-mono subsequence, derivative weak convergence against every
+index-appropriate `timeL2` test vector, and uniform convergence of every
+continuous representative. The zero-member family is handled directly.
+
 The proof uses the existing vector-valued Arzelà–Ascoli theorem for uniform
 compactness and sequential Banach–Alaoglu plus Fréchet–Riesz for weak
 compactness. The two limits are identified pointwise through the adjoint of the
 bounded time-evaluation map.
+
+The finite-family theorem recursively extracts the first `m` members and then
+the last member. Strictly monotone subsequences are composed, and earlier weak
+and uniform convergence is preserved by the later subsequence's convergence to
+`atTop`. Derivative convergence is projected from full `timeH1` weak
+convergence using `timeH1.mk 0 z`.
 
 ## Supporting estimates
 
@@ -40,8 +52,9 @@ limit of manifold-valued curves into an admissible manifold `H¹` curve. The
 remaining geometric frontier is still a chart-compatible weak-derivative /
 velocity realization API.
 
-Progress accounting for this brick: `compact_subseq` and its dedicated
-two-point modulus machinery are complete (100%). The manifold-valued Perelman
-minimizer theorem remains unstated and therefore 0%; `redVolume_anti` remains
-0%. This file adds generic reused compactness infrastructure and does not by
-itself advance the dedicated L-geometry theorem percentage.
+Progress accounting for this brick: `compact_subseq`, `compact_subseq_fin`, and
+their dedicated two-point modulus machinery are complete (100%). The
+manifold-valued Perelman minimizer theorem remains unstated and therefore 0%;
+`redVolume_anti` remains 0%. This file adds generic reused compactness
+infrastructure and does not by itself advance the dedicated L-geometry theorem
+percentage.

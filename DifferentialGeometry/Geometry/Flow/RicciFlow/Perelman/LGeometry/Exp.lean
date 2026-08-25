@@ -316,7 +316,9 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [SigmaCompactSpace M] in
-private theorem lRegTail_congr
+/-- Full pointwise regularized L-curve data is invariant under equality of
+curve germs at the parameter time. -/
+theorem lRegData_congr
     (S : SolutionOn (I := I) (M := M) D) (T s : Real)
     {gamma eta : Real → M} (heq : gamma =ᶠ[𝓝 s] eta)
     (heta : T - s ^ 2 ∈ D.regular ∧
@@ -1299,9 +1301,9 @@ private theorem lRegFamily_step_of
   refine ⟨hbeta0, hbetaVel, ?_⟩
   intro s hs
   rcases hs with hsJ | hsK
-  · exact lRegTail_congr S T s (hbetaAlpha s hsJ)
+  · exact lRegData_congr S T s (hbetaAlpha s hsJ)
       ((hcurves Z (hWV hZ)).2.2 s hsJ)
-  · exact lRegTail_congr S T s (hbetaEta s hsK) (hetaReg Z hZ s hsK)
+  · exact lRegData_congr S T s (hbetaEta s hsK) (hetaReg Z hZ s hsK)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1568,6 +1570,31 @@ theorem lRegDomain_preconn
   intro r hr
   exact ⟨alpha, J, hJopen, hJconn, h0J, hr, halpha⟩
 
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [SigmaCompactSpace M] in
+/-- Every nonnegative square-root time below a time in the maximal regularized
+domain remains in that domain. -/
+theorem lRegDomain_seg
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (x : M) (Z : TangentSpace I x) {r s : Real}
+    (hs : s ∈ lRegDomain S T x Z) (hr0 : 0 ≤ r) (hrs : r ≤ s) :
+    r ∈ lRegDomain S T x Z := by
+  have hzero : (0 : Real) ∈ lRegDomain S T x Z := by
+    obtain ⟨alpha, J, hJopen, hJconn, h0J, _hsJ, halpha⟩ := hs
+    exact ⟨alpha, J, hJopen, hJconn, h0J, h0J, halpha⟩
+  exact (lRegDomain_preconn S T x Z).ordConnected.out hzero hs ⟨hr0, hrs⟩
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [SigmaCompactSpace M] in
+/-- Every square-root time in the maximal regularized domain corresponds to a
+regular Ricci-flow time. -/
+theorem lRegDomain_reg
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (x : M) (Z : TangentSpace I x) {s : Real}
+    (hs : s ∈ lRegDomain S T x Z) : T - s ^ 2 ∈ D.regular := by
+  obtain ⟨_alpha, _J, _hJopen, _hJconn, _h0J, hsJ, halpha⟩ := hs
+  exact (halpha.2.2 s hsJ).1
+
 omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
 /-- A regular terminal time gives a nonempty maximal regularized domain. -/
 theorem zero_mem_lRegDomain
@@ -1639,6 +1666,22 @@ theorem lRegCurve_eqOn
     lRegChosen_spec S T x Z hsdom
   exact lRegWitness_eq S hS T hKopen hKconn h0K hJopen hJconn h0J
     hchosen halpha ⟨hsK, hs⟩
+
+omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
+/-- A regularized solution on an open neighborhood of a nonnegative closed
+interval agrees there with the totalized maximal regularized L-curve. -/
+theorem lRegCurve_eqIcc
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T b e : Real)
+    (hb : 0 ≤ b) (he : 0 < e)
+    {alpha : Real → M} {x : M} {Z : TangentSpace I x}
+    (halpha : IsLRegCurveOn S T alpha (Ioo (-e) (b + e)) x Z) :
+    Set.EqOn (lRegCurve S T x Z) alpha (Icc (0 : Real) b) := by
+  have h0 : (0 : Real) ∈ Ioo (-e) (b + e) := by
+    constructor <;> linarith
+  have heq := lRegCurve_eqOn S hS T isOpen_Ioo isPreconnected_Ioo h0 halpha
+  intro s hs
+  exact heq ⟨by linarith [hs.1], by linarith [hs.2]⟩
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1721,6 +1764,28 @@ theorem lRegCurve_smoothOn
       (lRegJointDom S T x) := by
   intro p hp
   exact (lRegCurve_smooth S hS T x hp).contMDiffWithinAt
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
+/-- Fixing the initial tangent in the jointly smooth maximal curve gives a C1
+curve on every nonnegative closed segment of its domain. -/
+theorem lRegCurve_c1On
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : Real)
+    (x : M) (Z : TangentSpace I x) {b : Real}
+    (hb : b ∈ lRegDomain S T x Z) :
+    ContMDiffOn (modelWithCornersSelf Real Real) I 1
+      (lRegCurve S T x Z) (Set.Icc (0 : Real) b) := by
+  intro s hs
+  have hsDom : s ∈ lRegDomain S T x Z :=
+    lRegDomain_seg S T x Z hb hs.1 hs.2
+  have hpair : ContMDiffAt (modelWithCornersSelf Real Real)
+      ((modelWithCornersSelf Real E).prod (modelWithCornersSelf Real Real)) ∞
+      ((fun r : Real ↦ (Z, r)) : Real → E × Real) s :=
+    (contMDiff_const.prodMk contMDiff_id).contMDiffAt
+  have hcomp := (lRegCurve_smooth S hS T x hsDom).comp s hpair
+  exact (hcomp.of_le (by norm_num)).contMDiffWithinAt
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [SigmaCompactSpace M] in
@@ -1810,6 +1875,36 @@ theorem mem_lExpPosDom
     exact ⟨htau, htau.le, hreg⟩
   · rintro ⟨htau, _htau0, hreg⟩
     exact ⟨htau, hreg⟩
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [SigmaCompactSpace M] in
+/-- Positive L-exponential-domain membership is preserved when backward time
+is decreased but remains positive. -/
+theorem lExpPosDom_down
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (x : M) (Z : TangentSpace I x) {sigma tau : Real}
+    (htau : (Z, tau) ∈ lExpPosDom S T x)
+    (hsigma : 0 < sigma) (hle : sigma ≤ tau) :
+    (Z, sigma) ∈ lExpPosDom S T x := by
+  rcases (mem_lExpPosDom S T x Z tau).1 htau with ⟨_htau, _htau0, htauDom⟩
+  apply (mem_lExpPosDom S T x Z sigma).2
+  refine ⟨hsigma, hsigma.le, ?_⟩
+  exact lRegDomain_seg S T x Z htauDom (Real.sqrt_nonneg sigma)
+    (Real.sqrt_le_sqrt hle)
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [SigmaCompactSpace M] in
+/-- A positive L-exponential-domain point supplies regular Ricci-flow times
+along its full nonnegative square-root-time segment. -/
+theorem lExpPosDom_reg
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (x : M) (Z : TangentSpace I x) {tau s : Real}
+    (htau : (Z, tau) ∈ lExpPosDom S T x)
+    (hs : s ∈ Set.Icc (0 : Real) (Real.sqrt tau)) :
+    T - s ^ 2 ∈ D.regular := by
+  rcases (mem_lExpPosDom S T x Z tau).1 htau with ⟨_htau, _htau0, htauDom⟩
+  exact lRegDomain_reg S T x Z
+    (lRegDomain_seg S T x Z htauDom hs.1 hs.2)
 
 omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
 /-- The positive-time joint domain of the L-exponential map is open. -/

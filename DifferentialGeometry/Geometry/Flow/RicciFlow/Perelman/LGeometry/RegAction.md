@@ -32,6 +32,10 @@ The variation layer provides:
 
 The direct-method preparation now also provides:
 
+- `lRegAction_add` and `lRegAction_sum`, the adjacent-interval and finite
+  subdivision identities with honest interval-integrability hypotheses. These
+  are the algebraic bridge used when local chart lower bounds are assembled
+  into the action on the whole curve;
 - `lScalar_lower`, a uniform lower bound for the complete scalar-potential
   term on a compact square-root-time interval and compact manifold, using only
   `ScalarSTContOn` and carrier membership;
@@ -80,7 +84,8 @@ continuous combination of its derivative and the Jacobi pairing.
 
 ## Verification and frontier
 
-Focused verification passes without warnings. The newly used time-slab export
+Focused verification passes without warnings, including the adjacent-interval
+and finite-subdivision action identities. The newly used time-slab export
 also passes its targeted module refresh. The downstream `lAction_subseq`
 consumer is focused-green, so the family-uniform constants and reference-energy
 bound have also been checked in their intended compactness use.

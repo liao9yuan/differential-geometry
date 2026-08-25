@@ -58,6 +58,32 @@ noncomputable def lRegAction
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+/-- Regularized L-action is additive across adjacent intervals when the
+Lagrangian is integrable on both pieces. -/
+theorem lRegAction_add
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (alpha : Real → M) (a b c : Real)
+    (hab : IntervalIntegrable (lRegLag S T alpha) volume a b)
+    (hbc : IntervalIntegrable (lRegLag S T alpha) volume b c) :
+    lRegAction S T alpha a b + lRegAction S T alpha b c =
+      lRegAction S T alpha a c := by
+  exact intervalIntegral.integral_add_adjacent_intervals hab hbc
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+/-- A finite sum of regularized L-actions over adjacent intervals equals the
+action over their union. -/
+theorem lRegAction_sum
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (alpha : Real → M) {t : ℕ → Real} {n : ℕ}
+    (hint : ∀ k < n,
+      IntervalIntegrable (lRegLag S T alpha) volume (t k) (t (k + 1))) :
+    (∑ k ∈ Finset.range n, lRegAction S T alpha (t k) (t (k + 1))) =
+      lRegAction S T alpha (t 0) (t n) := by
+  exact intervalIntegral.sum_integral_adjacent_intervals hint
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- Regularized L-action depends only on the curve on the open interval; the
 endpoint derivatives do not affect the interval integral. -/
 theorem lRegAction_congr
