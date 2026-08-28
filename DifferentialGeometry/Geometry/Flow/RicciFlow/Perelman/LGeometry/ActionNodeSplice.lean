@@ -451,6 +451,7 @@ theorem exists_chartH1_join
       exact congrArg (extChartAt I (p1 i1))
         (hgamma1_eq (hshift1 i1 hr')).symm
 
+omit [CompactSpace M] in
 /-- Two chart `timeH1` pieces whose inverse-chart endpoint values agree admit
 global `C¹` fixed-endpoint approximants.  Both local representatives converge
 strongly, and the complete regularized L-action converges to that of the

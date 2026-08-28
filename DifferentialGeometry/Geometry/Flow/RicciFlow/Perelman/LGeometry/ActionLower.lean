@@ -135,11 +135,11 @@ theorem lKinetic_liminf
 variable {N : Type u} [UniformSpace N] [ChartedSpace H N]
   [IsManifold I ∞ N] [CompactSpace N]
 
-/-- On one fixed chart interval, the generalized regularized action of the
-local time-`H¹` limit is bounded above by the liminf of the manifold actions.
-The limiting kinetic term remains the chart weak derivative, not a manifold
-`lVelocity`. -/
-theorem lRegAction_liminf
+omit [CompactSpace N] in
+/-- On one fixed chart interval with a supplied compact target, the generalized
+regularized action of the local time-`H¹` limit is bounded above by the liminf
+of the manifold actions. -/
+theorem lRegAction_lim_cpt
     [I.Boundaryless]
     (S : SolutionOn (I := I) (M := N) D)
     (hMet : MetricFamilySmoothOn (I := I) (M := N) D S.family.metric)
@@ -153,6 +153,8 @@ theorem lRegAction_liminf
     (hdiff : ∀ n, ∀ᵐ r ∂timeMeasure (b - a),
       MDifferentiableAt (modelWithCornersSelf Real Real) I (alpha n) (a + r))
     (alphaLim : Real → N) (uLim : timeH1 E (b - a))
+    (Q : Set N) (hQ : IsCompact Q)
+    (hval : ∀ n s, s ∈ Icc a b → alpha n s ∈ Q)
     {K : Set E} (hKc : IsCompact K)
     (hKchart : K ⊆ interior (extChartAt I p).target)
     (huK : ∀ n (r : Icc (0 : Real) (b - a)), (u n).toFun r.1 ∈ K)
@@ -195,8 +197,8 @@ theorem lRegAction_liminf
   have hcarrier : ∀ s ∈ Icc a b, T - s ^ 2 ∈ D.carrier :=
     fun s hs ↦ D.regular_subset (hreg s hs)
   have hpot : Tendsto pot atTop (nhds potLim) := by
-    exact lScalar_tendsto (I := I) S hSc T a b hab hcarrier
-      alpha alphaLim hcont halpha
+    exact lScalar_tendsto_cpt (I := I) S hSc T a b hab hcarrier Q hQ
+      alpha alphaLim hcont hval halpha
   have hkinInt (n : ℕ) : IntervalIntegrable
       (fun s ↦ (1 / 2 : Real) *
         (S.base.metric (T - s ^ 2)).inner (alpha n s)
@@ -244,6 +246,50 @@ theorem lRegAction_liminf
     exact (hsplit n).symm
   rw [hseq] at hsum
   exact hsum
+
+/-- On one fixed chart interval, the generalized regularized action of the
+local time-`H¹` limit is bounded above by the liminf of the manifold actions.
+The limiting kinetic term remains the chart weak derivative, not a manifold
+`lVelocity`. -/
+theorem lRegAction_liminf
+    [I.Boundaryless]
+    (S : SolutionOn (I := I) (M := N) D)
+    (hMet : MetricFamilySmoothOn (I := I) (M := N) D S.family.metric)
+    (hSc : ScalarSTContOn (I := I) (M := N) S)
+    (T a b : Real) (hab : a ≤ b)
+    (p : N) (alpha : ℕ → Real → N)
+    (u : ℕ → timeH1 E (b - a))
+    (hsrc : ∀ n, MapsTo (alpha n) (Icc a b) (chartAt H p).source)
+    (hrep : ∀ n, EqOn (u n).toFun
+      (fun r ↦ extChartAt I p (alpha n (a + r))) (Icc (0 : Real) (b - a)))
+    (hdiff : ∀ n, ∀ᵐ r ∂timeMeasure (b - a),
+      MDifferentiableAt (modelWithCornersSelf Real Real) I (alpha n) (a + r))
+    (alphaLim : Real → N) (uLim : timeH1 E (b - a))
+    {K : Set E} (hKc : IsCompact K)
+    (hKchart : K ⊆ interior (extChartAt I p).target)
+    (huK : ∀ n (r : Icc (0 : Real) (b - a)), (u n).toFun r.1 ∈ K)
+    (huLimK : ∀ r : Icc (0 : Real) (b - a), uLim.toFun r.1 ∈ K)
+    (hu : TendstoUniformly
+      (fun n (r : Icc (0 : Real) (b - a)) ↦ (u n).toFun r.1)
+      (fun r ↦ uLim.toFun r.1) atTop)
+    (hdu : ∀ z : timeL2 E (b - a), Tendsto
+      (fun n ↦ inner Real (u n).deriv z) atTop
+      (nhds (inner Real uLim.deriv z)))
+    (halpha : TendstoUniformly
+      (fun n (s : Icc a b) ↦ alpha n s.1)
+      (fun s ↦ alphaLim s.1) atTop)
+    (hact : IsBoundedUnder (· ≤ ·) atTop
+      (fun n ↦ lRegAction S T (alpha n) a b))
+    (hreg : ∀ s ∈ Icc a b, T - s ^ 2 ∈ D.regular) :
+    (∫ r in (0 : Real)..b - a, (1 / 2 : Real) * inner Real
+        (chartGramOp (I := I) S.family p
+          (T - (a + r) ^ 2, uLim.toFun r) (uLim.deriv r))
+        (uLim.deriv r)) +
+      (∫ s in a..b, 2 * s ^ 2 * S.scalar (T - s ^ 2) (alphaLim s)) ≤
+        liminf (fun n ↦ lRegAction S T (alpha n) a b) atTop := by
+  exact lRegAction_lim_cpt S hMet hSc T a b hab p alpha u hsrc hrep hdiff
+    alphaLim uLim Set.univ isCompact_univ (fun _ _ _ ↦ Set.mem_univ _)
+    hKc hKchart huK huLimK hu hdu halpha hact hreg
 
 omit [CompactSpace N] in
 /-- A finite fixed-chart `timeH1` realization computes the regularized
@@ -369,11 +415,10 @@ theorem lRegAction_chart
   intro i _
   rw [hsplit i, hkinChart i]
 
-/-- A finite chart subdivision preserves lower semicontinuity of the
-regularized L-action.  The limiting kinetic terms are the chart weak
-derivatives, while the scalar terms are evaluated on the uniform manifold
-limit. -/
-theorem lRegAction_fin_lsc
+omit [CompactSpace N] in
+/-- A finite chart subdivision with a supplied compact target preserves lower
+semicontinuity of the regularized L-action. -/
+theorem lRegAction_fin_cpt
     [I.Boundaryless]
     (S : SolutionOn (I := I) (M := N) D)
     (hMet : MetricFamilySmoothOn (I := I) (M := N) D S.family.metric)
@@ -382,6 +427,8 @@ theorem lRegAction_fin_lsc
     (htmono : Monotone t) (ht0 : t 0 = a)
     (htlast : t (Fin.last m) = b)
     (p : Fin m → N) (alpha : Nat → Real → N) (gamma : Real → N)
+    (Q : Set N) (hQ : IsCompact Q)
+    (hval : ∀ n s, s ∈ Icc a b → alpha n s ∈ Q)
     (u : (i : Fin m) → Nat → timeH1 E (lSegLen t i))
     (hsrc : ∀ i n, MapsTo (alpha n)
       (Icc (t i.castSucc) (t i.succ)) (chartAt H (p i)).source)
@@ -486,13 +533,14 @@ theorem lRegAction_fin_lsc
     exact mul_nonneg (by norm_num)
       (chartGramOp_nonneg (I := I) S.family (p i)
         (T - (t i.castSucc + r) ^ 2, (u i n).toFun r) ((u i n).deriv r))
-  obtain ⟨C, hC⟩ := lScalar_lower (I := I) S hSc T a b hcarrier
+  obtain ⟨C, hC⟩ := lScalar_lower_cpt (I := I) S hSc T a b hcarrier Q hQ
   have hpotLower (i : Fin m) (n : Nat) : C * lSegLen t i ≤ pot i n := by
     have hmono := intervalIntegral.integral_mono_on (hseg i)
       intervalIntegrable_const (hpotInt i n) (fun s hs ↦
         hC s (by
           simpa only [uIcc_of_le hab] using
-            ⟨(hleft i).trans hs.1, hs.2.trans (hright i)⟩) (alpha n s))
+            ⟨(hleft i).trans hs.1, hs.2.trans (hright i)⟩) (alpha n s)
+          (hval n s ⟨(hleft i).trans hs.1, hs.2.trans (hright i)⟩))
     rw [intervalIntegral.integral_const] at hmono
     simpa only [pot, lSegLen, smul_eq_mul, mul_comm] using hmono
   have hqLower (i : Fin m) (n : Nat) : C * lSegLen t i ≤ q i n := by
@@ -558,8 +606,10 @@ theorem lRegAction_fin_lsc
     let inc : Icc (t i.castSucc) (t i.succ) → Icc a b := fun s ↦
       ⟨s.1, (hleft i).trans s.2.1, s.2.2.trans (hright i)⟩
     have halpha_i := halpha.comp inc
-    apply lRegAction_liminf S hMet hSc T (t i.castSucc) (t i.succ) (hseg i)
-      (p i) alpha (u i) (hsrc i) (hrep i) (hdiff i) gamma (uLim i)
+    apply lRegAction_lim_cpt S hMet hSc T (t i.castSucc) (t i.succ) (hseg i)
+      (p i) alpha (u i) (hsrc i) (hrep i) (hdiff i) gamma (uLim i) Q hQ
+      (fun n s hs ↦ hval n s
+        ⟨(hleft i).trans hs.1, hs.2.trans (hright i)⟩)
       (hKc i) (hKchart i) (huK i) (huLimK i) (hu i) (hdu i)
     · simpa only [Function.comp_apply, inc] using halpha_i
     · exact hqUpper i
@@ -592,5 +642,57 @@ theorem lRegAction_fin_lsc
       congr 1
       funext n
       exact hsum n
+
+/-- A finite chart subdivision preserves lower semicontinuity of the
+regularized L-action.  The limiting kinetic terms are the chart weak
+derivatives, while the scalar terms are evaluated on the uniform manifold
+limit. -/
+theorem lRegAction_fin_lsc
+    [I.Boundaryless]
+    (S : SolutionOn (I := I) (M := N) D)
+    (hMet : MetricFamilySmoothOn (I := I) (M := N) D S.family.metric)
+    (hSc : ScalarSTContOn (I := I) (M := N) S)
+    (T a b : Real) {m : Nat} (t : Fin (m + 1) → Real)
+    (htmono : Monotone t) (ht0 : t 0 = a)
+    (htlast : t (Fin.last m) = b)
+    (p : Fin m → N) (alpha : Nat → Real → N) (gamma : Real → N)
+    (u : (i : Fin m) → Nat → timeH1 E (lSegLen t i))
+    (hsrc : ∀ i n, MapsTo (alpha n)
+      (Icc (t i.castSucc) (t i.succ)) (chartAt H (p i)).source)
+    (hrep : ∀ i n, EqOn (u i n).toFun
+      (fun r ↦ extChartAt I (p i) (alpha n (t i.castSucc + r)))
+      (Icc (0 : Real) (lSegLen t i)))
+    (hdiff : ∀ i n, ∀ᵐ r ∂timeMeasure (lSegLen t i),
+      MDifferentiableAt (modelWithCornersSelf Real Real) I
+        (alpha n) (t i.castSucc + r))
+    (K : Fin m → Set E) (hKc : ∀ i, IsCompact (K i))
+    (hKchart : ∀ i, K i ⊆ interior (extChartAt I (p i)).target)
+    (huK : ∀ i n (r : Icc (0 : Real) (lSegLen t i)),
+      (u i n).toFun r.1 ∈ K i)
+    (uLim : (i : Fin m) → timeH1 E (lSegLen t i))
+    (hu : ∀ i, TendstoUniformly
+      (fun n (r : Icc (0 : Real) (lSegLen t i)) ↦ (u i n).toFun r.1)
+      (fun r ↦ (uLim i).toFun r.1) atTop)
+    (hdu : ∀ i (z : timeL2 E (lSegLen t i)), Tendsto
+      (fun n ↦ inner Real (u i n).deriv z) atTop
+      (nhds (inner Real (uLim i).deriv z)))
+    (halpha : TendstoUniformly
+      (fun n (s : Icc a b) ↦ alpha n s.1)
+      (fun s ↦ gamma s.1) atTop)
+    (hact : IsBoundedUnder (· ≤ ·) atTop
+      (fun n ↦ lRegAction S T (alpha n) a b))
+    (hreg : ∀ s ∈ Icc a b, T - s ^ 2 ∈ D.regular) :
+    (∑ i : Fin m, (
+      (∫ r in (0 : Real)..lSegLen t i, (1 / 2 : Real) * inner Real
+        (chartGramOp (I := I) S.family (p i)
+          (T - (t i.castSucc + r) ^ 2, (uLim i).toFun r)
+          ((uLim i).deriv r))
+        ((uLim i).deriv r)) +
+      (∫ s in (t i.castSucc)..(t i.succ),
+        2 * s ^ 2 * S.scalar (T - s ^ 2) (gamma s)))) ≤
+      liminf (fun n ↦ lRegAction S T (alpha n) a b) atTop := by
+  exact lRegAction_fin_cpt S hMet hSc T a b t htmono ht0 htlast p alpha gamma
+    Set.univ isCompact_univ (fun _ _ _ ↦ Set.mem_univ _) u hsrc hrep hdiff
+    K hKc hKchart huK uLim hu hdu halpha hact hreg
 
 end DifferentialGeometry.PDE.RicciFlow.Perelman

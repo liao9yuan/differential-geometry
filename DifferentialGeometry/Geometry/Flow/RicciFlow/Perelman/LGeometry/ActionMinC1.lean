@@ -31,6 +31,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- A monotone finite chart-`H¹` realization of a fixed-endpoint regularized
 L-action minimizer is `C¹` when its parameter interval is nondegenerate. -/
 theorem lMinCurve_c1

@@ -215,7 +215,7 @@ theorem lRegAction_chart_sum
   exact lChartAct_split S hMet hSc T (t i.castSucc) (p i)
     (sub_nonneg.mpr hseg) (u i) htar hregi
 
-omit [NeZero (Module.finrank Real E)] [T2Space M] in
+omit [NeZero (Module.finrank Real E)] [T2Space M] [CompactSpace M] in
 /-- Global minimality against fixed-endpoint `C¹` curves gives local
 fixed-endpoint minimality of every positive chart `timeH1` piece. -/
 theorem lChartAct_local

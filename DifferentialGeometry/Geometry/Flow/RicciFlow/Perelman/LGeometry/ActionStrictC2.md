@@ -30,6 +30,10 @@ public theorem.
 Focused verification passed without warnings or placeholders. The exported
 module was refreshed for downstream consumers.
 
+The focused noncompact recheck also passed without warnings. Both
+`lStrict_piece_c2` and `lStrict_piece_c2_at` now export without an ambient
+`CompactSpace M` instance. Their downstream refresh passed.
+
 The terminal `exists_lMinimizer` and `redVolume_anti` remain 0%. The strict
 finite-piece coordinate and manifold-valued C² producers and their local-
 minimum-to-Tonelli assembly are 100%.

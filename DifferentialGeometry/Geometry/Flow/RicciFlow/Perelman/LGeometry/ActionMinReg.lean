@@ -33,6 +33,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- A monotone finite chart-`H¹` realization of a global regularized L-action
 minimizer satisfies the full regularized L-geodesic triple at every interior
 time. -/

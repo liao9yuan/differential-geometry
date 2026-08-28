@@ -32,6 +32,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 private theorem lFinCurve_c1_aux
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (T a b : Real) {m : Nat} (t : Fin (m + 3) → Real)
@@ -180,6 +181,7 @@ private theorem lFinCurve_c1_aux
     congr 1
   simpa only [htn0, htnlast] using hfull
 
+omit [CompactSpace M] in
 /-- A positive finite chart-`H¹` realization of a global regularized L-action
 minimizer is `C¹` on its full closed parameter interval. -/
 theorem lFinCurve_c1

@@ -30,6 +30,9 @@ chain without adding a new solution class or a stronger consumer assumption:
   square-root-time interval;
 * `lRegSol_eqOn` propagates arbitrary-time phase-state uniqueness, and
   `lRegFamily_step` glues one restarted family to an existing family;
+* `lPhaseSeed_vel` exposes the intrinsic-to-chart velocity seed identity, and
+  `lRegFamily_step_of` exposes the supplied-flow family splice used by compact
+  phase-cage continuation arguments;
 * `lRegFamily_extend` uses an open/closure-stable good-time argument and the
   compact uniform phase-flow radius to continue a common parameter family
   across any compact segment of a witness;
@@ -42,6 +45,10 @@ chain without adding a new solution class or a stronger consumer assumption:
 `lExpDomain` is the nonnegative pullback of `lRegDomain` by `sqrt`, and `lExp`
 evaluates `lRegCurve` at square-root time.  `lExpPosDom` is its joint positive
 part; it is open, and `lExp_smoothOn` proves joint smoothness throughout it.
+At every positive backward time, `lExp_vel_sqrt` identifies the terminal
+regularized velocity with `2 * sqrt tau` times the velocity of the ordinary
+backward-time `lExp` ray.  This is a pure reparameterization identity and needs
+no regular-domain or solution hypothesis.
 `lExpPosDom_down` transfers positive-domain membership to every smaller
 positive backward time, and `lExpPosDom_reg` supplies regular Ricci-flow times
 on the full associated nonnegative square-root-time segment.
@@ -52,8 +59,9 @@ to define `lExp`.
 
 ## Verification and boundary
 
-Focused verification passed without warnings after the endpoint-facing and
-domain-restriction exports.  Axiom audits of `lRegCurve_c1On` and
+Focused verification passed without warnings after the endpoint-facing,
+domain-restriction, restart-facing, and velocity-reparameterization exports.
+Axiom audits of `lRegCurve_c1On` and
 `lExpPosDom_reg` report only `propext`, classical choice, and quotient
 soundness.  The file contains no `sorry`, `admit`, or new axiom.
 

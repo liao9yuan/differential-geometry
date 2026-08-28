@@ -11,6 +11,11 @@ Ricci-flow-specific regularity assumption beyond scalar continuity.
 
 - `lScalar_cont`: continuity along a continuous curve.
 - `lScalar_int`: interval integrability obtained from that continuity.
+- `lScalar_lower_cpt`: a uniform lower bound on a supplied compact target;
+  ambient compactness is not required.
+- `lScalar_tendsto_cpt`: convergence of scalar-potential integrals when the
+  approximating curves share a supplied compact target; ambient compactness is
+  not required.
 - `lScalar_tendsto`: convergence of the scalar-potential interval integrals
   under uniform convergence of continuous curves.
 
@@ -25,7 +30,8 @@ single-curve continuity/integrability declarations.
 
 ## Verification
 
-Focused verification passed without warnings or placeholders. A shifted
+Focused verification of the compact-target producers and the existing
+declarations passes without warnings or placeholders. A shifted
 producer was deliberately moved to the narrow `ScalarShift` module: keeping it
 here pulled the unrelated top-level `NeZero (finrank E)` section context into
 the declaration and caused a deterministic elaboration timeout.

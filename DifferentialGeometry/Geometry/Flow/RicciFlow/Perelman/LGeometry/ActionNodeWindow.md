@@ -53,6 +53,10 @@ Focused verification passed without warnings or placeholders.  The public
 name has twelve characters and the theorem uses no new class, axiom, or
 reference-tree import.
 
+The focused noncompact recheck also passed without warnings. `lNodeWin_cmp`
+now uses the generalized two-piece density producer and exports without an
+ambient `CompactSpace M` instance. Its downstream refresh also passed.
+
 - `lNodeWin_cmp`: 100% for its exact comparison interface.
 - Arbitrary positive-window variational localization machinery: about 98--99%;
   the remaining work is the caller-side finite resegmentation adapter.

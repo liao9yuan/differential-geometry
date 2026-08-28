@@ -78,6 +78,7 @@ private theorem has_fin_seg
       rw [hidx]
       exact hks
 
+omit [CompactSpace M] in
 /-- A strict finite chart-`H¹` realization of a global regularized L-action
 minimizer satisfies the full regularized L-geodesic triple at every interior
 time. -/

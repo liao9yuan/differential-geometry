@@ -846,7 +846,9 @@ private theorem lPhaseSeed_smooth
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-private theorem lPhaseSeed_vel
+/-- The velocity coordinate in a regular chart seed is the chart
+trivialization of the intrinsic curve velocity. -/
+theorem lPhaseSeed_vel
     {gamma : Real → M} {s0 : Real} (x0 : M)
     (hgamma : MDifferentiableAt 𝓘(Real, Real) I gamma s0)
     (hsrc : gamma s0 ∈ (chartAt H x0).source) :
@@ -1010,7 +1012,9 @@ theorem exists_lRegFamily
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
-private theorem lRegFamily_step_of
+/-- A supplied uniform local phase flow extends a jointly smooth family of
+regularized L-curves across the seed time. -/
+theorem lRegFamily_step_of
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : Real) (x : M)
     {alpha : E × Real → M} {V : Set E} {J : Set Real}
@@ -1853,6 +1857,38 @@ noncomputable def lExp
     (S : SolutionOn (I := I) (M := M) D) (T : Real)
     (x : M) (Z : TangentSpace I x) (tau : Real) : M :=
   lRegCurve S T x Z (Real.sqrt tau)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [SigmaCompactSpace M] in
+/-- At positive backward time, the regularized terminal velocity is twice
+square-root time times the ordinary L-exponential ray velocity. -/
+theorem lExp_vel_sqrt
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (x : M) (Z : TangentSpace I x) {tau : Real} (htau : 0 < tau) :
+    lVelocity (I := I) (lRegCurve S T x Z) (Real.sqrt tau) =
+      (2 * Real.sqrt tau) •
+        lVelocity (I := I) (fun r : Real ↦ lExp S T x Z r) tau := by
+  let s : Real := Real.sqrt tau
+  let gamma : Real → M := fun r ↦ lExp S T x Z r
+  have hs : 0 < s := Real.sqrt_pos.2 htau
+  have heq : lRegCurve S T x Z =ᶠ[𝓝 s] sqReparam gamma := by
+    filter_upwards [eventually_gt_nhds hs] with r hr
+    simp only [sqReparam, gamma, lExp, Real.sqrt_sq hr.le]
+  have hvel :
+      lVelocity (I := I) (lRegCurve S T x Z) s =
+        lVelocity (I := I) (sqReparam gamma) s := by
+    unfold lVelocity
+    rw [Filter.EventuallyEq.mfderiv_eq
+      (I := 𝓘(Real, Real)) (I' := I) heq]
+    rfl
+  change lVelocity (I := I) (lRegCurve S T x Z) s =
+    (2 * s) • lVelocity (I := I) gamma tau
+  have hsq := lVelocity_sq_pos (I := I) gamma s hs
+  rw [← hvel] at hsq
+  rw [show s ^ 2 = tau by simpa only [s] using Real.sq_sqrt htau.le] at hsq
+  exact hsq
 
 /-- The positive-time joint domain of the L-exponential map. -/
 def lExpPosDom

@@ -38,6 +38,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- At every internal node of a strict finite realization of a global
 regularized L-action minimizer, the attained curve has a differentiable
 velocity field and satisfies the intrinsic regularized acceleration equation. -/

@@ -35,6 +35,11 @@ application those bounds are derived from kinetic nonnegativity, a common
 scalar lower bound, total-action boundedness, and `lRegAction_sum`; they are not
 new hypotheses for the eventual minimizer theorem.
 
+`lRegAction_lim_cpt` is the noncompact one-chart interface: it uses a supplied
+compact target for the scalar dominated-convergence bound. The compatibility
+theorem `lRegAction_liminf` recovers the previous compact-manifold statement by
+taking that target to be the whole manifold.
+
 `lRegAction_fin_lsc` is the finite-subdivision assembly theorem. It sums the
 generalized chart kinetic terms of the local `timeH1` limits and the scalar
 terms along the uniform manifold limit. It derives each local Lagrangian
@@ -49,6 +54,11 @@ the kinetic and scalar integrability on every piece, and identifies the finite
 generalized chart sum with the actual `lRegAction`. It uses the existing
 finite-adjacent-interval identity internally and exposes no extra
 integrability or differentiability assumptions.
+
+`lRegAction_fin_cpt` is the corresponding noncompact finite-subdivision
+producer. Its supplied compact target gives both the scalar lower bound needed
+to control the chart-piece actions and the scalar dominated-convergence bound.
+The new compact-target forms pass focused verification without warnings.
 
 ## Progress boundary
 

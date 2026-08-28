@@ -223,7 +223,9 @@ private theorem contMDiffAt_metric_inner
 
 
 omit [CompleteSpace E] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
-private theorem nabla0SFun_two_eval_smooth_slots
+/-- Evaluate the covariant derivative of a smooth covariant two-tensor on two
+smooth vector-field slots. -/
+theorem nabla0S_two_apply
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _))
@@ -1501,7 +1503,7 @@ private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
           nablaAlphaSec x (vec2 (I := I) (Yf x) (XZc x)) := by
     have h2 := nabla2OneFormRealizesAt_apply (I := I) cov alphaSec
       nablaAlphaSec x nabla2Alpha hnabla2 Xsec Y Z
-    have hraw := nabla0SFun_two_eval_smooth_slots
+    have hraw := nabla0S_two_apply
       (I := I) cov Xsec Ysec Zsec nablaAlphaSec x
     calc
       nabla2Alpha (vec3 (I := I) X Y Z)
@@ -1521,7 +1523,7 @@ private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
           nablaAlphaSec x (vec2 (I := I) (Xf x) (YZc x)) := by
     have h2 := nabla2OneFormRealizesAt_apply (I := I) cov alphaSec
       nablaAlphaSec x nabla2Alpha hnabla2 Ysec X Z
-    have hraw := nabla0SFun_two_eval_smooth_slots
+    have hraw := nabla0S_two_apply
       (I := I) cov Ysec Xsec Zsec nablaAlphaSec x
     calc
       nabla2Alpha (vec3 (I := I) Y X Z)

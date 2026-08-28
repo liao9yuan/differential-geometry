@@ -31,6 +31,10 @@ reference-tree import, new class, or frontier wrapper is assumed.
 
 Focused verification passed without warnings or placeholders.  The theorem is
 100% complete and closes the strict finite-piece intrinsic-equation consumer.
+
+The focused noncompact recheck also passed without warnings.
+`lStrict_piece_accel` now exports without an ambient `CompactSpace M` instance;
+its downstream refresh passed.
 The terminal `exists_lMinimizer` and `redVolume_anti` remain 0%; dedicated
 L-geometry machinery is approximately 97--98%, reused generic infrastructure
 is 100%, P2 remains below 1%, and the whole Poincare program remains

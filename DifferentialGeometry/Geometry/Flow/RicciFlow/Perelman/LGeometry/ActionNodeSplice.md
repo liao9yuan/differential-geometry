@@ -24,6 +24,12 @@ the construction and assumptions are unchanged.
 
 ## Verification
 
+The noncompact declaration-level generalization of `lNode_c1_dense` passed
+focused verification without warnings. Its proof delegates the approximation
+step to the compact-target finite-chart density producer, so no ambient
+compactness hypothesis or new replacement assumption is added. The refreshed
+export for `ActionNodeWindow` also passed.
+
 Focused verification passes without warnings.  The theorem has no project
 placeholders; its axiom audit reports only `propext`, `Classical.choice`, and
 `Quot.sound`.

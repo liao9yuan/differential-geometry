@@ -12,8 +12,10 @@ fixed monotone subdivision it combines:
 
 The conclusion is convergence of the complete regularized L-action.  The
 kinetic term uses `chartKin_tendsto`; the scalar-curvature term uses
-`lScalar_tendsto`; `lRegAction_chart` identifies the finite coordinate sum
-with the raw manifold action.
+`lScalar_tendsto_cpt` on the compact manifold image of each supplied compact
+coordinate buffer; `lRegAction_chart` identifies the finite coordinate sum
+with the raw manifold action. This removes the former ambient `CompactSpace`
+requirement from the chart, strong-`timeH1`, and global `C¹` density theorems.
 
 `lAction_h1_lim` is the natural strong-topology interface: callers provide
 strong convergence of each local `timeH1` representative, and the theorem
@@ -48,9 +50,11 @@ are not exposed as consumer assumptions.
 ## Verification
 
 The upstream endpoint-flat density, strong quadratic, fixed-chart kinetic
-convergence, and finite geometric assembly modules are verified.  Focused
-verification of the completed `ActionDensity.lean` passes without warnings or
-placeholders.
+convergence, and finite geometric assembly modules are verified. Focused
+verification of the compact-range generalization now passes without warnings
+or placeholders. Its chart-image membership proof explicitly normalizes the
+shifted time and converts `chartAt` source membership to `extChartAt` source
+membership.
 
 ## Project position
 

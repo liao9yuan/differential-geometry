@@ -89,6 +89,35 @@ omit [ConnectedSpace M] in
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
+/-- The framed intrinsic exponential of a vector lies in every metric eball
+whose radius is larger than the vector's model norm. -/
+theorem intrFrame_mem_eball
+    [PseudoEMetricSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
+    (p : M) {r : Real} {z : E} (hz : ‖z‖ < r) :
+    intrinsicFramedExp (I := I) g hEnorm p z ∈
+      Metric.eball p (ENNReal.ofReal r) := by
+  have hdist :=
+    intrinsicGeodesic_riemannianEDist_le (I := I) g hEnorm p
+      (normalFrame (I := I) g p z)
+      (s := (0 : Real)) (t := (1 : Real)) zero_le_one
+  have hrad :
+      edist p (intrinsicFramedExp (I := I) g hEnorm p z) ≤
+        ENNReal.ofReal ‖z‖ := by
+    rw [IsRiemannianManifold.out (I := I) p
+      (intrinsicFramedExp (I := I) g hEnorm p z)]
+    simpa only [intrinsicGeodesic_zero, ← expMapIntrinsic_def,
+      intrFrame_apply, normalFrame_sqrt, sub_zero, mul_one] using hdist
+  rw [Metric.mem_eball']
+  exact hrad.trans_lt
+    ((ENNReal.ofReal_lt_ofReal_iff_of_nonneg (norm_nonneg z)).2 hz)
+
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem intrFrame_smooth
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

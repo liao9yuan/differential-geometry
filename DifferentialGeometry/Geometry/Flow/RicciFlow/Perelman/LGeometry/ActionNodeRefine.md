@@ -29,6 +29,9 @@ non-definitional index transport is proved through `Sigma.mk` equality and
 ## Progress
 
 - `lNodeRef_cmp`: 100% (proved and focused GREEN).
+- The noncompact declaration-level recheck is warning-free green: the theorem
+  exports without `CompactSpace M` because all compactness is carried by its
+  supplied finite chart data. Its downstream refresh also passed.
 - Caller-side finite right-piece refinement adapter: 100%.
 - Dedicated finite-node comparison machinery: about 99%; downstream assembly
   still has to consume this exported theorem.

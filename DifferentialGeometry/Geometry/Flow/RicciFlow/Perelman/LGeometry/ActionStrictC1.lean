@@ -31,6 +31,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- Every coordinate representative in a strict finite chart-`H¹`
 realization of a global regularized L-action minimizer is `C¹` on its closed
 piece interval. -/

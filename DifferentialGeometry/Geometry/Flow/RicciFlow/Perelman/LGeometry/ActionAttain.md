@@ -12,6 +12,11 @@ same compact direct-method time-slab hypotheses, it bounds `lRegCostC1` by the
 action of any supplied global fixed-endpoint `C¹` competitor. It reuses the
 attained minimizer and avoids unfolding `sInf` in cut-domain consumers.
 
+`lRegCostC1_le_bdd` is the noncompact infimum accessor.  It assumes exactly
+that the fixed-endpoint global `C¹` action values are bounded below, then
+bounds their infimum by every member.  It needs no compactness, separation,
+boundarylessness, flow-equation, time-slab, or regular-time hypothesis.
+
 The theorem proves the exact action equality and the inequality against every
 global `C¹` fixed-endpoint competitor. It also retains a finite chart
 subdivision, local `timeH1` representatives of the relaxed curve, and a global
@@ -35,12 +40,14 @@ use here is the finite realization and the cost lower-bound API.
 
 ## Verification and progress
 
-Focused verification passed without warnings or placeholders after adding
-`lRegCostC1_le`. The existing public endpoint axiom audit reports only
-`propext`, `Classical.choice`, and `Quot.sound`.
+Focused verification passed without warnings or placeholders after adding the
+noncompact accessor, and the exported module was refreshed for downstream
+consumers.  The existing public endpoint axiom audit reports only `propext`,
+`Classical.choice`, and `Quot.sound`.
 
 - `exists_lRegMinC1`: 100%.
 - `lRegCostC1_le`: 100%.
+- `lRegCostC1_le_bdd`: 100% proved and focused green.
 - Compact regular `exists_lMinimizer`: 100% downstream.
 - The minimizing-prefix/cut-domain machinery remains incomplete; its next
   exact producer is an arbitrary two-piece finite chart-H1 join.

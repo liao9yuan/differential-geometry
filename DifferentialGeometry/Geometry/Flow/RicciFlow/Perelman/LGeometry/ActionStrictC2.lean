@@ -31,6 +31,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- Every coordinate representative in a strict finite chart-`H¹`
 realization of a global regularized L-action minimizer is `C²` on its closed
 piece interval. -/
@@ -103,6 +104,7 @@ theorem lStrict_piece_c2
     contDiffOn_succ_iff_derivWithin (uniqueDiffOn_Icc hL)]
   exact ⟨hu1.differentiableOn (by norm_num), by simp, hq1.congr hder⟩
 
+omit [CompactSpace M] in
 /-- On the interior of a strict realized piece, the attained manifold curve is
 `C²`; this is the manifold-valued form of `lStrict_piece_c2`. -/
 theorem lStrict_piece_c2_at

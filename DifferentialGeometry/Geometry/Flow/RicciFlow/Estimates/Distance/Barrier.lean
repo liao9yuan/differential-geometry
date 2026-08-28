@@ -652,7 +652,7 @@ private structure CalabiFlowCore
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [InnerProductSpace ℝ E] in
-private theorem calabi_core_of_sol
+private theorem calabi_core_of_tail
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E
@@ -661,39 +661,47 @@ private theorem calabi_core_of_sol
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (O : M)
-    {T Λ t r n q : Real}
+    {T Λ t r n q R : Real}
     (hreg : Set.Ioc 0 T ⊆ D.regular)
-    (hricQuad : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+    (hricBall : ∀ y ∈ Metric.eball O (ENNReal.ofReal R),
       ∀ v : TangentSpace I y,
-        |ricciTensor (I := I) (S.base.metric s) y v v| ≤
-          Λ * (S.base.metric s).inner y v v)
+        |ricciTensor (I := I) (S.base.metric t) y v v| ≤
+          Λ * (S.base.metric t).inner y v v)
     (ht : t ∈ Set.Icc 0 T)
     (htpos : 0 < t)
     (x : M)
-    (hfinite : Manifold.riemannianEDist I O x ≠ (⊤ : ENNReal))
-    (hOx : O ≠ x)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ =
         ENNReal.ofReal
           (Real.sqrt ((S.base.metric t).inner y w w)))
+    (tail : CalabiTailData
+      (I := I) (S.base.metric t) hEnorm O x r)
+    (hreach : tail.left + tail.ell * tail.b < R)
     (hq : 0 ≤ q)
-    (hRicLower :
-      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
-        (I := I) (S.base.metric t) (-(n * q ^ 2)))
-    (hr : r = (Manifold.riemannianEDist I O x).toReal)
+    (hRicTail : 0 < Module.finrank Real E - 1 →
+      let γ : Real → M :=
+        intrinsicGeodesic
+          (I := I) (S.base.metric t) hEnorm tail.p tail.u
+      ∀ u ∈ Set.Ioo (0 : Real) tail.b,
+        -(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2) *
+              (S.base.metric t).inner (γ u)
+                (Geometry.Riemannian.Variation.curveVelocity
+                  (I := I) γ u)
+                (Geometry.Riemannian.Variation.curveVelocity
+                  (I := I) γ u) ≤
+          ricciTensor (I := I) (S.base.metric t) (γ u)
+            (Geometry.Riemannian.Variation.curveVelocity
+              (I := I) γ u)
+            (Geometry.Riemannian.Variation.curveVelocity
+              (I := I) γ u))
     (hn :
       n = ((Module.finrank Real E - 1 : Nat) : Real)) :
     Nonempty (CalabiFlowCore (I := I) S O T t x Λ r n q) := by
   classical
-  have hRicLower' :
-      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
-        (I := I) (S.base.metric t)
-          (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)) := by
-    simpa only [← hn] using hRicLower
-  obtain ⟨tail, _, hrho0_x, _, hrho0_ev,
+  obtain ⟨_, hrho0_x, _, hrho0_ev,
       hgrad0, hgrad0_norm, hlap0⟩ :=
-    exists_calabiData
-      (I := I) (S.base.metric t) hEnorm q hq hRicLower' hOx hfinite
+    calabiData_of_tail
+      (I := I) (S.base.metric t) hEnorm q hq tail hRicTail
   let rho0 : M → Real := fun y =>
     tail.left +
       branchRadius (I := I) (S.base.metric t) tail.branch y
@@ -849,6 +857,39 @@ private theorem calabi_core_of_sol
         (I := I) (S.base.metric t) hEnorm tail.p
           (show TangentSpace I tail.p from tail.branch.inv x)
           hinv_pos u
+  have hδ_ball : ∀ u ∈ Set.Icc (0 : Real) 1,
+      δ x u ∈ Metric.eball O (ENNReal.ofReal R) := by
+    intro u hu
+    have hu' : u ∈ Set.Icc (0 : Real) tail.b :=
+      ⟨hu.1, hu.2.trans tail.one_lt.le⟩
+    simpa only [δ, hinv_x] using tail.mem_eball hreach hu'
+  have hbpos : 0 < tail.b := zero_lt_one.trans tail.one_lt
+  have htailpos : 0 < tail.ell * tail.b :=
+    mul_pos tail.ell_pos hbpos
+  have hleftR : tail.left < R := by
+    linarith
+  have hR : 0 < R := tail.left_pos.trans hleftR
+  have hγ_ball : ∀ u ∈ Set.Icc (0 : Real) 1,
+      γ u ∈ Metric.eball O (ENNReal.ofReal R) := by
+    intro u hu
+    have hseg :=
+      intrinsicGeodesic_riemannianEDist_le
+        (I := I) (S.base.metric t) hEnorm O vLeft
+          (s := (0 : Real)) (t := u) hu.1
+    have hseg' :
+        Manifold.riemannianEDist I O (γ u) ≤
+          ENNReal.ofReal (tail.left * u) := by
+      simpa only [γ, intrinsicGeodesic_zero, hvLeft_norm', sub_zero]
+        using hseg
+    have hmul : tail.left * u < R := by
+      calc
+        tail.left * u ≤ tail.left * 1 :=
+          mul_le_mul_of_nonneg_left hu.2 tail.left_nonneg
+        _ = tail.left := mul_one _
+        _ < R := hleftR
+    rw [Metric.mem_eball',
+      IsRiemannianManifold.out (I := I) O (γ u)]
+    exact hseg'.trans_lt ((ENNReal.ofReal_lt_ofReal_iff hR).2 hmul)
   have hL₁_deriv :=
     pathLength_timeDeriv_of_ricciFlow
       (I := I) S hS zero_le_one htreg γ hγ_smooth hγ_vel
@@ -864,7 +905,7 @@ private theorem calabi_core_of_sol
     simpa only [L₁] using
       pathLength_deriv_ge
         (I := I) S hS (A := Λ) zero_le_one htreg γ hγ_smooth hγ_vel
-          (fun u _hu => hricQuad t ht (γ u)
+          (fun u hu => hricBall (γ u) (hγ_ball u hu)
             (mfderiv 𝓘(Real, Real) I γ u (1 : Real)))
   have hL₂_lower :
       -Λ * L₂ t x ≤ deriv (fun s => L₂ s x) t := by
@@ -872,7 +913,7 @@ private theorem calabi_core_of_sol
       pathLength_deriv_ge
         (I := I) S hS (A := Λ) zero_le_one htreg (δ x)
           (hδ_smooth x) hδx_vel
-          (fun u _hu => hricQuad t ht (δ x u)
+          (fun u hu => hricBall (δ x u) (hδ_ball u hu)
             (mfderiv 𝓘(Real, Real) I (δ x) u (1 : Real)))
   have hv_diffAt :
       DifferentiableAt Real (fun s => vSupport s x) t := by
@@ -907,7 +948,7 @@ private theorem calabi_core_of_sol
           (I := I) (LeviCivita (I := I) (S.base.metric t))
           (S.base.metric t) rho0 x ≤
         2 * n / r + n * q := by
-    rw [hr, hn]
+    rw [hn]
     simpa only [rho0] using hlap0
   refine ⟨{
     rho0 := rho0
@@ -924,7 +965,81 @@ private theorem calabi_core_of_sol
   }⟩
   · funext y
     exact hvSupport_t y
-  · exact hrho0_x.trans hr.symm
+  · exact hrho0_x
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
+private theorem calabi_core_of_sol
+    [RiemannianBundle (fun y : M => TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E
+      (fun y : M => TangentSpace I y)]
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (O : M)
+    {T Λ t r n q : Real}
+    (hreg : Set.Ioc 0 T ⊆ D.regular)
+    (hricQuad : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      ∀ v : TangentSpace I y,
+        |ricciTensor (I := I) (S.base.metric s) y v v| ≤
+          Λ * (S.base.metric s).inner y v v)
+    (ht : t ∈ Set.Icc 0 T)
+    (htpos : 0 < t)
+    (x : M)
+    (hfinite : Manifold.riemannianEDist I O x ≠ (⊤ : ENNReal))
+    (hOx : O ≠ x)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal
+          (Real.sqrt ((S.base.metric t).inner y w w)))
+    (hq : 0 ≤ q)
+    (hRicLower :
+      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
+        (I := I) (S.base.metric t) (-(n * q ^ 2)))
+    (hr : r = (Manifold.riemannianEDist I O x).toReal)
+    (hn :
+      n = ((Module.finrank Real E - 1 : Nat) : Real)) :
+    Nonempty (CalabiFlowCore (I := I) S O T t x Λ r n q) := by
+  classical
+  have hRicLower' :
+      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
+        (I := I) (S.base.metric t)
+          (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)) := by
+    simpa only [← hn] using hRicLower
+  obtain ⟨tail, _⟩ :=
+    exists_calabiData
+      (I := I) (S.base.metric t) hEnorm q hq hRicLower' hOx hfinite
+  let R : Real := tail.left + tail.ell * tail.b + 1
+  have hreach : tail.left + tail.ell * tail.b < R := by
+    dsimp only [R]
+    linarith
+  have hRicTail : 0 < Module.finrank Real E - 1 →
+      let γ : Real → M :=
+        intrinsicGeodesic
+          (I := I) (S.base.metric t) hEnorm tail.p tail.u
+      ∀ u ∈ Set.Ioo (0 : Real) tail.b,
+        -(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2) *
+              (S.base.metric t).inner (γ u)
+                (Geometry.Riemannian.Variation.curveVelocity
+                  (I := I) γ u)
+                (Geometry.Riemannian.Variation.curveVelocity
+                  (I := I) γ u) ≤
+          ricciTensor (I := I) (S.base.metric t) (γ u)
+            (Geometry.Riemannian.Variation.curveVelocity
+              (I := I) γ u)
+            (Geometry.Riemannian.Variation.curveVelocity
+              (I := I) γ u) := by
+    intro _
+    dsimp only
+    intro u _
+    exact hRicLower' _ _
+  subst r
+  exact calabi_core_of_tail
+    (I := I) S hS O hreg
+      (fun y _hy v => hricQuad t ht y v) ht htpos x hEnorm
+      tail hreach hq hRicTail hn
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [SigmaCompactSpace M] [T2Space M] in
@@ -1091,6 +1206,68 @@ private theorem CalabiFlowCore.scale
   }⟩
   rw [hcoef]
   exact hpar
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
+/-- Scale the dynamic Calabi support built from an explicit tail whose two
+radial pieces remain in a region with an absolute Ricci quadratic bound. -/
+theorem scaled_of_tail
+    [RiemannianBundle (fun y : M => TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E
+      (fun y : M => TangentSpace I y)]
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (O : M)
+    {T t d Λ r q R : Real}
+    (hT : 0 < T)
+    (hreg : Set.Ioc 0 T ⊆ D.regular)
+    (ht : t ∈ Set.Icc 0 T)
+    (htpos : 0 < t)
+    (x : M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal
+          (Real.sqrt ((S.base.metric t).inner y w w)))
+    (tail : CalabiTailData
+      (I := I) (S.base.metric t) hEnorm O x r)
+    (hreach : tail.left + tail.ell * tail.b < R)
+    (hq : 0 ≤ q)
+    (hRicTail : 0 < Module.finrank Real E - 1 →
+      let γ : Real → M :=
+        intrinsicGeodesic
+          (I := I) (S.base.metric t) hEnorm tail.p tail.u
+      ∀ u ∈ Set.Ioo (0 : Real) tail.b,
+        -(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2) *
+              (S.base.metric t).inner (γ u)
+                (Geometry.Riemannian.Variation.curveVelocity
+                  (I := I) γ u)
+                (Geometry.Riemannian.Variation.curveVelocity
+                  (I := I) γ u) ≤
+          ricciTensor (I := I) (S.base.metric t) (γ u)
+            (Geometry.Riemannian.Variation.curveVelocity
+              (I := I) γ u)
+            (Geometry.Riemannian.Variation.curveVelocity
+              (I := I) γ u))
+    (hricBall : ∀ y ∈ Metric.eball O (ENNReal.ofReal R),
+      ∀ v : TangentSpace I y,
+        |ricciTensor (I := I) (S.base.metric t) y v v| ≤
+          Λ * (S.base.metric t).inner y v v)
+    (hcoef :
+      2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
+        2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
+          ((Module.finrank Real E - 1 : Nat) : Real) * q) :
+    Nonempty (ScaledDistSupport (I := I) S O T t x d Λ r) := by
+  let n : Real := ((Module.finrank Real E - 1 : Nat) : Real)
+  obtain ⟨core⟩ :=
+    calabi_core_of_tail
+      (I := I) (Λ := Λ) (n := n) S hS O hreg hricBall ht htpos x
+        hEnorm tail hreach hq hRicTail rfl
+  obtain ⟨h⟩ := core.scale (d := d) hT ht (by
+    simpa only [n] using hcoef)
+  exact ⟨h⟩
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

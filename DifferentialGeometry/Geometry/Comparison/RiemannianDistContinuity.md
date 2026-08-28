@@ -26,6 +26,13 @@ an `IsMetricNorm` consumer assumption.  A consumer phrased with
 `riemannianEDistOf g` can expose its local Riemannian-bundle instance and use
 this theorem by simplification of `riemannianEDistOf`.
 
+`dist_lt_riedist_cpt` is the proper-subset form needed on complete noncompact
+manifolds.  It assumes only that the relevant target set is compact, restricts
+both compatible uniform structures to that subtype, and uses uniqueness of the
+uniformity on a compact Hausdorff space.  Thus it supplies the same uniform
+modulus for points in the compact set without a `CompactSpace` instance on the
+ambient manifold.
+
 A direct import of `DistanceScaling` was rejected because it perturbed the
 tangent inner-product instance environment of this established comparison
 file.  Keeping the canonical let-bound `riemannianEDist` statement avoids that
@@ -33,7 +40,8 @@ import and remains definitionally compatible with `riemannianEDistOf` consumers.
 
 ## Verification and frontier
 
-Focused verification passes without `sorry` or linter warnings.  The compact
+Focused verification and the targeted module refresh of the new compact-subset
+form passed without warnings. The compact
 Riemannian-distance-to-compatible-distance bridge is complete.  It converts an
 existing square-root extended-distance modulus into ordinary metric
 equicontinuity; it does not itself supply the separate Arzelà–Ascoli subsequence

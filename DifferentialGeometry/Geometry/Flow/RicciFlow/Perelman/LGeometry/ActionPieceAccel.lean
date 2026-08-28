@@ -33,6 +33,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- Every open piece in a strict finite chart-`H¹` realization of a global
 regularized L-action minimizer satisfies the intrinsic regularized
 L-geodesic acceleration equation. -/

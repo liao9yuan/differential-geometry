@@ -35,7 +35,7 @@ private theorem seg_before {m : Nat} {i j : Fin m} (hij : i < j) :
     i.succ ≤ j.castSucc := by
   simpa only [Fin.val_succ, Fin.val_castSucc] using hij
 
-omit [NeZero (Module.finrank Real E)] [T2Space M] in
+omit [NeZero (Module.finrank Real E)] [T2Space M] [CompactSpace M] in
 /-- Global fixed-endpoint minimality gives the exact two-piece comparison on
 any adjacent positive window of a finite chart realization. -/
 theorem lNodeWin_cmp

@@ -23,6 +23,12 @@ No extra regularity, transition-map package, or minimizer assumption is added.
 Focused verification passed without warnings or placeholders.  The exported
 module was refreshed for its downstream umbrella consumer.
 
+The focused noncompact recheck also passed without warnings. Both
+`lFinCurve_c1_aux` and `lFinCurve_c1` now work without an ambient
+`CompactSpace M` instance, using only the generalized piece and node
+producers. Their downstream refresh completed successfully; it replayed only
+the unrelated pre-existing `ActionNodeLocal` linter warning.
+
 ## Progress
 
 `lFinCurve_c1` and its finite positive-realization assembly are 100% complete.

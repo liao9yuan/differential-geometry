@@ -27,6 +27,9 @@ The variation layer provides:
 - `lRegEuler_var_c1`, joint `C¹` regularity of the regularized Euler residual
   throughout the regular flow-time region, including square-root time zero;
 - `lRegAction_first`, the endpoint-pairing minus Euler-integral formula;
+- `lRegEulerInt_deriv`, the derivative of the negative Euler-residual integral,
+  and `lRegJacobi_contOn`, compact-interval continuity of the resulting Jacobi
+  pairing; these genuine producers are public for moving-node second variation;
 - `lRegAction_second`, the supplied-smooth-variation, fixed-endpoint second
   variation formula along an `IsLRegCurveOn` central curve.
 
@@ -85,7 +88,9 @@ continuous combination of its derivative and the Jacobi pairing.
 ## Verification and frontier
 
 Focused verification passes without warnings, including the adjacent-interval
-and finite-subdivision action identities. The newly used time-slab export
+and finite-subdivision action identities. The two variation-specific producers
+used by moving-node second variation were exposed without changing their proof
+bodies, and the file plus its targeted module refresh pass. The newly used time-slab export
 also passes its targeted module refresh. The downstream `lAction_subseq`
 consumer is focused-green, so the family-uniform constants and reference-energy
 bound have also been checked in their intended compactness use.

@@ -23,6 +23,12 @@ Focused verification and the exported-module refresh passed without warnings.
 The file contains no `sorry`, `admit`, new axiom, reference-tree import, or
 additional consumer assumption.
 
+The focused noncompact recheck also passed without warnings. `lFinNode_vel`
+now exports without an ambient `CompactSpace M` instance after the local and
+two-piece comparison producers were generalized. Its downstream refresh
+completed successfully; an unrelated pre-existing unused-section-variable
+warning remains in `ActionNodeLocal`.
+
 The theorem itself and its finite-node comparison route are complete.  The
 next exact consumer is the finite strict-piece C¹ assembly: combine
 `lStrict_piece_c1`, `lFinNode_vel`, and `curve_c1_fin` to obtain global C¹

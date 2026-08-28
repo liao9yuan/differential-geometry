@@ -146,7 +146,8 @@ theorem ball_sub_image_segDom_closed [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem segBall_vol_le_density
+/-- Bounds segment-ball volume by the integral of its exponential Jacobian density. -/
+theorem segBall_vol_le_int
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1162,7 +1163,8 @@ private lemma radial_model_lintegral_scaled_mul
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space M] [SigmaCompactSpace M] in
-private lemma gBall_modelIntegral_eq
+/-- Evaluates the radial model-density integral over a metric tangent ball. -/
+theorem gBall_model_int
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1380,7 +1382,7 @@ private lemma segBall_vol_le_explicit
   let F : E → ℝ := fun v => normalChartDensity (I := I) g x 0 *
     hypDensity (q * Real.sqrt (g.inner x (show TangentSpace I x from v)
       (show TangentSpace I x from v))) (Module.finrank ℝ E - 1) 1
-  have hV := segBall_vol_le_density (I := I) g hEnorm x R
+  have hV := segBall_vol_le_int (I := I) g hEnorm x R
   have hpoint : ∀ v : E, v ∈ K → v ≠ 0 →
       expJacDensity (I := I) g hEnorm x v ≤ F v := by
     intro v hv hvne
@@ -1423,7 +1425,7 @@ private lemma segBall_vol_le_explicit
   have hstep3 : (∫⁻ v in K, ENNReal.ofReal (F v) ∂(modelHaar (E := E)))
       ≤ ∫⁻ v in closedGBall g x R, ENNReal.ofReal (F v) ∂(modelHaar (E := E)) :=
     lintegral_mono_set (Set.inter_subset_right : K ⊆ closedGBall g x R)
-  have hstep4 := gBall_modelIntegral_eq (I := I) g x q R hq hR
+  have hstep4 := gBall_model_int (I := I) g x q R hq hR
   calc
     riemannianVolumeMeasure (I := I) (M := M) g
         {y : M | riemannianEDist I x y < ENNReal.ofReal R}
@@ -1474,7 +1476,7 @@ theorem segBall_vol_fin [ConnectedSpace M] [PseudoEMetricSpace M]
     (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
   let K : Set E := {v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x} ∩
     closedGBall g x R
-  have hV := segBall_vol_le_density (I := I) g hEnorm x R
+  have hV := segBall_vol_le_int (I := I) g hEnorm x R
   have hKcomp : IsCompact K := by
     have hclosed : IsClosed {v : E | (show TangentSpace I x from v) ∈ SegDom
       (I := I) g hEnorm x} := by

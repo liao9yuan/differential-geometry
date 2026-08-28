@@ -22,6 +22,11 @@ public result: that conclusion is already the canonical `lChartAct_local` API.
 Focused verification passed without warnings or placeholders.  The exported
 module was refreshed for downstream consumers.
 
+The focused noncompact recheck also passed without warnings: `lStrict_piece_c1`
+now consumes the generalized local-minimum producer without an ambient
+`CompactSpace M` instance. Its refreshed export for the remaining regularity
+chain is still pending.
+
 This theorem is a dedicated finite-node regularity producer, not the terminal
 minimizer or reduced-volume result.  The terminal `exists_lMinimizer` and
 `redVolume_anti` remain 0%.  The theorem and its strict-piece local-to-`C¹`

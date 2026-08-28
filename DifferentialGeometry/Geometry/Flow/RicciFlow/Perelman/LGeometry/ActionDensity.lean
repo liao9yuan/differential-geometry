@@ -140,6 +140,7 @@ private theorem exists_flat_nonneg
       exists_flat_dense hLpos u
     exact ⟨w, f, hf, hwf, hf0, hfL, hfg0, hfgL, hw⟩
 
+omit [CompactSpace M] in
 /-- On a finite fixed-chart subdivision, uniform convergence of the manifold
 curves together with strong convergence of all chart derivatives implies
 convergence of the complete regularized L-action. -/
@@ -241,10 +242,30 @@ theorem lAction_chart_lim
       let incl : Icc (t i.castSucc) (t i.succ) → Icc a b :=
         fun s ↦ ⟨s.1, hpieceSub i s.2⟩
       simpa only [Function.comp_apply, incl] using hunif.comp incl
+    let Q : Set M := (extChartAt I (p i)).symm '' K i
+    have hQc : IsCompact Q :=
+      (hKc i).image_of_continuousOn
+        ((continuousOn_extChartAt_symm (I := I) (p i)).mono
+          (fun z hz ↦ interior_subset (hKchart i hz)))
+    have hval : ∀ n s, s ∈ Icc (t i.castSucc) (t i.succ) → alpha n s ∈ Q := by
+      intro n s hs
+      have hr : s - t i.castSucc ∈ Icc (0 : Real) (lSegLen t i) := by
+        constructor
+        · linarith [hs.1]
+        · simp only [lSegLen]
+          linarith [hs.2]
+      refine ⟨extChartAt I (p i) (alpha n s), ?_, ?_⟩
+      · have hcoord := huK i n ⟨s - t i.castSucc, hr⟩
+        rw [hrep i n hr] at hcoord
+        have hshift : t i.castSucc + (s - t i.castSucc) = s := by ring
+        simpa only [hshift] using hcoord
+      · apply (extChartAt I (p i)).left_inv
+        rw [extChartAt_source]
+        exact hsrc i n hs
     simpa only [pot, potLim] using
-      lScalar_tendsto (I := I) S hSc T (t i.castSucc) (t i.succ)
-        (hseg i) hcarrier alpha gamma
-        (fun n ↦ (halpha n).mono (hpieceSub i)) hconv
+      lScalar_tendsto_cpt (I := I) S hSc T (t i.castSucc) (t i.succ)
+        (hseg i) hcarrier Q hQc alpha gamma
+        (fun n ↦ (halpha n).mono (hpieceSub i)) hval hconv
   have hsum : Tendsto
       (fun n ↦ ∑ i : Fin m, (kin i n + pot i n)) atTop
       (nhds (∑ i : Fin m, (kinLim i + potLim i))) := by
@@ -266,6 +287,7 @@ theorem lAction_chart_lim
     hlim]
   exact hsum
 
+omit [CompactSpace M] in
 /-- Strong convergence of all local chart `timeH1` representatives, together
 with uniform convergence of the manifold curves, implies convergence of the
 complete regularized L-action. -/
@@ -309,6 +331,7 @@ theorem lAction_h1_lim
     (fun i ↦ timeH1_deriv_lim (u i) (uLim i) (hu i))
     halpha hunif hreg
 
+omit [CompactSpace M] in
 /-- A finite chart `timeH1` representative of a regularized curve admits
 fixed-endpoint global `C¹` approximants whose complete regularized L-actions converge. -/
 theorem lAction_c1_dense

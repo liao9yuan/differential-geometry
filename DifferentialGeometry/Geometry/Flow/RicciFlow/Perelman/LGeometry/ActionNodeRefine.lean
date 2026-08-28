@@ -63,7 +63,7 @@ private theorem ins_succ {m : Nat} (j k : Fin (m + 2)) :
   all_goals simp_all
   omega
 
-omit [NeZero (Module.finrank Real E)] [T2Space M] in
+omit [NeZero (Module.finrank Real E)] [T2Space M] [CompactSpace M] in
 /-- Splitting the right piece at an interior time preserves the full finite
 realization and gives exact comparison for the left piece and the inserted
 left-chart head. -/

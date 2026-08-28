@@ -68,6 +68,22 @@ def lRegCostC1
     ContMDiff (modelWithCornersSelf Real Real) I 1 alpha ∧
       alpha a = x ∧ alpha b = y ∧ lRegAction S T alpha a b = r}
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
+  [CompactSpace M] in
+/-- A lower-bounded fixed-endpoint `C¹` action class bounds its infimum by
+the action of every member. -/
+theorem lRegCostC1_le_bdd
+    (S : SolutionOn (I := I) (M := M) D) (T a b : Real) (x y : M)
+    (hbdd : BddBelow {r : Real | ∃ alpha : Real → M,
+      ContMDiff (modelWithCornersSelf Real Real) I 1 alpha ∧
+        alpha a = x ∧ alpha b = y ∧ lRegAction S T alpha a b = r})
+    (alpha : Real → M)
+    (halpha : ContMDiff (modelWithCornersSelf Real Real) I 1 alpha)
+    (hxa : alpha a = x) (hyb : alpha b = y) :
+    lRegCostC1 S T a b x y ≤ lRegAction S T alpha a b := by
+  unfold lRegCostC1
+  exact csInf_le hbdd ⟨alpha, halpha, hxa, hyb, rfl⟩
+
 omit [NeZero (Module.finrank Real E)] in
 /-- On a compact manifold, a nonempty fixed-endpoint `C¹` competitor class
 has a continuous relaxed minimizer. Its action attains the infimum of the

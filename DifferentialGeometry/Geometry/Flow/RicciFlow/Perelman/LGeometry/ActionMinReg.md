@@ -18,6 +18,11 @@ assumption.
 Focused verification and the targeted module refresh passed without warnings
 or placeholders.
 
+The noncompact declaration-level generalization passed focused verification
+without warnings after the shared guard cleared. `lMinCurve_reg` now exports
+without an ambient `CompactSpace M` instance; its downstream refresh also
+passed.
+
 ## Project position
 
 This theorem is the arbitrary-monotone interior regularity consumer.  The

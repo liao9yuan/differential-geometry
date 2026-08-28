@@ -24,3 +24,7 @@ dedicated minimizer-regularity machinery, not `exists_lMinimizer` or
 `redVolume_anti`; those endpoints remain 0% until their declarations are
 proved.  Dedicated L-geometry machinery is approximately 96--97%, while P2
 remains below 1% and the whole Poincare program remains approximately 3--5%.
+
+The focused noncompact recheck also passed without warnings. `lMinCurve_c1`
+now exports without an ambient `CompactSpace M` instance; its refreshed export
+for the complete-flow endpoint also passed.

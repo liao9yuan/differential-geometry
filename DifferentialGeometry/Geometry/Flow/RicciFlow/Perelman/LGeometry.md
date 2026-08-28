@@ -334,3 +334,357 @@ inclusive minimizing domain are also complete; strict pre-cut uniqueness is
 complete as well. `redVolume_anti` remains unproved (0%); the next L5 frontier
 is nonconjugacy before cut plus the limiting cut alternative, followed by the
 open injectivity domain and measure-zero cut image.
+
+The umbrella now also exports the L6 adapted-field scalar layer.
+`AdaptedField.lAdapted_inner` proves the square-root-time Ricci cancellation
+for the moving metric pairing, and `lAdapted_inner_eq` gives closed-interval
+constancy.  `AdaptedIndex.lIndex_adapted_pt` and `lIndex_adapted` give the
+pointwise and integrated regularized-index formulas for the scaled adapted
+field.  Their individual focused checks, targeted refreshes, and the updated
+umbrella focused check pass without warnings.
+
+The actual field producer `exists_lAdapted` is now checked and exported.  It
+uses a terminal-metric parallel orthonormal frame, a smooth finite-dimensional
+linear ODE for the coefficients, and reconstructs a smooth field on an open
+neighborhood of the closed parameter interval.  The lower generic theorem
+`ricciSharp_chart` isolates the chart algebra that previously exceeded the
+standard heartbeat limit in the large consumer; its own focused check and
+targeted refresh are green.  The adapted-field producer and the single-field
+index identity are therefore 100%.  `AdaptedTrace.lIndex_trace` is also checked
+and exported: it propagates terminal orthonormality along the adapted family,
+contracts the terminal norm sum to `finrank`, and contracts the Ricci diagonal
+sum to scalar curvature.  Thus the finite adapted-frame trace contraction is
+100%.  `LocalBranch.lActBranch_smooth`, `ReducedLength.lCost_smooth`, and
+`redLength_smooth` provide the actual strict-endpoint open neighborhood needed
+to identify the Laplacian with the Hessian trace.  `Laplacian.redLength_lap_le`
+then sums `redLength_hess_le` over a supplied terminal-orthonormal adapted
+family and substitutes `lIndex_trace`; its regular-time and ray-smoothness
+facts are derived internally from the strict minimizing-domain hypothesis.
+That supplied-family strict-region Laplacian inequality is 100%.  Its later
+Hamilton-`H`/time-Ricci contraction and `redVolume_anti` remain 0% rather than
+being inferred from the completed spatial trace infrastructure.
+
+The Hamilton--`H` contraction is now also checked and exported.
+`TraceDensity.lIndexInt_trace` contracts the finite adapted index-density sum
+to Ricci norm, the velocity Ricci contraction, and the scalar Laplacian.
+`HamiltonH.lTrace_deriv` combines this with scalar evolution and the path
+chain rule, while `lK_sq` packages Hamilton's integral in square-root time.
+`TraceIntegral.lTraceInt_eq` integrates the identity on a positive compact
+regularized interval without adding a scalar-curvature integrability
+assumption: the required regularity is derived from the smooth regularized
+ray and the Ricci-flow scalar field.  Finally,
+`HamiltonBound.redLength_lap_K` substitutes the trace identity into the
+strict-region Laplacian comparison.  All four modules pass warning-free
+focused verification, their exported artifacts are refreshed, and the
+umbrella check is green.
+
+Thus the strict-region L6 Hamilton--`K` differential-inequality stage is
+100%.  The L7 pointwise layer is now also checked: `Jacobian.lExpTrace_eq`
+gives the moving determinant trace, and `Monotonicity.lRedJac_deriv_le0` plus
+`lRedJac_anti` derive the canonical strict-ray monotonicity without supplied
+fields or integrability assumptions.
+
+`ReducedVolume.lean` completes the fixed-manifold global assembly.  It builds
+the strict-domain fixed-time partial diffeomorphism, proves its parameter
+density is `lExpDensity`, proves the strict target image has full moving
+Riemannian volume via the cut-image null theorem, and applies the generic
+weighted parametrization identity.  Nested strict domains and
+`lRedJac_anti` then prove `redVolume_anti`.  The endpoint and the umbrella are
+warning-free green, and the endpoint axiom audit reports only `propext`,
+classical choice, and quotient soundness.
+
+The fixed-manifold reduced-volume monotonicity capstone is therefore **100%**.
+Dedicated compact ordinary-flow L-geometry is about **99%** when the separate
+Euclidean small-time normalization follow-up is included; reused generic
+infrastructure for the capstone route is **100%**.  P2 remains below **1%**,
+and the whole Poincare program remains approximately **3--5%**.
+
+The Euclidean small-time follow-up has now started with four checked bricks.
+`SmallTime.lRayAct_zero_lim` identifies the normalized action of a fixed
+regularized ray at zero, and `lRedLen_sq_lim` transfers that limit to reduced
+length whenever the ray is strictly minimizing at one later time.
+`SourceGaussian.lSrcGauss_mass` proves that the exact source Gaussian has
+total `modelHaar` mass one, reusing the finite-dimensional SPD Gaussian
+integral.  `ShortMinimizing.lRegInit_shrink` proves the uniform initial-vector
+bound needed in the separate global short-time minimizing argument.  All four
+focused checks are warning-free green.
+
+The pointwise small-time chain is now complete.  `SmallJacobian.lExpDen_zero_lim`
+gives the normalized L-exponential density limit, while
+`SmallReduced.lRedJac_zero_lim` combines it with reduced-length asymptotics and
+`lRedJac_mul_src`.  `SmallReduced.lRedJac_le_gauss` then uses
+`lRedJac_anti` and the right-hand limit to bound every positive-time strict
+minimizing ray by its intrinsic source Gaussian.  These declarations are
+warning-free focused green, their modules have refreshed artifacts, and the
+umbrella import is warning-free green.
+
+Thus the dedicated pointwise zero-time machinery is **100%**.  The full
+`redVolume_zero_lim` remains unstated and unproved at **0%**: its remaining
+geometric producer is bounded-ball short-time endpoint injectivity for
+`W ↦ lRegCurve S T x W b`, needed to exhaust the source by strict minimizing
+domains.  The checked `ShortMinimizing.lRegInit_shrink` supplies the boundedness
+half; the missing half is the compact-uniform derivative/injectivity bridge.
+Dedicated global source-exhaustion machinery remains about **35%**,
+`smooth_nlc` remains **0%**, and `redVolume_anti` remains **100%**.
+
+The short-time source-domain exhaustion stage is now complete.  The generic
+`paramInt_tendstoUnif` theorem gives compact-uniform convergence of shrinking
+interval averages under joint continuity.  `SmallEndpoint.lEnd_inj_small`
+applies it to the removable regularized-endpoint quotient and proves that, on
+every fixed tangent closed ball, all sufficiently small positive square-root
+times give an injective endpoint map.  `SmallExhaustion.lInj_eventually` then
+uses a bad-sequence contradiction, minimizing vectors at doubled backward
+times, `lRayAct_zero_lim`, `lRegInit_shrink`, and that bounded-ball endpoint
+injectivity to prove
+
+```text
+eventually tau -> 0+, Z belongs to lInjDomain(S,T,x,tau)
+```
+
+for every fixed source tangent `Z` and every regular base time `T`.  Both
+theorems are warning-free focused green, their modules have refreshed
+artifacts, and neither adds a geometric assumption, foundational class, or
+frontier wrapper.  The source-domain exhaustion theorem and its dedicated
+geometric machinery are therefore **100%**.
+
+`SmallReduced.lRedJac_tau_lim` is also checked and refreshed in the original
+backward-time parameter.  `SmallVolume.redVolume_le_one` integrates the
+pointwise Gaussian upper bound over the strict source domain and is checked
+and refreshed.  The exact active capstone is `redVolume_zero_lim`: combine
+`redVolume_lint`, `lInj_eventually`, `lRedJac_tau_lim`, the source-Gaussian
+dominator, and the total mass `lSrcGauss_mass` by dominated convergence.  That
+capstone remains **0%** until its declaration itself is warning-free green;
+its dedicated global normalization assembly is about **70--75%**, while the
+reused generic Gaussian, change-of-variables, and compact-uniform calculus
+infrastructure is **100%**.  `redVolume_anti` remains **100%**, `smooth_nlc`
+remains **0%**, P2 remains below **1%**, and the whole Poincare program remains
+approximately **3--5%**.
+
+The global small-time normalization stage is now complete.
+`SmallVolume.redVolume_zero_lim` is warning-free focused green, its targeted
+artifact is refreshed, and the umbrella import is warning-free focused green.
+The proof puts the strict minimizing-domain integrand on the whole source by an
+indicator, uses `lInj_eventually` and `lRedJac_tau_lim` for pointwise
+convergence, and closes dominated convergence with `lRedJac_le_gauss` and
+`lSrcGauss_mass`.  It assumes only a connected compact manifold and regularity
+of the terminal time; no new public wrapper or geometric assumption was added.
+
+Thus `redVolume_zero_lim` and its dedicated global-normalization machinery are
+both **100%**.  The exact active ordinary-flow capstone is now `smooth_nlc`,
+whose conclusion must use the existing canonical `NoLocalCollapsing` predicate
+and whose proof must be an L-geometry producer rather than an alias of the
+existing W-entropy producer.  A live route audit shows that monotonicity plus
+the zero-time limit supplies only the upper bound `redVolume <= 1`; it does not
+produce a volume-ratio lower bound.  The next genuine producers are a uniform
+positive reduced-volume floor on compact regular spacetime slabs and a local
+upper estimate of reduced volume by the controlled-ball volume ratio plus a
+Gaussian tail.  `SmoothNLC.redVolume_set_low`, now warning-free focused green
+and refreshed, is the first reference-faithful input to the floor construction.
+
+Direct assembly of `smooth_nlc` therefore meets the plan's honest missing-
+groundwork stop condition.  `smooth_nlc` remains **0%** until that theorem is
+stated and proved, while its dedicated reduced-volume-to-ball bridge is about
+**2--3%**.  `redVolume_anti` remains **100%**, reused generic infrastructure
+remains **100%**, P2 remains below **1%**, and the whole Poincare program remains
+approximately **3--5%**.
+
+## 2026-08-27 public-import refresh
+
+The import-only umbrella now exports the complete bounded-curvature minimizer
+and range modules, joint terminal-parameter cost and reduced-volume modules,
+the compact-slab uniform reduced-volume floor, and the uniform source-Gaussian
+tail/localization modules.  The full umbrella has passed warning-free focused
+verification after these imports were added.
+
+At that import-only checkpoint, `redVolume_anti`, `redVolume_zero_lim`,
+`redVolume_lsc`, and `redVolume_unif_low` were **100%**, while the three later
+endpoints were still unproved.  The following entry records the subsequent
+compact-slab capstone without changing the half-open-time obstruction.
+
+## 2026-08-27 compact-slab ball capstone
+
+`NLCBallUpper.redVolume_ball_le` is warning-free focused green, its named
+artifact is refreshed, and the umbrella import remains warning-free focused
+green.  The theorem fixes one terminal time and one compact regular backward
+slab before choosing the short-scale threshold.  It combines the checked
+small-source localization and moving-volume comparison with the exact
+source-domain complement and the uniform Gaussian tail, giving the terminal
+ball volume factor plus `1 / 4`.
+
+Accordingly, `redVolume_ball_le` is now **100%**.  This does not provide a
+threshold uniform over a half-open terminal-time interval: the next theorem
+endpoint remains `redVolume_late_low`, whose required `exists_redLen_le`
+producer still depends on the all-point spacetime upper barrier across the cut
+locus.  `redVolume_late_low`, `smooth_nlc`, P2, and the final Poincare theorem
+therefore remain **0% theorem endpoints**.
+
+## 2026-08-27 positive-start continuation and chart cover
+
+`CalabiBranch` is now warning-free focused green and refreshed through
+`lTailFamily_extend`.  Its four public producers construct, locally extend, and
+globally continue a jointly smooth positive-start L-solution family using the
+actual starting velocity as parameter.  They do not assume the endpoint map is
+injective.  The next geometric input is the suffix-relative endpoint
+differential injectivity theorem from minimizing index theory; the local
+inverse/tail-action upper branch and the all-point spacetime barrier remain
+unproved.
+
+`LateSliceSplice` and `ChartBallCover` are also focused green and refreshed.
+Their checked output is an explicit reduced-length bound on a genuine
+inverse-chart ball, together with a finite coordinate-ball cover carrying one
+strictly positive uniform volume floor.  What remains before
+`redVolume_late_low` is a genuine `exists_redLen_le` witness, finite assembly of
+the chart/action constants, and the square-root-time estimates uniform on the
+half-open terminal interval.  The umbrella import has been updated and its
+coordinated focused recheck is warning-free green.
+
+Thus the new continuation and finite-cover machinery is complete, but
+`exists_redLen_le`, `redVolume_late_low`, `smooth_nlc`, P2, and the final
+Poincare theorem remain **0% theorem endpoints**.  Dedicated L-geometry is
+about **48--50%**, reused generic infrastructure is **100%**, and whole P0--P9
+infrastructure remains **15--25%**.
+
+## 2026-08-27 finite uniform splice assembly
+
+`FiniteSpliceBound.redLen_cover_bound` is warning-free focused green and its
+named artifact is refreshed.  It combines the finite chart cover with the
+local ramp-splice estimates by taking finite suprema of all chart-dependent
+constants and radii.  Given one concrete minimizing ray with a supplied
+reduced-length bound, it returns a measurable target set with one fixed
+positive volume floor and one chart-independent reduced-length bound.
+
+The umbrella imports this verified module.  The two-slice specialization is
+now warning-free focused green and refreshed as well: `sqrt_gap_low` supplies
+the uniform positive square-root gap, and `redLen_slice_bound` packages one
+terminal-time-independent `K` and positive volume floor from a concrete ray.
+`SliceVolumeLow.redVolume_slice_low` is also warning-free focused green and
+refreshed: it converts those constants through `redVolume_set_low` into one
+strictly positive reduced-volume floor uniform in terminal time, still from
+the same concrete ray data.
+The genuine low-reduced-length ray producer is still absent; consequently
+`redVolume_late_low`, `smooth_nlc`, P2, and the final Poincare theorem remain
+**0% theorem endpoints**.  Dedicated late-floor machinery is about
+**55--60%**, dedicated L-geometry across open L8--L9 is about **51--53%**,
+reused generic infrastructure is **100%**, and whole P0--P9 infrastructure
+remains **15--25%**.
+
+## 2026-08-27 complete-flow spatial minimum
+
+`RedMinCompact.exists_redMin_rm` is warning-free focused green and its named
+artifact is refreshed.  It removes the fixed-terminal-endpoint restriction
+from the complete bounded-curvature direct method and proves that, for every
+fixed positive backward time, reduced length attains its spatial minimum on a
+connected complete flow.  The proof uses one action-bounded compact range,
+finite-chart weak lower semicontinuity, C1 density, and connectedness only to
+provide fixed-endpoint competitor curves; it assumes neither compactness of
+the manifold nor the desired minimum.
+
+The umbrella imports `RedMinCompact`, and its coordinated focused check has
+verified that public import together with the later Calabi/index additions.
+No compactness of all minimizing `(tau,y)` pairs is claimed: that separate
+statement still needs joint lower semicontinuity in varying positive `tau` and
+uniform compact localization.  Fixed-time spatial attainment and its dedicated
+machinery are **100%**.  The all-point spacetime weak barrier,
+`exists_redLen_le`, `redVolume_late_low`, `smooth_nlc`, P2, and final Poincare
+endpoints remain **0%**.  Dedicated L-geometry across open L8--L9 is about
+**49--51%**, reused generic infrastructure is **100%**, and whole P0--P9
+infrastructure remains **15--25%**.
+
+## 2026-08-27 positive-start Calabi upper support
+
+The noncompact positive-start branch is now public and verified end to end.
+`CompleteActionBound.lRegCosts_bdd_rm` supplies the fixed-endpoint action lower
+bound from a slab Riemann bound.  `CutMinimizerRm.lMinVec_min_rm` proves the
+minimizing-ray action inequality without compactness.  `TailEndpoint` turns the
+left-relative negative-index contradiction into injectivity of the terminal
+endpoint differential, and `TailLocalBranch.lTail_localDiffeo` realizes the
+corresponding native local inverse.
+
+`TailActionBranch.lTailAct_smooth` proves smoothness of the actual fixed tail
+action, `lTailBranch_smooth` pulls it through that local inverse, and
+`exists_lCost_support` adds the fixed minimizing head.  The latter proves both
+the nearby upper bound for `lCost` and exact equality at the minimizing
+endpoint; equality is derived from regular-solution uniqueness and action
+additivity, not assumed.  All five modules are imported by the umbrella.  The
+new action-support module is warning-free focused green and refreshed, and the
+post-import umbrella check is warning-free green.
+
+Thus positive-start endpoint injectivity, local inversion, and the spatial
+Calabi upper support are each **100% theorem endpoints**.  The next exact
+producer is the all-point spacetime weak upper support combining this spatial
+branch with time variation and the strict-domain Hamilton--Jacobi/Laplacian
+formulas.  That spacetime barrier, `exists_redLen_le`,
+`redVolume_late_low`, `smooth_nlc`, P2, and the final Poincare theorem remain
+**0% theorem endpoints**.  Dedicated L-geometry across open L8--L9 is about
+**54--56%**, reused generic infrastructure is **100%**, and whole P0--P9
+infrastructure remains **15--25%**.
+
+## 2026-08-27 joint-time and weighted positive-start trace
+
+`lTailTime_local` and `lTailAct_joint` are warning-free focused green.  They
+respectively provide the genuine joint endpoint-time local inverse and the
+exact joint parameter/upper-endpoint derivative of the positive-start tail
+action.  The first endpoint-time branch consumer is still being assembled, so
+these two new exports have not yet been named-refreshed.
+
+The positive-start trace chain is also checked.  `lIndex_smul_pt` is refreshed;
+`lIndex_trace_pos` gives the finite adapted trace for the fields
+`((s-a)/(b-a)) P_i(s)`; and `lKTail`, `lKTail_sq`, and `lTraceInt_pos` integrate
+that exact density to the terminal scalar-curvature term and Hamilton's
+weighted tail.  The proof derives weighted-H integrability internally and
+adds no desired inequality or compactness assumption.
+
+The next exact theorem is `lTailJoint_mfd`, followed by the noncompact tail
+Hessian/Laplacian chain, `lKTail_tendsto`, and the all-point spacetime weak
+upper support.  The latter barrier, `exists_redLen_le`, `redVolume_late_low`,
+`smooth_nlc`, P2, and the final Poincare theorem remain **0% theorem
+endpoints**.  Dedicated L-geometry across open L8--L9 is about **56--58%**,
+reused generic infrastructure is **100%**, and whole P0--P9 infrastructure
+remains **15--25%**.
+
+## 2026-08-27 noncompact spacetime weak barrier
+
+The umbrella now imports `WeakBarrier`.  Its public theorem
+`exists_redWeak_sup` is fully proved and supplies a genuine product-local
+space-time upper support, spatial smoothness, a time derivative, and the weak
+reduced-length differential inequality at every positive point of a complete
+bounded-curvature slab.  It introduces no compactness assumption, support
+class, frontier hypothesis, `sorry`, `admit`, or new axiom.
+
+`WeakBarrier.lean` is warning-free focused green and explicitly
+named-refreshed (9217/9217).  The umbrella focused check is also warning-free
+green.  Thus `exists_redWeak_sup` and its dedicated assembly are each **100%**.
+The exact next endpoint is `exists_redLen_le`, which remains **0%** until its
+own declaration verifies; `redVolume_late_low`, `smooth_nlc`, P2, and the final
+Poincare endpoint likewise remain **0%**.  `redVolume_anti` is already checked
+and remains **100%**.  Dedicated complete-flow L8--L9 work is about
+**66--68%**, reused generic infrastructure is **100%**, and whole P0--P9
+infrastructure remains **15--25%**.
+
+## 2026-08-27 late reduced-volume floor and arbitrary tail
+
+The umbrella now exports `RedMinTime`, `RedLengthFence`, and `LateVolumeLow`.
+The checked chain proves positive-time continuity of the spatial reduced-length
+minimum, Perelman's half-dimension fence `exists_redLen_le`, and the uniform
+half-open-time floor `redVolume_late_low`. The new endpoint is warning-free
+focused green and named-refreshed; the updated umbrella is warning-free green.
+
+`NLCBallUpper.redVolume_ball_eta` also generalizes the fixed-time ball upper
+estimate to every prescribed positive Gaussian-tail error; the former
+`redVolume_ball_le` remains as the `1/4` specialization. Both the generalized
+module and its named artifact are green.
+
+`P2AxiomCheck` is warning-free focused green: all eleven audited public endpoints,
+including `redVolume_anti`, `redVolume_late_low`, and `redVolume_ball_eta`,
+depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+Thus `exists_redLen_le` and `redVolume_late_low` are 100%. `smooth_nlc`
+remains an unstated and unproved 0% theorem: the exact remaining input is one
+short-scale ball threshold uniform over the half-open terminal-time interval.
+The current threshold depends on a global compact-slab scalar-gradient bound,
+so the smallest honest missing producer is `shiRm1_ball`, a scale-invariant
+first-curvature-derivative bound on a smaller cylinder inside an Rm-controlled
+parabolic ball. Its immediate adapter is `lGrad_ball`; all checked Shi
+producers currently require whole-manifold curvature control. Dedicated
+L8--L9 machinery is about 76--78%, reused generic infrastructure is 100%, and
+whole P0--P9 infrastructure remains 15--25%.

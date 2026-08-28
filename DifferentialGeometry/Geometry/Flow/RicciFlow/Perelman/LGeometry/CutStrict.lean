@@ -1,12 +1,16 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CutDomain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ActionNodeSplice
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ActionMinC1
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CutMinimizer
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.IndexNegative
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.IndexNode
 
 /-!
-# Strict pre-cut uniqueness
+# Strict pre-cut uniqueness and nonconjugacy
 
 Before the terminal time of a minimizing L-exponential ray, another minimizing
-ray reaching the same point has the same initial tangent.
+ray reaching the same point has the same initial tangent, and the ray has no
+L-conjugate point.
 -/
 
 set_option autoImplicit false
@@ -354,6 +358,55 @@ theorem lMinVec_unique_lt
     hchosenZ.2.1.trans (Nat.cast_smul_eq_nsmul Real 2 Z).symm
   apply smul_right_injective (TangentSpace I x) (by norm_num : (2 : Real) ≠ 0)
   exact hW2.symm.trans (hvel0.trans hZ2)
+
+/-- A regularized L-ray minimizing through a later positive time has no
+L-conjugate point at a strictly earlier parameter time. -/
+theorem lMinVec_nconj_lt
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : Real) (x : M)
+    {Z : TangentSpace I x} {sigma tau : Real}
+    (hmin : (Z, tau) ∈ lMinDomain S T x)
+    (hlt : sigma < tau) : ¬ IsLConj S T x Z sigma := by
+  intro hconj
+  have htau : (Z, tau) ∈ lExpPosDom S T x :=
+    ((mem_lMinDomain S T x Z tau).1 hmin).1
+  have hsdom : (Z, sigma) ∈ lExpPosDom S T x :=
+    ((isLConj_iff_jac (I := I) S T x Z sigma).1 hconj).1
+  have hspos : 0 < sigma :=
+    ((mem_lExpPosDom (I := I) S T x Z sigma).1 hsdom).1
+  have hc0 : 0 < Real.sqrt sigma := Real.sqrt_pos.2 hspos
+  have hcb : Real.sqrt sigma < Real.sqrt tau :=
+    Real.sqrt_lt_sqrt hspos.le hlt
+  obtain ⟨gamma, Y0, Y1, hEq, hgeo, hY0, hY1,
+      hY0zero, hY1zero, hnode, hneg⟩ :=
+    lIndex_neg_conj (I := I) S hS T x Z htau hlt hconj
+  have hminGamma : ∀ delta : Real → M,
+      ContMDiff (modelWithCornersSelf Real Real) I 1 delta →
+      delta 0 = gamma 0 →
+      delta (Real.sqrt tau) = gamma (Real.sqrt tau) →
+      lRegAction S T gamma 0 (Real.sqrt tau) ≤
+        lRegAction S T delta 0 (Real.sqrt tau) := by
+    intro delta hdelta hd0 hdt
+    have hEq0 : gamma 0 = lRegCurve S T x Z 0 :=
+      hEq ⟨le_rfl, Real.sqrt_nonneg tau⟩
+    have hEqT : gamma (Real.sqrt tau) =
+        lRegCurve S T x Z (Real.sqrt tau) :=
+      hEq ⟨Real.sqrt_nonneg tau, le_rfl⟩
+    have hraw := lMinVec_reg_min (I := I) S hS T x hmin delta hdelta
+      (hd0.trans hEq0) (hdt.trans hEqT)
+    have haction : lRegAction S T gamma 0 (Real.sqrt tau) =
+        lRegAction S T (lRegCurve S T x Z) 0 (Real.sqrt tau) := by
+      apply lRegAction_congr (I := I) S T
+      intro s hs
+      have hs' : s ∈ Set.Ioo (0 : Real) (Real.sqrt tau) := by
+        simpa only [Set.uIoo_of_le (Real.sqrt_nonneg tau)] using hs
+      exact hEq ⟨hs'.1.le, hs'.2.le⟩
+    rw [haction]
+    exact hraw
+  have hnonneg := lIndex_sum_nonneg (I := I) S hS T gamma
+    0 (Real.sqrt sigma) (Real.sqrt tau) hc0 hcb x Z hgeo hminGamma
+    Y0 Y1 hY0 hY1 hY0zero hY1zero hnode
+  linarith
 
 end DifferentialGeometry.PDE.RicciFlow.Perelman
 

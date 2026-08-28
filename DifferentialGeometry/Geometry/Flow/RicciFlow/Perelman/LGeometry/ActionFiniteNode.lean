@@ -37,6 +37,7 @@ variable {M : Type u} [PseudoMetricSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
 variable {D : RealTimeInterval}
 
+omit [CompactSpace M] in
 /-- At every internal node of a positive finite L-action realization, the
 terminal coordinate velocity transports to the initial velocity of the next
 piece. -/

@@ -31,6 +31,11 @@ The shared interior-`C²` reconstruction now lives canonically in
 `ActionStrictC2` as `lStrict_piece_c2_at`; the former private duplicate was
 removed.  The refactored node module was rechecked and refreshed successfully.
 
+The focused noncompact recheck also passed without warnings. `lFinNode_reg`
+now exports without an ambient `CompactSpace M` instance; its downstream
+refresh completed successfully, replaying only the unrelated pre-existing
+`ActionNodeLocal` linter warning.
+
 ## Progress
 
 - `lFinNode_reg`: 100%.

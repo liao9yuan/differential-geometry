@@ -35,4 +35,17 @@ theorem metricRm04StdAt_eq_chartRiemannCLM
         = riemannOp (cov := LeviCivita (I := I) g) x X Y Z from rfl,
     riemannOp_eq_chartRiemannCLM_apply]
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
+/-- The standard metric curvature tensor is the metric pairing with the
+Levi-Civita curvature operator. -/
+theorem rm04_eq_inner_riem
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) :
+    metricRm04StdAt (I := I) g x X Y Z W =
+      g.inner x W (riemannOp (cov := LeviCivita (I := I) g) x X Y Z) := by
+  rw [metricRm04StdAt_eq_chartRiemannCLM,
+    riemannOp_eq_chartRiemannCLM_apply]
+
 end DifferentialGeometry

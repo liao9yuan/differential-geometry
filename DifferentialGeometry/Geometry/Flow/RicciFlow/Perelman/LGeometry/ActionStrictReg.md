@@ -19,6 +19,11 @@ Focused verification passed without warnings or placeholders.  The shared
 open-piece `C²` producer was extracted into `ActionStrictC2`, both downstream
 consumers were rechecked, and the targeted export refresh passed.
 
+The focused noncompact recheck also passed without warnings.
+`lStrict_curve_reg` now exports without an ambient `CompactSpace M` instance;
+its downstream refresh completed successfully, replaying only the unrelated
+pre-existing `ActionNodeLocal` linter warning.
+
 ## Project position
 
 This theorem is the strict-finite interior assembly immediately before

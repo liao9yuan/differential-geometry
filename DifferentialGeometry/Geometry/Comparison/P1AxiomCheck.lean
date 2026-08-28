@@ -1,0 +1,44 @@
+import DifferentialGeometry.Geometry.Comparison.HopfRinow
+import DifferentialGeometry.Geometry.Comparison.Volume.BishopLocal
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallContinuity
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanUpper
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentCount
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanStrict
+import DifferentialGeometry.Geometry.Comparison.CGTVolumeInjectivity
+import DifferentialGeometry.Geometry.Compactness.CheegerGromov.BoundedGeometry.CGTDecay
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Foundations.NoncollapseInjectivity
+
+set_option autoImplicit false
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_rel
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_pow
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_le_euclidean
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_card
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.exists_euclid_ratio
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_cont
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.endpointCont_of_lim
+#print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.endpointCont_compact
+#print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.geo_Ioo_extend_cpt
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.normalHaar_eq
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.gBall_model_eucl
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.transDens_eq_rigid
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_lt_of_ricci
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_lt
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_lt_eucl
+
+#print axioms DifferentialGeometry.rm04_eq_inner_riem
+#print axioms DifferentialGeometry.Geometry.Riemannian.BonnetMyers.ricci_nonneg_of_sec
+#print axioms DifferentialGeometry.Geometry.Riemannian.BonnetMyers.ricci_pos_of_sec
+#print axioms DifferentialGeometry.Geometry.Riemannian.BonnetMyers.ricciLower_of_sec
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_lt_of_sec
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.NormalCoordinates.intrFrame_mem_eball
+#print axioms DifferentialGeometry.Geometry.Riemannian.NormalCoordinates.framedExp_not_conj
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.intrInj_ge_cgt
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.intrInj_ge_cgt_on
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.intrInj_ge_vol
+#print axioms DifferentialGeometry.HCGCompactness.injDecay_of_bg
+#print axioms DifferentialGeometry.HCGCompactness.injDecay_realizes
+#print axioms DifferentialGeometry.HCGCompactness.flowInj_of_vol

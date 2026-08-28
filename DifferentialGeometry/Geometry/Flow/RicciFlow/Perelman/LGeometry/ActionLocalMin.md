@@ -43,6 +43,11 @@ Focused verification and the targeted module refresh passed without warnings.
 No placeholders are present, and all public names satisfy the twenty-character
 limit.
 
+The focused recheck after generalizing `lChartAct_local` also passed without
+warnings, and the exported module was refreshed. The theorem now exports
+without an ambient `CompactSpace M` instance; its proof uses only the supplied
+finite realization and the compact chart images already constructed locally.
+
 ## Project position
 
 - `lChartAct_split`, `lRegAction_chart_sum`, and `lChartAct_local`: 100%.

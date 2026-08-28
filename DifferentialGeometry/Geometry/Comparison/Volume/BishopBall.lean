@@ -264,6 +264,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 def hypRadVol (q : Real) (d : Nat) (R : Real) : Real :=
   ∫ t in (0 : Real)..R, hypDensity q d t
 
+/-- At zero curvature, the radial model volume is the Euclidean power integral. -/
+theorem hypRadVol_zero (d : Nat) (R : Real) :
+    hypRadVol 0 d R = R ^ (d + 1) / (d + 1) := by
+  simp [hypRadVol, hypDensity, hypSn, integral_pow]
+
 theorem volSphere_finrank
     [MeasurableSpace E] [BorelSpace E] :
     (volume : Measure E).toSphere Set.univ =

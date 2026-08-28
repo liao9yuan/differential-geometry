@@ -56,6 +56,45 @@ theorem scalar_le_of_rm
         Real.sqrt (1 / B.radius ^ 4) := by
       exact mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt hnorm) (sq_nonneg _)
 
+/-- A controlled parabolic Riemann-curvature norm bounds scalar curvature from
+below on the flow metric ball. -/
+theorem scalar_ge_of_rm
+    {S : SolutionOn (I := I) (M := M) D}
+    {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
+    (B : FlowMetricBall S time) (hB : B.IsRmControlled)
+    {t : ℝ} (ht : t ∈ Set.Icc ((time : ℝ) - B.radius ^ 2) (time : ℝ))
+    {x : M} (hx : x ∈ B.setAt t) :
+    -((Module.finrank ℝ (TangentSpace I x) : ℝ) ^ 2 *
+        Real.sqrt (1 / B.radius ^ 4)) ≤
+      DifferentialGeometry.Geometry.Curvature.metricScalarAt
+        (I := I) (M := M) (S.base.metric t) x := by
+  have hnorm : FlowMetricBall.rmNormSq S t x ≤ 1 / B.radius ^ 4 := by
+    apply (le_div_iff₀ (pow_pos B.radius_pos 4)).2
+    simpa only [mul_comm] using hB.2 t ht x hx
+  have hscalar :=
+    DifferentialGeometry.Geometry.Curvature.scalar_abs_le_rm
+      (I := I) (M := M) (S.base.metric t) x
+  have hscalar' :
+      |DifferentialGeometry.Geometry.Curvature.metricScalarAt
+          (I := I) (M := M) (S.base.metric t) x| ≤
+        (Module.finrank ℝ (TangentSpace I x) : ℝ) ^ 2 *
+          Real.sqrt (FlowMetricBall.rmNormSq S t x) := by
+    simpa only [FlowMetricBall.rmNormSq, SolutionFamily.rm04] using hscalar
+  have habs :
+      |DifferentialGeometry.Geometry.Curvature.metricScalarAt
+          (I := I) (M := M) (S.base.metric t) x| ≤
+        (Module.finrank ℝ (TangentSpace I x) : ℝ) ^ 2 *
+          Real.sqrt (1 / B.radius ^ 4) :=
+    hscalar'.trans
+      (mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt hnorm) (sq_nonneg _))
+  calc
+    -((Module.finrank ℝ (TangentSpace I x) : ℝ) ^ 2 *
+        Real.sqrt (1 / B.radius ^ 4)) ≤
+        -|DifferentialGeometry.Geometry.Curvature.metricScalarAt
+          (I := I) (M := M) (S.base.metric t) x| := neg_le_neg habs
+    _ ≤ DifferentialGeometry.Geometry.Curvature.metricScalarAt
+        (I := I) (M := M) (S.base.metric t) x := neg_abs_le _
+
 end
 
 end DifferentialGeometry.PDE.RicciFlow.Perelman
