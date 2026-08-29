@@ -6,10 +6,11 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.PullbackNatura
 set_option autoImplicit false
 
 /-!
-# Diffeomorphism naturality of Perelman's regularized L-exponential map
+# Diffeomorphism naturality of Perelman's L-geometry
 
-This file transports the regularized L-geodesic equation through a fixed
-diffeomorphism and identifies its maximal domain and totalized exponential map.
+This file transports the L-density, L-length, and regularized L-geodesic
+equation through a fixed diffeomorphism and identifies the maximal domain and
+totalized exponential map.
 -/
 
 noncomputable section
@@ -89,6 +90,31 @@ private theorem lVelocity_pull
     simp only [lVelocity, mfderiv_zero_of_not_mdifferentiableAt halpha,
       mfderiv_zero_of_not_mdifferentiableAt hmap, ContinuousLinearMap.zero_apply,
       map_zero]
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] in
+/-- Perelman's L-density is natural under a fixed diffeomorphism. -/
+theorem lDensity_pull
+    (S : SolutionOn (I := I) (M := N) D) (Phi : M ≃ₘ⟮I, I⟯ N)
+    (T : Real) (alpha : Real → M) (s : Real) :
+    lDensity (solutionOn_pullback (I := I) S Phi) T alpha s =
+      lDensity S T (fun r => Phi (alpha r)) s := by
+  unfold lDensity lSpeedSq
+  rw [scalar_pullback (I := I) S Phi]
+  rw [show (solutionOn_pullback (I := I) S Phi).base.metric (T - s) =
+      Diffeomorph.pullbackMetric (I := I) (S.base.metric (T - s)) Phi from rfl]
+  rw [Diffeomorph.pullbackMetric_inner, lVelocity_pull]
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] in
+/-- Perelman's L-length is natural under a fixed diffeomorphism. -/
+theorem lLength_pull
+    (S : SolutionOn (I := I) (M := N) D) (Phi : M ≃ₘ⟮I, I⟯ N)
+    (T : Real) (alpha : Real → M) (a b : Real) :
+    lLength (solutionOn_pullback (I := I) S Phi) T alpha a b =
+      lLength S T (fun r => Phi (alpha r)) a b := by
+  unfold lLength
+  apply intervalIntegral.integral_congr
+  intro s _
+  exact lDensity_pull (I := I) S Phi T alpha s
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] in
 /-- The regularized L-acceleration is natural under a fixed diffeomorphism. -/

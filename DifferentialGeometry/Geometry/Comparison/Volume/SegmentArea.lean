@@ -47,6 +47,20 @@ def expJacDensity
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+/-- The intrinsic exponential Jacobian density is nonnegative. -/
+theorem expJacDensity_nonneg
+    [ConnectedSpace M] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
+    (x : M) (v : E) :
+    0 ≤ expJacDensity (I := I) g hEnorm x v :=
+  Real.sqrt_nonneg _
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private theorem pou_term_exp_eq
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

@@ -116,6 +116,42 @@ theorem hasWeakPart_of_lip
   have hneg := congrArg Neg.neg hibp'
   simpa only [ei, neg_neg] using hneg.symm
 
+/-- A Lipschitz real-valued function belongs to `W^{1,2}` on every finite
+Euclidean ball. -/
+theorem memW1p_ball_of_lip
+    {C : ℝ≥0} {f : E → ℝ} (hf : LipschitzWith C f)
+    (c : E) (r : ℝ) :
+    DeGiorgi.MemW1p 2 f (Metric.ball c r) := by
+  letI : IsFiniteMeasure (volume.restrict (Metric.ball c r)) :=
+    ⟨by
+      rw [Measure.restrict_apply_univ]
+      exact measure_ball_lt_top.lt_top⟩
+  refine ⟨?_, ?_⟩
+  · refine MemLp.of_bound
+      (hf.continuous.aestronglyMeasurable.mono_measure Measure.restrict_le_self)
+      ((C : ℝ) * r + ‖f c‖) ?_
+    rw [ae_restrict_iff' measurableSet_ball]
+    filter_upwards with x hx
+    calc
+      ‖f x‖ = ‖f x - f c + f c‖ := by rw [sub_add_cancel]
+      _ ≤ ‖f x - f c‖ + ‖f c‖ := norm_add_le _ _
+      _ = dist (f x) (f c) + ‖f c‖ := by rw [dist_eq_norm]
+      _ ≤ (C : ℝ) * dist x c + ‖f c‖ := by
+        gcongr
+        exact hf.dist_le_mul x c
+      _ ≤ (C : ℝ) * r + ‖f c‖ := by
+        gcongr
+        exact le_of_lt (Metric.mem_ball.mp hx)
+  · intro i
+    let ei : E := EuclideanSpace.single i 1
+    let gi : E → ℝ := fun x ↦ lineDeriv ℝ f x ei
+    have hgi_top : MemLp gi ∞ (volume.restrict (Metric.ball c r)) := by
+      simpa only [gi] using
+        hf.memLp_lineDeriv (μ := volume.restrict (Metric.ball c r)) ei
+    refine ⟨gi, hgi_top.mono_exponent (by norm_num), ?_⟩
+    simpa only [gi, ei] using
+      hasWeakPart_of_lip (Omega := Metric.ball c r) hf i
+
 theorem memW1p_of_lip
     {p : ℝ≥0∞} {C : ℝ≥0} {f : E → ℝ} {Omega : Set E}
     (hf : LipschitzWith C f) (hf_supp : HasCompactSupport f) :

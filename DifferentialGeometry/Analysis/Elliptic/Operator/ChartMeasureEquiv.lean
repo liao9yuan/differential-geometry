@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
@@ -35,6 +35,22 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+/-- A compactly supported function contained in one chart has its Riemannian-volume
+integral represented on the model-space chart target. -/
+theorem integral_model
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
+    (hf_supp : tsupport f ⊆ (chartAt H α).source) :
+    ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+      ∫ y in (extChartAt I α).target,
+        chartDensity g α ((extChartAt I α).symm y) *
+          f ((extChartAt I α).symm y)
+        ∂(modelHaar (E := E)) := by
+  classical
+  rw [integral_eq_chart (I := I) (M := M) g α hf_cont hf_cs hf_supp]
+  exact integral_chartLocalMeasure (I := I) (M := M) g α f hf_cont.measurable
+
 theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -45,17 +61,15 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
         chartDensity g α ((extChartAt I α).symm y) *
           f ((extChartAt I α).symm y)
         ∂(modelHaar (E := E)) := by
-  classical
-  have h_step1 :=
-    integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart
-      (I := I) (M := M) g α hf_cont hf_supp
-  rw [h_step1]
-  exact integral_chartLocalMeasure (I := I) (M := M) g α f hf_cont.measurable
+  exact integral_model (I := I) (M := M) g α hf_cont
+    (HasCompactSupport.of_compactSpace f) hf_supp
 
-theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+/-- The model-space chart formula for a compactly supported function, with the
+chart target written as an indicator. -/
+theorem integral_model_ind
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
-    {f : M → ℝ} (hf_cont : Continuous f)
+    {f : M → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∫ y,
@@ -64,8 +78,7 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
           Set.indicator (extChartAt I α).target (fun _ => (1 : ℝ)) y
         ∂(modelHaar (E := E)) := by
   classical
-  rw [integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
-    (I := I) (M := M) g α hf_cont hf_supp]
+  rw [integral_model (I := I) (M := M) g α hf_cont hf_cs hf_supp]
   have htgt_meas : MeasurableSet (extChartAt I α).target :=
     measurableSet_extChartAt_target (I := I) α
   rw [show
@@ -85,6 +98,20 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
   by_cases hy : y ∈ (extChartAt I α).target
   · rw [Set.indicator_of_mem hy, Set.indicator_of_mem hy, mul_one]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy, mul_zero]
+
+theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf_cont : Continuous f)
+    (hf_supp : tsupport f ⊆ (chartAt H α).source) :
+    ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+      ∫ y,
+        chartDensity g α ((extChartAt I α).symm y) *
+          f ((extChartAt I α).symm y) *
+          Set.indicator (extChartAt I α).target (fun _ => (1 : ℝ)) y
+        ∂(modelHaar (E := E)) := by
+  exact integral_model_ind (I := I) (M := M) g α hf_cont
+    (HasCompactSupport.of_compactSpace f) hf_supp
 
 private def toEuclideanMeasurableEquiv :
     E ≃ᵐ EuclN :=
@@ -116,10 +143,12 @@ private lemma chartTargetEuclid_measurableSet (α : M) :
   exact (toEuclideanMeasurableEquiv (E := E)).measurableEmbedding.measurableSet_image.mpr
     htarget_meas
 
-theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+/-- A compactly supported function contained in one chart has its Riemannian-volume
+integral represented on the Euclidean chart target. -/
+theorem integral_euclid
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
-    {f : M → ℝ} (hf_cont : Continuous f)
+    {f : M → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -128,8 +157,7 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
         ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
             (modelHaar (E := E))) := by
   classical
-  rw [integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
-    (I := I) (M := M) g α hf_cont hf_supp]
+  rw [integral_model (I := I) (M := M) g α hf_cont hf_cs hf_supp]
   have htarget_meas : MeasurableSet (extChartAt I α).target :=
     measurableSet_extChartAt_target (I := I) α
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
@@ -211,10 +239,26 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
             densityOnEuclid (I := I) g α y''' *
               f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'''))) y'')
 
-theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
+theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf_cont : Continuous f)
+    (hf_supp : tsupport f ⊆ (chartAt H α).source) :
+    ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+      ∫ y in chartTargetEuclid (I := I) (M := M) α,
+        densityOnEuclid (I := I) g α y *
+          f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+        ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
+            (modelHaar (E := E))) := by
+  exact integral_euclid (I := I) (M := M) g α hf_cont
+    (HasCompactSupport.of_compactSpace f) hf_supp
+
+/-- The Euclidean chart formula for a compactly supported function, with the
+chart target written as an indicator. -/
+theorem integral_euclid_ind
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∫ y,
@@ -225,8 +269,7 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
         ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
             (modelHaar (E := E))) := by
   classical
-  rw [integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
-    (I := I) (M := M) g α hf_cont hf_supp]
+  rw [integral_euclid (I := I) (M := M) g α hf_cont hf_cs hf_supp]
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
   rw [show
@@ -249,6 +292,22 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   · rw [Set.indicator_of_mem hy, Set.indicator_of_mem hy, mul_one]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy, mul_zero]
+
+theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf_cont : Continuous f)
+    (hf_supp : tsupport f ⊆ (chartAt H α).source) :
+    ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+      ∫ y,
+        densityOnEuclid (I := I) g α y *
+          f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+          Set.indicator (chartTargetEuclid (I := I) (M := M) α)
+            (fun _ => (1 : ℝ)) y
+        ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
+            (modelHaar (E := E))) := by
+  exact integral_euclid_ind (I := I) (M := M) g α hf_cont
+    (HasCompactSupport.of_compactSpace f) hf_supp
 
 end ChartMeasureEquiv
 end Laplacian

@@ -31,3 +31,71 @@ This certifies the listed P1b producer and consumer machinery, not the two exact
 local-on-balls P1b endpoints.  Those remain zero of two because the incomplete-
 ambient compact-closure bridge and the bounded-ball propagation adapter are not
 yet stated and proved.
+
+The P1c expansion adds the proper-Riemannian-metric input, the minimizing-ray
+producer, the finite Busemann metric core, the checked radial-Laplacian chain,
+the Calabi smooth upper support, and the new epsilon-relaxed distance-barrier
+adapter.  The first expanded run reached every new declaration but failed on
+two audit-only namespace typos.  After replacing them by the declarations'
+actual full names, focused verification passed.  After adding the local
+Laplacian subtraction producer and the barrier-to-lower-test-viscosity bridge,
+the expanded audit passed again: all 41 printed P1a--P1c
+declarations depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+This does not certify any of the four formal P1c endpoints.  The lower-test
+viscosity bridge is checked infrastructure, while the viscosity-to-
+distributional Laplacian bridge, the weak and Sobolev parts of the Busemann
+endpoint, splitting, and soul remain unstated and therefore remain at 0%.
+
+The final P1c infrastructure expansion adds the compact-support Green second
+identity, the noncompact signed chart-integral adapter, the intrinsic
+compact-test distributional predicate and its open-set restriction, and the
+smooth pointwise-to-distributional producer.  Focused verification passed for
+all 46 printed P1a--P1c declarations; every declaration again depends only on
+`propext`, `Classical.choice`, and `Quot.sound`.  This still does not certify a
+formal P1c endpoint: the genuine viscosity-to-distributional conversion theorem
+is absent.
+
+The direct polar-distance route adds four more audited declarations:
+`expJac_map_eq`, `expJac_lintegral`, `segInt_lintegral`, and
+`expJac_radial`.  Focused verification passed for all 50 printed declarations;
+the four additions also depend only on `propext`, `Classical.choice`, and
+`Quot.sound`.  They supply function-level exponential change of variables and
+the radial Jacobian scaling identity, but not yet the distance distributional
+Laplacian endpoint.
+
+The completed signed polar reassembly now adds the public distance-gradient
+pairing inequality and the formal distributional distance-Laplacian endpoint
+to this audit.  Focused verification passes for all 52 printed P1 declarations;
+the two additions, like the earlier declarations, depend only on `propext`,
+`Classical.choice`, and `Quot.sound`.
+
+The supplied-ray Busemann weak-Laplacian endpoint is now included directly.
+Focused verification passes for all 53 printed declarations; `busemann_lap`
+depends only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+The supplied-line ray adapters, Busemann-pair metric lemmas, weak-Laplacian
+addition rule, and Busemann-pair Laplacian assembly are now included.  Their
+focused axiom verification passes.  All 58 printed declarations depend only on
+`propext`, `Classical.choice`, and `Quot.sound`.
+
+The next splitting-infrastructure expansion adds the intrinsic Lipschitz
+energy inequality, its zero-source specialization, local chart `W^{1,2}`
+membership for the Busemann pair, and the normalized-coefficient local strong
+minimum principle.  All four producers were warning-free focused checked and
+their explicitly named modules were refreshed before this downstream audit.
+The expanded 62-declaration focused audit passed; all printed declarations
+again depend only on `propext`, `Classical.choice`, and `Quot.sound`.  The
+splitting endpoint itself remains unstated and therefore remains 0%; these
+declarations are dedicated machinery only.
+
+The current 70-declaration expansion additionally audits the canonical
+Euclidean and manifold local Sobolev producers, nonnegative `H₀¹` density,
+normalized chart coefficients, arbitrary-ball strong minimum, the
+distributional-to-De-Giorgi chart bridge, global Busemann-pair zero propagation,
+and the local Busemann weak-solution assembly.  Every newly printed producer has
+warning-free focused verification, and every new declaration required by an
+importing downstream module has a fresh named artifact.  The unified focused
+70-declaration axiom audit passed without warnings.  Every printed declaration
+depends only on `propext`, `Classical.choice`, and `Quot.sound`; no project
+axiom or `sorryAx` appears.

@@ -1219,6 +1219,130 @@ private lemma gram_quad_low
           field_simp
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] in
+private lemma gram_quad_low_on
+    [Module.Finite ℝ E]
+    (α : M) {K : Set M} (hK : IsCompact K)
+    (hKchart : K ⊆ (chartAt H α).source) :
+    ∃ c0 : Real, 0 < c0 ∧ ∀ y ∈ K, ∀ ξ : Fin (Module.finrank Real E) → Real,
+      c0 * (ξ ⬝ᵥ ξ) ≤ ξ ⬝ᵥ (chartGramMatrix (I := I) gRef α y) *ᵥ ξ := by
+  classical
+  have hKbase : K ⊆ (trivializationAt E (TangentSpace I : M → Type _) α).baseSet := by
+    intro y hy
+    rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
+    exact hKchart hy
+  set f : M × (Fin (Module.finrank Real E) → Real) → Real := fun p =>
+    p.2 ⬝ᵥ (chartGramMatrix (I := I) gRef α p.1) *ᵥ p.2 with hf
+  have hfe : f = fun p : M × (Fin (Module.finrank Real E) → Real) =>
+      ∑ i, p.2 i * ∑ j, chartGramMatrix (I := I) gRef α p.1 i j * p.2 j := by
+    funext p
+    simp [hf, dotProduct, Matrix.mulVec]
+  have hfcont : ContinuousOn f
+      ((trivializationAt E (TangentSpace I : M → Type _) α).baseSet ×ˢ
+        (Set.univ : Set (Fin (Module.finrank Real E) → Real))) := by
+    rw [hfe]
+    refine continuousOn_finset_sum _ fun i _ => ContinuousOn.mul ?_ ?_
+    · exact ((continuous_apply i).comp continuous_snd).continuousOn
+    · refine continuousOn_finset_sum _ fun j _ => ContinuousOn.mul ?_ ?_
+      · have hentry := (chartGramMatrix_entry_contMDiffOn
+          (I := I) gRef α i j).continuousOn
+        exact hentry.comp continuous_fst.continuousOn fun p hp => hp.1
+      · exact ((continuous_apply j).comp continuous_snd).continuousOn
+  have hg0cont : Continuous fun ξ : Fin (Module.finrank Real E) → Real => ξ ⬝ᵥ ξ := by
+    have hge : (fun ξ : Fin (Module.finrank Real E) → Real => ξ ⬝ᵥ ξ) =
+        fun ξ => ∑ i, ξ i * ξ i := by
+      funext ξ
+      simp [dotProduct]
+    rw [hge]
+    exact continuous_finset_sum _ fun i _ => (continuous_apply i).mul (continuous_apply i)
+  set S : Set (Fin (Module.finrank Real E) → Real) := {ξ | ξ ⬝ᵥ ξ = 1} with hSdef
+  have hSclosed : IsClosed S := by
+    have hpre : S = (fun ξ : Fin (Module.finrank Real E) → Real => ξ ⬝ᵥ ξ) ⁻¹' {1} := rfl
+    rw [hpre]
+    exact IsClosed.preimage hg0cont isClosed_singleton
+  have hSsub : S ⊆ Metric.closedBall 0 1 := by
+    intro ξ hξ
+    rw [Metric.mem_closedBall, dist_zero_right, pi_norm_le_iff_of_nonneg zero_le_one]
+    intro i
+    have hsum : ξ i * ξ i ≤ 1 := by
+      have hle : ξ i * ξ i ≤ ∑ j, ξ j * ξ j :=
+        Finset.single_le_sum (fun j _ => mul_self_nonneg (ξ j)) (Finset.mem_univ i)
+      have hone : (∑ j, ξ j * ξ j) = 1 := hξ
+      linarith
+    rw [Real.norm_eq_abs]
+    nlinarith [abs_nonneg (ξ i), sq_abs (ξ i), abs_mul_abs_self (ξ i)]
+  have hScpt : IsCompact S :=
+    (isCompact_closedBall (0 : Fin (Module.finrank Real E) → Real) 1).of_isClosed_subset
+      hSclosed hSsub
+  have hSne : S.Nonempty := by
+    refine ⟨Pi.single (0 : Fin (Module.finrank Real E)) 1, ?_⟩
+    change (Pi.single (0 : Fin (Module.finrank Real E)) (1 : Real))
+      ⬝ᵥ (Pi.single (0 : Fin (Module.finrank Real E)) (1 : Real)) = 1
+    simp [dotProduct, Pi.single_apply]
+  set KS : Set (M × (Fin (Module.finrank Real E) → Real)) := K ×ˢ S with hKS
+  have hKScpt : IsCompact KS := hK.prod hScpt
+  have hKSsub : KS ⊆
+      (trivializationAt E (TangentSpace I : M → Type _) α).baseSet ×ˢ Set.univ := by
+    intro p hp
+    exact ⟨hKbase hp.1, Set.mem_univ _⟩
+  have hfcontKS : ContinuousOn f KS := hfcont.mono hKSsub
+  by_cases hKne : K.Nonempty
+  · have hKSne : KS.Nonempty := hKne.prod hSne
+    obtain ⟨p0, hp0, hp0min⟩ := hKScpt.exists_isMinOn hKSne hfcontKS
+    have hp0pos : 0 < f p0 := by
+      have hp0base := hKbase hp0.1
+      have hp0ne : p0.2 ≠ 0 := by
+        intro hp0zero
+        have hp0S : p0.2 ∈ S := hp0.2
+        rw [hSdef] at hp0S
+        simp [hp0zero, dotProduct] at hp0S
+      have hpd := chartGramMatrix_posDef (I := I) gRef α hp0base
+      have hstar : star p0.2 = p0.2 := funext fun i => by simp
+      change 0 < p0.2 ⬝ᵥ (chartGramMatrix (I := I) gRef α p0.1) *ᵥ p0.2
+      have hdot := hpd.dotProduct_mulVec_pos hp0ne
+      rw [hstar] at hdot
+      exact hdot
+    refine ⟨f p0, hp0pos, ?_⟩
+    intro y hy ξ
+    by_cases hξ0 : ξ = 0
+    · subst hξ0
+      simp [hf]
+    · have hnormpos : 0 < ξ ⬝ᵥ ξ := by
+        have hnonneg : 0 ≤ ξ ⬝ᵥ ξ :=
+          Finset.sum_nonneg fun i _ => mul_self_nonneg _
+        rcases hnonneg.eq_or_lt with hzero | hpos
+        · exfalso
+          apply hξ0
+          funext i
+          have hall := (Finset.sum_eq_zero_iff_of_nonneg
+            (fun j _ => mul_self_nonneg (ξ j))).mp hzero.symm
+          exact mul_self_eq_zero.mp (hall i (Finset.mem_univ i))
+        · exact hpos
+      set r : Real := Real.sqrt (ξ ⬝ᵥ ξ) with hr
+      have hrpos : 0 < r := Real.sqrt_pos.mpr hnormpos
+      have hr2 : r ^ 2 = ξ ⬝ᵥ ξ := Real.sq_sqrt hnormpos.le
+      have hscaled : (r⁻¹ • ξ) ∈ S := by
+        change (r⁻¹ • ξ) ⬝ᵥ (r⁻¹ • ξ) = 1
+        rw [smul_dotProduct, dotProduct_smul, smul_eq_mul, smul_eq_mul, ← mul_assoc]
+        rw [show r⁻¹ * r⁻¹ = (r ^ 2)⁻¹ by rw [sq, mul_inv], hr2]
+        field_simp
+      have hmin : f p0 ≤ f (y, r⁻¹ • ξ) := hp0min ⟨hy, hscaled⟩
+      have hfscale : f (y, r⁻¹ • ξ) = (r ^ 2)⁻¹ * f (y, ξ) := by
+        change (r⁻¹ • ξ) ⬝ᵥ (chartGramMatrix (I := I) gRef α y) *ᵥ (r⁻¹ • ξ) =
+          (r ^ 2)⁻¹ * (ξ ⬝ᵥ (chartGramMatrix (I := I) gRef α y) *ᵥ ξ)
+        rw [Matrix.mulVec_smul, smul_dotProduct, dotProduct_smul]
+        rw [smul_eq_mul, smul_eq_mul, ← mul_assoc]
+        rw [show r⁻¹ * r⁻¹ = (r ^ 2)⁻¹ by rw [sq, mul_inv]]
+      rw [hfscale] at hmin
+      calc f p0 * (ξ ⬝ᵥ ξ) ≤ ((r ^ 2)⁻¹ * f (y, ξ)) * (ξ ⬝ᵥ ξ) :=
+            mul_le_mul_of_nonneg_right hmin (le_of_lt hnormpos)
+        _ = f (y, ξ) := by rw [← hr2]; field_simp
+  · refine ⟨1, one_pos, ?_⟩
+    intro y hy
+    exact (hKne ⟨y, hy⟩).elim
+
+omit [Module.Finite ℝ E] in
 omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem invGram_le_of_low
     [Module.Finite ℝ E]
@@ -1294,6 +1418,94 @@ theorem invGram_le_of_low
     rw [hη]
     show chartInvGramMatrix (I := I) u x x k l
       = ((chartGramMatrix (I := I) u x x)⁻¹ *ᵥ Pi.single l 1) k
+    rw [chartInvGramMatrix]
+    simp [Matrix.mulVec, dotProduct, Pi.single_apply]
+  rw [hentry]
+  exact (habs k).trans hNle
+
+omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] in
+/-- A fixed chart has a uniform inverse-Gram bound on a compact subset when
+the metric has a uniform positive lower bound relative to the reference metric. -/
+theorem invGram_le_of_lowOn
+    [Module.Finite ℝ E]
+    (α : M) {K : Set M} (hK : IsCompact K)
+    (hKchart : K ⊆ (chartAt H α).source)
+    (lam : Real) (hlam : 0 < lam) :
+    ∃ Mb : Real, 0 ≤ Mb ∧ ∀ y ∈ K, ∀ u : SmoothRiemannianMetric I M,
+      (∀ ξ : TangentSpace I y, lam * gRef.inner y ξ ξ ≤ u.inner y ξ ξ) →
+      ∀ k l : Fin (Module.finrank Real E),
+        |chartInvGramMatrix (I := I) u α y k l| ≤ Mb := by
+  classical
+  obtain ⟨c0, hc0, hquad⟩ := gram_quad_low_on gRef α hK hKchart
+  have hμ : 0 < lam * c0 := by positivity
+  refine ⟨(lam * c0)⁻¹, (inv_nonneg).mpr hμ.le, ?_⟩
+  intro y hy u hlow k l
+  have hybase : y ∈ (trivializationAt E (TangentSpace I : M → Type _) α).baseSet := by
+    rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
+    exact hKchart hy
+  have hdet : IsUnit (chartGramMatrix (I := I) u α y).det :=
+    (chartGramMatrix_det_pos (I := I) u α hybase).ne'.isUnit
+  have hulow : ∀ ξ : Fin (Module.finrank Real E) → Real,
+      lam * c0 * (ξ ⬝ᵥ ξ) ≤ ξ ⬝ᵥ (chartGramMatrix (I := I) u α y) *ᵥ ξ := by
+    intro ξ
+    have hu := chartGramMatrix_dotProduct_mulVec (I := I) u α y ξ
+    have hg := chartGramMatrix_dotProduct_mulVec (I := I) gRef α y ξ
+    have hstar : star ξ = ξ := funext fun i => by simp
+    rw [hstar] at hu hg
+    calc lam * c0 * (ξ ⬝ᵥ ξ) = lam * (c0 * (ξ ⬝ᵥ ξ)) := by ring
+      _ ≤ lam * (ξ ⬝ᵥ (chartGramMatrix (I := I) gRef α y) *ᵥ ξ) :=
+          mul_le_mul_of_nonneg_left (hquad y hy ξ) hlam.le
+      _ = lam * gRef.inner y (∑ i, ξ i • chartBasisVecFiber (I := I) α i y)
+            (∑ j, ξ j • chartBasisVecFiber (I := I) α j y) := by rw [hg]
+      _ ≤ u.inner y (∑ i, ξ i • chartBasisVecFiber (I := I) α i y)
+            (∑ j, ξ j • chartBasisVecFiber (I := I) α j y) := hlow _
+      _ = ξ ⬝ᵥ (chartGramMatrix (I := I) u α y) *ᵥ ξ := hu.symm
+  set η : Fin (Module.finrank Real E) → Real :=
+    (chartGramMatrix (I := I) u α y)⁻¹ *ᵥ Pi.single l 1 with hη
+  have hGη : (chartGramMatrix (I := I) u α y) *ᵥ η = Pi.single l 1 := by
+    rw [hη, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hdet, Matrix.one_mulVec]
+  have hquadη : η ⬝ᵥ (chartGramMatrix (I := I) u α y) *ᵥ η = η l := by
+    rw [hGη]
+    simp [dotProduct, Pi.single_apply]
+  have hηnn : 0 ≤ η ⬝ᵥ η := Finset.sum_nonneg fun i _ => mul_self_nonneg _
+  set N : Real := Real.sqrt (η ⬝ᵥ η) with hN
+  have hN2 : N ^ 2 = η ⬝ᵥ η := Real.sq_sqrt hηnn
+  have hNnn : 0 ≤ N := Real.sqrt_nonneg _
+  have habs : ∀ p, |η p| ≤ N := by
+    intro p
+    rw [hN]
+    refine Real.abs_le_sqrt ?_
+    calc η p ^ 2 = η p * η p := sq (η p)
+      _ ≤ ∑ i, η i * η i :=
+          Finset.single_le_sum (fun i _ => mul_self_nonneg (η i)) (Finset.mem_univ p)
+      _ = η ⬝ᵥ η := rfl
+  have hkey : lam * c0 * N ^ 2 ≤ N := by
+    have h1 := hulow η
+    rw [hquadη] at h1
+    calc lam * c0 * N ^ 2 = lam * c0 * (η ⬝ᵥ η) := by rw [hN2]
+      _ ≤ η l := h1
+      _ ≤ |η l| := le_abs_self _
+      _ ≤ N := habs l
+  have hNle : N ≤ (lam * c0)⁻¹ := by
+    rcases eq_or_lt_of_le hNnn with h0 | hNpos
+    · rw [← h0]
+      positivity
+    · have hmulN : (lam * c0) * N ≤ 1 := by
+        have h2 : (lam * c0) * N * N ≤ 1 * N := by
+          calc (lam * c0) * N * N = lam * c0 * N ^ 2 := by ring
+            _ ≤ N := hkey
+            _ = 1 * N := (one_mul N).symm
+        exact le_of_mul_le_mul_right h2 hNpos
+      calc N = (lam * c0)⁻¹ * ((lam * c0) * N) := by field_simp
+        _ ≤ (lam * c0)⁻¹ * 1 :=
+            mul_le_mul_of_nonneg_left hmulN ((inv_nonneg).mpr hμ.le)
+        _ = (lam * c0)⁻¹ := mul_one _
+  have hentry : chartInvGramMatrix (I := I) u α y k l = η k := by
+    rw [hη]
+    show chartInvGramMatrix (I := I) u α y k l =
+      ((chartGramMatrix (I := I) u α y)⁻¹ *ᵥ Pi.single l 1) k
     rw [chartInvGramMatrix]
     simp [Matrix.mulVec, dotProduct, Pi.single_apply]
   rw [hentry]

@@ -2,9 +2,10 @@
 
 ## Status
 
-Focused verification passes without local warnings.  The migrated
-`arxiv-preprint` module uses the current `Solution/Basic` and curvature
-namespaces and is consumed by all later L0--L3 modules.
+Focused verification, including `lLength_join`, passes without local warnings.
+The first check of the new theorem failed only because the neighborhood lemmas
+`Iio_mem_nhds` and `Ioi_mem_nhds` were incorrectly qualified by `Set`; removing
+those qualifiers resolved the issue.
 
 ## Checked content
 
@@ -17,6 +18,21 @@ namespaces and is consumed by all later L0--L3 modules.
 - Zero intervals, adjacent-interval additivity, speed-square nonnegativity,
   germ-level curve congruence, moving-metric/scalar continuity, and interval
   integrability are checked.
+
+## 2026-08-29 same-clock concatenation
+
+- `lLength_join` uses the native paste
+  `Set.piecewise (Set.Iic c) gamma0 gamma1` and states exact additivity from the
+  two piece-density interval-integrability hypotheses.
+- The order hypotheses `a <= c <= b` are necessary to identify the two sides
+  of the threshold with the two oriented subintervals.
+- No node equality, continuity, or derivative matching is needed for this
+  numerical identity.  Away from the single seam the pasted curve has the
+  same germ as the corresponding piece, while the seam itself is
+  volume-null.
+- This is only the same-clock action concatenation adapter.  It does not define
+  a restricted segment cost, competitor domain, or dynamic-programming
+  principle.
 
 The continuity proof reuses the native tangent-bundle velocity lift and the
 native moving-metric quadratic evaluation.  It fully applies the metric before
@@ -31,11 +47,9 @@ equality of their manifold derivatives.
 
 ## Progress and next target
 
-L0 is complete and consumed through the focused-green local regularized
-L-geodesic existence/uniqueness stage.  `redVolume_anti` remains **0%**;
-dedicated L-geometry machinery is about **16--18%**, and reusable generic
-prerequisites are about **60--70%**.  P2 remains below **1%**.
-
-The next stage is the L-exponential map.  It first needs a canonical maximal
-regularized-solution domain and an explicit domain-exterior totalization, not
-another definition-level L-length wrapper.
+`lLength_join` is focused-green (**100% theorem completion**) and its dedicated
+proof machinery is complete (**100%**).  The only failed attempt was the
+resolved local namespace issue above; the later `hr.le` diagnostic was its
+cascade.  This closes only the numerical concatenation brick of P2c, not the
+restricted-cost/DPP producer.  Dedicated Perelman L-geometry machinery remains
+about **30--32%**, while `redVolume_anti` remains **0%**.

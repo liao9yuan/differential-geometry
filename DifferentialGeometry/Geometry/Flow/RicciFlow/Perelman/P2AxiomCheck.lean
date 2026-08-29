@@ -1,3 +1,5 @@
+import DifferentialGeometry.Analysis.Integration.Measure.Tight
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Fields.ScalarConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CostChartLip
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CompleteFlowBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedMinTime
@@ -6,6 +8,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.LateVolum
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallUpper
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallUnif
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SmoothNLC
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Naturality
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CrossingCost
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedAction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.ChangingDistance
+import DifferentialGeometry.Geometry.Metric.Convergence.RicciFromJetsCompact
 
 set_option autoImplicit false
 
@@ -22,3 +30,14 @@ set_option autoImplicit false
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_ball_unif
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_anti
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.smooth_nlc
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lLength_join
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lDensity_pull
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lLength_pull
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lLength_cross
+#print axioms DifferentialGeometry.HCGCompactness.lVelocity_src_map
+#print axioms DifferentialGeometry.HCGCompactness.lKinetic_src_pull
+#print axioms DifferentialGeometry.HCGCompactness.lLength_tendsto
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_short_support
+#print axioms DifferentialGeometry.Analysis.Measure.mass_tendsto_of_cc
+#print axioms DifferentialGeometry.HCGCompactness.scalarSub_le_dNormOn
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.scalar_convOn

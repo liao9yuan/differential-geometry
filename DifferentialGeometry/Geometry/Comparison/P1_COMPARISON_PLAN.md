@@ -105,7 +105,7 @@ blocker.  The known P0 chain `intrInj_ge_cgt -> injDecay_of_bg -> flowInj_of_vol
 must be reused and must not be reopened.  The acceptance target is the exact
 additional P2/P3 injectivity statement, if any.
 
-### Running status (2026-08-27, exact consumer set frozen)
+### Running status (2026-08-28, exact consumer set frozen)
 
 - Project-used theorem endpoints: **0%** (zero of two separately counted
   endpoints are yet proved in their exact local-on-balls P3 shape).
@@ -131,67 +131,306 @@ additional P2/P3 injectivity statement, if any.
   bounded ball.  P2 has no direct P1b call.  Most P3 inputs are complete
   kappa-solutions, but the `volcomp` use at `temp2kappa:2668` explicitly allows
   an incomplete ambient and prevents completeness from being imposed globally.
-- Current action: implement the smallest incomplete-ambient producer
-  `frame_mem_expDom`, deriving raw exponential-domain coverage from compactness
-  of a buffered extended ball.  This attacks the shared Route 1 blocker before
-  any raw CGT port or E2 assembly.
+- Current action: P1b is closed at the exact incomplete-ambient raw-domain
+  blocker below.  Release its file claims and start P1c in phase order.  Do not
+  state `frame_mem_expDom` under compact-eball assumptions: that proposed
+  producer is false for the live fixed-chart representation of `expDomain`.
 
 ### Remaining-frontier route audit
 
-1. **Direct compact-tail / partial-exp route (preferred).**  The incomplete
-   ambient has the raw `framedInjRadius`, `exp_dom_of_inj`,
-   `endpointCont_compact`, `geo_Ioo_extend_cpt`, and the non-complete Zorn
-   extension wrapper.  The missing producer is a local Hopf--Rinow theorem from
-   compact closure of a larger intrinsic ball to both tangent-ball exp-domain
-   coverage and metric-ball coverage by `radialMinSet`.  Exp-domain coverage
-   alone does not supply the local Bishop/polar ball-volume upper bound, and the
-   existing CGT collision proof would then still need a raw partial-exp port.
-2. **Complete metric surgery on an open restriction.**  `restrictOpen`,
-   `geodesicOn_open_iff`, curvature naturality, and
-   `bumpExtend_complete` exist.  This route fails earlier: the last theorem
-   needs a pre-existing complete background metric and does not construct one
-   on an arbitrary open subtype.  Even with such a metric, no buffered
-   equality theorem transfers small-ball distance, volume, exp, and
-   injectivity radius back to the original metric.  Thus this route exposes at
-   least two independent API frontiers.
-3. **Localize the checked `CGTDecay` propagation proof.**  Its algebraic base
-   volume shift and Bishop/CGT estimates are reusable, but its normal-coordinate
-   input is globally packaged by `SeqBoundedGeometry` and completeness.  A
-   bounded-ball version first needs a producer from padded compact-ball
-   curvature jets to uniform local metric control/nonconjugacy/raw framed-exp
-   local diffeomorphism; volume propagation then still needs Route 1's local
-   Bishop/minimizing coverage.  It therefore cannot independently bypass the
-   compact-tail frontier.
+1. **Source-contained fixed-chart route.**  A raw compatibility theorem can be
+   proved if the entire geodesic is assumed to remain in
+   `(chartAt H x).source`; a capped version of the compact-tail Zorn proof is
+   also still needed.  Compact eball closure does not imply this chart-source
+   condition, so the resulting theorem is valid but does not cover the audited
+   Morgan--Tian consumers.
+2. **Global witness/domain redesign.**  Generalize or replace
+   `MaximalGeodesicWitness` and `expDomain` so the phase lift solves the global
+   `geodesicVectorField`, with chart-local realization proved separately.  This
+   is the smallest mathematically faithful route to the MT statement, but it is
+   a substantial foundational API migration rather than a P1b-local lemma.
+3. **Base-geodesic domain plus downstream migration.**  Define the raw domain
+   directly from an open preconnected `IsGeodesicOn` base curve with initial
+   data, prove compact-buffer coverage there, and migrate raw exponential,
+   Jacobi, Bishop, and CGT consumers.  This avoids the fixed-chart phase field
+   but creates a second domain notion and is larger than Route 2.
 
-The smallest shared next theorem is the Route 1 local Hopf--Rinow producer,
-with conclusion split into exp-domain coverage and `radialMinSet` coverage.
-This is missing groundwork rather than a local coercion issue; no endpoint is
-counted until it is formally stated and proved.
+The decisive obstruction is representational: live `expDomain` uses a
+`MaximalGeodesicWitness` for `geodesicVectorFieldChart g x`, which agrees with
+the global geodesic vector field only inside the initial chart source and is
+zero outside it.  Thus compact-eball-only `frame_mem_expDom`, and an
+assumption-free equation-to-phase-lift bridge, are under-hypothesized.  P1b
+therefore stops honestly at a foundational design choice after three distinct
+routes; no endpoint is counted and no theorem-shaped placeholder was created.
 
-## P1c -- Laplacian comparison, Busemann functions, and splitting
+## P1c -- Laplacian comparison, Busemann, splitting, and soul
 
 P1c starts only after P1b closes or reaches a precisely recorded genuine
 blocker.  The expected order is the weakest reusable Laplacian-comparison
 producer, then Busemann, then the Cheeger--Gromoll splitting endpoint, adjusted
-only if the exact P3 consumers give a shorter native route.  Missing distance
-smoothness, cut-locus, barrier/weak-Laplacian, ray compactness, or Hessian-trace
-infrastructure must be isolated as the smallest native bridge rather than
-replaced by a parallel hierarchy.
+only if the exact P3 consumers give a shorter native route.  The global
+authority also assigns the Cheeger--Gromoll soul theorem to P1c as a separate
+classical endpoint; it is not a corollary of splitting.  Missing distance
+smoothness, cut-locus, barrier/weak-Laplacian, ray compactness, Hessian-trace,
+or soul/exhaustion infrastructure must be isolated as the smallest native
+bridge rather than replaced by a parallel hierarchy.
 
-### Running status (not started)
+### Running status (2026-08-29, exact consumer and native-asset audits frozen)
 
-- Laplacian-comparison endpoint: **0%**.
-- Busemann endpoint: **0%**.
+- Laplacian-comparison endpoint: **100%**.  `dist_lap_distrib` is formally
+  stated and proved on the punctured manifold under nonnegative Ricci curvature
+  and positive transverse dimension; it is warning-free focused/named-refresh
+  green and direct-axiom clean.
+- Busemann weak-Laplacian endpoint: **100%**.  `busemann_lap` is formally
+  stated and proved for a supplied minimizing ray; focused/named-refresh and
+  direct-axiom checks are green.  The stronger `narrows` gradient-direction
+  extension remains separate unfinished machinery.
 - Cheeger--Gromoll splitting endpoint: **0%**.
-- Dedicated native machinery: provisionally **5--15%** pending the asset audit.
-- P1d boundary: record exact Toponogov assumptions consumed downstream; do not
-  implement them in this campaign.
+- Cheeger--Gromoll soul endpoint: **0%**.
+- Dedicated native machinery: **about 60--65%** across the whole four-endpoint P1c
+  denominator.  Separately: the Laplacian endpoint's dedicated machinery is
+  **100%**, the weak Busemann endpoint **100%**, splitting **45--50%**, and soul
+  **5%**.  The broader Busemann package needed by `narrows`, including the
+  almost-everywhere unit-gradient/asymptotic-ray direction, is about **55%**.
+  The canonical compact-test predicate `IsLapLEDistribOn`, its restriction
+  theorem, and `lapDistrib_of_smooth` are now checked.  Noncompact Green second
+  identity and signed chart-integral transport are also checked.  The direct
+  distance-specific polar route now additionally has signed function-level
+  exponential change of variables, signed restricted-set polar evaluation, its
+  `SegInt` specialization, the radial Jacobian scaling identity and derivative
+  inequality, one-dimensional weighted integration by parts, a setwise
+  full-measure regular-segment image in each ball, and compact-test annulus
+  localization away from the pole.  `dist_grad_radial` now also proves that
+  distance is differentiable on the nonzero regular minimizing exponential
+  image and identifies its gradient with the outgoing unit radial velocity.
+  `dist_green` now gives the noncompact compact-support weak Green identity for
+  distance, and `dist_action_radial` identifies its action integrand pointwise
+  on the nonzero regular minimizing locus.
+- Current action: the distance-specific polar route and weak Busemann endpoint
+  are closed.  The supplied-line splitting route has checked line-to-ray,
+  Busemann-pair, weak-addition, pair-Laplacian, and compact-smooth-test Lipschitz
+  energy producers.  The earlier arbitrary-continuous strong-minimum target was
+  too broad for the exact consumer: the Busemann pair is intrinsically
+  two-Lipschitz, so its local chart `W^{1,2}` witness can be built directly by
+  cutoff and the Euclidean Lipschitz theorem.  `buse_pair_memW1p` is now
+  warning-free focused-check green.  The sign-preserving smooth-test density
+  theorem `MemH01.nonneg_approx` and the normalized metric coefficient package
+  `exists_metric_coeff` are also warning-free focused-check and named-refresh
+  green.  The
+  formerly missing nonsmooth chart Green/energy compatibility theorem is now
+  checked as `chart_super_of_lap`: it identifies the distributional inequality
+  with the weighted coefficient bilinear form, and both its warning-free
+  focused check and explicit named refresh are green.  The downstream zero-set
+  propagation `buse_pair_eq_zero` and local weak-solution assembly
+  `busemann_chart_sol` are now also warning-free focused and named-refresh
+  green.  The live frontier is the smooth-coefficient weak-solution to
+  smooth-representative bridge; none of these declarations may be replaced by
+  a stronger endpoint hypothesis.
+  The general Euclidean `visc_div_le_integral` remains a distinct larger
+  deferred API.
+- P1d boundary: record exact Toponogov assumptions consumed downstream,
+  including any used by the soul route; do not implement P1d in this campaign.
+
+### Exact dependency order and acceptance boundary
+
+1. **Ray producer.**  On a complete connected noncompact Riemannian manifold,
+   every chosen basepoint admits a unit-speed minimizing ray with
+   `dist (gamma s) (gamma t) = t - s` for `0 <= s <= t`.  This is a properness
+   and compactness result, not a Toponogov theorem.
+2. **Busemann metric producer.**  For such a ray,
+   `dist (gamma t) x - t` decreases to a finite limit, the limit is
+   one-Lipschitz, and its value on `gamma s` is `-s`.  General smoothness is not
+   an acceptance requirement; local Sobolev regularity is used downstream.
+3. **Weak Laplacian bridge.**  Under nonnegative Ricci curvature, first prove
+   the distance-specific compact-test inequality directly on the measurable
+   minimizing-segment domain.  The checked function-level exponential and
+   polar formulas reduce it to the radial Jacobian differential inequality and
+   one-dimensional integration by parts.  The existing non-sharp Calabi bound
+   remains an alternate input for the larger viscosity route and is sufficient
+   for the later escaping-pole decay once a distributional comparison exists.
+4. **Supplied-line splitting.**  Complete plus nonnegative Ricci curvature and
+   a minimizing line must yield a global Riemannian isometry with a product by
+   `Real`, aligned with the supplied line.  A diffeomorphism alone is too weak.
+   The proof still needs elliptic regularity/maximum principles, Bochner, and
+   the parallel-gradient flow realization.
+5. **Soul.**  This remains independent of splitting: nonnegative sectional
+   curvature must produce compact totally convex/totally geodesic soul data and
+   a normal-bundle diffeomorphism; positive sectional curvature supplies the
+   point-soul/Euclidean specialization actually used in P3.  No native
+   soul/normal-bundle/exhaustion chain currently exists.
+
+### Direct polar-distance route
+
+1. `expJac_map_eq`, `expJac_lintegral`, and `segInt_lintegral` promote the
+   set-level area formula to function-level change of variables on every
+   measurable injective exponential domain.  `setLIntegral_polar` and
+   `segInt_polar` then expose the sphere-by-positive-radius integral with the
+   Euclidean radial power carried by `volumeIoiPow`.
+2. `integral_polar_prod`, `integral_polar`, `setIntegral_polar`,
+   `expJac_integrable`, `expJac_integral`, `segInt_integral`, and
+   `segInt_int_polar` are the checked signed Bochner/Fubini layer needed for the
+   distributional pairing.  `expJacDensity_nonneg` is the canonical density
+   sign lemma used by the change-of-variables proof.
+3. `expJac_radial` is the checked bridge
+   `expJacDensity (r • u) * r ^ (n - 1) = C * curveDensity r` for a transverse
+   orthonormal Jacobi frame.  `intrDen_deriv_le` supplies its exact derivative
+   and Ricci-zero upper bound, while `neg_mul_deriv_le` supplies the favorable
+   weighted one-dimensional integration-by-parts inequality.
+4. `segBall_reg_zero` proves that the complement of the regular minimizing
+   exponential image inside each ball is volume-null.  `tsupp_dist_bounds`
+   places every compact test supported away from the pole inside one finite
+   positive-radius annulus.
+5. The genuine first-order bridge is checked: `dist_green` gives the noncompact
+   compact-support weak Green identity, while `dist_grad_radial` and
+   `dist_action_radial` identify its action integrand on `Exp(SegInt)`.  The
+   signed `volumeIoiPow` initial-segment integration-by-parts/exhaustion bridge
+   and its polar reassembly are now checked as `radial_pairing_le` and
+   `dist_pairing_le`.
+6. `dist_lap_distrib` assembles the formal compact-test distributional
+   comparison on `{p}ᶜ`.  Focused verification, the downstream-required named
+   refresh, and the common direct axiom audit are green.  Existing
+   `weak_grad_of_lip` remains compact-manifold-only; the larger cutoff and
+   countable-chart alternatives are no longer on the immediate route.
+
+### Supplied-line splitting frontier
+
+The metric and weak inputs before the strong-minimum step are checked.
+`IsMinimizingLine` supplies exact positive and negative minimizing rays;
+`buse_pair_nonneg`, `buse_pair_zero`, and `buse_pair_line` give the two
+Busemann functions' pointwise sum properties; `IsLapLEDistribOn.add` supplies
+canonical weak addition; and `buse_pair_lap` proves that their sum has
+distributional Laplacian at most zero.  All focused checks and required named
+refreshes are green, and the common axiom audit is clean.
+
+The splitting consumer does not require a new arbitrary-continuous
+distributional strong-minimum principle.  Its Busemann pair is already
+intrinsically two-Lipschitz.  `IsLapLEDistribOn.neg_int_le_energy` and
+`lip_energy_nonneg` are focused-check green and convert the checked
+distributional inequality into the correctly signed intrinsic energy
+inequality against nonnegative smooth compact tests.  `buse_pair_memW1p` gives
+the cutoff/chart local `DeGiorgi.MemW1p 2` witness and is warning-free focused-
+check green.  This removes the old continuous-to-Sobolev regularity
+gap without changing the splitting assumptions.
+
+Three genuinely distinct native routes were audited for the remaining
+chartwise weak-supersolution bridge:
+
+1. **De Giorgi/Harnack.**  `weak_harnack_on_ball` requires
+   `DeGiorgi.IsSupersolution`.  Local `MemW1p 2` is now available by the
+   Lipschitz cutoff route, but no public theorem identifies its chart weak
+   derivatives with the intrinsic energy pairing or with
+   `bilinFormOfCoeff`.  The existing Harnack theorem also assumes dimension
+   strictly greater than two, which is sufficient for the exact 3-dimensional
+   Morgan--Tian consumer but not yet for a dimension-free splitting theorem.
+2. **Harmonic replacement or mollification.**  Harmonic replacement already
+   assumes `MemW1p 2`.  Local `L1` mollification exists, but no
+   order-preserving variable-coefficient commutator converts the distributional
+   inequality to smooth supersolutions; the Friedrichs and H1 approximation
+   APIs already assume global `L2` weak derivatives or weak-solution data.
+3. **Viscosity or heat flow.**  The viscosity tree lacks local-uniform limit,
+   sum, and strong-minimum stability for these Busemann limits.  The available
+   strong parabolic maximum principle and heat semigroup are compact/smooth or
+   compact-`L2` results and cannot consume a noncompact linearly growing
+   Lipschitz distributional supersolution.
+
+The exact coefficient is `rho * g^-1`, represented by
+`weightedInvGramOnEuclid`.  The smallest honest producer sequence was:
+
+1. a nonsmooth local chart Green/divergence adapter identifying the compact
+   smooth-test distributional inequality with the chart weak-gradient bilinear
+   form;
+2. a nonnegative smooth-compact density theorem for nonnegative `MemH01`
+   tests, since the existing defining approximation need not preserve sign;
+3. an elliptic-coefficient package for `rho * g^-1`, including inverse
+   coercivity and the normalization consumed by the native weak Harnack API.
+
+The local strong-minimum endgame is already checked as `super_zero_ball`:
+for a normalized coefficient in dimension greater than two it uses
+`weak_harnack`, constant shifts, an essential-infimum bound from continuity,
+zero integral, and open positive measure to propagate an interior zero across
+the quarter ball.  `super_zero_on_ball` is also warning-free focused-check and
+named-refresh green and uses the existing normalized coefficient and
+supersolution scaling API to give the same conclusion on every positive-radius
+ball.  The sign-preserving density and normalized-coefficient producers are
+checked; the chart bridge `chart_super_of_lap` is also warning-free focused and
+named-refresh green.  Thus these are producer inputs to the checked consumer,
+not new splitting assumptions.  Global propagation is only
+the open-and-closed zero-set argument in `ConnectedSpace`; it does not require
+a chart-overlap chain.  Adding `MemW1p`, coefficient data, or a supersolution
+witness as a splitting hypothesis would merely move the frontier and is
+forbidden.
+
+That propagation is checked as `buse_pair_eq_zero`.  Around every
+zero it chooses one ball compatible with both the checked local `W^{1,2}`
+witness and compact chart containment, applies the checked chart bridge and
+checked arbitrary-ball strong minimum, and pulls the resulting quarter-ball
+zero set back to the manifold.  The proof then uses continuity, the line-base
+zero, and connectedness.  The declaration is warning-free focused and
+named-refresh green.
+
+The post-minimum-principle regularity stage has also been source-audited.  Once
+the Busemann pair is identically zero, the two individual Busemann functions
+can be made opposite weak supersolutions for the same metric coefficient, hence
+a local `DeGiorgi.IsSolution`.  The formerly private proof that an arbitrary
+Lipschitz Euclidean function is in `W^{1,2}` on a finite-radius ball has now
+been extracted to the canonical Euclidean Sobolev layer as
+`memW1p_ball_of_lip`; it and the generic manifold producer
+`raw_memW1p_of_lip` are warning-free focused/named-refresh green, and the
+shortened pair consumer is focused green.  After pair zero, the negative
+summand supplies the missing subsolution sign and the two chart supersolutions
+assemble a local `DeGiorgi.IsSolution`.  That assembly is checked as
+`busemann_chart_sol`, with warning-free focused and named-refresh verification.
+The genuine next
+analytic frontier is larger: no checked native
+headline currently promotes a local smooth-coefficient `IsSolution` to a
+smooth representative on a smaller ball.  `loc_nonsmooth_solution` supplies
+approximant `H²` bounds but not the compactness/bootstrap/representative
+assembly.  Even after that promotion, the Bochner endgame separately needs a
+Busemann eikonal theorem and zero-Frobenius-Hessian/parallel-gradient bridges.
+None of these missing producers may be added as assumptions to the splitting
+statement.
+
+### Deferred viscosity-to-distributional route audit
+
+1. **Direct Euclidean divergence-form theorem.**  In a Euclidean chart, prove
+   `visc_div_le_integral` for a smooth positive density and a smooth symmetric,
+   locally uniformly elliptic coefficient field: a lower-test viscosity bound
+   for `rho^-1 div(A grad u)` implies the nonnegative compact-test integral
+   inequality.  Existing `densityOnEuclid`, `weightedInvGramOnEuclid`, their
+   smoothness/positivity/ellipticity results, the public noncompact chart
+   formulas, and finite compact-support partition-of-unity reduction cover the
+   geometric transport.  No native or Mathlib theorem supplies the analytic
+   Euclidean implication itself.
+2. **Inf/sup-convolution and mollification.**  This route needs viscosity
+   preservation, semiconvex approximation, Alexandrov almost-everywhere second
+   differentiability, and a limit theorem.  The repository's mollifier and
+   Friedrichs tools start from weak/Sobolev information and would therefore be
+   circular; the required viscosity/semiconvexity APIs are absent.
+3. **Dirichlet or harmonic replacement.**  A comparison proof would need local
+   classical Dirichlet solvability, interior/boundary regularity, and
+   viscosity-versus-weak comparison.  The native elliptic tree has weak
+   De Giorgi infrastructure but not this classical replacement chain, so this
+   route is strictly larger than Route 1.
+
+The obstruction on this general route is therefore missing PDE groundwork, not
+a coercion or typeclass problem.  `visc_div_le_integral` remains a substantial
+analytic development.  It is no longer the immediate P1c lemma because the
+distance-specific polar proof has a strictly smaller faithful dependency
+surface.  No theorem-shaped assumption or consumer wrapper has been added in
+its place.
+
+The P1d boundary is exact.  Constructing a line in an at-infinity limit for
+Morgan--Tian `topsplit`, including the required distance-gradient direction,
+uses their length-comparison/Toponogov input.  Their source proof of the soul
+theorem also calls that comparison theorem.  P1c records both dependencies but
+does not implement either P1d producer.
 
 ## Program accounting
 
 - Final theorem `poincare_of_inputs`: **0%** (not declared).
 - P1a theorem endpoints: **87.5%** (seven of eight); P1b: **0%** (zero of two);
-  P1c endpoint counts remain 0% pending its exact consumer/asset audit.  Do not
+  P1c: **50%** (two of four independently counted endpoints: Laplacian and the
+  weak Busemann endpoint are complete; splitting and soul remain 0%).  Do not
   collapse these distinct denominators into a misleading single percentage.
 - Whole P0--P9 program infrastructure: retain the global authority's current
   **15--25%** estimate; P1 audit or helper work must not inflate it.
@@ -208,9 +447,13 @@ This table is filled from live source evidence during each phase.
 | P1a | MT 9.66 | a sufficiently small radius has Euclidean-normalized volume within any prescribed relative error; no audited consumer needs a public abstract limit | `framedDens_zero`, `framedDens_haar`, `exists_ball_ratio`, `exists_euclid_ratio` | checked producer and endpoint | focused checks passed; both normalization theorems and the endpoint are axiom-clean |
 | P1a | MT 9.66 | continuity in radius, used to choose a half-model-volume radius | `segBall_vol_cont` via polar integral, sphere-null, and dominated convergence | checked endpoint | focused/named-build verification passed; common axiom audit has only standard logical axioms |
 | P1a | MT 9.56 | global strict positive sectional curvature makes every positive-radius intrinsic ball strictly smaller than its Euclidean comparison ball | checked bottom equality chain and radial propagation `transDens_eq_rigid`; checked general strict producers `expJac_lt_of_ricci` and `segBall_vol_lt`; checked smooth-manifold `normalHaar_eq`, `gBall_model_eucl`, `rm04_eq_inner_riem`, and sectional-to-Ricci bridges; exact wrapper `segBall_lt_of_sec` | checked endpoint | all dependencies and `SegmentBallEuclideanStrict` itself are warning-free focused/named-refresh green; common direct audit reports only `propext`, `Classical.choice`, and `Quot.sound` |
-| P1b E1 | MT `volinj`; `basicconv`; `2ndmfdconv`; P3 `flowlimit` and the local `basicconv` use | Global `Ric >= 0` is available in every actual P3 use; a relevant larger ball has compact closure and a uniform local `|Rm|` bound; a smaller ball has `Vol >= epsilon*r^n`; conclude `inj(p) >= delta(n,epsilon)*r`. Ambient completeness cannot be required because of `temp2kappa:2668` | checked `intrInj_ge_cgt_on` and ambient-ball quantitative assembly `intrInj_ge_vol`; `flowInj_of_vol` realizes the stronger complete/global-bounded-geometry special case | missing exact local producer | all listed machinery is focused/named green and direct-axiom clean; exact raw exp-domain/local Hopf--Rinow and raw CGT bridges remain |
+| P1b E1 | MT `volinj`; `basicconv`; `2ndmfdconv`; P3 `flowlimit` and the local `basicconv` use | Global `Ric >= 0` is available in every actual P3 use; a relevant larger ball has compact closure and a uniform local `|Rm|` bound; a smaller ball has `Vol >= epsilon*r^n`; conclude `inj(p) >= delta(n,epsilon)*r`. Ambient completeness cannot be required because of `temp2kappa:2668` | checked `intrInj_ge_cgt_on` and ambient-ball quantitative assembly `intrInj_ge_vol`; `flowInj_of_vol` realizes the stronger complete/global-bounded-geometry special case | missing exact local producer | all listed machinery is focused/named green and direct-axiom clean; the live fixed-chart `expDomain` cannot express compact-eball coverage without an extra chart-source hypothesis, so an exact raw producer requires a global witness/domain redesign before the raw Bishop/CGT bridge |
 | P1b E2 | MT `mfdconv` proof, then P3 `flowlimit` | On each fixed bounded ball: compact closure and uniform curvature-derivative bounds; uniform positive base inj/noncollapse; conclude a uniform positive inj lower bound throughout that ball, allowing incomplete ambient manifolds | `injDecay_of_bg` gives an explicit exponential pointwise bound under complete global `SeqBoundedGeometry`; its proof actually reads only order-zero curvature, base injectivity, and the intrinsic complete-manifold normal-control package | conditional producer; exact local-on-balls adapter missing | source-complete global special case and all direct axiom prints are clean; exact E2 requires raw buffered normal/CGT control plus local Bishop coverage |
-| P1c | not started | not started | asset audit pending | not yet audited | not yet audited |
+| P1c ray | MT `ends`, `prelim.tex:1093-1124` | complete connected noncompact manifold and chosen point; obtain a unit-speed minimizing ray with exact pairwise distance on nonnegative times | checked `properSpace_riemMetric`, `IsMinimizingRay`, and `exists_minRay` | checked producer | `MinimizingRay` is warning-free focused/named-refresh green and the common audit reports only the three standard logical axioms; no Toponogov dependency |
+| P1c Laplacian | MT weak distance comparison, `prelim.tex:887-908,958-1000` | under `Ric >= 0`, distance from a pole satisfies the compactly supported distributional upper inequality needed for escaping-pole limits | `dist_lap_distrib`, assembled from the checked radial/Riccati chain, signed polar change of variables, compact-support Green identity, `radial_pairing_le`, and `dist_pairing_le` | checked endpoint | endpoint is warning-free focused and named-refresh green; the common direct audit reports only `propext`, `Classical.choice`, and `Quot.sound` |
+| P1c Busemann | MT `prelim.tex:1128-1178`, especially `Blambda` | finite decreasing limit, one-Lipschitz continuity, value `-s` on the ray, and weak `Delta B <= 0`; `narrows` additionally needs a.e. unit-gradient/asymptotic-ray direction | checked metric core plus `busemann_lap`, obtained from escaping-pole `dist_lap_distrib` and compact-support dominated convergence | checked weak endpoint; stronger `narrows` extension missing | endpoint is warning-free focused/named-refresh green and the 58-declaration common audit reports only standard logical axioms; local Sobolev/unit-gradient/asymptotic-direction machinery remains for `narrows` |
+| P1c splitting | MT `prelim.tex:1528-1606`, `line` and two-end `splitting` | supplied unit-speed minimizing line plus complete connected `Ric >= 0` gives an aligned global Riemannian product; two ends additionally give a compact factor | checked `IsMinimizingLine.pos_ray`/`neg_ray`, `buse_pair_nonneg`, `buse_pair_line`, `IsLapLEDistribOn.add`, `buse_pair_lap`, local Busemann-pair `W^{1,2}`, nonnegative `H₀¹` density, normalized metric coefficients, arbitrary-ball strong minimum, `chart_super_of_lap`, `buse_pair_eq_zero`, and `busemann_chart_sol`; Bochner pointwise identity exists downstream | prove smooth-coefficient weak solution to smooth representative, then eikonal/Hessian-zero, parallel-flow, and product assembly | the checked local analytic inputs add no splitting assumptions; the at-infinity line construction for `topsplit` remains P1d-dependent |
+| P1c soul | MT `prelim.tex:1295-1321`, `soul`; P3 uses at `temp2kappa:2293,3581,3612,3714,3727` | complete connected noncompact `sec >= 0` gives compact totally convex/totally geodesic soul and diffeomorphism to its normal bundle; `sec > 0` gives point soul and `M` diffeomorphic to Euclidean space | no native soul, convex-exhaustion, smooth normal-bundle, normal exponential, or global normal-diffeomorphism chain found | missing producer; independent endpoint | MT's proof invokes `lengthcompar`, so that source route crosses the recorded P1d boundary; do not conflate soul with splitting |
 
 ## Status log
 
@@ -444,3 +687,248 @@ This table is filled from live source evidence during each phase.
   all 28 P1a/P1b declarations, including `injDecay_of_bg`,
   `injDecay_realizes`, and `flowInj_of_vol`, depend only on `propext`,
   `Classical.choice`, and `Quot.sound`.
+- 2026-08-28: the proposed compact-eball producer `frame_mem_expDom` was
+  rejected before creating Lean source.  The live raw domain is represented by
+  a witness for the fixed-chart vector field `geodesicVectorFieldChart g x`;
+  outside the initial chart source that field is zero, while compact closure of
+  an intrinsic eball supplies no chart-source containment.  Three distinct
+  routes were assessed: a source-contained theorem that does not cover MT, a
+  global chart-independent witness/domain redesign, and a larger base-geodesic
+  domain with downstream migration.  Hence P1b closes at a genuine
+  foundational API/design blocker with both exact endpoints still 0% and its
+  dedicated checked machinery about 94%; P1c may now start after P1b claims are
+  released.
+- 2026-08-28: P1c scope was reconciled with the newer global authority before
+  implementation.  Besides Laplacian comparison, Busemann, and splitting,
+  `POINCARE_PLAN.md` assigns the Cheeger--Gromoll soul theorem to P1c as an
+  independent fourth endpoint because P3 uses both the positive-curvature
+  point-soul consequence and soul basepoints for noncompact kappa-solutions.
+  Any Toponogov input exposed by that route is recorded as the P1d boundary and
+  is not implemented here.
+- 2026-08-28: the exact P1c consumer and native-asset audits were frozen.  The
+  native tree already has the smooth Calabi upper-support producer needed for
+  the distance comparison, so another smooth Laplacian wrapper would be
+  duplicate infrastructure.  It has no minimizing-ray/Busemann layer and no
+  barrier-to-intrinsic-weak-Laplacian theorem; splitting also lacks the weak
+  elliptic regularity, parallel-gradient, and product-isometry chain, while the
+  soul endpoint has no dedicated native chain at all.  The first implementation
+  brick is therefore the properness-based `exists_minRay`, followed by the
+  metric Busemann limit.  All four formal endpoints remain 0%; whole-P1c
+  dedicated machinery is estimated at 15--25%, with the narrower checked
+  Calabi/distance-Laplacian submachinery at 80--90%.
+- 2026-08-28: `MinimizingRay.lean` now supplies the properness/compact-direction
+  ray producer, and `Busemann.lean` supplies the finite decreasing metric limit,
+  one-Lipschitz estimate, and value `-s` along the ray.  Both modules passed
+  warning-free focused verification and explicit named refresh.  The separate
+  `DistanceBarrier.lean` packages the existing Calabi support as an honest
+  epsilon-relaxed upper barrier and also passed warning-free focused/named
+  verification.  The expanded common audit passed for all 39 printed
+  declarations with only `propext`, `Classical.choice`, and `Quot.sound`.
+  These are verified producers, not formal P1c endpoints: all four endpoints
+  remain 0%, while whole-P1c dedicated machinery is now estimated at 20--30%.
+  The next concrete producer is barrier-to-lower-test viscosity, followed by
+  local-uniform stability and the intrinsic weak bridge.
+- 2026-08-28: `GradientRegularity.lean` now supplies the local smooth
+  subtraction rule `laplacian_sub_at`, and `LaplacianViscosity.lean` uses it
+  with the native minimum theorem to prove
+  `IsLapLEBarrierAt.to_viscosity`.  Both passed warning-free focused checks and
+  explicit named refreshes.  The common audit now covers 41 declarations and
+  again reports only `propext`, `Classical.choice`, and `Quot.sound`.  This is
+  checked analytic infrastructure, not the formal Laplacian endpoint: that
+  endpoint remains 0%.  The next brick is the canonical compact-test
+  distributional predicate plus its smooth Green adapter, after which the
+  genuine viscosity-to-distributional theorem remains the single analytic
+  frontier.
+- 2026-08-29: the canonical distributional layer is now checked.
+  `green_second_of_supp` supplies the noncompact compact-support Green identity;
+  `IsLapLEDistribOn` records the exact Morgan--Tian nonnegative compact-test
+  inequality; and `lapDistrib_of_smooth` proves the smooth pointwise adapter
+  with only a locally integrable right-hand side.  Public noncompact signed
+  chart formulas (`integral_eq_chart`, `integral_model`, and `integral_euclid`
+  with indicator variants) preserve all old compact API signatures.  Every
+  module passed warning-free focused verification and the required named
+  refresh, and the common audit now covers 46 declarations with only
+  `propext`, `Classical.choice`, and `Quot.sound`.  Three routes to the remaining
+  viscosity-to-distributional implication were assessed; all expose the same
+  missing Euclidean PDE theorem `visc_div_le_integral` or a strictly larger
+  absent regularity hierarchy.  All four formal P1c endpoints therefore remain
+  0%; whole-P1c dedicated machinery is about 25--30% and Laplacian-specific
+  machinery about 75--80%.
+- 2026-08-29: after auditing the general viscosity theorem against two shorter
+  alternatives, P1c selected the distance-specific polar route.  New checked
+  producers are `expJac_map_eq`, `expJac_lintegral`, `segInt_lintegral`,
+  `setLIntegral_polar`, `segInt_polar`, and the exported `expJac_radial`.
+  Focused checks and required named refreshes are green.  The aggregate audit
+  covers the first three change-of-variables declarations and
+  `expJac_radial`, bringing it to 50 declarations with only `propext`,
+  `Classical.choice`, and `Quot.sound`; the two latest polar adapters await the
+  next audit pass.  All four formal P1c endpoints remain 0%.  Whole-P1c
+  dedicated machinery is about 30%, and Laplacian-specific machinery is about
+  80--85%.  The next producer is the radial-weight derivative inequality,
+  followed by one-dimensional integration by parts.
+- 2026-08-29: the direct polar route has now discharged the routine signed and
+  radial-calculus layer.  Checked producers are `integral_polar_prod`,
+  `integral_polar`, `setIntegral_polar`, `expJacDensity_nonneg`,
+  `expJac_integrable`, `expJac_integral`, `segInt_integral`,
+  `segInt_int_polar`, `intrDen_deriv_le`, and `neg_mul_deriv_le`; their focused
+  checks and every required named refresh are green.  `segBall_reg_zero` gives
+  the setwise null complement of the regular minimizing exponential image in a
+  ball, and `tsupp_dist_bounds` gives a positive finite annulus containing any
+  compact test support away from the pole; both are also warning-free focused
+  green, with `segBall_reg_zero` named-refreshed.  This advances dedicated
+  machinery only: all four P1c endpoints remain 0%, whole-P1c machinery is
+  about 30--35%, and Laplacian-specific machinery about 88--92%.  The first
+  remaining geometric producer is distance differentiability with radial
+  gradient on `Exp(SegInt)`.  The first remaining analytic producer is the
+  noncompact compact-support weak Green/radial-pairing identity.  Three routes
+  were audited (distance-specific polar, noncompact Rademacher--Sobolev, and
+  regular-locus cutoff); only the first has the smallest faithful dependency
+  surface, but it still requires those two genuine producers.
+- 2026-08-29: `dist_grad_radial` discharged the first remaining geometric
+  producer.  Its double-`branchRadius` sandwich uses the reversed minimizing
+  tail and proves both differentiability of distance and the exact outgoing
+  unit radial gradient on nonzero `SegInt`; focused verification and the named
+  refresh are warning-free green.  The four formal P1c endpoints remain 0%.
+  Whole-P1c dedicated machinery is about 32--36%, Laplacian-specific machinery
+  about 90--93%, and the next producer is exclusively the noncompact
+  compact-support weak Green identity before signed polar assembly.
+- 2026-08-29: the direct polar route is complete.  `radial_pairing_le` proves
+  the signed weighted inequality on almost every initial minimizing ray;
+  `dist_pairing_le` performs the model-Haar Fubini reassembly; and
+  `dist_lap_distrib` is the formal punctured-manifold distributional distance
+  comparison.  The smooth-grade binders in `SegmentRayInterval`,
+  `SegmentIntegral`, and `SegmentBallIntegral` were corrected from accidental
+  analytic outer-top annotations without strengthening consumer assumptions.
+  Every edited module is warning-free focused green, all downstream-required
+  named refreshes are green, and the 52-declaration common audit reports only
+  `propext`, `Classical.choice`, and `Quot.sound`.  P1c is now one of four
+  endpoints complete (**25%**); whole-P1c dedicated machinery is about
+  **38--42%**.  The next concrete target is the project-used Busemann weak
+  Laplacian endpoint via escaping integer poles.
+- 2026-08-29: `busemann_lap` closes the weak Busemann endpoint for a supplied
+  minimizing ray.  It applies `dist_lap_distrib` at escaping integer poles,
+  removes the constant shift by compact-support divergence, passes the left
+  side by dominated convergence, and squeezes the reciprocal-distance right
+  side to zero on the compact test support.  The theorem is warning-free
+  focused and named-refresh green, has no heartbeat override or frontier
+  assumption, and the final 58-declaration common audit reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.  P1c is now two of four formal endpoints
+  complete (**50%**), while the stronger `narrows` unit-gradient/asymptotic-ray
+  extension remains unfinished machinery.  The next formal endpoint is the
+  supplied-line Cheeger--Gromoll splitting theorem.
+- 2026-08-29: the supplied-line route now has checked canonical line data and
+  all pre-maximum-principle Busemann producers.  `IsMinimizingLine.pos_ray` and
+  `.neg_ray` expose the two rays; `buse_pair_nonneg`, `buse_pair_zero`, and
+  `buse_pair_line` give the metric sum facts; `IsLapLEDistribOn.add` is the
+  generic weak algebra bridge; and `buse_pair_lap` gives the exact
+  distributional superharmonic sum.  Focused and required named checks are
+  warning-free green, and the expanded 58-declaration audit reports only
+  `propext`, `Classical.choice`, and `Quot.sound`.  Splitting itself remains
+  unstated (**0%**); its dedicated machinery is about **25--30%**.  Direct
+  De Giorgi/Harnack, harmonic-replacement/mollification, and viscosity/heat
+  routes all fail at documented missing APIs.  The smallest next lemma is a
+  weighted chart bridge from the continuous distributional inequality to local
+  `W^{1,2}` `DeGiorgi.IsSupersolution`; this is a substantial analytic producer,
+  not a local elaboration issue.
+- 2026-08-29: the exact Busemann consumer removes the earlier need for an
+  arbitrary continuous-to-Sobolev theorem.  `IsLapLEDistribOn.neg_int_le_energy`
+  and `lip_energy_nonneg` are warning-free focused green, and
+  `buse_pair_memW1p` is warning-free focused green using intrinsic
+  two-Lipschitz control, a smooth chart cutoff, and Euclidean weak derivatives.
+  `super_zero_ball` is also warning-free focused green and closes the local
+  normalized-coefficient strong-minimum argument in dimension greater than
+  two.  All three new modules needed by the common audit were explicitly named-
+  refreshed, and the expanded 62-declaration focused audit reports only
+  `propext`, `Classical.choice`, and `Quot.sound`.  Splitting itself remains
+  unstated (**0%**); its dedicated machinery is
+  about **35--40%**.  `MemH01.nonneg_approx` and `exists_metric_coeff` are now
+  warning-free focused/named-refresh green, so the live frontier has narrowed to chart weak-
+  energy compatibility for `weightedInvGramOnEuclid` and its closure from
+  nonnegative smooth tests to arbitrary nonnegative `H₀¹` tests.  Neither may
+  be moved into the splitting statement as a new assumption.
+- 2026-08-29: `MemH01.nonneg_approx` is warning-free focused/named-refresh green and returns
+  one limit witness together with pointwise nonnegative smooth compactly
+  supported approximants converging in the function and every weak-gradient
+  component `L²` norm.  `exists_metric_coeff` is warning-free focused/named-refresh green and
+  constructs the normalized positive-scalar `ρ g⁻¹` coefficient on every chart
+  ball with compact closure in the chart target.  `laplacian_chart_div` and
+  `chart_div_test_le` are also warning-free focused green, so the smooth-test
+  distributional inequality now reaches the exact Euclidean chart-divergence
+  form.  The remaining analytic lemma is the honest weak-derivative integration
+  by parts and `H₀¹` closure producing `DeGiorgi.IsSupersolution`; splitting
+  itself remains unstated (**0%**).
+- 2026-08-29: `super_zero_on_ball` is warning-free focused/named-refresh green.  It transports
+  the checked unit-ball strong minimum through the existing normalized
+  coefficient and supersolution scaling theorems, with no new analytic or
+  splitting assumption.  Once the chartwise `IsSupersolution` bridge is green,
+  the local Busemann-pair zero propagation can therefore use an arbitrary small
+  chart ball directly.
+- 2026-08-29: `chart_super_of_lap` is source-written with no new frontier
+  hypothesis.  It constructs compactly supported smooth coefficient extensions,
+  applies weak-coordinate integration by parts, and closes arbitrary
+  nonnegative `H₀¹` tests using `MemH01.nonneg_approx` and bilinear-form
+  continuity.  It remains **0% complete** until its first focused check passes;
+  no elaboration was started while the shared guard was occupied.
+- 2026-08-29: `buse_pair_eq_zero` is source-written with the exact supplied-line,
+  `Ric >= 0`, and dimension-greater-than-two assumptions already consumed by
+  the native weak-Laplacian and strong-minimum chain.  Its local chart proof and
+  global clopen propagation add no new splitting hypothesis.  It remains **0% complete**
+  until `chart_super_of_lap` and its own focused check pass.  Splitting itself
+  remains unstated (**0%**), with dedicated machinery conservatively held at
+  about **35--40%** pending those gates.
+- 2026-08-29: `chart_super_of_lap` passed warning-free focused verification
+  after three local elaboration-only repair rounds, then its explicit named
+  refresh completed GREEN (8766/8766).  The proof has no `sorry` and introduces
+  no new analytic or splitting hypothesis.  The live gate is now the focused
+  verification of `buse_pair_eq_zero`; splitting itself remains unstated
+  (**0%**) and its dedicated machinery remains conservatively **35--40%** until
+  that consumer is checked.
+- 2026-08-29: the local Busemann-pair Sobolev proof was factored at its canonical
+  layers without changing its public consumer statement.  The Euclidean
+  `memW1p_ball_of_lip` producer and manifold `raw_memW1p_of_lip` adapter both
+  passed warning-free focused verification and their required named refreshes;
+  the shortened `buse_pair_memW1p` consumer then passed warning-free focused
+  verification.  This is checked dedicated machinery only: the splitting
+  theorem remains unstated (**0%**) and the next gate is still
+  `buse_pair_eq_zero`.
+- 2026-08-29: `busemann_chart_sol` is source-written in its dedicated comparison
+  module with the exact supplied-line, completeness, connectedness, dimension,
+  and `Ric >= 0` inputs already required downstream.  It uses one checked local
+  Sobolev witness, pair-zero to obtain the negative witness, one normalized
+  coefficient, and two checked chart supersolution bridges; it introduces no
+  wrapper predicate or new frontier hypothesis.  It remains **0% verified**
+  until `buse_pair_eq_zero` and its own focused verification pass.
+- 2026-08-29: `buse_pair_eq_zero` and `busemann_chart_sol` both passed
+  warning-free focused verification and their explicitly required named
+  refreshes (9055/9055 and 9056/9056).  They introduce no new splitting
+  assumption and contain no placeholders.  Splitting itself remains unstated
+  (**0%**); its checked dedicated machinery is now about **45--50%** and the
+  smallest live analytic producer is the local smooth-coefficient weak-solution
+  to smooth-representative bridge.
+- 2026-08-29: the expanded common `P1AxiomCheck` passed warning-free with 70
+  direct declarations.  The canonical Euclidean/manifold Sobolev producers,
+  nonnegative `H₀¹` density, normalized coefficients, arbitrary-ball strong
+  minimum, chart supersolution bridge, Busemann-pair zero propagation, and local
+  Busemann weak solution all depend only on `propext`, `Classical.choice`, and
+  `Quot.sound`; no project axiom or `sorryAx` appears.
+- 2026-08-29: the post-weak-solution regularity audit found a genuine local PDE
+  frontier, not an adapter mismatch that can be hidden.  The De Giorgi solution
+  uses an explicit `MemW1pWitness.weakGrad`, whereas the current Nirenberg
+  `SmoothEllipticBilinearForm.IsWeakSolution` evaluates the classical `fderiv`
+  of the nonsmooth function.  Its smooth route assumes the desired smoothness;
+  its approximation route additionally assumes global `L2`, a classical-
+  derivative weak equation, and a uniform mollified-source bound; and the
+  checked chart difference-quotient chain is packaged with `[CompactSpace M]`.
+  None is an honest consumer of the local noncompact Busemann solution.  The
+  smallest canonical analytic producer is therefore a witness-based interior
+  `IsSolution`-to-`W^{2,2}` difference-quotient theorem, followed by
+  differentiated-equation bootstrap.  A routine interface repair is being
+  separated from that mathematics: the Busemann chart producer must retain the
+  already proved positive scale and its equality with the weighted inverse
+  metric coefficient.  Independently, the supplied-ray compactness route is
+  now directed at `exists_asymp_ray`: unit initial directions of minimizing
+  segments to escaping poles have a compact-sphere subsequential limit whose
+  ray gives the exact global Busemann distance-support inequality.  This does
+  not use P1d/Toponogov.  Until focused verification is green these are active
+  producers, not completed machinery; endpoint and percentage accounting are
+  unchanged.

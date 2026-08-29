@@ -31,6 +31,24 @@ def tangentSectionAction
   fun x => mfderiv I 𝓘(ℝ) f x (X x)
 
 omit [Module.Finite ℝ E] in
+/-- The tangent action is supported where its scalar argument is supported. -/
+lemma action_tsupp_le
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) :
+    tsupport (tangentSectionAction (I := I) X f) ⊆ tsupport f := by
+  refine closure_minimal ?_ (isClosed_tsupport f)
+  intro x hx
+  by_contra hnot
+  have hev : f =ᶠ[𝓝 x] (fun _ : M => (0 : ℝ)) :=
+    notMem_tsupport_iff_eventuallyEq.mp hnot
+  have hmfderiv : mfderiv I 𝓘(ℝ) f x = 0 := by
+    rw [Filter.EventuallyEq.mfderiv_eq hev, mfderiv_const]
+    rfl
+  apply hx
+  unfold tangentSectionAction
+  rw [hmfderiv]
+  rfl
+
+omit [Module.Finite ℝ E] in
 @[simp] lemma tangentSectionAction_def
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
     tangentSectionAction (I := I) X f x = mfderiv I 𝓘(ℝ) f x (X x) := rfl
@@ -68,6 +86,34 @@ lemma chartPullZero_nmem (α : M) (f : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     chartPullZero (I := I) α f y = 0 :=
   Set.indicator_of_notMem hy _
+
+omit [Module.Finite ℝ E] in
+/-- Differentiability of the zero-extended chart pullback at a chart point
+implies manifold differentiability of the original scalar function. -/
+theorem mdiff_of_pull [I.Boundaryless]
+    (α : M) {f : M → ℝ} {x : M}
+    (hx : x ∈ (chartAt H α).source)
+    (hf : DifferentiableAt ℝ (chartPullZero (I := I) α f)
+      (extChartAt I α x)) :
+    MDifferentiableAt I 𝓘(ℝ) f x := by
+  have hxsrc : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]
+    exact hx
+  have hxy : extChartAt I α x ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hxsrc
+  have heq : chartPullZero (I := I) α f =ᶠ[𝓝 (extChartAt I α x)]
+      scalarOnE (I := I) α f := by
+    filter_upwards [(isOpen_extChartAt_target (I := I) α).mem_nhds hxy] with y hy
+    exact chartPullZero_mem (I := I) α f hy
+  have hscalar : DifferentiableAt ℝ (scalarOnE (I := I) α f)
+      (extChartAt I α x) := hf.congr_of_eventuallyEq heq.symm
+  have hcomp : MDifferentiableAt I 𝓘(ℝ)
+      ((scalarOnE (I := I) α f) ∘ extChartAt I α) x :=
+    hscalar.mdifferentiableAt.comp x (mdifferentiableAt_extChartAt (I := I) hx)
+  apply hcomp.congr_of_eventuallyEq
+  filter_upwards [(isOpen_extChartAt_source (I := I) α).mem_nhds hxsrc] with y hy
+  change f y = scalarOnE (I := I) α f (extChartAt I α y)
+  rw [scalarOnE_def, (extChartAt I α).left_inv hy]
 omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma scalarOnE_extChartAt (α : M) (f : M → ℝ) {x : M}
     (hx : x ∈ (extChartAt I α).source) :

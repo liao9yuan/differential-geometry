@@ -2937,3 +2937,58 @@ At every handoff record separately:
   prerequisite lies in P6b: define and review that event/seam object before
   proving the planned `lLength_seam_add`.  Introducing such an object inside
   the fixed-manifold L-geometry lane would violate this plan's scope boundary.
+
+- 2026-08-29 (Updated P2 scope / `book12` crosswalk): this scope supersedes
+  the original kickoff ordering without reopening any checked endpoint.
+  Morgan--Tian `newcompar`, `newcomp2`, and `noncoll` remain the authority for
+  project-used consumers.  The read-only `book12.tex` reduced-geometry chapter
+  supplies corrected human proofs and interface quantifiers; its `PC-*`
+  semantic IDs are not approved Lean declaration names.  The exact native
+  consumer/producer table is frozen in `P2_USED_STATEMENTS.md`.
+
+  * **P2a is closed.** `redVolume_anti`, `redVolume_zero_lim`,
+    `redVolume_ball_unif`, and `smooth_nlc` remain 100% theorem endpoints with
+    100% dedicated compact ordinary-flow machinery.  The book's alternative
+    upper-support/distributional monotonicity route must not replace the
+    existing direct-axiom-clean Jacobian route.
+  * **P2b is active.** The first exact frontier is
+    `BernsteinTower.estimate_complete`: its statement exists but its proof is
+    0%, while its finite-cutoff/exhaustion machinery is about 90--95%.  After
+    it closes, freeze the used-statement table for complete bounded-curvature
+    reduced geometry.  The `book12` source nodes to match natively are the
+    arbitrary regular pole and same-clock action, domain calculus
+    (`prop:red-domain-calculus`), confined pointed action convergence
+    (`prop:red-action-convergence`), changing-distance/two-point coercivity,
+    Gaussian tightness, and no-mass-loss.  Broader P2b endpoint completion is
+    0% until those exact native statements and consumers are frozen.
+  * **P2c is active only for RFWS-independent smooth interfaces.** Audit and
+    implement only a consumed exact same-clock concatenation/dynamic-programming
+    law, locality/covariance or domain rule, confined action convergence, and
+    the smooth crossing-cost bound (`lem:red-crossing-cost`).  Its next theorem
+    endpoints are still unstated, hence 0%; no dedicated-machinery credit is
+    assigned before the native crosswalk identifies what is genuinely missing.
+  * **P2d is blocked by design.** Surviving points/worldlines, surgery maps,
+    across-event admissibility, jump errors, `lLength_seam_add`, and eventwise
+    `smooth_nlc` all remain 0% theorem endpoints with 0% dedicated machinery
+    until P6b supplies a reviewed event/seam/RFWS presentation.
+
+  The asymptotic-shrinker theorem remains a P3 endpoint at 0%; P2 may only
+  deliver its reduced-geometry producers and must not assume P3 inputs in a
+  completion-looking wrapper.  P1's elliptic/distributional files are outside
+  this campaign.  `poincare_of_inputs` remains 0%, and whole P0--P9
+  infrastructure remains approximately 15--25%.
+
+- 2026-08-29 (updated-scope first execution): the exact book/native consumer
+  table is current in `P2_USED_STATEMENTS.md`.  `estimate_complete` remains a
+  0% theorem endpoint: three native routes confirm its generic statement lacks
+  both Kato-gradient and complete-cutoff data; its dedicated machinery is
+  still about 90--95%.  No assumption wrapper or public rewrite was added.
+  `lDensity_pull`, `lLength_pull`, `lLength_cross`, `lVelocity_src_map`,
+  `lKinetic_src_pull`, and `dist_short_support` are warning-free focused green,
+  named-refreshed, and direct-axiom-clean.  The first five are 100% individual
+  producer/interface endpoints; `dist_short_support` is 100% for the short
+  fixed-endpoint branch, while the full changing-distance theorem remains 0%.
+  Cross-flow action convergence remains 0% with about 15% dedicated machinery;
+  broader P2c machinery is about 25--35%, with same-clock piece concatenation
+  the next exact thin theorem.  P2d, the P3 shrinker, and
+  `poincare_of_inputs` remain 0%; whole P0--P9 remains about 15--25%.

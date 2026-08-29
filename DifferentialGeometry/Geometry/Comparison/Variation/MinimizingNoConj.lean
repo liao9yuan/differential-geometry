@@ -62,7 +62,9 @@ omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] in
-private theorem tailCurve_eq
+/-- Restarting an intrinsic geodesic at an intermediate point and scaling its
+velocity parametrizes the remaining tail on the unit interval. -/
+theorem tailCurve_eq
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -114,7 +116,9 @@ private theorem tailCurve_eq
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem tailVel_one
+/-- The endpoint velocity of a restarted intrinsic tail is the corresponding
+scale of the endpoint velocity of the original intrinsic geodesic. -/
+theorem tailVel_one
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -217,7 +221,9 @@ theorem minSeg_edist
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem minTail_edist
+/-- The remaining tail of a minimizing intrinsic radial segment realizes the
+Riemannian distance to its endpoint. -/
+theorem minTail_edist
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]

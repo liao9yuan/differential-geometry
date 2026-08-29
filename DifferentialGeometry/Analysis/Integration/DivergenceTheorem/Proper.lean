@@ -305,6 +305,120 @@ private lemma riemannianVolumeMeasure_restrict_eq_finset_sum
         (fun x : M => ENNReal.ofReal (ρ α x))).restrict K from rfl]
     rw [ih, ← Measure.restrict_add]
 
+/-- On a compact set contained in one chart, Riemannian volume agrees with the
+local measure of that chart. -/
+theorem volume_restrict_comp
+    [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M) (α₀ : M)
+    {K : Set M} (hK : IsCompact K)
+    (hKα : K ⊆ (chartAt H α₀).source) :
+    (riemannianVolumeMeasure (I := I) (M := M) g).restrict K =
+      (chartLocalMeasure (I := I) g α₀).restrict K := by
+  classical
+  let ρ : SmoothPartitionOfUnity M I M (univ : Set M) := chartAtlasPOU I M
+  let S : Finset M := (pouFinset_for_compactSet (I := I) (M := M) hK).toFinset
+  have hρsub : ρ.IsSubordinate (fun α : M => (chartAt H α).source) := by
+    simpa only [ρ] using chartAtlasPOU_isSubordinate I M
+  have hSmem : ∀ {α : M}, α ∈ S ↔
+      (tsupport ((chartAtlasPOU I M) α) ∩ K).Nonempty := fun {α} =>
+    Set.Finite.mem_toFinset _
+  have hKmeas : MeasurableSet K := hK.isClosed.measurableSet
+  rw [riemannianVolumeMeasure_restrict_eq_finset_sum (I := I) (M := M) g hK]
+  ext A hA
+  rw [Measure.restrict_apply hA, Measure.restrict_apply hA]
+  rw [Measure.finset_sum_apply]
+  have hAKmeas : MeasurableSet (A ∩ K) := hA.inter hKmeas
+  simp_rw [withDensity_apply _ hAKmeas]
+  have hchange : ∀ α ∈ S,
+      ∫⁻ x in A ∩ K, ENNReal.ofReal ((ρ α : M → ℝ) x)
+          ∂(chartLocalMeasure (I := I) g α) =
+        ∫⁻ x in A ∩ K, ENNReal.ofReal ((ρ α : M → ℝ) x)
+          ∂(chartLocalMeasure (I := I) g α₀) := by
+    intro α _
+    rw [← lintegral_indicator hAKmeas, ← lintegral_indicator hAKmeas]
+    refine chartLocalMeasure_lintegral_eq_of_support_in_overlap
+      (I := I) g α α₀ ?_ ?_
+    · exact (measurable_ofReal_pou_weight ρ α).indicator hAKmeas
+    · intro x hx
+      by_cases hxAK : x ∈ A ∩ K
+      · rw [Set.indicator_of_mem hxAK]
+        have hxα₀ : x ∈ (chartAt H α₀).source := hKα hxAK.2
+        have hxα : x ∉ (chartAt H α).source := fun hxα' => hx ⟨hxα', hxα₀⟩
+        have hxnot : x ∉ tsupport (ρ α : M → ℝ) := fun hxt => hxα (hρsub α hxt)
+        have hρzero : (ρ α : M → ℝ) x = 0 := by
+          by_contra hne
+          exact hxnot (subset_tsupport _ hne)
+        rw [hρzero, ENNReal.ofReal_zero]
+      · rw [Set.indicator_of_notMem hxAK]
+  rw [Finset.sum_congr rfl hchange]
+  have hmeas (α : M) : Measurable
+      ((A ∩ K).indicator (fun x => ENNReal.ofReal ((ρ α : M → ℝ) x))) :=
+    (measurable_ofReal_pou_weight ρ α).indicator hAKmeas
+  calc
+    ∑ α ∈ S, ∫⁻ x in A ∩ K, ENNReal.ofReal ((ρ α : M → ℝ) x)
+          ∂(chartLocalMeasure (I := I) g α₀) =
+        ∑ α ∈ S, ∫⁻ x,
+          (A ∩ K).indicator (fun y => ENNReal.ofReal ((ρ α : M → ℝ) y)) x
+            ∂(chartLocalMeasure (I := I) g α₀) := by
+      refine Finset.sum_congr rfl ?_
+      intro α _
+      rw [lintegral_indicator hAKmeas]
+    _ = ∫⁻ x, ∑ α ∈ S,
+          (A ∩ K).indicator (fun y => ENNReal.ofReal ((ρ α : M → ℝ) y)) x
+            ∂(chartLocalMeasure (I := I) g α₀) := by
+      rw [lintegral_finset_sum S (fun α _ => hmeas α)]
+    _ = ∫⁻ x in A ∩ K, (1 : ENNReal)
+          ∂(chartLocalMeasure (I := I) g α₀) := by
+      rw [← lintegral_indicator hAKmeas]
+      refine lintegral_congr (fun x => ?_)
+      by_cases hxAK : x ∈ A ∩ K
+      · simp only [Set.indicator_of_mem hxAK]
+        have hfins : ρ.finsupport x ⊆ S := by
+          intro α hα
+          rw [hSmem]
+          rw [ρ.mem_finsupport] at hα
+          exact ⟨x, subset_tsupport _ hα, hxAK.2⟩
+        have hone : ∑ α ∈ S, (ρ α : M → ℝ) x = 1 :=
+          ρ.sum_finsupport' x (Set.mem_univ x) hfins
+        rw [← ENNReal.ofReal_sum_of_nonneg (fun α _ => ρ.nonneg α x), hone]
+        simp
+      · simp only [Set.indicator_of_notMem hxAK, Finset.sum_const_zero]
+    _ = (chartLocalMeasure (I := I) g α₀) (A ∩ K) := setLIntegral_one _
+
+/-- A compactly supported integrable function contained in one chart is
+integrable for Riemannian volume, with the same integral. -/
+theorem chart_int_eq_volume
+    [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ}
+    (hf : Integrable f (chartLocalMeasure (I := I) g α))
+    (hf_cs : HasCompactSupport f)
+    (hf_supp : tsupport f ⊆ (chartAt H α).source) :
+    Integrable f (riemannianVolumeMeasure (I := I) (M := M) g) ∧
+      ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        ∫ x, f x ∂(chartLocalMeasure (I := I) g α) := by
+  have hrestrict := volume_restrict_comp (I := I) (M := M) g α hf_cs hf_supp
+  have hzero : ∀ x, x ∉ tsupport f → f x = 0 := by
+    intro x hx
+    by_contra hne
+    exact hx (subset_tsupport _ hne)
+  have hglobal_on : IntegrableOn f (tsupport f)
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    change Integrable f
+      ((riemannianVolumeMeasure (I := I) (M := M) g).restrict (tsupport f))
+    rw [hrestrict]
+    exact hf.integrableOn
+  refine ⟨hglobal_on.integrable_of_forall_notMem_eq_zero hzero, ?_⟩
+  calc
+    ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        ∫ x in tsupport f, f x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+      (setIntegral_eq_integral_of_forall_compl_eq_zero hzero).symm
+    _ = ∫ x in tsupport f, f x ∂(chartLocalMeasure (I := I) g α) := by
+      rw [hrestrict]
+    _ = ∫ x, f x ∂(chartLocalMeasure (I := I) g α) :=
+      setIntegral_eq_integral_of_forall_compl_eq_zero hzero
+
 private lemma integral_riemannianVolumeMeasure_of_compactSupport_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -373,7 +487,9 @@ private lemma integral_riemannianVolumeMeasure_of_compactSupport_eq_finset_sum
   change (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal • h x = h x * ((ρ α : M → ℝ) x)
   rw [ENNReal.toReal_ofReal (ρ.nonneg α x), smul_eq_mul, mul_comm]
 
-private lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_compactSupport_in_chart
+/-- A compactly supported continuous function contained in one chart has the same
+integral for the Riemannian volume measure and that chart's local measure. -/
+theorem integral_eq_chart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
     {h : M → ℝ} (hh_cont : Continuous h) (hh_cs : HasCompactSupport h)
@@ -658,7 +774,7 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
         ∫ x, tangentSectionAction (I := I) X (φ α) x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     intro α _
-    exact (integral_riemannianVolumeMeasure_eq_chartLocal_of_compactSupport_in_chart
+    exact (integral_eq_chart
       (I := I) g α (hAct_cont α) (hAct_cs α) (hAct_supp α)).symm
   rw [Finset.sum_congr rfl h_step_e]
   haveI : IsLocallyFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=

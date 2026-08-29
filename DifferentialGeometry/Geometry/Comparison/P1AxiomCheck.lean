@@ -4,7 +4,24 @@ import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallContinuity
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanUpper
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentCount
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanStrict
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentIntegral
 import DifferentialGeometry.Geometry.Comparison.CGTVolumeInjectivity
+import DifferentialGeometry.Geometry.Comparison.Busemann
+import DifferentialGeometry.Geometry.Comparison.BusemannLaplacian
+import DifferentialGeometry.Geometry.Comparison.BusemannLineLaplacian
+import DifferentialGeometry.Geometry.Comparison.BusemannLineEnergy
+import DifferentialGeometry.Geometry.Comparison.DistanceRadialIntegral
+import DifferentialGeometry.Geometry.Comparison.LaplacianViscosity
+import DifferentialGeometry.Analysis.Elliptic.LipschitzSupersolution
+import DifferentialGeometry.Analysis.Elliptic.DistribSupersolution
+import DifferentialGeometry.Analysis.Elliptic.MetricEllipticCoeff
+import DifferentialGeometry.Analysis.Elliptic.WeakLaplacian
+import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.LipschitzW1
+import DifferentialGeometry.Analysis.Sobolev.Manifold.Lipschitz
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace.PositiveTestDensity
+import DifferentialGeometry.External.DeGiorgi.StrongMinimum
+import DifferentialGeometry.Geometry.Comparison.BusemannLineSolution
 import DifferentialGeometry.Geometry.Compactness.CheegerGromov.BoundedGeometry.CGTDecay
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Foundations.NoncollapseInjectivity
 
@@ -16,6 +33,10 @@ set_option autoImplicit false
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_card
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.exists_euclid_ratio
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_cont
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_map_eq
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_lintegral
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segInt_lintegral
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_radial
 
 #print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.endpointCont_of_lim
 #print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.endpointCont_compact
@@ -42,3 +63,45 @@ set_option autoImplicit false
 #print axioms DifferentialGeometry.HCGCompactness.injDecay_of_bg
 #print axioms DifferentialGeometry.HCGCompactness.injDecay_realizes
 #print axioms DifferentialGeometry.HCGCompactness.flowInj_of_vol
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.properSpace_riemMetric
+#print axioms DifferentialGeometry.Geometry.Riemannian.exists_minRay
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.busemann_tendsto
+#print axioms DifferentialGeometry.Geometry.Riemannian.busemann_dist
+#print axioms DifferentialGeometry.Geometry.Riemannian.busemann_ray
+
+#print axioms DifferentialGeometry.Geometry.Riemannian.branchLap_eq_mean
+#print axioms DifferentialGeometry.Geometry.Riemannian.radialLap_eq_mean
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.exists_intrMean_on
+#print axioms DifferentialGeometry.calabiDist_support
+#print axioms DifferentialGeometry.lapBarAt_of_support
+#print axioms DifferentialGeometry.dist_lap_barrier
+#print axioms DifferentialGeometry.Geometry.Operator.laplacian_sub_at
+#print axioms DifferentialGeometry.IsLapLEBarrierAt.to_viscosity
+
+#print axioms DifferentialGeometry.Integral.DivergenceTheorem.green_second_of_supp
+#print axioms DifferentialGeometry.Integral.DivergenceTheorem.integral_eq_chart
+#print axioms DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv.integral_euclid
+#print axioms DifferentialGeometry.IsLapLEDistribOn.mono
+#print axioms DifferentialGeometry.lapDistrib_of_smooth
+#print axioms DifferentialGeometry.dist_pairing_le
+#print axioms DifferentialGeometry.dist_lap_distrib
+#print axioms DifferentialGeometry.busemann_lap
+#print axioms DifferentialGeometry.Geometry.Riemannian.IsMinimizingLine.pos_ray
+#print axioms DifferentialGeometry.Geometry.Riemannian.buse_pair_nonneg
+#print axioms DifferentialGeometry.Geometry.Riemannian.buse_pair_line
+#print axioms DifferentialGeometry.IsLapLEDistribOn.add
+#print axioms DifferentialGeometry.buse_pair_lap
+#print axioms DifferentialGeometry.IsLapLEDistribOn.neg_int_le_energy
+#print axioms DifferentialGeometry.IsLapLEDistribOn.lip_energy_nonneg
+#print axioms DifferentialGeometry.buse_pair_memW1p
+#print axioms DifferentialGeometry.Analysis.Sobolev.Euclidean.memW1p_ball_of_lip
+#print axioms DifferentialGeometry.Analysis.Sobolev.Chart.raw_memW1p_of_lip
+#print axioms DeGiorgi.MemH01.nonneg_approx
+#print axioms DifferentialGeometry.Analysis.Laplacian.MetricExtension.exists_metric_coeff
+#print axioms DeGiorgi.super_zero_ball
+#print axioms DeGiorgi.super_zero_on_ball
+#print axioms DifferentialGeometry.Analysis.Laplacian.DistribSupersolution.chart_super_of_lap
+#print axioms DifferentialGeometry.buse_pair_eq_zero
+#print axioms DifferentialGeometry.busemann_chart_sol

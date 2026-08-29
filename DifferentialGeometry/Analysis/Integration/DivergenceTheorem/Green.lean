@@ -124,6 +124,103 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
+/-- Green's second identity when at least one smooth function has compact support. -/
+theorem green_second_of_supp
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {f h : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
+    (hsupp : HasCompactSupport f ∨ HasCompactSupport h) :
+    ∫ x, (f x * Δ_g (I := I) g ⟨_, hh⟩ x - h x * Δ_g (I := I) g ⟨_, hf⟩ x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
+  classical
+  let gradF : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    grad_g (I := I) g ⟨f, hf⟩
+  let gradH : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    grad_g (I := I) g ⟨h, hh⟩
+  let X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    smoothSmul (I := I) f hf gradH
+  let Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    smoothSmul (I := I) (-h) hh.neg gradF
+  let Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := X + Y
+  have hXY_cs : HasCompactSupport X ∧ HasCompactSupport Y := by
+    rcases hsupp with hf_cs | hh_cs
+    · have hgradF_cs : HasCompactSupport gradF := by
+        simpa [gradF] using hasCompactSupport_grad_g (I := I) g ⟨f, hf⟩ hf_cs
+      constructor
+      · change HasCompactSupport
+          (f • (gradH : (x : M) → TangentSpace I x))
+        exact hf_cs.smul_right
+      · change HasCompactSupport
+          ((-h) • (gradF : (x : M) → TangentSpace I x))
+        exact hgradF_cs.smul_left
+    · have hgradH_cs : HasCompactSupport gradH := by
+        simpa [gradH] using hasCompactSupport_grad_g (I := I) g ⟨h, hh⟩ hh_cs
+      constructor
+      · change HasCompactSupport
+          (f • (gradH : (x : M) → TangentSpace I x))
+        exact hgradH_cs.smul_left
+      · change HasCompactSupport
+          ((-h) • (gradF : (x : M) → TangentSpace I x))
+        exact hh_cs.neg.smul_right
+  have hZ_cs : HasCompactSupport Z := by
+    change HasCompactSupport
+      ((X : (x : M) → TangentSpace I x) +
+        (Y : (x : M) → TangentSpace I x))
+    exact hXY_cs.1.add hXY_cs.2
+  have hact_f (x : M) :
+      tangentSectionAction (I := I) gradH f x =
+        g.inner x (gradH x) (gradF x) := by
+    simpa [gradF] using
+      tangentSectionAction_eq_inner_grad_g (I := I) g ⟨f, hf⟩ gradH x
+  have hact_neg_h (x : M) :
+      tangentSectionAction (I := I) gradF (-h) x =
+        -g.inner x (gradF x) (gradH x) := by
+    have hhx : MDifferentiableAt I 𝓘(ℝ, ℝ) h x :=
+      hh.mdifferentiable (by simp) x
+    have hmf :
+        mfderiv I 𝓘(ℝ, ℝ) (-h) x = -mfderiv I 𝓘(ℝ, ℝ) h x := by
+      simpa using hhx.hasMFDerivAt.neg.mfderiv
+    have hneg :
+        tangentSectionAction (I := I) gradF (-h) x =
+          -tangentSectionAction (I := I) gradF h x := by
+      change mfderiv I 𝓘(ℝ, ℝ) (-h) x (gradF x) =
+        -(mfderiv I 𝓘(ℝ, ℝ) h x (gradF x))
+      rw [hmf]
+      rfl
+    rw [hneg]
+    congr 1
+    simpa [gradH] using
+      tangentSectionAction_eq_inner_grad_g (I := I) g ⟨h, hh⟩ gradF x
+  have hdiv (x : M) :
+      divergence_g (I := I) g Z x =
+        f x * Δ_g (I := I) g ⟨h, hh⟩ x -
+          h x * Δ_g (I := I) g ⟨f, hf⟩ x := by
+    change divergence_g (I := I) g (X + Y) x = _
+    rw [divergence_g_add (I := I) g X Y x]
+    change
+      divergence_g (I := I) g (smoothSmul (I := I) f hf gradH) x +
+          divergence_g (I := I) g (smoothSmul (I := I) (-h) hh.neg gradF) x = _
+    rw [divergence_g_smoothSmul (I := I) g f hf gradH x]
+    rw [divergence_g_smoothSmul (I := I) g (-h) hh.neg gradF x]
+    rw [hact_f x, hact_neg_h x]
+    change
+      f x * Δ_g (I := I) g ⟨h, hh⟩ x + g.inner x (gradH x) (gradF x) +
+          (-h x * Δ_g (I := I) g ⟨f, hf⟩ x -
+            g.inner x (gradF x) (gradH x)) =
+        f x * Δ_g (I := I) g ⟨h, hh⟩ x -
+          h x * Δ_g (I := I) g ⟨f, hf⟩ x
+    rw [g.symm x (gradH x) (gradF x)]
+    ring
+  calc
+    ∫ x, (f x * Δ_g (I := I) g ⟨_, hh⟩ x - h x * Δ_g (I := I) g ⟨_, hf⟩ x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        ∫ x, divergence_g (I := I) g Z x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+      exact integral_congr_ae (Filter.Eventually.of_forall (fun x ↦ (hdiv x).symm))
+    _ = 0 := integral_divergence_eq_zero_of_hasCompactSupport (I := I) g Z hZ_cs
+
 theorem green_second_integral_smul_laplacian_sub_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
