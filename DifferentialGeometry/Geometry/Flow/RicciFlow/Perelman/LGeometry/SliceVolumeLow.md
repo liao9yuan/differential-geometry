@@ -2,6 +2,9 @@
 
 `SliceVolumeLow.lean` is the narrow consumer of the fixed-slice splice bound.
 It does not produce a minimizing ray and does not state the late-time endpoint.
+It imports the canonical low-level `RedVolumeSetLow.lean` module directly;
+this avoids a dependency from the late-volume chain back to the final
+`SmoothNLC.lean` capstone.
 
 ## Result
 
@@ -22,10 +25,12 @@ step for the metric time. Replacing that step by the separate scalar equality
 pass without warnings. The named module artifact was refreshed successfully;
 its replayed warnings came only from unrelated upstream modules.
 
+After the canonical-home import change, focused verification again passed
+without warnings and the named artifact was refreshed for `LateVolumeLow`.
+
 ## Scope and progress
 
-The checked theorem is only the conditional fixed-slice reduced-volume consumer. The
-all-point spacetime weak barrier, `exists_redLen_le`, `redVolume_late_low`, and
-`smooth_nlc` remain 0% as theorem endpoints. Subject to focused verification,
-the dedicated late-time-floor machinery is roughly 55--60% complete; reused
-generic infrastructure remains tracked separately.
+The checked theorem is the conditional fixed-slice reduced-volume consumer,
+and remains 100% for that interface.  Its downstream `redVolume_late_low` and
+the compact ordinary-flow `smooth_nlc` capstone are now also proved; those
+separate theorem endpoints are not counted as completion of this module.

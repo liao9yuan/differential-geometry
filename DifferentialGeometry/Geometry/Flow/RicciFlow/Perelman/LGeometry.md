@@ -688,3 +688,29 @@ parabolic ball. Its immediate adapter is `lGrad_ball`; all checked Shi
 producers currently require whole-manifold curvature control. Dedicated
 L8--L9 machinery is about 76--78%, reused generic infrastructure is 100%, and
 whole P0--P9 infrastructure remains 15--25%.
+
+## 2026-08-29 compact smooth-flow noncollapsing capstone
+
+The umbrella now exports `NLCBallUnif.redVolume_ball_unif` and
+`SmoothNLC.smooth_nlc`.  The former chooses its positive short-time threshold
+before the compact flow, terminal time, controlled ball, and actual radius;
+the latter combines this uniform upper bound with `redVolume_late_low` and the
+initial small-ball volume estimate to prove the canonical
+`Perelman.NoLocalCollapsing` predicate for compact smooth finite-dimensional
+flows, hence in particular for the three-dimensional Poincare consumer.  It
+does not route through the entropy/W persistence producer and does not add a
+public ambient metric or dimension-equality assumption.
+
+The set-level lower bound `redVolume_set_low` moved unchanged to the canonical
+low module `RedVolumeSetLow`, so `SliceVolumeLow` and `LateVolumeLow` no longer
+form an import cycle through the capstone.  The lower module, affected slice
+and late modules, `NLCBallUnif`, and `SmoothNLC` are warning-free focused green;
+their required named artifacts were refreshed.  The umbrella is warning-free
+green, and `P2AxiomCheck` reports only `propext`, `Classical.choice`, and
+`Quot.sound` for the new endpoints.
+
+Thus `redVolume_anti`, `redVolume_ball_unif`, and `smooth_nlc` are each 100%
+theorem endpoints, and the dedicated compact ordinary-flow L-geometry stage is
+100%.  Complete bounded-curvature L8 refinements and surgery/eventwise
+noncollapsing remain distinct later phases.  The latter has no honest theorem
+signature until P6b supplies the absent RFWS event/seam object.

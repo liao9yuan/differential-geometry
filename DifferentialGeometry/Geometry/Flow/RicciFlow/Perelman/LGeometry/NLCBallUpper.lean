@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Integration.Measure.MetricComparison
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ActionC1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCEndpoint
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallCore
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCSourceTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing.CurvatureBound
 
@@ -84,118 +85,10 @@ theorem lRedLen_scale
   intro eps heps heps₀ B hBrho hB Z hZ hZinj
   have hepsR' : eps ≤ epsR := heps₀.trans (min_le_left epsR 1)
   have heps1 : eps ≤ 1 := heps₀.trans (min_le_right epsR 1)
-  let tau : Real := eps * B.radius ^ 2
-  let b : Real := Real.sqrt eps * B.radius
-  let n : Real := Module.finrank Real F
-  let K : Real := n ^ 2 * Real.sqrt (1 / B.radius ^ 4)
-  have htau : 0 < tau := mul_pos heps (sq_pos_of_pos B.radius_pos)
-  have hb : Real.sqrt tau = b := by
-    dsimp only [tau, b]
-    rw [Real.sqrt_mul heps.le, Real.sqrt_sq_eq_abs, abs_of_pos B.radius_pos]
-  have hbpos : 0 < b := by rw [← hb]; exact Real.sqrt_pos.2 htau
-  have hbSq : b ^ 2 = tau := by rw [← hb, Real.sq_sqrt htau.le]
-  have hK : 0 ≤ K := mul_nonneg (sq_nonneg n) (Real.sqrt_nonneg _)
   have hrange' := hrange eps heps hepsR' B hBrho hB Z hZ
   dsimp only at hrange'
-  obtain ⟨sigma, hsigma, hmin⟩ := hZinj
-  have hminTau : (Z, tau) ∈ lMinDomain S (time : Real) B.center := by
-    exact lMinDomain_down S hS (time : Real) B.center Z hmin htau
-      (by simpa only [tau] using hsigma.le)
-  have hdomTau : (Z, tau) ∈ lExpPosDom S (time : Real) B.center :=
-    ((mem_lMinDomain S (time : Real) B.center Z tau).1 hminTau).1
-  have hbdom : b ∈ lRegDomain S (time : Real) B.center Z := by
-    rcases (mem_lExpPosDom S (time : Real) B.center Z tau).1 hdomTau with
-      ⟨_, _, hdom⟩
-    simpa only [hb] using hdom
-  let alpha : Real → N := lRegCurve S (time : Real) B.center Z
-  have halpha : ContMDiffOn (modelWithCornersSelf Real Real) J 1 alpha
-      (Icc (0 : Real) b) := by
-    simpa only [alpha] using
-      lRegCurve_c1On S hS (time : Real) B.center Z hbdom
-  have hregRay : ∀ s ∈ Icc (0 : Real) b,
-      (time : Real) - s ^ 2 ∈ D'.regular := by
-    intro s hs
-    exact lRegDomain_reg S (time : Real) B.center Z
-      (lRegDomain_seg S (time : Real) B.center Z hbdom hs.1 hs.2)
-  have hLagInt : IntervalIntegrable (lRegLag S (time : Real) alpha) volume 0 b :=
-    lRegLag_int_c1 S hS.smoothMetric ⟨hS.scalarCont⟩ (time : Real) 0 b
-      hbpos.le alpha halpha hregRay
-  have hconstInt : IntervalIntegrable (fun _ : Real ↦ -2 * b ^ 2 * K)
-      volume 0 b := intervalIntegrable_const
-  have hLagLower : ∀ s ∈ Icc (0 : Real) b,
-      -2 * b ^ 2 * K ≤ lRegLag S (time : Real) alpha s := by
-    intro s hs
-    have hsSq : s ^ 2 ≤ b ^ 2 :=
-      (sq_le_sq₀ hs.1 hbpos.le).2 hs.2
-    have hbRad : b ^ 2 ≤ B.radius ^ 2 := by
-      rw [hbSq]
-      dsimp only [tau]
-      nlinarith [sq_nonneg B.radius]
-    have htimeB : (time : Real) - s ^ 2 ∈
-        Icc ((time : Real) - B.radius ^ 2) (time : Real) :=
-      ⟨by linarith, by nlinarith [sq_nonneg s]⟩
-    have hsc : -K ≤ S.scalar ((time : Real) - s ^ 2) (alpha s) := by
-      simpa only [K, n, alpha, SolutionOn.scalar, SolutionFamily.scalar] using
-        scalar_ge_of_rm (I := J) B hB htimeB (hrange' s hs).2
-    have hkin : 0 ≤ (1 / 2 : Real) *
-        (S.base.metric ((time : Real) - s ^ 2)).inner (alpha s)
-          (lVelocity (I := J) alpha s) (lVelocity (I := J) alpha s) := by
-      apply mul_nonneg (by norm_num)
-      by_cases hv : lVelocity (I := J) alpha s = 0
-      · rw [hv]
-        rw [((S.base.metric ((time : Real) - s ^ 2)).inner (alpha s)).map_zero,
-          ContinuousLinearMap.zero_apply]
-      · exact ((S.base.metric ((time : Real) - s ^ 2)).pos
-          (alpha s) (lVelocity (I := J) alpha s) hv).le
-    have hscalar : -2 * b ^ 2 * K ≤
-        2 * s ^ 2 * S.scalar ((time : Real) - s ^ 2) (alpha s) := by
-      have h₁ : -2 * b ^ 2 * K ≤ -2 * s ^ 2 * K := by
-        nlinarith
-      have h₂ : -2 * s ^ 2 * K ≤
-          2 * s ^ 2 * S.scalar ((time : Real) - s ^ 2) (alpha s) := by
-        nlinarith [sq_nonneg s]
-      exact h₁.trans h₂
-    dsimp only [lRegLag]
-    linarith
-  have haction : -2 * b ^ 2 * K * b ≤
-      lRegAction S (time : Real) alpha 0 b := by
-    unfold lRegAction
-    have hmono := intervalIntegral.integral_mono_on hbpos.le hconstInt hLagInt hLagLower
-    calc
-      -2 * b ^ 2 * K * b = b * (-2 * b ^ 2 * K) := by ring
-      _ ≤ lRegAction S (time : Real) alpha 0 b := by
-        simpa only [intervalIntegral.integral_const, smul_eq_mul, sub_zero] using hmono
-  have hcost : lCost S (time : Real) B.center
-      (lExp S (time : Real) B.center Z tau) tau =
-        lRegAction S (time : Real) alpha 0 b := by
-    have hlen : lLength S (time : Real)
-        (fun r : Real ↦ lExp S (time : Real) B.center Z r) 0 tau =
-          lRegAction S (time : Real) alpha 0 b := by
-      simpa only [alpha, lExp, sqrtReparam, hb] using
-        lLength_sqrt (I := J) S (time : Real) alpha tau htau.le
-    exact (((mem_lMinDomain S (time : Real) B.center Z tau).1 hminTau).2.symm).trans hlen
-  have hscaleK : B.radius ^ 2 * K = n ^ 2 := by
-    dsimp only [K, n]
-    have hr2 : 0 < B.radius ^ 2 := sq_pos_of_pos B.radius_pos
-    rw [show B.radius ^ 4 = (B.radius ^ 2) ^ 2 by ring]
-    rw [show 1 / (B.radius ^ 2) ^ 2 = (1 / B.radius ^ 2) ^ 2 by field_simp]
-    rw [Real.sqrt_sq_eq_abs, abs_of_pos (one_div_pos.mpr hr2)]
-    field_simp [B.radius_pos.ne']
-  have hb2K : b ^ 2 * K = n ^ 2 * eps := by
-    rw [hbSq]
-    dsimp only [tau]
-    calc
-      eps * B.radius ^ 2 * K = eps * (B.radius ^ 2 * K) := by ring
-      _ = eps * n ^ 2 := by rw [hscaleK]
-      _ = n ^ 2 * eps := by ring
-  rw [redLength, hcost, hb]
-  have hden : 0 < 2 * b := mul_pos (by norm_num) hbpos
-  apply (le_div_iff₀ hden).2
-  calc
-    -(n ^ 2 * eps) * (2 * b) = -2 * (n ^ 2 * eps) * b := by ring
-    _ = -2 * (b ^ 2 * K) * b := by rw [hb2K]
-    _ = -2 * b ^ 2 * K * b := by ring
-    _ ≤ lRegAction S (time : Real) alpha 0 b := haction
+  exact lRedLen_of_range (J := J) S hS time heps heps1 B hB Z hZinj
+    (fun s hs ↦ (hrange' s hs).2)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -232,10 +125,10 @@ theorem lRedDen_scale
     lRedLen_scale (J := J) S hS time hrho hreg
   refine ⟨eps₀, heps₀, ?_⟩
   intro eps heps heps₀ B hBrho hB Z hZ hZinj
-  have hlen' := hlen eps heps heps₀ B hBrho hB Z hZ hZinj
-  unfold redDensity
-  apply Real.exp_le_exp.mpr
-  linarith
+  exact lRedDen_of_len (J := J) S (time : Real) B.center
+    (lExp S (time : Real) B.center Z (eps * B.radius ^ 2))
+    (eps * B.radius ^ 2) ((Module.finrank Real F : Real) ^ 2 * eps)
+    (hlen eps heps heps₀ B hBrho hB Z hZ hZinj)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -279,12 +172,9 @@ theorem lRedJac_ball_le
     ((Module.finrank Real E : Real) ^ 2 * eps -
       ((Module.finrank Real E : Real) / 2) * Real.log tau -
       ((Module.finrank Real E : Real) / 2) * Real.log (4 * Real.pi))
-  let U : Set E := lInjDomain S (time : Real) B.center tau
-  let A : Set E := U ∩
+  let A : Set E := lInjDomain S (time : Real) B.center tau ∩
     {Z | Real.sqrt ((S.base.metric (time : Real)).inner B.center Z Z) ≤
       1 / (8 * Real.sqrt eps)}
-  let Ψ := lExpPartial S hS (time : Real) B.center tau
-    (mul_pos heps (sq_pos_of_pos B.radius_pos))
   have hepsD' : eps ≤ epsD := heps₀.trans (min_le_left epsD epsE)
   have hepsE' : eps ≤ epsE := heps₀.trans (min_le_right epsD epsE)
   have htau : 0 < tau := by
@@ -299,86 +189,21 @@ theorem lRedJac_ball_le
     · fun_prop
   have hAmeas : MeasurableSet A := by
     exact (lInj_isOpen S hS (time : Real) B.center tau).measurableSet.inter hnormMeas
-  have hAsource : A ⊆ Ψ.source := by
-    dsimp only [Ψ]
-    rw [lExpPartial_source S hS (time : Real) B.center tau htau]
-    exact inter_subset_left
-  have hImageMeas : MeasurableSet (Ψ '' A) :=
-    measurableSet_image_param_global (I := I) Ψ hAmeas hAsource
-  have hImageBall : Ψ '' A ⊆ B.set := by
-    rintro y ⟨Z, hZA, rfl⟩
-    dsimp only [Ψ]
-    rw [lExpPartial_apply S hS (time : Real) B.center tau htau hZA.1]
-    simpa only [tau] using hend eps heps hepsE' B hBrho hB Z hZA.2
-  have hImageDen : ∀ y ∈ Ψ '' A,
-      ENNReal.ofReal (redDensity S (time : Real) B.center y tau) ≤
-        ENNReal.ofReal c := by
-    rintro y ⟨Z, hZA, rfl⟩
-    dsimp only [Ψ]
-    rw [lExpPartial_apply S hS (time : Real) B.center tau htau hZA.1]
-    apply ENNReal.ofReal_le_ofReal
-    simpa only [c, tau] using
-      hden eps heps hepsD' B hBrho hB Z hZA.2 hZA.1
-  have hparam :
-      (∫⁻ y in Ψ '' A,
-          ENNReal.ofReal (redDensity S (time : Real) B.center y tau)
-          ∂riemannianVolumeMeasure (I := I) (M := M)
-            (S.base.metric ((time : Real) - tau))) =
-        ∫⁻ Z in A,
-          ENNReal.ofReal
-              (paramDensity (S.base.metric ((time : Real) - tau)) Ψ Z) *
-            ENNReal.ofReal (redDensity S (time : Real) B.center (Ψ Z) tau)
-          ∂modelHaar (E := E) :=
-    riemVol_param_lint (I := I) (S.base.metric ((time : Real) - tau)) Ψ
-      (fun y ↦ ENNReal.ofReal (redDensity S (time : Real) B.center y tau))
-      hAmeas hAsource
-  have hsmallEq :
-      (∫⁻ Z in A,
-          ENNReal.ofReal
-            (lRedJac S (time : Real) B.center Z tau *
-              lSrcDensity S (time : Real) B.center)
-          ∂modelHaar (E := E)) =
-        ∫⁻ y in Ψ '' A,
-          ENNReal.ofReal (redDensity S (time : Real) B.center y tau)
-          ∂riemannianVolumeMeasure (I := I) (M := M)
-            (S.base.metric ((time : Real) - tau)) := by
-    rw [hparam]
-    refine MeasureTheory.setLIntegral_congr_fun hAmeas ?_
-    intro Z hZA
-    dsimp only [Ψ]
-    rw [lExpPartial_density S hS (time : Real) B.center tau htau hZA.1,
-      lExpPartial_apply S hS (time : Real) B.center tau htau hZA.1]
-    rw [← ENNReal.ofReal_mul (lExpDensity_pos S hS (time : Real)
-      B.center htau hZA.1).le]
-    exact congrArg ENNReal.ofReal
-      (lRedJac_mul_src S hS (time : Real) B.center htau hZA.1)
   change (∫⁻ Z in A,
       ENNReal.ofReal
         (lRedJac S (time : Real) B.center Z tau *
           lSrcDensity S (time : Real) B.center)
-      ∂modelHaar (E := E)) ≤ _
-  calc
-    (∫⁻ Z in A,
-        ENNReal.ofReal
-          (lRedJac S (time : Real) B.center Z tau *
-            lSrcDensity S (time : Real) B.center)
-        ∂modelHaar (E := E)) =
-      ∫⁻ y in Ψ '' A,
-        ENNReal.ofReal (redDensity S (time : Real) B.center y tau)
-        ∂riemannianVolumeMeasure (I := I) (M := M)
-          (S.base.metric ((time : Real) - tau)) := hsmallEq
-    _ ≤ ∫⁻ _y in Ψ '' A, ENNReal.ofReal c
-        ∂riemannianVolumeMeasure (I := I) (M := M)
-          (S.base.metric ((time : Real) - tau)) :=
-      MeasureTheory.setLIntegral_mono' hImageMeas hImageDen
-    _ ≤ ∫⁻ _y in B.set, ENNReal.ofReal c
-        ∂riemannianVolumeMeasure (I := I) (M := M)
-          (S.base.metric ((time : Real) - tau)) :=
-      MeasureTheory.lintegral_mono_set hImageBall
-    _ = ENNReal.ofReal c *
-        riemannianVolumeMeasure (I := I) (M := M)
-          (S.base.metric ((time : Real) - tau)) B.set := by
-      rw [MeasureTheory.setLIntegral_const]
+      ∂modelHaar (E := E)) ≤
+    ENNReal.ofReal c *
+      riemannianVolumeMeasure (I := I) (M := M)
+        (S.base.metric ((time : Real) - tau)) B.set
+  exact lRedJac_set_le (I := I) S hS (time : Real) B.center htau
+    A B.set hAmeas inter_subset_left c
+    (fun Z hZA ↦ by
+      simpa only [tau] using hend eps heps hepsE' B hBrho hB Z hZA.2)
+    (fun Z hZA ↦ by
+      simpa only [c, tau] using
+        hden eps heps hepsD' B hBrho hB Z hZA.2 hZA.1)
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless] in
 /-- On a sufficiently short parabolic interval, the moving volume of the
@@ -628,17 +453,7 @@ theorem redVolume_ball_eta [ConnectedSpace M]
         _ ≤ rho ^ 2 := by simpa only [one_mul] using hrSq
     exact ⟨by linarith [ht.1], ht.2⟩)]
   change (∫⁻ Z in U, f Z ∂(modelHaar (E := E))) ≤ _
-  calc
-    (∫⁻ Z in U, f Z ∂(modelHaar (E := E))) =
-        (∫⁻ Z in A, f Z ∂(modelHaar (E := E))) +
-          ∫⁻ Z in C, f Z ∂(modelHaar (E := E)) := by
-      rw [← hunion]
-      exact MeasureTheory.lintegral_union hCmeas hdisj
-    _ ≤ ENNReal.ofReal c *
-          (ENNReal.ofReal
-              (Real.sqrt ((4 / 3 : Real) ^ Module.finrank Real E)) *
-            B.volume) +
-        eta := add_le_add hsmall' htail'
+  exact redVolume_split (E := E) hCmeas hunion hdisj hsmall' htail'
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

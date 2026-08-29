@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Metric.Completeness
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+import DifferentialGeometry.Geometry.Comparison.Volume.FamilyParamControl
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -24,6 +25,118 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
+
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [I.Boundaryless]
+  [SigmaCompactSpace M] [T2Space M] in
+private theorem exists_param_speed
+    {D : RealTimeInterval}
+    (g : Real → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g)
+    {a b : Real} (hab : a ≤ b) (hK : Set.Icc a b ⊆ D.carrier)
+    (Psi : PartialDiffeomorph 𝓘(Real, E) I E M 1)
+    {B : Set E} (hB : B ⊆ Psi.source) (hBne : B.Nonempty)
+    (hBcompact : IsCompact B) :
+    ∃ L : Real, 1 ≤ L ∧
+      ∀ t ∈ Set.Icc a b, ∀ w ∈ B, ∀ v : E,
+        Real.sqrt
+            ((g t).inner (Psi w)
+              (mfderiv 𝓘(Real, E) I Psi w v)
+              (mfderiv 𝓘(Real, E) I Psi w v)) ≤
+          L * ‖v‖ := by
+  let T := {t : Real // t ∈ Set.Icc a b}
+  let P := T × B
+  let U : Set E := Metric.closedBall (0 : E) 1
+  let Q := P × U
+  let speed : Q → Real := fun q ↦
+    Real.sqrt
+      ((g q.1.1.1).inner (Psi q.1.2.1)
+        (mfderiv 𝓘(Real, E) I Psi q.1.2.1 q.2.1)
+        (mfderiv 𝓘(Real, E) I Psi q.1.2.1 q.2.1))
+  have htangent : Continuous (fun q : Q ↦
+      TotalSpace.mk' E (E := fun x : M ↦ TangentSpace I x) (Psi q.1.2.1)
+        (mfderiv 𝓘(Real, E) I Psi q.1.2.1 q.2.1)) := by
+    let lift : Q → TangentBundle 𝓘(Real, E) E :=
+      fun q ↦ ⟨q.1.2.1, q.2.1⟩
+    have hlift : Continuous lift :=
+      (tangentBundleModelSpaceHomeomorph 𝓘(Real, E)).symm.continuous.comp
+        ((continuous_subtype_val.comp (continuous_snd.comp continuous_fst)).prodMk
+          (continuous_subtype_val.comp continuous_snd))
+    simpa [lift] using
+      (PartialDiffeomorph.mfderiv_cont Psi (by norm_num) lift hlift
+        (fun q ↦ hB q.1.2.2))
+  have hspeed : Continuous speed := by
+    have hquad :=
+      metricTimeBundleQuad_cont_of_metricFamilySmoothOn
+        (I := I) (M := M) g hG hK
+    have hpull : Continuous (fun q : Q ↦
+        (q.1.1,
+          TotalSpace.mk' E (E := fun x : M ↦ TangentSpace I x) (Psi q.1.2.1)
+            (mfderiv 𝓘(Real, E) I Psi q.1.2.1 q.2.1))) :=
+      (continuous_fst.comp continuous_fst).prodMk htangent
+    exact Real.continuous_sqrt.comp (hquad.comp hpull)
+  letI : CompactSpace T := isCompact_iff_compactSpace.mp isCompact_Icc
+  letI : CompactSpace B := isCompact_iff_compactSpace.mp hBcompact
+  letI : CompactSpace U :=
+    isCompact_iff_compactSpace.mp (by
+      simpa [U] using isCompact_closedBall (0 : E) 1)
+  have hQne : (Set.univ : Set Q).Nonempty := by
+    obtain ⟨w, hw⟩ := hBne
+    let q : Q :=
+      ((⟨a, Set.left_mem_Icc.mpr hab⟩, ⟨w, hw⟩),
+        ⟨0, by simp [U]⟩)
+    exact ⟨q, Set.mem_univ q⟩
+  obtain ⟨qmax, _hqmax, hmax⟩ :=
+    (isCompact_univ : IsCompact (Set.univ : Set Q)).exists_isMaxOn
+      hQne hspeed.continuousOn
+  let L : Real := max 1 (speed qmax)
+  have hL_one : 1 ≤ L := le_max_left _ _
+  refine ⟨L, hL_one, ?_⟩
+  intro t ht w hw v
+  by_cases hv : v = 0
+  · subst v
+    have hd0 :
+        mfderiv 𝓘(Real, E) I Psi w (0 : E) =
+          (0 : TangentSpace I (Psi w)) := map_zero _
+    rw [hd0]
+    simp
+  · have hvnorm_pos : 0 < ‖v‖ := norm_pos_iff.mpr hv
+    let u : E := ‖v‖⁻¹ • v
+    have hu_norm : ‖u‖ = 1 := by
+      dsimp [u]
+      rw [norm_smul, Real.norm_eq_abs, abs_inv, abs_norm]
+      exact inv_mul_cancel₀ (ne_of_gt hvnorm_pos)
+    have hu_mem : u ∈ U := by
+      simp [U, Metric.mem_closedBall, dist_zero_right, hu_norm]
+    let q : Q := ((⟨t, ht⟩, ⟨w, hw⟩), ⟨u, hu_mem⟩)
+    have hspeed_le : speed q ≤ L :=
+      le_trans ((isMaxOn_iff.mp hmax) q (Set.mem_univ q)) (le_max_right _ _)
+    have hv_from_u : ‖v‖ • u = v := by
+      dsimp [u]
+      rw [smul_smul, mul_inv_cancel₀ (ne_of_gt hvnorm_pos), one_smul]
+    have hscale :
+        (g t).inner (Psi w)
+            (mfderiv 𝓘(Real, E) I Psi w v)
+            (mfderiv 𝓘(Real, E) I Psi w v) =
+          ‖v‖ ^ 2 *
+            (g t).inner (Psi w)
+              (mfderiv 𝓘(Real, E) I Psi w u)
+              (mfderiv 𝓘(Real, E) I Psi w u) := by
+      conv_lhs => rw [← hv_from_u]
+      have hdscale :
+          mfderiv 𝓘(Real, E) I Psi w (‖v‖ • u) =
+            ‖v‖ • mfderiv 𝓘(Real, E) I Psi w u := map_smul _ _ _
+      rw [hdscale, metric_smul2]
+      ring
+    rw [hscale, Real.sqrt_mul (sq_nonneg ‖v‖), Real.sqrt_sq_eq_abs,
+      abs_of_nonneg (norm_nonneg v)]
+    have hspeed_le' :
+        Real.sqrt
+            ((g t).inner (Psi w)
+              (mfderiv 𝓘(Real, E) I Psi w u)
+              (mfderiv 𝓘(Real, E) I Psi w u)) ≤ L := by
+      simpa [speed, q] using hspeed_le
+    simpa [mul_comm] using
+      (mul_le_mul_of_nonneg_left hspeed_le' (norm_nonneg v))
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [I.Boundaryless]
   [SigmaCompactSpace M] [T2Space M] in
@@ -340,6 +453,143 @@ theorem edistCont_Icc
     exact edistOf_le_of_quad
       (I := I) (S.base.metric p.1) (S.base.metric q.1)
       (Real.exp_pos _) (fun y v ↦ (hpair y v).2) O q.2
+
+omit [SigmaCompactSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The distance from a fixed center for a smooth Ricci-flow metric is jointly
+continuous at that center and every regular time. -/
+theorem edistContAt_ctr
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    {t : Real} (ht : t ∈ D.regular) (O : M) :
+    ContinuousAt
+      (fun p : Real × M ↦
+        riemannianEDistOf (I := I) (S.base.metric p.1) O p.2)
+      (t, O) := by
+  classical
+  obtain ⟨a, b, htab, hreg⟩ := D.exists_Icc_regular ht
+  have hab : a ≤ b := htab.1.le.trans htab.2.le
+  have hK : Set.Icc a b ⊆ D.carrier := hreg.trans D.regular_subset
+  let Psi :=
+    DifferentialGeometry.Geometry.Riemannian.NormalCoordinates.expMapDiffeo
+      (I := I) (S.base.metric t) O
+  let R : Real :=
+    DifferentialGeometry.Geometry.Riemannian.expMapC2Radius
+      (I := I) (S.base.metric t) O / 4
+  let B : Set E := Metric.closedBall (0 : E) (2 * R)
+  have hR_pos : 0 < R := by
+    dsimp [R]
+    exact div_pos
+      (DifferentialGeometry.Geometry.Riemannian.expMapC2Radius_pos
+        (I := I) (S.base.metric t) O)
+      (by norm_num)
+  have hB : B ⊆ Psi.source := by
+    intro w hw
+    apply DifferentialGeometry.Geometry.Riemannian.mem_expMapDiffeo_source_of_norm_lt_radius
+        (I := I) (S.base.metric t) O
+    have hw_le : ‖w‖ ≤ 2 * R := by
+      simpa [B, Metric.mem_closedBall, dist_zero_right] using hw
+    have h2R_lt :
+        2 * R <
+          DifferentialGeometry.Geometry.Riemannian.expMapC2Radius
+            (I := I) (S.base.metric t) O := by
+      dsimp [R]
+      nlinarith [DifferentialGeometry.Geometry.Riemannian.expMapC2Radius_pos
+        (I := I) (S.base.metric t) O]
+    exact hw_le.trans_lt h2R_lt
+  have hBne : B.Nonempty := by
+    refine ⟨0, ?_⟩
+    simp [B, hR_pos.le]
+  have hBcompact : IsCompact B := by
+    simpa [B] using isCompact_closedBall (0 : E) (2 * R)
+  obtain ⟨L, hL_one, hctrl⟩ :=
+    exists_param_speed (I := I) S.family.metric hS.smoothMetric
+      hab hK Psi hB hBne hBcompact
+  have hL_pos : 0 < L := zero_lt_one.trans_le hL_one
+  change Filter.Tendsto
+    (fun p : Real × M ↦
+      riemannianEDistOf (I := I) (S.base.metric p.1) O p.2)
+    (nhds (t, O))
+    (nhds (riemannianEDistOf (I := I) (S.base.metric t) O O))
+  rw [riemannianEDistOf_self]
+  refine ENNReal.tendsto_nhds_zero.2 ?_
+  intro eps heps
+  by_cases hepstop : eps = (⊤ : ENNReal)
+  · exact Filter.Eventually.of_forall fun _ ↦ by simp [hepstop]
+  have heps_real : 0 < eps.toReal :=
+    ENNReal.toReal_pos heps.ne' hepstop
+  let delta : Real := min R (eps.toReal / (2 * L))
+  have hdelta_pos : 0 < delta := by
+    exact lt_min hR_pos (div_pos heps_real (mul_pos (by norm_num) hL_pos))
+  have hdelta_R : delta ≤ R := min_le_left _ _
+  have hsmall_source : Metric.ball (0 : E) delta ⊆ Psi.source := by
+    intro z hz
+    apply hB
+    have hz_norm : ‖z‖ < delta := by
+      simpa [Metric.mem_ball, dist_zero_right] using hz
+    simp only [B, Metric.mem_closedBall, dist_zero_right]
+    linarith
+  have hspace_open : IsOpen (Psi '' Metric.ball (0 : E) delta) :=
+    Psi.toOpenPartialHomeomorph.isOpen_image_of_subset_source
+      Metric.isOpen_ball hsmall_source
+  have hO_image : O ∈ Psi '' Metric.ball (0 : E) delta := by
+    refine ⟨0, by simpa using hdelta_pos, ?_⟩
+    simpa [Psi] using
+      (DifferentialGeometry.Geometry.Riemannian.NormalCoordinates.expMapDiffeo_zero
+        (I := I) (S.base.metric t) O)
+  have htime : Set.Icc a b ∈ nhds t := Icc_mem_nhds htab.1 htab.2
+  have hspace : Psi '' Metric.ball (0 : E) delta ∈ nhds O :=
+    hspace_open.mem_nhds hO_image
+  filter_upwards [prod_mem_nhds htime hspace] with q hq
+  obtain ⟨z, hz, hzq⟩ := hq.2
+  letI : Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨(S.base.metric q.1).toRiemannianMetric⟩
+  have hspd : ∀ w ∈ B, ∀ xi : E,
+      ‖mfderiv 𝓘(Real, E) I Psi w xi‖ₑ ≤
+        ENNReal.ofReal (L * ‖xi‖) := by
+    intro w hw xi
+    rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+    change ENNReal.ofReal
+        (Real.sqrt
+          ((S.base.metric q.1).inner (Psi w)
+            (mfderiv 𝓘(Real, E) I Psi w xi)
+            (mfderiv 𝓘(Real, E) I Psi w xi))) ≤
+      ENNReal.ofReal (L * ‖xi‖)
+    exact ENNReal.ofReal_le_ofReal (by
+      simpa only [SolutionOn.family_metric] using hctrl q.1 hq.1 w hw xi)
+  have hzB : z ∈ B := by
+    have hz_norm : ‖z‖ < delta := by
+      simpa [Metric.mem_ball, dist_zero_right] using hz
+    simp only [B, Metric.mem_closedBall, dist_zero_right]
+    linarith
+  have hzeroB : (0 : E) ∈ B := by
+    simp [B, hR_pos.le]
+  have hseg : segment Real (0 : E) z ⊆ B :=
+    (convex_closedBall (0 : E) (2 * R)).segment_subset hzeroB hzB
+  have hdist :=
+    DifferentialGeometry.Geometry.Riemannian.param_edist_le
+      (I := I) Psi hB hspd hseg
+  have hzero : Psi 0 = O := by
+    simpa [Psi] using
+      (DifferentialGeometry.Geometry.Riemannian.NormalCoordinates.expMapDiffeo_zero
+        (I := I) (S.base.metric t) O)
+  change Manifold.riemannianEDist I O q.2 ≤ eps
+  rw [← hzq, ← hzero]
+  refine hdist.trans (le_of_lt ?_)
+  have hz_dist : dist (0 : E) z < delta := by
+    simpa [Metric.mem_ball, dist_comm] using hz
+  have hmul : L * dist (0 : E) z < eps.toReal := by
+    calc
+      L * dist (0 : E) z < L * delta :=
+        mul_lt_mul_of_pos_left hz_dist hL_pos
+      _ ≤ L * (eps.toReal / (2 * L)) :=
+        mul_le_mul_of_nonneg_left (min_le_right _ _) hL_pos.le
+      _ = eps.toReal / 2 := by field_simp
+      _ < eps.toReal := by linarith
+  exact (ENNReal.ofReal_lt_iff_lt_toReal
+    (mul_nonneg hL_pos.le (dist_nonneg : 0 ≤ dist (0 : E) z)) hepstop).2 hmul
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem complete_of_ricBound

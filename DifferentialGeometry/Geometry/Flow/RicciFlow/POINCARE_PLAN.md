@@ -12,7 +12,7 @@ There is no `nonnegcurv.tex` in this snapshot: that chapter (`Manifolds of
 non-negative curvature`, label `nonnegcurv`) is the second chapter of
 `prelim.tex`, starting at `prelim.tex:1068`.
 
-Live status refreshed 2026-08-27.  The current companion sources are:
+Live status refreshed 2026-08-29.  The current companion sources are:
 
 * `DimensionThree/PositiveRicci/AxiomCheck.lean` for the checked Hamilton
   endpoint (Phase P0);
@@ -73,11 +73,11 @@ into an explicit bundle field, never a hidden wrapper (2026-07-05 audit rule).
 | Comparison geometry: geodesics, Jacobi, Gauss lemma, index form, convexity, Bonnet–Myers, Hopf–Rinow(proper), injectivity radius | substantial; the Bishop–Gromov/CGT producers used by P0 are checked |
 | Hamilton compactness (M–T Ch `converge2` ≈ MSM135 3.9/3.10) | provider-native endpoint checked under `RicciFlow/Compactness/` |
 | Hamilton positive-Ricci endpoint | `hamilton_positive_ricci` checked and direct-axiom audited |
-| Fixed-manifold L-geometry | monotonicity, zero-time limit, half-dimension fence, half-open late floor, and arbitrary-tail fixed-time ball bound checked; `smooth_nlc` remains absent |
+| Fixed-manifold L-geometry | monotonicity, zero-time limit, uniform ball upper bound, and the compact smooth-flow `smooth_nlc` capstone are checked and direct-axiom audited |
 | Smooth gluing / jet splice (surgery seed) | engine built, 2 gates (`hglue` lane) |
 | Space forms / quotients | active lane |
 | Curvature *pinched toward positive* for generalized flows / RFWS | **absent** — the checked pinching is the compact smooth-flow version only (§3 item 11) |
-| Shi derivative estimates | compact whole-manifold versions checked; complete-flow `estimate_complete` is a `sorry`, local ball version `shiRm1_ball` does not exist (§3 item 12) |
+| Shi derivative estimates | compact whole-manifold and the P2 ball-local `shiRm1_ball` producer are checked; complete-flow `estimate_complete` remains a `sorry` (§3 item 12) |
 | Parabolic rescaling formalism, pointed flow sequences | in-tree |
 | Final Poincaré assembly | `poincare_of_inputs` is not yet declared |
 
@@ -142,11 +142,12 @@ Execution plan: `Perelman/L_GEOMETRY_PLAN.md`.  The fixed-manifold ordinary
 flow layer is built first; generalized surgery-space-time paths are a later
 extension and must not contaminate the basic L-length API.
 
-**Live status:** the compact fixed-manifold L0–L7 core is essentially complete:
-`redVolume_anti` and `redVolume_zero_lim` are checked. The later chain now also
-contains checked `exists_redLen_le`, `redVolume_late_low`, and the arbitrary-
-tail fixed-terminal estimate `redVolume_ball_eta`. The theorem `smooth_nlc` is
-still unstated and unproved (**0%**). Its current missing producer chain is
+**Live status:** the compact fixed-manifold L0–L7 core and ordinary smooth-flow
+L9 capstone are checked.  `redVolume_anti`, `redVolume_zero_lim`,
+`exists_redLen_le`, `redVolume_late_low`, `redVolume_ball_unif`, and
+`smooth_nlc` are stated and proved; the last two and the capstone pass the P2
+direct axiom audit with only the standard three axioms.  The completed producer
+chain is
 
 ```text
 shiRm1_ball -> lGrad_ball -> lRegSpeed_unif
@@ -155,15 +156,15 @@ shiRm1_ball -> lGrad_ball -> lRegSpeed_unif
   + redVolume_late_low -> IsKappaNoncollapsed -> smooth_nlc.
 ```
 
-The obstruction is not the Gaussian tail or late reduced-volume floor: both
-are now complete. The present short-scale threshold uses a global compact-slab
-gradient constant and is chosen after the terminal time; compactness cannot
-uniformize it on `[a, omega)`. A genuine scale-invariant local derivative
-estimate on a smaller cylinder inside the controlled parabolic ball is
-required. The exact missing lowest producer is `shiRm1_ball`; the existing Shi
-theorems require curvature control at every spatial point and cannot supply it
-from `FlowMetricBall.IsRmControlled`. The remaining complete bounded-curvature
-L8 work and the surgery/eventwise L9 extension stay separate later endpoints.
+Here `redVolume_ball_unif` chooses its short-scale threshold before the flow,
+terminal time, center, and actual radius, and the dimension-generic
+`smooth_nlc` converts the late reduced-volume floor into the canonical
+`NoLocalCollapsing` predicate while using the initial small-ball volume estimate
+for early times.  The theorem
+`smooth_nlc` and its dedicated compact ordinary-flow assembly are **100%**.
+The remaining complete bounded-curvature L8 refinements and surgery/eventwise
+L9 extension stay separate later endpoints; the latter cannot begin until the
+P6b RFWS event/seam object exists.
 
 **P3 — κ-solutions** (M–T `temp2kappa`).  Ancient κ-noncollapsed solutions:
 Hamilton's Li–Yau–Hamilton Harnack inequality (new tensor-MP computation, big
@@ -256,9 +257,10 @@ Ordered by how many phases consume them:
    discharged; audit any stronger P2/P3 use before declaring the whole package
    complete.
 3. **L-geometry layer** (P2): L-geodesics through reduced volume.  The compact
-   fixed-manifold monotonicity and zero-time normalization are checked; the
-   live gap is the short-scale ball route to `smooth_nlc`, whose lowest
-   missing producer is the local Shi estimate of item 12.
+   fixed-manifold monotonicity, zero-time normalization, uniform controlled-ball
+   route, and `smooth_nlc` are checked.  Remaining work is the distinct L8
+   complete bounded-curvature refinement and, after P6b supplies an RFWS
+   event/seam object, the surgery/eventwise extension used by P7.
 4. **Splitting/Busemann + the Cheeger–Gromoll soul theorem + Toponogov
    (used-statements-only)** (P1c/P1d).  Consumers: P3, P4.  The soul theorem
    (`prelim.tex:1304`) is a separate endpoint from splitting and is consumed
@@ -282,12 +284,12 @@ Ordered by how many phases consume them:
     pinched toward positive”): preserved by surgery, stable under blow-up
     limits, including the weak form at `bddcurvbdddist.tex:709`.  Consumers:
     P4, P6, P7.  Not supplied by the checked compact smooth-flow pinching.
-12. **Shi derivative estimates beyond the compact whole-manifold case.**  Two
-    concrete holes: `BernsteinTower.estimate_complete`
-    (`Estimates/Shi/Complete.lean:2866`) is a `sorry` already consumed at
-    `Compactness/Shi/Local.lean:512`; and the LOCAL ball estimate
-    `shiRm1_ball` — currently the lowest missing P2 producer — does not exist
-    at all.  Consumers: P2 (`smooth_nlc`), P3, P4, L8.
+12. **Shi derivative estimates beyond the compact whole-manifold case.**  The
+    local controlled-ball theorem `shiRm1_ball` used by `smooth_nlc` is checked.
+    The remaining concrete hole is `BernsteinTower.estimate_complete`
+    (`Estimates/Shi/Complete.lean:2866`), a `sorry` already consumed at
+    `Compactness/Shi/Local.lean:512`.  Remaining consumers include P3, P4, and
+    the complete bounded-curvature L8 refinements.
 13. **(Conditional on the P8 ruling) minimal 2-spheres / Sacks–Uhlenbeck.**
     Needed iff P8a is proved rather than replaced by input T4.  Consumer: P8.
 14. (Excluded, input bundle) 3-manifold topology T1–T3, plus T4 under P8
@@ -320,20 +322,15 @@ P6b exists; its final statement still consumes P7's Theorem `MAIN`, and its
 
 Recommended immediate order:
 
-1. **Build the missing local Shi producer.** Prove `shiRm1_ball` by a spatial
-   cutoff/local maximum-principle argument on a controlled parabolic ball, with
-   the estimate stated only on a strictly smaller cylinder.
-2. **Finish the compact smooth-flow P2 consumer chain:** adapt this through
-   `lGrad_ball`, local speed/metric/range/exponential bounds, and
-   `redVolume_ball_unif`; combine it with checked `redVolume_late_low` to prove
-   `smooth_nlc`.
-3. **Audit and start P1c/P1d** against the exact P3 consumers: splitting/
+1. **Audit and start P1c/P1d** against the exact P3 consumers: splitting/
    Busemann first, and only the Toponogov statements Morgan–Tian actually uses.
-4. **Design P6b early but do not contaminate P2:** write and review the RFWS
+2. **Design P6b early but do not contaminate P2:** write and review the RFWS
    event/seam object before P4–P8 depend on it.
-5. After compact `smooth_nlc`, implement the L8 complete bounded-curvature
-   extension and only then the surgery/eventwise L-length extension.
-6. **Two rulings that must be made before their phases open, not during
+3. **Continue the distinct L8 complete bounded-curvature refinement**, whose
+   remaining Shi input includes the honest `estimate_complete` frontier; only
+   after the P6b event/seam object exists should the surgery/eventwise L-length
+   extension begin.
+4. **Two rulings that must be made before their phases open, not during
    them:** the P8a/T4 ruling of §2, and how “pinched toward positive” will be
    carried by the P6b RFWS object (it is a hypothesis of nearly every P4/P6/P7
    theorem, so the object must be able to state it from day one).
@@ -344,12 +341,12 @@ Use two separate denominators:
 
 * final theorem `poincare_of_inputs`: **0%**, because it is not yet declared;
 * P0 theorem `hamilton_positive_ricci`: **100%**, direct-axiom audited;
-* fixed compact-flow L-geometry through reduced-volume monotonicity and
-  zero-time normalization: about **99%** dedicated machinery, with both named
-  capstones **100%**;
-* `smooth_nlc`: **0%** as a theorem; its dedicated reduced-volume-to-
-  noncollapse L8--L9 machinery is about **76–78%**;
-* full P0–P9 program infrastructure: approximately **10–18%**, with an
+* compact ordinary-flow L-geometry through `smooth_nlc`: **100%** dedicated
+  machinery for that scoped stage, with `redVolume_anti` and `smooth_nlc`
+  each **100%** and direct-axiom audited;
+* complete bounded-curvature L8 refinements and surgery/eventwise
+  noncollapsing: separate incomplete stages, not counted in `smooth_nlc`;
+* full P0–P9 program infrastructure: approximately **15–25%**, with an
   explicitly unreliable denominator (see the warning below).
 
 The last range uses the phase workload, not file or lemma counts, and avoids
@@ -428,3 +425,16 @@ input.
   Scale estimate lowered to 10–18% with an explicit denominator warning.  No
   theorem status changed by this audit: `smooth_nlc` and `poincare_of_inputs`
   both remain 0%, and P0 remains 100% and axiom-clean.
+- 2026-08-29 (compact ordinary-flow P2 capstone): the full local producer chain
+  `shiRm1_ball -> lGrad_ball -> lRegSpeed_unif -> lMetric_ball ->
+  lRegRange_unif -> redVolume_ball_unif` is checked.  Together with the checked
+  half-open floor `redVolume_late_low`, it proves the public theorem
+  dimension-generic `smooth_nlc : NoLocalCollapsing S rho` for compact
+  connected boundaryless smooth flows, in particular the three-dimensional
+  Poincare consumer.  The theorem and its uniform ball producer
+  pass the direct P2 axiom audit with only `propext`, `Classical.choice`, and
+  `Quot.sound`.  This makes the compact ordinary-flow P2 capstone 100%; it does
+  not complete the separate complete-bounded-curvature L8 refinements or the
+  surgery/eventwise extension, which must wait for the absent P6b RFWS
+  event/seam presentation.  `poincare_of_inputs` remains 0%, and whole P0--P9
+  infrastructure remains approximately 15--25%.

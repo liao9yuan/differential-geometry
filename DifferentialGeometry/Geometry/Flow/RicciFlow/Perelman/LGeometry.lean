@@ -87,6 +87,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SourceGau
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCSourceTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCEndpoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallUpper
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallUnif
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.LateSliceSplice
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ChartBallCover
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.FiniteSpliceBound

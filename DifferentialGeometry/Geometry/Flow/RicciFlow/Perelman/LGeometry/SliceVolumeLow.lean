@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SliceSpliceBound
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SmoothNLC
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedVolumeSetLow
 
 /-!
 # Reduced-volume lower bound from fixed-slice data

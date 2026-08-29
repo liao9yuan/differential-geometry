@@ -256,7 +256,7 @@ theorem exists_ballFlow
       exact hyriem
     have habs := ricci_abs_of_rm (I := I) B hB htB hyset v
     rw [hsqrt] at habs
-    simpa only [Λ, d, dNat, one_div, div_eq_mul_inv] using habs
+    simpa only [Λ, d, dNat, one_div, div_eq_mul_inv, one_mul] using habs
   have hRicTail : 0 < Module.finrank Real E - 1 →
       let γ : Real → M :=
         intrinsicGeodesic
@@ -292,8 +292,12 @@ theorem exists_ballFlow
       2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
         2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
           ((Module.finrank Real E - 1 : Nat) : Real) * q := by
-    rw [hdn, hnq]
-    rfl
+    calc
+      2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
+          2 * n / r + Real.sqrt (n * Λ) := by rw [hdn]
+      _ = 2 * n / r + n * q := by rw [hnq, hdn]
+      _ = 2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
+          ((Module.finrank Real E - 1 : Nat) : Real) * q := by rfl
   exact DistanceBarrierCore.scaled_of_tail
     (I := I) S hS B.center hT hreg ht htpos x hEnorm tail hreach hq
       hRicTail hricBall hcoef

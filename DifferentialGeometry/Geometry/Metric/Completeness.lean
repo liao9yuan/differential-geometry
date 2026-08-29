@@ -45,6 +45,28 @@ namespace RiemannianMetricComplete
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Every smooth Riemannian metric on a compact manifold is complete. -/
+theorem of_compact [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) :
+    RiemannianMetricComplete (I := I) g := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  refine ⟨?_⟩
+  letI : RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : M ↦ TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  infer_instance
+
+omit [CompleteSpace E] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem of_lower
     {g h : SmoothRiemannianMetric I M}
     (hg : RiemannianMetricComplete (I := I) g)

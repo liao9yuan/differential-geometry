@@ -544,7 +544,7 @@ theorem lRegSpeed_scale
   exact lRegSpeed_fixed S hS time hrho hreg A hA hgrad heps heps32
     (by simpa only [C, n] using hsqrtC) B hBrho hB Z hZ hs hpoint
 
-private theorem first_exit_to
+theorem first_exit_to
     {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsClosed K)
     {gamma : Real → X} {b : Real} (hb : 0 < b)
     (hgamma : ContinuousOn gamma (Set.Icc 0 b))
@@ -636,7 +636,7 @@ private theorem c1_ref_int
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
-private theorem lRegTerm_int
+theorem lRegTerm_int
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : Real)
     (x : M) (Z : TangentSpace I x) {b : Real}

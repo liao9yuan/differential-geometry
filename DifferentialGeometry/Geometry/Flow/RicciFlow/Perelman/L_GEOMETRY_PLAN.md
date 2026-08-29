@@ -8,10 +8,12 @@ under `DifferentialGeometry/` and uses RicciFlower conventions.
 
 Live status is recorded by the latest entry in the status log.  Older dated
 entries and the creation-time percentages below are historical snapshots, not
-current truth.  As of 2026-08-27, `redVolume_anti`, `redVolume_zero_lim`,
+current truth.  As of 2026-08-29, `redVolume_anti`, `redVolume_zero_lim`,
 `redVolume_lsc`, `redVolume_unif_low`, `exists_redWeak_sup`,
-`exists_redLen_le`, `redVolume_late_low`, `redVolume_ball_eta`, and its
-`redVolume_ball_le` specialization are checked; `smooth_nlc` remains unproved.
+`exists_redLen_le`, `redVolume_late_low`, `redVolume_ball_unif`, and
+`smooth_nlc` are checked.  The compact ordinary smooth-flow capstones are
+complete; complete bounded-curvature L8 refinements and the surgery/eventwise
+extension remain separate later work.
 
 ## 0. Scope and final deliverables
 
@@ -372,279 +374,10 @@ At every handoff record separately:
 
 ## Status log
 
-- 2026-08-15: plan created after a live source audit.  No native L-length,
-  reduced-length, or reduced-volume declaration existed.  The fixed-manifold
-  first route was selected; `Defs.lean` is the first execution target.
-- 2026-08-15 (L0--L1 execution): `LGeometry/Defs.lean` and
-  `LGeometry/Reparam.lean` are focused-green, warning-free, and contain no
-  `sorry` or `admit`.  L0 now has the four total fixed-manifold definitions,
-  speed-square nonnegativity, zero/additive interval laws, germ-level
-  congruence, and moving-metric/scalar continuity plus integrability.  L1 now
-  has `A(s) = 2s X(s^2)`, the regularized density, and the oriented
-  square-root interval formula.  Mathlib's existing monotone substitution
-  theorem was sufficient, so no generic integration wrapper was added.
-
-  The next exact theorem is `lInner_deriv` in `MovingMetric.lean`.  At a
-  backward time `tau0` with `T - tau0` regular, and for differentiable sections
-  `V,W` along `gamma`, it should state the `HasDerivAt` identity
-
-  ```text
-  d/dtau <V,W>_{g(T-tau)} |_{tau0}
-    = <D_tau V,W> + <V,D_tau W> + 2 Ric(V,W)
-  ```
-
-  using `covDerivAlong` for the two fixed-time connection terms and
-  `IsSolutionOn.equation` for the backward-time metric term.  Prove the
-  chart-regularity form matching the existing metric-compatibility theorem
-  first, then add a smooth-curve wrapper.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **2--3%**; reusable generic prerequisites about **35--45%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%** because this first local brick does not materially move the
-  multi-year denominator.
-
-- 2026-08-15 (L2 moving-metric brick): `LGeometry/MovingMetric.lean` is
-  focused-green, warning-free, and contains no `sorry` or `admit`.
-  `lInner_deriv_chart` proves the weakest pinned-chart form of
-
-  ```text
-  d/dtau <V,W>_{g(T-tau)}
-    = <D_tau V,W> + <V,D_tau W> + 2 Ric(V,W),
-  ```
-
-  and `lInner_deriv` supplies a pointwise-smooth wrapper.  The proof uses a
-  jointly differentiable scalar chart-Gram pairing and its two coordinate
-  slices; it does not infer the full derivative by merely adding two frozen
-  formulas, and it introduces no new family class or moving-bundle equality.
-
-  The next exact theorem is `lDensity_deriv` in
-  `LGeometry/FirstVariation.lean`, the pointwise variation derivative of the
-  L-density.  Reuse the native speed-square variation and mixed-covariant
-  commutation plus fixed-time scalar-gradient duality.  Do not add an
-  integrated variation theorem with a new domination hypothesis; first
-  produce any missing joint compact-slab regularity at the reusable layer.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **4--5%**; reusable generic prerequisites about **35--45%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
-
-- 2026-08-15 (L2 first variation and equation):
-  `LGeometry/FirstVariation.lean` and `LGeometry/Geodesic.lean` are
-  focused-green, warning-free, and contain no `sorry` or `admit`.
-  `lLength_first_var` proves the complete oriented Morgan--Tian first-variation
-  identity, with compact domination and all interval integrability produced
-  internally.  `lEulerPair` and `lLength_euler` give the fully applied scalar
-  Euler-residual form.  `HasLEquationAt` prevents fake solutions at
-  nondifferentiable points, `IsLGeodesic` is set-indexed for local positive
-  regular-time segments, and `lFirst_var_zero` proves equation implies
-  fixed-endpoint stationarity.
-
-  Three independent routes have now been rejected.  Separate fixed-time scalar
-  smoothness plus joint value continuity did not control spatial derivatives;
-  pointwise difference quotients/FTC still lacked a common compact bound; and
-  the existing exponential-map variation realization requires global
-  completeness, connectedness, and continuous Riemannian-bundle assumptions
-  absent from this lane.  The first two were resolved by the new generic
-  producers `derivFst_contMDiffAt`, `scalarJointAt`, and `metricCLMSmoothAt`.
-  The third is the current honest stop condition.
-
-  The exact next producer is `exists_chartVar` in the generic
-  comparison/variation layer: realize a compactly supported smooth field along
-  a curve, supported inside one coordinate chart, by a smooth variation fixed
-  wherever that field vanishes.  This should enable the fundamental-lemma
-  converse from fixed-endpoint criticality to the pointwise L-geodesic equation
-  without strengthening consumers.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **8--10%**; reusable generic prerequisites about **40--50%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
-
-- 2026-08-15 (L2 criticality equivalence): the third route boundary is now
-  resolved without stronger consumer assumptions.  The generic
-  `Comparison/Variation/ChartVariation.lean` module proves `exists_chartVar`:
-  a compactly supported smooth model field whose supported curve image lies
-  in one chart is realized as the transverse field of a global smooth
-  variation, fixed wherever the field vanishes.  Its assumptions do not
-  include completeness, connectedness, a metric, or a continuous
-  Riemannian-bundle package.
-
-  `LGeometry/FirstVariation.lean` now exposes the continuity producers
-  `lGrad_contOn`, `lCross_contOn`, and `lEuler_contOn`, together with test-vector
-  linearity `lEulerPair_smul`.  `LGeometry/Geodesic.lean` defines the canonical
-  fixed-endpoint predicate `IsLCritical`; `IsLGeodesic.critical` proves the
-  forward implication, and `IsLCritical.isLGeo` uses `exists_chartVar`, the
-  scalar fundamental lemma, and continuity to prove the pointwise Euler
-  equation on `Ioo a b`.  The generic producer and first-variation module have
-  green targeted refreshes, while `Geodesic.lean` is focused-green and
-  warning-free.  These files contain no `sorry` or `admit`.
-
-  L2 is therefore complete at the planned intrinsic/criticality level.  The
-  exact next theorem is `lEuler_sq` in `LGeometry/Geodesic.lean`: for
-  `alpha(s) = gamma(s^2)` and `A = alpha'`, prove at `s > 0` the fully applied
-  identity
-
-  ```text
-  4*s^2*lEulerPair
-    = <Y,D_s A> - 2*s^2*<grad R,Y> + 4*s*Ric(Y,A).
-  ```
-
-  This is the nonsingular L3 normal form.  Do not start chart ODE existence
-  from the singular `tau` equation, and do not define `lExp` before this
-  identity is green.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **10--12%**; reusable generic prerequisites about **45--55%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
-
-- 2026-08-16 (first L3 regularized ODE brick): the square-root normal form and
-  its first-order phase interface are focused-green and warning-free, with no
-  `sorry` or `admit`.  The generic connection layer now has
-  `covDerivAlong_comp`, and `lVelocity_sq_pos` supplies the positive-time germ
-  identity even when manifold derivatives use their totalized zero value.
-  `lEuler_sq` proves
-
-  ```text
-  4*s^2*lEulerPair
-    = <Y,D_s A> - 2*s^2*<grad R,Y> + 4*s*Ric(Y,A).
-  ```
-
-  `lRegAccel` packages the direct vector right-hand side
-  `2*s^2*grad R - 4*s*Ric-sharp(A)`, and
-  `HasLEquationAt.accel_sq` upgrades the all-test-vector equation to
-  `D_s A = lRegAccel`.  `lPhaseField` is the corresponding fixed-chart
-  first-order system.  Its zero-time value is the ordinary phase field of
-  `g(T)`, and the correct seed is `A(0) = 2*Z`, not `Z`.
-
-  The exact next theorem is `lPhaseField_smoothAt` in `Geodesic.lean`: under
-  `hS : IsSolutionOn S`, `T - s^2 in D.regular`, and a chart-interior phase
-  point, prove joint `C-infinity` regularity of
-  `Function.uncurry (lPhaseField S T x0)` at `(s,z)`.  Existing manifold
-  integral-curve existence and uniqueness are sufficient after autonomizing
-  on `Real x (E x E)`; no new Picard class or stronger manifold hypothesis is
-  planned.
-
-  `lPhaseField_smoothAt` is currently unstated and therefore **0%**.  The
-  smallest missing reusable API is joint smoothness of the fixed-chart
-  Christoffel contraction for a smooth metric family: a close proof exists
-  only as a private DeTurck helper.  The scalar-gradient and Ricci-sharp terms
-  can be produced componentwise from `scalarJointAt`, inverse-Gram
-  smoothness, `derivFst_contMDiffAt`, and the metric evolution equation.  This
-  is an API-placement gap rather than a mathematical obstruction, and its
-  reusable prerequisites are counted separately.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **12--14%**; reusable generic prerequisites about **45--55%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
-
-- 2026-08-21 (`arxiv-preprint` migration and L3 existence): the checked L0--L3
-  implementation has been migrated to the current native layout.  In
-  particular, `Solution/Basic` replaces the older `Basic/Core` route,
-  `Evolution/Scalar/JointRegularity.scalar_joint` supplies joint scalar
-  regularity, and `Bundle/PartialMfderiv/Basic.timeDeriv_smoothAt` supplies the
-  first-time-derivative producer.  The required generic bridges now live at
-  their native layers: `metricCLMSmoothAt`, `covDerivAlong_comp`,
-  `exists_chartVar`, the fixed-chart metric-sharp formula, and joint scalar and
-  Ricci coordinate regularity.  No reference-tree import was introduced.
-
-  `lPhaseField_smoothAt` is now proved and focused-green.  The autonomized ODE
-  layer gives `exists_lPhaseSol`, arbitrary-base-time germ uniqueness
-  `lPhaseSol_unique_at`, and its zero-time wrapper.  The chart/intrinsic bridges
-  then give `exists_lRegCurve`, `lRegCurve_unique_at`, and the zero-time
-  specialization, with the correct seed `A(0) = 2*Z`.
-
-  `LGeometry/Exp.lean` completes the first maximal-domain brick:
-  `IsLRegCurveOn`, `LRegCurveWitness`, the open `lRegDomain`, the totalized
-  `lRegCurve`, `lExpDomain`, and `lExp`, including the zero-domain and zero-value
-  laws.  It follows the native `maximalGeodesic` convention and returns the
-  base point outside the witnessed domain.  Focused verification is green and
-  warning-free, and the migrated files contain no `sorry` or `admit`.
-
-  The exact next theorem is `lRegWitness_eq`: two `IsLRegCurveOn` witnesses on
-  open preconnected sets containing zero, with the same `(x,Z)`, agree on the
-  intersection of their domains.  It must propagate `lRegCurve_unique_at`
-  from the common initial data at zero, after which `lRegCurve` can be shown
-  locally equal to any witness and the existing local-flow machinery can
-  export smooth dependence of `lExp`.  Pointwise germ uniqueness is complete;
-  connected-domain propagation is not yet claimed.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **18--20%**; reusable generic prerequisites about **60--70%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
-
-- 2026-08-21 (L3 witness coherence and short-time smooth dependence):
-  `LGeometry/Exp.lean` is focused-green and warning-free.  The maximal
-  square-root-time domain is now preconnected; `lRegWitness_eq` propagates
-  arbitrary-base-time germ uniqueness across overlapping witness intervals;
-  and `lRegCurve_eqOn` identifies the totalized maximal curve with every local
-  witness.
-
-  The local ODE flow has also been promoted to actual parameter dependence.
-  `exists_lPhaseFlow` gives a jointly smooth chart phase flow near a regular
-  seed, `exists_lRegFamily` reconstructs a common smooth intrinsic family for
-  nearby initial tangent vectors, and `lRegCurve_smoothAt` proves the
-  regularized joint extension at `(Z,0)`.  Composing with `sqrt` away from zero,
-  `exists_lExpFamily` proves joint smoothness of `lExp` on a uniform short
-  positive-time interval.  No compactness/completeness consumer hypothesis,
-  ordinary exponential-map definition, or new solution class was introduced.
-
-  The exact next producer is `lRegFamily_extend`: continue this smooth family
-  across a compact subinterval of a witnessed regularized solution, using the
-  local phase flow and `lRegWitness_eq`.  This is needed before claiming joint
-  smoothness at every positive point of the full maximal `lExpDomain`.
-  Pullback/parabolic-scaling naturality also remains in L3, and L4 must not use
-  the short-time theorem as an all-domain statement.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **22--24%**; reusable generic prerequisites about **65--75%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
-
-- 2026-08-21 (L3 full maximal-domain smoothness and naturality): L3 is now
-  complete for the ordinary fixed-manifold `SolutionOn` model.  `Exp.lean`
-  extends the local phase collar along every witnessed compact
-  square-root-time segment.  The resulting declarations `lRegFamily_extend`,
-  `lRegCurve_smooth`, `lRegCurve_smoothAt`, `lRegJointDom_open`,
-  `lRegCurve_smoothOn`, `lExpPosDom_open`, and `lExp_smoothOn` give joint
-  smoothness on the full positive maximal domain, while retaining the smooth
-  regularized extension at `s = 0`.
-
-  `Scaling.lean` proves both witness directions under parabolic rescaling and
-  then identifies `lRegDomain`, the totalized `lRegCurve`, `lExpDomain`, and
-  `lExp`; the terminal formula uses `Z -> R^(-1/2) Z` and `tau -> R*tau`.
-  The generic metric input is the native `covDerivAlong_scale` theorem.
-  `Naturality.lean` separately proves fixed-diffeomorphism naturality from the
-  generic `chartRep_map_diff` and `covAlong_natMDiff` bridges.  Its
-  single-witness theorem is directional, while the maximal-domain equality
-  genuinely uses the inverse diffeomorphism.  `Perelman/LGeometry.lean` is now
-  the import-only public entry point.
-
-  All edited L3 modules are focused-green and warning-free; the two new
-  terminal modules also pass targeted module verification.  The lane contains
-  no `sorry`, `admit`, new axiom, reference-tree import, new foundational
-  class, or strengthened compactness/completeness consumer assumption.
-
-  The exact next declaration is `lRegJacobiPair` in a new `Jacobi.lean`: the
-  fully paired scalar linearization of the regularized L-geodesic equation,
-  with the current-time metric frozen in both along-curve covariant
-  derivatives.  Then define `HasLRegJacobiAt` and `IsLRegJacobi`; the first
-  substantive theorem is `lRegVar_jacobi` for a smooth family of regularized
-  L-geodesics.  Connecting that theorem to the local `lExp` family will require
-  a pointwise `cov_commute_at` adapter in the generic curvature-commutation
-  layer, because the existing public wrapper assumes a globally smooth
-  variation.  The fixed-chart pointwise identity already exists, so this is a
-  routine local API placement task rather than a mathematical blocker and does
-  not require consultation.
-
-  Honest progress: `redVolume_anti` **0%**; dedicated L-geometry machinery
-  about **30--32%**; reusable generic prerequisites about **75--80%**; P2 as a
-  whole remains below **1%**.  The whole Poincare program estimate remains
-  **3--5%**.
+- Historical entries through the completion of the ordinary fixed-manifold
+  L3 maximal-domain and naturality stage are archived verbatim in
+  [`L_GEOMETRY_HISTORY.md`](L_GEOMETRY_HISTORY.md).  The entries below and
+  the live status near the top of this file remain the execution authority.
 
 - 2026-08-22 (L4 Jacobi bridge, index form, and fixed-endpoint second
   variation): the regularized variation equation is now fully connected to the
@@ -2998,3 +2731,209 @@ At every handoff record separately:
   **100%** and pass the P2 standard-axiom audit; `smooth_nlc`, P2, and final Poincare remain **0% theorem
   endpoints**. Dedicated L8--L9 machinery is about **76--78%**, reused generic
   infrastructure is **100%**, and whole P0--P9 remains **15--25%**.
+
+- 2026-08-28 (ball-local dynamic Calabi distance support):
+  `RicciBound.ricci_abs_of_rm` is warning-free focused green and refreshed. It
+  converts `FlowMetricBall.IsRmControlled` directly to the absolute Ricci
+  quadratic estimate used by moving-length variation, without adding another
+  curvature predicate.
+
+  The generic distance layer now has warning-free focused-green and refreshed
+  `DistanceBarrierCore.scaled_of_tail`. Its private core takes an explicit
+  shortened `CalabiTailData`, uses tail-local Ricci only for the static
+  Jacobi/Riccati comparison, and uses an outer-ball absolute Ricci estimate
+  only along the minimizing left segment and the tail. The old global
+  `scaled_of_quad` endpoint is retained and consumes the same core. In the P2
+  layer, `exists_ballFlow` is warning-free focused green: on the inner half of
+  an Rm-controlled flow ball it chooses the exact transverse coefficient and
+  produces the established time-dependent `ScaledDistSupport`. The
+  zero-transverse-dimension branch does not acquire an unused Ricci assumption.
+
+  This completes the ball-local dynamic Calabi support brick, not the Shi
+  estimate. The exact next theorem is the generic
+  `Shi/Cutoff.support_of_scaled`: extract the existing cutoff-profile
+  composition from the global exhaustion proof while retaining its `a ^ 2`
+  scale. Its P2 consumer then builds the one fixed-radius lower support with
+  error `C(d, delta) / radius ^ 2`, followed by the finite compact-support
+  `m = 1` Bernstein maximum-principle estimate. `shiRm1_ball` and
+  `smooth_nlc` remain **0% theorem endpoints**. `redVolume_anti` remains
+  **100%**; dedicated L8--L9 machinery is about **78--80%**, reused generic
+  infrastructure is **100%**, and whole P0--P9 remains **15--25%**.
+
+- 2026-08-28 (fixed ball cutoff lower supports):
+  the generic `Shi/Cutoff.support_of_scaled` extraction is warning-free focused
+  green and named-refreshed. It retains the quadratic `a ^ 2` terms and takes
+  only eventual finiteness of the moving distance near the support point. The
+  P2 file `ShiBallCutoff.lean` now defines the fixed radial profile and its exact
+  error budget, proves positivity forces membership in the inner half-ball, and
+  proves `exists_cutoff_ne` from `exists_ballFlow`.
+
+  The previously missing center input is now the warning-free focused-green and
+  refreshed generic theorem `edistContAt_ctr`: at a regular time, distance from
+  a fixed center is jointly continuous at that center for a smooth solution. Its
+  proof uses a compact regular time window, normal coordinates, a compact
+  chart-speed bound, and `param_edist_le`; it adds no curvature, completeness,
+  or whole-manifold Ricci assumption. Consequently `exists_cutoff_ctr` uses the
+  constant support `1`, and `exists_cutoff` combines the center and noncenter
+  branches. `ShiBallCutoff.lean` is warning-free focused green.
+
+  In parallel, `HigherDerivative.reactionSum_top_at` now accepts the exact
+  current-point zeroth-order bound, while the old `reactionSum_top_le` remains
+  its global compatibility specialization. `Complete.GfunSupport_parabolic_le`
+  consumes this local input and its existing callers recover the old behavior
+  from `B.hw0_bound`; both affected files are focused green, and the exported
+  producer is refreshed.
+
+  The exact next brick is the finite fixed-cutoff data needed by the compact
+  maximum principle: a time-independent compact spatial support, cutoff
+  vanishing outside it, and joint continuity on its compact slab. Then extract
+  the finite-error `m = 1` Bernstein estimate without requiring a globally
+  bounded `BernsteinTower`. `shiRm1_ball` and `smooth_nlc` remain **0% theorem
+  endpoints**. `redVolume_anti` remains **100%**; dedicated L8--L9 machinery is
+  about **80--82%**, reused generic infrastructure is **100%**, and whole
+  P0--P9 remains **15--25%**.
+
+- 2026-08-28 (ball-local first derivative Shi estimate):
+  `Shi/CutoffData.lean`, `Shi/FiniteCutoff.lean`, and the P2 fixed-ball cutoff
+  package now provide the compact support, joint continuity, local zeroth
+  curvature input, exact plateau, and finite `m = 1` Bernstein estimate needed
+  at unit scale. The normalized proof uses a closed-open restriction only to
+  obtain joint norm continuity; the cutoff and curvature control remain on the
+  original solution.
+
+  `ShiRm1Ball.shiRm1_ball` is now a warning-free focused-green public theorem.
+  It selects `theta` and `C` from the dimension before all flow and ball data,
+  proves the radius-one estimate, and transports it by parabolic scaling to
+  `sqrt |nabla Rm|^2 <= C / radius^3` on the later half-time interval and the
+  radius-`1/8` subball. Its assumptions are only the controlled parabolic ball,
+  the honest regularity window, and completeness on the shorter working slab.
+
+  The exact next theorem is `lGrad_ball`: contract the checked first curvature
+  derivative through the scalar-curvature gradient identity and bound the
+  resulting scalar pairing using the native tensor norm. It then feeds
+  `lRegSpeed_unif`. `smooth_nlc` remains **0%** until its own declaration is
+  stated and proved. `redVolume_anti` remains **100%**; dedicated L8--L9
+  machinery is about **86--88%**, reused generic infrastructure is **100%**,
+  and whole P0--P9 remains **15--25%**.
+
+- 2026-08-28 (ball-local scalar-gradient estimate):
+  `GradBall.lGrad_ball` is warning-free focused green. It traces the checked
+  first Ricci covariant derivative, identifies the trace with one half of the
+  scalar differential by contracted Bianchi, and applies the native rank-one
+  tensor norm bound. Together with `shiRm1_ball`, this gives
+
+  ```text
+  |<grad R, v>| <= (C / radius^3) * sqrt(<v,v>)
+  ```
+
+  throughout the later half-time interval and radius-`1/16` subball. The
+  positive constants are chosen from the dimension before the flow, terminal
+  time, center, and radius. No compactness, whole-manifold curvature bound,
+  stronger consumer assumption, or new tensor API is introduced.
+
+  The exact next theorem is `lRegSpeed_unif`: combine this pairing estimate
+  with `lRegRicci_le` in the existing `lRegSpeed_gron` inequality while
+  retaining the same uniform choice order. `smooth_nlc` remains **0%** until
+  its own declaration is stated and proved. `redVolume_anti` remains **100%**;
+  dedicated L8--L9 machinery is about **88--90%**, reused generic
+  infrastructure is **100%**, and whole P0--P9 remains **15--25%**.
+
+- 2026-08-28 (ball-local uniform regularized speed):
+  `MinMaxSplit.lRegSpeed_split` is warning-free focused green and refreshed.
+  It exposes the genuine two-coefficient Gronwall estimate already used
+  internally by the compact-slab proof: the scalar-gradient coefficient and
+  Ricci quadratic coefficient remain separate. This separation is forced by
+  scaling, since merging `C / radius^3` and `C / radius^2` into one coefficient
+  leaves a term proportional to `eps / radius`.
+
+  `RegSpeedBall.lRegSpeed_unif` is warning-free focused green. Its positive
+  `theta` is chosen before the radius ceiling, and its positive short-time
+  threshold is then chosen before the flow, terminal time, center, and actual
+  radius. On any prefix contained in the moving radius-`1/16` ball it proves
+
+  ```text
+  lRegSpeedSq(s) <= (4/3) * (lRegSpeedSq(0) + 1).
+  ```
+
+  It has no `CompactSpace` assumption. Membership of the evaluated parameter
+  in the actual maximal regularized-ray domain is explicit; the existing
+  automatic slab continuation theorem is compact-only, so the complete
+  noncompact maximal-domain closure belongs honestly to the subsequent
+  first-exit/range layer.
+
+  The exact next sibling is `lMetric_ball`, followed by `lRegRange_unif` using
+  the terminal radius-`1/32` / moving radius-`1/16` margin. `smooth_nlc` remains
+  **0%** until stated and proved; `redVolume_anti` remains **100%**. Dedicated
+  L8--L9 machinery is about **90--92%**, reused generic infrastructure is
+  **100%**, and whole P0--P9 remains **15--25%**.
+
+- 2026-08-28 (uniform metric, maximal range, and L-exponential endpoint):
+  `MetricBall.lMetric_ball` is warning-free focused green and refreshed.  On
+  the terminal radius-`1/32` closed ball it gives the two-sided quadratic
+  comparison between the moving and terminal metrics on a dimension-uniform
+  short interval.  The local distance bridge `edistTo_terminal` is public and
+  follows a terminal minimizing curve, so no ball-local comparison is
+  incorrectly promoted to a whole-manifold one.
+
+  `RayContinue.lRegDomain_of_cpt` is warning-free focused green and refreshed.
+  It closes a maximal regularized ray from an explicit compact range and a
+  uniform speed bound, without `CompactSpace M`.  `RegRangeBall.lRegRange_unif`
+  is also warning-free focused green: a first-exit argument confines every
+  small-source ray to the terminal radius-`1/32` closed ball and the moving
+  radius-`1/16` open ball, then terminal completeness supplies the compact set
+  consumed by `lRegDomain_of_cpt`.  Its endpoint corollary
+  `lExp_ball_unif` is warning-free focused green with the same uniform
+  quantifier order and assumptions.
+
+  The exact next theorem is `redVolume_ball_unif`: adapt the checked
+  good/bad-source reduced-volume upper-bound assembly to consume these uniform
+  noncompact producers, choosing its short-scale threshold before the flow,
+  terminal time, center, and actual radius.  `smooth_nlc` remains **0%** until
+  its own declaration is stated and proved; `redVolume_anti` remains **100%**.
+  Dedicated L8--L9 machinery is about **94--96%**, reused generic
+  infrastructure is **100%**, and whole P0--P9 remains **15--25%**.
+
+- 2026-08-29 (uniform reduced-volume bound and compact smooth-flow capstone):
+  `NLCBallCore.lean` now contains the reusable good-source reduced-length,
+  density, Jacobian, and good/bad integral-splitting lemmas; the old
+  `NLCBallUpper` endpoints consume this core without changing their public
+  statements.  The set-local chart comparison `chart_lint_le_on`, restricted
+  metric-volume comparison `volume_restrict_le`, and compact-metric
+  completeness producer `RiemannianMetricComplete.of_compact` supply the
+  weakest lower-layer inputs used by the final ball estimate.
+
+  `NLCBallUnif.redVolume_ball_unif` is warning-free focused green and
+  named-refreshed.  For fixed positive `rho` and arbitrary positive ENNReal
+  tail `eta`, it chooses `eps0 > 0` before the flow, terminal time, controlled
+  ball, and actual radius.  It combines one `lRegRange_unif` witness with the
+  moving radius-`1/16` length control, terminal radius-`1/32` image and volume
+  control, and the cutoff `1 / (128 * sqrt eps)`.
+
+  The elementary `redVolume_set_low` theorem moved unchanged to the canonical
+  lower module `RedVolumeSetLow.lean`, removing the former dependency cycle
+  through `SliceVolumeLow` and `LateVolumeLow`.  The public theorem
+  `SmoothNLC.smooth_nlc` is warning-free focused green and named-refreshed.  It
+  strengthens the consumer shape of `no_local_open`: every compact connected
+  boundaryless smooth finite-dimensional solution on `[0, omega)` is
+  `NoLocalCollapsing` below every positive fixed scale.  The old explicit
+  three-dimensional equality is not needed by any producer.  Its proof uses the
+  initial small-ball volume estimate for early times and the native
+  `redVolume_late_low` plus `redVolume_ball_unif` route for late times; it does
+  not import the entropy/W persistence producer or add a public ambient metric
+  assumption.  The umbrella is warning-free green, and the P2 direct axiom
+  audit reports only `propext`, `Classical.choice`, and `Quot.sound` for both
+  `redVolume_ball_unif` and `smooth_nlc`.
+
+  Honest accounting: `redVolume_anti`, `redVolume_ball_unif`, and
+  `smooth_nlc` are each **100% theorem endpoints**.  Their dedicated compact
+  ordinary-flow L-geometry machinery is **100%**, and reused generic
+  infrastructure is **100%**.  This does not complete the distinct
+  complete-bounded-curvature L8 refinements, surgery/eventwise noncollapsing,
+  P2's later generalized-flow consumers, or `poincare_of_inputs`; whole P0--P9
+  infrastructure remains about **15--25%**.
+
+  There is no surgery event/seam or RFWS presentation in the live tree, so an
+  eventwise `smooth_nlc` theorem cannot yet be stated honestly.  The next exact
+  prerequisite lies in P6b: define and review that event/seam object before
+  proving the planned `lLength_seam_add`.  Introducing such an object inside
+  the fixed-manifold L-geometry lane would violate this plan's scope boundary.

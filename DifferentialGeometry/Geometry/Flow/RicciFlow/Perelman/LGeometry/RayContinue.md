@@ -2,12 +2,13 @@
 
 ## Goal
 
-Prove that every regularized L-ray exists across a compact regular backward-time
-slab on a compact manifold.
+Prove that a regularized L-ray exists across a compact regular backward-time
+slab whenever its existing prefixes have bounded speed and lie in one explicit
+compact spatial set.  Compact manifolds are then a specialization.
 
 ## Route
 
-The proof bounds regularized speed uniformly on the square-root-time slab.  At a
+The generic theorem receives uniform speed and compact-range bounds. At a
 putative boundary point of the maximal domain it takes actual late phase seeds,
 passes only the base points to a convergent subsequence, and places the eventual
 chart positions and velocities in one compact phase cage.  Compact phase ODE
@@ -17,15 +18,19 @@ compactness is used.
 
 ## Status
 
-The target theorem and its dedicated speed-bound helper pass focused
-verification without warnings.  The proof uses the native compact phase-flow
-and family-restart APIs; no additional continuation assumption remains.
+Both `lRegDomain_of_cpt` and the preserved compact specialization pass focused
+verification without warnings. The generic theorem discards a finite prefix of
+the boundary sequence before applying compactness, so its range hypothesis is
+needed only on the requested square-root-time interval. The proof uses the
+native compact phase-flow and family-restart APIs; no additional continuation
+assumption remains.
 
 ## Progress
 
 - `lRegDomain_of_slab`: verified and sorry-free (100%).
+- `lRegDomain_of_cpt`: verified and sorry-free (100%).
 - Dedicated continuation machinery: verified (100%).
-- Compact regularized-ray continuation lane: about 94%; the continuation
-  producer is complete, while downstream cut/minimizer consumers remain.
-- Whole L-geometry program: about 60%; P2 remains below 1%, and the full
-  Poincare project remains about 3--5%.
+- Complete noncompact P2 continuation input: 100%; its `lRegRange_unif`
+  consumer remains to be proved.
+- `smooth_nlc`: 0%; dedicated L8--L9 machinery is about 90--92%, generic
+  continuation infrastructure is 100%, and whole P0--P9 is about 15--25%.

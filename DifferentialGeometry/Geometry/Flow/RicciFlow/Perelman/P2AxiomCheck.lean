@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedMinTim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedLengthFence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.LateVolumeLow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallUpper
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.NLCBallUnif
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SmoothNLC
 
 set_option autoImplicit false
 
@@ -17,4 +19,6 @@ set_option autoImplicit false
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_late_low
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_ball_eta
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_ball_le
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_ball_unif
 #print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redVolume_anti
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.smooth_nlc

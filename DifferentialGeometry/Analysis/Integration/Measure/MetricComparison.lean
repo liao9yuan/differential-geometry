@@ -179,6 +179,61 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+/-- Domination of Riemannian quadratic forms on a measurable set gives the
+sharp comparison of the two volume measures restricted to that set. -/
+theorem volume_restrict_le
+    (g h : SmoothRiemannianMetric I M) {Q : Real} (hQ : 0 < Q)
+    {s : Set M} (hs : MeasurableSet s)
+    (hcomp : ∀ x ∈ s, ∀ v : TangentSpace I x,
+      h.inner x v v ≤ Q * g.inner x v v) :
+    (riemannianVolumeMeasure (I := I) (M := M) h).restrict s ≤
+      ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) •
+        (riemannianVolumeMeasure (I := I) (M := M) g).restrict s := by
+  classical
+  have hbase : ∀ (x₀ : M), ∀ x ∈
+      tsupport (fun y : M ↦ (chartAtlasPOU I M x₀ : M → Real) y),
+      x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by
+    intro x₀ x hx
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact (chartAtlasPOU_isSubordinate I M) x₀ hx
+  have hlin : ∀ (F : M → ℝ≥0∞), Measurable F →
+      (∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) h).restrict s) ≤
+        ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
+          ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) g).restrict s := by
+    intro F hF
+    change (∫⁻ x in s, F x ∂riemannianMeasure (I := I) h (chartAtlasPOU I M)) ≤
+      ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
+        ∫⁻ x in s, F x ∂riemannianMeasure (I := I) g (chartAtlasPOU I M)
+    rw [← lintegral_indicator hs, ← lintegral_indicator hs,
+      riemannianMeasure_lintegral_eq (I := I) h (chartAtlasPOU I M)
+        (hF.indicator hs),
+      riemannianMeasure_lintegral_eq (I := I) g (chartAtlasPOU I M)
+        (hF.indicator hs)]
+    calc
+      (∑' x₀ : M, ∫⁻ x,
+          ENNReal.ofReal ((chartAtlasPOU I M x₀ : M → Real) x) * s.indicator F x
+            ∂(chartLocalMeasure (I := I) h x₀)) ≤
+          ∑' x₀ : M, ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
+            ∫⁻ x, ENNReal.ofReal ((chartAtlasPOU I M x₀ : M → Real) x) *
+                s.indicator F x
+              ∂(chartLocalMeasure (I := I) g x₀) := by
+        refine ENNReal.tsum_le_tsum fun x₀ ↦ ?_
+        have hlocal := chart_lint_le_on (I := I) (M := M) g h x₀
+          (Real.sqrt (Q ^ Module.finrank Real E)) (Real.sqrt_nonneg _)
+          hs (fun x hx hxs ↦
+            chartDensity_le (I := I) g h hQ x₀ (hbase x₀ x hx) (hcomp x hxs)) hF
+        simpa only [← lintegral_indicator hs, indicator_mul_right] using hlocal
+      _ = ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
+          ∑' x₀ : M, ∫⁻ x,
+            ENNReal.ofReal ((chartAtlasPOU I M x₀ : M → Real) x) * s.indicator F x
+              ∂(chartLocalMeasure (I := I) g x₀) := ENNReal.tsum_mul_left
+  rw [Measure.le_iff]
+  intro t ht
+  have h := hlin (Set.indicator t (1 : M → ℝ≥0∞))
+    (measurable_const.indicator ht)
+  rw [lintegral_indicator_one ht, lintegral_indicator_one ht] at h
+  simpa only [Measure.smul_apply, smul_eq_mul] using h
+
 /-- Pointwise domination of Riemannian quadratic forms gives domination of the
 associated volume measures, with the sharp square-root determinant factor. -/
 theorem volumeMeasure_le
@@ -188,45 +243,9 @@ theorem volumeMeasure_le
     riemannianVolumeMeasure (I := I) (M := M) h ≤
       ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) •
         riemannianVolumeMeasure (I := I) (M := M) g := by
-  classical
-  have hbase : ∀ (x₀ : M), ∀ x ∈
-      tsupport (fun y : M ↦ (chartAtlasPOU I M x₀ : M → Real) y),
-      x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by
-    intro x₀ x hx
-    rw [trivializationAt_baseSet_eq_chartAt_source]
-    exact (chartAtlasPOU_isSubordinate I M) x₀ hx
-  have hlin : ∀ (F : M → ℝ≥0∞), Measurable F →
-      (∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) h)) ≤
-        ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
-          ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-    intro F hF
-    change (∫⁻ x, F x ∂riemannianMeasure (I := I) h (chartAtlasPOU I M)) ≤
-      ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
-        ∫⁻ x, F x ∂riemannianMeasure (I := I) g (chartAtlasPOU I M)
-    rw [
-      riemannianMeasure_lintegral_eq (I := I) h (chartAtlasPOU I M) hF,
-      riemannianMeasure_lintegral_eq (I := I) g (chartAtlasPOU I M) hF]
-    calc
-      (∑' x₀ : M, ∫⁻ x,
-          ENNReal.ofReal ((chartAtlasPOU I M x₀ : M → Real) x) * F x
-            ∂(chartLocalMeasure (I := I) h x₀)) ≤
-          ∑' x₀ : M, ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
-            ∫⁻ x, ENNReal.ofReal ((chartAtlasPOU I M x₀ : M → Real) x) * F x
-              ∂(chartLocalMeasure (I := I) g x₀) := by
-        refine ENNReal.tsum_le_tsum fun x₀ ↦ ?_
-        exact chart_lintegral_le (I := I) (M := M) g h x₀
-          (Real.sqrt (Q ^ Module.finrank Real E)) (Real.sqrt_nonneg _)
-          (fun x hx ↦ chartDensity_le (I := I) g h hQ x₀ (hbase x₀ x hx) (hcomp x)) hF
-      _ = ENNReal.ofReal (Real.sqrt (Q ^ Module.finrank Real E)) *
-          ∑' x₀ : M, ∫⁻ x,
-            ENNReal.ofReal ((chartAtlasPOU I M x₀ : M → Real) x) * F x
-              ∂(chartLocalMeasure (I := I) g x₀) := ENNReal.tsum_mul_left
-  rw [Measure.le_iff]
-  intro s hs
-  have h := hlin (Set.indicator s (1 : M → ℝ≥0∞))
-    (measurable_const.indicator hs)
-  rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
-  simpa only [Measure.smul_apply, smul_eq_mul] using h
+  simpa only [Measure.restrict_univ] using
+    volume_restrict_le (I := I) (M := M) g h hQ MeasurableSet.univ
+      (fun x _ ↦ hcomp x)
 
 end VolumeMeasure
 

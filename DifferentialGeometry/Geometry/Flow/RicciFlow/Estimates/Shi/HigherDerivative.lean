@@ -232,6 +232,12 @@ def towerBarGood (c : Real) (C : ℕ -> Real) (k : ℕ) : Real :=
 def towerBarTop (c : Real) (C : ℕ -> Real) (m : ℕ) : Real :=
   2 * c + c * (∑ j ∈ Finset.Ico 1 m, C j * C (m - j)) / 2
 
+/-- The top Bernstein reaction coefficient has no cross term at level one. -/
+@[simp] theorem towerBarTop_one (c : Real) (C : ℕ → Real) :
+    towerBarTop c C 1 = 2 * c := by
+  rw [towerBarTop]
+  norm_num
+
 def towerFactCoeff (m i : ℕ) : Real :=
   (Nat.factorial (m - 1) : Real) / (Nat.factorial i : Real)
 
@@ -573,9 +579,12 @@ theorem sum_range_succ_split {α : Type*} [AddCommMonoid α] (f : ℕ -> α) {m 
   congr 1
   rw [Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (by omega : 0 < m)]
 omit [CompleteSpace E] [T2Space M] in
-theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
+/-- Bounds the top Bernstein reaction sum at a point where the zeroth-order
+curvature energy is controlled by `K ^ 2`. -/
+theorem reactionSum_top_at (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     {t : Real} (htpos : 0 < t) {x : M}
     (hmem : t ∈ Set.Icc 0 B.T)
+    (hw0 : B.w 0 t x <= B.K ^ 2)
     (hIH : ∀ j, j < m -> t ^ j * B.w j t x <= (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
     towerReactionSum (M := M) B.w B.c m t x <=
       towerBarTop B.c (towerConst B.c B.α) m * B.K *
@@ -587,8 +596,7 @@ theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= 
   have hwm_nonneg : 0 <= B.w m t x := B.hw_nonneg m t hmem x
   have hw0_nonneg : 0 <= B.w 0 t x := B.hw_nonneg 0 t hmem x
   have hsqrt_w0 : Real.sqrt (B.w 0 t x) <= B.K := by
-    have : B.w 0 t x <= B.K ^ 2 := B.hw0_bound t hmem x
-    calc Real.sqrt (B.w 0 t x) <= Real.sqrt (B.K ^ 2) := Real.sqrt_le_sqrt this
+    calc Real.sqrt (B.w 0 t x) <= Real.sqrt (B.K ^ 2) := Real.sqrt_le_sqrt hw0
       _ = B.K := Real.sqrt_sq (le_of_lt B.hK)
   set r : Real := Real.sqrt (t ^ m) with hr
   have hr_pos : 0 < r := Real.sqrt_pos.mpr htm_pos
@@ -696,6 +704,17 @@ theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= 
   set S : Real := ∑ j ∈ Finset.Ico 1 m, C j * C (m - j) with hS
   nlinarith [hbdry0, hbdrym, hmidsum, mul_nonneg (mul_nonneg B.hc (le_of_lt B.hK)) hKtm_nonneg,
     hwm_nonneg, hKtm_nonneg, B.hc, le_of_lt B.hK]
+
+omit [CompleteSpace E] [T2Space M] in
+/-- Global zeroth-order specialization of `reactionSum_top_at`. -/
+theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
+    {t : Real} (htpos : 0 < t) {x : M}
+    (hmem : t ∈ Set.Icc 0 B.T)
+    (hIH : ∀ j, j < m -> t ^ j * B.w j t x <= (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
+    towerReactionSum (M := M) B.w B.c m t x <=
+      towerBarTop B.c (towerConst B.c B.α) m * B.K *
+        (B.w m t x + B.K ^ 2 / t ^ m) :=
+  reactionSum_top_at (I := I) B hm htpos hmem (B.hw0_bound t hmem x) hIH
 
 def Gcoef (B : BernsteinTower (I := I) G) (m i : ℕ) : Real :=
   if i = m then 1 else towerBeta B.c B.α (towerConst B.c B.α) m * towerFactCoeff m i

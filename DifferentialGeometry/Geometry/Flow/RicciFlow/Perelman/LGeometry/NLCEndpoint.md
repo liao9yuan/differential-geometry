@@ -39,6 +39,10 @@ endpoint distance.
 - `lExp_mem_ball` turns the strict version of that quantitative bound into
   membership in `FlowMetricBall.set`, whose metric is exactly the terminal
   metric at the ball time.
+- `first_exit_to` and `lRegTerm_int` are now public unchanged.  The complete
+  noncompact ball-local range theorem has a real downstream use for the same
+  first-exit topology and terminal-energy integrability, so these are exported
+  rather than duplicated.
 - `lRegRange_scale` performs the first-exit argument.  Its internally chosen
   scale gives a strict energy margin even when the first exit is the right
   endpoint, and it concludes both terminal half-ball containment and moving

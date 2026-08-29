@@ -127,13 +127,20 @@ private theorem lRegSpeed_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A compact regular backward-time slab lies in the maximal square-root-time
-domain of every regularized L-ray. -/
-theorem lRegDomain_of_slab
+omit [CompactSpace M] in
+/-- A regularized L-ray with bounded speed and compact spatial range continues
+across a compact regular backward-time slab. -/
+theorem lRegDomain_of_cpt
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : Real)
     (x : M) (Z : TangentSpace I x) (B : Real)
-    (hB : 0 ≤ B) (hslab : Set.Icc (T - B ^ 2) T ⊆ D.regular) :
+    (hB : 0 ≤ B) (hslab : Set.Icc (T - B ^ 2) T ⊆ D.regular)
+    (Kbase : Set M) (hKbase : IsCompact Kbase) (Q : Real)
+    (hrange : ∀ s ∈ Set.Icc (0 : Real) B,
+      s ∈ lRegDomain S T x Z → lRegCurve S T x Z s ∈ Kbase)
+    (hspeed : ∀ s ∈ Set.Icc (0 : Real) B,
+      s ∈ lRegDomain S T x Z →
+        lRegSpeedSq S T (lRegCurve S T x Z) s ≤ Q) :
     B ∈ lRegDomain S T x Z := by
   classical
   by_cases hB0 : B = 0
@@ -150,8 +157,6 @@ theorem lRegDomain_of_slab
     simpa only [zero_pow, sub_zero] using
       (show T ∈ Set.Icc (T - B ^ 2) T from
         ⟨sub_le_self T (sq_nonneg B), le_rfl⟩)
-  obtain ⟨Q, hQ, hspeed⟩ :=
-    lRegSpeed_le (I := I) S hS T x Z hBpos hslab
   have hclosed : closure U ∩ Set.Icc (0 : Real) B ⊆ U := by
     rintro s ⟨hscl, hsIcc⟩
     by_cases hsU : s ∈ U
@@ -159,28 +164,39 @@ theorem lRegDomain_of_slab
     have hspos : 0 < s := lt_of_le_of_ne hsIcc.1 (fun h ↦ hsU (h ▸ h0U))
     obtain ⟨t, htU, htlim⟩ := mem_closure_iff_seq_limit.mp hscl
     let gamma : Real → M := lRegCurve S T x Z
-    obtain ⟨y, _hy, phi, hphi, hylim⟩ :=
-      (isCompact_univ : IsCompact (Set.univ : Set M)).tendsto_subseq
-        (x := fun n ↦ gamma (t n)) (fun _ ↦ Set.mem_univ _)
-    let tn : Nat → Real := fun n ↦ t (phi n)
-    have htnU : ∀ n, tn n ∈ U := fun n ↦ htU (phi n)
-    have htnlim : Tendsto tn atTop (nhds s) := by
-      simpa only [tn, Function.comp_apply] using htlim.comp hphi.tendsto_atTop
-    have hbaselim : Tendsto (fun n ↦ gamma (tn n)) atTop (nhds y) := by
-      simpa only [tn, Function.comp_apply] using hylim
-    have htnlt : ∀ n, 0 ≤ tn n → tn n < s := by
+    have htlt : ∀ n, 0 ≤ t n → t n < s := by
       intro n hn0
       apply lt_of_not_ge
       intro hst
-      have hnDom : tn n ∈ lRegDomain S T x Z := by
-        simpa only [U] using htnU n
+      have hnDom : t n ∈ lRegDomain S T x Z := by
+        simpa only [U] using htU n
       exact hsU (show s ∈ U from by
         simpa only [U] using lRegDomain_seg S T x Z hnDom hsIcc.1 hst)
-    have htnpos : ∀ᶠ n in atTop, 0 < tn n :=
-      Filter.Tendsto.eventually_const_lt hspos htnlim
-    have htnIcc : ∀ᶠ n in atTop, tn n ∈ Set.Icc (0 : Real) B := by
-      filter_upwards [htnpos] with n hn
-      exact ⟨hn.le, (htnlt n hn.le).le.trans hsIcc.2⟩
+    have htpos : ∀ᶠ n in atTop, 0 < t n :=
+      Filter.Tendsto.eventually_const_lt hspos htlim
+    have htIcc : ∀ᶠ n in atTop, t n ∈ Set.Icc (0 : Real) B := by
+      filter_upwards [htpos] with n hn
+      exact ⟨hn.le, (htlt n hn.le).le.trans hsIcc.2⟩
+    obtain ⟨N, hN⟩ := (eventually_atTop.1 htIcc)
+    let ts : Nat → Real := fun n ↦ t (n + N)
+    have htsU : ∀ n, ts n ∈ U := fun n ↦ htU (n + N)
+    have htsIcc : ∀ n, ts n ∈ Set.Icc (0 : Real) B := by
+      intro n
+      exact hN (n + N) (Nat.le_add_left N n)
+    have htslim : Tendsto ts atTop (nhds s) := by
+      simpa only [ts] using htlim.comp (tendsto_add_atTop_nat N)
+    obtain ⟨y, _hy, phi, hphi, hylim⟩ :=
+      hKbase.tendsto_subseq
+        (x := fun n ↦ gamma (ts n)) (fun n ↦
+          hrange (ts n) (htsIcc n) (htsU n))
+    let tn : Nat → Real := fun n ↦ ts (phi n)
+    have htnU : ∀ n, tn n ∈ U := fun n ↦ htsU (phi n)
+    have htnIcc : ∀ n, tn n ∈ Set.Icc (0 : Real) B :=
+      fun n ↦ htsIcc (phi n)
+    have htnlim : Tendsto tn atTop (nhds s) := by
+      simpa only [tn, Function.comp_apply] using htslim.comp hphi.tendsto_atTop
+    have hbaselim : Tendsto (fun n ↦ gamma (tn n)) atTop (nhds y) := by
+      simpa only [tn, Function.comp_apply] using hylim
     have hySrc : y ∈ (chartAt H y).source := mem_chart_source H y
     have hyExt : y ∈ (extChartAt I y).source := by
       rw [extChartAt_source]
@@ -220,7 +236,8 @@ theorem lRegDomain_of_slab
       trivToE (I := I) y (gamma (tn n))
         (lVelocity (I := I) gamma (tn n))
     have hvelR : ∀ᶠ n in atTop, ‖vel n‖ ≤ R := by
-      filter_upwards [htnIcc, hposK, hbaseSrc] with n hn hpn hsrc
+      filter_upwards [hposK, hbaseSrc] with n hpn hsrc
+      have hn := htnIcc n
       have htime : T - tn n ^ 2 ∈ Set.Icc (T - B ^ 2) T := by
         have hsq : tn n ^ 2 ≤ B ^ 2 :=
           (sq_le_sq₀ hn.1 hB).2 hn.2
@@ -283,7 +300,8 @@ theorem lRegDomain_of_slab
       exists_lPhaseComp S hS T y hCcompact hCreg
     have hseedC : ∀ᶠ n in atTop,
         (tn n, extChartAt I y (gamma (tn n)), vel n) ∈ C := by
-      filter_upwards [htnIcc, hposK, hvelR] with n hn hp hv
+      filter_upwards [hposK, hvelR] with n hp hv
+      have hn := htnIcc n
       exact ⟨hn, hp, by simpa only [Metric.mem_closedBall, dist_zero_right] using hv⟩
     have hnear : ∀ᶠ n in atTop, s ∈ Set.Ioo (tn n - epsilon) (tn n + epsilon) := by
       have hnhds : Set.Ioo (s - epsilon) (s + epsilon) ∈ nhds s :=
@@ -347,5 +365,24 @@ theorem lRegDomain_of_slab
     isPreconnected_Icc.subset_of_closure_inter_subset hUopen
       ⟨0, ⟨⟨le_rfl, hB⟩, h0U⟩⟩ hclosed
   exact hall ⟨hB, le_rfl⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A compact regular backward-time slab lies in the maximal square-root-time
+domain of every regularized L-ray on a compact manifold. -/
+theorem lRegDomain_of_slab
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : Real)
+    (x : M) (Z : TangentSpace I x) (B : Real)
+    (hB : 0 ≤ B) (hslab : Set.Icc (T - B ^ 2) T ⊆ D.regular) :
+    B ∈ lRegDomain S T x Z := by
+  by_cases hB0 : B = 0
+  · subst B
+    exact zero_mem_lRegDomain (I := I) S hS T x Z (hslab (by simp))
+  have hBpos : 0 < B := lt_of_le_of_ne hB (Ne.symm hB0)
+  obtain ⟨Q, _hQ, hspeed⟩ :=
+    lRegSpeed_le (I := I) S hS T x Z hBpos hslab
+  exact lRegDomain_of_cpt (I := I) S hS T x Z B hB hslab Set.univ
+    isCompact_univ Q (fun _ _ _ ↦ Set.mem_univ _) hspeed
 
 end DifferentialGeometry.PDE.RicciFlow.Perelman

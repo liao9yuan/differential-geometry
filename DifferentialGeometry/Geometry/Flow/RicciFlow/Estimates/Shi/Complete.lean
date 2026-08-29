@@ -30,7 +30,8 @@ variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-private theorem parabolic_mul_nhds
+/-- Product rule for the parabolic operator under point-local regularity. -/
+theorem parabolic_mul_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
     (u v : Real → M → Real) (t : Real) (x : M)
@@ -242,7 +243,8 @@ private theorem parabolic_add_nhds
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-private theorem sum_reg_nhds
+/-- Point-local regularity of a finite sum of spacetime functions. -/
+theorem sum_reg_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     {κ : Type*} (s : Finset κ)
     (u : κ → Real → M → Real) (T t : Real) (x : M)
@@ -324,7 +326,8 @@ private theorem sum_reg_nhds
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-private theorem parabolic_sum_nhds
+/-- Finite-sum rule for the parabolic operator under point-local regularity. -/
+theorem parabolic_sum_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     {κ : Type*} (s : Finset κ)
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
@@ -420,7 +423,8 @@ private theorem parabolic_const_zero
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-private theorem parabolic_smul_nhds
+/-- Constant-multiple rule for the parabolic operator under point-local regularity. -/
+theorem parabolic_smul_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
     (a : Real) (u : Real → M → Real) (t : Real) (x : M)
@@ -464,7 +468,8 @@ private theorem parabolic_smul_nhds
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-private theorem parabolic_aff_nhds
+/-- Parabolic operator of an affine time barrier minus a spacetime function. -/
+theorem parabolic_aff_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
     (F : Real → M → Real) (a b t : Real) (x : M)
@@ -856,7 +861,8 @@ end ShiCutoffData
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-private theorem support_pow_para
+/-- Parabolic upper bound for a power of a point-local lower cutoff support. -/
+theorem support_pow_para
     {G : MetricConnectionFamily (I := I) (M := M) Real} {T eps t : Real}
     {chi : Real → M → Real} {x : M}
     (support : ShiCutoffLowerSupportAt (I := I) G T eps chi t x)
@@ -1697,7 +1703,7 @@ private theorem GfunSupport_parabolic_le
     (hgrad : TowerNormGradUpTo (I := I) B m)
     {eps t : Real} {chi : Real → M → Real} {x : M}
     (support : ShiCutoffLowerSupportAt (I := I) G B.T eps chi t x)
-    (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t)
+    (ht : t ∈ Set.Icc 0 B.T) (hw0 : B.w 0 t x ≤ B.K ^ 2) (htpos : 0 < t)
     (hchi : chi t x ∈ Set.Icc (0 : Real) 1) (heps : 0 ≤ eps)
     (hIH : ∀ j, j < m →
       t ^ j * B.w j t x ≤ (towerConst B.c B.α j) ^ 2 * B.K ^ 2)
@@ -1936,7 +1942,7 @@ private theorem GfunSupport_parabolic_le
     have hGm : BernsteinTower.Gcoef (I := I) B m m = 1 := by
       rw [BernsteinTower.Gcoef]
       simp
-    have hreact := BernsteinTower.reactionSum_top_le (I := I) B hm htpos ht hIH
+    have hreact := BernsteinTower.reactionSum_top_at (I := I) B hm htpos ht hw0 hIH
     rw [← hC, ← hbarTop] at hreact
     have htm0 : 0 ≤ t ^ m := pow_nonneg ht.1 m
     have htmne : t ^ m ≠ 0 := ne_of_gt (pow_pos htpos m)
@@ -2030,7 +2036,7 @@ private theorem GfunSupport_parabolic_le
         simp only [errTerm, cutErrCoeff, Nat.cast_zero, zero_add, pow_zero]
         ring
       _ ≤ (9 * eps * BernsteinTower.Gcoef (I := I) B m 0) * B.K ^ 2 :=
-        mul_le_mul_of_nonneg_left (B.hw0_bound t ht x) hcoef0
+        mul_le_mul_of_nonneg_left hw0 hcoef0
       _ = 9 * eps * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := rfl
   rw [hsum]
   linarith [hsumBound, hassembled, herr0]
@@ -2069,7 +2075,7 @@ theorem GfunCut_parabolic_le
       grad_sq_le := cut.grad_sq_le n t ht htpos x
       parabolic_le := cut.parabolic_le n t ht htpos x }
   simpa only [GfunCut, GfunLocal] using
-    (GfunSupport_parabolic_le (I := I) B hm hgrad support ht htpos
+    (GfunSupport_parabolic_le (I := I) B hm hgrad support ht (B.hw0_bound t ht x) htpos
       (cut.range n t x ht) (cut.err_nonneg n) hIH hsmall).2.2.2
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
@@ -2674,7 +2680,7 @@ theorem estimate_barrier_at
             GfunLocal (I := I) B support.phi m
           let v : Real → M → Real := fun r z ↦ (aBar + bBar * r) - Fs r z
           have hrec := GfunSupport_parabolic_le (I := I) B hmpos hgrad support
-            hs hspos (cut.range n s y hs) (cut.err_nonneg n)
+            hs (B.hw0_bound s hs y) hspos (cut.range n s y hs) (cut.err_nonneg n)
             (fun j hj ↦ by
               have hgrad_j : TowerNormGradUpTo (I := I) B j := by
                 intro k hk

@@ -83,6 +83,27 @@ structure ShiCutoffLowerSupportAt
     parabolicOperatorWithDrift (I := I) G T
       (fun _ y => (0 : TangentSpace I y)) phi t x ≤ ε
 
+/-- One fixed finite-error cutoff for a compact parabolic maximum-principle
+argument. Unlike `ShiCutoffData`, it has no exhaustion parameter and its error
+need not tend to zero. -/
+structure ShiFixedCutoff
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
+    (T eps : Real) where
+  chi : Real → M → Real
+  support : Set M
+  err_nonneg : 0 ≤ eps
+  support_compact : IsCompact support
+  support_zero :
+    ∀ t, t ∈ Set.Icc 0 T → ∀ x, x ∉ support → chi t x = 0
+  range :
+    ∀ t, t ∈ Set.Icc 0 T → ∀ x, chi t x ∈ Set.Icc (0 : Real) 1
+  joint_cont :
+    ContinuousOn (fun p : Real × M ↦ chi p.1 p.2)
+      (Set.Icc 0 T ×ˢ support)
+  lower_support :
+    ∀ t, t ∈ Set.Icc 0 T → 0 < t → ∀ x, 0 < chi t x →
+      Nonempty (ShiCutoffLowerSupportAt (I := I) G T eps chi t x)
+
 structure ShiBarrierCutoffData
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real)
@@ -173,5 +194,26 @@ def toBarrierAt
     · exact Filter.Eventually.of_forall fun y => cut.space_diff ht y
 
 end ShiCutoffData
+
+namespace ShiFixedCutoff
+
+/-- The compact spacetime slab carrying a fixed cutoff. -/
+theorem slab_compact
+    {G : MetricConnectionFamily (I := I) (M := M) Real} {T eps : Real}
+    (cut : ShiFixedCutoff (I := I) G T eps) :
+    IsCompact (Set.Icc 0 T ×ˢ cut.support) :=
+  isCompact_Icc.prod cut.support_compact
+
+/-- A positive cutoff point lies in its declared compact support. -/
+theorem mem_of_pos
+    {G : MetricConnectionFamily (I := I) (M := M) Real} {T eps t : Real}
+    (cut : ShiFixedCutoff (I := I) G T eps)
+    (ht : t ∈ Set.Icc 0 T) {x : M} (hx : 0 < cut.chi t x) :
+    x ∈ cut.support := by
+  by_contra hmem
+  rw [cut.support_zero t ht x hmem] at hx
+  exact lt_irrefl 0 hx
+
+end ShiFixedCutoff
 
 end DifferentialGeometry.PDE.RicciFlow

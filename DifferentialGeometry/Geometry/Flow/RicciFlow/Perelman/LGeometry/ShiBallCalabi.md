@@ -13,8 +13,16 @@ positive, this dominates the pointwise Ricci loss obtained from
 
 Focused verification is warning-free GREEN.
 
+`exists_ballFlow` is also warning-free focused GREEN. It uses the same
+shortened tail, `ricci_abs_of_rm` on the outer ball, and the generic
+`DistanceBarrierCore.scaled_of_tail` theorem to produce an actual
+time-dependent `ScaledDistSupport`. The transverse comparison coefficient is
+chosen exactly so the spatial Calabi term agrees with the established
+parabolic support constant. The one-dimensional branch still needs no Ricci
+lower input.
+
 ## Next theorem
 
-Use this fixed-time support inside the time-dependent radial cutoff to produce
+Compose `exists_ballFlow` with the native cutoff profile to produce
 `ShiCutoffLowerSupportAt` with error of order `radius⁻²`, then apply the finite
 compact-support maximum-principle estimate for the `m = 1` Bernstein quantity.
