@@ -28,3 +28,19 @@ for the P2 cutoff construction, not the local Shi estimate itself.
 theorem endpoints.  Against the current L-geometry plan, dedicated L8--L9
 machinery remains about **78--80%**, reused generic infrastructure is **100%**,
 and whole P0--P9 infrastructure remains about **15--25%**.
+
+## Compact-time intrinsic-distance comparison
+
+`edistEquiv_Icc` is the public two-time distance form of the existing private
+quadratic-form comparison `metric_pair_Icc`.  Under the same metric evolution
+identity and global absolute Ricci quadratic bound on `Icc a b`, it compares
+the intrinsic extended distances of `g s` and `g t` by the sharp factors
+`exp (-K * |s - t|)` and `exp (K * |s - t|)`.  The proof reuses
+`le_edistOf_of_quad` and `edistOf_le_of_quad`; the factor `2` in the metric
+bound disappears after taking the square root in path length.
+
+Focused verification passed without warnings.  Direct axiom inspection reports
+only `propext`, `Classical.choice`, and `Quot.sound`.  This producer is complete
+and supplies the fixed-endpoint metric-change part of the moving-distance
+absolute-continuity chain; the endpoint-curve variation and final P2/P3
+coercivity consumers remain separate.

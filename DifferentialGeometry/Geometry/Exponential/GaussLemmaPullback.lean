@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
+import DifferentialGeometry.Geometry.Exponential.Smoothness.RadialGeodesic
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Geodesic.Equation
@@ -38,7 +39,9 @@ section GaussLemma
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
+    [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
       ∀ {v : TangentSpace I p}, ‖(v : E)‖ < ρ →
@@ -72,11 +75,8 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
   have hIcc_sub_J : Set.Ioo (-1 : ℝ) 2 ⊆ J := by
     rw [hJ_eq]; intro x hx; obtain ⟨hx0, hx1⟩ := hx; exact ⟨by linarith, by linarith⟩
   have ht_J : t ∈ J := hIcc_sub_J ht
-  have h0_J : (0 : ℝ) ∈ J := hIcc_sub_J ⟨by norm_num, by norm_num⟩
   set F : ℝ → TangentBundle I M :=
     Exponential.chartFlowOrbitLiftRescaled (I := I) Φ p t' vb with hF_def
-  have hF0 : F 0 = (⟨p, t' • vb⟩ : TangentBundle I M) :=
-    Exponential.chartFlowOrbitLiftRescaled_zero (I := I) p vb t' (hΦ_init vb hvb_ball)
   have hF_int :
       IsMIntegralCurveOn F
         (Geodesic.geodesicVectorFieldChart (I := I) g p) J :=
@@ -90,13 +90,6 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
       (hΦ_init vb hvb_ball) (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball) (s := s) hs
     rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at h
     exact h
-  have hgeo_init :
-      Geodesic.IsGeodesicOnWithInitial (I := I) g
-        (fun s : ℝ => (F s).proj) J p v := by
-    refine ⟨F, fun _ => rfl, ?_, hF_int⟩
-    rw [hF0, show (t' • vb : TangentSpace I p) = v from hvb_resc]
-  obtain ⟨ρ_src, hρ_src_pos, hsrc⟩ :=
-    Exponential.foot_in_source_throughout (I := I) (g := g) (p := p)
   have hF_src : (F t).proj ∈ (chartAt H p).source := by
     have hts_Icc : t' * t ∈ Set.Icc (-T) T := by
       obtain ⟨ht0, ht1⟩ := ht
@@ -110,7 +103,8 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     rw [hF_def]; exact hsrc'
   have hgeoAt :
       Geodesic.IsGeodesicAt (I := I) g (fun s : ℝ => (F s).proj) t :=
-    hgeo_init.isGeodesicAt (hJ_open.mem_nhds ht_J) hF_src
+    ⟨p, F, fun _ => rfl, hF_src,
+      hF_int.isMIntegralCurveAt (hJ_open.mem_nhds ht_J)⟩
   have hgeoEqF :
       Geodesic.HasGeodesicEquationAt (I := I) g (fun s : ℝ => (F s).proj) t :=
     hgeoAt.hasGeodesicEquationAt g
@@ -532,6 +526,21 @@ lemma radialCurve_contMDiffAt2
     expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p ht₀
   exact hexp.comp t₀ hbase
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+private lemma rawRadial_contMDiffAt2
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
+    (ht₀ : (show TangentSpace I p from t₀ • a) ∈ expDomain (I := I) g p) :
+    ContMDiffAt 𝓘(ℝ, ℝ) I 2
+      (fun u : ℝ => (expMap (I := I) g p
+        (show TangentSpace I p from u • a) : M)) t₀ := by
+  have hbase : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 2 (fun u : ℝ => u • a) t₀ :=
+    (contMDiff_id.smul contMDiff_const).contMDiffAt
+  have hexp : ContMDiffAt 𝓘(ℝ, E) I 2
+      (fun b : E => (expMap (I := I) g p
+        (show TangentSpace I p from b) : M)) (t₀ • a) :=
+    (expMap_contMDiffAt (I := I) g p ht₀).of_le (by decide)
+  exact hexp.comp t₀ hbase
+
 lemma radial_geo_at
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
@@ -589,25 +598,22 @@ private def radialSpeedSq (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t : 
     (mfderiv 𝓘(ℝ, ℝ) I
       (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t (1 : ℝ))
 
-private lemma radialSpeedSq_hasDerivAt_zero
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+private lemma rawRadialSpeed_deriv
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
-    (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
+    (t₀ : ℝ)
+    (ht₀ : (show TangentSpace I p from t₀ • a) ∈ expDomain (I := I) g p) :
     HasDerivAt (radialSpeedSq (I := I) g p a) 0 t₀ := by
-  have hnorm : ‖t₀ • a‖ < expMapC2Radius (I := I) g p := by
-    rw [norm_smul, Real.norm_eq_abs]
-    obtain ⟨h0, h1⟩ := ht₀
-    have habs : |t₀| < 1 := by rw [abs_of_pos h0]; exact h1
-    calc |t₀| * ‖a‖ ≤ 1 * ‖a‖ := mul_le_mul_of_nonneg_right habs.le (norm_nonneg _)
-      _ = ‖a‖ := one_mul _
-      _ < _ := ha
   exact speedSq_hasDerivAt_zero_of_geodesic (I := I) g
     (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t₀
-    (radialCurve_contMDiffAt2 (I := I) g p a t₀ hnorm)
-    (radial_geo_at (I := I) g p a ha t₀ ht₀)
+    (rawRadial_contMDiffAt2 (I := I) g p a t₀ ht₀)
+    (raw_radial_geo_at (I := I) g p (show TangentSpace I p from a) ht₀)
 
-lemma radialSpeedSq_eq_inner
+private lemma rawRadialSpeed_eq
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
-    (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
+    (hdom : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • a) ∈ expDomain (I := I) g p)
+    (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
     radialSpeedSq (I := I) g p a t₀ = g.inner p a a := by
   haveI : T2Space M := gauss_t2Space_base (I := I)
   have hval0 : radialSpeedSq (I := I) g p a 0 = g.inner p a a := by
@@ -631,14 +637,14 @@ lemma radialSpeedSq_eq_inner
     have hconv : Convex ℝ (Set.Ioo (0 : ℝ) 1) := convex_Ioo 0 1
     have hdiffOn : DifferentiableOn ℝ (radialSpeedSq (I := I) g p a) (Set.Ioo (0 : ℝ) 1) :=
       fun z hz =>
-        ((radialSpeedSq_hasDerivAt_zero (I := I) g p a ha z
-          hz).differentiableAt).differentiableWithinAt
+        ((rawRadialSpeed_deriv (I := I) g p a z
+          (hdom z ⟨hz.1.le, hz.2.le⟩)).differentiableAt).differentiableWithinAt
     apply Convex.is_const_of_fderivWithin_eq_zero hconv hdiffOn _ hx hy
     intro z hz
     have hfd : HasFDerivWithinAt (radialSpeedSq (I := I) g p a) (0 : ℝ →L[ℝ] ℝ)
         (Set.Ioo (0 : ℝ) 1) z := by
-      have h := ((radialSpeedSq_hasDerivAt_zero (I := I) g p a ha z
-        hz).hasFDerivAt).hasFDerivWithinAt
+      have h := ((rawRadialSpeed_deriv (I := I) g p a z
+        (hdom z ⟨hz.1.le, hz.2.le⟩)).hasFDerivAt).hasFDerivWithinAt
         (s := Set.Ioo (0 : ℝ) 1)
       rwa [show (ContinuousLinearMap.toSpanSingleton ℝ (0 : ℝ)) = (0 : ℝ →L[ℝ] ℝ) from by
         ext; simp] at h
@@ -649,14 +655,7 @@ lemma radialSpeedSq_eq_inner
     set V : ∀ u, TangentSpace I (γ u) := fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ) with hV
     have hC2on : ∀ t ∈ Set.Icc (0 : ℝ) 1, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t := by
       intro t ht
-      have hnorm : ‖t • a‖ < expMapC2Radius (I := I) g p := by
-        rw [norm_smul, Real.norm_eq_abs]
-        obtain ⟨h0, h1⟩ := ht
-        have habs : |t| ≤ 1 := by rw [abs_of_nonneg h0]; exact h1
-        calc |t| * ‖a‖ ≤ 1 * ‖a‖ := mul_le_mul_of_nonneg_right habs (norm_nonneg _)
-          _ = ‖a‖ := one_mul _
-          _ < _ := ha
-      exact radialCurve_contMDiffAt2 (I := I) g p a t hnorm
+      exact rawRadial_contMDiffAt2 (I := I) g p a t (hdom t ht)
     have hsec : ContinuousOn
         (fun t : ℝ => (TotalSpace.mk' E (γ t) (V t) : TangentBundle I M)) (Set.Icc (0 : ℝ) 1) :=
       sectionAlongCurve_continuousOn_totalSpace (I := I) γ V
@@ -678,6 +677,21 @@ lemma radialSpeedSq_eq_inner
       exact nhdsGT_neBot 0
     exact tendsto_nhds_unique h1 h2
   rw [← h0val, hval0]
+
+lemma radialSpeedSq_eq_inner
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E)
+    (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ)
+    (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
+    radialSpeedSq (I := I) g p a t₀ = g.inner p a a := by
+  apply rawRadialSpeed_eq (I := I) g p a _ t₀ ht₀
+  intro t ht
+  apply mem_expDomain_of_norm_lt_radius (I := I) g p
+  rw [norm_smul, Real.norm_eq_abs]
+  have habs : |t| ≤ 1 := by rw [abs_of_nonneg ht.1]; exact ht.2
+  calc
+    |t| * ‖a‖ ≤ 1 * ‖a‖ := mul_le_mul_of_nonneg_right habs (norm_nonneg _)
+    _ = ‖a‖ := one_mul _
+    _ < _ := ha
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
     [T2Space (TangentBundle I M)] in
@@ -827,8 +841,9 @@ private lemma gaussClamp_contMDiff (δ : ℝ) :
 
 private lemma gauss_phi_hasDerivAt
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) (δ : ℝ) (hδ : 0 < δ)
-    (hsmall : ‖v‖ < expMapC2Radius (I := I) g p)
-    (hδsmall : ‖v‖ + δ * (Real.pi / 2) * ‖w‖ < expMapC2Radius (I := I) g p)
+    (hTube : ∀ s : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • (v + (gaussClamp δ s) • w)) ∈
+        expDomain (I := I) g p)
     (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
     HasDerivAt
       (fun t : ℝ => g.inner
@@ -851,31 +866,15 @@ private lemma gauss_phi_hasDerivAt
     refine ContMDiff.smul contMDiff_snd ?_
     refine contMDiff_const.add ?_
     exact (hclampMD.comp contMDiff_fst).smul contMDiff_const
-  have hball : ∀ s : ℝ, ‖v + (gaussClamp δ s) • w‖ < expMapC2Radius (I := I) g p := by
-    intro s
-    calc ‖v + (gaussClamp δ s) • w‖ ≤ ‖v‖ + ‖(gaussClamp δ s) • w‖ := norm_add_le _ _
-      _ = ‖v‖ + |gaussClamp δ s| * ‖w‖ := by rw [norm_smul, Real.norm_eq_abs]
-      _ ≤ ‖v‖ + δ * (Real.pi / 2) * ‖w‖ := by
-          nlinarith [norm_nonneg w, (gaussClamp_abs_lt δ hδ s).le]
-      _ < _ := hδsmall
-  have hball_t : ∀ s : ℝ, ‖t₀ • (v + (gaussClamp δ s) • w)‖ < expMapC2Radius (I := I) g p := by
-    intro s
-    rw [norm_smul, Real.norm_eq_abs]
-    obtain ⟨h0, h1⟩ := ht₀
-    have habs : |t₀| ≤ 1 := by rw [abs_of_pos h0]; exact h1.le
-    calc |t₀| * ‖v + (gaussClamp δ s) • w‖
-        ≤ 1 * ‖v + (gaussClamp δ s) • w‖ :=
-          mul_le_mul_of_nonneg_right habs (norm_nonneg _)
-      _ = ‖v + (gaussClamp δ s) • w‖ := one_mul _
-      _ < _ := hball s
   have hslice_u_all : ∀ s : ℝ, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => F s u) t₀ := by
     intro s
-    exact radialCurve_contMDiffAt2 (I := I) g p (v + (gaussClamp δ s) • w) t₀ (hball_t s)
+    exact rawRadial_contMDiffAt2 (I := I) g p
+      (v + (gaussClamp δ s) • w) t₀
+      (hTube s t₀ ⟨ht₀.1.le, ht₀.2.le⟩)
   have hclamp0 : gaussClamp δ 0 = 0 := gaussClamp_zero δ
   have hcentral_eq : (fun t : ℝ => F 0 t)
       = (fun t : ℝ => (expMap (I := I) g p (show TangentSpace I p from (t • v)) : M)) := by
     funext t; rw [hF]; simp only; rw [hclamp0, zero_smul, add_zero]
-  have hv_ball : ‖v‖ < expMapC2Radius (I := I) g p := hsmall
   have hFjoint : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I 2
       (fun q : ℝ × ℝ => F q.1 q.2) (0, t₀) := by
     have hbase : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) 2
@@ -887,7 +886,8 @@ private lemma gauss_phi_hasDerivAt
       have hval : (fun q : ℝ × ℝ => q.2 • (v + (gaussClamp δ q.1) • w)) (0, t₀)
           = t₀ • (v + (gaussClamp δ 0) • w) := rfl
       rw [hval]
-      exact expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p (hball_t 0)
+      exact (expMap_contMDiffAt (I := I) g p
+        (hTube 0 t₀ ⟨ht₀.1.le, ht₀.2.le⟩)).of_le (by decide)
     exact hexp.comp (0, t₀) hbase
   have hF2 : ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (F 0 t₀) (F q.1 q.2)) (0, t₀) := by
     have hext : ContMDiffAt I 𝓘(ℝ, E) 2 (extChartAt I (F 0 t₀)) (F 0 t₀) :=
@@ -908,14 +908,15 @@ private lemma gauss_phi_hasDerivAt
   have hslice_u_ev : ∀ᶠ s in nhds (0 : ℝ), ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => F s u) t₀ :=
     Filter.Eventually.of_forall hslice_u_all
   have hslice_v_ev : ∀ᶠ v' in nhds t₀, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => F u v') 0 := by
-    have hcont_norm : ContinuousAt (fun v' : ℝ => ‖v' • v‖) t₀ :=
-      (continuous_norm.comp (continuous_id.smul continuous_const)).continuousAt
-    have ht₀_ball : ‖t₀ • v‖ < expMapC2Radius (I := I) g p := by
-      have := hball_t 0
-      rwa [hclamp0, zero_smul, add_zero] at this
-    have hnhds : {v' : ℝ | ‖v' • v‖ < expMapC2Radius (I := I) g p} ∈ nhds t₀ :=
-      hcont_norm (isOpen_Iio.mem_nhds ht₀_ball)
-    filter_upwards [hnhds] with v' hv'
+    have ht₀dom : (show TangentSpace I p from t₀ • v) ∈
+        expDomain (I := I) g p := by
+      simpa only [hclamp0, zero_smul, add_zero] using
+        hTube 0 t₀ ⟨ht₀.1.le, ht₀.2.le⟩
+    have hdom_ev : ∀ᶠ v' in nhds t₀,
+        (show TangentSpace I p from v' • v) ∈ expDomain (I := I) g p :=
+      (continuous_id.smul continuous_const).continuousAt
+        ((isOpen_expDomain (I := I) g p).mem_nhds ht₀dom)
+    filter_upwards [hdom_ev] with v' hv'
     have hbase : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 2
         (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0 := by
       have hMD : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞
@@ -929,7 +930,7 @@ private lemma gauss_phi_hasDerivAt
       have hval : (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0 = v' • v := by
         simp only; rw [hclamp0, zero_smul, add_zero]
       rw [hval]
-      exact expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p hv'
+      exact (expMap_contMDiffAt (I := I) g p hv').of_le (by decide)
     exact hexp.comp 0 hbase
   have hcommute :
       covDerivAlong (I := I) g (fun s : ℝ => F s t₀)
@@ -948,7 +949,9 @@ private lemma gauss_phi_hasDerivAt
   have hγgeo : HasGeodesicEquationAt (I := I) g γ t₀ := by
     rw [show γ = (fun t : ℝ => (expMap (I := I) g p
       (show TangentSpace I p from (t • v)) : M)) from hcentral_eq]
-    exact radial_geo_at (I := I) g p v hv_ball t₀ ht₀
+    exact raw_radial_geo_at (I := I) g p (show TangentSpace I p from v)
+      (by simpa only [hclamp0, zero_smul, add_zero] using
+        hTube 0 t₀ ⟨ht₀.1.le, ht₀.2.le⟩)
   have hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀ :=
     velocityChartRep_differentiableAt_of_contMDiffAt2 (I := I) γ t₀ hγC2
   have hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀ := by
@@ -979,8 +982,8 @@ private lemma gauss_phi_hasDerivAt
       =ᶠ[nhds (0 : ℝ)] (fun s : ℝ => g.inner p (v + (gaussClamp δ s) • w)
         (v + (gaussClamp δ s) • w)) := by
     filter_upwards with s
-    have hball_s := hball s
-    have := radialSpeedSq_eq_inner (I := I) g p (v + (gaussClamp δ s) • w) hball_s t₀ ht₀
+    have := rawRadialSpeed_eq (I := I) g p (v + (gaussClamp δ s) • w)
+      (hTube s) t₀ ht₀
     rw [radialSpeedSq] at this
     exact this
   have hclamp_deriv : HasDerivAt (gaussClamp δ) 1 0 := gaussClamp_hasDerivAt_one δ hδ
@@ -1069,9 +1072,10 @@ open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
-theorem mfderiv_exp_radial
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+private theorem mfderiv_exp_rad_dom
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
-    (ht : ‖t₀ • a‖ < expMapC2Radius (I := I) g p) :
+    (ht : (show TangentSpace I p from t₀ • a) ∈ expDomain (I := I) g p) :
     mfderiv 𝓘(ℝ, ℝ) I
         (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t₀ (1 : ℝ)
       = mfderiv 𝓘(ℝ, E) I
@@ -1080,7 +1084,7 @@ theorem mfderiv_exp_radial
   have hexp_mdiff : MDifferentiableAt 𝓘(ℝ, E) I
       (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M))
         ((fun u : ℝ => u • a) t₀) :=
-    (expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p ht).mdifferentiableAt (by decide)
+    (expMap_contMDiffAt (I := I) g p ht).mdifferentiableAt (by decide)
   have hsmul_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun u : ℝ => u • a) t₀ := by
     have hs : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun u : ℝ => u • a) :=
       contMDiff_id.smul contMDiff_const
@@ -1100,9 +1104,24 @@ theorem mfderiv_exp_radial
     rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
   rw [hlaunch]
 
+theorem mfderiv_exp_radial
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
+    (ht : ‖t₀ • a‖ < expMapC2Radius (I := I) g p) :
+    mfderiv 𝓘(ℝ, ℝ) I
+        (fun u : ℝ => (expMap (I := I) g p
+          (show TangentSpace I p from u • a) : M)) t₀ (1 : ℝ)
+      = mfderiv 𝓘(ℝ, E) I
+          (fun b : E => (expMap (I := I) g p
+            (show TangentSpace I p from b) : M)) (t₀ • a)
+          (show TangentSpace I p from a) :=
+  mfderiv_exp_rad_dom (I := I) g p a t₀
+    (mem_expDomain_of_norm_lt_radius (I := I) g p ht)
+
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma gauss_phi_continuousOn
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) (δ : ℝ)
-    (hsmall : ‖v‖ < expMapC2Radius (I := I) g p) :
+    (hdom : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • v) ∈ expDomain (I := I) g p) :
     ContinuousOn (fun t : ℝ => g.inner
         (expMap (I := I) g p (show TangentSpace I p from (t • (v + (gaussClamp δ 0) • w))))
         (mfderiv 𝓘(ℝ, ℝ) I
@@ -1122,20 +1141,12 @@ private lemma gauss_phi_continuousOn
   set V : ∀ t, TangentSpace I (γ t) := fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) with hVdef
   set W : ∀ t, TangentSpace I (γ t) :=
     fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F u t) 0 (1 : ℝ) with hWdef
-  have hnorm_t : ∀ t ∈ Set.Icc (0 : ℝ) 1, ‖t • v‖ < expMapC2Radius (I := I) g p := by
-    intro t ht
-    rw [norm_smul, Real.norm_eq_abs]
-    obtain ⟨h0, h1⟩ := ht
-    have habs : |t| ≤ 1 := by rw [abs_of_nonneg h0]; exact h1
-    calc |t| * ‖v‖ ≤ 1 * ‖v‖ := mul_le_mul_of_nonneg_right habs (norm_nonneg _)
-      _ = ‖v‖ := one_mul _
-      _ < _ := hsmall
   have hγC2 : ∀ t ∈ Set.Icc (0 : ℝ) 1, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t := by
     intro t ht
     have heq : γ = fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • v)) : M) := by
       funext u; rw [hγ, hF]; simp only; rw [hclamp0, zero_smul, add_zero]
     rw [heq]
-    exact radialCurve_contMDiffAt2 (I := I) g p v t (hnorm_t t ht)
+    exact rawRadial_contMDiffAt2 (I := I) g p v t (hdom t ht)
   have hF2 : ∀ t ∈ Set.Icc (0 : ℝ) 1,
       ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (F 0 t) (F q.1 q.2)) (0, t) := by
     intro t ht
@@ -1154,7 +1165,7 @@ private lemma gauss_phi_continuousOn
         have hval : (fun q : ℝ × ℝ => q.2 • (v + (gaussClamp δ q.1) • w)) (0, t) = t • v := by
           simp only; rw [hclamp0, zero_smul, add_zero]
         rw [hval]
-        exact expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p (hnorm_t t ht)
+        exact (expMap_contMDiffAt (I := I) g p (hdom t ht)).of_le (by decide)
       exact hexp.comp (0, t) hbase
     have hext : ContMDiffAt I 𝓘(ℝ, E) 2 (extChartAt I (F 0 t)) (F 0 t) :=
       contMDiffAt_extChartAt (I := I) (x := F 0 t)
@@ -1169,11 +1180,11 @@ private lemma gauss_phi_continuousOn
     intro t ht
     have hslice_v_md : ∀ᶠ v' in nhds t,
         MDifferentiableAt 𝓘(ℝ, ℝ) I (fun u : ℝ => F u v') 0 := by
-      have hcont_norm : ContinuousAt (fun v' : ℝ => ‖v' • v‖) t :=
-        (continuous_norm.comp (continuous_id.smul continuous_const)).continuousAt
-      have hnhds : {v' : ℝ | ‖v' • v‖ < expMapC2Radius (I := I) g p} ∈ nhds t :=
-        hcont_norm (isOpen_Iio.mem_nhds (hnorm_t t ht))
-      filter_upwards [hnhds] with v' hv'
+      have hdom_ev : ∀ᶠ v' in nhds t,
+          (show TangentSpace I p from v' • v) ∈ expDomain (I := I) g p :=
+        (continuous_id.smul continuous_const).continuousAt
+          ((isOpen_expDomain (I := I) g p).mem_nhds (hdom t ht))
+      filter_upwards [hdom_ev] with v' hv'
       have hbase : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 2
           (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0 := by
         have hMD : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞
@@ -1187,7 +1198,7 @@ private lemma gauss_phi_continuousOn
         have hval : (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0 = v' • v := by
           simp only; rw [hclamp0, zero_smul, add_zero]
         rw [hval]
-        exact expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p hv'
+        exact (expMap_contMDiffAt (I := I) g p hv').of_le (by decide)
       exact (hexp.comp 0 hbase).mdifferentiableAt (by decide)
     exact variationFieldChartRep_differentiableAt_of_contDiffAt2 (I := I) F t (hF2 t ht)
       (hγC2 t ht).continuousAt hslice_v_md
@@ -1201,27 +1212,65 @@ private lemma gauss_phi_continuousOn
       (fun t ht => (hγC2 t ht).continuousAt.continuousWithinAt) hWdiff
   exact Variation.continuousOn_g_inner_along_curve (I := I) g hsecV hsecW
 
-theorem gauss_lemma_pullback
-    (g : SmoothRiemannianMetric I M) (p : M) {v : E}
-    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
-    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+private lemma exists_gauss_tube
+    (g : SmoothRiemannianMetric I M) (p : M) (v w : E)
+    (hdom : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • v) ∈ expDomain (I := I) g p) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ s : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • (v + (gaussClamp δ s) • w)) ∈
+        expDomain (I := I) g p := by
+  let U : Set E := {z | (show TangentSpace I p from z) ∈ expDomain (I := I) g p}
+  let F : ℝ × ℝ → E := fun q => q.1 • (v + q.2 • w)
+  let N : Set (ℝ × ℝ) := F ⁻¹' U
+  have hUopen : IsOpen U := by
+    simpa only [U] using isOpen_expDomain (I := I) g p
+  have hFcont : Continuous F := by
+    exact continuous_fst.smul
+      (continuous_const.add (continuous_snd.smul continuous_const))
+  have hNopen : IsOpen N := hUopen.preimage hFcont
+  have hprod : Set.Icc (0 : ℝ) 1 ×ˢ ({0} : Set ℝ) ⊆ N := by
+    rintro ⟨t, r⟩ ⟨ht, hr⟩
+    have hr0 : r = 0 := by simpa only [Set.mem_singleton_iff] using hr
+    subst r
+    change F (t, 0) ∈ U
+    simpa only [F, U, zero_smul, add_zero] using hdom t ht
+  obtain ⟨A, B, hAopen, hBopen, hIA, h0B, hAB⟩ :=
+    generalized_tube_lemma isCompact_Icc isCompact_singleton hNopen hprod
+  obtain ⟨ε, hε, hεB⟩ :=
+    (Metric.isOpen_iff.mp hBopen) 0 (h0B (by simp))
+  let δ : ℝ := ε / Real.pi
+  have hδ : 0 < δ := div_pos hε Real.pi_pos
+  have hδπ : δ * (Real.pi / 2) < ε := by
+    rw [show δ * (Real.pi / 2) = ε / 2 by
+      dsimp only [δ]
+      field_simp [Real.pi_ne_zero]]
+    linarith
+  refine ⟨δ, hδ, ?_⟩
+  intro s t ht
+  have hsB : gaussClamp δ s ∈ B := by
+    apply hεB
+    rw [Metric.mem_ball, dist_zero_right, Real.norm_eq_abs]
+    exact (gaussClamp_abs_lt δ hδ s).trans hδπ
+  have hpair : (t, gaussClamp δ s) ∈ A ×ˢ B := ⟨hIA ht, hsB⟩
+  have hmem := hAB hpair
+  change F (t, gaussClamp δ s) ∈ U at hmem
+  simpa only [F, U] using hmem
+
+/-- The Gauss pullback identity holds along every raw radial segment contained
+in the time-one exponential domain. -/
+theorem raw_gauss_pullback
+    (g : SmoothRiemannianMetric I M) (p : M) {v w : E}
+    (hdom : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • v) ∈ expDomain (I := I) g p) :
     g.inner (expMap (I := I) g p (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I
           (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
           (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I
           (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
-          (show TangentSpace I p from v)) =
-      g.inner p v v ∧
-    ∀ {w : E}, g.inner p v w = (0 : ℝ) →
-      g.inner (expMap (I := I) g p (show TangentSpace I p from v))
-          (mfderiv 𝓘(ℝ, E) I
-            (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
-            (show TangentSpace I p from v))
-          (mfderiv 𝓘(ℝ, E) I
-            (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
-            (show TangentSpace I p from w)) =
-        (0 : ℝ) := by
+          (show TangentSpace I p from w)) =
+      g.inner p v w := by
   haveI : T2Space M := gauss_t2Space_base (I := I)
   have key : ∀ w : E,
       g.inner (expMap (I := I) g p (show TangentSpace I p from v))
@@ -1230,22 +1279,9 @@ theorem gauss_lemma_pullback
           (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I
           (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
-          (show TangentSpace I p from w)) = g.inner p v w := by
+    (show TangentSpace I p from w)) = g.inner p v w := by
     intro w
-    set R : ℝ := expMapC2Radius (I := I) g p with hR
-    have hRpos : 0 < R - ‖v‖ := sub_pos.mpr hsmall
-    set δ : ℝ := (R - ‖v‖) / (2 * ((Real.pi / 2) * ‖w‖ + 1)) with hδdef
-    have hden_pos : 0 < 2 * ((Real.pi / 2) * ‖w‖ + 1) := by positivity
-    have hδ : 0 < δ := by rw [hδdef]; exact div_pos hRpos hden_pos
-    have hδsmall : ‖v‖ + δ * (Real.pi / 2) * ‖w‖ < R := by
-      have hstep : δ * ((Real.pi / 2) * ‖w‖ + 1) = (R - ‖v‖) / 2 := by
-        rw [hδdef]; field_simp
-      have hle : δ * (Real.pi / 2) * ‖w‖ ≤ δ * ((Real.pi / 2) * ‖w‖ + 1) := by
-        have heq : δ * (Real.pi / 2) * ‖w‖ = δ * ((Real.pi / 2) * ‖w‖) := by ring
-        rw [heq]
-        exact mul_le_mul_of_nonneg_left (by linarith [norm_nonneg w]) hδ.le
-      have hbnd : δ * (Real.pi / 2) * ‖w‖ ≤ (R - ‖v‖) / 2 := by rw [← hstep]; exact hle
-      linarith [hbnd, hRpos]
+    obtain ⟨δ, hδ, hTube⟩ := exists_gauss_tube (I := I) g p v w hdom
     set F : ℝ → ℝ → M := fun s t =>
       (expMap (I := I) g p (show TangentSpace I p from (t • (v + (gaussClamp δ s) • w))) : M)
       with hF
@@ -1261,11 +1297,10 @@ theorem gauss_lemma_pullback
     have hderiv : ∀ t ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt φ (g.inner p v w) t := by
       intro t ht
       rw [hφdef]
-      exact gauss_phi_hasDerivAt (I := I) g p v w δ hδ
-        (by rw [← hR]; exact hsmall) (by rw [← hR]; exact hδsmall) t ht
+      exact gauss_phi_hasDerivAt (I := I) g p v w δ hδ hTube t ht
     have hcont : ContinuousOn φ (Set.Icc (0 : ℝ) 1) := by
       rw [hφdef]
-      exact gauss_phi_continuousOn (I := I) g p v w δ (by rw [← hR]; exact hsmall)
+      exact gauss_phi_continuousOn (I := I) g p v w δ hdom
     have hint : IntervalIntegrable (fun _ : ℝ => g.inner p v w) MeasureTheory.volume 0 1 :=
       intervalIntegrable_const
     have hFTC : ∫ _t in (0 : ℝ)..1, (g.inner p v w) = φ 1 - φ 0 :=
@@ -1306,9 +1341,8 @@ theorem gauss_lemma_pullback
           (show TangentSpace I p from v) := by
       have hav : v + (gaussClamp δ 0) • w = v := by rw [gaussClamp_zero δ, zero_smul, add_zero]
       rw [hav]
-      have hnorm1 : ‖(1 : ℝ) • v‖ < expMapC2Radius (I := I) g p := by
-        rw [one_smul]; exact hsmall
-      rw [mfderiv_exp_radial (I := I) g p v 1 hnorm1, one_smul]
+      rw [mfderiv_exp_rad_dom (I := I) g p v 1
+        (hdom 1 ⟨by norm_num, le_rfl⟩), one_smul]
     have hsvar1 : mfderiv 𝓘(ℝ, ℝ) I
         (fun u : ℝ => (expMap (I := I) g p
           (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0 (1 : ℝ)
@@ -1321,7 +1355,8 @@ theorem gauss_lemma_pullback
       have hexp_mdiff : MDifferentiableAt 𝓘(ℝ, E) I
           (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) (Hs 0) := by
         rw [hHs0]
-        exact (expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p hsmall).mdifferentiableAt
+        exact (expMap_contMDiffAt (I := I) g p
+          (by simpa only [one_smul] using hdom 1 ⟨by norm_num, le_rfl⟩)).mdifferentiableAt
           (by decide)
       have hHs_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) Hs 0 := by
         have hMD : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ Hs := by
@@ -1378,10 +1413,46 @@ theorem gauss_lemma_pullback
       rw [htvel1, hsvar1, hbase1]
     rw [hφ1eval, hcollapse] at hφ1
     exact hφ1
+  exact key w
+
+/-- On the uniform small-radius neighborhood, the radial image has the original
+length and stays orthogonal to images of orthogonal tangent vectors. -/
+theorem gauss_lemma_pullback
+    (g : SmoothRiemannianMetric I M) (p : M) {v : E}
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
+    g.inner (expMap (I := I) g p (show TangentSpace I p from v))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
+          (show TangentSpace I p from v))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
+          (show TangentSpace I p from v)) =
+      g.inner p v v ∧
+    ∀ {w : E}, g.inner p v w = (0 : ℝ) →
+      g.inner (expMap (I := I) g p (show TangentSpace I p from v))
+          (mfderiv 𝓘(ℝ, E) I
+            (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
+            (show TangentSpace I p from v))
+          (mfderiv 𝓘(ℝ, E) I
+            (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
+            (show TangentSpace I p from w)) =
+        (0 : ℝ) := by
+  have hdom : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (show TangentSpace I p from t • v) ∈ expDomain (I := I) g p := by
+    intro t ht
+    apply mem_expDomain_of_norm_lt_radius (I := I) g p
+    rw [norm_smul, Real.norm_eq_abs]
+    have habs : |t| ≤ 1 := by rw [abs_of_nonneg ht.1]; exact ht.2
+    calc
+      |t| * ‖v‖ ≤ 1 * ‖v‖ := mul_le_mul_of_nonneg_right habs (norm_nonneg _)
+      _ = ‖v‖ := one_mul _
+      _ < _ := hsmall
   refine ⟨?_, ?_⟩
-  · exact key v
+  · exact raw_gauss_pullback (I := I) g p (v := v) (w := v) hdom
   · intro w hw
-    rw [key w]; exact hw
+    rw [raw_gauss_pullback (I := I) g p (v := v) (w := w) hdom]
+    exact hw
 
 end GaussAssembly
 

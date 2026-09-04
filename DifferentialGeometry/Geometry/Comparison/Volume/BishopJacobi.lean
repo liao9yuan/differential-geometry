@@ -174,6 +174,46 @@ theorem curveRatio_anti
       exact hderiv t ht'
   simpa only [R] using hanti
 
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
+/-- On an interval, a Jacobi density whose ratio to the model density is
+antitone and tends to one at the pole is bounded by the model density. -/
+theorem curveDensity_le_on
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V : ι → ∀ t, TangentSpace I (γ t)) (q b : ℝ) (d : ℕ)
+    (hq : 0 ≤ q)
+    (hγ : ∀ t ∈ Ioo (0 : ℝ) b,
+      ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
+    (hVdiff : ∀ t ∈ Ioo (0 : ℝ) b, ∀ i,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t) t)
+    (hLI : ∀ t ∈ Ioo (0 : ℝ) b,
+      LinearIndependent ℝ fun i => V i t)
+    (hW : ∀ t ∈ Ioo (0 : ℝ) b, ∀ i j,
+      jacobiWronskian g γ (V i) (V j) t = 0)
+    (hmean : ∀ t ∈ Ioo (0 : ℝ) b,
+      curveMean (I := I) g γ V t ≤ hypMeanCurv q d t)
+    (hpole : Tendsto
+      (fun t => curveDensity (I := I) g γ V t / hypDensity q d t)
+      (𝓝[>] (0 : ℝ)) (𝓝 1)) :
+    ∀ t ∈ Ioo (0 : ℝ) b,
+      curveDensity (I := I) g γ V t ≤ hypDensity q d t := by
+  have hanti := curveRatio_anti (I := I) hn g γ V q b d hq hγ hVdiff hLI hW hmean
+  intro t ht
+  have hpos : 0 < hypDensity q d t := hypDensity_pos hq ht.1
+  have hRatioLE :
+      curveDensity (I := I) g γ V t / hypDensity q d t ≤ 1 := by
+    have hev : ∀ᶠ s in 𝓝[>] (0 : ℝ),
+        curveDensity (I := I) g γ V t / hypDensity q d t ≤
+          curveDensity (I := I) g γ V s / hypDensity q d s := by
+      filter_upwards [Ioo_mem_nhdsGT ht.1] with s hs
+      have hsb : s ∈ Ioo (0 : ℝ) b := ⟨hs.1, hs.2.trans ht.2⟩
+      exact hanti hsb ht hs.2.le
+    exact ge_of_tendsto hpole hev
+  rwa [div_le_one hpos] at hRatioLE
+
 omit [SigmaCompactSpace M] in
 theorem curveMean_le_hyp
     {n : WithTop ℕ∞} (hn : 1 ≤ n)

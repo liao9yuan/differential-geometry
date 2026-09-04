@@ -228,6 +228,85 @@ theorem lDensity_contOn
     Real.continuous_sqrt.continuousOn.mul (hscalar.add hspeed)
 
 omit [T2Space M] [SigmaCompactSpace M] in
+/-- A locally `C¹` backward-time curve has almost everywhere strongly
+measurable L-density on the corresponding half-open interval. -/
+theorem lDensity_aemeas
+    (S : SolutionOn (I := I) (M := M) D) (T a b : Real) (gamma : Real -> M)
+    (hG : MetricFamilySmoothOn
+      (I := I) (M := M) D S.family.metric)
+    (hR : ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
+      (D.carrier ×ˢ (univ : Set M)))
+    (hgamma : ContMDiffOn 𝓘(Real, Real) I 1 gamma (Ioo a b))
+    (hback : MapsTo (fun tau : Real => T - tau) (Ioo a b) D.carrier) :
+    AEStronglyMeasurable (lDensity S T gamma)
+      (volume.restrict (Ioc a b)) := by
+  have hunit : Continuous (fun tau : Real =>
+      (⟨tau, (1 : Real)⟩ : TangentBundle 𝓘(Real, Real) Real)) := by
+    have hhomeo :
+        Continuous ((tangentBundleModelSpaceHomeomorph 𝓘(Real, Real)).symm :
+          ModelProd Real Real → TangentBundle 𝓘(Real, Real) Real) :=
+      (tangentBundleModelSpaceHomeomorph 𝓘(Real, Real)).symm.continuous
+    exact hhomeo.comp (continuous_id.prodMk continuous_const)
+  have hunitMaps : MapsTo
+      (fun tau : Real =>
+        (⟨tau, (1 : Real)⟩ : TangentBundle 𝓘(Real, Real) Real))
+      (Ioo a b) (Bundle.TotalSpace.proj ⁻¹' Ioo a b) := by
+    intro tau htau
+    simpa using htau
+  have hvelWithin : ContinuousOn
+      (fun tau : Real => tangentMapWithin 𝓘(Real, Real) I gamma (Ioo a b)
+        (⟨tau, (1 : Real)⟩ : TangentBundle 𝓘(Real, Real) Real))
+      (Ioo a b) :=
+    (hgamma.continuousOn_tangentMapWithin (le_refl 1)
+      isOpen_Ioo.uniqueMDiffOn).comp hunit.continuousOn hunitMaps
+  have hvelOn : ContinuousOn
+      (fun tau : Real => tangentMap 𝓘(Real, Real) I gamma
+        (⟨tau, (1 : Real)⟩ : TangentBundle 𝓘(Real, Real) Real))
+      (Ioo a b) := by
+    refine hvelWithin.congr ?_
+    intro tau htau
+    have hwithin : mfderivWithin 𝓘(Real, Real) I gamma (Ioo a b) tau =
+        mfderiv 𝓘(Real, Real) I gamma tau :=
+      mfderivWithin_of_isOpen isOpen_Ioo htau
+    simp only [tangentMapWithin, tangentMap, hwithin]
+  let P := {tau : Real // tau ∈ Ioo a b}
+  let timeLift : P -> {t : Real // t ∈ D.carrier} :=
+    fun tau => ⟨T - tau.1, hback tau.2⟩
+  let velLift : P -> TangentBundle I M :=
+    fun tau => tangentMap 𝓘(Real, Real) I gamma
+      (⟨tau.1, (1 : Real)⟩ : TangentBundle 𝓘(Real, Real) Real)
+  let input : P -> {t : Real // t ∈ D.carrier} × TangentBundle I M :=
+    fun tau => (timeLift tau, velLift tau)
+  have htime : Continuous timeLift := by
+    exact ((continuous_const.sub continuous_subtype_val).subtype_mk _)
+  have hvel : Continuous velLift := by
+    have hvel' := continuousOn_iff_continuous_restrict.mp hvelOn
+    simpa only [P, velLift] using hvel'
+  have hinput : Continuous input := htime.prodMk hvel
+  have hquad :=
+    metricTimeBundleQuad_cont_of_metricFamilySmoothOn
+      (I := I) (M := M) S.family.metric hG (K := D.carrier) (fun _ ht => ht)
+  have hspeed : ContinuousOn (lSpeedSq S T gamma) (Ioo a b) := by
+    rw [continuousOn_iff_continuous_restrict]
+    have hcomp := hquad.comp hinput
+    simpa [P, input, timeLift, velLift, DifferentialGeometry.metricTimeBundleQuad,
+      lSpeedSq, lVelocity, tangentMap] using hcomp
+  have hpair : ContinuousOn (fun tau : Real => (T - tau, gamma tau)) (Ioo a b) :=
+    (continuous_const.sub continuous_id).continuousOn.prodMk hgamma.continuousOn
+  have hmaps : MapsTo (fun tau : Real => (T - tau, gamma tau)) (Ioo a b)
+      (D.carrier ×ˢ (univ : Set M)) := by
+    intro tau htau
+    exact ⟨hback htau, mem_univ _⟩
+  have hscalar : ContinuousOn (fun tau : Real => S.scalar (T - tau) (gamma tau))
+      (Ioo a b) := by
+    simpa [Function.comp_def] using hR.comp hpair hmaps
+  have hdensity : ContinuousOn (lDensity S T gamma) (Ioo a b) := by
+    simpa only [lDensity] using
+      Real.continuous_sqrt.continuousOn.mul (hscalar.add hspeed)
+  rw [← restrict_Ioo_eq_restrict_Ioc]
+  exact hdensity.aestronglyMeasurable measurableSet_Ioo
+
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- The L-density is interval-integrable under the same moving-metric and
 scalar-continuity hypotheses. -/
 theorem lDensity_integrable

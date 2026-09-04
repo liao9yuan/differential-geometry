@@ -9,7 +9,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open Set Bundle Manifold
+open Set Bundle Manifold Filter
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
@@ -208,6 +208,216 @@ theorem ConvOut.scalar_convOn
   dsimp only [u] at hmetric
   rw [gSeqExt_scalar (I := I) Phi R bf hsrc htgt (co.φ k) t x hxgrow] at hmetric
   simpa only [Function.comp_apply] using hmetric
+
+/-- Compact-uniform scalar convergence remains uniform when evaluated along
+uniformly converging curves confined to one compact spatial set. -/
+theorem ConvOut.scalar_compOn
+    (R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M)
+    (bf : BumpFamily (I := I) Phi) (hsrc : SrcSigma Phi) (htgt : TgtSigma Phi)
+    (beta psi : Real) (cLow : Real) (hcLow : 0 < cLow)
+    (hbound : letI : TopologicalSpace P.M := P.topology
+        letI : ChartedSpace H P.M := P.charted
+        letI : IsManifold I ∞ P.M := P.smooth
+      ∀ (k : Nat) (t : Real), t ∈ Set.Icc beta psi →
+        ∀ (y : SourceDomain (I := I) Phi k)
+          (v : letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+              sourceDomTop (I := I) Phi k
+            letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+              sourceDomCharted (I := I) Phi k
+            TangentSpace I y),
+          cLow * R.inner (y : P.M) v v ≤
+            letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+              sourceDomTop (I := I) Phi k
+            letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+              sourceDomCharted (I := I) Phi k
+            letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+              sourceDomSmooth (I := I) Phi k
+            (srcMetric (I := I) Phi hsrc htgt k t).inner y v v)
+    (hcovTail : letI : TopologicalSpace P.M := P.topology
+        letI : ChartedSpace H P.M := P.charted
+        letI : T2Space P.M := P.t2
+        letI : IsManifold I ∞ P.M := P.smooth
+        letI : SigmaCompactSpace P.M := P.sigmaCompact
+      ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real), t ∈ Set.Icc beta psi →
+        ∀ z : P.M, z ∈ bf.grow k →
+          metricCovDerivNorm (I := I) q
+            (gSeqExt (I := I) Phi R bf hsrc htgt k t) R z ≤ C)
+    (co : ConvOut (I := I) Phi R bf hsrc htgt beta psi)
+    (a b : Real) (tau : Set.Icc a b → Real)
+    (alpha : Nat → Set.Icc a b → P.M)
+    (alphaLim : Set.Icc a b → P.M)
+    (dP : PseudoMetricSpace P.M)
+    (htop : dP.toUniformSpace.toTopologicalSpace = P.topology)
+    (halpha : letI : PseudoMetricSpace P.M := dP
+      TendstoUniformly alpha alphaLim Filter.atTop)
+    (K : Set P.M)
+    (hK : letI : TopologicalSpace P.M := P.topology; IsCompact K)
+    (hseqK : letI : TopologicalSpace P.M := P.topology
+      ∀ᶠ k in Filter.atTop, ∀ s, alpha k s ∈ K)
+    (hlimK : ∀ s, alphaLim s ∈ K)
+    (htau : ∀ s : Set.Icc a b, tau s ∈ Set.Icc beta psi)
+    (htime : Set.Icc beta psi ⊆ X.D.carrier) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    TendstoUniformly
+      (fun k s ↦
+        letI : TopologicalSpace (X.term ((subseq ∘ co.φ) k)).M :=
+          (X.term ((subseq ∘ co.φ) k)).topology
+        letI : ChartedSpace H (X.term ((subseq ∘ co.φ) k)).M :=
+          (X.term ((subseq ∘ co.φ) k)).charted
+        letI : IsManifold I ∞ (X.term ((subseq ∘ co.φ) k)).M :=
+          (X.term ((subseq ∘ co.φ) k)).smooth
+        letI : SigmaCompactSpace (X.term ((subseq ∘ co.φ) k)).M :=
+          (X.term ((subseq ∘ co.φ) k)).sigmaCompact
+        letI : T2Space (X.term ((subseq ∘ co.φ) k)).M :=
+          (X.term ((subseq ∘ co.φ) k)).t2
+        (X.term ((subseq ∘ co.φ) k)).S.scalar (tau s)
+          (Phi.map (co.φ k) (alpha k s)))
+      (fun s ↦ metricScalarAt (I := I) (co.gInf (tau s)) (alphaLim s))
+      Filter.atTop := by
+  classical
+  letI : PseudoMetricSpace P.M := dP
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : CompleteSpace E := FiniteDimensional.complete Real E
+  let scalarSeq : Nat → Real × P.M → Real := fun k q ↦
+    letI : TopologicalSpace (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).topology
+    letI : ChartedSpace H (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).charted
+    letI : IsManifold I ∞ (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).smooth
+    letI : SigmaCompactSpace (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).sigmaCompact
+    letI : T2Space (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).t2
+    (X.term (subseq (co.φ k))).S.scalar q.1 (Phi.map (co.φ k) q.2)
+  let scalarLim : Real × P.M → Real := fun q ↦
+    metricScalarAt (I := I) (co.gInf q.1) q.2
+  let Q : Set (Real × P.M) := Set.Icc beta psi ×ˢ K
+  have hscalar : TendstoUniformlyOn scalarSeq scalarLim Filter.atTop Q := by
+    rw [Metric.tendstoUniformlyOn_iff]
+    intro epsilon hepsilon
+    obtain ⟨k0, hk0⟩ := co.scalar_convOn Phi R bf hsrc htgt beta psi cLow hcLow
+      hbound hcovTail K hK epsilon hepsilon
+    filter_upwards [Filter.eventually_ge_atTop k0] with k hk
+    rintro ⟨t, x⟩ ⟨ht, hx⟩
+    simpa only [scalarSeq, scalarLim, Real.dist_eq, abs_sub_comm,
+      Function.comp_apply] using hk0 k hk t ht x hx
+  obtain ⟨kgrow, hkgrow⟩ := bf.grow_cover K hK
+  have hscalarCont : ∀ᶠ k in Filter.atTop,
+      ContinuousOn (scalarSeq k) Q := by
+    filter_upwards [Filter.eventually_ge_atTop kgrow] with k hk
+    letI : TopologicalSpace (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).topology
+    letI : ChartedSpace H (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).charted
+    letI : IsManifold I ∞ (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).smooth
+    letI : SigmaCompactSpace (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).sigmaCompact
+    letI : T2Space (X.term (subseq (co.φ k))).M :=
+      (X.term (subseq (co.φ k))).t2
+    have hKsrc : K ⊆ Phi.source (co.φ k) := fun x hx ↦
+      bf.grow_subset (co.φ k)
+        (hkgrow (co.φ k) (hk.trans (co.hφ.id_le k)) hx)
+    have hmap : ContinuousOn (fun x : P.M ↦ Phi.map (co.φ k) x) K := by
+      simpa only [PointedCGHMaps.map] using
+        (Phi.partialDiffeomorph (co.φ k)).contMDiffOn_toFun.continuousOn.mono hKsrc
+    have hpair : ContinuousOn
+        (fun q : Real × P.M ↦ (q.1, Phi.map (co.φ k) q.2)) Q :=
+      continuousOn_fst.prodMk
+        (hmap.comp continuousOn_snd (fun _ hq ↦ hq.2))
+    have hmaps : MapsTo
+        (fun q : Real × P.M ↦ (q.1, Phi.map (co.φ k) q.2)) Q
+        (X.D.carrier ×ˢ (Set.univ : Set (X.term (subseq (co.φ k))).M)) :=
+      fun _ hq ↦ ⟨htime hq.1, Set.mem_univ _⟩
+    simpa only [scalarSeq] using
+      (X.term (subseq (co.φ k))).isSolution.scalarCont.comp hpair hmaps
+  have hlimCont : ContinuousOn scalarLim Q :=
+    hscalar.continuousOn hscalarCont.frequently
+  have hQ : IsCompact Q := isCompact_Icc.prod hK
+  have hprodTop :
+      (inferInstance : UniformSpace (Real × P.M)).toTopologicalSpace =
+        (inferInstance : TopologicalSpace (Real × P.M)) := by
+    rw [toTopologicalSpace_prod, htop]
+  have hlimCont' : @ContinuousOn (Real × P.M) Real
+      (inferInstance : UniformSpace (Real × P.M)).toTopologicalSpace
+      inferInstance scalarLim Q := by
+    rw [hprodTop]
+    exact hlimCont
+  have hQ' : @IsCompact (Real × P.M)
+      (inferInstance : UniformSpace (Real × P.M)).toTopologicalSpace Q := by
+    rw [hprodTop]
+    exact hQ
+  have huc : UniformContinuousOn scalarLim Q :=
+    hQ'.uniformContinuousOn_of_continuous hlimCont'
+  have htauSelf : TendstoUniformly (fun _ : Nat ↦ tau) tau Filter.atTop := by
+    rw [tendstoUniformly_iff_tendsto]
+    exact tendsto_diag_uniformity (tau ∘ Prod.snd) (Filter.atTop ×ˢ ⊤)
+  have hpairTwo := htauSelf.prodMk halpha
+  have hpair : TendstoUniformly
+      (fun k s ↦ (tau s, alpha k s)) (fun s ↦ (tau s, alphaLim s))
+      Filter.atTop := by
+    rw [tendstoUniformly_iff_tendsto] at hpairTwo ⊢
+    have hdiag : Tendsto (fun k : Nat ↦ (k, k)) Filter.atTop
+        (Filter.atTop ×ˢ Filter.atTop) := tendsto_id.prodMk tendsto_id
+    have hpull : Tendsto
+        (fun q : Nat × Set.Icc a b ↦ ((q.1, q.1), q.2))
+        (Filter.atTop ×ˢ ⊤) ((Filter.atTop ×ˢ Filter.atTop) ×ˢ ⊤) :=
+      (hdiag.comp tendsto_fst).prodMk tendsto_snd
+    exact hpairTwo.comp hpull
+  have hmoving : TendstoUniformly
+      (fun k s ↦ scalarLim (tau s, alpha k s))
+      (fun s ↦ scalarLim (tau s, alphaLim s)) Filter.atTop := by
+    apply huc.comp_tendstoUniformly_eventually
+    · filter_upwards [hseqK] with k hk
+      exact fun s ↦ ⟨htau s, hk s⟩
+    · exact fun s ↦ ⟨htau s, hlimK s⟩
+    · exact hpair
+  rw [Metric.tendstoUniformly_iff]
+  intro epsilon hepsilon
+  have hsame := (Metric.tendstoUniformlyOn_iff.mp hscalar)
+    (epsilon / 2) (by positivity)
+  have hmove := (Metric.tendstoUniformly_iff.mp hmoving)
+    (epsilon / 2) (by positivity)
+  filter_upwards [hsame, hmove, hseqK] with k hsamek hmovek hk
+  letI : TopologicalSpace (X.term (subseq (co.φ k))).M :=
+    (X.term (subseq (co.φ k))).topology
+  letI : ChartedSpace H (X.term (subseq (co.φ k))).M :=
+    (X.term (subseq (co.φ k))).charted
+  letI : IsManifold I ∞ (X.term (subseq (co.φ k))).M :=
+    (X.term (subseq (co.φ k))).smooth
+  letI : SigmaCompactSpace (X.term (subseq (co.φ k))).M :=
+    (X.term (subseq (co.φ k))).sigmaCompact
+  letI : T2Space (X.term (subseq (co.φ k))).M :=
+    (X.term (subseq (co.φ k))).t2
+  intro s
+  have hs := hsamek (tau s, alpha k s) ⟨htau s, hk s⟩
+  have hm := hmovek s
+  calc
+    dist (metricScalarAt (I := I) (co.gInf (tau s)) (alphaLim s))
+        ((X.term (subseq (co.φ k))).S.scalar (tau s)
+          (Phi.map (co.φ k) (alpha k s)))
+        ≤ dist (scalarLim (tau s, alphaLim s))
+            (scalarLim (tau s, alpha k s)) +
+          dist (scalarLim (tau s, alpha k s))
+            (scalarSeq k (tau s, alpha k s)) := by
+          simpa only [scalarSeq, scalarLim] using
+            dist_triangle (scalarLim (tau s, alphaLim s))
+              (scalarLim (tau s, alpha k s))
+              (scalarSeq k (tau s, alpha k s))
+    _ < epsilon / 2 + epsilon / 2 := add_lt_add hm hs
+    _ = epsilon := by ring
 
 end HCGCompactness
 end DifferentialGeometry

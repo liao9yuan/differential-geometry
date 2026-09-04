@@ -1,15 +1,62 @@
 import DifferentialGeometry.Geometry.Comparison.HopfRinow
+import DifferentialGeometry.Geometry.Comparison.CompactGeodesic
+import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
+import DifferentialGeometry.Geometry.Geodesic.VelocityLift
+import DifferentialGeometry.Geometry.Geodesic.GlobalUniqueness
+import DifferentialGeometry.Geometry.Geodesic.MaximalUniqueness
+import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
+import DifferentialGeometry.Geometry.Exponential.BufferedExpDomain
+import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Geometry.Exponential.Smoothness.Domain
+import DifferentialGeometry.Geometry.Exponential.Smoothness.RadialGeodesic
+import DifferentialGeometry.Geometry.Exponential.JacobiVariation
+import DifferentialGeometry.Geometry.Comparison.Variation.JacobiField
+import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDensity
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentArea
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentPolar
+import DifferentialGeometry.Geometry.Comparison.Volume.BishopJacobi
+import DifferentialGeometry.Geometry.Comparison.Volume.RadialGram
+import DifferentialGeometry.Geometry.Comparison.Volume.HyperbolicModel
+import DifferentialGeometry.Analysis.Integration.Measure.ManifoldImageLe
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopLocal
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallContinuity
+import DifferentialGeometry.Geometry.Comparison.Volume.BishopRawDensity
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanUpper
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentCount
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentBallEuclideanStrict
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentIntegral
 import DifferentialGeometry.Geometry.Comparison.CGTVolumeInjectivity
 import DifferentialGeometry.Geometry.Comparison.Busemann
+import DifferentialGeometry.Geometry.Comparison.BusemannAsymptotic
+import DifferentialGeometry.Geometry.Comparison.BusemannEikonal
 import DifferentialGeometry.Geometry.Comparison.BusemannLaplacian
 import DifferentialGeometry.Geometry.Comparison.BusemannLineLaplacian
 import DifferentialGeometry.Geometry.Comparison.BusemannLineEnergy
+import DifferentialGeometry.Geometry.Comparison.BusemannLineH2
+import DifferentialGeometry.Geometry.Comparison.BusemannLineSmooth
+import DifferentialGeometry.Geometry.Comparison.BusemannLineHarmonic
+import DifferentialGeometry.Geometry.Comparison.BusemannLineParallel
+import DifferentialGeometry.Geometry.Comparison.BusemannLineFlow
+import DifferentialGeometry.Geometry.Comparison.BusemannLineProduct
+import DifferentialGeometry.Geometry.Comparison.BusemannMetricSplit
+import DifferentialGeometry.Geometry.Connection.ParallelFlow
+import DifferentialGeometry.Geometry.Exponential.ParallelField
+import DifferentialGeometry.Geometry.Metric.ParallelFlow
+import DifferentialGeometry.Topology.Morse.RegularLevel
+import DifferentialGeometry.Analysis.ODE.IndexForm
+import DifferentialGeometry.Analysis.ODE.CompleteFlow
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.HomogeneousDifferentiated
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.HomogeneousThird
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.HomogeneousFourth
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.DifferentiatedSourceW1
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.DifferentiatedSourceK
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Interior
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SourceDifferentiated
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SourceThird
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Restriction
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SourceAllOrder
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.HomogeneousAllOrder
 import DifferentialGeometry.Geometry.Comparison.DistanceRadialIntegral
 import DifferentialGeometry.Geometry.Comparison.LaplacianViscosity
 import DifferentialGeometry.Analysis.Elliptic.LipschitzSupersolution
@@ -20,6 +67,7 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.LipschitzW1
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Lipschitz
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.PositiveTestDensity
+import DifferentialGeometry.External.DeGiorgi.WeakFormulation.ExistenceTheory
 import DifferentialGeometry.External.DeGiorgi.StrongMinimum
 import DifferentialGeometry.Geometry.Comparison.BusemannLineSolution
 import DifferentialGeometry.Geometry.Compactness.CheegerGromov.BoundedGeometry.CGTDecay
@@ -37,13 +85,61 @@ set_option autoImplicit false
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_lintegral
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segInt_lintegral
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_radial
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.isCompact_rawSeg
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.ball_sub_rawSeg
 
 #print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.endpointCont_of_lim
 #print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.endpointCont_compact
 #print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.geo_Ioo_extend_cpt
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.chart_vf_on_iff
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.geoLift_isIntegralOn
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.gvf_eqOn
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeo_eqOn
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.expMap_smul_max_ne
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.mem_expDom_of_cpt
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.expMap_contMDiffAt
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.isOpen_expDomain
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.expMap_contMDiffOn
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.raw_radial_geo_at
+#print axioms DifferentialGeometry.Geometry.Riemannian.Variation.jacobiAt_congr
+#print axioms DifferentialGeometry.Geometry.Riemannian.radial_jacobi_dom
+#print axioms DifferentialGeometry.Geometry.Riemannian.radial_jacobi_d0
+#print axioms DifferentialGeometry.Geometry.Riemannian.radial_jacobi_reg
+#print axioms DifferentialGeometry.Geometry.Riemannian.radial_jacobi_reg0
+#print axioms DifferentialGeometry.Geometry.Riemannian.Variation.indexForm_nonneg_var
+#print axioms DifferentialGeometry.Geometry.Riemannian.Variation.indexForm_nonneg_of_minimising_geodesic
+#print axioms DifferentialGeometry.Geometry.Riemannian.Variation.raw_exp_inj_of_min
+#print axioms DifferentialGeometry.Geometry.Riemannian.Variation.jacobi_perp_of_init
+#print axioms DifferentialGeometry.Geometry.Riemannian.Variation.wronskian_zero_Ioo
+#print axioms DifferentialGeometry.Analysis.ODE.IsJacobiSolOn.of_Ioo
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.raw_exp_density
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.riemVol_rawExp_le
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.rawBall_vol_le_int
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.rawSpeed_sq
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.raw_ratio_anti
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.raw_density_le
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.rawDens_eq_trans
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.rawDens_le_zero
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.curveDensity_le_on
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.radialDensity_pole
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.radialRatio_pole
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.radialJacobi_li_of
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.hypDensity_pole
+#print axioms DifferentialGeometry.Integral.Measure.mapJacDensity
+#print axioms DifferentialGeometry.Integral.Measure.riemVol_image_le
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.expMap_smul_eq_max
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.radialGeo_of_end
+#print axioms DifferentialGeometry.Geometry.Riemannian.Geodesic.radialGeo_of_dom
+#print axioms DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity.sphere_jump_raw
+#print axioms DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity.sphere_jump_cpt
+#print axioms DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity.minExp_of_cptBall
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.broken_minimizer_velocity_match
+#print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.geo_Ioo_extend_to
+#print axioms DifferentialGeometry.Geometry.Riemannian.HopfRinow.exists_geo_one_cpt
 
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.normalHaar_eq
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.gBall_model_eucl
+#print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.ball_vol_le_eucl
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.transDens_eq_rigid
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.expJac_lt_of_ricci
 #print axioms DifferentialGeometry.Geometry.Riemannian.VolumeComparison.segBall_vol_lt
@@ -104,4 +200,82 @@ set_option autoImplicit false
 #print axioms DeGiorgi.super_zero_on_ball
 #print axioms DifferentialGeometry.Analysis.Laplacian.DistribSupersolution.chart_super_of_lap
 #print axioms DifferentialGeometry.buse_pair_eq_zero
+#print axioms DifferentialGeometry.busemann_chart_data
 #print axioms DifferentialGeometry.busemann_chart_sol
+#print axioms DifferentialGeometry.Geometry.Riemannian.exists_asymp_ray
+#print axioms DifferentialGeometry.Geometry.Riemannian.busemann_grad_sq
+#print axioms DeGiorgi.exists_smooth_cutoff
+#print axioms DeGiorgi.IsSolution.bilin_eq_zero_smooth
+#print axioms DeGiorgi.weak_eq_of_smooth
+#print axioms DeGiorgi.IsSolution.to_homogeneous
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.stdTest_sq_bound
+#print axioms DeGiorgi.exists_global_wit
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergSubstitutionNonSmooth.master_raw_nonsmooth
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.hom_master_nonsmooth
+#print axioms DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.two_of_wit
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.dq_norm_of_sum
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_dq_bound
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_second
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_memW2
+#print axioms DifferentialGeometry.busemann_chart_h2
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_diff_id
+#print axioms DeGiorgi.hasWeakDiv_of_parts
+#print axioms DeGiorgi.weakRHS_eq_integral
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_substOn
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.subst_expand_on
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.src_master_nonsmooth
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homDiffField_memLp
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homDiffSource_memLp
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homDiff_hasDiv
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_dq_bound
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_second
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_memW2
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homDiff_weak_eq
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_memW3
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.diff_bilin_scaled
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_diff_id
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homDiff_memW1
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homDiff_memWkp
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcDiff_weak_eq
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_memW2_on
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_memW3_on
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_memW4_on
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcEq_restrict
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.srcSol_memWkp_on
+#print axioms DifferentialGeometry.Analysis.Sobolev.NirenbergHomogeneous.homSol_memWkp_on
+#print axioms DifferentialGeometry.busemann_chart_wkp
+#print axioms DifferentialGeometry.busemann_chart_cdiff
+#print axioms DifferentialGeometry.busemann_smooth
+#print axioms DifferentialGeometry.lap_le_of_distrib
+#print axioms DifferentialGeometry.Geometry.Connection.cov_zero_of_frob
+#print axioms DifferentialGeometry.busemann_lap_zero
+#print axioms DifferentialGeometry.busemann_grad_par
+#print axioms DifferentialGeometry.Geometry.Riemannian.Exponential.intrinsic_intCurve
+#print axioms DifferentialGeometry.Analysis.ODE.curveAt_contMDiff
+#print axioms DifferentialGeometry.Analysis.ODE.curveAtDiffeo
+#print axioms DifferentialGeometry.busemannFlow_zero
+#print axioms DifferentialGeometry.busemannFlow_curve
+#print axioms DifferentialGeometry.busemannFlow_add
+#print axioms DifferentialGeometry.busemannFlow_smooth
+#print axioms DifferentialGeometry.busemannFlow_inner
+#print axioms DifferentialGeometry.busemannFlow_value
+#print axioms DifferentialGeometry.busemannFlow_line
+#print axioms DifferentialGeometry.busemannProdEquiv
+#print axioms DifferentialGeometry.busemannProdHomeo
+#print axioms DifferentialGeometry.busemann_deriv_ne
+#print axioms DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.curveAt_mfderiv_par
+#print axioms DifferentialGeometry.Geometry.Riemannian.curveAt_inner_eq
+#print axioms DifferentialGeometry.Geometry.Riemannian.curveAt_pullback_eq
+#print axioms DifferentialGeometry.Topology.Morse.isCrit_trans_iff
+#print axioms DifferentialGeometry.busemannProdDiffeo
+#print axioms DifferentialGeometry.localPull_smooth
+#print axioms DifferentialGeometry.immersionPullMetric
+#print axioms DifferentialGeometry.immersionPull_inner
+#print axioms DifferentialGeometry.prodMetric
+#print axioms DifferentialGeometry.prodMetric_inner
+#print axioms DifferentialGeometry.busemannProd_mfderiv
+#print axioms DifferentialGeometry.busemannLevelMetric
+#print axioms DifferentialGeometry.busemannProd_horiz
+#print axioms DifferentialGeometry.busemannProd_vert
+#print axioms DifferentialGeometry.busemannProd_cross
+#print axioms DifferentialGeometry.busemannMetricSplit

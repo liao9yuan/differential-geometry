@@ -41,15 +41,34 @@ representations.  The scalar hypothesis is kept separate from metric
 smoothness, and the carrier condition is imposed only on the theorems that use
 solution-time regularity.
 
+## 2026-08-29 local density measurability
+
+- `lDensity_aemeas` is source-written with the weakest local curve regularity
+  needed by transported pointed curves: `ContMDiffOn` only on `Ioo a b` and
+  backward-time carrier membership only on that open interval.  It has no
+  endpoint-order hypothesis.
+- The proof obtains continuity of the within-tangent map, identifies it with
+  the ordinary tangent map on the open interval, and reuses the native moving
+  metric quadratic evaluation.  Atomlessness identifies the restricted
+  `Ioo a b` and `Ioc a b` measures, so endpoint regularity is unnecessary.
+- This is the local measurability producer consumed by fixed-curve pointed
+  action convergence.  Focused verification is warning-free green, and the
+  named module refresh is current for its downstream consumer.
+- The first focused check reached only the pointwise velocity identification:
+  `tangentMapWithin_eq_tangentMap` inferred the total-space projection as the
+  curve.  The source now avoids that fragile implicit inference and uses the
+  native open-set identity `mfderivWithin_of_isOpen`.  The second check showed
+  that the ensuing `simp only` already closes the equality, so its redundant
+  trailing `rfl` was removed.
+
 Curve congruence intentionally assumes equality of germs at each integration
 point.  Pointwise or almost-everywhere equality of curves alone does not imply
 equality of their manifold derivatives.
 
 ## Progress and next target
 
-`lLength_join` is focused-green (**100% theorem completion**) and its dedicated
-proof machinery is complete (**100%**).  The only failed attempt was the
-resolved local namespace issue above; the later `hr.le` diagnostic was its
-cascade.  This closes only the numerical concatenation brick of P2c, not the
-restricted-cost/DPP producer.  Dedicated Perelman L-geometry machinery remains
-about **30--32%**, while `redVolume_anti` remains **0%**.
+`lLength_join` and `lDensity_aemeas` are focused-green (**100% completion for
+their stated endpoints**) with complete dedicated proofs.  This closes the
+numerical concatenation and local measurability bricks, not the restricted-cost
+DPP or no-mass-loss producers.  Compact P2a `redVolume_anti` remains **100%**;
+the broader P2b/P2c packages are accounted separately in `L_GEOMETRY_PLAN.md`.

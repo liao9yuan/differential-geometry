@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Calculus.CompactCutoff
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
 import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
@@ -233,5 +234,145 @@ theorem lapDistrib_of_smooth
     _ ≤ ∫ x, b x * φ x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
       integral_mono_ae hφΔu_int hbφ_int (Filter.Eventually.of_forall hpoint)
+
+/-- For a smooth function and a continuous source, a distributional Laplacian
+upper bound is pointwise. -/
+theorem lap_le_of_distrib
+    (g : SmoothRiemannianMetric I M)
+    {u b : M → Real} {U : Set M}
+    (hu : ContMDiff I 𝓘(Real, Real) ∞ u)
+    (hb : ContinuousOn b U)
+    (h : IsLapLEDistribOn (I := I) g u b U) :
+    ∀ x ∈ U, Δ_g (I := I) g ⟨u, hu⟩ x ≤ b x := by
+  classical
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsLocallyFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
+  letI : μ.IsOpenPosMeasure := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isOpenPosMeasure (I := I) (M := M) g
+  intro x hx
+  by_contra hle
+  let q : M → Real := fun y => Δ_g (I := I) g ⟨u, hu⟩ y - b y
+  have hqx : 0 < q x := by
+    exact sub_pos.mpr (lt_of_not_ge hle)
+  have hq_contOn : ContinuousOn q U := by
+    exact (Δ_g_contMDiff (I := I) g ⟨u, hu⟩).continuous.continuousOn.sub hb
+  have hq_contAt : ContinuousAt q x :=
+    (hq_contOn x hx).continuousAt (h.isOpen.mem_nhds hx)
+  have hqx_lt : q x / 2 < q x := by linarith
+  obtain ⟨V₀, hV₀_nhd, hV₀_pos⟩ :
+      ∃ V₀ ∈ 𝓝 x, ∀ y ∈ V₀, q x / 2 < q y := by
+    have hev := hq_contAt.eventually (p := fun z : Real => q x / 2 < z) ?_
+    · exact ⟨_, hev, fun y hy => hy⟩
+    · exact eventually_nhds_iff.mpr
+        ⟨Ioi (q x / 2), fun _ hy => hy, isOpen_Ioi, hqx_lt⟩
+  rcases mem_nhds_iff.mp hV₀_nhd with ⟨W, hWV₀, hW_open, hxW⟩
+  let V : Set M := W ∩ U
+  have hV_open : IsOpen V := hW_open.inter h.isOpen
+  have hxV : x ∈ V := ⟨hxW, hx⟩
+  have hVU : V ⊆ U := Set.inter_subset_right
+  have hq_pos : ∀ y ∈ V, 0 < q y := by
+    intro y hy
+    have hyq := hV₀_pos y (hWV₀ hy.1)
+    linarith
+  obtain ⟨χ, hχ_smooth, hχ_comp, hχ_one, hχ_supp, hχ_range⟩ :=
+    Analysis.exists_mfd_bump (I := I) (K := ({x} : Set M)) (U := V)
+      isCompact_singleton hV_open (by simpa only [singleton_subset_iff] using hxV)
+  have hχ_nonneg : ∀ y : M, 0 ≤ χ y := by
+    intro y
+    exact (hχ_range ⟨y, rfl⟩).1
+  have hχx : χ x = 1 := by
+    simpa only [Pi.one_apply] using hχ_one.self_of_nhdsSet (mem_singleton x)
+  let φ : C^∞⟮I, M; Real⟯ := ⟨χ, hχ_smooth⟩
+  have hφ_comp : φ ∈ compactlySupportedSmoothFunctions I M := by
+    exact hχ_comp
+  have hφU : tsupport (φ : M → Real) ⊆ U := by
+    simpa only [φ] using hχ_supp.trans hVU
+  have huΔφ_int : Integrable
+      (fun y : M => u y * Δ_g (I := I) g φ y) μ := by
+    exact (hu.continuous.mul
+      (Δ_g_contMDiff (I := I) g φ).continuous).integrable_of_hasCompactSupport
+        (lap_hasCompSupp (I := I) g φ hφ_comp).mul_left
+  have hχΔu_int : Integrable
+      (fun y : M => χ y * Δ_g (I := I) g ⟨u, hu⟩ y) μ := by
+    exact (hχ_smooth.continuous.mul
+      (Δ_g_contMDiff (I := I) g ⟨u, hu⟩).continuous).integrable_of_hasCompactSupport
+        hχ_comp.mul_right
+  have hΔuχ_int : Integrable
+      (fun y : M => Δ_g (I := I) g ⟨u, hu⟩ y * χ y) μ := by
+    exact hχΔu_int.congr (Filter.Eventually.of_forall fun y => by
+      exact mul_comm _ _)
+  have hbχ_int : Integrable (fun y : M => b y * χ y) μ := by
+    simpa only [μ, φ] using int_mul_test (I := I) h.locInt_right φ hφ_comp hφU
+  have hgreen :
+      ∫ y, (u y * Δ_g (I := I) g φ y -
+          χ y * Δ_g (I := I) g ⟨u, hu⟩ y) ∂μ = 0 := by
+    simpa only [μ, φ] using green_second_of_supp (I := I) g
+      (f := u) (h := χ) hu hχ_smooth (Or.inr hχ_comp)
+  rw [integral_sub huΔφ_int hχΔu_int] at hgreen
+  have hgreen_eq :
+      (∫ y, u y * Δ_g (I := I) g φ y ∂μ) =
+        ∫ y, χ y * Δ_g (I := I) g ⟨u, hu⟩ y ∂μ :=
+    sub_eq_zero.mp hgreen
+  have htest :
+      (∫ y, u y * Δ_g (I := I) g φ y ∂μ) ≤
+        ∫ y, b y * χ y ∂μ := by
+    simpa only [μ, φ] using h.test_le φ hφ_comp hφU (by
+      intro y
+      exact hχ_nonneg y)
+  have hcomm :
+      (∫ y, Δ_g (I := I) g ⟨u, hu⟩ y * χ y ∂μ) =
+        ∫ y, χ y * Δ_g (I := I) g ⟨u, hu⟩ y ∂μ := by
+    apply integral_congr_ae
+    exact Filter.Eventually.of_forall fun y => mul_comm _ _
+  have hpair :
+      (∫ y, Δ_g (I := I) g ⟨u, hu⟩ y * χ y ∂μ) ≤
+        ∫ y, b y * χ y ∂μ := by
+    calc
+      (∫ y, Δ_g (I := I) g ⟨u, hu⟩ y * χ y ∂μ) =
+          ∫ y, χ y * Δ_g (I := I) g ⟨u, hu⟩ y ∂μ := hcomm
+      _ = ∫ y, u y * Δ_g (I := I) g φ y ∂μ := hgreen_eq.symm
+      _ ≤ ∫ y, b y * χ y ∂μ := htest
+  have hqχ_int : Integrable (fun y : M => q y * χ y) μ := by
+    simpa only [q, sub_mul] using hΔuχ_int.sub hbχ_int
+  have hqχ_nonneg : ∀ y : M, 0 ≤ q y * χ y := by
+    intro y
+    by_cases hyV : y ∈ V
+    · exact mul_nonneg (le_of_lt (hq_pos y hyV)) (hχ_nonneg y)
+    · have hχy : χ y = 0 := by
+        by_contra hχy
+        exact hyV (hχ_supp (subset_tsupport _ hχy))
+      simp only [hχy, mul_zero, le_refl]
+  have hqχ_cont : Continuous (fun y : M => q y * χ y) := by
+    rw [continuous_iff_continuousAt]
+    intro y
+    by_cases hyU : y ∈ U
+    · exact ((hq_contOn y hyU).continuousAt (h.isOpen.mem_nhds hyU)).mul
+        hχ_smooth.continuous.continuousAt
+    · have hyts : y ∉ tsupport χ := by
+        intro hyts
+        exact hyU (hVU (hχ_supp hyts))
+      have hχ_zero : χ =ᶠ[𝓝 y] (fun _ : M => (0 : Real)) :=
+        notMem_tsupport_iff_eventuallyEq.mp hyts
+      have hprod_zero :
+          (fun z : M => q z * χ z) =ᶠ[𝓝 y] (fun _ : M => (0 : Real)) :=
+        hχ_zero.mono fun z hz => by simp only [hz, mul_zero]
+      exact continuousAt_const.congr_of_eventuallyEq hprod_zero
+  have hqχ_ne : q x * χ x ≠ 0 := by
+    rw [hχx, mul_one]
+    exact ne_of_gt hqx
+  have hqχ_pos : 0 < ∫ y, q y * χ y ∂μ :=
+    integral_pos_of_integrable_nonneg_nonzero hqχ_cont hqχ_int hqχ_nonneg hqχ_ne
+  have hqχ_eq :
+      (∫ y, q y * χ y ∂μ) =
+        (∫ y, Δ_g (I := I) g ⟨u, hu⟩ y * χ y ∂μ) -
+          ∫ y, b y * χ y ∂μ := by
+    simpa only [q, sub_mul] using integral_sub hΔuχ_int hbχ_int
+  have hqχ_nonpos : ∫ y, q y * χ y ∂μ ≤ 0 := by
+    rw [hqχ_eq]
+    linarith
+  exact (not_lt_of_ge hqχ_nonpos) hqχ_pos
 
 end DifferentialGeometry

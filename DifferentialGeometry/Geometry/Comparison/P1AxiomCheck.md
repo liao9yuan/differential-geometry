@@ -99,3 +99,67 @@ importing downstream module has a fresh named artifact.  The unified focused
 70-declaration axiom audit passed without warnings.  Every printed declaration
 depends only on `propext`, `Classical.choice`, and `Quot.sound`; no project
 axiom or `sorryAx` appears.
+
+The current 73-declaration expansion adds the scale-retaining Busemann chart
+solution data, the supplied-ray asymptotic support producer, and the
+pointwise differentiable Busemann eikonal identity.  Each producer passed its
+focused check, and the two new exporting modules were refreshed before this
+downstream audit.  The unified focused audit passed without warnings; all 73
+printed declarations depend only on `propext`, `Classical.choice`, and
+`Quot.sound`.  The splitting theorem remains unstated and therefore 0%
+complete: the new entries are dedicated post-regularity machinery, not a
+substitute for the missing local elliptic regularity, parallel-gradient, or
+global product producers.
+
+The current 77-declaration expansion adds the public compact-in-open smooth
+cutoff, signed smooth-test bilinear equality, smooth-test density extension,
+and `IsSolution.to_homogeneous`.  The unified focused audit passed without
+warnings; all 77 printed declarations depend only on `propext`,
+`Classical.choice`, and `Quot.sound`.  This closes the weak-solution interface
+gap but not the local `W^{2,2}` theorem, which remains unstated and therefore
+0% complete.
+
+The current 88-declaration expansion audits the complete compact-free
+difference-quotient chain through `homSol_memW2`, its chart application
+`busemann_chart_h2`, and the differentiated weak identity `homSol_diff_id`.
+All exporting modules passed warning-free focused verification and the required
+named refreshes before this downstream check.  The unified focused audit passed
+without warnings; every printed declaration depends only on `propext`,
+`Classical.choice`, and `Quot.sound`.  This verifies local chart `W^{2,2}` and
+the first differentiated equation as dedicated splitting machinery; the
+Cheeger--Gromoll splitting endpoint remains unstated and therefore 0% complete.
+
+The current 101-declaration expansion adds the scalar-source substitution and
+master chain, weak-divergence lowering, differentiated source integrability,
+the full differentiated weak equation, scalar-source local `W^{2,2}`, and the
+fixed-order `homSol_memW3` assembly.  Every exporting module had already passed
+warning-free focused verification and its required named refresh.  The unified
+focused audit passed without warnings; all 101 printed declarations depend only
+on `propext`, `Classical.choice`, and `Quot.sound`.  These declarations verify
+the local `W^{2,2} -> W^{3,2}` machinery.  They do not state the global
+Cheeger--Gromoll splitting theorem, which therefore remains 0% complete.
+
+The current 148-declaration expansion reaches the completed supplied-line
+metric splitting endpoint.  It includes the smooth regular-level product
+diffeomorphism, induced immersion metric, product metric, differential split,
+horizontal/vertical/mixed metric blocks, and the public
+`busemannMetricSplit`.  All exporting modules have warning-free focused
+verification; the final metric-splitting module also has a fresh explicit
+named artifact.  The unified focused audit passed without warnings, and every
+printed declaration depends only on `propext`, `Classical.choice`, and
+`Quot.sound`.  This makes the supplied-line splitting endpoint formally and
+axiom-cleanly complete.  The independent Soul endpoint remains unstated and is
+not counted as splitting progress.
+
+The current 196-declaration expansion closes the compact-buffer P1a chain.  In
+addition to the chart-independent continuation, compact minimizing-exponential,
+raw segment-domain, image-measure, Jacobi, and pole-normalization producers, it
+directly audits `rawSpeed_sq`, `raw_ratio_anti`, `raw_density_le`,
+`rawDens_eq_trans`, `rawDens_le_zero`, and the final local absolute-volume
+endpoint `ball_vol_le_eucl`.  The endpoint requires compactness only for a
+strictly larger buffer ball and Ricci nonnegativity only on the compared ball;
+it adds neither ambient completeness nor global Ricci assumptions.  Both
+exporting modules passed warning-free focused verification and their exact
+named refreshes before this downstream check.  The unified audit passed without
+warnings; all 196 printed declarations depend only on `propext`,
+`Classical.choice`, and `Quot.sound`.

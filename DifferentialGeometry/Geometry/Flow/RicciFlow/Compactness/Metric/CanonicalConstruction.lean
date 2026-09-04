@@ -1,4 +1,5 @@
-import DifferentialGeometry.Geometry.Compactness.CheegerGromov.Limit.LimitMetrics
+import DifferentialGeometry.Geometry.Compactness.CheegerGromov.Limit.BallCapture
+import DifferentialGeometry.Geometry.Compactness.CheegerGromov.Limit.TailMapProvenance
 import DifferentialGeometry.Geometry.Metric.Convergence.CovariantDerivativeBounds
 import DifferentialGeometry.Geometry.Metric.Convergence.DerivativeNormRestriction
 import DifferentialGeometry.Geometry.Metric.Convergence.SelfCovariantDerivative
@@ -351,6 +352,101 @@ noncomputable def tailMemberMaps
             simpa using
               (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                 (I := I) (g j) x v)) j₀ D₀ n)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
+/-- On an earlier tail core, the canonical member map is the finite ambient
+chain composite used to construct the direct system. -/
+theorem tailMember_chain
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) (σ : ℕ → ℕ) :
+    letI : ∀ j, TopologicalSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).topology
+    letI : ∀ j, ChartedSpace H (X.obj (σ j)).M := fun j => (X.obj (σ j)).charted
+    letI : ∀ j, IsManifold I ∞ (X.obj (σ j)).M := fun j => (X.obj (σ j)).smooth
+    letI : ∀ j, T2Space (X.obj (σ j)).M := fun j => (X.obj (σ j)).t2
+    letI : ∀ j, SigmaCompactSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).sigmaCompact
+    letI : ∀ j, MetricSpace (X.obj (σ j)).M := fun j =>
+      alignedMetric (I := I) (σ j) (P (σ j))
+    letI : ∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj (σ j)).M := fun j => by
+      change IsManifold I ∞ (X.obj (σ j)).M
+      infer_instance
+    letI : ∀ j, Bundle.RiemannianBundle
+        (fun x : (X.obj (σ j)).M => TangentSpace I x) :=
+      fun j => (X.obj (σ j)).riemBundle
+    letI : ∀ j, IsRiemannianManifold I (X.obj (σ j)).M := fun j => by
+      refine ⟨fun x y => ?_⟩
+      have hreal := (P (σ j)).realizes x y
+      rw [edist_dist, ← hreal]
+      rfl
+    ∀ (Ψ : ∀ j, PartialDiffeomorph I I (X.obj (σ j)).M
+        (X.obj (σ (j + 1))).M (∞ : WithTop ℕ∞))
+      (hbase : ∀ j, (Ψ j : (X.obj (σ j)).M → (X.obj (σ (j + 1))).M)
+        (X.obj (σ j)).basepoint = (X.obj (σ (j + 1))).basepoint)
+      (j₀ : ℕ)
+      (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+        (Metric.closedBall (X.obj (σ (j₀ + n))).basepoint ((2 : ℝ) ^ (j₀ + n)))
+        (1 / 2) 0
+        (chainComp (I := I) (Mf := fun j => (X.obj (σ j)).M) Ψ (j₀ + n) k)
+        (X.obj (σ (j₀ + n))).metric (X.obj (σ ((j₀ + n) + k))).metric),
+      let b := fun j => (X.obj (σ j)).basepoint
+      let g := fun j => (X.obj (σ j)).metric
+      letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+      let S := tailBallSystem (I := I) b Ψ hbase g (by
+        intro j x v
+        simpa using
+          (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+            (I := I) (g j) x v)) j₀ D₀
+      letI : ∀ m, SigmaCompactSpace (tailBallOpen b j₀ m) := fun m =>
+        isSigmaCompact_iff_sigmaCompactSpace.mp
+          (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ m).isOpen)
+      ∀ (gTail : ∀ m, SmoothRiemannianMetric I (tailBallOpen b j₀ m))
+        (hgTail : S.MetricCocycle gTail) (n k : ℕ) (x : tailBallOpen b j₀ n),
+        cast (congrArg (fun j => (X.obj (σ j)).M) (Nat.add_assoc j₀ n k).symm)
+            ((tailMemberMaps (I := I) P σ Ψ hbase j₀ D₀ gTail hgTail).partialDiffeomorph
+              (n + k) (S.toSeqSystem.incl n x)) =
+          (chainComp (I := I) (Mf := fun j => (X.obj (σ j)).M) Ψ (j₀ + n) k :
+            (X.obj (σ (j₀ + n))).M → (X.obj (σ ((j₀ + n) + k))).M) x := by
+  letI : ∀ j, TopologicalSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).topology
+  letI : ∀ j, ChartedSpace H (X.obj (σ j)).M := fun j => (X.obj (σ j)).charted
+  letI : ∀ j, IsManifold I ∞ (X.obj (σ j)).M := fun j => (X.obj (σ j)).smooth
+  letI : ∀ j, T2Space (X.obj (σ j)).M := fun j => (X.obj (σ j)).t2
+  letI : ∀ j, SigmaCompactSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).sigmaCompact
+  letI : ∀ j, MetricSpace (X.obj (σ j)).M := fun j =>
+    alignedMetric (I := I) (σ j) (P (σ j))
+  letI : ∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj (σ j)).M := fun j => by
+    change IsManifold I ∞ (X.obj (σ j)).M
+    infer_instance
+  letI : ∀ j, Bundle.RiemannianBundle
+      (fun x : (X.obj (σ j)).M => TangentSpace I x) :=
+    fun j => (X.obj (σ j)).riemBundle
+  letI : ∀ j, IsRiemannianManifold I (X.obj (σ j)).M := fun j => by
+    refine ⟨fun x y => ?_⟩
+    have hreal := (P (σ j)).realizes x y
+    rw [edist_dist, ← hreal]
+    rfl
+  intro Ψ hbase j₀ D₀
+  let b := fun j => (X.obj (σ j)).basepoint
+  let g := fun j => (X.obj (σ j)).metric
+  letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+  let S := tailBallSystem (I := I) b Ψ hbase g (by
+    intro j x v
+    simpa using
+      (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (g j) x v)) j₀ D₀
+  letI : ∀ m, SigmaCompactSpace (tailBallOpen b j₀ m) := fun m =>
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ m).isOpen)
+  dsimp only
+  intro gTail hgTail n k x
+  change cast (congrArg (fun j => (X.obj (σ j)).M) (Nat.add_assoc j₀ n k).symm)
+      ((Function.invFun (S.toSeqSystem.incl (n + k)) (S.toSeqSystem.incl n x) :
+        tailBallOpen b j₀ (n + k)) : (X.obj (σ (j₀ + (n + k)))).M) = _
+  exact tailInvIncl_apply (I := I) b Ψ hbase g (by
+    intro j y v
+    simpa using
+      (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (g j) y v)) j₀ D₀ n k x
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -928,6 +1024,21 @@ private structure StepDCanonPackage
   conn :
     letI : TopologicalSpace canon.mc.limit.M := canon.mc.limit.topology
     ConnectedSpace canon.mc.limit.M
+  capture :
+    ∀ (A : ℝ), 0 < A →
+      letI : TopologicalSpace canon.mc.limit.M := canon.mc.limit.topology
+      letI : ChartedSpace H canon.mc.limit.M := canon.mc.limit.charted
+      letI : IsManifold I ∞ canon.mc.limit.M := canon.mc.limit.smooth
+      ∃ K : Set canon.mc.limit.M, IsCompact K ∧
+        ∀ᶠ k : ℕ in Filter.atTop,
+          let Y := X.obj (canon.mc.subseq k)
+          letI : EMetricSpace Y.M := Y.emetricSpace
+          letI : TopologicalSpace Y.M := Y.topology
+          letI : ChartedSpace H Y.M := Y.charted
+          letI : IsManifold I ∞ Y.M := Y.smooth
+          K ⊆ (canon.mc.maps.partialDiffeomorph k).source ∧
+            Metric.eball Y.basepoint (ENNReal.ofReal A) ⊆
+              (canon.mc.maps.partialDiffeomorph k : canon.mc.limit.M → Y.M) '' K
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1199,6 +1310,55 @@ private opaque compactness_canonPackage
       MetricCGConvergenceData.ofSeqSubseq,
       MetricSourceData.ofSubseq,
       MetricSourceData.ofSeqSubseq] using hchain_bounds
+  have hcapture :
+      ∀ (A : ℝ), 0 < A →
+        letI : TopologicalSpace L.M := L.topology
+        letI : ChartedSpace H L.M := L.charted
+        letI : IsManifold I ∞ L.M := L.smooth
+        ∃ K : Set L.M, IsCompact K ∧
+          ∀ᶠ m : ℕ in Filter.atTop,
+            let Y := X.obj (σ (j₀ + m))
+            letI : EMetricSpace Y.M := Y.emetricSpace
+            letI : TopologicalSpace Y.M := Y.topology
+            letI : ChartedSpace H Y.M := Y.charted
+            letI : IsManifold I ∞ Y.M := Y.smooth
+            K ⊆ (maps.partialDiffeomorph m).source ∧
+              Metric.eball Y.basepoint (ENNReal.ofReal A) ⊆
+                (maps.partialDiffeomorph m : L.M → Y.M) '' K := by
+    intro A hA
+    letI : TopologicalSpace L.M := L.topology
+    letI : ChartedSpace H L.M := L.charted
+    letI : IsManifold I ∞ L.M := L.smooth
+    obtain ⟨K, hK, hcap⟩ := tailBall_capture (I := I) b Ψ hbase g (by
+      intro j x v
+      simpa using
+        (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+          (I := I) (g j) x v)) j₀ D₀ A hA
+    refine ⟨K, hK, ?_⟩
+    filter_upwards [hcap] with m hm
+    let Y := X.obj (σ (j₀ + m))
+    letI : EMetricSpace Y.M := Y.emetricSpace
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    change K ⊆ (maps.partialDiffeomorph m).source ∧
+      Metric.eball Y.basepoint (ENNReal.ofReal A) ⊆
+        (maps.partialDiffeomorph m : L.M → Y.M) '' K
+    constructor
+    · change K ⊆
+        (PartialDiffeomorph.liftTargetOpen (S.inclPartialDiffeo m) rfl).source
+      exact hm.1
+    · intro y hy
+      have hyball : y ∈ Metric.ball (b (j₀ + m)) A := by
+        rw [Metric.mem_eball] at hy
+        have hreal := (P (σ (j₀ + m))).realizes y (b (j₀ + m))
+        rw [hreal, ENNReal.ofReal_lt_ofReal_iff hA] at hy
+        simpa only [Metric.mem_ball] using hy
+      obtain ⟨x, hx, hxy⟩ := hm.2 hyball
+      refine ⟨x, hx, ?_⟩
+      change (PartialDiffeomorph.liftTargetOpen (S.inclPartialDiffeo m) rfl :
+        S.toSeqSystem.Lim → (X.obj (σ (j₀ + m))).M) x = y
+      exact hxy
   let C : StepDCanon (I := I) X :=
     { mc := mc
       domain_eq := by
@@ -1211,11 +1371,12 @@ private opaque compactness_canonPackage
         simpa only [mc] using hbounds.1
       init_cov := by
         simpa only [mc] using hbounds.2 }
-  refine ⟨C, ?_⟩
-  letI : ∀ n, PreconnectedSpace (tailBallOpen b j₀ n) := fun n =>
-    tailBall_preconn (I := I) b j₀ n
-  change ConnectedSpace S.toSeqSystem.Lim
-  infer_instance
+  refine ⟨C, ?_, ?_⟩
+  · letI : ∀ n, PreconnectedSpace (tailBallOpen b j₀ n) := fun n =>
+      tailBall_preconn (I := I) b j₀ n
+    change ConnectedSpace S.toSeqSystem.Lim
+    infer_instance
+  · simpa only [C, mc] using hcapture
 
 noncomputable def compactness_canon
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -1233,6 +1394,29 @@ theorem compactness_conn
     ConnectedSpace C.mc.limit.M := by
   simpa only [compactness_canon] using
     (compactness_canonPackage (I := I) P B).conn
+
+/-- Every fixed intrinsic ball in the canonical target sequence is eventually
+captured by the image of one compact subset of the canonical limit manifold. -/
+theorem canon_ball_capture
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
+    (B : StepB1RawInput (X := X) P) (A : ℝ) (hA : 0 < A) :
+    let C := compactness_canon (I := I) P B
+    letI : TopologicalSpace C.mc.limit.M := C.mc.limit.topology
+    letI : ChartedSpace H C.mc.limit.M := C.mc.limit.charted
+    letI : IsManifold I ∞ C.mc.limit.M := C.mc.limit.smooth
+    ∃ K : Set C.mc.limit.M, IsCompact K ∧
+      ∀ᶠ k : ℕ in Filter.atTop,
+        let Y := X.obj (C.mc.subseq k)
+        letI : EMetricSpace Y.M := Y.emetricSpace
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        K ⊆ (C.mc.maps.partialDiffeomorph k).source ∧
+          Metric.eball Y.basepoint (ENNReal.ofReal A) ⊆
+            (C.mc.maps.partialDiffeomorph k : C.mc.limit.M → Y.M) '' K := by
+  simpa only [compactness_canon] using
+    (compactness_canonPackage (I := I) P B).capture A hA
 
 noncomputable def compactness_of_b1
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

@@ -1,15 +1,16 @@
 import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.RicciFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.PathLengthVariation
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.RicciEndpoint
 
 set_option autoImplicit false
 
 /-!
-# Short endpoint changing-distance support
+# Fixed-endpoint changing-distance support
 
-This file gives the short-distance branch of Perelman's endpoint
-changing-distance estimate for a complete smooth Ricci flow.  A minimizing
-geodesic at the base time supplies a differentiable upper support for the
-later backward-time distance.
+This file gives the short- and long-distance fixed-endpoint branches of
+Perelman's changing-distance estimate for a complete smooth Ricci flow.  A
+minimizing geodesic at the base time supplies a differentiable upper support
+for the later backward-time distance.
 -/
 
 noncomputable section
@@ -22,6 +23,7 @@ open Bundle Filter Manifold MeasureTheory Set
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open scoped Manifold ContDiff Topology Bundle ENNReal
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -185,6 +187,54 @@ private theorem backPath_deriv_le
     dsimp only [t] at hforwardLower ⊢
     linarith
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+  [T2Space M] [SigmaCompactSpace M] in
+private theorem edistOf_le_arc
+    (g : SmoothRiemannianMetric I M) {gamma : Real → M} {a b : Real}
+    (hab : a ≤ b)
+    (hgamma : ContMDiffOn 𝓘(Real, Real) I 1 gamma (Icc a b)) :
+    riemannianEDistOf (I := I) g (gamma a) (gamma b) ≤
+      ENNReal.ofReal
+        (Variation.arcLength (I := I) g gamma a b) := by
+  letI : RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  change riemannianEDist I (gamma a) (gamma b) ≤ _
+  apply Geometry.Riemannian.Geodesic.riemannianEDist_le_arcLength
+    (I := I) g hab hgamma
+  intro t ht
+  rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+  congr 2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [IsManifold I 1 M] [IsManifold I 2 M] [T2Space M]
+  [SigmaCompactSpace M] in
+private theorem edistOf_real_tri
+    [ConnectedSpace M]
+    (g : SmoothRiemannianMetric I M) (x y z : M) :
+    (riemannianEDistOf (I := I) g x z).toReal ≤
+      (riemannianEDistOf (I := I) g x y).toReal +
+        (riemannianEDistOf (I := I) g y z).toReal := by
+  letI : RiemannianBundle (fun p : M ↦ TangentSpace I p) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun p : M ↦ TangentSpace I p) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro p v w; rfl⟩⟩
+  have hxy : riemannianEDistOf (I := I) g x y ≠ (⊤ : ENNReal) := by
+    change riemannianEDist I x y ≠ (⊤ : ENNReal)
+    exact riemannianEDist_ne_top (I := I) x y
+  have hyz : riemannianEDistOf (I := I) g y z ≠ (⊤ : ENNReal) := by
+    change riemannianEDist I y z ≠ (⊤ : ENNReal)
+    exact riemannianEDist_ne_top (I := I) y z
+  have htri := edistOf_triangle (I := I) g x y z
+  have hreal := ENNReal.toReal_mono
+    (ENNReal.add_ne_top.mpr ⟨hxy, hyz⟩) htri
+  rwa [ENNReal.toReal_add hxy hyz] at hreal
+
 omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -333,7 +383,7 @@ theorem dist_short_support
           (riemannianEDistOf
             (I := I) (S.base.metric (T - s)) x y).toReal) ≤ᶠ[𝓝[>] tau] phi := by
     exact Filter.Eventually.of_forall (fun s ↦ by
-      have hedist := edistOf_le_arcLength
+      have hedist := edistOf_le_arc
         (I := I) (S.base.metric (T - s)) zero_le_one hgamma.contMDiffOn
       rw [hgamma0, hgamma1] at hedist
       have hphi_nonneg : 0 ≤ phi s := by
@@ -364,5 +414,405 @@ theorem dist_short_support
       _ = 2 * ((Module.finrank Real E : Real) - 1) * K * r := by
         simp only [A]
         ring
+
+omit [IsManifold I 2 M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- If a base-time minimizing geodesic has length at least twice the endpoint
+radius, endpoint-ball Ricci upper bounds produce a differentiable upper
+support for its backward-time distance with the sharp long-case derivative
+bound. -/
+theorem dist_long_support
+    [T2Space (TangentBundle I M)] [ConnectedSpace M]
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    {T tau K r : Real}
+    (ht : T - tau ∈ D.regular)
+    (hcomplete : RiemannianMetricComplete
+      (I := I) (S.base.metric (T - tau)))
+    (hr : 0 < r)
+    (x y : M)
+    (hlong :
+      2 * r ≤
+        (riemannianEDistOf
+          (I := I) (S.base.metric (T - tau)) x y).toReal)
+    (hRic : ∀ z : M, ∀ w : TangentSpace I z,
+      (riemannianEDistOf
+          (I := I) (S.base.metric (T - tau)) x z < ENNReal.ofReal r ∨
+        riemannianEDistOf
+          (I := I) (S.base.metric (T - tau)) y z < ENNReal.ofReal r) →
+      ricciTensor (I := I) (S.base.metric (T - tau)) z w w ≤
+        ((Module.finrank Real E : Real) - 1) * K *
+          (S.base.metric (T - tau)).inner z w w) :
+    ∃ phi : Real → Real, ∃ d : Real,
+      phi tau =
+          (riemannianEDistOf
+            (I := I) (S.base.metric (T - tau)) x y).toReal ∧
+      (fun s ↦
+          (riemannianEDistOf
+            (I := I) (S.base.metric (T - s)) x y).toReal) ≤ᶠ[𝓝[>] tau] phi ∧
+      HasDerivAt phi d tau ∧
+      d ≤ 2 * ((Module.finrank Real E : Real) - 1) *
+        ((2 / 3 : Real) * K * r + 1 / r) := by
+  classical
+  let g : SmoothRiemannianMetric I M := S.base.metric (T - tau)
+  letI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun z : M ↦ TangentSpace I z) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun z : M ↦ TangentSpace I z) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro z v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : CompleteSpace M := by
+    simpa only [g] using hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro z w
+    rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+    congr 2
+  have hdist :
+      riemannianEDistOf (I := I) g x y = riemannianEDist I x y :=
+    riemannianEDistOf_eq_riemannianEDist (I := I) g hEnorm x y
+  let ell : Real := (riemannianEDist I x y).toReal
+  have hell_long : 2 * r ≤ ell := by
+    simpa only [g, hdist, ell] using hlong
+  have hell_pos : 0 < ell := by
+    exact (show 0 < 2 * r by linarith).trans_le hell_long
+  have hell0 : ell ≠ 0 := ne_of_gt hell_pos
+  have hdist_real : riemannianEDist I x y = ENNReal.ofReal ell := by
+    have hfin : riemannianEDist I x y ≠ ⊤ :=
+      riemannianEDist_ne_top (I := I) x y
+    simpa only [ell] using (ENNReal.ofReal_toReal hfin).symm
+  let v : TangentSpace I x := minimizingVec (I := I) g hEnorm x y
+  let w : TangentSpace I x := ell⁻¹ • v
+  let gamma : Real → M := intrinsicGeodesic (I := I) g hEnorm x w
+  have hv_len : Real.sqrt (g.inner x v v) = ell := by
+    simpa only [v, ell] using minimizingVec_len (I := I) g hEnorm x y
+  have hinner_v : g.inner x v v = ell ^ 2 := by
+    rw [← Real.sq_sqrt (gInner_self_nonneg (I := I) g x v), hv_len]
+  have hinner_w : g.inner x w w = 1 := by
+    dsimp only [w]
+    rw [gInner_smul_self (I := I) g x ell⁻¹ v, hinner_v,
+      ← mul_pow, inv_mul_cancel₀ hell0, one_pow]
+  have hell_smul : ell • w = v := by
+    dsimp only [w]
+    rw [smul_smul, mul_inv_cancel₀ hell0, one_smul]
+  have hgamma0 : gamma 0 = x := by
+    exact intrinsicGeodesic_zero (I := I) g hEnorm x w
+  have hgammaL : gamma ell = y := by
+    calc
+      gamma ell = intrinsicGeodesic (I := I) g hEnorm x (ell • w) 1 :=
+        (intrinsicGeodesic_smul (I := I) g hEnorm x w ell).symm
+      _ = intrinsicGeodesic (I := I) g hEnorm x v 1 := by
+        rw [hell_smul]
+      _ = y := by
+        rw [← expMapIntrinsic_def]
+        simpa only [v] using minimizingVec_exp (I := I) g hEnorm x y
+  have hgamma : ContMDiff 𝓘(Real, Real) I ∞ gamma := by
+    simpa only [gamma] using
+      isGeodesic_contMDiff
+        (I := I) g
+        (intrinsicGeodesic_isGeodesic (I := I) g hEnorm x w)
+        (intrinsicGeodesic_continuous (I := I) g hEnorm x w)
+  have hgammaOne : ContMDiff 𝓘(Real, Real) I 1 gamma :=
+    hgamma.of_le
+      (WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hgeo : IsGeodesicOn (I := I) g gamma (Icc 0 ell) := by
+    simpa only [gamma] using
+      (intrinsicGeodesic_isGeodesic
+        (I := I) g hEnorm x w).isGeodesicOn (Icc 0 ell)
+  have hunitAll : ∀ t : Real,
+      g.inner (gamma t)
+          (mfderiv 𝓘(Real, Real) I gamma t 1)
+          (mfderiv 𝓘(Real, Real) I gamma t 1) = 1 := by
+    intro t
+    change
+      g.inner (intrinsicGeodesic (I := I) g hEnorm x w t)
+          (mfderiv 𝓘(Real, Real) I
+            (intrinsicGeodesic (I := I) g hEnorm x w) t 1)
+          (mfderiv 𝓘(Real, Real) I
+            (intrinsicGeodesic (I := I) g hEnorm x w) t 1) = 1
+    exact (intrinsicGeodesic_speedSq_eq
+      (I := I) g hEnorm x w t).trans hinner_w
+  have hunit : ∀ t ∈ Icc (0 : Real) ell,
+      g.inner (gamma t)
+          (mfderiv 𝓘(Real, Real) I gamma t 1)
+          (mfderiv 𝓘(Real, Real) I gamma t 1) = 1 :=
+    fun t _ ↦ hunitAll t
+  have hvel : ∀ t ∈ Icc (0 : Real) ell,
+      mfderiv 𝓘(Real, Real) I gamma t 1 ≠ 0 := by
+    intro t _ht hzero
+    have hone := hunitAll t
+    rw [hzero] at hone
+    have h01 : (0 : Real) = 1 := by
+      simpa only [map_zero] using hone
+    exact zero_ne_one h01
+  have hpath : Variation.arcLength (I := I) g gamma 0 ell = ell := by
+    unfold Variation.arcLength
+    calc
+      _ = ∫ _t in (0 : Real)..ell, (1 : Real) := by
+        apply intervalIntegral.integral_congr
+        intro t _ht
+        change Real.sqrt (g.inner (gamma t)
+          (mfderiv 𝓘(Real, Real) I gamma t 1)
+          (mfderiv 𝓘(Real, Real) I gamma t 1)) = 1
+        rw [hunitAll t, Real.sqrt_one]
+      _ = ell := by simp
+  have hmin : ∀ eta : Real → M,
+      ContMDiffOn 𝓘(Real, Real) I 1 eta (Icc 0 ell) →
+      eta 0 = gamma 0 → eta ell = gamma ell →
+      Variation.arcLength (I := I) g gamma 0 ell ≤
+        Variation.arcLength (I := I) g eta 0 ell := by
+    intro eta heta heta0 hetaL
+    have heta_nonneg : 0 ≤ Variation.arcLength (I := I) g eta 0 ell := by
+      unfold Variation.arcLength
+      exact intervalIntegral.integral_nonneg hell_pos.le
+        (fun _ _ ↦ Real.sqrt_nonneg _)
+    have hed :
+        riemannianEDist I (eta 0) (eta ell) ≤
+          ENNReal.ofReal (Variation.arcLength (I := I) g eta 0 ell) :=
+      Geometry.Riemannian.Geodesic.riemannianEDist_le_arcLength
+        (I := I) g hell_pos.le heta (fun t _ht ↦ hEnorm (eta t) _)
+    have hreal := ENNReal.toReal_mono ENNReal.ofReal_ne_top hed
+    have hell_le : ell ≤ Variation.arcLength (I := I) g eta 0 ell := by
+      rw [heta0, hetaL, hgamma0, hgammaL, hdist_real,
+        ENNReal.toReal_ofReal hell_pos.le,
+        ENNReal.toReal_ofReal heta_nonneg] at hreal
+      exact hreal
+    rw [hpath]
+    exact hell_le
+  let A : Real := ((Module.finrank Real E : Real) - 1) * K
+  have hRicGamma : ∀ t ∈ Icc (0 : Real) ell,
+      t < r ∨ ell - r < t →
+      ricciTensor (I := I) g (gamma t)
+          (mfderiv 𝓘(Real, Real) I gamma t 1)
+          (mfderiv 𝓘(Real, Real) I gamma t 1) ≤ A := by
+    intro t ht hend
+    have hball :
+        riemannianEDistOf (I := I) g x (gamma t) < ENNReal.ofReal r ∨
+          riemannianEDistOf (I := I) g y (gamma t) < ENNReal.ofReal r := by
+      rcases hend with hleft | hright
+      · left
+        rw [riemannianEDistOf_eq_riemannianEDist (I := I) g hEnorm]
+        have hseg :
+            riemannianEDist I (gamma 0) (gamma t) ≤
+              ENNReal.ofReal (Real.sqrt (g.inner x w w) * (t - 0)) := by
+          simpa only [gamma] using
+            intrinsicGeodesic_riemannianEDist_le
+              (I := I) g hEnorm x w (s := 0) (t := t) ht.1
+        rw [hgamma0, hinner_w, Real.sqrt_one, sub_zero, one_mul] at hseg
+        exact hseg.trans_lt ((ENNReal.ofReal_lt_ofReal_iff hr).2 hleft)
+      · right
+        have htail : ell - t < r := by linarith
+        rw [riemannianEDistOf_eq_riemannianEDist (I := I) g hEnorm]
+        have hseg :
+            riemannianEDist I (gamma t) (gamma ell) ≤
+              ENNReal.ofReal (Real.sqrt (g.inner x w w) * (ell - t)) := by
+          simpa only [gamma] using
+            intrinsicGeodesic_riemannianEDist_le
+              (I := I) g hEnorm x w (s := t) (t := ell) ht.2
+        rw [hinner_w, Real.sqrt_one, one_mul] at hseg
+        rw [riemannianEDist_comm, ← hgammaL]
+        exact hseg.trans_lt ((ENNReal.ofReal_lt_ofReal_iff hr).2 htail)
+    have hraw :=
+      hRic (gamma t) (mfderiv 𝓘(Real, Real) I gamma t 1)
+        (by simpa only [g] using hball)
+    have hu := hunitAll t
+    simpa only [g, A, hu, mul_one] using hraw
+  let R : Real → Real := fun t ↦
+    ricciTensor (I := I) g (gamma t)
+      (mfderiv 𝓘(Real, Real) I gamma t 1)
+      (mfderiv 𝓘(Real, Real) I gamma t 1)
+  have hRicInt :
+      (∫ t in (0 : Real)..ell, R t) ≤
+        (Module.finrank Real E - 1 : Real) * (2 / r) +
+          A * (4 * r / 3) := by
+    simpa only [R] using
+      ricci_int_end_le
+        (I := I) g gamma
+        (L := ell) (r := r) (A := A)
+        hr hell_long hgamma hgeo hunit hmin hRicGamma
+  let phi : Real → Real := fun s ↦
+    Variation.arcLength
+      (I := I) (S.base.metric (T - s)) gamma 0 ell
+  have hcontact : phi tau = ell := by
+    simpa only [phi, g] using hpath
+  have hupper :
+      (fun s ↦
+        (riemannianEDistOf
+          (I := I) (S.base.metric (T - s)) x y).toReal) ≤ᶠ[𝓝[>] tau] phi := by
+    exact Filter.Eventually.of_forall (fun s ↦ by
+      have hed := edistOf_le_arc
+        (I := I) (S.base.metric (T - s))
+        hell_pos.le hgammaOne.contMDiffOn
+      rw [hgamma0, hgammaL] at hed
+      have hphi_nonneg : 0 ≤ phi s := by
+        dsimp only [phi, Variation.arcLength]
+        exact intervalIntegral.integral_nonneg hell_pos.le
+          (fun _ _ ↦ Real.sqrt_nonneg _)
+      have hreal := ENNReal.toReal_mono ENNReal.ofReal_ne_top hed
+      rw [ENNReal.toReal_ofReal hphi_nonneg] at hreal
+      exact hreal)
+  have hforward :
+      HasDerivAt
+        (fun s ↦ Variation.arcLength
+          (I := I) (S.base.metric s) gamma 0 ell)
+        (-(∫ t in (0 : Real)..ell, R t)) (T - tau) := by
+    have h := pathLength_timeDeriv_of_ricciFlow
+      (I := I) S hS hell_pos.le ht gamma hgammaOne hvel
+    have hint :
+        (∫ u in (0 : Real)..ell,
+          -ricciTensor (I := I) (S.base.metric (T - tau)) (gamma u)
+              (mfderiv 𝓘(Real, Real) I gamma u 1)
+              (mfderiv 𝓘(Real, Real) I gamma u 1) /
+            Real.sqrt ((S.base.metric (T - tau)).inner (gamma u)
+              (mfderiv 𝓘(Real, Real) I gamma u 1)
+              (mfderiv 𝓘(Real, Real) I gamma u 1))) =
+          -(∫ u in (0 : Real)..ell, R u) := by
+      calc
+        _ = ∫ u in (0 : Real)..ell, -R u := by
+          apply intervalIntegral.integral_congr
+          intro u _hu
+          change
+            -ricciTensor (I := I) (S.base.metric (T - tau)) (gamma u)
+                (mfderiv 𝓘(Real, Real) I gamma u 1)
+                (mfderiv 𝓘(Real, Real) I gamma u 1) /
+              Real.sqrt ((S.base.metric (T - tau)).inner (gamma u)
+                (mfderiv 𝓘(Real, Real) I gamma u 1)
+                (mfderiv 𝓘(Real, Real) I gamma u 1)) =
+              -R u
+          have hu := hunitAll u
+          rw [show
+            (S.base.metric (T - tau)).inner (gamma u)
+                (mfderiv 𝓘(Real, Real) I gamma u 1)
+                (mfderiv 𝓘(Real, Real) I gamma u 1) = 1 by
+              simpa only [g] using hu,
+            Real.sqrt_one, div_one]
+        _ = -(∫ u in (0 : Real)..ell, R u) := by
+          rw [intervalIntegral.integral_neg]
+    rw [← hint]
+    exact h
+  have hsub : HasDerivAt (fun s : Real ↦ T - s) (-1) tau := by
+    simpa only [sub_eq_add_neg, Pi.add_apply, Pi.neg_apply,
+      id_eq, zero_add] using
+      (hasDerivAt_const (x := tau) (c := T)).sub
+        (hasDerivAt_id (x := tau))
+  let d : Real := (-(∫ t in (0 : Real)..ell, R t)) * (-1)
+  have hphiDeriv : HasDerivAt phi d tau := by
+    simpa only [phi, d, Function.comp_apply] using hforward.comp tau hsub
+  have hd : d = ∫ t in (0 : Real)..ell, R t := by
+    dsimp only [d]
+    ring
+  refine ⟨phi, d, ?_, hupper, hphiDeriv, ?_⟩
+  · calc
+      phi tau = ell := hcontact
+      _ = (riemannianEDist I x y).toReal := rfl
+      _ = (riemannianEDistOf (I := I) g x y).toReal :=
+        congrArg ENNReal.toReal hdist.symm
+      _ = (riemannianEDistOf
+          (I := I) (S.base.metric (T - tau)) x y).toReal := rfl
+  · calc
+      d = ∫ t in (0 : Real)..ell, R t := hd
+      _ ≤ (Module.finrank Real E - 1 : Real) * (2 / r) +
+          A * (4 * r / 3) := hRicInt
+      _ = 2 * ((Module.finrank Real E : Real) - 1) *
+          ((2 / 3 : Real) * K * r + 1 / r) := by
+        simp only [A]
+        ring
+
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [IsManifold I 1 M] [IsManifold I 2 M] [T2Space M]
+  [SigmaCompactSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A fixed-endpoint upper support and first-order endpoint-distance bounds
+give the corresponding upper right slope bound for moving endpoints. -/
+theorem dist_moving_slope
+    [ConnectedSpace M]
+    (g : Real → SmoothRiemannianMetric I M)
+    (x y : Real → M) (phi : Real → Real)
+    {tau d C vx vy : Real}
+    (hcontact : phi tau =
+      (riemannianEDistOf (I := I) (g tau) (x tau) (y tau)).toReal)
+    (hupper :
+      (fun s ↦
+        (riemannianEDistOf (I := I) (g s) (x tau) (y tau)).toReal)
+          ≤ᶠ[𝓝[>] tau] phi)
+    (hphi : HasDerivAt phi d tau)
+    (hd : d ≤ C)
+    (hx : ∀ eps > 0, ∀ᶠ s in 𝓝[>] tau,
+      (riemannianEDistOf (I := I) (g s) (x s) (x tau)).toReal /
+          (s - tau) < vx + eps)
+    (hy : ∀ eps > 0, ∀ᶠ s in 𝓝[>] tau,
+      (riemannianEDistOf (I := I) (g s) (y tau) (y s)).toReal /
+          (s - tau) < vy + eps) :
+    ∀ eps > 0, ∀ᶠ s in 𝓝[>] tau,
+      slope
+          (fun u ↦
+            (riemannianEDistOf (I := I) (g u) (x u) (y u)).toReal)
+          tau s < C + vx + vy + eps := by
+  intro eps heps
+  let q : Real := eps / 3
+  have hq : 0 < q := by
+    dsimp only [q]
+    positivity
+  have hphiSlope : ∀ᶠ s in 𝓝[>] tau, slope phi tau s < d + q :=
+    (hphi.tendsto_slope.mono_left (nhdsGT_le_nhdsNE tau)).eventually_lt_const
+      (by linarith)
+  filter_upwards [hupper, hx q hq, hy q hq, hphiSlope,
+    self_mem_nhdsWithin] with s hsupper hsx hsy hsphi htaus
+  have hden : 0 < s - tau := sub_pos.mpr htaus
+  let F : Real → Real := fun u ↦
+    (riemannianEDistOf (I := I) (g u) (x u) (y u)).toReal
+  let X : Real :=
+    (riemannianEDistOf (I := I) (g s) (x s) (x tau)).toReal
+  let Y : Real :=
+    (riemannianEDistOf (I := I) (g s) (y tau) (y s)).toReal
+  have htri : F s ≤ X +
+      (riemannianEDistOf (I := I) (g s) (x tau) (y tau)).toReal + Y := by
+    calc
+      F s ≤ X +
+          (riemannianEDistOf (I := I) (g s) (x tau) (y s)).toReal := by
+        simpa only [F, X] using
+          edistOf_real_tri (I := I) (g s) (x s) (x tau) (y s)
+      _ ≤ X +
+          ((riemannianEDistOf (I := I) (g s) (x tau) (y tau)).toReal +
+            Y) := by
+        have htail :
+            (riemannianEDistOf (I := I) (g s) (x tau) (y s)).toReal ≤
+              (riemannianEDistOf (I := I) (g s) (x tau) (y tau)).toReal +
+                Y := by
+          simpa only [Y] using
+            edistOf_real_tri (I := I) (g s) (x tau) (y tau) (y s)
+        linarith
+      _ = X +
+          (riemannianEDistOf (I := I) (g s) (x tau) (y tau)).toReal + Y := by
+        ring
+  have hmove : F s ≤ X + phi s + Y := by
+    exact htri.trans (by gcongr)
+  have hFtau : F tau = phi tau := by
+    exact hcontact.symm
+  have hslope : slope F tau s ≤
+      X / (s - tau) + slope phi tau s + Y / (s - tau) := by
+    rw [slope_def_field, hFtau]
+    have hdiv := (div_le_div_iff_of_pos_right hden).2
+      (sub_le_sub_right hmove (phi tau))
+    rw [slope_def_field]
+    calc
+      (F s - phi tau) / (s - tau) ≤
+          (X + phi s + Y - phi tau) / (s - tau) := hdiv
+      _ = X / (s - tau) + (phi s - phi tau) / (s - tau) +
+          Y / (s - tau) := by ring
+  change slope F tau s < C + vx + vy + eps
+  calc
+    slope F tau s ≤
+        X / (s - tau) + slope phi tau s + Y / (s - tau) := hslope
+    _ < (vx + q) + (d + q) + (vy + q) := by
+      dsimp only [X, Y]
+      linarith
+    _ ≤ C + vx + vy + eps := by
+      dsimp only [q]
+      linarith
 
 end DifferentialGeometry.PDE.RicciFlow

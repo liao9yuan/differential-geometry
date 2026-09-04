@@ -129,6 +129,66 @@ theorem smoothTest_memH01
     MemH01 u Ω :=
   memW01p_of_contDiff_hasCompactSupport_subset hΩ hu.1 hu.2.1 hu.2.2
 
+namespace IsSolution
+
+/-- A function that is both a De Giorgi subsolution and supersolution has zero
+bilinear pairing against every signed smooth compactly supported test. -/
+theorem bilin_eq_zero_smooth
+    {Ω : Set E} (hΩ : IsOpen Ω)
+    {A : EllipticCoeff d Ω} {u : E → ℝ}
+    (hu : IsSolution A u)
+    (huw : MemW1pWitness 2 u Ω)
+    {φ : E → ℝ} (hφ : IsSmoothTestOn Ω φ) :
+    bilinFormOfCoeff A huw (smoothTestWitness hΩ hφ) = 0 := by
+  obtain ⟨η, hη_smooth, hη_compact, hη_range, hη_one, hη_support⟩ :=
+    exists_smooth_cutoff hφ.2.1 hΩ hφ.2.2
+  obtain ⟨C, hC⟩ := hφ.2.1.exists_bound_of_continuous hφ.1.continuous
+  have hC_nonneg : 0 ≤ C :=
+    (norm_nonneg (φ 0)).trans (hC 0)
+  have hη_nonneg : ∀ x, 0 ≤ η x := by
+    intro x
+    exact (hη_range ⟨x, rfl⟩).1
+  let hη : IsSmoothTestOn Ω η :=
+    ⟨hη_smooth, hη_compact, hη_support⟩
+  let hCη : IsSmoothTestOn Ω (fun x => C * η x) := hη.smul C
+  let hφCη : IsSmoothTestOn Ω (fun x => φ x + C * η x) := hφ.add hCη
+  let hCηw := smoothTestWitness hΩ hCη
+  let hφw := smoothTestWitness hΩ hφ
+  let hφCηw := smoothTestWitness hΩ hφCη
+  have hCη_nonneg : ∀ x, 0 ≤ C * η x := by
+    intro x
+    exact mul_nonneg hC_nonneg (hη_nonneg x)
+  have hφCη_nonneg : ∀ x, 0 ≤ φ x + C * η x := by
+    intro x
+    by_cases hx : x ∈ tsupport φ
+    · have habs : |φ x| ≤ C := by
+        simpa [Real.norm_eq_abs] using hC x
+      rw [hη_one x hx]
+      linarith [neg_abs_le (φ x)]
+    · have hφx : φ x = 0 := image_eq_zero_of_notMem_tsupport hx
+      simp [hφx, hCη_nonneg x]
+  have hCη_zero : bilinFormOfCoeff A huw hCηw = 0 := by
+    apply le_antisymm
+    · exact hu.1.2 huw _ (smoothTest_memH01 hΩ hCη) hCηw hCη_nonneg
+    · exact hu.2.2 huw _ (smoothTest_memH01 hΩ hCη) hCηw hCη_nonneg
+  have hφCη_zero : bilinFormOfCoeff A huw hφCηw = 0 := by
+    apply le_antisymm
+    · exact hu.1.2 huw _ (smoothTest_memH01 hΩ hφCη) hφCηw hφCη_nonneg
+    · exact hu.2.2 huw _ (smoothTest_memH01 hΩ hφCη) hφCηw hφCη_nonneg
+  have hsplit :
+      bilinFormOfCoeff A huw hφCηw =
+        bilinFormOfCoeff A huw hφw + bilinFormOfCoeff A huw hCηw := by
+    calc
+      bilinFormOfCoeff A huw hφCηw =
+          bilinFormOfCoeff A huw (hφw.add hCηw) :=
+        bilinFormOfCoeff_eq_right hΩ A huw hφCηw (hφw.add hCηw)
+      _ = bilinFormOfCoeff A huw hφw + bilinFormOfCoeff A huw hCηw :=
+        bilinFormOfCoeff_add_right A huw hφw hCηw
+  rw [hφCη_zero, hCη_zero] at hsplit
+  linarith
+
+end IsSolution
+
 /-- The `L²` gradient class carried by a Sobolev witness. -/
 noncomputable def gradLpOfWitness
     {Ω : Set E} {u : E → ℝ} (hu : MemW1pWitness 2 u Ω) :

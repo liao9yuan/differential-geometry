@@ -281,4 +281,171 @@ and next-theorem pointers in `L_GEOMETRY_PLAN.md`.
   whole remains below **1%**.  The whole Poincare program estimate remains
   **3--5%**.
 
+- 2026-08-22 (L4 Jacobi bridge, index form, and fixed-endpoint second
+  variation): the regularized variation equation is now fully connected to the
+  ordinary positive-backward-time equation.  `Jacobi.lean` proves
+  `lRegVar_jacobiAt`, `lRegVar_jacobi`, the initial-tangent field
+  `lRegJacobiField`, `lRegCurve_jacobi`, its normalization
+  `lRegJacobi_d0`, and the differential identity `lExpJacobi_eq`.
+
+  `SecondVariation.lean` defines the dynamic `lJacobiVel`, `lJacobiPair`,
+  `HasLJacobiAt`, and `IsLJacobi`.  The fully paired square-root bridge
+  `lJacobiPair_sq`, the moving-connection regularity theorem
+  `lJacobiVel_sq_diff`, and `lJacobi_of_sq` yield `lExp_jacobi` without
+  comparing whole moving bundle or Hom-valued objects.  The supporting
+  Ricci-flow connection layer separates the scalar pairing identities
+  `connBack_pair` and `connBack_along_sq` from `connBack_vec_sq`, which
+  reconstructs chart differentiability of the resulting moving vector field.
+
+  The L-index layer now contains `lIndexInt`, `lIndex`, pointwise and integral
+  symmetry, the diagonal formula, the scalar balance identity
+  `lIndex_balance`, zero interval, adjacent additivity with honest
+  integrability hypotheses, Green's identity, the fixed-endpoint form, and the
+  Jacobi boundary formula.  The scalar producers `lEuler_var_c1`,
+  `lVarJacobiVel_diff`, and `lVarInner_c1` generate the compact-interval
+  integrability needed by the concrete consumer.  Consequently
+  `lLength_second_var` is proved with only its natural inputs: a smooth
+  variation, a central L-geodesic, and fixed endpoints.  Its conclusion is the
+  exact equality between the second derivative of L-length and twice
+  `lIndex Y Y`; no nonnegativity is claimed without minimization or
+  no-conjugate-point input.
+
+  Focused verification is warning-free, the exported `SecondVariation` module
+  refresh passes, and the import-only L-geometry umbrella checks against the
+  refreshed artifact.  The edited lane contains no `sorry`, `admit`, new axiom,
+  reference-tree import, foundational class, generalized RFWS object, or
+  strengthened consumer assumption.
+
+  The exact next theorem is `lRegJacobi_unique` in `Jacobi.lean`: on a connected
+  regularized-time interval, two regularized L-Jacobi fields along the same
+  curve with equal value and equal frozen-metric covariant derivative at one
+  time agree throughout the interval.  It should be produced from the native
+  regularized phase/ODE uniqueness layer, not added as a consumer hypothesis.
+  This is the gate for defining L-conjugate points via the initial-tangent
+  differential of `lExp`, and then proving the remaining L4 output, positivity
+  of the index form before the first conjugate point.
+
+  Honest progress: `redVolume_anti` **0%**; `lLength_second_var` **100%**;
+  the broader L4 phase about **70--75%**; dedicated L-geometry machinery about
+  **48--52%**; reusable generic prerequisites about **88--92%**; P2 as a whole
+  remains below **1%**.  The whole Poincare program estimate remains **3--5%**.
+
+- 2026-08-22 (L4 regularized Jacobi uniqueness and conjugacy):
+  `LGeometry/JacobiUnique.lean` is focused-green and warning-free.
+  `lRegJacobi_unique` proves initial-value uniqueness on a connected open
+  regularized-time set by putting the field and its moving covariant velocity
+  into a fixed-chart linear ODE and propagating equality by an open/relatively
+  closed argument.  Its public hypotheses do not assume that the base curve is
+  an L-geodesic or add an acceleration equation.
+
+  The reusable coefficient input is now honest: `scalarHess_cont` and
+  `nablaRicci_cont` supply the joint scalar-Hessian and covariant-Ricci tensor
+  families, while `lRegJacCLM_cont` reconstructs the geometric velocity from
+  its fixed-chart coordinate and proves operator-norm continuity without
+  unfolding tensor or Hom representations.  The two generic regularity
+  producers and the uniqueness module pass focused verification; the new
+  exported modules have the targeted refreshes needed by their consumers.
+
+  `LGeometry/Conjugate.lean` is also focused-green and warning-free.  `IsLConj`
+  includes positive `lExp`-domain membership, so the totalized off-domain value
+  cannot create artificial conjugate points.  `isLConj_iff` and
+  `isLConj_iff_jac` give the kernel and regularized-Jacobi characterizations;
+  `lExpDeriv_inj` and `lExpDeriv_surj` give the finite-dimensional
+  nonconjugate differential consequences.
+
+  The exact next theorem is `lRegIndex_balance` in a new `RegIndex.lean`.
+  Define the square-root-time index density so that
+
+  ```text
+  d/ds <D_s Y,W> = 2 K_s(Y,W) + lRegJacobiPair(Y,W).
+  ```
+
+  This removes the positive-lower-endpoint restriction from the Green identity
+  and permits a genuine endpoint at `s = 0`.  The subsequent bridge to the
+  ordinary `lIndex` must prove the change of variables only almost everywhere:
+  the pointwise density identity need not hold at `s = 0`.  Do not claim index
+  positivity by adding a supplied semidefiniteness hypothesis; its remaining
+  input is the native L-minimizer and field-realization layer.
+
+  Honest progress: `redVolume_anti` **0%**; `lRegJacobi_unique` **100%**;
+  the conjugacy definition/characterization brick **100%**; the broader L4
+  phase about **78--82%**; dedicated L-geometry machinery about **52--56%**;
+  reusable generic prerequisites about **90--93%**; P2 as a whole remains below
+  **1%**.  The whole Poincare program estimate remains **3--5%**.
+
+- 2026-08-22 (L4 endpoint-zero regularized index): `Jacobi.lean` now exposes
+  `lRegJacobi_dyn_eq`, the residual-preserving moving-velocity identity; the
+  original `lRegJacobi_dyn` is its Jacobi-zero corollary, so the connection
+  calculus is not duplicated.  The refactored module is focused-green and its
+  exported artifact is refreshed.
+
+  The new `LGeometry/RegIndex.lean` is focused-green and warning-free.  It
+  defines `lRegIndexInt` and `lRegIndex`, proves pointwise and integral
+  symmetry, and establishes
+
+  ```text
+  d/ds <D_s Y,W> = 2 lRegIndexInt(Y,W) + lRegJacobiPair(Y,W).
+  ```
+
+  Consequently `lRegIndex_green` is valid on oriented intervals whose endpoint
+  may be `s = 0`; `lRegIndex_zero_ends` and `lRegIndex_jacobi` give the
+  fixed-endpoint and Jacobi boundary forms.  `lRegIndexInt_sq` identifies the
+  positive-time density under `tau = s^2`, while `lIndex_sq` proves the
+  interval identity by an almost-everywhere congruence that removes only the
+  singleton `s = 0`.  No false pointwise equality at zero is stated.  The
+  terminal L-geometry umbrella checks against the targeted `RegIndex` export.
+
+  The exact next theorem is `lRegAction_second` in a new `RegAction.lean`.
+  Define the direct regularized Lagrangian and action on a raw regularized
+  curve, prove the first-variation formula, and then show that a smooth
+  fixed-endpoint regularized variation about an `IsLRegCurveOn` central curve
+  has second derivative `2 * lRegIndex Y Y`.  Produce compact domination and
+  integrability internally; do not pass through an epsilon-to-zero limit and
+  do not add a supplied semidefiniteness or minimizer assumption.
+
+  Honest progress: `redVolume_anti` **0%**; the regularized index/Green/square
+  bridge **100%**; the broader L4 phase about **82--85%**; dedicated L-geometry
+  machinery about **55--59%**; reusable generic prerequisites about
+  **90--93%**; P2 as a whole remains below **1%**.  The whole Poincare program
+  estimate remains **3--5%**.
+
+- 2026-08-22 (L4 endpoint-zero regularized action): the new
+  `LGeometry/RegAction.lean` defines the direct square-root-time Lagrangian
+  `lRegLag` and action `lRegAction`.  `lRegDensity_eq` and `lLength_reg`
+  identify them with the earlier square-reparameterized density and ordinary
+  L-length.  `lRegLag_deriv`, `lRegAction_deriv`, `lRegEuler_var_c1`, and
+  `lRegAction_first` provide the pointwise, integral, regularity, and
+  integration-by-parts first-variation layers with compact domination
+  produced internally.
+
+  The capstone `lRegAction_second` is focused-green and exported through the
+  public L-geometry umbrella.  For a supplied smooth fixed-endpoint variation
+  about an `IsLRegCurveOn` central curve it proves that the second derivative
+  of regularized action is `2 * lRegIndex Y Y`.  The interval may have an
+  endpoint at `s = 0`.  Jacobi integrability comes from the joint Euler
+  regularity and `lRegEuler_deriv`; index-density integrability is proved
+  internally from the independent metric/curve-time `C^2` theorem
+  `lVarMetric_c2`, `inner_deriv_at`, and `lRegIndex_balance`.  No epsilon limit,
+  supplied domination, minimizer wrapper, or semidefiniteness hypothesis was
+  introduced.  Focused checks, the targeted `RegAction` export, and the
+  import-only umbrella check all pass without warnings.
+
+  The exact next theorem is `lRegIndex_nonneg_var` in a new
+  `LGeometry/Minimizer.lean`: an actual smooth fixed-endpoint variation whose
+  regularized action has a local minimum at the central parameter has
+  nonnegative diagonal `lRegIndex`.  It should be a direct consequence of
+  `lRegAction_deriv`, `lRegAction_second`, and the native real-calculus theorem
+  `second_deriv_nonneg_of_isLocalMin`, not a supplied semidefinite wrapper.
+  The following producer is the generic fixed-endpoint field-realization
+  theorem needed to apply this result to an arbitrary smooth field; the
+  existing complete-metric exponential producer is mathematically stronger
+  than necessary, so the local ordinary-exponential route is being checked in
+  the generic variation layer before adding L-specific assumptions.
+
+  Honest progress: `redVolume_anti` **0%**; the regularized action/second-
+  variation brick **100%**; the broader L4 phase about **86--89%**; dedicated
+  L-geometry machinery about **58--62%**; reusable generic prerequisites about
+  **90--93%**; P2 as a whole remains below **1%**.  The whole Poincare program
+  estimate remains **3--5%**.
+
 <!-- End of the verbatim archived block. -->

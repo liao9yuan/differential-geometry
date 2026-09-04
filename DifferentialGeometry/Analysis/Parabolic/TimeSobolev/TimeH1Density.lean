@@ -222,12 +222,12 @@ private lemma flat_seq
   obtain ⟨N, hN⟩ := hevent
   exact ⟨N, fun n hn => (hdist n).trans (hN n hn)⟩
 
-/-- Every positive-length vector-valued time-`H¹` curve is a strong limit of global `C¹`
+/-- Every positive-length vector-valued time-`H¹` curve is a strong limit of global smooth
 curves with its exact endpoint traces and constant germs at both endpoints. -/
-theorem exists_flat_dense
+theorem exists_flat_smooth
     {T : ℝ} (hT : 0 < T) (u : timeH1 X T) :
     ∃ w : ℕ → timeH1 X T, ∃ f : ℕ → ℝ → X,
-      (∀ n, ContDiff ℝ 1 (f n)) ∧
+      (∀ n, ContDiff ℝ ∞ (f n)) ∧
         (∀ n, EqOn (w n).toFun (f n) (Icc (0 : ℝ) T)) ∧
         (∀ n, f n 0 = u.toFun 0) ∧ (∀ n, f n T = u.toFun T) ∧
         (∀ n, f n =ᶠ[𝓝 (0 : ℝ)] fun _ => u.toFun 0) ∧
@@ -287,9 +287,9 @@ theorem exists_flat_dense
     filter_upwards [hgT n, (unitBump_zero T hT).2] with t hgt hbt
     simp only [d, b, hgt, hbt, Pi.zero_apply, zero_smul, add_zero]
   let f : ℕ → ℝ → X := fun n t => u.toFun 0 + ∫ s in (0 : ℝ)..t, d n s
-  have hf : ∀ n, ContDiff ℝ 1 (f n) := by
+  have hf : ∀ n, ContDiff ℝ ∞ (f n) := by
     intro n
-    rw [contDiff_one_iff_deriv]
+    rw [contDiff_infty_iff_deriv]
     constructor
     · exact (differentiable_const (c := u.toFun 0)).add
         (intervalIntegral.differentiable_integral_of_continuous (hd n).continuous)
@@ -300,7 +300,9 @@ theorem exists_flat_dense
           (hd n).continuous.aestronglyMeasurable.stronglyMeasurableAtFilter
           (hd n).continuous.continuousAt).const_add (u.toFun 0)).deriv
       rw [hderiv]
-      exact (hd n).continuous
+      exact hd n
+  have hf1 : ∀ n, ContDiff ℝ 1 (f n) := fun n =>
+    (hf n).of_le (by norm_num : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
   have hf0 : ∀ n, f n 0 = u.toFun 0 := fun n => by simp only [f, integral_same, add_zero]
   have htime : ∀ n, ∫ t in (0 : ℝ)..T, d n t =
       TimeSobolev.timeIntegral X T u.deriv := by
@@ -340,7 +342,7 @@ theorem exists_flat_dense
     rw [hrebase]
     simpa only [hfT n] using prim_germ (hd n).continuous (hdT n) (f n T)
   let w : ℕ → timeH1 X T := fun n =>
-    timeH1.ofContDiffOn hT.le (f n) (hf n).contDiffOn
+    timeH1.ofContDiffOn hT.le (f n) (hf1 n).contDiffOn
   have hc_rep : ∀ n, c n =ᵐ[timeMeasure T] fun t => b t • δ n := by
     intro n
     dsimp only [c]
@@ -351,7 +353,7 @@ theorem exists_flat_dense
   have hwderiv : ∀ n, (w n).deriv = z n + c n := by
     intro n
     apply Lp.ext
-    filter_upwards [timeH1.deriv_ofContDiffOn hT.le (f n) (hf n).contDiffOn,
+    filter_upwards [timeH1.deriv_ofContDiffOn hT.le (f n) (hf1 n).contDiffOn,
       hzg n, hc_rep n, Lp.coeFn_add (z n) (c n)]
       with t hwt hzt hct hsum
     have hderiv : _root_.deriv (f n) t = d n t := by
@@ -382,7 +384,25 @@ theorem exists_flat_dense
       nlinarith [norm_nonneg (w n - u), norm_nonneg ((w n).deriv - u.deriv)]
     simpa only [hnorm] using hnormD
   refine ⟨w, f, hf, ?_, hf0, hfT, hfg0, hfgT, hw, hwD⟩
-  exact fun n => timeH1.toFun_ofContDiffOn hT.le (f n) (hf n).contDiffOn
+  exact fun n => timeH1.toFun_ofContDiffOn hT.le (f n) (hf1 n).contDiffOn
+
+/-- Every positive-length vector-valued time-`H¹` curve is a strong limit of global `C¹`
+curves with its exact endpoint traces and constant germs at both endpoints. -/
+theorem exists_flat_dense
+    {T : ℝ} (hT : 0 < T) (u : timeH1 X T) :
+    ∃ w : ℕ → timeH1 X T, ∃ f : ℕ → ℝ → X,
+      (∀ n, ContDiff ℝ 1 (f n)) ∧
+        (∀ n, EqOn (w n).toFun (f n) (Icc (0 : ℝ) T)) ∧
+        (∀ n, f n 0 = u.toFun 0) ∧ (∀ n, f n T = u.toFun T) ∧
+        (∀ n, f n =ᶠ[𝓝 (0 : ℝ)] fun _ => u.toFun 0) ∧
+        (∀ n, f n =ᶠ[𝓝 T] fun _ => u.toFun T) ∧
+        Tendsto w atTop (𝓝 u) ∧
+        Tendsto (fun n => (w n).deriv) atTop (𝓝 u.deriv) := by
+  obtain ⟨w, f, hf, hwf, hf0, hfT, hfg0, hfgT, hw, hwD⟩ :=
+    exists_flat_smooth hT u
+  exact ⟨w, f, fun n => (hf n).of_le
+      (by norm_num : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞)),
+    hwf, hf0, hfT, hfg0, hfgT, hw, hwD⟩
 
 end
 

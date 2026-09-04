@@ -111,13 +111,12 @@ private theorem lscAt_of_seq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
+  [CompactSpace M] in
 private theorem exists_cost_curve
     [ConnectedSpace M]
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S) (T : Real) (x y : M)
-    (tau : Real) (htau : 0 < tau)
-    (hslab : Icc (T - tau) T ⊆ D.regular)
+    (T : Real) (x y : M) (tau : Real) (htau : 0 < tau)
     (A : Real) (hA : lCost S T x y tau < A) :
     ∃ alpha : Real → M,
       ContMDiff (modelWithCornersSelf Real Real) I 1 alpha ∧
@@ -147,24 +146,21 @@ private theorem exists_cost_curve
     simp only [alpha₀, zero_div, Path.extend_zero]
   have hb₀ : alpha₀ b = y := by
     simp only [alpha₀, div_self hb.ne', Path.extend_one]
-  have hback : ∀ s ∈ Icc (0 : Real) b,
-      T - s ^ 2 ∈ Icc (T - tau) T := by
-    simpa only [b] using sqrt_back_mem (T := T) htau.le
-  have htime : Icc (T - tau) T ⊆ D.carrier :=
-    fun _ hr ↦ D.regular_subset (hslab hr)
-  obtain ⟨gamma, _m, _t, _p, _uLim, beta, _u, _hgamma, _hga, _hgb,
-      heq, _hmin, _htmono, _ht0, _htlast, _hsrc, _hrep, hbeta,
-      hbetaa, hbetab, _hsrcBeta, _hrepBeta, _hu, _hunifBeta, hbetaAct⟩ :=
-    exists_lRegMinC1 (I := I) S hS T (T - tau) T 0 b hb.le htime hback
-      x y alpha₀ halpha₀ ha₀ hb₀ (fun s hs ↦ hslab (hback s hs))
-  have hgammaA : lRegAction S T gamma 0 b < A := by
-    rw [heq, ← lCost_eq_reg (I := I) S T x y tau htau.le]
-    exact hA
-  have hev : ∀ᶠ n in atTop, lRegAction S T (beta n) 0 b < A :=
-    hbetaAct.eventually (Iio_mem_nhds hgammaA)
-  obtain ⟨n, hn⟩ := hev.exists
-  exact ⟨beta n, hbeta n, hbetaa n, by simpa only [b] using hbetab n,
-    by simpa only [b] using hn⟩
+  let costs : Set Real := {r : Real | ∃ alpha : Real → M,
+    ContMDiff (modelWithCornersSelf Real Real) I 1 alpha ∧
+      alpha 0 = x ∧ alpha (Real.sqrt tau) = y ∧
+        lLength S T (sqrtReparam alpha) 0 tau = r}
+  have hcosts : costs.Nonempty := by
+    refine ⟨lLength S T (sqrtReparam alpha₀) 0 tau, alpha₀,
+      halpha₀, ha₀, ?_, rfl⟩
+    simpa only [b] using hb₀
+  have hcostA : sInf costs < A := by
+    simpa only [lCost, costs] using hA
+  obtain ⟨r, hr, hrA⟩ := exists_lt_of_csInf_lt hcosts hcostA
+  rcases hr with ⟨alpha, halpha, hstart, hend, rfl⟩
+  refine ⟨alpha, halpha, hstart, hend, ?_⟩
+  rw [← lLength_sqrt (I := I) S T alpha tau htau.le]
+  exact hrA
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -180,7 +176,7 @@ private theorem lCost_param_usc
   apply uscAt_of_seq
   intro q hq A hA
   obtain ⟨alpha, halpha, hstart, hend, halphaA⟩ :=
-    exists_cost_curve (I := I) S hS T x y tau htau hslab A hA
+    exists_cost_curve (I := I) S T x y tau htau A hA
   have hT : Tendsto (fun n ↦ (q n).1) atTop (nhds T) := by
     simpa only using continuous_fst.continuousAt.tendsto.comp hq
   have hx : Tendsto (fun n ↦ (q n).2) atTop (nhds x) := by
@@ -203,7 +199,7 @@ private theorem lCost_y_usc
   apply uscAt_of_seq
   intro q hq A hA
   obtain ⟨alpha, halpha, hstart, hend, halphaA⟩ :=
-    exists_cost_curve (I := I) S hS T x y tau htau hslab A hA
+    exists_cost_curve (I := I) S T x y tau htau A hA
   exact lCost_lt_event (I := I) S hS T (T - tau) T tau htau
     (fun _ hr ↦ D.regular_subset (hslab hr))
     (sqrt_back_mem (T := T) htau.le) x y alpha halpha hstart hend
@@ -272,6 +268,18 @@ private theorem redDensity_y_lsc
   simpa only [Function.comp_apply, phi, redDensity, redLength, neg_div] using
     hphi.comp_upperSemicontinuous_antitone
       (lCost_y_usc (I := I) S hS T x tau htau hslab) hphiAnti
+
+omit [NeZero (Module.finrank Real E)] in
+/-- At positive backward time, reduced density is measurable in its target
+point on a regular backward-time slab. -/
+theorem redDensity_meas
+    [ConnectedSpace M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : Real) (x : M)
+    (tau : Real) (htau : 0 < tau)
+    (hslab : Icc (T - tau) T ⊆ D.regular) :
+    Measurable (fun y : M ↦ redDensity S T x y tau) :=
+  (redDensity_y_lsc (I := I) S hS T x tau htau hslab).measurable
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] in
 private theorem chartDensity_time_cont

@@ -1,8 +1,7 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
-import DifferentialGeometry.Geometry.Geodesic.Uniqueness
-import Mathlib.Topology.Connected.Clopen
+import DifferentialGeometry.Geometry.Geodesic.GlobalUniqueness
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
@@ -53,9 +52,9 @@ theorem maximalGeodesicWitness_zero_all_times
     Set.mem_univ _, Set.mem_univ _, ?_⟩
   refine ⟨fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), ?_, rfl, ?_⟩
   · intro _; rfl
-  · have hvf_zero : geodesicVectorFieldChart (I := I) g p
+  · have hvf_zero : geodesicVectorField (I := I) g
         (⟨p, (0 : E)⟩ : TangentBundle I M) = 0 :=
-      geodesicVectorFieldChart_zero_section (I := I) g p
+      geodesicVectorField_zero_section (I := I) g p
     exact (isMIntegralCurve_const hvf_zero).isMIntegralCurveOn Set.univ
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
@@ -110,82 +109,27 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
 private lemma isMIntegralCurve_const_zero_section
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsMIntegralCurve (fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M))
-      (geodesicVectorFieldChart (I := I) g p) :=
-  isMIntegralCurve_const (geodesicVectorFieldChart_zero_section (I := I) g p)
+      (geodesicVectorField (I := I) g) :=
+  isMIntegralCurve_const (geodesicVectorField_zero_section (I := I) g p)
 
-omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 theorem isMIntegralCurveOn_zero_section_eq_const
     (g : SmoothRiemannianMetric I M) (p : M)
     {f : ℝ → TangentBundle I M} {J : Set ℝ}
     (hJ_open : IsOpen J) (hJ_conn : IsPreconnected J) (h0J : (0 : ℝ) ∈ J)
-    (hf : IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g p) J)
+    (hf : IsMIntegralCurveOn f (geodesicVectorField (I := I) g) J)
     (hf0 : f 0 = (⟨p, (0 : E)⟩ : TangentBundle I M)) :
     ∀ t ∈ J, f t = (⟨p, (0 : E)⟩ : TangentBundle I M) := by
-  classical
   set c : ℝ → TangentBundle I M :=
     fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M) with hc_def
-  have hc_int : IsMIntegralCurve c (geodesicVectorFieldChart (I := I) g p) :=
+  have hc_int : IsMIntegralCurve c (geodesicVectorField (I := I) g) :=
     isMIntegralCurve_const_zero_section (I := I) g p
-  haveI : PreconnectedSpace (↥J) :=
-    isPreconnected_iff_preconnectedSpace.mp hJ_conn
-  set Tsub : Set (↥J) := {t : ↥J | f (t : ℝ) = c (t : ℝ)} with hTsub_def
-  suffices hTsub_univ : Tsub = Set.univ by
-    intro t ht
-    have ht_sub : (⟨t, ht⟩ : ↥J) ∈ Tsub := by
-      have hu : (⟨t, ht⟩ : ↥J) ∈ (Set.univ : Set ↥J) := Set.mem_univ _
-      rw [← hTsub_univ] at hu
-      exact hu
-    have hft : f t = c t := ht_sub
-    simpa [hc_def] using hft
-  have h0_mem : (⟨0, h0J⟩ : ↥J) ∈ Tsub := by
-    change f 0 = c 0
-    rw [hf0, hc_def]
-  have hf_cont : ContinuousOn f J := hf.continuousOn
-  have hc_cont : Continuous c := continuous_const
-  have hf_sub_cont : Continuous (fun t : ↥J => f (t : ℝ)) := by
-    refine continuousOn_iff_continuous_restrict.mp ?_
-    exact hf_cont
-  have hc_sub_cont : Continuous (fun t : ↥J => c (t : ℝ)) :=
-    hc_cont.comp continuous_subtype_val
-  haveI : T2Space (TangentBundle I M) := inferInstance
-  have hTsub_closed : IsClosed Tsub := by
-    have hdiag : IsClosed {p : TangentBundle I M × TangentBundle I M | p.1 = p.2} :=
-      isClosed_diagonal
-    have hpair_cont : Continuous
-        (fun t : ↥J => (f (t : ℝ), c (t : ℝ))) :=
-      hf_sub_cont.prodMk hc_sub_cont
-    have : Tsub = (fun t : ↥J => (f (t : ℝ), c (t : ℝ))) ⁻¹'
-        {p : TangentBundle I M × TangentBundle I M | p.1 = p.2} := by
-      ext t; rfl
-    rw [this]
-    exact hdiag.preimage hpair_cont
-  have hTsub_open : IsOpen Tsub := by
-    rw [isOpen_iff_mem_nhds]
-    intro t₀ ht₀
-    have hft₀ : f (t₀ : ℝ) = (⟨p, (0 : E)⟩ : TangentBundle I M) := ht₀
-    have hp_src : (f (t₀ : ℝ)).proj ∈ (chartAt H p).source := by
-      rw [hft₀]
-      exact mem_chart_source H p
-    have hf_at : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g p)
-        (t₀ : ℝ) :=
-      hf.isMIntegralCurveAt (hJ_open.mem_nhds t₀.2)
-    have hc_at : IsMIntegralCurveAt c (geodesicVectorFieldChart (I := I) g p)
-        (t₀ : ℝ) := hc_int.isMIntegralCurveAt _
-    have hfc_eq : f (t₀ : ℝ) = c (t₀ : ℝ) := hft₀
-    have hf_eq_c : f =ᶠ[𝓝 (t₀ : ℝ)] c :=
-      isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
-        (I := I) (g := g) (α := p) (t₀ := (t₀ : ℝ))
-        (f₁ := f) (f₂ := c) hp_src hf_at hc_at hfc_eq
-    rcases Filter.eventually_iff_exists_mem.mp hf_eq_c with ⟨U, hU_nhds, hU_eq⟩
-    rcases mem_nhds_iff.mp hU_nhds with ⟨V, hVU, hV_open, hV_mem⟩
-    refine Filter.mem_of_superset (hV_open.preimage continuous_subtype_val
-      |>.mem_nhds hV_mem) ?_
-    intro s hs
-    change f (s : ℝ) = c (s : ℝ)
-    exact hU_eq _ (hVU hs)
-  have hTsub_clopen : IsClopen Tsub := ⟨hTsub_closed, hTsub_open⟩
-  exact hTsub_clopen.eq_univ ⟨_, h0_mem⟩
+  have hc_on : IsMIntegralCurveOn c (geodesicVectorField (I := I) g) J :=
+    hc_int.isMIntegralCurveOn J
+  have hfc : Set.EqOn f c J :=
+    gvf_eqOn (I := I) g hJ_open hJ_conn h0J hf hc_on (by simpa [hc_def] using hf0)
+  intro t ht
+  simpa [hc_def] using hfc ht
 
 end ZeroVelocityPropagation
 

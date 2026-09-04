@@ -39,6 +39,33 @@ theorem riemannianEDistOf_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The intrinsic extended distance of a chosen smooth Riemannian metric is symmetric. -/
+theorem edistOf_comm
+    (g : SmoothRiemannianMetric I M) (x y : M) :
+    riemannianEDistOf (I := I) g x y =
+      riemannianEDistOf (I := I) g y x := by
+  letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨g.toRiemannianMetric⟩
+  change Manifold.riemannianEDist I x y = Manifold.riemannianEDist I y x
+  exact Manifold.riemannianEDist_comm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The intrinsic extended distance of a chosen smooth Riemannian metric
+satisfies the triangle inequality. -/
+theorem edistOf_triangle
+    (g : SmoothRiemannianMetric I M) (x y z : M) :
+    riemannianEDistOf (I := I) g x z ≤
+      riemannianEDistOf (I := I) g x y +
+        riemannianEDistOf (I := I) g y z := by
+  letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨g.toRiemannianMetric⟩
+  change Manifold.riemannianEDist I x z ≤
+    Manifold.riemannianEDist I x y + Manifold.riemannianEDist I y z
+  exact Manifold.riemannianEDist_triangle
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem edistOf_iInf
     (g : SmoothRiemannianMetric I M) (x y : M) :
     riemannianEDistOf (I := I) g x y =

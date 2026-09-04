@@ -207,6 +207,19 @@ theorem hypSnRatio_tendsto (q : ℝ) :
     simp [hypSn, div_eq_inv_mul, smul_eq_mul]
   · simp [hypSnDeriv]
 
+/-- The hyperbolic model density has Euclidean normalization at the pole. -/
+theorem hypDensity_pole (q : ℝ) (d : ℕ) :
+    Tendsto (fun r => hypDensity q d r / r ^ d)
+      (𝓝[>] (0 : ℝ)) (𝓝 1) := by
+  have hpow := (hypSnRatio_tendsto q).pow d
+  rw [one_pow] at hpow
+  have hfun : (fun r : ℝ => hypDensity q d r / r ^ d) =
+      fun r : ℝ => (hypSn q r / r) ^ d := by
+    funext r
+    simp only [hypDensity, div_pow]
+  rw [hfun]
+  exact hpow
+
 theorem hypSn_le_two (q : ℝ) :
     ∀ᶠ r in 𝓝[>] (0 : ℝ), hypSn q r ≤ 2 * r := by
   have hratio := (hypSnRatio_tendsto q).eventually

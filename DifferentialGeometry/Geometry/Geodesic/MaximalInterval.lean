@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.Existence
-import DifferentialGeometry.Geometry.Geodesic.Uniqueness
+import DifferentialGeometry.Geometry.Geodesic.GlobalVectorField
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -24,24 +24,54 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+/-- A projected integral curve of the global geodesic vector field with prescribed initial lift. -/
 def IsGeodesicOnWithInitial
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (s : Set ℝ)
     (p : M) (v : TangentSpace I p) : Prop :=
   ∃ f : ℝ → TangentBundle I M,
     (∀ t, (f t).proj = γ t) ∧
     f 0 = (⟨p, v⟩ : TangentBundle I M) ∧
-    IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g p) s
+    IsMIntegralCurveOn f (geodesicVectorField (I := I) g) s
 
 omit [NeZero (Module.finrank ℝ E)] in
+/-- Global geodesic-vector-field support gives the chart-local geodesic predicate at an
+interior time. -/
+lemma IsGeodesicOnWithInitial.geoAt
+    [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
+    {p : M} {v : TangentSpace I p} {t : ℝ}
+    (hγ : IsGeodesicOnWithInitial (I := I) g γ s p v) (ht : s ∈ 𝓝 t) :
+    IsGeodesicAt (I := I) g γ t := by
+  obtain ⟨f, hproj, _, hf⟩ := hγ
+  let α := γ t
+  have hft : IsMIntegralCurveAt f (geodesicVectorField (I := I) g) t :=
+    hf.isMIntegralCurveAt ht
+  have hproj_cont : ContinuousAt (fun u => (f u).proj) t :=
+    (FiberBundle.continuous_proj E (TangentSpace I)).continuousAt.comp hft.continuousAt
+  have hsrc_t : (f t).proj ∈ (chartAt H α).source := by
+    rw [hproj t]
+    exact mem_chart_source H (γ t)
+  have hsrc : (fun u => (f u).proj) ⁻¹' (chartAt H α).source ∈ 𝓝 t :=
+    hproj_cont.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hsrc_t)
+  have hf_chart : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g α) t := by
+    rw [isMIntegralCurveAt_iff]
+    refine ⟨s ∩ (fun u => (f u).proj) ⁻¹' (chartAt H α).source,
+      inter_mem ht hsrc, ?_⟩
+    apply (chart_vf_on_iff (I := I) g α (fun u hu => hu.2)).mpr
+    exact hf.mono inter_subset_left
+  exact ⟨α, f, hproj, hsrc_t, hf_chart⟩
+
+omit [NeZero (Module.finrank ℝ E)] in
+/-- Compatibility form of `IsGeodesicOnWithInitial.geoAt`; the old fixed-chart source
+hypothesis is no longer needed. -/
 lemma IsGeodesicOnWithInitial.isGeodesicAt
+    [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
     {p : M} {v : TangentSpace I p} {t : ℝ}
     (hγ : IsGeodesicOnWithInitial (I := I) g γ s p v) (ht : s ∈ 𝓝 t)
-    (ht_src : γ t ∈ (chartAt H p).source) :
-    IsGeodesicAt (I := I) g γ t := by
-  obtain ⟨f, hproj, _, hf⟩ := hγ
-  refine ⟨p, f, hproj, ?_, hf.isMIntegralCurveAt ht⟩
-  rw [hproj t]; exact ht_src
+    (_ht_src : γ t ∈ (chartAt H p).source) :
+    IsGeodesicAt (I := I) g γ t :=
+  hγ.geoAt ht
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesicOnWithInitial.start_eq
@@ -102,8 +132,18 @@ omit [NeZero (Module.finrank ℝ E)] in
 lemma exists_maximalGeodesicWitness_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     MaximalGeodesicWitness (I := I) g p v 0 := by
+  have hsmooth : ContMDiffAt I.tangent I.tangent.tangent 1
+      (fun q : TangentBundle I M =>
+        (⟨q, geodesicVectorField (I := I) g q⟩ :
+          TangentBundle I.tangent (TangentBundle I M)))
+      (⟨p, v⟩ : TangentBundle I M) :=
+    (geodesicVF_smooth (I := I) g).contMDiffAt.of_le
+      (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   obtain ⟨f, hf0, hf⟩ :=
-    exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) g p v
+    exists_isMIntegralCurveAt_of_contMDiffAt_boundaryless
+      (I := I.tangent) (M := TangentBundle I M)
+      (v := geodesicVectorField (I := I) g)
+      (t₀ := (0 : ℝ)) (x₀ := (⟨p, v⟩ : TangentBundle I M)) hsmooth
   rw [isMIntegralCurveAt_iff'] at hf
   obtain ⟨ε, hε, hf_on⟩ := hf
   refine ⟨projectCurve (I := I) f, Metric.ball (0 : ℝ) ε,
@@ -196,34 +236,54 @@ section MaximalGeodesicAtTime
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
-theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+/-- A maximal-interval witness is geodesic at the selected supported time. -/
+theorem exists_geoAt_of_mem
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
-    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
-    (ht_src : ∀ (γ : ℝ → M) (J : Set ℝ),
-      IsGeodesicOnWithInitial (I := I) g γ J p v →
-        γ t ∈ (chartAt H p).source) :
+    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v) :
     ∃ (γ : ℝ → M) (J : Set ℝ), IsOpen J ∧ (0 : ℝ) ∈ J ∧ t ∈ J ∧
       IsGeodesicOnWithInitial (I := I) g γ J p v ∧
       IsGeodesicAt (I := I) g γ t := by
   obtain ⟨γ, J, hJ, _hJ_conn, h0, ht, hγ⟩ := h
   refine ⟨γ, J, hJ, h0, ht, hγ, ?_⟩
-  exact hγ.isGeodesicAt (hJ.mem_nhds ht) (ht_src γ J hγ)
+  exact hγ.geoAt (hJ.mem_nhds ht)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
-theorem exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+/-- Compatibility form of `exists_geoAt_of_mem`; its former source hypothesis is redundant. -/
+theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
-    (ht_src : ∀ (γ : ℝ → M) (J : Set ℝ),
+    (_ht_src : ∀ (γ : ℝ → M) (J : Set ℝ),
       IsGeodesicOnWithInitial (I := I) g γ J p v →
         γ t ∈ (chartAt H p).source) :
+    ∃ (γ : ℝ → M) (J : Set ℝ), IsOpen J ∧ (0 : ℝ) ∈ J ∧ t ∈ J ∧
+      IsGeodesicOnWithInitial (I := I) g γ J p v ∧
+      IsGeodesicAt (I := I) g γ t :=
+  exists_geoAt_of_mem (I := I) h
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+/-- A maximal-interval witness is geodesic both initially and at a selected supported time. -/
+theorem exists_geoAt_zero
+    {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
+    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v) :
     ∃ γ : ℝ → M, γ 0 = p ∧ IsGeodesicAt (I := I) g γ 0 ∧
       IsGeodesicAt (I := I) g γ t := by
   obtain ⟨γ, J, hJ, h0, ht, hγ_init, hγ_at⟩ :=
-    exists_isGeodesicAt_of_mem_maximalGeodesicInterval (I := I) h ht_src
+    exists_geoAt_of_mem (I := I) h
   refine ⟨γ, hγ_init.start_eq, ?_, hγ_at⟩
-  refine hγ_init.isGeodesicAt (hJ.mem_nhds h0) ?_
-  rw [hγ_init.start_eq]; exact mem_chart_source H p
+  exact hγ_init.geoAt (hJ.mem_nhds h0)
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+/-- Compatibility form of `exists_geoAt_zero`; its former source hypothesis is redundant. -/
+theorem exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval
+    {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
+    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
+    (_ht_src : ∀ (γ : ℝ → M) (J : Set ℝ),
+      IsGeodesicOnWithInitial (I := I) g γ J p v →
+        γ t ∈ (chartAt H p).source) :
+    ∃ γ : ℝ → M, γ 0 = p ∧ IsGeodesicAt (I := I) g γ 0 ∧
+      IsGeodesicAt (I := I) g γ t :=
+  exists_geoAt_zero (I := I) h
 
 end MaximalGeodesicAtTime
 
@@ -232,12 +292,9 @@ section MaximalGeodesicMain
 variable [I.Boundaryless] [CompleteSpace E]
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem maximalGeodesic_structure_of_footInSource
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
-    (hsrc : ∀ t ∈ maximalGeodesicInterval (I := I) g p v,
-      ∀ (γ : ℝ → M) (J : Set ℝ),
-        IsGeodesicOnWithInitial (I := I) g γ J p v →
-          γ t ∈ (chartAt H p).source) :
+/-- The maximal geodesic construction supplies local geodesics at every supported time. -/
+theorem maximalGeo_structure
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     let I_max := maximalGeodesicInterval (I := I) g p v
     let γ_max := maximalGeodesic (I := I) g p v
     IsOpen I_max ∧ (0 : ℝ) ∈ I_max ∧ γ_max 0 = p ∧
@@ -250,8 +307,23 @@ theorem maximalGeodesic_structure_of_footInSource
   · intro t ht
     exact maximalGeodesic_of_not_mem (I := I) ht
   · intro t ht
-    exact exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval (I := I) ht
-      (hsrc t ht)
+    exact exists_geoAt_zero (I := I) ht
+
+omit [NeZero (Module.finrank ℝ E)] in
+/-- Compatibility form of `maximalGeo_structure`; fixed-chart source control is no longer needed. -/
+theorem maximalGeodesic_structure_of_footInSource
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    (_hsrc : ∀ t ∈ maximalGeodesicInterval (I := I) g p v,
+      ∀ (γ : ℝ → M) (J : Set ℝ),
+        IsGeodesicOnWithInitial (I := I) g γ J p v →
+          γ t ∈ (chartAt H p).source) :
+    let I_max := maximalGeodesicInterval (I := I) g p v
+    let γ_max := maximalGeodesic (I := I) g p v
+    IsOpen I_max ∧ (0 : ℝ) ∈ I_max ∧ γ_max 0 = p ∧
+      (∀ t ∉ I_max, γ_max t = p) ∧
+      (∀ t ∈ I_max, ∃ γ : ℝ → M, γ 0 = p ∧
+        IsGeodesicAt (I := I) g γ 0 ∧ IsGeodesicAt (I := I) g γ t) :=
+  maximalGeo_structure (I := I) g p v
 
 end MaximalGeodesicMain
 

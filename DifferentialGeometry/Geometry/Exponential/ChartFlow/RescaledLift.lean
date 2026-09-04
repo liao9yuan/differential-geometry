@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLif
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.InverseManifoldChain
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.PreconnectedPropagation
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowData
+import DifferentialGeometry.Geometry.Geodesic.GlobalUniqueness
+import DifferentialGeometry.Geometry.Geodesic.GlobalVectorField
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
 open DifferentialGeometry.Geometry.Curvature
@@ -508,9 +510,22 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
   obtain ⟨ε, hε, hg_on, hgeo, hg_src⟩ :=
     exists_picardLift_witness_interval (I := I) (g := g) (p := p)
       (v := t' • v) hg0 hg_int
+  have hF_src_J : ∀ s' ∈ J,
+      (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s').proj ∈
+        (chartAt H p).source := by
+    intro s' hs'_J
+    have hts' : t' * s' ∈ Set.Ioo (-T) T :=
+      mul_mem_Ioo_of_pos_of_lt ht'_pos hs'_J
+    have hΦ_target_s' := hΦ_target_Icc (t' * s') (Set.Ioo_subset_Icc_self hts')
+    exact chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p v t' s'
+      hΦ_target_s'
+  have hF_global_J : IsMIntegralCurveOn
+      (chartFlowOrbitLiftRescaled (I := I) Φ p t' v)
+      (geodesicVectorField (I := I) g) J :=
+    (chart_vf_on_iff (I := I) g p hF_src_J).mp hF_int
   have hgeo_F : IsGeodesicOnWithInitial (I := I) g
       (fun s => (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s).proj) J p (t' • v) := by
-    refine ⟨chartFlowOrbitLiftRescaled (I := I) Φ p t' v, ?_, hF0, hF_int⟩
+    refine ⟨chartFlowOrbitLiftRescaled (I := I) Φ p t' v, ?_, hF0, hF_global_J⟩
     intro _; rfl
   have hs_witness : MaximalGeodesicWitness (I := I) g p (t' • v) s :=
     ⟨fun s => (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s).proj,
@@ -530,26 +545,15 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
   have h0_K : (0 : ℝ) ∈ K := ⟨h0_J, h0_J'⟩
   have hs_K : s ∈ K := ⟨hs, hs_J'⟩
   have hF_on_K : IsMIntegralCurveOn (chartFlowOrbitLiftRescaled (I := I) Φ p t' v)
-      (geodesicVectorFieldChart (I := I) g p) K :=
-    hF_int.mono Set.inter_subset_left
+      (geodesicVectorField (I := I) g) K :=
+    hF_global_J.mono Set.inter_subset_left
   have hf'_on_K : IsMIntegralCurveOn f'
-      (geodesicVectorFieldChart (I := I) g p) K :=
+      (geodesicVectorField (I := I) g) K :=
     hf'_on.mono Set.inter_subset_right
-  have hF_src_K : ∀ s' ∈ K,
-      (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s').proj ∈
-        (chartAt H p).source := by
-    intro s' hs'_K
-    have hs'_J : s' ∈ J := hs'_K.1
-    have hts' : t' * s' ∈ Set.Ioo (-T) T :=
-      mul_mem_Ioo_of_pos_of_lt ht'_pos hs'_J
-    have hΦ_target_s' := hΦ_target_Icc (t' * s') (Set.Ioo_subset_Icc_self hts')
-    exact chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p v t' s'
-      hΦ_target_s'
   have h0_eq : chartFlowOrbitLiftRescaled (I := I) Φ p t' v 0 = f' 0 := by
     rw [hF0, hf'_0]
-  have heqOn := isMIntegralCurveOn_eq_of_isPreconnected (I := I) (g := g) (p := p)
-    (f₁ := chartFlowOrbitLiftRescaled (I := I) Φ p t' v) (f₂ := f')
-    hK_open hK_conn h0_K hF_on_K hf'_on_K hF_src_K h0_eq
+  have heqOn := gvf_eqOn (I := I) g hK_open hK_conn h0_K
+    hF_on_K hf'_on_K h0_eq
   have hF_s_eq : chartFlowOrbitLiftRescaled (I := I) Φ p t' v s = f' s := heqOn hs_K
   have : (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s).proj = (f' s).proj := by
     rw [hF_s_eq]

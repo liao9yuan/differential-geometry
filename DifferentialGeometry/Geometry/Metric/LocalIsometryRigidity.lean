@@ -26,6 +26,7 @@ variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem small_ray_data
     [I.Boundaryless] [T2Space (TangentBundle I M)]
     (g : SmoothRiemannianMetric I M) (q : M) :
@@ -93,9 +94,6 @@ private theorem small_ray_data
     have hproj : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
       FiberBundle.continuous_proj E (TangentSpace I)
     exact hproj.comp_continuousOn hF_int.continuousOn
-  have hinit : IsGeodesicOnWithInitial (I := I) g γ O q a := by
-    exact ⟨Exponential.chartFlowOrbitLiftRescaled (I := I) Φ q t' vb,
-      fun _ => rfl, hF0, hF_int⟩
   have hgeo : IsGeodesicOn (I := I) g γ O := by
     intro s hs
     have hts :
@@ -106,7 +104,11 @@ private theorem small_ray_data
       exact Exponential.chartFlowOrbitLiftRescaled_proj_mem_chartAt_source
         (I := I) q vb t' s
         (hΦ_target vb hvb_ball (t' * s) (Set.Ioo_subset_Icc_self hts))
-    exact (hinit.isGeodesicAt (isOpen_Ioo.mem_nhds hs) hsrc).hasGeodesicEquationAt g
+    have hgeoAt : IsGeodesicAt (I := I) g γ s :=
+      ⟨q, Exponential.chartFlowOrbitLiftRescaled (I := I) Φ q t' vb,
+        fun _ => rfl, hsrc,
+        hF_int.isMIntegralCurveAt (isOpen_Ioo.mem_nhds hs)⟩
+    exact hgeoAt.hasGeodesicEquationAt g
   have hstart : γ 0 = q := by
     exact congrArg Bundle.TotalSpace.proj hF0
   have hvel :

@@ -21,7 +21,10 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-private lemma exists_smooth_cutoff
+/-- A compact subset of an open Euclidean domain admits a smooth cutoff that
+equals one on the compact set, takes values in `[0, 1]`, and has compact
+support contained in the domain. -/
+theorem exists_smooth_cutoff
     {K Ω : Set E}
     (hK : IsCompact K) (hΩ : IsOpen Ω) (hKΩ : K ⊆ Ω) :
     ∃ η : E → ℝ,

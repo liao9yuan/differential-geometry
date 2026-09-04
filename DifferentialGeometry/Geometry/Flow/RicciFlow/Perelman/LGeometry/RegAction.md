@@ -20,6 +20,11 @@ lLength (sqrtReparam alpha) 0 tau = lRegAction alpha 0 (sqrt tau)
 for every raw `alpha` and `tau >= 0`; it never asks for differentiability of
 the singular backward-time curve at `tau = 0`.
 
+`lLength_sqrt_Icc` supplies the positive-start version: on `0 <= a <= b`,
+the raw interval `[a^2,b^2]` for `sqrtReparam alpha` has exactly the
+regularized action of `alpha` on `[a,b]`.  This is the reparameterization
+bridge used by pointed restricted-value stability away from the singular pole.
+
 The variation layer provides:
 
 - `lRegLag_deriv` and `lRegAction_deriv`, with compact-interval domination

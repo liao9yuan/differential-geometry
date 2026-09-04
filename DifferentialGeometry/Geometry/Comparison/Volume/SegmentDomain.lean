@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Geometry.Exponential.BufferedExpDomain
+import DifferentialGeometry.Geometry.Exponential.Smoothness.Domain
+import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
@@ -31,6 +34,158 @@ private local instance instBorelTangent (x : M) : BorelSpace (TangentSpace I x) 
 def gBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
     Set (TangentSpace I x) :=
   {v | Real.sqrt (g.inner x v v) < R}
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+def closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) : Set E :=
+  {v : E | Real.sqrt (g.inner x (show TangentSpace I x from v)
+    (show TangentSpace I x from v)) ≤ R}
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+theorem isClosed_closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
+    IsClosed (closedGBall (I := I) g x R) :=
+  by
+    have hcont : Continuous (fun v : E => g.inner x (show TangentSpace I x from v)
+        (show TangentSpace I x from v)) := by
+      simpa using (continuous_gInner_self (I := I) g x)
+    exact isClosed_le (Real.continuous_sqrt.comp hcont) continuous_const
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
+theorem isCompact_closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
+    IsCompact (closedGBall (I := I) g x R) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  refine Metric.isCompact_iff_isClosed_bounded.mpr
+    ⟨isClosed_closedGBall (I := I) g x R, ?_⟩
+  rw [Metric.isBounded_iff_subset_ball (0 : E)]
+  refine ⟨R / Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+    (I := I) g x) + 1, ?_⟩
+  intro v hv
+  have hc_pos : 0 < DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+      (I := I) g x :=
+    DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst_pos (I := I) g x
+  have hsc_pos : 0 < Real.sqrt
+      (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst (I := I) g x) :=
+    Real.sqrt_pos.mpr hc_pos
+  have hcoerc : DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+      (I := I) g x * ‖v‖ ^ 2 ≤ g.inner x (show TangentSpace I x from v)
+        (show TangentSpace I x from v) :=
+    DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst_le (I := I) g x v
+  have hgnn : 0 ≤ g.inner x v v := le_trans (by positivity) hcoerc
+  have hkey : Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+        (I := I) g x) * ‖v‖ ≤ Real.sqrt (g.inner x v v) := by
+    have hlhs_eq : Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+          (I := I) g x) * ‖v‖
+        = Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+            (I := I) g x * ‖v‖ ^ 2) := by
+      rw [Real.sqrt_mul hc_pos.le, Real.sqrt_sq (norm_nonneg v)]
+    rw [hlhs_eq]
+    exact Real.sqrt_le_sqrt hcoerc
+  have hnorm : ‖v‖ ≤ Real.sqrt (g.inner x v v) / Real.sqrt
+      (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst (I := I) g x) := by
+    rw [le_div_iff₀ hsc_pos, mul_comm]
+    exact hkey
+  have hle : Real.sqrt (g.inner x v v) / Real.sqrt
+        (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst (I := I) g x) ≤
+      R / Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+        (I := I) g x) :=
+    div_le_div_of_nonneg_right hv (Real.sqrt_nonneg _)
+  simpa [Metric.mem_ball, dist_eq_norm, sub_zero] using
+    lt_of_le_of_lt (hnorm.trans hle) (lt_add_one _)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The raw minimizing equality locus in a strictly buffered tangent ball is compact. -/
+theorem isCompact_rawSeg
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+    [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
+    (p : M) {R R₀ : ℝ} (hRR₀ : R < R₀)
+    (hcpt : @IsCompact M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace
+      (Metric.closedEBall p (ENNReal.ofReal R₀))) :
+    IsCompact
+      ({v : E | ENNReal.ofReal (Real.sqrt
+          (g.inner p (show TangentSpace I p from v)
+            (show TangentSpace I p from v))) =
+        riemannianEDist I p
+          (expMap (I := I) g p (show TangentSpace I p from v))} ∩
+        closedGBall (I := I) g p R) := by
+  let K : Set E := closedGBall (I := I) g p R
+  have hKcpt : IsCompact K := isCompact_closedGBall (I := I) g p R
+  have hKdom : K ⊆ expDomain (I := I) g p := by
+    intro v hv
+    exact mem_expDom_of_cpt (I := I) g hEnorm p v
+      (lt_of_le_of_lt hv hRR₀) hcpt
+  have hexp : ContinuousOn
+      (fun v : E => expMap (I := I) g p (show TangentSpace I p from v)) K :=
+    (expMap_contMDiffOn (I := I) g p).continuousOn.mono hKdom
+  have hinner : Continuous (fun v : E =>
+      g.inner p (show TangentSpace I p from v)
+        (show TangentSpace I p from v)) := by
+    simpa using (continuous_gInner_self (I := I) g p)
+  have hleft : ContinuousOn (fun v : E => ENNReal.ofReal (Real.sqrt
+      (g.inner p (show TangentSpace I p from v)
+        (show TangentSpace I p from v)))) K :=
+    ENNReal.continuous_ofReal.comp_continuousOn
+      (Real.continuous_sqrt.comp hinner).continuousOn
+  have hright : ContinuousOn (fun v : E => riemannianEDist I p
+      (expMap (I := I) g p (show TangentSpace I p from v))) K := by
+    have hdist : Continuous (fun q : M => riemannianEDist I q p) :=
+      continuous_riemannianEDist_to (I := I) p
+    exact (hdist.comp_continuousOn hexp).congr
+      (fun _ _ => Manifold.riemannianEDist_comm)
+  have hclosed : IsClosed
+      (K ∩ {v : E | ENNReal.ofReal (Real.sqrt
+          (g.inner p (show TangentSpace I p from v)
+            (show TangentSpace I p from v))) =
+        riemannianEDist I p
+          (expMap (I := I) g p (show TangentSpace I p from v))}) :=
+    (isClosed_closedGBall (I := I) g p R).isClosed_eq hleft hright
+  have hcompact := hKcpt.of_isClosed_subset hclosed
+    (Set.inter_subset_left : K ∩ {v : E | ENNReal.ofReal (Real.sqrt
+      (g.inner p (show TangentSpace I p from v)
+        (show TangentSpace I p from v))) =
+      riemannianEDist I p
+        (expMap (I := I) g p (show TangentSpace I p from v))} ⊆ K)
+  simpa only [K, Set.inter_comm] using hcompact
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A compactly buffered metric ball is covered by raw minimizing exponential vectors. -/
+theorem ball_sub_rawSeg
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+    [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
+    (p : M) {R R₀ : ℝ} (hRR₀ : R ≤ R₀)
+    (hcpt : @IsCompact M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace
+      (Metric.closedEBall p (ENNReal.ofReal R₀))) :
+    {q : M | riemannianEDist I p q < ENNReal.ofReal R} ⊆
+      (fun v : E => expMap (I := I) g p (show TangentSpace I p from v)) ''
+        ({v : E | ENNReal.ofReal (Real.sqrt
+            (g.inner p (show TangentSpace I p from v)
+              (show TangentSpace I p from v))) =
+          riemannianEDist I p
+            (expMap (I := I) g p (show TangentSpace I p from v))} ∩
+          closedGBall (I := I) g p R) := by
+  intro q hq
+  have hqR₀ : riemannianEDist I p q < ENNReal.ofReal R₀ :=
+    hq.trans_le (ENNReal.ofReal_mono hRR₀)
+  obtain ⟨v, _hvdom, hvexp, hvlen⟩ :=
+    RadialSurjectivity.minExp_of_cptBall (I := I) g hEnorm p q hqR₀ hcpt
+  refine ⟨v, ⟨?_, ?_⟩, hvexp⟩
+  · subst q
+    exact hvlen
+  · change Real.sqrt (g.inner p v v) ≤ R
+    exact le_of_lt ((ENNReal.ofReal_lt_ofReal_iff_of_nonneg
+      (Real.sqrt_nonneg _)).mp (hvlen.trans_lt hq))
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

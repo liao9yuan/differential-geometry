@@ -181,6 +181,35 @@ theorem MemW1p_congr_ae
       obtain ⟨g, hg_memLp, hg_weak⟩ := h.2 i
       exact ⟨g, hg_memLp, hasWeakPartialDeriv_congr_ae hΩ i huv.symm hg_weak⟩
 
+/-- A `W^{1,2}` witness whose displayed gradient is again locally `W^{1,2}`
+provides canonical `W^{2,2}` membership. -/
+theorem MemWkp.two_of_wit
+    {Ω : Set E} (hΩ : IsOpen Ω) {u : E → ℝ}
+    (hu : DeGiorgi.MemW1pWitness 2 u Ω)
+    (hgrad : ∀ i : Fin d,
+      DeGiorgi.MemW1p 2 (fun x => hu.weakGrad x i) Ω) :
+    MemWkp (d := d) 2 2 u Ω := by
+  cases d with
+  | zero =>
+      refine ⟨hu.memW1p, ?_⟩
+      intro i
+      exact Fin.elim0 i
+  | succ d =>
+      letI : NeZero (Nat.succ d) := ⟨Nat.succ_ne_zero d⟩
+      refine ⟨hu.memW1p, ?_⟩
+      intro i
+      rw [MemWkp.one_iff_memW1p]
+      let hchosen : DeGiorgi.MemW1pWitness 2 u Ω :=
+        DeGiorgi.MemW1p.someWitness hu.memW1p
+      have hae_grad := DeGiorgi.MemW1pWitness.ae_eq hΩ hu hchosen
+      have hae_i :
+          (fun x => hu.weakGrad x i) =ᵐ[volume.restrict Ω]
+            chosenWeakPartial' 2 i u Ω := by
+        filter_upwards [hae_grad] with x hx
+        simpa only [chosenWeakPartial', dif_pos hu.memW1p, hchosen] using
+          congrArg (fun z : EuclideanSpace ℝ (Fin (Nat.succ d)) => z i) hx
+      exact (MemW1p_congr_ae hΩ hae_i).mp (hgrad i)
+
 theorem chosenWeakPartial'_ae_congr
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v)

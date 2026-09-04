@@ -1,3 +1,4 @@
+import Mathlib.Analysis.Calculus.FDeriv.Extend
 import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
@@ -27,6 +28,49 @@ theorem contOn_fst (h : IsJacobiSolOn R a b y v) : ContinuousOn y (Icc a b) :=
 
 theorem contOn_snd (h : IsJacobiSolOn R a b y v) : ContinuousOn v (Icc a b) :=
   fun t ht => (h.deriv_snd t ht).continuousWithinAt
+
+/-- A continuous Jacobi system satisfying both equations on the interior of a
+nondegenerate closed interval satisfies them up to its endpoints. -/
+theorem of_Ioo (hab : a < b)
+    (hy : ContinuousOn y (Icc a b)) (hv : ContinuousOn v (Icc a b))
+    (hacc : ContinuousOn (fun t => -(R t) (y t)) (Icc a b))
+    (hode : ∀ t ∈ Ioo a b,
+      HasDerivAt y (v t) t ∧ HasDerivAt v (-(R t) (y t)) t) :
+    IsJacobiSolOn R a b y v := by
+  have close (f d : ℝ → F)
+      (hf : ContinuousOn f (Icc a b)) (hd : ContinuousOn d (Icc a b))
+      (hfd : ∀ t ∈ Ioo a b, HasDerivAt f (d t) t) :
+      ∀ t ∈ Icc a b, HasDerivWithinAt f (d t) (Icc a b) t := by
+    have hdiff : DifferentiableOn ℝ f (Ioo a b) :=
+      fun t ht => (hfd t ht).differentiableAt.differentiableWithinAt
+    have hderiv : ∀ t ∈ Ioo a b, deriv f t = d t :=
+      fun t ht => (hfd t ht).deriv
+    have ha : HasDerivWithinAt f (d a) (Ici a) a := by
+      refine hasDerivWithinAt_Ici_of_tendsto_deriv (s := Ioo a b)
+        hdiff ?_ (Ioo_mem_nhdsGT hab) ?_
+      · exact (hf.continuousWithinAt (left_mem_Icc.mpr hab.le)).mono
+          Ioo_subset_Icc_self
+      · rw [← nhdsWithin_Ioo_eq_nhdsGT hab]
+        exact ((hd.continuousWithinAt (left_mem_Icc.mpr hab.le)).mono
+          Ioo_subset_Icc_self).tendsto.congr'
+            (Filter.eventuallyEq_of_mem self_mem_nhdsWithin hderiv).symm
+    have hb : HasDerivWithinAt f (d b) (Iic b) b := by
+      refine hasDerivWithinAt_Iic_of_tendsto_deriv (s := Ioo a b)
+        hdiff ?_ (Ioo_mem_nhdsLT hab) ?_
+      · exact (hf.continuousWithinAt (right_mem_Icc.mpr hab.le)).mono
+          Ioo_subset_Icc_self
+      · rw [← nhdsWithin_Ioo_eq_nhdsLT hab]
+        exact ((hd.continuousWithinAt (right_mem_Icc.mpr hab.le)).mono
+          Ioo_subset_Icc_self).tendsto.congr'
+            (Filter.eventuallyEq_of_mem self_mem_nhdsWithin hderiv).symm
+    intro t ht
+    rcases eq_or_ne t a with rfl | hta
+    · exact ha.mono Icc_subset_Ici_self
+    rcases eq_or_ne t b with rfl | htb
+    · exact hb.mono Icc_subset_Iic_self
+    exact (hfd t ⟨lt_of_le_of_ne ht.1 hta.symm, lt_of_le_of_ne ht.2 htb⟩).hasDerivWithinAt
+  exact ⟨close y v hy hv (fun t ht => (hode t ht).1),
+    close v (fun t => -(R t) (y t)) hv hacc (fun t ht => (hode t ht).2)⟩
 
 end IsJacobiSolOn
 

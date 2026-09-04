@@ -14,6 +14,9 @@ distances, or mass.
   source curve and the source map are `MDifferentiableAt`.
 - `lKinetic_src_pull` combines that chain rule with
   `SourceDomainMetricData.pullback_inner`.
+- `lKinetic_map` specializes the source pullback identity to the actual pointed
+  source metric and transported curve, with only pointwise source membership
+  and differentiability hypotheses.
 - `lLength_tendsto` is the analytic integration adapter.  It assumes uniform
   convergence of the scalar and kinetic terms on the parameter interval,
   eventual almost-everywhere strong measurability of the resulting densities,
@@ -26,17 +29,9 @@ distances, or mass.
 
 Compact confinement is intentionally absent from `lLength_tendsto`: once the
 two along-curve terms are explicitly controlled, confinement plays no role in
-the interval argument.  It belongs to the missing HCG producer.  That producer
-must place the fixed curve in a compact `K`, obtain eventual
-`K ⊆ Phi.source k`, upgrade scalar pullback convergence from pointwise to
-compact-uniform on the space-time tube, and combine spacetime metric convergence
-with a uniform reference-metric speed bound for the fixed curve.
-
-The current `SmoothCGHConverges` API does not provide those last two uniform
-inputs.  Its scalar convergence is pointwise in spacetime, and the reference
-metric used by spacetime metric convergence has no packaged uniform control on
-a fixed curve's speed.  Therefore `SmoothCGHConverges` alone is not advertised
-as an action-convergence theorem.
+the interval argument.  The checked `PointedConvergence.lean` assembly now
+supplies that geometric layer from `ConvOut`, compact exhaustion, scalar and
+kinetic convergence, and local density measurability.
 
 ## Verification and progress
 
@@ -45,13 +40,12 @@ the non-project notation `𝓥(Real, Real)` instead of the established
 real model notation `𝓘(Real, Real)`.  After correcting those three occurrences,
 the focused retry passed without warnings.
 
-The two pullback declarations remain verified.  After the redundant
+All four declarations are warning-free focused green.  After the redundant
 statement-level `densityLim` let was removed, `lLength_tendsto` passed focused
-verification without warnings and its named module refresh also passed.  This
-analytic integration endpoint is therefore **100%** complete.  The missing
-cross-flow HCG uniform producer remains **0%**: the exact blocker is
-compact-uniform scalar pullback convergence together with uniform
-reference-speed control on the fixed curve.
+verification; `lKinetic_map` was then checked and named-refreshed for its real
+downstream consumer.  The analytic integration and source-map identities are
+therefore **100%** complete for their stated roles.  The fixed `C¹` geometric
+consumer is now checked separately as `lLength_conv_curve`.
 
 The separate reduced-density total-mass/no-mass-loss endpoint also remains
 open.  Fixed-curve action convergence does not supply chart tightness, compact
@@ -62,5 +56,5 @@ is one P2c brick; broader P2c interfaces and the independent P2b producer lane
 must be counted separately.  The whole P0--P9 Poincare program remains about
 **15--25%** complete.
 
-The named module refresh is current for all three declarations in this file.
-The downstream direct axiom audit for `lLength_tendsto` remains pending.
+The named module refresh is current, and the direct audit reports only
+`propext`, `Classical.choice`, and `Quot.sound` for these public endpoints.

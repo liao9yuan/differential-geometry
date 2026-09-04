@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Exp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Solutions.Pullback
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Solutions.OpenRestriction
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Solution.Regularity
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.PullbackNaturality
 
@@ -115,6 +116,96 @@ theorem lLength_pull
   apply intervalIntegral.integral_congr
   intro s _
   exact lDensity_pull (I := I) S Phi T alpha s
+
+omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+  [IsManifold I ∞ N] [T2Space N] [SigmaCompactSpace N] in
+private theorem mdiff_restrict_iff
+    (U : TopologicalSpace.Opens M) (gamma : Real → U) (s : Real) :
+    MDifferentiableAt 𝓘(Real, Real) I (fun r ↦ (gamma r : M)) s ↔
+      MDifferentiableAt 𝓘(Real, Real) I gamma s := by
+  classical
+  constructor
+  · intro hgamma
+    let cor : M → U := fun x ↦ if hx : x ∈ U then ⟨x, hx⟩ else gamma s
+    have hcorval : ∀ x : U, cor (x : M) = x := by
+      intro x
+      simp only [cor, dif_pos x.2, Subtype.coe_eta]
+    have hcor : ContMDiffAt I I ∞ cor (gamma s : M) := by
+      rw [← contMDiffAt_subtype_iff (I := I) (I' := I) (U := U)
+        (n := ∞) (x := gamma s)]
+      have hid : (fun x : U ↦ cor (x : M)) = id := by
+        funext x
+        exact hcorval x
+      rw [hid]
+      exact contMDiffAt_id
+    have hcomp := (hcor.mdifferentiableAt infty_ne_zero_nat).comp s hgamma
+    have heq : cor ∘ (fun r ↦ (gamma r : M)) = gamma := by
+      funext r
+      exact hcorval (gamma r)
+    rw [heq] at hcomp
+    exact hcomp
+  · intro hgamma
+    exact ((contMDiff_subtype_val (I := I) (U := U)).mdifferentiableAt
+      infty_ne_zero_nat).comp s hgamma
+
+omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+  [IsManifold I ∞ N] [T2Space N] [SigmaCompactSpace N] in
+private theorem lVelocity_restrict
+    (U : TopologicalSpace.Opens M) (gamma : Real → U) (s : Real) :
+    lVelocity (I := I) (fun r ↦ (gamma r : M)) s =
+      lVelocity (I := I) gamma s := by
+  by_cases hgamma : MDifferentiableAt 𝓘(Real, Real) I gamma s
+  · simpa only [lVelocity, mfderiv_subtype_val_apply] using
+      (mfderiv_comp_apply (I := 𝓘(Real, Real)) (I' := I) (I'' := I)
+        (x := s) (f := gamma) (g := (Subtype.val : U → M))
+        ((contMDiff_subtype_val (I := I) (U := U)).mdifferentiableAt
+          infty_ne_zero_nat) hgamma (1 : Real))
+  · have hcoe : ¬MDifferentiableAt 𝓘(Real, Real) I
+        (fun r ↦ (gamma r : M)) s := by
+      exact fun h ↦ hgamma ((mdiff_restrict_iff (I := I) U gamma s).mp h)
+    simp only [lVelocity, mfderiv_zero_of_not_mdifferentiableAt hgamma,
+      mfderiv_zero_of_not_mdifferentiableAt hcoe, ContinuousLinearMap.zero_apply]
+    rfl
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [IsManifold I ∞ N] [T2Space N] [SigmaCompactSpace N] in
+private theorem lDensity_restrict
+    (S : SolutionOn (I := I) (M := M) D)
+    (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
+    (T : Real) (gamma : Real → U) (s : Real) :
+    lDensity
+        (DifferentialGeometry.HCGCompactness.solutionOn_restrictOpen
+          (I := I) S U) T gamma s =
+      lDensity S T (fun r ↦ (gamma r : M)) s := by
+  unfold lDensity lSpeedSq
+  rw [DifferentialGeometry.HCGCompactness.scalar_restrictOpen]
+  change Real.sqrt s *
+      (S.scalar (T - s) (gamma s : M) +
+        ((S.base.metric (T - s)).restrictOpen (I := I) U).inner
+          (gamma s) (lVelocity (I := I) gamma s) (lVelocity (I := I) gamma s)) = _
+  rw [SmoothRiemannianMetric.restrictOpen_inner]
+  rw [lVelocity_restrict (I := I) U gamma s]
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [IsManifold I ∞ N] [T2Space N] [SigmaCompactSpace N] in
+/-- L-length is unchanged when a solution and its raw curve are restricted to
+an open submanifold. -/
+theorem lLength_restrict
+    (S : SolutionOn (I := I) (M := M) D)
+    (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
+    (T : Real) (gamma : Real → U) (a b : Real) :
+    lLength
+        (DifferentialGeometry.HCGCompactness.solutionOn_restrictOpen
+          (I := I) S U) T gamma a b =
+      lLength S T (fun s ↦ (gamma s : M)) a b := by
+  unfold lLength
+  apply intervalIntegral.integral_congr
+  intro s _
+  exact lDensity_restrict (I := I) S U T gamma s
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] in
 /-- The regularized L-acceleration is natural under a fixed diffeomorphism. -/

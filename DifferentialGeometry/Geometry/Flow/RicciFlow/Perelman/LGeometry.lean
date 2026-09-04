@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Naturality
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedAction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensitySource
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Scaling
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SecondVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RegIndex
@@ -64,6 +67,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.HamiltonB
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.WeakBarrier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Monotonicity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ReducedVolume
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedDensityTail
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensityTest
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensitySourceTest
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensityCC
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SegmentValue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedValue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SmallTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SmallJacobian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SourceGaussian

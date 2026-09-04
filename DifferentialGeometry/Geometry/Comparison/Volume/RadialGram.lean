@@ -1,10 +1,11 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
+import DifferentialGeometry.Geometry.Comparison.Volume.HyperbolicModel
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
-open Set Bundle
+open Set Bundle Filter Matrix
 open scoped Topology Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry
@@ -65,6 +66,46 @@ lemma radialJacobi_li
     funext i
     rw [radialJacobi_scale (I := I) g p x (v i) t,
       radialJacobi_one (I := I) g p (t • x) (t • v i) htx_rad]
+  rw [hfield]
+  exact hmapped
+
+omit [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
+/-- Raw-domain radial Jacobi fields preserve linear independence whenever the
+differential of the raw exponential map is injective at the endpoint. -/
+lemma radialJacobi_li_of
+    {ι : Type*} {v : ι → E}
+    (g : SmoothRiemannianMetric I M) (p : M) (x : E) {t : ℝ}
+    (hv : LinearIndependent ℝ v) (ht : t ≠ 0)
+    (htx_dom : (show TangentSpace I p from t • x) ∈ expDomain (I := I) g p)
+    (hLinj : Function.Injective (mfderiv 𝓘(ℝ, E) I
+      (fun b : E => (expMap (I := I) g p
+        (show TangentSpace I p from b) : M)) (t • x))) :
+    LinearIndependent ℝ fun i ↦
+      radialJacobiField (I := I) g p x (v i) t := by
+  let L := mfderiv 𝓘(ℝ, E) I
+    (fun b : E ↦ (expMap (I := I) g p
+      (show TangentSpace I p from b) : M)) (t • x)
+  let u : ℝˣ := Units.mk0 t ht
+  let us : ι → ℝˣ := fun _ ↦ u
+  have hscaled : LinearIndependent ℝ fun i ↦ t • v i := by
+    have hus : us • v = fun i ↦ t • v i := by
+      funext i
+      rfl
+    rw [← hus]
+    exact hv.units_smul us
+  have hLinj' : Function.Injective L := by
+    simpa only [L] using hLinj
+  have hmapped : LinearIndependent ℝ fun i ↦ L (t • v i) :=
+    hscaled.map' L.toLinearMap (LinearMap.ker_eq_bot.mpr hLinj')
+  have hfield :
+      (fun i ↦ radialJacobiField (I := I) g p x (v i) t) =
+        fun i ↦ L (t • v i) := by
+    funext i
+    rw [radialJacobi_scale (I := I) g p x (v i) t]
+    simpa only [L, radialJacobiField] using
+      (DifferentialGeometry.Geometry.Riemannian.radial_jacobi_dom
+        (I := I) g p (t • x) (t • v i) htx_dom)
   rw [hfield]
   exact hmapped
 
@@ -270,6 +311,207 @@ private lemma bilin_smul_both
   rw [bilin_smul_left, (β x).map_smul]
   simp only [smul_eq_mul, pow_two]
   ring
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+/-- The Gram density of radial Jacobi fields has Euclidean pole normalization. -/
+theorem radialDensity_pole
+    (g : SmoothRiemannianMetric I M) (p : M) (u : E)
+    (v : ι → E)
+    (hON : ∀ i j, g.inner p (v i) (v j) = if i = j then 1 else 0) :
+    Tendsto
+      (fun t => curveDensity (I := I) g (radialCurve (I := I) g p u)
+          (fun i => radialJacobiField (I := I) g p u (v i)) t /
+        t ^ Fintype.card ι)
+      (𝓝[>] (0 : ℝ)) (𝓝 1) := by
+  classical
+  let C : Matrix (Fin (Module.finrank ℝ E)) ι ℝ :=
+    fun k i => (chartModelBasis E).repr (v i) k
+  let A : ℝ → Matrix ι ι ℝ :=
+    fun t => Cᵀ * normalGramMatrix (I := I) g p (t • u) * C
+  have hv (i : ι) :
+      v i = ∑ k, C k i • (chartModelBasis E) k := by
+    dsimp only [C]
+    exact ((chartModelBasis E).sum_repr (v i)).symm
+  have hG0 (k l : Fin (Module.finrank ℝ E)) :
+      normalGramMatrix (I := I) g p (0 : E) k l =
+        g.inner p ((chartModelBasis E) k) ((chartModelBasis E) l) := by
+    rw [normalGram_apply, expMapDiffeo_zero]
+    change
+      g.inner p
+          (mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E)
+            ((chartModelBasis E) k))
+          (mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E)
+            ((chartModelBasis E) l)) =
+        g.inner p ((chartModelBasis E) k) ((chartModelBasis E) l)
+    exact normalChartAt_metric_pullback_at_origin (I := I) g p
+      ((chartModelBasis E) k) ((chartModelBasis E) l)
+  have hC0 :
+      Cᵀ * normalGramMatrix (I := I) g p (0 : E) * C =
+        (1 : Matrix ι ι ℝ) := by
+    have hbase0 :
+        curveGram (I := I) g (fun _ : ℝ => p)
+            (fun k (_ : ℝ) => (show TangentSpace I p from (chartModelBasis E) k)) 0 =
+          normalGramMatrix (I := I) g p (0 : E) := by
+      ext k l
+      simpa only [curveGram, Matrix.of_apply] using (hG0 k l).symm
+    have hrect0 :=
+      curveGram_rect (I := I) g (fun _ : ℝ => p)
+        (fun k (_ : ℝ) => (show TangentSpace I p from (chartModelBasis E) k))
+        (fun i (_ : ℝ) => (show TangentSpace I p from v i)) 0 C hv
+    rw [← hbase0, ← hrect0]
+    ext i j
+    simpa only [curveGram, Matrix.of_apply, Matrix.one_apply] using hON i j
+  have hA0 : A 0 = (1 : Matrix ι ι ℝ) := by
+    simpa only [A, zero_smul] using hC0
+  have htx : Tendsto (fun t : ℝ => t • u) (𝓝[>] (0 : ℝ)) (𝓝 (0 : E)) := by
+    have hcont : Continuous fun t : ℝ => t • u :=
+      continuous_id.smul continuous_const
+    have hzero : Tendsto (fun t : ℝ => t • u) (𝓝 (0 : ℝ)) (𝓝 (0 : E)) := by
+      simpa using (hcont.continuousAt (x := (0 : ℝ))).tendsto
+    exact hzero.mono_left inf_le_left
+  have hnormal :
+      Tendsto
+        (fun t : ℝ => normalGramMatrix (I := I) g p (t • u))
+        (𝓝[>] (0 : ℝ))
+        (𝓝 (normalGramMatrix (I := I) g p (0 : E))) :=
+    (normalGram_contAt (I := I) g p).tendsto.comp htx
+  have hA : Tendsto A (𝓝[>] (0 : ℝ)) (𝓝 (1 : Matrix ι ι ℝ)) := by
+    rw [← hA0]
+    have hmul : ContinuousAt
+        (fun G : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ =>
+          Cᵀ * G * C)
+        (normalGramMatrix (I := I) g p (0 : E)) := by
+      have hleft : Continuous
+          (fun G : Matrix (Fin (Module.finrank ℝ E))
+              (Fin (Module.finrank ℝ E)) ℝ => Cᵀ * G) :=
+        continuous_const.matrix_mul continuous_id
+      have hright : Continuous
+          (fun _ : Matrix (Fin (Module.finrank ℝ E))
+              (Fin (Module.finrank ℝ E)) ℝ => C) :=
+        continuous_const
+      exact (hleft.matrix_mul hright).continuousAt
+    simpa only [A, Function.comp_apply, zero_smul] using hmul.tendsto.comp hnormal
+  have hsrc : ∀ᶠ t in 𝓝[>] (0 : ℝ),
+      t • u ∈ (expMapDiffeo (I := I) g p).source :=
+    htx.eventually ((expMapDiffeo (I := I) g p).open_source.mem_nhds
+      (zero_mem_expMapDiffeo_source (I := I) g p))
+  have hrad : ∀ᶠ t in 𝓝[>] (0 : ℝ),
+      ‖(t • u : E)‖ < expMapC2Radius (I := I) g p := by
+    have hball := htx.eventually
+      (Metric.ball_mem_nhds (0 : E) (expMapC2Radius_pos (I := I) g p))
+    filter_upwards [hball] with t ht
+    simpa only [Metric.mem_ball, dist_zero_right] using ht
+  have hgram : ∀ᶠ t in 𝓝[>] (0 : ℝ),
+      curveGram (I := I) g (radialCurve (I := I) g p u)
+          (fun i => radialJacobiField (I := I) g p u (v i)) t =
+        (t ^ 2) • A t := by
+    filter_upwards [hsrc, hrad] with t hsrct hradt
+    have hrecomb (i : ι) :
+        radialJacobiField (I := I) g p (t • u) (v i) 1 =
+          ∑ k, C k i • radialJacobiField (I := I) g p (t • u)
+            ((chartModelBasis E) k) 1 := by
+      calc
+        radialJacobiField (I := I) g p (t • u) (v i) 1 =
+            radialJacobiField (I := I) g p (t • u)
+              (∑ k, C k i • (chartModelBasis E) k) 1 := by rw [hv i]
+        _ = _ := radialJacobi_sum (I := I) g p (t • u)
+          (chartModelBasis E) (fun k => C k i) hradt
+    have hbase :
+        curveGram (I := I) g (radialCurve (I := I) g p u)
+            (fun k t => radialJacobiField (I := I) g p (t • u)
+              ((chartModelBasis E) k) 1) t =
+          normalGramMatrix (I := I) g p (t • u) := by
+      rw [normalGram_radialMat (I := I) g p hsrct hradt]
+      rfl
+    have hrect :
+        curveGram (I := I) g (radialCurve (I := I) g p u)
+            (fun i t => radialJacobiField (I := I) g p (t • u) (v i) 1) t =
+          A t := by
+      rw [curveGram_rect (I := I) g (radialCurve (I := I) g p u)
+        (fun k t => radialJacobiField (I := I) g p (t • u)
+          ((chartModelBasis E) k) 1)
+        (fun i t => radialJacobiField (I := I) g p (t • u) (v i) 1)
+        t C hrecomb, hbase]
+    calc
+      curveGram (I := I) g (radialCurve (I := I) g p u)
+          (fun i => radialJacobiField (I := I) g p u (v i)) t =
+          (t ^ 2) •
+            curveGram (I := I) g (radialCurve (I := I) g p u)
+              (fun i t => radialJacobiField (I := I) g p (t • u) (v i) 1) t := by
+        ext i j
+        simp only [curveGram, Matrix.of_apply, Matrix.smul_apply]
+        have hi :
+            radialJacobiField (I := I) g p u (v i) t =
+              t • radialJacobiField (I := I) g p (t • u) (v i) 1 := by
+          calc
+            radialJacobiField (I := I) g p u (v i) t =
+                radialJacobiField (I := I) g p (t • u) (t • v i) 1 :=
+              radialJacobi_scale (I := I) g p u (v i) t
+            _ = t • radialJacobiField (I := I) g p (t • u) (v i) 1 :=
+              radialJacobi_one_smul (I := I) g p (t • u) (v i) t hradt
+        have hj :
+            radialJacobiField (I := I) g p u (v j) t =
+              t • radialJacobiField (I := I) g p (t • u) (v j) 1 := by
+          calc
+            radialJacobiField (I := I) g p u (v j) t =
+                radialJacobiField (I := I) g p (t • u) (t • v j) 1 :=
+              radialJacobi_scale (I := I) g p u (v j) t
+            _ = t • radialJacobiField (I := I) g p (t • u) (v j) 1 :=
+              radialJacobi_one_smul (I := I) g p (t • u) (v j) t hradt
+        rw [hi, hj]
+        simpa only [smul_eq_mul] using bilin_smul_both
+          (g.inner (radialCurve (I := I) g p u t)) t
+          (radialJacobiField (I := I) g p (t • u) (v i) 1)
+          (radialJacobiField (I := I) g p (t • u) (v j) 1)
+      _ = (t ^ 2) • A t := congrArg ((t ^ 2) • ·) hrect
+  have hdet : Tendsto (fun t => (A t).det) (𝓝[>] (0 : ℝ)) (𝓝 1) := by
+    simpa using (continuous_id.matrix_det.continuousAt.tendsto.comp hA)
+  have hsqrt : Tendsto (fun t => Real.sqrt (A t).det) (𝓝[>] (0 : ℝ)) (𝓝 1) := by
+    simpa using (Real.continuous_sqrt.continuousAt.tendsto.comp hdet)
+  refine hsqrt.congr' ?_
+  filter_upwards [hgram, self_mem_nhdsWithin] with t hgramt ht
+  have ht0 : (0 : ℝ) < t := ht
+  have htpow : 0 < t ^ Fintype.card ι := pow_pos ht0 _
+  simp only [curveDensity]
+  rw [hgramt, Matrix.det_smul]
+  have hpow : (t ^ 2) ^ Fintype.card ι = (t ^ Fintype.card ι) ^ 2 := by
+    rw [← pow_mul, ← pow_mul]
+    congr 1
+    omega
+  rw [hpow, Real.sqrt_mul (sq_nonneg (t ^ Fintype.card ι)),
+    Real.sqrt_sq_eq_abs, abs_of_pos htpow,
+    mul_div_cancel_left₀ _ htpow.ne']
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+/-- The raw radial Jacobi density has unit ratio to every hyperbolic model
+density at the pole. -/
+theorem radialRatio_pole
+    (g : SmoothRiemannianMetric I M) (p : M) (u : E)
+    (v : ι → E) (q : ℝ)
+    (hON : ∀ i j, g.inner p (v i) (v j) = if i = j then 1 else 0) :
+    Tendsto
+      (fun t => curveDensity (I := I) g (radialCurve (I := I) g p u)
+          (fun i => radialJacobiField (I := I) g p u (v i)) t /
+        hypDensity q (Fintype.card ι) t)
+      (𝓝[>] (0 : ℝ)) (𝓝 1) := by
+  have hcd := radialDensity_pole (I := I) g p u v hON
+  have hmd := hypDensity_pole q (Fintype.card ι)
+  have hcombine := hcd.div hmd one_ne_zero
+  rw [div_one] at hcombine
+  refine hcombine.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with t ht
+  have ht0 : (0 : ℝ) < t := ht
+  have htpow : 0 < t ^ Fintype.card ι := pow_pos ht0 _
+  have hsn : hypSn q t ≠ 0 := by
+    by_cases hq : q = 0
+    · subst q
+      simpa only [hypSn, if_pos rfl] using ht0.ne'
+    · rw [hypSn, if_neg hq]
+      exact div_ne_zero (Real.sinh_ne_zero.mpr (mul_ne_zero hq ht0.ne')) hq
+  have hden : hypDensity q (Fintype.card ι) t ≠ 0 := by
+    simpa only [hypDensity] using pow_ne_zero (Fintype.card ι) hsn
+  simp only [Pi.div_apply]
+  field_simp [htpow.ne', hden]
 
 omit [T2Space M]
   [SigmaCompactSpace M] in

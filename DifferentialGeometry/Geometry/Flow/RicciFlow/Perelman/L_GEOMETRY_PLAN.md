@@ -374,177 +374,10 @@ At every handoff record separately:
 
 ## Status log
 
-- Historical entries through the completion of the ordinary fixed-manifold
-  L3 maximal-domain and naturality stage are archived verbatim in
+- Historical entries through L4 regularized Jacobi uniqueness and conjugacy
+  are archived verbatim in
   [`L_GEOMETRY_HISTORY.md`](L_GEOMETRY_HISTORY.md).  The entries below and
   the live status near the top of this file remain the execution authority.
-
-- 2026-08-22 (L4 Jacobi bridge, index form, and fixed-endpoint second
-  variation): the regularized variation equation is now fully connected to the
-  ordinary positive-backward-time equation.  `Jacobi.lean` proves
-  `lRegVar_jacobiAt`, `lRegVar_jacobi`, the initial-tangent field
-  `lRegJacobiField`, `lRegCurve_jacobi`, its normalization
-  `lRegJacobi_d0`, and the differential identity `lExpJacobi_eq`.
-
-  `SecondVariation.lean` defines the dynamic `lJacobiVel`, `lJacobiPair`,
-  `HasLJacobiAt`, and `IsLJacobi`.  The fully paired square-root bridge
-  `lJacobiPair_sq`, the moving-connection regularity theorem
-  `lJacobiVel_sq_diff`, and `lJacobi_of_sq` yield `lExp_jacobi` without
-  comparing whole moving bundle or Hom-valued objects.  The supporting
-  Ricci-flow connection layer separates the scalar pairing identities
-  `connBack_pair` and `connBack_along_sq` from `connBack_vec_sq`, which
-  reconstructs chart differentiability of the resulting moving vector field.
-
-  The L-index layer now contains `lIndexInt`, `lIndex`, pointwise and integral
-  symmetry, the diagonal formula, the scalar balance identity
-  `lIndex_balance`, zero interval, adjacent additivity with honest
-  integrability hypotheses, Green's identity, the fixed-endpoint form, and the
-  Jacobi boundary formula.  The scalar producers `lEuler_var_c1`,
-  `lVarJacobiVel_diff`, and `lVarInner_c1` generate the compact-interval
-  integrability needed by the concrete consumer.  Consequently
-  `lLength_second_var` is proved with only its natural inputs: a smooth
-  variation, a central L-geodesic, and fixed endpoints.  Its conclusion is the
-  exact equality between the second derivative of L-length and twice
-  `lIndex Y Y`; no nonnegativity is claimed without minimization or
-  no-conjugate-point input.
-
-  Focused verification is warning-free, the exported `SecondVariation` module
-  refresh passes, and the import-only L-geometry umbrella checks against the
-  refreshed artifact.  The edited lane contains no `sorry`, `admit`, new axiom,
-  reference-tree import, foundational class, generalized RFWS object, or
-  strengthened consumer assumption.
-
-  The exact next theorem is `lRegJacobi_unique` in `Jacobi.lean`: on a connected
-  regularized-time interval, two regularized L-Jacobi fields along the same
-  curve with equal value and equal frozen-metric covariant derivative at one
-  time agree throughout the interval.  It should be produced from the native
-  regularized phase/ODE uniqueness layer, not added as a consumer hypothesis.
-  This is the gate for defining L-conjugate points via the initial-tangent
-  differential of `lExp`, and then proving the remaining L4 output, positivity
-  of the index form before the first conjugate point.
-
-  Honest progress: `redVolume_anti` **0%**; `lLength_second_var` **100%**;
-  the broader L4 phase about **70--75%**; dedicated L-geometry machinery about
-  **48--52%**; reusable generic prerequisites about **88--92%**; P2 as a whole
-  remains below **1%**.  The whole Poincare program estimate remains **3--5%**.
-
-- 2026-08-22 (L4 regularized Jacobi uniqueness and conjugacy):
-  `LGeometry/JacobiUnique.lean` is focused-green and warning-free.
-  `lRegJacobi_unique` proves initial-value uniqueness on a connected open
-  regularized-time set by putting the field and its moving covariant velocity
-  into a fixed-chart linear ODE and propagating equality by an open/relatively
-  closed argument.  Its public hypotheses do not assume that the base curve is
-  an L-geodesic or add an acceleration equation.
-
-  The reusable coefficient input is now honest: `scalarHess_cont` and
-  `nablaRicci_cont` supply the joint scalar-Hessian and covariant-Ricci tensor
-  families, while `lRegJacCLM_cont` reconstructs the geometric velocity from
-  its fixed-chart coordinate and proves operator-norm continuity without
-  unfolding tensor or Hom representations.  The two generic regularity
-  producers and the uniqueness module pass focused verification; the new
-  exported modules have the targeted refreshes needed by their consumers.
-
-  `LGeometry/Conjugate.lean` is also focused-green and warning-free.  `IsLConj`
-  includes positive `lExp`-domain membership, so the totalized off-domain value
-  cannot create artificial conjugate points.  `isLConj_iff` and
-  `isLConj_iff_jac` give the kernel and regularized-Jacobi characterizations;
-  `lExpDeriv_inj` and `lExpDeriv_surj` give the finite-dimensional
-  nonconjugate differential consequences.
-
-  The exact next theorem is `lRegIndex_balance` in a new `RegIndex.lean`.
-  Define the square-root-time index density so that
-
-  ```text
-  d/ds <D_s Y,W> = 2 K_s(Y,W) + lRegJacobiPair(Y,W).
-  ```
-
-  This removes the positive-lower-endpoint restriction from the Green identity
-  and permits a genuine endpoint at `s = 0`.  The subsequent bridge to the
-  ordinary `lIndex` must prove the change of variables only almost everywhere:
-  the pointwise density identity need not hold at `s = 0`.  Do not claim index
-  positivity by adding a supplied semidefiniteness hypothesis; its remaining
-  input is the native L-minimizer and field-realization layer.
-
-  Honest progress: `redVolume_anti` **0%**; `lRegJacobi_unique` **100%**;
-  the conjugacy definition/characterization brick **100%**; the broader L4
-  phase about **78--82%**; dedicated L-geometry machinery about **52--56%**;
-  reusable generic prerequisites about **90--93%**; P2 as a whole remains below
-  **1%**.  The whole Poincare program estimate remains **3--5%**.
-
-- 2026-08-22 (L4 endpoint-zero regularized index): `Jacobi.lean` now exposes
-  `lRegJacobi_dyn_eq`, the residual-preserving moving-velocity identity; the
-  original `lRegJacobi_dyn` is its Jacobi-zero corollary, so the connection
-  calculus is not duplicated.  The refactored module is focused-green and its
-  exported artifact is refreshed.
-
-  The new `LGeometry/RegIndex.lean` is focused-green and warning-free.  It
-  defines `lRegIndexInt` and `lRegIndex`, proves pointwise and integral
-  symmetry, and establishes
-
-  ```text
-  d/ds <D_s Y,W> = 2 lRegIndexInt(Y,W) + lRegJacobiPair(Y,W).
-  ```
-
-  Consequently `lRegIndex_green` is valid on oriented intervals whose endpoint
-  may be `s = 0`; `lRegIndex_zero_ends` and `lRegIndex_jacobi` give the
-  fixed-endpoint and Jacobi boundary forms.  `lRegIndexInt_sq` identifies the
-  positive-time density under `tau = s^2`, while `lIndex_sq` proves the
-  interval identity by an almost-everywhere congruence that removes only the
-  singleton `s = 0`.  No false pointwise equality at zero is stated.  The
-  terminal L-geometry umbrella checks against the targeted `RegIndex` export.
-
-  The exact next theorem is `lRegAction_second` in a new `RegAction.lean`.
-  Define the direct regularized Lagrangian and action on a raw regularized
-  curve, prove the first-variation formula, and then show that a smooth
-  fixed-endpoint regularized variation about an `IsLRegCurveOn` central curve
-  has second derivative `2 * lRegIndex Y Y`.  Produce compact domination and
-  integrability internally; do not pass through an epsilon-to-zero limit and
-  do not add a supplied semidefiniteness or minimizer assumption.
-
-  Honest progress: `redVolume_anti` **0%**; the regularized index/Green/square
-  bridge **100%**; the broader L4 phase about **82--85%**; dedicated L-geometry
-  machinery about **55--59%**; reusable generic prerequisites about
-  **90--93%**; P2 as a whole remains below **1%**.  The whole Poincare program
-  estimate remains **3--5%**.
-
-- 2026-08-22 (L4 endpoint-zero regularized action): the new
-  `LGeometry/RegAction.lean` defines the direct square-root-time Lagrangian
-  `lRegLag` and action `lRegAction`.  `lRegDensity_eq` and `lLength_reg`
-  identify them with the earlier square-reparameterized density and ordinary
-  L-length.  `lRegLag_deriv`, `lRegAction_deriv`, `lRegEuler_var_c1`, and
-  `lRegAction_first` provide the pointwise, integral, regularity, and
-  integration-by-parts first-variation layers with compact domination
-  produced internally.
-
-  The capstone `lRegAction_second` is focused-green and exported through the
-  public L-geometry umbrella.  For a supplied smooth fixed-endpoint variation
-  about an `IsLRegCurveOn` central curve it proves that the second derivative
-  of regularized action is `2 * lRegIndex Y Y`.  The interval may have an
-  endpoint at `s = 0`.  Jacobi integrability comes from the joint Euler
-  regularity and `lRegEuler_deriv`; index-density integrability is proved
-  internally from the independent metric/curve-time `C^2` theorem
-  `lVarMetric_c2`, `inner_deriv_at`, and `lRegIndex_balance`.  No epsilon limit,
-  supplied domination, minimizer wrapper, or semidefiniteness hypothesis was
-  introduced.  Focused checks, the targeted `RegAction` export, and the
-  import-only umbrella check all pass without warnings.
-
-  The exact next theorem is `lRegIndex_nonneg_var` in a new
-  `LGeometry/Minimizer.lean`: an actual smooth fixed-endpoint variation whose
-  regularized action has a local minimum at the central parameter has
-  nonnegative diagonal `lRegIndex`.  It should be a direct consequence of
-  `lRegAction_deriv`, `lRegAction_second`, and the native real-calculus theorem
-  `second_deriv_nonneg_of_isLocalMin`, not a supplied semidefinite wrapper.
-  The following producer is the generic fixed-endpoint field-realization
-  theorem needed to apply this result to an arbitrary smooth field; the
-  existing complete-metric exponential producer is mathematically stronger
-  than necessary, so the local ordinary-exponential route is being checked in
-  the generic variation layer before adding L-specific assumptions.
-
-  Honest progress: `redVolume_anti` **0%**; the regularized action/second-
-  variation brick **100%**; the broader L4 phase about **86--89%**; dedicated
-  L-geometry machinery about **58--62%**; reusable generic prerequisites about
-  **90--93%**; P2 as a whole remains below **1%**.  The whole Poincare program
-  estimate remains **3--5%**.
 
 - 2026-08-22 (L4 variation-level index nonnegativity and field-realization
   blocker): the new `LGeometry/Minimizer.lean` proves the warning-free,
@@ -2951,11 +2784,10 @@ At every handoff record separately:
     100% dedicated compact ordinary-flow machinery.  The book's alternative
     upper-support/distributional monotonicity route must not replace the
     existing direct-axiom-clean Jacobian route.
-  * **P2b is active.** The first exact frontier is
-    `BernsteinTower.estimate_complete`: its statement exists but its proof is
-    0%, while its finite-cutoff/exhaustion machinery is about 90--95%.  After
-    it closes, freeze the used-statement table for complete bounded-curvature
-    reduced geometry.  The `book12` source nodes to match natively are the
+  * **P2b is active.** The former generic `estimate_complete` lacked both
+    Kato-gradient and cutoff data and was removed with its sole dead caller.
+    The actual solution endpoint is the proved `movingShi_complete`; its focused
+    regression and the 32-endpoint direct axiom audit are green. Native nodes are
     arbitrary regular pole and same-clock action, domain calculus
     (`prop:red-domain-calculus`), confined pointed action convergence
     (`prop:red-action-convergence`), changing-distance/two-point coercivity,
@@ -2977,18 +2809,217 @@ At every handoff record separately:
   completion-looking wrapper.  P1's elliptic/distributional files are outside
   this campaign.  `poincare_of_inputs` remains 0%, and whole P0--P9
   infrastructure remains approximately 15--25%.
+- 2026-08-30 (complete-Shi/action/locality brick): the obsolete generic
+  `estimate_complete` and its dead caller are removed; the actual endpoint
+  `movingShi_complete` and the unified 32-endpoint audit are warning-free green,
+  with the audit reporting only `propext`, `Classical.choice`, and `Quot.sound`.
+  Fixed-curve pointed action convergence, `redDensity_gauss`, and
+  `lLength_lower` remain checked as scoped producers, not broader endpoints.
+  `lLength_restrict` is warning-free focused green and gives exact raw-curve
+  open-subflow locality. The generic AC paste theorem, `exists_flat_smooth`,
+  and the exact endpoint-ramp trapezoid formulas (`2/r` derivative energy and
+  `4r/3` defect integral) are also warning-free focused green. The generic
+  polynomial-growth exterior Gaussian estimate and its common tail-to-zero
+  theorem are warning-free focused green as well. `IsLSegCurve` and
+  `lSegCurve_join` are source-written pending the required generic-AC module
+  refresh and downstream focused check. Segment value/domain calculus/DPP,
+  `ricci_int_end_le`, geometric moving-center tightness, and no-mass-loss remain
+  0%. Broader P2b and P2c remain unstated 0% packages with roughly 46--49% and
+  55--60% dedicated machinery respectively. P2a stays 100%; P2d, P3
+  asymptotic shrinker, `poincare_of_inputs` stay 0%; whole P0--P9 stays 15--25%.
 
-- 2026-08-29 (updated-scope first execution): the exact book/native consumer
-  table is current in `P2_USED_STATEMENTS.md`.  `estimate_complete` remains a
-  0% theorem endpoint: three native routes confirm its generic statement lacks
-  both Kato-gradient and complete-cutoff data; its dedicated machinery is
-  still about 90--95%.  No assumption wrapper or public rewrite was added.
-  `lDensity_pull`, `lLength_pull`, `lLength_cross`, `lVelocity_src_map`,
-  `lKinetic_src_pull`, and `dist_short_support` are warning-free focused green,
-  named-refreshed, and direct-axiom-clean.  The first five are 100% individual
-  producer/interface endpoints; `dist_short_support` is 100% for the short
-  fixed-endpoint branch, while the full changing-distance theorem remains 0%.
-  Cross-flow action convergence remains 0% with about 15% dedicated machinery;
-  broader P2c machinery is about 25--35%, with same-clock piece concatenation
-  the next exact thin theorem.  P2d, the P3 shrinker, and
-  `poincare_of_inputs` remain 0%; whole P0--P9 remains about 15--25%.
+- 2026-08-31 (same-clock value and domain-calculus brick):
+  `SegmentValue.lean` now provides the fixed-pole-metric admissible category
+  `IsLSegCurve`, exact restriction and adjacent join, the extended-real
+  restricted value `lSegValue`, and the exact midpoint dynamic-programming law
+  `lSegValue_dpp`.  Empty competitor classes have value top; no minimizer
+  existence is assumed.  The three book12 domain rules are warning-free
+  focused green: `lSegValue_mono`, compact-graph `lSegValue_exhaust`, and
+  `lSegValue_gap`.  The last theorem consumes an honest positive outside-action
+  gap and returns value equality plus strict epsilon-minimizer confinement; it
+  does not pretend to construct that geometric gap.
+
+  The generic Gaussian shell-tail module is checked and refreshed.
+  `RiemannianTail.riem_gauss_tail` is warning-free focused green for one fixed
+  center, but its named refresh is currently blocked before reaching the target
+  by source-local errors in P1-owned `RadialSurjectivity.lean` and
+  `Variation/JacobiField.lean`.  P2 changed neither dependency.  Accordingly,
+  the expanded 39-declaration direct axiom audit is source-written but has not
+  run; the previous 32-declaration audit remains the latest verified audit and
+  reports only `propext`, `Classical.choice`, and `Quot.sound`.
+
+  Same-clock DPP and each stated order-theoretic domain endpoint are 100%.
+  Their dedicated machinery is 100%.  The broader P2b package theorem remains
+  unstated at 0%, with dedicated machinery about 50--54%; the broader P2c
+  package theorem remains unstated at 0%, with RFWS-independent smooth
+  machinery about 66--72%.  Moving-center Gaussian tightness and no-mass-loss
+  remain 0% theorem endpoints.  P2a stays 100%; P2d, P3 asymptotic shrinker,
+  and `poincare_of_inputs` stay 0%; whole P0--P9 remains about 15--25%.
+
+  After the blocked refresh/audit integration window, the next exact P2b
+  theorem to localize is `ricci_int_end_le`, followed by the complete
+  long/moving-endpoint changing-distance chain and two-point coercivity.  No
+  kappa-solution or surgery/event/RFWS work belongs to this lane.
+
+- 2026-08-31 (static endpoint-Ricci producer):
+  `Estimates/Distance/RicciEndpoint.ricci_int_end_le` is warning-free focused
+  green.  For a complete time slice and a unit-speed minimizing geodesic of
+  length `L`, endpoint-segment Ricci control by `A` gives
+  `(integral Ric) <= (n-1) * (2/r) + A * (4*r/3)`.  The proof reuses the native
+  perpendicular parallel frame and minimizing second variation, then passes
+  the exact-endpoint smooth H¹ approximants to the scalar trapezoid through
+  the checked strong quadratic-form limit.  It assumes no Ricci flow and no
+  sign condition on `A`; completeness is retained honestly because the reused
+  minimizing-geodesic producer requires it.
+
+  This theorem endpoint is 100%.  The next exact consumer is
+  `dist_long_support` in `ChangingDistance.lean`, followed by the distinct
+  moving-endpoint AC triangle chain.  The broader P2b package theorem remains
+  unstated at 0%, with dedicated machinery about 54--58%; P2c remains an
+  unstated 0% package with RFWS-independent smooth machinery about 66--72%.
+  Moving-center Gaussian tightness, no-mass-loss, P2d, the P3 asymptotic
+  shrinker, and `poincare_of_inputs` remain 0%.  P2a stays 100%, and whole
+  P0--P9 infrastructure remains about 15--25%.  Kappa-solutions and surgery
+  remain collaborator-owned and outside this lane.
+
+- 2026-08-31 (fixed-endpoint changing-distance closure): the canonical
+  `pathLength_timeDeriv_of_ricciFlow` theorem moved unchanged into the narrow
+  `Estimates/Distance/PathLengthVariation.lean` module; the old
+  `RicciFlow.lean` import path remains a compatibility re-export.
+  `ricci_int_end_le`, `dist_short_support`, and `dist_long_support` are each
+  warning-free focused green.  The long theorem normalizes the native complete
+  minimizing geodesic, consumes the exact endpoint-ramp Ricci integral, and
+  yields the sharp fixed-endpoint upper-support coefficient without assuming
+  `0 <= K`.  Its exact module refresh is green.
+
+  The four-declaration distance audit is warning-free green and reports only
+  `propext`, `Classical.choice`, and `Quot.sound`.  The unified 42-declaration
+  audit is source-ready but remains artifact-blocked by the independent
+  `RiemannianTail` dependency cone.  Both fixed-endpoint support endpoints and
+  their dedicated machinery are **100%**; the full moving-endpoint
+  changing-distance theorem remains unstated at **0%**.  Its next exact
+  producer is the absolutely-continuous endpoint triangle/chain rule.  Broader
+  P2b remains an unstated **0%** package with dedicated machinery about
+  **58--62%**; P2c remains unstated at **0%** with RFWS-independent machinery
+  about **66--72%**.  Moving-center tightness, no-mass-loss, P2d, the P3
+  asymptotic shrinker, and `poincare_of_inputs` remain **0%**.  P2a stays
+  **100%**, whole P0--P9 remains about **15--25%**, and kappa-solutions and
+  surgery remain collaborator-owned.
+- 2026-08-31 (moving-distance, Dini, and pointed-value closure):
+  `dist_short_slope` and `dist_long_slope` are focused/refresh GREEN.  The
+  **49-declaration unified P2 audit is warning-free GREEN** with only the three
+  standard logical axioms; its source now has 56 declarations pending an
+  exclusive named-refresh window.
+  `lExp_time_c1`/`lExp_c1On` give pointwise/compact-interval regularity for a
+  fixed L-exp ray; `lMinSpeed_eq` and `lMinPrefix_le` give the exact Hamilton-
+  `K` speed identity and scalar-nonnegative prefix estimate.  The generic
+  `sub_le_integral_dini`/`sub_le_int_loc_dini` close both Dini integration
+  forms, and `lSegValue_limsup` gives the confined transported fixed-competitor
+  limsup.  All producer files are warning-free focused GREEN; completed direct
+  audits report only the standard three axioms.
+  The next P2b producer is moving-distance local AC from compact-interval
+  endpoint control and global bounded-curvature metric comparison.  The later
+  scale-invariant speed bound consumes P3 ancient Hamilton--Harnack; no wrapper
+  will hide it.  P2b is an unstated **0%** package with **67--71%** machinery;
+  P2c is unstated **0%** with **69--75%** machinery.  P2a is **100%**; P2d, P3
+  shrinker, and `poincare_of_inputs` are **0%**; whole P0--P9 is **15--25%**.
+
+- 2026-08-31 (complete bounded-curvature moving-distance AC closure):
+  `edist_curve_lip` and `edistEquiv_Icc` combine in the warning-free checked
+  `dist_lip_Icc`; `dist_ac_Icc` is its direct absolute-continuity projection.
+  The new `dist_ac_rm` reuses `twoTensorQuadBound_of_solutions` and
+  `metricRicciAt_apply_eq_ricciTensor` to discharge the Ricci quadratic bound
+  from a global `Rm` norm-square bound on the regular compact time slab.  It
+  adds no ancientness, Harnack, nonnegative-curvature, kappa-solution, or
+  surgery hypothesis.
+
+  `MovingDistance` is warning-free focused GREEN and exact-refresh GREEN.  The
+  **61-declaration unified P2 audit is warning-free GREEN**; every declaration,
+  including `dist_ac_rm`, uses only `propext`, `Classical.choice`, and
+  `Quot.sound`.  The changing-distance local-AC and complete bounded-curvature
+  adapter endpoints, with their dedicated machinery, are **100%**.
+
+  The next exact P2b theorem is `lRegAction_pt_lsc` in a new
+  `LGeometry/PointedActionLower.lean`: under explicit compact confinement and
+  an action bound, a pointed sequence of varying curves admits a uniformly
+  convergent subsequence whose limit action is bounded by the source-action
+  liminf.  Its proof must derive the varying-metric action comparison from
+  `ConvOut` and reuse the fixed-flow weak lower-semicontinuity machinery; it
+  must not assume the desired comparison.  P3 remains responsible for
+  producing ancient-flow confinement/coercivity.
+
+  The broader P2b package theorem remains unstated at **0%**, with dedicated
+  machinery about **72--76%**; P2c remains unstated at **0%** with RFWS-
+  independent machinery about **69--75%**.  P2a is **100%**; P2d, the P3
+  asymptotic shrinker, and `poincare_of_inputs` are **0%**; whole P0--P9 remains
+  about **15--25%**.  Kappa-solutions and surgery remain collaborator-owned.
+
+- 2026-08-31 (pointed restricted-value convergence):
+  `lLength_sqrt_Icc` bridges raw `[a^2,b^2]` and regularized `[a,b]` actions;
+  `IsLSegAttainer` records an exact admissible minimizer; and
+  `lSegValue_pt_lim` combines the checked limsup/liminf under explicit compact
+  chart-H1 confinement.  All three are warning-free focused/refresh GREEN; the
+  umbrella is focused GREEN, and the **73-declaration** audit reports only the
+  three standard logical axioms.
+
+  Next is compact-test reduced-density convergence, beginning with fixed-
+  compact chart-volume-density convergence.  P2b remains an unstated **0%**
+  package with **84--87%** machinery; P2c is unstated **0%** with **69--75%**
+  machinery.  P2a is **100%**; P2d, P3 shrinker, and `poincare_of_inputs` are
+  **0%**; whole P0--P9 remains **15--25%**.
+
+- 2026-08-31 (pointed regularized-action lower semicontinuity):
+  `lRegAction_pt_lsc` is warning-free focused GREEN and exact-refresh GREEN.
+  Under explicit compact/chart confinement, uniform convergence of the chart
+  representatives, weak convergence of their time-H1 derivatives, and a
+  bounded source-action sequence, it proves lower semicontinuity for the
+  actual varying-flow regularized actions.  The proof derives the kinetic
+  comparison from `ConvOut.chartKin_liminf`, identifies the mapped kinetic
+  density on the bump-one region, and handles the scalar term by dominated
+  convergence; it does not assume the desired action comparison.
+
+  The unified **70-declaration** P2 audit is warning-free GREEN, and every
+  printed declaration uses only `propext`, `Classical.choice`, and
+  `Quot.sound`.  The next exact P2b consumer is `lSegValue_pt_lim` in a new
+  `PointedValue.lean`: combine `lSegValue_limsup` and `lRegAction_pt_lsc` for
+  exact source and limit minimizers under the same explicit confinement data.
+  Geometric production of that confinement remains a P3 input.
+
+  The broader P2b package theorem remains unstated at **0%**, with dedicated
+  machinery about **80--84%**; P2c remains unstated at **0%** with RFWS-
+  independent machinery about **69--75%**.  P2a is **100%**; P2d, the P3
+  asymptotic shrinker, and `poincare_of_inputs` are **0%**; whole P0--P9 remains
+  about **15--25%**.  Kappa-solutions and surgery remain collaborator-owned.
+- 2026-08-31 (raw-segment density/infimum closure): `lSegChartH1_fin` gives finite chart-`timeH1`
+  realization; `lSegValue_eq_reg` identifies raw and global `C1` infima. Its scalar lower bound proves only boundedness below. The metric-ball
+  AC route avoids direct-continuity timeouts and a tangent-norm diamond.
+  `SegmentDensity` is focused/refresh GREEN and standard-three-axiom clean.  The
+  97-declaration reverse-tail chain is GREEN; P2 no-mass-loss machinery is
+  **97--99%**, while its theorem remains **0%** pending P3 moving-center
+  coercivity. P2a is **100%**; P2d, P3, and `poincare_of_inputs` are **0%**;
+  whole P0--P9 is **15--25%**. See `L_GEOMETRY_STATUS.md`; surgery stays external.
+
+- 2026-09-01 (complete-flow density and same-clock attainment closure):
+  `redDensity_meas_rm` proves target-point measurability of complete bounded-
+  curvature reduced density by combining complete minimizers with the native
+  smooth upper-support theorem.  The internal compact near-minimizer selector
+  in `RedVolumeParam` now uses the nonempty infimum set directly, without
+  changing its public compact endpoint.  Both files are warning-free focused
+  GREEN, and the direct audit of `redDensity_meas_rm` uses only `propext`,
+  `Classical.choice`, and `Quot.sound`.
+
+  `lSegCurve_sqrtOn` turns interval-local `C1` regularity into a same-clock
+  finite-action segment after square-root reparameterization, and
+  `exists_lSegAtt_rm` turns the complete bounded-curvature regularized
+  minimizer into an exact `IsLSegAttainer`.  The new module is warning-free
+  focused GREEN under the default heartbeat budget; direct audits of both
+  declarations use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+  Complete-flow target measurability and complete same-clock attainment are
+  each **100% theorem endpoints**, with **100% dedicated machinery**.  No new
+  single-flow confinement theorem is introduced: `lSegValue_gap` and
+  `lLength_cross` have no exact P2 consumer.  The remaining common-compact
+  confinement/equicoercivity input is a P3 moving-sequence producer.  Geometric
+  no-mass-loss remains **0%**, P3 asymptotic shrinker remains **0%**, and P2d
+  surgery/event geometry remains **0%** and collaborator-owned.  P2a stays
+  **100%**; whole P0--P9 remains about **15--25%**.

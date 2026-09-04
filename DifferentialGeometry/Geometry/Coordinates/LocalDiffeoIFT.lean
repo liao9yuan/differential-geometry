@@ -22,6 +22,17 @@ variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G} [J.Boun
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J n N]
 variable {f : M → N} {x : M}
 
+omit [CompleteSpace E] [CompleteSpace F] [J.Boundaryless]
+    [IsManifold I n M] [IsManifold J n N] in
+/-- In boundaryless source coordinates, invertibility of the manifold derivative
+is equivalent to invertibility of the derivative of the written map. -/
+theorem written_fderiv_inv
+    (hf : MDifferentiableAt I J f x)
+    (hinv : (mfderiv I J f x).IsInvertible) :
+    (fderiv ℝ (writtenInExtChartAt I J x f) (extChartAt I x x)).IsInvertible := by
+  simpa only [mfderiv, if_pos hf,
+    ModelWithCorners.Boundaryless.range_eq_univ, fderivWithin_univ] using hinv
+
 theorem isInvertible_of_norm_id_sub_lt {T : E →L[ℝ] E}
     (h : ‖ContinuousLinearMap.id ℝ E - T‖ < 1) : T.IsInvertible := by
   exact ContinuousLinearMap.invertible_of_id_sub h

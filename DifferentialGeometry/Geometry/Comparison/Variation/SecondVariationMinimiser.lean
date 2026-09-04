@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Comparison.Variation.FieldRealization
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
@@ -587,19 +588,24 @@ theorem exists_variation_realising_field_via_exp
     rw [harg]
     exact expMapIntrinsic_zero (I := I) g hEnorm (γ L)
 
-omit [ConnectedSpace M] in
+omit [ConnectedSpace M] [CompleteSpace M] [CompleteSpace E]
+    [T2Space (TangentBundle I M)]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [ConnectedSpace M] in
-theorem indexForm_nonneg_of_minimising_geodesic
-    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+/-- An endpoint-fixed smooth variation of a minimizing unit geodesic has
+nonnegative index form along its variational field. -/
+theorem indexForm_nonneg_var
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : IsMetricNorm (I := I) (M := M) g)
-    (γ : ℝ → M) (L : ℝ) (V : ℝ → E)
+    (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ) (V : ℝ → E)
+    (hf_smooth : IsSmoothVariation (I := I) f)
+    (hf0 : ∀ t : ℝ, f 0 t = γ t)
+    (hf_vel : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t)
+    (hf_fix0 : ∀ s : ℝ, f s 0 = γ 0)
+    (hf_fixL : ∀ s : ℝ, f s L = γ L)
     (hL : 0 < L)
-    (hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
-    (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
-      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t))))
     (hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
     (hmin : ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
       η 0 = γ 0 → η L = γ L →
@@ -609,14 +615,9 @@ theorem indexForm_nonneg_of_minimising_geodesic
           (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
           (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
     (hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0)
-    (hV0 : V 0 = 0) (hVL : V L = 0) :
+      g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0) :
     0 ≤ indexForm (I := I) g γ 0 L V V := by
   classical
-  obtain ⟨f, hf_smooth, hf0, hf_vel, hf_fix0_if, hf_fixL_if⟩ :=
-    exists_variation_realising_field_via_exp (I := I) g hEnorm γ V L hγ_smooth hVbundle
-  have hf_fix0 : ∀ s : ℝ, f s 0 = γ 0 := hf_fix0_if hV0
-  have hf_fixL : ∀ s : ℝ, f s L = γ L := hf_fixL_if hVL
   set L_arc : ℝ → ℝ := fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L with hL_arc
   set Vfield : ℝ → E :=
     fun t : ℝ => (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) with hVfield
@@ -679,6 +680,44 @@ theorem indexForm_nonneg_of_minimising_geodesic
     exact hintegrand_Ioo t ⟨hmem.1, lt_of_le_of_ne hmem.2 htne⟩
   rw [← hindexForm_eq]
   exact hnonneg_field
+
+omit [ConnectedSpace M] [CompleteSpace M] [CompleteSpace E]
+    [T2Space (TangentBundle I M)]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A minimizing unit geodesic has nonnegative index form on every smooth
+perpendicular field vanishing at its endpoints. -/
+theorem indexForm_nonneg_of_minimising_geodesic
+    (g : SmoothRiemannianMetric I M)
+    (γ : ℝ → M) (L : ℝ) (V : ℝ → E)
+    (hL : 0 < L)
+    (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t))))
+    (hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (hmin : ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
+      η 0 = γ 0 → η L = γ L →
+      arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L)
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
+    (hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0)
+    (hV0 : V 0 = 0) (hVL : V L = 0) :
+    0 ≤ indexForm (I := I) g γ 0 L V V := by
+  classical
+  obtain ⟨f, hf_smooth, hf0, hf_vel_uIcc, hf_fix0, hf_fixL⟩ :=
+    exists_var_fix_ends (I := I) g γ V 0 L
+      (hVbundle.of_le
+        (WithTop.coe_le_coe.2 (le_top : (8 : ℕ∞) ≤ (⊤ : ℕ∞)))) hV0 hVL
+  have hf_vel : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t := by
+    intro t ht
+    exact hf_vel_uIcc t (by simpa only [Set.uIcc_of_le hL.le] using ht)
+  exact indexForm_nonneg_var (I := I) g γ f L V hf_smooth hf0 hf_vel
+    hf_fix0 hf_fixL hL hγ hmin hUnit hVperp
 
 end Construction
 

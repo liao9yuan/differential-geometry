@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ManifoldImageLe
 import DifferentialGeometry.Analysis.Integration.Measure.JacobianImageLe
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+import DifferentialGeometry.Geometry.Exponential.Smoothness.Domain
 
 set_option autoImplicit false
 
@@ -585,6 +587,71 @@ theorem riemVol_exp_image_le
     exact tsum_ofReal_pou_eq_one (I := I) (chartAtlasPOU I M)
       (expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from v))
   rw [h1, one_mul]
+
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
+  [RiemannianBundle (fun x : M => TangentSpace I x)] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Bounds the volume of a compact raw exponential image by the Gram density
+of its time-one radial variation fields. -/
+theorem riemVol_rawExp_le
+    (g : SmoothRiemannianMetric I M) (p : M) {K : Set E}
+    (hK : IsCompact K)
+    (hKdom : K ⊆ expDomain (I := I) g p) :
+    riemannianVolumeMeasure (I := I) (M := M) g
+        ((fun b : E => expMap (I := I) g p
+          (show TangentSpace I p from b)) '' K)
+      ≤ ∫⁻ v in K, ENNReal.ofReal
+          (curveDensity (I := I) g
+            (fun t : ℝ => expMap (I := I) g p
+              (show TangentSpace I p from t • v))
+            (fun (i : Fin (Module.finrank ℝ E)) (t : ℝ) =>
+              mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ =>
+                expMap (I := I) g p
+                  (show TangentSpace I p from
+                    t • (v + s • (chartModelBasis E) i))) 0 (1 : ℝ)) 1)
+          ∂(modelHaar (E := E)) := by
+  classical
+  let F : E → M := fun b =>
+    expMap (I := I) g p (show TangentSpace I p from b)
+  let U : Set E := expDomain (I := I) g p
+  have hU : IsOpen U := by
+    simpa only [U] using isOpen_expDomain (I := I) g p
+  have hKU : K ⊆ U := by
+    simpa only [U] using hKdom
+  have hF : ContMDiffOn 𝓘(ℝ, E) I 1 F U := by
+    simpa only [F, U] using
+      (expMap_contMDiffOn (I := I) g p).of_le (by norm_num)
+  have harea := riemVol_image_le (I := I) g (f := F) (U := U)
+    hU hK hKU hF
+  have hjac : ∀ v ∈ K,
+      mapJacDensity (I := I) g F v =
+        curveDensity (I := I) g
+          (fun t : ℝ => expMap (I := I) g p
+            (show TangentSpace I p from t • v))
+          (fun (i : Fin (Module.finrank ℝ E)) (t : ℝ) =>
+            mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ =>
+              expMap (I := I) g p
+                (show TangentSpace I p from
+                  t • (v + s • (chartModelBasis E) i))) 0 (1 : ℝ)) 1 := by
+    intro v hv
+    simpa only [F] using raw_exp_density (I := I) g p v (hKdom hv)
+  have hint :
+      (∫⁻ v in K, ENNReal.ofReal (mapJacDensity (I := I) g F v)
+          ∂(modelHaar (E := E))) =
+        ∫⁻ v in K, ENNReal.ofReal
+          (curveDensity (I := I) g
+            (fun t : ℝ => expMap (I := I) g p
+              (show TangentSpace I p from t • v))
+            (fun (i : Fin (Module.finrank ℝ E)) (t : ℝ) =>
+              mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ =>
+                expMap (I := I) g p
+                  (show TangentSpace I p from
+                    t • (v + s • (chartModelBasis E) i))) 0 (1 : ℝ)) 1)
+          ∂(modelHaar (E := E)) := by
+    refine setLIntegral_congr_fun hK.measurableSet (fun v hv => ?_)
+    exact congrArg ENNReal.ofReal (hjac v hv)
+  simpa only [F] using harea.trans_eq hint
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

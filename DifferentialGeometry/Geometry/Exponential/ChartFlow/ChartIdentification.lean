@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Geodesic.Equation
+import DifferentialGeometry.Geometry.Geodesic.GlobalVectorField
 import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
@@ -28,50 +28,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
 section ChartOfTM
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
-theorem extChartAt_tangent_apply_snd
-    (q : TangentBundle I M) {p : TangentBundle I M}
-    (hp : p.proj ∈ (chartAt H q.proj).source) :
-    (extChartAt I.tangent q p).2 =
-      (trivializationAt E (TangentSpace I) q.proj).continuousLinearMapAt ℝ p.proj p.snd := by
-  classical
-  have hp_base : p.proj ∈ (trivializationAt E (TangentSpace I) q.proj).baseSet := by
-    rw [TangentBundle.trivializationAt_baseSet]
-    exact hp
-  have hcoe :=
-    (trivializationAt E (TangentSpace I) q.proj).coe_linearMapAt_of_mem
-      (R := ℝ) hp_base
-  have hcoe_at :
-      (trivializationAt E (TangentSpace I) q.proj).linearMapAt ℝ p.proj p.snd =
-      (trivializationAt E (TangentSpace I) q.proj p).2 := by
-    have h := congrFun hcoe p.snd
-    exact h
-  have hext : extChartAt I.tangent q p =
-      ((extChartAt I q.proj) (trivializationAt E (TangentSpace I) q.proj p).1,
-        (trivializationAt E (TangentSpace I) q.proj p).2) := by
-    rw [FiberBundle.extChartAt]
-    rfl
-  rw [hext]
-  change (trivializationAt E (TangentSpace I) q.proj p).2 = _
-  rw [← hcoe_at]
-  rfl
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
-theorem extChartAt_tangent_apply_fst
-    (q : TangentBundle I M) {p : TangentBundle I M}
-    (_hp : p.proj ∈ (chartAt H q.proj).source) :
-    (extChartAt I.tangent q p).1 = extChartAt I q.proj p.proj := by
-  classical
-  have hext : extChartAt I.tangent q p =
-      ((extChartAt I q.proj) (trivializationAt E (TangentSpace I) q.proj p).1,
-        (trivializationAt E (TangentSpace I) q.proj p).2) := by
-    rw [FiberBundle.extChartAt]
-    rfl
-  rw [hext]
-  have hp1 : (trivializationAt E (TangentSpace I) q.proj p).1 = p.proj :=
-    TangentBundle.trivializationAt_fst _ _
-  rw [hp1]
 
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_zero_apply

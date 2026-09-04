@@ -28,6 +28,9 @@ objects, assume an L-geometry curve, or introduce a minimizer-facing wrapper.
   coordinate change between two charts containing the same manifold point.
 - `chartGramOp_self`: self-adjointness of every fixed-chart Gram operator.
 - `chartGramOp_nonneg`: nonnegativity of its quadratic form.
+- `chartGramOp_diff_le`: on a compact coordinate set, one constant uniformly
+  bounds the operator-norm difference for every pair of chart metric families
+  by their zeroth-order `metricDerivNorm` against a reference metric.
 - `chartGramOp_cont`: joint continuity on any time-coordinate subset of the
   regular chart domain.
 - `chartGramOp_unif`: uniform coefficient convergence along uniformly
@@ -60,10 +63,27 @@ definiteness gives nonnegativity after separating the zero vector. Strict
 positivity is intentionally not claimed; identifying a nonzero model vector
 after inverse trivialization requires the appropriate chart-domain hypothesis.
 
+For the difference estimate, the successful route is entirely lower-layer:
+the inverse image of the compact coordinate set is compact, the existing
+reference-metric chart-inverse estimate uniformly bounds both unit vectors,
+and `metricDiff_abs_le` controls their mixed metric pairing.  The Hilbert-space
+unit-vector characterization then gives the operator norm bound.  No
+Ricci-flow compactness module or entrywise `chartGram_sub_le` import is used.
+The constant is quantified before the two metric families because the proof
+depends only on the reference metric and compact chart set; this is the shape
+needed to compare an entire pointed-convergence sequence with one limit metric.
+The explicit `T2Space` assumption is inherited from the current public
+`metricDerivNorm` API; no completeness or metric-family regularity is needed.
+
 ## Project position
 
 This producer is complete for fixed-chart estimates and pointwise cross-chart
-Gram transport (100%). It supplies a reusable
+Gram transport, including compact-set zeroth-order operator comparison (100%).
+Focused verification of the new comparison theorem passed without warnings or
+placeholders, and its direct axiom audit reports only `propext`,
+`Classical.choice`, and `Quot.sound`. It supplies a reusable
 geometric input to the already checked varying-operator weak convergence and
-quadratic lower-semicontinuity machinery. The global minimizer theorem and
-`redVolume_anti` remain separate, unstated/unproved endpoints (0% each).
+quadratic lower-semicontinuity machinery.  The compact ordinary-flow
+`redVolume_anti` endpoint remains separately checked; the downstream P2b
+pointed action-liminf endpoint is not completed by this bridge and remains 0%
+until its own theorem is verified.

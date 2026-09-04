@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.Measure.ParamEvaluation
+import DifferentialGeometry.Analysis.Integration.Measure.ManifoldImageLe
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.EndpointShape
@@ -225,5 +226,59 @@ theorem exp_density_curve
     Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq_eq_abs]
   rw [chartDensity]
   ring
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit riemannianBundle [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
+  [T2Space M] [SigmaCompactSpace M] in
+/-- On the raw exponential domain, the map Jacobian density is the Gram density
+of the time-one radial variation fields. -/
+theorem raw_exp_density
+    (g : SmoothRiemannianMetric I M) (p : M) (v : E)
+    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p) :
+    mapJacDensity (I := I) g
+        (fun b : E => expMap (I := I) g p (show TangentSpace I p from b)) v
+      = curveDensity (I := I) g
+          (fun t : ℝ =>
+            expMap (I := I) g p (show TangentSpace I p from t • v))
+          (fun (i : Fin (Module.finrank ℝ E)) (t : ℝ) =>
+            mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ =>
+              expMap (I := I) g p
+                (show TangentSpace I p from
+                  t • (v + s • (chartModelBasis E) i))) 0 (1 : ℝ)) 1 := by
+  classical
+  set F : E → M := fun b : E =>
+    expMap (I := I) g p (show TangentSpace I p from b)
+  have hcol : ∀ i : Fin (Module.finrank ℝ E),
+      mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ =>
+        expMap (I := I) g p
+          (show TangentSpace I p from
+            (1 : ℝ) • (v + s • (chartModelBasis E) i))) 0 (1 : ℝ)
+        = mfderiv 𝓘(ℝ, E) I F v ((chartModelBasis E) i) := by
+    intro i
+    simpa only [F] using
+      (radial_jacobi_dom (I := I) g p v ((chartModelBasis E) i) hv)
+  have hbase :
+      expMap (I := I) g p
+          (show TangentSpace I p from (1 : ℝ) • v) = F v := by
+    rw [one_smul]
+  have hgram :
+      curveGram (I := I) g
+          (fun t : ℝ =>
+            expMap (I := I) g p (show TangentSpace I p from t • v))
+          (fun (i : Fin (Module.finrank ℝ E)) (t : ℝ) =>
+            mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ =>
+              expMap (I := I) g p
+                (show TangentSpace I p from
+                  t • (v + s • (chartModelBasis E) i))) 0 (1 : ℝ)) 1
+        = Matrix.of fun i j =>
+            g.inner (F v) (mfderiv 𝓘(ℝ, E) I F v ((chartModelBasis E) i))
+              (mfderiv 𝓘(ℝ, E) I F v ((chartModelBasis E) j)) := by
+    ext i j
+    simp only [curveGram, Matrix.of_apply]
+    rw [hbase, hcol i, hcol j]
+    rfl
+  change mapJacDensity (I := I) g F v = _
+  rw [mapJacDensity, curveDensity, hgram]
 
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison

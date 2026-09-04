@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
+import DifferentialGeometry.Geometry.Geodesic.GlobalUniqueness
+import DifferentialGeometry.Geometry.Geodesic.GlobalVectorField
+import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -24,7 +27,7 @@ section MaximalGeodesicWitnessFromLift
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem exists_picardLift_witness_interval
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {g_v : ℝ → TangentBundle I M}
@@ -57,8 +60,11 @@ theorem exists_picardLift_witness_interval
   obtain ⟨ε₁, hε₁, hε₁_sub⟩ := Metric.mem_nhds_iff.mp hpreim_nhds
   refine ⟨min ε₀ ε₁, lt_min hε₀ hε₁, ?_, ?_, ?_⟩
   · exact hg_on.mono (Metric.ball_subset_ball (min_le_left _ _))
-  · exact ⟨g_v, fun _ => rfl, hg0,
-      hg_on.mono (Metric.ball_subset_ball (min_le_left _ _))⟩
+  · refine ⟨g_v, fun _ => rfl, hg0, ?_⟩
+    apply (chart_vf_on_iff (I := I) g p ?_).mp
+    · exact hg_on.mono (Metric.ball_subset_ball (min_le_left _ _))
+    · intro s hs
+      exact hε₁_sub (Metric.ball_subset_ball (min_le_right _ _) hs)
   · intro s hs
     have hs_ε₁ : s ∈ Metric.ball (0 : ℝ) ε₁ :=
       Metric.ball_subset_ball (min_le_right _ _) hs
@@ -228,14 +234,17 @@ theorem picardLift_proj_eq_maximalGeodesic_on_ball
   have hg_on_K : IsMIntegralCurveOn g_v
       (geodesicVectorFieldChart (I := I) g p) K :=
     hg_on.mono Set.inter_subset_left
-  have hf'_on_K : IsMIntegralCurveOn f' (geodesicVectorFieldChart (I := I) g p) K :=
-    hf'_on.mono Set.inter_subset_right
   have hg_src_K : ∀ s ∈ K, (g_v s).proj ∈ (chartAt H p).source := by
     intro s hs_K
     exact hg_src s hs_K.1
-  have heqOn := isMIntegralCurveOn_eq_of_isPreconnected (I := I) (g := g) (p := p)
-    (f₁ := g_v) (f₂ := f') hK_open hK_conn h0_K hg_on_K hf'_on_K hg_src_K
-    (by rw [hg0, hf'_0])
+  have hg_global_K : IsMIntegralCurveOn g_v
+      (geodesicVectorField (I := I) g) K :=
+    (chart_vf_on_iff (I := I) g p hg_src_K).mp hg_on_K
+  have hf'_on_K : IsMIntegralCurveOn f'
+      (geodesicVectorField (I := I) g) K :=
+    hf'_on.mono Set.inter_subset_right
+  have heqOn := gvf_eqOn (I := I) g hK_open hK_conn h0_K
+    hg_global_K hf'_on_K (by rw [hg0, hf'_0])
   have hg_t_eq : g_v t = f' t := heqOn ht_K
   have : (g_v t).proj = (f' t).proj := by rw [hg_t_eq]
   rw [this]

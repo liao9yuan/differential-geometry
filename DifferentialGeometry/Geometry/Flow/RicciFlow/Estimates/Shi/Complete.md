@@ -53,3 +53,20 @@
   exhaustion machinery remains about 90--95%.  Static audit completed; no Lean
   verification was run because the shared elaboration guard was occupied by
   the P1 campaign.
+
+## 2026-08-30: obsolete interface removed
+
+- The consumer audit confirmed that `estimate_complete` was not a valid
+  generic complete-manifold theorem: its hypotheses supplied neither the Kato
+  input `TowerNormGradUpTo` nor a cutoff exhaustion. Adding those as public
+  assumptions would merely duplicate the checked `estimate_barrier_at` API.
+- The actual complete bounded-curvature Ricci-flow endpoint is
+  `movingShi_complete` in `Compactness/Shi/Local.lean`. Its proof constructs
+  the Kato input from `towerNorm_grad_le`, the cutoff exhaustion from
+  `shiBarrierCutoff_of_sol`, and then uses the checked barrier estimate.
+- The obsolete `estimate_complete` declaration and its sole, unused private
+  caller were removed. The public solution endpoint and its assumptions were
+  unchanged. Focused verification and the explicitly named `Complete` refresh
+  passed without warnings. The downstream 32-endpoint focused axiom audit also
+  passed; `movingShi_complete` depends only on `propext`, `Classical.choice`,
+  and `Quot.sound`.

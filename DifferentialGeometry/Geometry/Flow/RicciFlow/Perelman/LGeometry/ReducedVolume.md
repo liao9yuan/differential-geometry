@@ -17,6 +17,10 @@
   `ofReal (lRedJac * lSrcDensity)` on the strict domain.
 - `redVolume_anti` compares these integrals on nested strict domains using the
   proved pointwise theorem `lRedJac_anti`.
+- `redDensity_gauss` converts any quadratic lower bound for `redLength` about
+  an arbitrary moving center into the exact pointwise Gaussian upper bound for
+  `redDensity`.  It needs no positivity, curvature, completeness, or compactness
+  assumption beyond those already encoded in the supplied lower bound.
 
 The public capstone assumes compactness and connectedness of the fixed
 manifold, positive `tau1 <= tau2`, and regularity of the single backward slab
@@ -25,13 +29,16 @@ manifold, positive `tau1 <= tau2`, and regularity of the single backward slab
 ## Verification and progress
 
 Focused verification passes without warnings or proof placeholders.  The
-axiom audit for `redVolume_anti` reports only `propext`, classical choice, and
-quotient soundness.
+named module refresh is current.  The direct audit for `redVolume_anti` and
+`redDensity_gauss` reports only `propext`, classical choice, and quotient
+soundness.
 
 - `redVolume_anti`: **100%** (stated, proved, and focused-check verified).
 - Fixed-manifold L7 monotonicity assembly: **100%**.
-- Dedicated compact ordinary-flow L-geometry, including the separate
-  Euclidean small-time normalization follow-up: about **99%**.
+- `redDensity_gauss`: **100%** for this pointwise adapter.  The geometric
+  moving-center tail remains **0%** until two-point coercivity and uniform ball
+  volume growth supply its hypotheses.
+- Dedicated compact ordinary-flow L-geometry: **100%**.
 - Generic infrastructure used by this proof route: **100%**.
-- P2 remains below **1%**; the whole Poincare program remains approximately
-  **3--5%**.
+- Broader P2b no-mass-loss remains **0%**; whole P0--P9 infrastructure remains
+  approximately **15--25%**.

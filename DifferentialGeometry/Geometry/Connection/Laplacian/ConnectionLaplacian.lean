@@ -296,6 +296,52 @@ omit [SigmaCompactSpace M] [T2Space M] in
           ((LeviCivita (I := I) g).toFun V x
             (smoothOrthoFrame (I := I) g x i x)) := rfl
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
+private theorem smoothFrameBasis
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
+      ∀ i, basis i = smoothOrthoFrame (I := I) g x i x := by
+  classical
+  have horth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner x
+          (smoothOrthoFrame (I := I) g x i x)
+          (smoothOrthoFrame (I := I) g x j x) =
+        if i = j then (1 : ℝ) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
+  have hli : LinearIndependent ℝ
+      (fun i : Fin (Module.finrank ℝ E) =>
+        smoothOrthoFrame (I := I) g x i x) := by
+    rw [linearIndependent_iff']
+    intro s c hsum k hk
+    have hzero :
+        g.inner x (smoothOrthoFrame (I := I) g x k x)
+          (∑ j ∈ s, c j • smoothOrthoFrame (I := I) g x j x) = 0 := by
+      rw [hsum]
+      simp
+    rw [map_sum] at hzero
+    have hpull : ∀ j ∈ s,
+        g.inner x (smoothOrthoFrame (I := I) g x k x)
+            (c j • smoothOrthoFrame (I := I) g x j x) =
+          c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g.inner x (smoothOrthoFrame (I := I) g x k x)).map_smul,
+        smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl hpull] at hzero
+    rw [Finset.sum_eq_single_of_mem k hk] at hzero
+    · simpa using hzero
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ E :=
+    Fintype.card_fin _
+  let basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
+    basisOfLinearIndependentOfCardEqFinrank hli hcard
+  refine ⟨basis, fun i => ?_⟩
+  change (basisOfLinearIndependentOfCardEqFinrank hli hcard :
+      Fin (Module.finrank ℝ E) → TangentSpace I x) i =
+    smoothOrthoFrame (I := I) g x i x
+  rw [coe_basisOfLinearIndependentOfCardEqFinrank]
+
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 lemma frobeniusSq_grad_vector_nonneg
@@ -311,6 +357,41 @@ lemma frobeniusSq_grad_vector_nonneg
   by_cases hv : v = 0
   · simp [hv]
   · exact le_of_lt (g.pos x v hv)
+
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
+/-- Vanishing Frobenius square of the covariant derivative forces that
+covariant derivative to vanish at the point. -/
+theorem cov_zero_of_frob
+    (g : SmoothRiemannianMetric I M)
+    (V : Π b : M, TangentSpace I b) (x : M)
+    (hzero : frobeniusSq_grad_vector (I := I) g V x = 0) :
+    (LeviCivita (I := I) g).toFun V x = 0 := by
+  classical
+  let L : TangentSpace I x →L[ℝ] TangentSpace I x :=
+    (LeviCivita (I := I) g).toFun V x
+  obtain ⟨basis, hbasis⟩ := smoothFrameBasis (I := I) g x
+  have hsum : ∑ i : Fin (Module.finrank ℝ E),
+      g.inner x (L (basis i)) (L (basis i)) = 0 := by
+    simpa only [frobeniusSq_grad_vector, L, hbasis] using hzero
+  have hnonneg : ∀ i : Fin (Module.finrank ℝ E),
+      0 ≤ g.inner x (L (basis i)) (L (basis i)) := by
+    intro i
+    by_cases hi : L (basis i) = 0
+    · simp [hi]
+    · exact (g.pos x (L (basis i)) hi).le
+  have hbasis_zero : ∀ i : Fin (Module.finrank ℝ E), L (basis i) = 0 := by
+    intro i
+    have hi : g.inner x (L (basis i)) (L (basis i)) = 0 :=
+      (Finset.sum_eq_zero_iff_of_nonneg
+        (fun j _ => hnonneg j)).mp hsum i (Finset.mem_univ i)
+    by_contra hne
+    exact (g.pos x (L (basis i)) hne).ne' hi
+  change L = 0
+  ext v
+  rw [← basis.sum_repr v, map_sum]
+  simp only [map_smul, hbasis_zero, smul_zero, Finset.sum_const_zero,
+    ContinuousLinearMap.zero_apply]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [T2Space M] [SigmaCompactSpace M] in

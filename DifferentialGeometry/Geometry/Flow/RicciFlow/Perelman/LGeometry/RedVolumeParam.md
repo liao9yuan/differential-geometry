@@ -10,12 +10,18 @@ against the fixed model Haar measure.
 
 ## Source route
 
-- `exists_cost_curve` chooses an actual near-minimizing global `C¹` competitor.
+- `exists_cost_curve` chooses an actual near-minimizing global `C¹` competitor
+  directly from the nonempty set defining the infimum.  This private selector
+  no longer needs compactness, while the compact public endpoint keeps its
+  original assumptions.
 - `lCost_param_usc` and `lCost_y_usc` derive the needed cost upper
   semicontinuity from the checked strict-event producers; they do not assume a
   continuity wrapper.
 - `redDensity_param_lsc` and `redDensity_y_lsc` pass cost upper
   semicontinuity through the antitone reduced-density exponential.
+- `redDensity_meas` exposes only the measurability projection needed by
+  compact-test convergence, without making the stronger private regularity
+  lemma part of the public API.
 - `chartDensity_time_cont` controls the moving metric density at fixed model
   coordinates.
 - `redVolume_chart_sum` is the exact finite chart partition-of-unity
@@ -29,7 +35,9 @@ against the fixed model Haar measure.
 
 ## Public statement
 
-`redVolume_lsc` states that for fixed `tau > 0`, if the base slab
+`redDensity_meas` states that the target-point reduced density is measurable
+at positive backward time on a regular slab.  `redVolume_lsc` states that for
+fixed `tau > 0`, if the base slab
 `[T - tau, T]` is regular, then
 `p ↦ redVolume S p.1 p.2 tau` is lower semicontinuous at `(T,x)`.
 Its hypotheses are the native solution, connectedness, compactness, and slab
@@ -40,13 +48,20 @@ regularity assumptions used by the producer chain.
 Warning-free focused verification passed, including after adding the explicit
 namespace terminator requested by the style linter.  The named artifact was
 refreshed before that style-only edit; no exported declaration changed.  The
-module contains no `sorry` or `admit`.  During elaboration repair, the generic
+new public `redDensity_meas` projection is also warning-free focused GREEN; it
+does change the exported declarations and therefore needs a named refresh only
+when its compact-test downstream is source-written.  The module contains no
+`sorry` or `admit`.  The exact named artifact has now been refreshed again so
+the new `redDensity_meas` export is available to its compact-test consumer.
+During elaboration repair, the generic
 ENNReal liminf-add route was
 replaced by the native finite-sum lower-semicontinuity theorem, and the moving
 chart-density proof was simplified to the local metric-family entry theorem
 plus native matrix determinant continuity.  This retained the original weak
 regular-slab hypotheses; the stronger globally quantified
-`MetricFamilyRegularAt` interface was deliberately not introduced.
+`MetricFamilyRegularAt` interface was deliberately not introduced.  The later
+noncompact-selector refactor was also warning-free focused GREEN and did not
+change any public statement.
 
 ## Progress accounting
 

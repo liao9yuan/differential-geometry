@@ -36,53 +36,49 @@ axiom-clean producer.  Reuse the checked `BishopBall`/normal-ball ratio,
 packing, polar/Jacobian, and ball-volume machinery.  Add only a missing stronger
 statement, thin adapter, or genuine producer required by those consumers.
 
-### Running status (2026-08-27, exact consumer audit frozen)
+### Running status (2026-09-01, exact consumer set closed)
 
-- Project-used theorem endpoints: **87.5%** (seven of eight separately counted
-  endpoints are checked: global model-ratio comparison, its zero-Ricci power
-  form, the absolute Euclidean upper bound, the packing consequence, and the
-  small-radius Euclidean epsilon normalization and positive-radius continuity
-  used by MT 9.66, plus the strict positive-sectional-curvature Euclidean
-  volume inequality used by MT 9.56).
-- Dedicated native machinery: **about 98%**.  The polar/Jacobian/normal-ball
-  engine, complete/global segment-ball engine, and compact-tail endpoint
-  continuation are checked.  The exact framed-density/Haar normalization is
-  now also warning-free focused-check and named-refresh green under the intended
-  smooth-manifold binder, and the Euclidean model-ball normalization adapter is
-  warning-free focused-check and named-refresh green.  The curvature-operator
-  and sectional-to-Ricci bridges are also checked and refreshed.
-  Radius continuity and radial equality propagation are checked and axiom-clean.
-  Local minimizing-geodesic coverage remains the sole genuine
-  missing-groundwork frontier.  Strict sectional-volume assembly is
-  warning-free focused-check and named-refresh green and is included in the
-  common direct axiom audit.
-- Direct P2/P3 usage has global curvature hypotheses (compact/global in P2;
-  complete with global nonnegative Ricci curvature in P3).  The local
-  compact-closure form is needed only to reproduce the Chapter 5 incomplete
-  compactness chain in its stated generality; it is tracked separately and is
-  not silently charged to the already checked global theorem.
-- Current action: P1a is closed at a precisely documented blocker after seven
-  checked endpoints.  Release its file claims and start the P1b consumer/native
-  audit.  Do not reopen the one remaining local compact-closure endpoint unless
-  new geodesic-lift or raw-exp polar infrastructure appears.
+- Project-used theorem endpoints: **100%** (eight of eight).  The seven earlier
+  global/complete, packing, small-radius, continuity, and strict-rigidity
+  endpoints remain checked.  The eighth endpoint `ball_vol_le_eucl` now gives
+  the incomplete-ambient compact-buffer Euclidean upper bound under Ricci
+  nonnegativity only on the compared ball.
+- Dedicated native machinery for this exact eight-endpoint denominator:
+  **100%**.  The chart-independent compact continuation and minimizing-ray
+  coverage, raw exponential smoothness and image-measure layer, compact raw
+  segment locus, raw Jacobi/no-conjugacy chain, transverse density comparison,
+  full-density factorization, pole normalization, and Haar/model-ball
+  normalization are all proved and focused verified.  Every export needed by a
+  downstream module has an exact named refresh, and the unified 196-declaration
+  audit is warning-free and standard-three-axiom clean.
+- One actual P3 use is genuinely incomplete-ambient: Morgan--Tian's `volcomp`
+  explicitly allows noncomplete flows and invokes the Chapter 5 `flowlimit`
+  chain.  Its nonnegative curvature-operator hypothesis narrows the exact
+  formalized project need to the local `Ric >= 0` Euclidean absolute upper
+  bound used by that flow-limit route.  A separate incomplete-ambient
+  two-radius ratio theorem, the arbitrary-negative-lower-bound model theorem,
+  and a primitive packing endpoint are textbook-generality extensions, not
+  part of this campaign's denominator.
+- Current action: P1a is closed.  `BishopRawDensity.lean` is warning-free
+  focused GREEN and refreshed through `rawSpeed_sq`, `raw_ratio_anti`,
+  `raw_density_le`, `rawDens_eq_trans`, and `rawDens_le_zero`.
+  `SegmentBallEuclideanUpper.lean` is warning-free focused GREEN and refreshed
+  through `ball_vol_le_eucl`.  The final unified audit directly prints all six
+  declarations and reports only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### Remaining-frontier route audit
 
-- **Local compact-closure form.**  The nearest native target is a radius-local
-  minimizing-exponential coverage theorem for `RadialSurjectivity.radialMinSet`,
-  with explicit `v in expDomain`.  The compact-tail continuation lemmas remove
-  ambient completeness for an already supplied bounded-speed geodesic, but they
-  do not construct the minimizing radial ray.  Moreover, the present `SegDom`,
-  `SegInt`, `expJacDensity`, and segment-polar integration layer are built from
-  `expMapIntrinsic`/`intrinsicGeodesic`, hence still require `CompleteSpace M`.
-  Thus the faithful incomplete-manifold theorem needs both local minimizing-ray
-  coverage and a raw-`expMap` local segment-polar bridge; adding compactness to
-  the existing complete theorem would not solve this consumer.  The smallest
-  honest first statement is `minExp_of_cptBall` in `RadialSurjectivity`: compact
-  closed ball plus a point in the corresponding open ball produces a minimizing
-  `v in expDomain`.  Its proof first needs a base-geodesic-to-initial-data phase
-  lift (the absent `IsGeodesicOn.toWithInitial`) and a finite-horizon maximal
-  extension; even this lemma alone does not remove the separate local-polar gap.
+- **Local compact-closure form.**  The project-used absolute endpoint is now
+  checked as `ball_vol_le_eucl`: compact closure of a strictly larger buffer
+  ball and nonnegative Ricci curvature on the compared ball imply its volume is
+  at most the Euclidean model-ball volume.  The proof uses the checked raw
+  minimizing-exponential coverage, compact raw segment locus, noninjective image
+  inequality, raw radial Jacobi/no-conjugacy chain, full-density comparison, and
+  pole/Haar normalization.  It requires neither `CompleteSpace M` nor a global
+  Ricci predicate.  The classical incomplete-ambient two-radius inequality
+  `Vol(B(p,R))*s^n <= R^n*Vol(B(p,s))` remains a separate extension: it cannot
+  be inferred from two one-sided absolute upper bounds and is not a ninth
+  project-used endpoint.
 - **Equality rigidity.**  Three native routes were checked.  Direct tightness of
   the three inequalities in `segBall_vol_le_explicit` and a strict-defect
   contrapositive both reduce to the equality/strictness case of the traced
@@ -105,11 +101,11 @@ blocker.  The known P0 chain `intrInj_ge_cgt -> injDecay_of_bg -> flowInj_of_vol
 must be reused and must not be reopened.  The acceptance target is the exact
 additional P2/P3 injectivity statement, if any.
 
-### Running status (2026-08-28, exact consumer set frozen)
+### Running status (2026-09-01, exact consumer set under post-migration re-audit)
 
 - Project-used theorem endpoints: **0%** (zero of two separately counted
   endpoints are yet proved in their exact local-on-balls P3 shape).
-- Dedicated native machinery: **about 94%**.  The Whitehead/Jensen/propeller
+- Dedicated native machinery: **about 99%**.  The Whitehead/Jensen/propeller
   stack, `intrInj_ge_cgt`, `injDecay_of_bg`, and `flowInj_of_vol` are
   source-complete with no `sorry`/`admit`; the realized P0 chain is historically
   axiom-clean.  The new `intrInj_ge_cgt_on` radial-local strengthening is
@@ -123,7 +119,11 @@ additional P2/P3 injectivity statement, if any.
   audit is green for all 28 P1a/P1b declarations, with only the three standard
   logical axioms.  The sequence-level producers still use global
   curvature/bounded geometry, while P3 supplies bounds separately on each fixed
-  bounded ball.
+  bounded ball.  The new raw local route is independently warning-free focused
+  GREEN through radial local-diffeomorphism, canonical lift fencing,
+  pull-volume/multiplicity, complete-extension joins, nonconjugacy, core
+  distance equality, branch-Hessian positivity, pinned injectivity, and the
+  exact raw-ball integral formula.
 - Exact endpoints: E1 has global nonnegative Ricci curvature, compact closure
   of a relevant larger ball, and full-curvature/volume control only there, and
   concludes a point injectivity lower bound; E2 propagates a uniform base
@@ -131,37 +131,51 @@ additional P2/P3 injectivity statement, if any.
   bounded ball.  P2 has no direct P1b call.  Most P3 inputs are complete
   kappa-solutions, but the `volcomp` use at `temp2kappa:2668` explicitly allows
   an incomplete ambient and prevents completeness from being imposed globally.
-- Current action: P1b is closed at the exact incomplete-ambient raw-domain
-  blocker below.  Release its file claims and start P1c in phase order.  Do not
-  state `frame_mem_expDom` under compact-eball assumptions: that proposed
-  producer is false for the live fixed-chart representation of `expDomain`.
+- Current action: retain the raw normal-map route and close only its final
+  endpoint-facing gaps.  E1 is implementing compact `rawCore_short_inj`, then
+  the actual-distance germ `rawCore_dist_germ`; strict Jensen, unique center,
+  raw orbit/fiber count, and quantitative CGT assembly follow in that order.
+  E2 is implementing the exact compact-buffer two-radius `rawBall_vol_rel`
+  from `rawBall_integral_eq` and the arbitrary-curvature radial comparison.
+  These three source lanes are mutually exclusive and permit focused checks
+  only; no named refresh or broader build may run until they reach a common
+  boundary.  Existing P0/global Hamilton consumers remain closed and are not
+  being reopened.
 
 ### Remaining-frontier route audit
 
-1. **Source-contained fixed-chart route.**  A raw compatibility theorem can be
-   proved if the entire geodesic is assumed to remain in
-   `(chartAt H x).source`; a capped version of the compact-tail Zorn proof is
-   also still needed.  Compact eball closure does not imply this chart-source
-   condition, so the resulting theorem is valid but does not cover the audited
-   Morgan--Tian consumers.
-2. **Global witness/domain redesign.**  Generalize or replace
-   `MaximalGeodesicWitness` and `expDomain` so the phase lift solves the global
-   `geodesicVectorField`, with chart-local realization proved separately.  This
-   is the smallest mathematically faithful route to the MT statement, but it is
-   a substantial foundational API migration rather than a P1b-local lemma.
-3. **Base-geodesic domain plus downstream migration.**  Define the raw domain
-   directly from an open preconnected `IsGeodesicOn` base curve with initial
-   data, prove compact-buffer coverage there, and migrate raw exponential,
-   Jacobi, Bishop, and CGT consumers.  This avoids the fixed-chart phase field
-   but creates a second domain notion and is larger than Route 2.
+The live post-migration audit gives three genuinely different routes.
 
-The decisive obstruction is representational: live `expDomain` uses a
-`MaximalGeodesicWitness` for `geodesicVectorFieldChart g x`, which agrees with
-the global geodesic vector field only inside the initial chart source and is
-zero outside it.  Thus compact-eball-only `frame_mem_expDom`, and an
-assumption-free equation-to-phase-lift bridge, are under-hypothesized.  P1b
-therefore stops honestly at a foundational design choice after three distinct
-routes; no endpoint is counted and no theorem-shaped placeholder was created.
+1. **Raw Jacobi producer followed by a raw CGT specialization.**  Use
+   `mem_expDom_of_cpt` for compact-buffer raw-domain coverage, prove a
+   curvature-controlled pointwise injectivity theorem for the differential of
+   `framedExpMap`, and package it as local diffeomorphism on a tangent ball.
+   Then specialize the checked Whitehead/Jensen/collision argument to the raw
+   normal map and conclude with `framedInjRadius`.  This is the shortest native
+   route and preserves the checked intrinsic/complete API.
+2. **Abstract normal-map kernel.**  Refactor the CGT proof around a package of
+   domain, smoothness, radial coverage, local-diffeomorphism, curvature, and
+   pull-volume hypotheses, then instantiate it for both intrinsic and raw
+   normal maps.  This can avoid proof duplication, but it changes a large
+   checked layer and is justified only if the direct raw specialization proves
+   structurally repetitive.
+3. **Complete local extension.**  Extend or modify the metric outside the
+   compact buffer to a complete auxiliary metric, apply the intrinsic CGT
+   theorem, and transfer balls, volume, curvature, exponential maps, and
+   injectivity radius back to the original metric.  The repository does not
+   currently provide the required complete-extension-and-transfer package, so
+   this route creates substantially more groundwork than Route 1.
+
+The live gap is no longer representation, raw-domain existence, or
+curvature-to-local-diffeomorphism.  `rawJacobi_ne_of_rm` assembles the closed
+raw Jacobi equation, pointwise `Rm04` estimate, parallel frame, and covariant
+Gronwall argument; `rawExp_mfderiv_inj`, `framed_mfderiv_inj`, and
+`framed_locdiff_rm` provide the exact differential and IFT consequences without
+ambient completeness.  E1 still needs a raw CGT collision/flat-loop
+specialization and an all-launch-vector pull-volume upper bound; E2
+additionally needs bounded-ball local volume/injectivity propagation.  No
+endpoint is counted until those exact consumer statements are formally stated
+and proved.
 
 ## P1c -- Laplacian comparison, Busemann, splitting, and soul
 
@@ -187,11 +201,11 @@ bridge rather than replaced by a parallel hierarchy.
   extension remains separate unfinished machinery.
 - Cheeger--Gromoll splitting endpoint: **0%**.
 - Cheeger--Gromoll soul endpoint: **0%**.
-- Dedicated native machinery: **about 60--65%** across the whole four-endpoint P1c
+- Dedicated native machinery: **about 76--79%** across the whole four-endpoint P1c
   denominator.  Separately: the Laplacian endpoint's dedicated machinery is
-  **100%**, the weak Busemann endpoint **100%**, splitting **45--50%**, and soul
+  **100%**, the weak Busemann endpoint **100%**, splitting **84--87%**, and soul
   **5%**.  The broader Busemann package needed by `narrows`, including the
-  almost-everywhere unit-gradient/asymptotic-ray direction, is about **55%**.
+  almost-everywhere unit-gradient/asymptotic-ray direction, is about **75%**.
   The canonical compact-test predicate `IsLapLEDistribOn`, its restriction
   theorem, and `lapDistrib_of_smooth` are now checked.  Noncompact Green second
   identity and signed chart-integral transport are also checked.  The direct
@@ -223,9 +237,38 @@ bridge rather than replaced by a parallel hierarchy.
   focused check and explicit named refresh are green.  The downstream zero-set
   propagation `buse_pair_eq_zero` and local weak-solution assembly
   `busemann_chart_sol` are now also warning-free focused and named-refresh
-  green.  The live frontier is the smooth-coefficient weak-solution to
-  smooth-representative bridge; none of these declarations may be replaced by
-  a stronger endpoint hypothesis.
+  green.  The signed-test bridge `IsSolution.bilin_eq_zero_smooth`, the public
+  density extension `weak_eq_of_smooth`, and
+  `IsSolution.to_homogeneous` are now warning-free focused/named-refresh green.
+  Thus the weak-solution interface mismatch is closed.  The compact-free
+  difference-quotient chain through `homSol_memW2` and its chart application
+  `busemann_chart_h2` are now warning-free focused/named-refresh green.
+  `homSol_diff_id` gives the first differentiated equation in the exact
+  `D_j(D_l u)` order needed downstream.  The generic scalar-source chain is now
+  checked through `srcSol_diff_id`, `srcDiff_weak_eq`, `homDiff_memWkp`, and
+  `srcSol_memWkp_on`.  The latter performs the honest nested-inner-domain
+  induction and proves `W^{m,2}` source regularity implies local `W^{m+2,2}`
+  solution regularity.  `srcEq_restrict` supplies the required restriction of
+  the actual `H_0^1` weak equation without extra compactness assumptions.  The
+  homogeneous specialization `homSol_memWkp_on` and the actual chart/manifold
+  Busemann consumers `busemann_chart_wkp`, `busemann_chart_cdiff`, and
+  `busemann_smooth` are now warning-free focused/named-refresh green.  The
+  converse bridge `lap_le_of_distrib` recovers a pointwise Laplacian upper bound
+  from the compact-test inequality when the source is continuous; its focused
+  check and named refresh are green.  The Bochner-side algebraic bridge
+  `cov_zero_of_frob` is likewise focused/named-refresh green.  Pointwise
+  harmonicity `busemann_lap_zero`, Bochner parallelism `busemann_grad_par`, the
+  parallel-section geodesic bridge `intrinsic_intCurve`, generic complete-flow
+  smoothness `curveAt_contMDiff`, and the six-interface Busemann flow module are
+  now all warning-free focused and named-refresh green.  In particular the flow
+  is global and jointly smooth, obeys the additive law, and translates the
+  Busemann value exactly.  The live frontier is now the explicit zero-level-set
+  product equivalence, followed by fixed-time flow diffeomorphisms and metric
+  preservation.  Upgrading the algebraic product equivalence to a manifold
+  diffeomorphism exposes the first genuine design/API blocker: the existing
+  regular-level manifold construction is specialized to `MorseModel (m+1)`,
+  whereas this endpoint is stated over an arbitrary finite-dimensional model
+  `E`.  The next common audit will include all newly exported declarations.
   The general Euclidean `visc_div_le_integral` remains a distinct larger
   deferred API.
 - P1d boundary: record exact Toponogov assumptions consumed downstream,
@@ -428,10 +471,12 @@ does not implement either P1d producer.
 ## Program accounting
 
 - Final theorem `poincare_of_inputs`: **0%** (not declared).
-- P1a theorem endpoints: **87.5%** (seven of eight); P1b: **0%** (zero of two);
-  P1c: **50%** (two of four independently counted endpoints: Laplacian and the
-  weak Busemann endpoint are complete; splitting and soul remain 0%).  Do not
-  collapse these distinct denominators into a misleading single percentage.
+- P1a theorem endpoints: **100%** (eight of eight); P1b: **0%** (zero of two);
+  P1c: **75%** (three of four independently counted endpoints: Laplacian, weak
+  Busemann comparison, and supplied-line metric splitting are complete; Soul
+  remains 0%).  Across P1a--P1c this is eleven of fourteen endpoints, **78.6%**.
+  Do not collapse these distinct denominators into a misleading single
+  percentage.
 - Whole P0--P9 program infrastructure: retain the global authority's current
   **15--25%** estimate; P1 audit or helper work must not inflate it.
 
@@ -443,17 +488,17 @@ This table is filled from live source evidence during each phase.
 |---|---|---|---|---|---|
 | P1a | MT 1.34; 5.6; 8.10 | Complete/global metric; Ricci lower bound; compare two radii, then upper/lower volume bounds give packing | `segBall_vol_rel`, `segBall_vol_le`, `segBall_card` | checked producer | focused checks passed; direct axiom print has only standard logical axioms |
 | P1a | MT 9.11, 9.59--9.63 | Complete; global `Ric >= 0`; power-law ratio and Euclidean absolute upper bound | `segBall_vol_pow`, `segBall_vol_le_euclidean` | checked producer plus thin zero-curvature adapter | focused/named-refresh checks passed; the common direct axiom audit reports only standard logical axioms |
-| P1a | MT 5.9--5.11, 5.15 | Compact closure of the relevant ball and a Ricci bound only there; full-radius local ratio/packing | `localBall_ratio` covers only a small injectivity-radius interval under global completeness; `endpointCont_compact` and `geo_Ioo_extend_cpt` supply the compact-tail continuation brick | missing stronger producer | continuation bricks are focused/named-build green and axiom-clean; `radialMinSet` still lacks local minimizing coverage, and the segment-polar layer still depends on complete-only `expMapIntrinsic` |
+| P1a | MT 5.9--5.11, 5.15; P3 `volcomp` | Compact closure of a strictly larger buffer ball and `Ric >= 0` on the compared ball; conclude the Euclidean absolute upper bound needed in the incomplete-ambient flow-limit route | `ball_vol_le_eucl`, using `minExp_of_cptBall`, `rawBall_vol_le_int`, `rawDens_le_zero`, and `normalHaar_eq` | checked endpoint | focused verification and exact named refresh are green; the 196-declaration unified audit reports only `propext`, `Classical.choice`, and `Quot.sound`. The separate local two-radius theorem remains a textbook extension, not a ninth project-used endpoint |
 | P1a | MT 9.66 | a sufficiently small radius has Euclidean-normalized volume within any prescribed relative error; no audited consumer needs a public abstract limit | `framedDens_zero`, `framedDens_haar`, `exists_ball_ratio`, `exists_euclid_ratio` | checked producer and endpoint | focused checks passed; both normalization theorems and the endpoint are axiom-clean |
 | P1a | MT 9.66 | continuity in radius, used to choose a half-model-volume radius | `segBall_vol_cont` via polar integral, sphere-null, and dominated convergence | checked endpoint | focused/named-build verification passed; common axiom audit has only standard logical axioms |
 | P1a | MT 9.56 | global strict positive sectional curvature makes every positive-radius intrinsic ball strictly smaller than its Euclidean comparison ball | checked bottom equality chain and radial propagation `transDens_eq_rigid`; checked general strict producers `expJac_lt_of_ricci` and `segBall_vol_lt`; checked smooth-manifold `normalHaar_eq`, `gBall_model_eucl`, `rm04_eq_inner_riem`, and sectional-to-Ricci bridges; exact wrapper `segBall_lt_of_sec` | checked endpoint | all dependencies and `SegmentBallEuclideanStrict` itself are warning-free focused/named-refresh green; common direct audit reports only `propext`, `Classical.choice`, and `Quot.sound` |
-| P1b E1 | MT `volinj`; `basicconv`; `2ndmfdconv`; P3 `flowlimit` and the local `basicconv` use | Global `Ric >= 0` is available in every actual P3 use; a relevant larger ball has compact closure and a uniform local `|Rm|` bound; a smaller ball has `Vol >= epsilon*r^n`; conclude `inj(p) >= delta(n,epsilon)*r`. Ambient completeness cannot be required because of `temp2kappa:2668` | checked `intrInj_ge_cgt_on` and ambient-ball quantitative assembly `intrInj_ge_vol`; `flowInj_of_vol` realizes the stronger complete/global-bounded-geometry special case | missing exact local producer | all listed machinery is focused/named green and direct-axiom clean; the live fixed-chart `expDomain` cannot express compact-eball coverage without an extra chart-source hypothesis, so an exact raw producer requires a global witness/domain redesign before the raw Bishop/CGT bridge |
-| P1b E2 | MT `mfdconv` proof, then P3 `flowlimit` | On each fixed bounded ball: compact closure and uniform curvature-derivative bounds; uniform positive base inj/noncollapse; conclude a uniform positive inj lower bound throughout that ball, allowing incomplete ambient manifolds | `injDecay_of_bg` gives an explicit exponential pointwise bound under complete global `SeqBoundedGeometry`; its proof actually reads only order-zero curvature, base injectivity, and the intrinsic complete-manifold normal-control package | conditional producer; exact local-on-balls adapter missing | source-complete global special case and all direct axiom prints are clean; exact E2 requires raw buffered normal/CGT control plus local Bishop coverage |
+| P1b E1 | MT `volinj`; `basicconv`; `2ndmfdconv`; P3 `flowlimit` and the local `basicconv` use | Global `Ric >= 0` is available in every actual P3 use; a relevant larger ball has compact closure and a uniform local `|Rm|` bound; a smaller ball has `Vol >= epsilon*r^n`; conclude `inj(p) >= delta(n,epsilon)*r`. Ambient completeness cannot be required because of `temp2kappa:2668` | checked `intrInj_ge_cgt_on` and `intrInj_ge_vol`; the completeness-free raw chain is checked through radial Jacobi nonvanishing/local diffeomorphism, canonical lift fencing, pull-volume/multiplicity, complete-extension minimizing joins, `rawCore_min_regular`, `rawBranch_hess_pos`, and `rawExt_pinned_inj`; `flowInj_of_vol` realizes the stronger complete/global-bounded-geometry special case | exact local endpoint missing | every listed raw prerequisite is warning-free focused GREEN and every artifact with a real downstream consumer is exactly refreshed. The next genuine producer is compact short-bigon exclusion (`rawCore_short_inj`), followed by actual-distance strict Jensen, center of mass, and the quantitative raw CGT assembly; no ambient-completeness wrapper is permitted |
+| P1b E2 | MT `mfdconv` proof, then P3 `flowlimit` | On each fixed bounded ball: compact closure and uniform curvature-derivative bounds; uniform positive base inj/noncollapse; conclude a uniform positive inj lower bound throughout that ball, allowing incomplete ambient manifolds | `injDecay_of_bg` gives the complete global special case; the local raw-polar chain is checked through `rawExp_inj_seg`, measurable strict segment domain, exact image identification, and `rawBall_integral_eq`, with `BishopRawDensity` providing the radial density comparison inputs | conditional producer; exact local-on-balls endpoint missing | the complete special case and raw integral machinery are focused/named green and direct-axiom clean. The exact next theorem is the two-radius local comparison `rawBall_vol_rel`; its source lane must add only the smallest arbitrary-radius density bridge actually absent from the checked API |
 | P1c ray | MT `ends`, `prelim.tex:1093-1124` | complete connected noncompact manifold and chosen point; obtain a unit-speed minimizing ray with exact pairwise distance on nonnegative times | checked `properSpace_riemMetric`, `IsMinimizingRay`, and `exists_minRay` | checked producer | `MinimizingRay` is warning-free focused/named-refresh green and the common audit reports only the three standard logical axioms; no Toponogov dependency |
 | P1c Laplacian | MT weak distance comparison, `prelim.tex:887-908,958-1000` | under `Ric >= 0`, distance from a pole satisfies the compactly supported distributional upper inequality needed for escaping-pole limits | `dist_lap_distrib`, assembled from the checked radial/Riccati chain, signed polar change of variables, compact-support Green identity, `radial_pairing_le`, and `dist_pairing_le` | checked endpoint | endpoint is warning-free focused and named-refresh green; the common direct audit reports only `propext`, `Classical.choice`, and `Quot.sound` |
 | P1c Busemann | MT `prelim.tex:1128-1178`, especially `Blambda` | finite decreasing limit, one-Lipschitz continuity, value `-s` on the ray, and weak `Delta B <= 0`; `narrows` additionally needs a.e. unit-gradient/asymptotic-ray direction | checked metric core plus `busemann_lap`, obtained from escaping-pole `dist_lap_distrib` and compact-support dominated convergence | checked weak endpoint; stronger `narrows` extension missing | endpoint is warning-free focused/named-refresh green and the 58-declaration common audit reports only standard logical axioms; local Sobolev/unit-gradient/asymptotic-direction machinery remains for `narrows` |
-| P1c splitting | MT `prelim.tex:1528-1606`, `line` and two-end `splitting` | supplied unit-speed minimizing line plus complete connected `Ric >= 0` gives an aligned global Riemannian product; two ends additionally give a compact factor | checked `IsMinimizingLine.pos_ray`/`neg_ray`, `buse_pair_nonneg`, `buse_pair_line`, `IsLapLEDistribOn.add`, `buse_pair_lap`, local Busemann-pair `W^{1,2}`, nonnegative `H₀¹` density, normalized metric coefficients, arbitrary-ball strong minimum, `chart_super_of_lap`, `buse_pair_eq_zero`, and `busemann_chart_sol`; Bochner pointwise identity exists downstream | prove smooth-coefficient weak solution to smooth representative, then eikonal/Hessian-zero, parallel-flow, and product assembly | the checked local analytic inputs add no splitting assumptions; the at-infinity line construction for `topsplit` remains P1d-dependent |
-| P1c soul | MT `prelim.tex:1295-1321`, `soul`; P3 uses at `temp2kappa:2293,3581,3612,3714,3727` | complete connected noncompact `sec >= 0` gives compact totally convex/totally geodesic soul and diffeomorphism to its normal bundle; `sec > 0` gives point soul and `M` diffeomorphic to Euclidean space | no native soul, convex-exhaustion, smooth normal-bundle, normal exponential, or global normal-diffeomorphism chain found | missing producer; independent endpoint | MT's proof invokes `lengthcompar`, so that source route crosses the recorded P1d boundary; do not conflate soul with splitting |
+| P1c splitting | MT `prelim.tex:1528-1606`, `line`; the supplied-line result is the P1c consumer | supplied unit-speed minimizing line plus complete connected `Ric >= 0` gives an aligned global Riemannian product | `busemannMetricSplit`, assembled from the checked Busemann harmonic/parallel chain, complete gradient flow, smooth regular zero level, `busemannProdDiffeo`, induced level metric, product metric, and the horizontal/vertical/mixed differential identities | checked endpoint | final module is warning-free focused and explicitly named-refresh GREEN; the 148-declaration common audit reports only `propext`, `Classical.choice`, and `Quot.sound`; constructing a line from two ends for `topsplit` remains P1d-dependent and is not part of this endpoint |
+| P1c soul | MT `prelim.tex:1295-1321`, `soul`; actual P3 uses at `temp2kappa:2293,3581,3612,3714,3727` | the actual consumers need only the positive-sectional-curvature point-soul specialization, the resulting three-dimensional Euclidean diffeomorphism, and neck separation/isotopy consequences | sectional-curvature, Hopf--Rinow, Busemann, Morse-flow, and point-normal-coordinate assets are checked, but there is no genuine total-convexity, soul-existence, point-soul, or Euclidean-diffeomorphism producer | missing project-used producer; endpoint 0% | the first source-faithful endpoint-moving angle-at-infinity lemma invokes `lengthcompar`/Toponogov twice, an exact P1d boundary; a standalone convexity predicate would not close or materially advance this endpoint |
 
 ## Status log
 
@@ -932,3 +977,1001 @@ This table is filled from live source evidence during each phase.
   not use P1d/Toponogov.  Until focused verification is green these are active
   producers, not completed machinery; endpoint and percentage accounting are
   unchanged.
+- 2026-08-29: `busemann_chart_data`, `exists_asymp_ray`, and
+  `busemann_grad_sq` are now checked and included in the common audit.  The
+  chart producer retains the normalized coefficient scale; the asymptotic-ray
+  producer retains a unit initial direction and a global Busemann support; and
+  the eikonal theorem proves unit squared gradient norm under the weakest
+  actual pointwise input `MDifferentiableAt`, with no Ricci or global
+  smoothness assumption.  Their focused checks and required named refreshes
+  are warning-free green.  The expanded 73-declaration `P1AxiomCheck` is also
+  warning-free green and every printed declaration depends only on `propext`,
+  `Classical.choice`, and `Quot.sound`.  Formal P1c endpoints remain two of
+  four (**50%**); splitting itself remains unstated (**0%**).  Checked
+  splitting-dedicated machinery is about **55--60%**, whole-P1c machinery
+  about **64--68%**, and the whole P0--P9 program remains about **15--25%**.
+  The smallest genuine frontier is still a witness-based local
+  `DeGiorgi.IsSolution`-to-`W^{2,2}` interior regularity producer, followed by
+  differentiated-equation bootstrap; eikonal geometry is no longer part of
+  that blocker.
+- 2026-08-29: the first witness-regularity interface gap is closed.
+  `exists_smooth_cutoff` is now the public canonical compact-in-open cutoff;
+  `IsSolution.bilin_eq_zero_smooth` writes an arbitrary signed smooth test as
+  the difference of two nonnegative smooth tests; `weak_eq_of_smooth` extends
+  the equality by the existing `H₀¹` density argument; and
+  `IsSolution.to_homogeneous` exposes the equality-form weak solution consumed
+  by difference quotients.  All three edited producer modules are
+  warning-free focused green, their required named refreshes are green, and
+  the expanded 77-declaration audit reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.  Formal P1c endpoints remain two of
+  four (**50%**); splitting remains unstated (**0%**).  Splitting-dedicated
+  machinery is now about **58--62%**, whole-P1c machinery about **65--69%**,
+  and the whole P0--P9 program remains **15--25%**.  The exact next producer is
+  a compact-free, witness-native local difference-quotient energy bound; the
+  local `W^{2,2}` theorem is still unstated (**0%**) even though its dedicated
+  generic machinery is about **80%** complete.
+- 2026-08-29: the compact-free local `W^{2,2}` producer is now complete.
+  `homSol_dq_bound`, `homSol_second`, and `homSol_memW2` assemble the global
+  witness, standard-test square bound, quantitative master inequality, and
+  difference-quotient weak-limit theorem.  `busemann_chart_h2` applies this
+  chain on an inner chart ball, and `homSol_diff_id` proves the first
+  differentiated divergence-form equation in the required weak-partial order.
+  Every exporting module is warning-free focused/named-refresh green.  The
+  expanded 88-declaration `P1AxiomCheck` is warning-free green, and every
+  printed declaration depends only on `propext`, `Classical.choice`, and
+  `Quot.sound`.  Formal P1c endpoints remain two of four (**50%**); splitting
+  and soul remain unstated (**0%** each).  Splitting-dedicated machinery is now
+  about **66--70%**, whole-P1c machinery about **68--71%**, and the whole
+  P0--P9 program remains about **15--25%**.  Three independent route audits
+  agree that the smallest honest next producer is a compact-free local
+  `W^{2,2}` estimate for a divergence-form equation with `W^{1,2}` vector
+  source; compact resolvent/domain-power and mollification routes would add
+  larger independent frontiers.
+- 2026-08-29: the fixed-order scalar-source bootstrap is now complete.
+  `hasWeakDiv_of_parts` and `weakRHS_eq_integral` lower the differentiated
+  vector source to a scalar `L²` pairing.  `srcSol_substOn`,
+  `src_master_nonsmooth`, and `srcSol_memW2` give the corresponding compact-free
+  scalar-source `W^{2,2}` estimate.  `homDiffField`, `homDiffSource`,
+  `homDiff_hasDiv`, and `homDiff_weak_eq` then identify the differentiated
+  homogeneous equation with source `rho * homDiffSource`, with the positive
+  sign fixed by the weak-divergence convention.  Finally `homSol_memW3`
+  assembles the canonical chosen derivatives and proves `W^{2,2} -> W^{3,2}`
+  on the inner set.  Every new exporting module is warning-free focused and
+  explicitly named-refresh green.  The expanded 101-declaration common axiom
+  audit is warning-free green, and every printed declaration depends only on
+  `propext`, `Classical.choice`, and `Quot.sound`.  Formal P1c endpoints remain
+  two of four (**50%**), and
+  splitting and soul remain unstated (**0%** each.  Splitting-dedicated
+  machinery is about **70--74%**, whole-P1c machinery about **69--72%**, and
+  the whole P0--P9 program remains about **15--25%**.  A separate all-order
+  audit found no multi-index obstruction: the next smallest producer is the
+  differentiated weak equation for a nonzero scalar source, followed by a
+  nested-inner-domain induction to all Sobolev orders.
+- 2026-08-29: the all-order scalar-source bootstrap is now complete.
+  `srcSol_diff_id` differentiates the actual scalar-source weak equation,
+  `srcDiff_weak_eq` packages each chosen first derivative with source
+  `D_l f + rho * homDiffSource`, and `homDiff_memWkp` proves the coefficient
+  source has the required arbitrary Sobolev order.  `srcEq_restrict` localizes
+  the actual equation to any smaller open set.  Finally `srcSol_memWkp_on`
+  carries out structural induction on the source order with one precompact
+  intermediate domain at each successor step.  All four exporting modules are
+  warning-free focused and explicitly named-refresh green, with no new
+  assumptions, predicates, or axioms.  Formal P1c endpoints remain two of four
+  (**50%**); splitting and soul remain unstated (**0%** each.  Splitting-
+  dedicated machinery is about **76--80%**, whole-P1c machinery about
+  **72--75%**, and the whole P0--P9 program remains about **15--25%**.  The next
+  smallest producer is the homogeneous specialization, followed immediately by
+  local all-order and smooth Busemann chart regularity.
+- 2026-08-29: the homogeneous and smooth Busemann specialization is now checked.
+  `homSol_memWkp_on` specializes the scalar-source induction without adding a
+  compactness hypothesis; `busemann_chart_wkp`, `busemann_chart_cdiff`, and
+  `busemann_smooth` turn the actual supplied-line Busemann weak solution into a
+  globally smooth function.  `lap_le_of_distrib` supplies the necessary
+  continuous-source distribution-to-pointwise converse, and `cov_zero_of_frob`
+  turns the later zero Frobenius energy into vanishing covariant derivative.
+  All are warning-free focused and explicitly named-refresh green.  Formal P1c
+  endpoints remain two of four (**50%**), with splitting and soul unstated
+  (**0%** each); splitting-dedicated machinery is about **82--85%**, whole-P1c
+  machinery about **75--78%**, and the whole P0--P9 program about **15--25%**.
+  The next smallest producer is pointwise harmonicity of the supplied-line
+  Busemann function, then the Bochner parallel-gradient conclusion.
+- 2026-08-29: the supplied-line flow and raw product-coordinate layers are now
+  checked.  `busemann_lap_zero`, `busemann_grad_par`, `intrinsic_intCurve`,
+  `curveAt_contMDiff`, and `curveAtDiffeo` give the harmonic/parallel complete
+  flow.  `busemannFlow_line` identifies its sign with the supplied line, while
+  `busemannProdEquiv`, `busemannProdHomeo`, and `busemann_deriv_ne` give a
+  universe-polymorphic algebraic and topological product over the raw zero
+  subtype.  Every exporting module is warning-free focused and explicitly
+  named-refresh GREEN.  The formal splitting theorem remains unstated
+  (**0%**); splitting-dedicated machinery is about **86--88%**, whole-P1c
+  machinery about **77--80%**, and the whole P0--P9 program remains about
+  **15--25%**.  A generic regular-level manifold/diffeomorphism cannot yet use
+  the current Morse API because both `IsCriticalPointAt` and `LevelSetSpace`
+  are restricted to `Type` and `RegularSublevel` is specialized to
+  `MorseModel`; narrowing P1c's universes would be an unacceptable public
+  regression.  Independently, the bottom APIs for flow metric preservation are
+  present, and the active next producer is the connection-level theorem that
+  the spatial differential of a complete parallel flow is parallel.  The
+  expanded common axiom audit will run only after that producer chain settles.
+- 2026-08-29: the generic connection-level flow producer is now checked.
+  `curveAt_mfderiv_par` proves, by a two-parameter smooth variation and
+  commuting covariant derivatives, that the spatial differential of a
+  complete parallel flow is parallel along every orbit.  Its focused check and
+  explicit named refresh are both warning-free GREEN; the common axiom audit
+  has been extended but remains deferred until the immediately downstream
+  metric-preservation producer settles.  This is checked dedicated machinery,
+  not a completed splitting theorem: the formal splitting endpoint remains
+  unstated (**0%**), splitting-dedicated machinery is about **88--90%**,
+  whole-P1c machinery about **79--81%**, and the whole P0--P9 program remains
+  about **15--25%**.  The next smallest lemma is `curveAt_inner_eq`, followed
+  by equality of the fixed-time pulled-back metric.
+- 2026-08-29: the parallel-flow metric chain is now checked through its
+  Busemann specialization.  `curveAt_inner_eq` uses metric compatibility and
+  `curveAt_mfderiv_par` to prove constancy of the inner product of two spatial
+  differential fields; `curveAt_pullback_eq` packages this as fixed-time
+  pullback-metric equality; and `busemannFlow_inner` specializes the result to
+  the supplied-line gradient flow.  Both exporting modules are warning-free
+  focused and explicitly named-refresh GREEN.  The formal splitting endpoint
+  remains unstated (**0%**); splitting-dedicated machinery is about
+  **90--92%**, whole-P1c machinery about **80--82%**, and the whole P0--P9
+  program remains about **15--25%**.  A fresh regular-level audit found that
+  the existing Morse charts, manifold instance, inclusion, and factor theorem
+  are mathematically sufficient; the next smallest API step is their surgical
+  universe generalization, followed by invariance of `IsCriticalPointAt` under
+  `ModelWithCorners.transContinuousLinearEquiv`.
+- 2026-08-29: the regular-level model bridge is now checked.  `SublevelSpace`
+  and `LevelSetSpace`, the public Morse manifold declarations, and the
+  regular-level chart/manifold/inclusion/factor API are universe-polymorphic;
+  every generalized module is warning-free focused and explicitly
+  named-refresh GREEN.  `isCrit_trans_iff` proves, without any differentiability
+  hypothesis, that critical-point status is invariant under
+  `ModelWithCorners.transContinuousLinearEquiv`.  This closes the former
+  `Type 0`/model-change API gate without adding a global instance, wrapper
+  predicate, or splitting assumption.  The formal splitting endpoint remains
+  unstated (**0%**); splitting-dedicated machinery is about **92--94%**,
+  whole-P1c machinery about **82--84%**, and the whole P0--P9 program remains
+  about **15--25%**.  The next smallest producer is the standard smooth product
+  diffeomorphism, built locally from the existing regular-level structure and
+  `busemannProdEquiv`.
+- 2026-08-30: the standard smooth product diffeomorphism is now checked.
+  `busemannProdDiffeo` equips the regular zero level with the canonical Morse
+  manifold structure and upgrades `busemannProdEquiv` to a smooth equivalence
+  with the ambient manifold.  Its focused check and explicit named refresh are
+  warning-free GREEN.  The required weakest-assumption repair in
+  `RegularSublevel` was restricted to the exact 17-declaration producer closure:
+  its ambient manifold grade is now the project's smooth inner top rather than
+  analytic outer top, with final focused and named-refresh verification GREEN.
+  This is still dedicated machinery: the formal Cheeger--Gromoll metric
+  splitting statement remains unstated (**0%**), splitting-dedicated machinery
+  is about **94--96%**, whole-P1c machinery about **83--85%**, and the whole
+  P0--P9 program remains about **15--25%**.  The next smallest canonical layer
+  is the induced metric of a smooth immersion and the product Riemannian metric,
+  followed by the horizontal, vertical, and mixed Busemann-flow identities and
+  the non-tautological pullback-metric equality.
+- 2026-08-30: the Soul-theorem denominator has been narrowed to the actual
+  Morgan--Tian consumers.  P2 does not use Soul.  P3 uses only the
+  positive-sectional-curvature specialization: a selectable point soul, the
+  resulting three-dimensional Euclidean diffeomorphism, and the downstream
+  separation/isotopy facts for neck central spheres.  It does not consume the
+  full nonnegative-curvature normal-bundle hierarchy.  The current native tree
+  has sectional-curvature-to-Ricci, Hopf--Rinow/minimizing-geodesic, Busemann,
+  Morse-flow, induced-metric, point-normal-coordinate, and generic deformation-
+  retract machinery, but it has no all-minimizing-segments total-convexity API,
+  smooth normal bundle/tubular exponential for an embedded submanifold,
+  Sharafutdinov retraction, soul existence, point-soul theorem, or Euclidean
+  diffeomorphism endpoint.  More importantly, Morgan--Tian's first genuine
+  soul-moving lemma is the angle-at-infinity estimate, whose proof invokes
+  `lengthcompar`/Toponogov twice.  That is an exact P1d boundary and is outside
+  this campaign.  Accordingly the project-used Soul endpoint remains unstated
+  (**0%**) and its dedicated machinery is only about **0--5%**; generic geometry
+  assets are not counted toward that percentage.  A standalone total-convexity
+  predicate would be a legitimate future API brick but would not by itself move
+  the endpoint, so P1c will not build a parallel Soul hierarchy around it.
+- 2026-08-30: the supplied-line Cheeger--Gromoll metric splitting endpoint is
+  now complete.  `localPull_smooth`, `immersionPullMetric`, and
+  `immersionPull_inner` provide the canonical induced-metric layer;
+  `prodMetric` and `prodMetric_inner` provide the product metric;
+  `busemannProd_mfderiv`, `busemannLevelMetric`, `busemannProd_horiz`,
+  `busemannProd_vert`, and `busemannProd_cross` identify the four metric
+  blocks.  The public `busemannMetricSplit` internally chooses the
+  `finrank(E)-1` Morse model and proves that the existing Busemann product
+  diffeomorphism pulls the ambient metric back to the level metric times the
+  flat real metric; callers supply no coordinate equivalence.  The final file
+  is warning-free focused GREEN and explicitly named-refresh GREEN.  The
+  expanded 148-declaration common axiom audit is warning-free GREEN, and every
+  printed declaration, including `busemannMetricSplit`, depends only on
+  `propext`, `Classical.choice`, and `Quot.sound`.  Formal P1c endpoints are now
+  three of four (**75%**): distributional Laplacian comparison, Busemann weak
+  comparison, and supplied-line metric splitting are complete; Soul remains
+  unstated (**0%**) at the exact P1d/Toponogov boundary.  Splitting-dedicated
+  machinery is **100%**; under the corrected actual-consumer denominator,
+  whole-P1c dedicated machinery is about **75--78%**, rather than counting
+  generic geometry assets toward Soul.  The whole P0--P9 infrastructure
+  estimate remains about **15--25%**, while the final Poincare theorem endpoint
+  remains unstated (**0%**).
+- 2026-08-30 aggregate accounting: across the actual project-used P1a--P1c
+  denominator, ten of fourteen formal endpoints are checked (**71.4%**).
+  P1a is seven of eight (**87.5%**) with about **98%** dedicated machinery;
+  P1b is zero of two (**0%**) despite about **94%** dedicated machinery; P1c is
+  three of four (**75%**) with about **75--78%** dedicated machinery under the
+  corrected Soul denominator.  These figures remain separate on purpose:
+  infrastructure is not theorem completion.  The unresolved endpoints are the
+  local compact-closure Bishop producer, the two incomplete-ambient CGT
+  consumers, and the positive-curvature Soul specialization.  The whole
+  Poincare final theorem remains unstated (**0%**); the broad P0--P9
+  infrastructure estimate remains **15--25%**.
+- 2026-08-30 P1a compact-continuation closeout: `chart_vf_on_iff`,
+  `geoLift_isIntegralOn`, `gvf_eqOn`, `geo_Ioo_extend_to`, and `exists_geo_one_cpt` are all
+  warning-free focused GREEN.  The first three newly exported modules and the
+  compact-geodesic module have fresh targeted artifacts, and the unified
+  153-declaration `P1AxiomCheck.lean` focused audit is warning-free GREEN and
+  every printed declaration depends only on `propext`, `Classical.choice`, and
+  `Quot.sound`.  The new compact theorem gives a base geodesic through time one
+  under a compact closed-eball buffer and no ambient completeness.  It does not
+  imply the current raw `expDomain`, because `IsGeodesicOnWithInitial` still
+  records integral curves of the fixed-initial-chart vector field.  Three
+  distinct routes are now exhausted: adding chart-source containment is true
+  but misses the Morgan--Tian consumer; changing the existing support semantics
+  to the global field is faithful but a foundational public API migration; and
+  introducing a second base-geodesic domain creates a forbidden parallel
+  hierarchy and a larger downstream migration.  The minimal canonical migration
+  touches the support definition and proofs in `Geodesic/MaximalInterval.lean`,
+  then the direct old-support constructions in `Geodesic/MaximalRescaling.lean`,
+  `Exponential/Defs.lean`, `Exponential/ChartFlow/PreconnectedPropagation.lean`,
+  `Exponential/ChartFlow/RescaledLift.lean`,
+  `Exponential/ChartFlow/ChainedFlowContinuity.lean`,
+  `Exponential/GaussLemmaPullback.lean`, and
+  `Metric/LocalIsometryRigidity.lean`; unchanged-signature Jacobi, Bishop, and
+  CGT consumers are regression checks.  No such public definition rewrite is
+  authorized in the current campaign, so P1a closes at this exact design/API
+  blocker with seven of eight endpoints (**87.5%**), P1b remains zero of two,
+  aggregate P1 remains ten of fourteen (**71.4%**), and no endpoint percentage
+  is credited for these completed helpers.
+- 2026-08-30 P1a raw-domain follow-up: the authorized support migration has now
+  passed `MaximalRescaling.lean` focused verification after only local
+  elaboration repairs; its missing artifact was restored by one explicit
+  exclusive-window named refresh (3754/3754).  The new canonical
+  `Exponential/Smoothness/Domain.lean` is warning-free focused green and proves
+  supported-point smoothness of raw `expMap`, openness of `expDomain`, and
+  smoothness on that domain without ambient completeness.  The compact-ball
+  minimizing assembly `minExp_of_cptBall` is source-written without placeholders
+  but is not yet focused-verified or axiom-audited, so it remains 0% as a theorem
+  endpoint.  P1a therefore remains seven of eight (**87.5%**) while dedicated
+  machinery is about **98--99%**; aggregate P1 remains ten of fourteen
+  (**71.4%**).  The next checks are `MinimizingGeodesic.lean` and
+  `RadialSurjectivity.lean`, followed by the compact truncated raw segment-domain
+  and localized area/Jacobi bridge.
+- 2026-08-30 P1a raw local-polar assembly: the weakened
+  `broken_minimizer_velocity_match` and the reusable noninjective manifold image
+  theorem `riemVol_image_le` are warning-free focused green.  The latter exposes
+  the coordinate-free `mapJacDensity` and needs only `C¹` regularity on an open
+  neighborhood of a compact source, with no injectivity or completeness.
+  Source-complete, placeholder-free downstream adapters now identify the raw
+  exponential map density with the existing radial `curveDensity`, bound a
+  compact raw exponential image, prove compactness and metric-ball coverage of
+  the buffered raw minimizing locus, and assemble `rawBall_vol_le_int` without
+  ambient completeness.  They remain unverified until their new upstream
+  artifacts can be refreshed outside the current multi-task parallel window;
+  the new rule allows only focused checks while tasks run concurrently.  Hence
+  P1a remains seven of eight endpoints (**87.5%**), the compact-closure Bishop
+  endpoint remains unstated (**0%**), dedicated machinery remains about
+  **98--99%**, and aggregate P1 remains ten of fourteen (**71.4%**).  The next
+  smallest independent producer is `curveDensity_le_on`; after it, the genuine
+  raw frontier is pole normalization plus expDomain-local radial Jacobi data.
+- 2026-08-30 P1a density-comparison producers: `curveDensity_le_on` is now a
+  warning-free focused-green scalar theorem deriving the model-density bound
+  from the localized mean comparison, ratio antitonicity, and pole limit.
+  `radialDensity_pole` is also warning-free focused green in `RadialGram.lean`;
+  it proves the Euclidean pole normalization directly for raw radial Jacobi
+  fields and a generic finite orthonormal family, without intrinsic-geodesic,
+  metric-completeness, or `hEnorm` assumptions.  The model counterpart
+  `hypDensity_pole` is warning-free focused green.  The combined
+  `radialRatio_pole` is source-complete and was independently checked by
+  temporarily expanding that one model-limit call, but its final canonical
+  source awaits the new `HyperbolicModel` artifact and is therefore not yet
+  counted as verified.  P1a endpoint accounting stays seven of eight
+  (**87.5%**) and the compact-closure theorem stays unstated (**0%**).  The next
+  producer is the expDomain-local radial Jacobi regularity/Jacobi-equation
+  package; after it, raw no-conjugacy/injectivity remains the genuine geometric
+  frontier.
+- 2026-08-30 P1a raw pole regularity: `radial_jacobi_d0` and
+  `radial_jacobi_reg0` are warning-free focused GREEN without `CompleteSpace M`,
+  `PseudoEMetricSpace`, `hEnorm`, Ricci, or small-radius assumptions.  They use
+  the open raw exponential domain and a pole-local smooth joint variation to
+  identify the prescribed initial derivative and supply exactly the two
+  chart-regularity facts at zero.  The final sources have no placeholders but
+  remain formally unverified because `Smoothness/Domain.olean` is absent and
+  parallel-task policy forbids a named refresh.  Endpoint accounting therefore
+  remains P1a seven of eight (**87.5%**), aggregate P1 ten of fourteen
+  (**71.4%**), and the compact-closure Bishop theorem itself **0%**.  The next
+  smallest producer is an endpoint-weakened Wronskian constancy lemma, followed
+  by `raw_exp_inj_of_min`.
+- 2026-08-30 P1a endpoint Wronskian bridge: `wronskian_zero_Ioo` is now
+  warning-free focused GREEN.  It keeps the curve, field, and covariant-
+  derivative regularity on the closed interval but needs the two Jacobi
+  equations only on the open interval; the old `wronskian_zero_on` signature is
+  preserved as a compatibility corollary.  This removes unnecessary endpoint
+  Jacobi assumptions from the radial orthogonality step.  The raw index-form
+  route still needs a separate endpoint-closure bridge for `IsJacobiSolOn`, so
+  the compact-closure Bishop endpoint remains unstated (**0%**), P1a remains
+  seven of eight (**87.5%**), and aggregate P1 remains ten of fourteen
+  (**71.4%**).  The next concrete theorem remains `raw_exp_inj_of_min`;
+  focused-only verification may resume after the shared window handback, but no
+  named refresh/build is permitted while tasks remain parallel.
+- 2026-08-30 P1a raw linear-independence adapter: `radialJacobi_li_of` is
+  source-written in `Volume/RadialGram.lean`.  It consumes only a nonzero radial
+  time, membership in the raw exponential domain, and injectivity of the raw
+  exponential differential; scaling plus `radial_jacobi_dom` then transports an
+  independent initial family to the corresponding radial Jacobi fields.  It
+  removes the old normal-chart source and small-`expMapC2Radius` hypotheses from
+  this bridge without adding completeness or a wrapper predicate.  Focused
+  verification and unified axiom audit remain pending, so no endpoint credit is
+  assigned; P1a stays **87.5%**, aggregate P1 stays **71.4%**, and the compact-
+  closure Bishop theorem stays **0%**.
+- 2026-08-30 P1a pointwise raw regularity: `radial_jacobi_reg` is now
+  source-written under the single hypothesis `t • x ∈ expDomain g p`.  It
+  returns exactly the two chart differentiability facts for the raw radial
+  variation and its covariant derivative, without endpoint Jacobi,
+  completeness, metric, curvature, or norm assumptions.  The earlier
+  `radial_jacobi_reg0` signature is preserved as its zero specialization.  Both
+  declarations await focused verification because their upstream artifact is
+  still stale; no endpoint credit changes.
+- 2026-08-30 P1a raw Gram focused attempt: `RadialGram.lean` stopped at the two
+  expected stale-import identifiers, `radial_jacobi_dom` and
+  `hypDensity_pole`; the former occurs at the new `radialJacobi_li_of` bridge,
+  so its body was not elaborated.  No local proof diagnostic was produced.
+  Dependency refresh remains prohibited during the parallel-task window, and
+  the endpoint and machinery percentages are unchanged.
+- 2026-09-01 P1a raw Gram recheck: `RadialGram.lean` is now warning-free
+  focused GREEN as a whole.  The raw-domain linear-independence adapter
+  `radialJacobi_li_of`, pole-normalized raw density `radialDensity_pole`, and
+  hyperbolic-model ratio `radialRatio_pole` all elaborate; the earlier stale
+  identifiers no longer block the file.  No refresh/build was run.  This closes
+  producer verification only and does not change endpoint accounting.
+- 2026-09-01 P1a raw segment-domain recheck: `SegmentDomain.lean` is
+  warning-free focused GREEN.  The compact buffered equality locus
+  `isCompact_rawSeg` and its raw exponential ball-coverage theorem
+  `ball_sub_rawSeg` both elaborate without ambient completeness.  They remain
+  producer machinery; the compact-closure Bishop inequality is still unstated
+  and endpoint accounting is unchanged.
+- 2026-09-01 P1a raw area adapter: `SegmentArea.lean` is warning-free focused
+  GREEN through `riemVol_rawExp_le`.  The general raw exponential image measure
+  is bounded by the time-one radial Gram density on every compact subset of
+  `expDomain`; an unused positive-finrank section instance was removed from the
+  theorem scope.  No refresh/build was run, and endpoint accounting is
+  unchanged.
+- 2026-08-30 P1a Jacobi-system endpoint closure: the native
+  `IsJacobiSolOn.of_Ioo` producer is warning-free focused GREEN.  Under only a
+  nondegenerate interval, closed-interval continuity of the field, velocity,
+  and acceleration, and the two ordinary derivative equations on the open
+  interval, it recovers both one-sided endpoint equations by Mathlib's
+  derivative-limit API.  It adds no completeness, endpoint-value, or operator-
+  wrapper hypothesis.  This closes the last generic ODE bridge needed by the
+  raw index-form route; `raw_exp_inj_of_min` remains the next concrete theorem.
+  Endpoint accounting is unchanged: P1a is **87.5%**, aggregate P1 is
+  **71.4%**, and the compact-closure Bishop theorem remains unstated (**0%**).
+- 2026-09-01 P1a Jacobi germ transport: `jacobiAt_congr` is warning-free
+  focused GREEN.  It transports `IsJacobiAt` using only equality germs for the
+  base curve and the underlying model-space values of the vector field; two
+  applications of private covariant-derivative locality recover the required
+  second derivative.  No derivative germ, completeness, or curvature
+  hypothesis is added.  The theorem is now listed in the pending unified axiom
+  audit.  Endpoint accounting is unchanged.
+- 2026-08-30 P1a signed radial-geodesic bridge: the canonical geodesic-layer
+  theorem `expMap_smul_max_ne` now handles every nonzero scalar by monotone or
+  antitone inverse rescaling and is warning-free focused GREEN; the existing
+  positive `expMap_smul_eq_max` interface is preserved as a direct corollary.
+  The pointwise consequence `raw_radial_geo_at` is implemented in the new
+  bridge module `Exponential/Smoothness/RadialGeodesic.lean`, above both raw-
+  domain openness and maximal rescaling.  It covers the pole by the stationary
+  identities and otherwise identifies the raw radial germ with the maximal
+  geodesic, with no completeness assumption.  Its focused check is now
+  warning-free GREEN; no refresh/build was run in the parallel-task window.
+  No endpoint percentage changes.
+- 2026-08-30 compact minimizing endpoint focused attempt: checking
+  `RadialSurjectivity.lean` stopped at import preflight because the new
+  `Exponential/BufferedExpDomain.olean` does not yet exist.  The checker never
+  reached `minExp_of_cptBall`, so this records an artifact-freshness blocker,
+  not a source or mathematical failure.  The required named refresh remains
+  prohibited while tasks are parallel; theorem and phase percentages are
+  unchanged.
+- 2026-08-30 compact-domain producer recheck: the missing artifact's defining
+  module `BufferedExpDomain.lean` is itself warning-free focused GREEN.  Thus
+  the downstream preflight failure is isolated to artifact freshness; no
+  source repair is pending in `mem_expDom_of_cpt`.  A named refresh still waits
+  for an exclusive window.
+- 2026-09-01 P1a completeness-free second variation: the canonical
+  `indexForm_nonneg_var` producer and the refactored
+  `indexForm_nonneg_of_minimising_geodesic` wrapper are warning-free focused
+  GREEN.  The proof now reuses `exists_var_fix_ends`, whose compact-support
+  global-flow construction realizes the field without ambient manifold
+  completeness; the separate `IsMetricNorm` and base-curve smoothness
+  assumptions were removed as redundant.  This is dedicated machinery only:
+  P1a remains seven of eight endpoints (**87.5%**), aggregate P1 remains ten of
+  fourteen (**71.4%**), and the compact-closure Bishop theorem itself remains
+  unstated (**0%**).  Three downstream calls are being migrated statically;
+  their focused checks wait for the single required upstream artifact refresh
+  in an exclusive non-parallel window.
+- 2026-09-01 P1a second-variation artifact handoff: the explicitly named
+  `SecondVariationMinimiser` refresh completed successfully after all parallel
+  P1 lanes were paused.  The target module remained warning-free; only existing
+  linter messages from replayed dependencies appeared.  Parallel work now
+  resumes with focused checks only on the three migrated consumers.  Endpoint
+  percentages remain unchanged.
+- 2026-09-01 P1a generic-interval artifact handoff: `radial_jacobi_on` now has
+  an implicit arbitrary upper endpoint, with its domain hypothesis on
+  `Icc 0 L` and all three regularity/Jacobi conclusions on `Ioo 0 L`; it is
+  warning-free focused GREEN and explicitly refreshed.  The independent
+  `RicciEndpoint` weak-signature refresh also passed for its one real consumer.
+  Both refreshes ran only after the parallel lanes were paused.  Endpoint
+  accounting remains unchanged pending the generic-horizon
+  `raw_exp_inj_of_min` focused check and final Bishop assembly.
+- 2026-09-01 P1a arbitrary-horizon nonsingularity: `raw_exp_inj_of_min` is now
+  warning-free focused GREEN with an explicit positive horizon `L`, raw-domain
+  coverage on `Icc 0 L`, the minimizing endpoint at `L • u`, and
+  nonsingularity at every `c ∈ Ioo 0 L`.  The theorem has no ambient
+  completeness or metric-norm witness and reuses the generic
+  `radial_jacobi_on` plus the completeness-free second-variation producer.
+  Its claim was normally released after targeted diff review.  This closes the
+  tracked raw producer gate, not the theorem endpoint: P1a remains seven of
+  eight endpoints (**87.5%**), the missing compact-closure Bishop theorem is
+  still unstated (**0%**), aggregate P1 remains ten of fourteen (**71.4%**),
+  and whole-Poincare endpoint completion remains **0%**.  The next smallest
+  producer is the q=0 raw radial density comparison, followed by the absolute
+  raw-polar ball-volume assembly; the two-radius equality/ratio bridge remains
+  a separate later gate.
+- 2026-09-01 P1a raw-density consumer re-audit: the compact-closure absolute
+  endpoint belongs in `Volume/SegmentBallEuclideanUpper.lean` and needs no
+  ambient completeness, global Ricci predicate, or extra integrability
+  hypothesis.  The checked `rawBall_vol_le_int`, `riemVol_rawExp_le`, and
+  `normalHaar_eq` chain will assemble it once a pointwise raw full-density
+  bound is available.  The source-written `raw_ratio_anti` and
+  `raw_density_le` target only the transverse density; `raw_exp_density`
+  identifies the full radial Gram but does not factor it.  Therefore the next
+  genuine producer after the scalar focused checks is a raw analogue of the
+  full-to-transverse factorization behind
+  `expJacDensity_eq_ncd0_mul_transverse`, followed by the pointwise endpoint
+  `rawDens_le_zero`.  This is machinery only: P1a remains seven of eight
+  endpoints (**87.5%**), aggregate P1 remains ten of fourteen (**71.4%**), and
+  the compact-closure Bishop theorem itself remains unstated (**0%**).  The
+  relative two-radius theorem is still a separate equality/common-polar-domain
+  frontier and cannot be inferred from two one-sided absolute upper bounds.
+- 2026-09-01 P1a compact-buffer endpoint closure: `BishopRawDensity.lean` is
+  warning-free focused GREEN and exactly refreshed through `rawSpeed_sq`,
+  `raw_ratio_anti`, `raw_density_le`, `rawDens_eq_trans`, and
+  `rawDens_le_zero`.  The final `ball_vol_le_eucl` consumer in
+  `SegmentBallEuclideanUpper.lean` is warning-free focused GREEN and its exact
+  named refresh is GREEN (3998/3998).  It assumes compactness only for a
+  strictly larger buffer ball and Ricci nonnegativity only on the compared
+  ball; it does not add completeness, global Ricci, injectivity, no-conjugacy,
+  or positive-radius hypotheses.  The 196-declaration unified P1 audit passed
+  without warnings and every print lists only `propext`, `Classical.choice`,
+  and `Quot.sound`.  P1a is therefore eight of eight endpoints (**100%**),
+  aggregate P1 is eleven of fourteen (**78.6%**), and the whole-Poincare
+  theorem endpoint remains unstated (**0%**).  The incomplete-ambient
+  two-radius relative theorem remains a separate textbook extension and is not
+  counted as a ninth project-used P1a endpoint.
+- 2026-09-01 P1b post-migration re-audit: the 2026-08-28 fixed-chart/domain
+  blocker is historical, not live.  Global `MaximalGeodesicWitness`, open raw
+  `expDomain`, `mem_expDom_of_cpt`, and raw exponential smoothness now provide
+  the domain layer.  Exact Morgan--Tian consumers still require incomplete-
+  ambient E1 and E2, both formally unstated (**0%**).  The selected shortest
+  route is a raw normal-map CGT specialization.  Its first bounded producer is
+  `raw_gauss_pullback`; after raw lift fencing, the first major mathematical
+  gate is local curvature upper control to raw exponential derivative
+  injectivity/local diffeomorphism.  E1 then needs raw collision/fiber-count
+  and full pull-volume assembly; E2 additionally needs compact-buffer local
+  two-radius volume propagation.  This reclassification changes no endpoint
+  count: P1 remains eleven of fourteen (**78.6%**), and the whole-Poincare
+  theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b coordinates plumbing: the canonical
+  `Coordinates.written_fderiv_inv` adapter is warning-free focused GREEN.  It
+  converts invertibility of the manifold derivative to invertibility of the
+  written ext-chart derivative under only the boundaryless source hypothesis,
+  and feeds the existing set-level `infty` local-diffeomorphism theorem.  This
+  closes plumbing only: curvature-to-raw-derivative injectivity and E1/E2 remain
+  formally unstated (**0%**), so no endpoint percentage changes.
+- 2026-09-01 P1b raw local-diffeomorphism plumbing: the explicitly named
+  `Coordinates.LocalDiffeoIFT` refresh is GREEN (2357/2357), and the new
+  `framedExp_mdiffAt` / `framedExp_locdiff` module is warning-free focused
+  GREEN.  It uses only raw-domain membership, finite-dimensional derivative
+  injectivity, and the canonical inverse-function theorem; it adds no
+  curvature, radius, or completeness assumption.  This is dedicated machinery
+  only.  E1 and E2 remain unstated (**0%**) and aggregate endpoint accounting is
+  unchanged.
+- 2026-09-01 P1b raw lift fence: map-generic `lift_norm_le` now assumes its
+  radial Cauchy inequality only along the input path.  The checked
+  `mfderiv_framedMap`, `rawFrame_radial_le`, and `rawLift_norm_le` chain
+  specializes it to the raw framed exponential under only path-local radial
+  domain support.  `LiftLength`, `RawFramedLocalDiffeo`, and
+  `GaussLemmaPullback` received only explicitly named downstream-required
+  refreshes; the final raw-lift file is warning-free focused GREEN.  This is
+  dedicated machinery only: E1/E2 remain unstated (**0%**) and aggregate
+  endpoint accounting remains eleven of fourteen (**78.6%**).
+- 2026-09-01 P1b pole Jacobi bridge: the private raw clamped variation now
+  proves its Jacobi conclusion on the closed interval by reusing
+  `raw_radial_geo_at` at the clamp center.  The public `radial_jacobi_on`
+  interface remains on `Ioo 0 L`, while `radial_jacobi_at0` exposes exactly
+  the missing pole equation without completeness or a public positive-finrank
+  premise.  Focused verification is warning-free GREEN; no artifact refresh
+  was run because no source-written downstream consumer yet reads the new
+  export.  Independent audits rule out duplicating the already-checked
+  Ioo-to-Ico Gronwall bridge.  Their next exact API gap is a smooth-clamp and
+  germ-transfer adapter giving an orthonormal parallel frame on a raw radial
+  `Icc`.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b raw interval frame: `exists_raw_ray_ext` globalizes a raw
+  radial segment by compact thickening and a smooth time clamp; it is
+  warning-free focused GREEN and exactly refreshed only because the new frame
+  consumer reads its export.  `Volume/RawRadialFrame.lean` then transfers the
+  existing global orthonormal parallel frame back by curve-germ congruence.
+  Its public `exists_raw_frame` also handles zero model dimension without a
+  `NeZero` assumption and is warning-free focused GREEN.  No raw-frame artifact
+  refresh has run because the curvature consumer is not yet source-written.
+  This closes the frame input to `covGronwall_ne_zero_at`; the next exact brick
+  is the raw curvature/ODE package and resulting nonvanishing of radial Jacobi
+  fields.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b raw curvature/local-diffeomorphism gate:
+  `RawRadialGronwall.lean` is warning-free focused GREEN through
+  `rawJacobi_ne_of_rm` and `rawExp_mfderiv_inj`.  It reuses the native raw
+  interval frame, pole Jacobi equation, `curv_sq_of_rm04_velocity_Ioo`, and
+  `covGronwall_ne_zero_at`; no duplicate ODE or curvature wrapper was added.
+  The exact upstream artifact refresh is GREEN (3874/3874).  The normal-frame
+  specialization lives separately in `RawFramedGronwall.lean` to avoid a
+  generic-norm/inner-product instance diamond; `framed_mfderiv_inj` and
+  `framed_locdiff_rm` are warning-free focused GREEN.  This closes the major
+  curvature-to-raw-local-diffeomorphism machinery gate, raising dedicated P1b
+  machinery to about **96%**, but it does not state E1 or E2: both remain
+  **0%**, aggregate P1 remains eleven of fourteen endpoints (**78.6%**), and
+  the whole-Poincare theorem endpoint remains unstated (**0%**).  The next
+  smallest frontier is the raw CGT collision/fiber-count specialization and
+  its all-launch pull-volume input.
+- 2026-09-01 P1b raw path-lift bridge: `CGTRawExpLift.lean` proves
+  `CGT.exists_raw_lift` directly in the canonical `IsLiftOn` interface.  The
+  compact fence is `rawLift_norm_le`, radial `expDomain` coverage is used only
+  inside the local-diffeomorphism ball, and no `CompleteSpace`, sigma-compact,
+  or duplicate `RawFrameLift` layer is introduced.  The exact
+  `RawLiftLength` refresh is GREEN (3805/3805), and the new theorem is
+  warning-free focused GREEN.  This closes one mechanical prerequisite but
+  not the collision theorem: dedicated P1b machinery remains about **96%**,
+  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of fourteen
+  endpoints (**78.6%**), and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).  The next smallest producer is the all-launch
+  injectivity-to-density bound `rawDens_le_of_inj`, in parallel with the raw
+  multiplicity-area and propeller dependency kernels.
+- 2026-09-01 P1b raw density/measure and radial-path split:
+  `BishopRawDensity.lean` now proves `rawDens_le_of_inj` under only closed
+  radial-domain coverage, positive-time raw differential injectivity, and
+  radial Ricci nonnegativity; its focused check is warning-free GREEN.  The
+  canonical lower measure layer now proves the completeness-free exact image
+  formula `riemVol_image_eq`, also warning-free focused GREEN.  The true
+  consumers `RawPullVolume.lean` and `RawMultiplicityArea.lean` are kept in
+  separate comparison modules; the former is source-complete and its focused
+  preflight stopped only because `rawDens_le_of_inj` has not yet been refreshed,
+  while the latter is source work in progress and likewise waits for the exact
+  image-equality artifact.  Independently, `CGTRawLiftOps.lean` is warning-free
+  focused GREEN through the canonical raw radial `Path`, its flatness, and the
+  exact length formulas `rawRadial_len` and `rawFlatPath_len`; the next source
+  module forms the two-ray collision loop.  Parallel work remains focused-only,
+  so no new targeted refresh/build has run.  These are dedicated producers,
+  not E1/E2: both endpoints remain unstated (**0%**), aggregate P1 remains
+  eleven of fourteen (**78.6%**), dedicated P1b machinery remains about
+  **96%**, and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw measure/collision integration: the exact
+  `BishopRawDensity` refresh is GREEN (3952/3952), after which
+  `rawPullVol_le_eucl` became warning-free focused GREEN and shed its unused
+  `SigmaCompactSpace M` premise.  The new canonical `riemVol_image_eq` artifact
+  is exactly refreshed GREEN (2869/2869); its true consumer
+  `raw_mul_le_area` is warning-free focused GREEN after only local import,
+  alias-rewrite, and unused-instance repairs, and does not require completeness,
+  connectedness, intrinsic APIs, or positive model dimension.  Independently,
+  `CGTRawLiftOps` is exactly refreshed GREEN (3962/3962), and the downstream
+  `rawCollisionPath`/`rawCollision_flat`/`rawCollision_len` module is
+  warning-free focused GREEN.  `CGTRawExpLift` is exactly refreshed GREEN
+  (3811/3811) for the next true consumer.  The next producer is now the
+  completeness-free fiber embedding/cardinality comparison
+  `rawFiber_encard_le`; a separate read-only audit is localizing the later raw
+  pullback-metric/Jensen bridge.  Because neither P1b endpoint has yet been
+  formally stated and proved, E1/E2 remain **0%**, aggregate P1 remains eleven
+  of fourteen (**78.6%**), dedicated P1b machinery remains conservatively about
+  **96%**, and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw geometric-boundary audit: the completeness-free fiber
+  propagation source is now being implemented as `rawFiber_encard_le` in a
+  dedicated focused-check-only module.  Independently, a source audit of
+  `CGTPullbackMetric`, `CGTWhiteheadJensen`, and `CGTPropeller` shows that the
+  first missing geometric producer is not the full Jensen package but the thin
+  raw pullback adapter `rawPull_pathLen`.  It can reuse `hloc_restrict_open`,
+  `localPullMetric`, and `localPull_pathLen` under a caller-provided raw local
+  diffeomorphism, with no completeness, connectedness, curvature, core, or
+  positive-dimension premise.  The next implementation lane therefore owns
+  only `CGTRawPullback.lean`; strict convexity and center-of-mass machinery stay
+  behind the later, separately audited frontier.  While these lanes run in
+  parallel, verification remains focused-only and no targeted refresh/build is
+  allowed.  E1/E2 are still unstated (**0%**), aggregate P1 is still eleven of
+  fourteen (**78.6%**), dedicated P1b machinery remains conservatively about
+  **96%**, and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw strict-Jensen dependency audit: actual pullback
+  half-squared-distance strict Jensen cannot be started from branch energy
+  alone.  All three audited routes converge on the same prerequisite order:
+  `rawExtJoin_fenced`, raw core closure of that join, raw pullback/extension
+  distance equality on the core, and only then the local branch-energy germ
+  equality with the actual half-squared distance.  Direct minimization in the
+  incomplete raw ball has no complete-space/minJoin input, while selected
+  branch energy is not a replacement for the true metric function consumed by
+  `CenterOfMass`.  The independent genuine producer
+  `rawBranch_hess_pos`--strict Hessian positivity for branch energy under a
+  caller-supplied extension-launch fence--has therefore been dispatched in
+  parallel with the join/fence lane.  This records a dependency, not endpoint
+  credit: strict Jensen remains unstated (**0%**), E1/E2 remain unstated
+  (**0%**), aggregate P1 remains eleven of fourteen (**78.6%**), and the
+  whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-02 P1b E2 raw interior measurability:
+  `rawSegInt_ball_meas` in `Volume/RawBallPolarEq.lean` is warning-free
+  focused GREEN (24.9s).  For a strict radius inside a compact closed buffer,
+  it expresses `rawSegInt ∩ gBall` as a countable union of continuous rational-
+  dilation preimages of a compact `rawSeg ∩ closedGBall` set.  This supplies
+  actual `MeasurableSet`, rather than substituting the weaker endpoint
+  `NullMeasurableSet`, and adds no ambient completeness or wrapper predicate.
+  The next exact-COV brick is the direct `riemVol_image_eq` specialization on
+  this set.  `rawBall_vol_rel` itself remains unstated (**0%**); E1/E2 remain
+  unstated (**0%**), aggregate P1 remains eleven of fourteen (**78.6%**),
+  dedicated P1b machinery remains conservatively about **97%**, and the
+  whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b E2 local-propagation audit: no current theorem is a short
+  incomplete-ambient adapter.  `injDecay_of_bg` and `segBall_vol_rel` use
+  complete/global bounded geometry; `intrInj_ge_vol` likewise carries a
+  complete ambient input.  The three audited alternatives isolate one
+  smallest missing native producer: a compact-buffer, two-radius Bishop
+  relative-volume lower bound (`rawBall_vol_rel`) under a local Ricci lower
+  bound.  The checked `ball_vol_le_eucl` and `rawBall_vol_le_int` are one-sided
+  upper bounds and cannot be reversed; a model-space complete extension would
+  require a much larger ambient distance/curvature/volume transfer package;
+  and the raw polar route still needs the common-domain/cut-locus volume
+  equality that turns density-ratio monotonicity into a ball-volume ratio.
+  The implementation lane is now attempting `rawBall_vol_rel` at the volume
+  comparison layer rather than adding an E2 wrapper assumption.  Until that
+  producer closes, E2 remains unstated (**0%**); aggregate P1 remains eleven
+  of fourteen (**78.6%**), and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b raw fiber propagation and norm-instance repair:
+  `rawFiber` and `rawFiber_encard_le` are warning-free focused GREEN.  The
+  proof uses only a raw radial pole loop, a short flat path, canonical
+  `IsLiftOn` existence/uniqueness, endpoint norm fencing, and an injective
+  fiber embedding; it has no ambient completeness, connectedness,
+  sigma-compactness, or positive-dimension premise.  Its first focused pass
+  exposed that `lift_norm_le`, `rawLift_norm_le`, and `exists_raw_lift` had
+  baked the Tensor0S tangent norm into their declarations.  The existing three
+  theorems now explicitly bind the two tangent norm structure families they
+  already use; no proof body, geometry hypothesis, or duplicate theorem was
+  added.  Each layer is warning-free focused GREEN, and the exact dependency
+  refreshes are GREEN for `LiftLength` (3778/3778), `RawLiftLength`
+  (3805/3805), and `CGTRawExpLift` (3811/3811).  The next two independent
+  producers are the raw pullback curvature/quadratic-form API and the public
+  multiplicity-to-`rawPullVol` composition bridge.  Parallel verification is
+  focused-only.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven
+  of fourteen (**78.6%**), dedicated P1b machinery remains conservatively
+  about **96%**, and the whole-Poincare theorem endpoint remains unstated
+  (**0%**).
+- 2026-09-01 P1b raw pullback and multiplicity composition:
+  `CGTRawPullback.lean` is warning-free focused GREEN through the exact
+  pullback path-length, framed differential, pullback-inner-product,
+  curvature, and quadratic-form adapters; its true downstream artifact was
+  exactly refreshed GREEN (3828/3828).  `RawPullVolume.lean` was likewise
+  exactly refreshed for its true consumer (3964/3964).  The public
+  `raw_mul_le_pull` theorem then became warning-free focused GREEN: it composes
+  `raw_mul_le_area` with the existing private normal-frame density conversion,
+  adds no completeness, connectedness, intrinsic-exponential, or positive
+  model-dimension assumption, and exposes no temporary conversion API.  The
+  next independent producer is the generic raw-loop transport and exact
+  pullback-length preservation; the read-only route audit separately selected
+  a narrow raw complete-extension producer as the first input to the later
+  core-staying minimizing join.  Parallel verification remains focused-only,
+  so no further targeted refresh/build is permitted until those lanes reach a
+  coordinated boundary.  E1/E2 remain unstated (**0%**), aggregate P1 remains
+  eleven of fourteen (**78.6%**), dedicated P1b machinery remains
+  conservatively about **96%**, and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b generic raw transport: `CGTRawTransport.lean` is warning-free
+  focused GREEN through the raw core, loop-radial path and exact length bound,
+  canonical lift existence, endpoint transport, joint continuity, C1 transport
+  of core curves, and exact pullback path-length preservation.  It imports the
+  narrow canonical Mathlib lifting module directly for
+  `IsLocalHomeomorph.continuous_lift` rather than routing through the heavier
+  intrinsic CGT hierarchy.  The API is generic in the input flat loop and has
+  no completeness, connectedness, ambient sigma-compactness, positive model
+  dimension, curvature, minimizer, collision, or Jensen premise.  No artifact
+  refresh has run: while the raw complete-extension and read-only endpoint
+  audit lanes remain active, verification is focused-only.  Exact length alone
+  does not prove nonexpansiveness; the next geometric input is a raw
+  distance-realizing core join built through the complete-extension route.
+  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of fourteen
+  (**78.6%**), dedicated P1b machinery remains conservatively about **96%**,
+  and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw complete extension: `CGTRawExtension.lean` is
+  warning-free focused GREEN through the complete extended metric,
+  closed-ball pointwise inner-product agreement, open-ball restriction
+  equality, and `rawExt_complete`.  It directly reuses the native compact
+  bump-extension and flat-model completeness APIs.  The final public interface
+  needs no ambient completeness, connectedness, sigma-compactness,
+  boundarylessness, tangent-bundle T2, curvature, raw-domain coverage, or
+  positive model dimension.  No artifact refresh has run while the remaining
+  static audits are active.  This removes the first prerequisite for the raw
+  distance-realizing core join, but neither the join nor nonexpansiveness is
+  yet proved.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), dedicated P1b machinery remains conservatively about
+  **96%**, and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b generic raw nonexpansion: the true downstream import justified
+  an exact `CGTRawTransport` refresh, which is GREEN (4000/4000).
+  `CGTRawNonexp.lean` then became warning-free focused GREEN through
+  `rawTransport_nonexp`.  The theorem consumes only one caller-supplied C1
+  core path whose pullback length realizes the source distance; it converts
+  exact transported length to ordinary-distance nonexpansion through the native
+  Hopf--Rinow metric realization.  It does not depend on a bundled min-join,
+  join existence, curvature, completeness, positive model dimension, strict
+  Jensen, or center-of-mass machinery.  The endpoint audit confirms that
+  nonexpansion is routine once a core-staying distance-realizing join exists,
+  but the later unique-center/fiber-count chain still genuinely needs strict
+  Jensen for the real pullback distance.  In parallel, the independent
+  `rawTransport_ne` producer and the extension-distance bridge are now the next
+  focused/source lanes.  E1/E2 remain unstated (**0%**), aggregate P1 remains
+  eleven of fourteen (**78.6%**), dedicated P1b machinery remains
+  conservatively about **96%**, and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b post-nonexp endpoint audit: exact transport length and
+  nonexpansion do not remove the strict-Jensen gate.  E1's remaining dependency
+  order is raw transport nonfixedness; raw zero-distance and core compactness;
+  a core-staying distance-realizing join; strict Jensen for the actual
+  pullback distance; unique center of mass; raw orbit/fiber count; quantitative
+  flat-loop and collision bounds; then `framedInj_ge_cgt` and the final
+  `framedInj_ge_vol`.  The center theorem genuinely consumes strict Jensen;
+  selected branch energy cannot be substituted for the true half-squared
+  distance.  `rawTransport_ne` is independent of the join/Jensen work and has
+  therefore been dispatched as the next checked producer.  E2 is a separate
+  frontier: propagating base noncollapse/injectivity across a bounded ball in
+  an incomplete ambient still needs a local two-radius Bishop lower-volume
+  theorem; the checked Euclidean upper bound cannot be reversed to supply it.
+  This audit changes no endpoint count: E1/E2 remain unstated (**0%**),
+  aggregate P1 remains eleven of fourteen (**78.6%**), and the whole-Poincare
+  theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw transport nonfixedness: `CGTRawPropeller.lean` is
+  warning-free focused GREEN through the single public theorem
+  `rawTransport_ne`.  A caller-supplied nonclosed lift of the short based loop,
+  together with raw lift uniqueness and the canonical radial return path,
+  proves that raw loop transport fixes no point of the core.  The theorem adds
+  no curvature, min-join, Jensen, center-of-mass, ambient completeness or
+  connectedness, ambient sigma-compactness, or positive-dimension premise.
+  It is the first post-nonexp producer in the E1 chain, not an endpoint.  No
+  artifact refresh has run because no source-written downstream consumer yet
+  imports it.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b raw core basics: `CGTRawCore.lean` is warning-free focused
+  GREEN through `rawCore_compact`, `rawZero`, `rawZero_mem`, and the exact
+  origin-distance identity `rawPull_dist_zero`.  The distance proof combines
+  the canonical raw radial upper path with the map-generic lift-length lower
+  bound.  Its statement honestly keeps radial `expDomain` coverage for every
+  raw-ball endpoint; local diffeomorphism alone is not treated as a domain
+  theorem.  No ambient completeness or connectedness, ambient
+  sigma-compactness, positive-dimension, curvature, minimizing-join, Jensen,
+  or center-of-mass premise was added.  This closes the zero-distance/core-
+  compactness prerequisite only.  Its first true downstream consumer now
+  justifies an exact named refresh, GREEN (4001/4001).  E1/E2 remain unstated
+  (**0%**), aggregate P1
+  remains eleven of fourteen (**78.6%**), dedicated P1b machinery remains
+  conservatively about **96%**, and the whole-Poincare theorem endpoint
+  remains unstated (**0%**).
+- 2026-09-01 P1b raw extension-distance bridge: the true downstream import
+  justified an exact `CGTRawExtension` refresh, which is GREEN (3840/3840).
+  `CGTRawExtDistance.lean` is then warning-free focused GREEN through
+  `rawPull_geo_of_ext`, `rawExt_geo_of_pull`, `rawExt_pathLen`,
+  `rawExt_radial_len`, and `rawExt_edist_le`.  The first three declarations
+  are radial-domain free; the final two retain only the actual endpoint radial
+  segments used by their proofs.  The live APIs do not derive those segment
+  premises from `hloc`, so no false no-domain wrapper was introduced.  The
+  module adds no ambient completeness/connectedness, positive dimension,
+  curvature, join/fence, Jensen, or center-of-mass assumption.  The next
+  join consumer justifies this module's exact named refresh, GREEN
+  (3982/3982).  The next producer is the complete-extension minimizing join
+  and its core fence;
+  strict Jensen for the resulting true pullback distance remains a distinct
+  later gate.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), dedicated P1b machinery remains conservatively about
+  **96%**, and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b complete-extension join and raw fence:
+  `CGTRawExtJoin.lean` is warning-free focused GREEN through `rawExtJoin`, its
+  endpoint identities, smoothness and geodesicity, and `rawExtJoin_fenced`.
+  The construction treats the zero-dimensional model internally rather than
+  adding a public positive-finrank assumption.  Its fence uses the honest
+  whole-raw-ball radial `expDomain` hypothesis needed at the first-hit point,
+  together with `rawPull_dist_zero`, `rawExt_edist_le`, and the pullback/
+  extension path-length identities; it adds no ambient completeness,
+  connectedness, or sigma-compactness assumption.  This closes the join/fence
+  prerequisite, not either P1b theorem endpoint.  The first source-written
+  downstream core-closure consumer justified an exact named refresh, GREEN
+  (4012/4012); no broader build was run.  E1/E2 remain
+  unstated (**0%**), aggregate P1 remains eleven of fourteen (**78.6%**),
+  dedicated P1b machinery is now conservatively about **97%**, and the
+  whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b branch-energy Hessian producer:
+  `CGTRawBranchHess.lean` is warning-free focused GREEN through the public
+  `rawBranch_hess_pos`.  For a fenced raw complete-extension launch, an
+  arbitrary valid `ExpInvBranch`, and every nonzero endpoint tangent vector,
+  it proves strict positivity of the branch-energy Hessian.  The proof uses
+  the native branch Hessian/index-form identity, the radial/transverse Jacobi
+  decomposition, the checked curvature-smallness estimate, and the exact
+  radial diagonal/cross-term identities; it does not replace true distance by
+  selected branch energy.  This closes an independent strict-Jensen input,
+  while the actual-distance germ and core distance-equality bridge remain
+  downstream.  No named refresh is justified yet because no checked consumer
+  imports the new export, and parallel work stays focused-check-only.  E1/E2
+  remain unstated (**0%**), aggregate P1 remains eleven of fourteen
+  (**78.6%**), dedicated P1b machinery remains conservatively about **97%**,
+  and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b pullback-instance boundary cleanup: the canonical curvature
+  theorem `rm04_localPull` no longer exports an ambient target
+  `SigmaCompactSpace`; it transports sigma compactness only onto the open
+  pullback target where the theorem actually needs it.  The true downstream
+  refresh of `PullbackNaturalityLocalCross` is GREEN (3667/3667).
+  `CGTRawPullback.lean` now derives the base `T2Space` from the already-present
+  tangent-bundle instance and is warning-free focused GREEN (18.3s), with its
+  exact refresh GREEN (3856/3856).  `CGTRawBranchHess.lean` consequently drops
+  the obsolete ambient sigma premise from the raw quadratic, no-conjugacy, and
+  branch-Hessian chain; its final focused check is warning-free GREEN and its
+  exact refresh is GREEN (3985/3985).  This is an API-boundary repair, not an
+  endpoint: E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), and the whole-Poincare theorem endpoint remains
+  unstated (**0%**).
+- 2026-09-01 P1b raw pinned injectivity: `CGTRawBigon.lean` is warning-free
+  focused GREEN through `rawExt_pinned_inj` (61.6s), without ambient
+  completeness, base sigma compactness, or a consumer wrapper.  Its exact
+  downstream-required refresh is GREEN (4029/4029).  The next E1 producer is
+  compact short-bigon exclusion on the raw core, reusing this local pinned
+  injectivity rather than duplicating the derivative/IFT proof; actual-distance
+  strict Jensen and center-of-mass assembly remain after it.  E1 itself is
+  still unstated (**0%**).
+- 2026-09-01 P1b raw-ball integration formula: `Volume/RawBallPolarEq.lean`
+  is warning-free focused GREEN through `rawSegInt_ball_meas`,
+  `rawSegInt_image_eq`, and `rawBall_integral_eq`; the last three checks took
+  24.9s, 25.2s, and 25.9s respectively.  The proof removes the cut endpoint
+  and metric-sphere boundaries by their native null-measure results and uses
+  the checked injective raw-exponential image identity; it assumes neither
+  ambient completeness nor a theorem-shaped volume hypothesis.  Its true
+  downstream refresh is GREEN (3969/3969).  The actual E2 endpoint
+  `rawBall_vol_rel` remains unstated (**0%**) and is now the active volume
+  source lane.
+- 2026-09-01 P1b post-pinned split: three mutually exclusive lanes are active
+  under focused-check-only coordination: E1 `rawCore_short_inj`; E2 the
+  canonical two-radius `rawBall_vol_rel` module; and the completed audit's
+  implementation handoff to the actual-distance germ `rawCore_dist_germ`.  No named refresh or
+  broader build is permitted while these lanes remain active.  Dedicated P1b
+  machinery is conservatively about **98%**, but neither E1 nor E2 has a
+  formally stated and proved endpoint, so both theorem percentages remain
+  **0%**; aggregate P1 remains eleven of fourteen (**78.6%**) and the
+  whole-Poincare theorem endpoint remains **0%**.
+- 2026-09-02 P1b raw short-launch fence:
+  `CGTRawBigon.lean` is warning-free focused GREEN through the public
+  `rawExt_short_fenced` (86.7s).  A complete-extension launch whose initial
+  point and metric length fit the `a + L < 3R/4` budget stays in the raw/extend
+  agreement ball.  The proof uses the first boundary hit, the checked raw pull
+  and extension path-length identities, and `rawPull_dist_zero`; it does not
+  add ambient completeness, connectedness, sigma compactness, curvature, or a
+  wrapper assumption.  The next source brick is the local pinned-root
+  injectivity consequence `rawExt_pinned_inj`, before compact short-bigon
+  exclusion.  No named refresh is permitted while the E1/E2 tasks are active
+  in parallel.  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of
+  fourteen (**78.6%**), dedicated P1b machinery remains conservatively about
+  **97%**, and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-02 P1b E2 raw interior injectivity:
+  `Volume/RawBallPolarEq.lean` is now warning-free focused GREEN through
+  `rawSegInt_sub` and the public `rawExp_inj_seg`.  The latter proves global
+  `Set.InjOn` of the raw exponential on the strict raw minimizing interior by
+  extending both radial geodesics and applying the native broken-minimizer
+  velocity-match theorem; it does not use ambient `CompleteSpace M`, a wrapper
+  predicate, or an unproved assumption.  The explicit `hEnorm` input is already
+  present in the intended local-volume consumer and is used only by the
+  speed/distance bridge.  The native exact change-of-variables route is now
+  blocked first by actual `MeasurableSet` of `rawSegInt ∩ gBall` (endpoint
+  null-measurability alone is insufficient), after which the genuinely
+  geometric remaining producer is the arbitrary-`q` raw radial density-ratio
+  comparison.  `rawBall_vol_rel` itself remains unstated (**0%**); E1/E2 remain
+  unstated (**0%**), aggregate P1 remains eleven of fourteen (**78.6%**),
+  dedicated P1b machinery remains conservatively about **97%**, and the
+  whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw core join and distance equality:
+  after the exact `CGTRawExtJoin` refresh GREEN (4012/4012),
+  `CGTRawCoreJoin.lean` is warning-free focused GREEN through
+  `exists_raw_fenced`, the budgeted `rawPull_edist_eq`, and the all-core
+  `rawCore_edist_eq`.  The nonzero-dimensional branch uses only private local
+  instances; no public `NeZero`, ambient completeness/connectedness/
+  sigma-compactness, curvature, Jensen, or center-of-mass hypothesis was
+  added.  Whole-ball radial `expDomain` coverage is carried honestly through
+  the fence and both distance inequalities.  This closes the core-staying
+  distance-realizing join and raw/extension distance-equality prerequisites;
+  it does not yet identify a local inverse-branch energy with actual squared
+  distance and therefore does not prove strict Jensen.  No CoreJoin refresh
+  is justified until that source-written consumer imports it.  E1/E2 remain
+  unstated (**0%**), aggregate P1 remains eleven of fourteen (**78.6%**),
+  dedicated P1b machinery remains conservatively about **97%**, and the
+  whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b E2 raw-polar boundary/domain slice:
+  `Volume/RawBallPolarEq.lean` is warning-free focused GREEN through
+  `rawSeg`, `rawSegInt`, raywise endpoint subsingleton, compact-buffer
+  `rawSegEnd_null`/`rawSegEnd_nullMeas`, `rawSeg_mem_dom`, and
+  `rawSegInt_geo`.  The endpoint
+  nullness is proved by compact radial contractions plus the native polar
+  integration formula; the domain lemma rules out Mathlib's outside-domain
+  exponential fallback for an honestly minimizing raw vector; the interior
+  lemma then obtains a radially extended geodesic from the native
+  `radialGeo_of_end`, retaining exactly its boundaryless and tangent-bundle
+  T2 requirements.  The lower geodesic layer now also has warning-free
+  focused-GREEN `smul_mem_expDomain`, proving the canonical star-domain
+  scaling rule by maximal-geodesic reparametrization without completeness.
+  No ambient
+  completeness or global curvature premise was added.  These results remove
+  the cut-boundary measure and domain gates, but they do not give global
+  injectivity of raw exponential on `rawSegInt`; local diffeomorphism alone is
+  insufficient for the image-equality change-of-variables theorem.  Hence
+  `rawBall_vol_rel` remains unstated (**0%**).  No named refresh is justified
+  yet because no source-written downstream module imports this export.
+  E1/E2 remain unstated (**0%**), aggregate P1 remains eleven of fourteen
+  (**78.6%**), dedicated P1b machinery remains conservatively about **97%**,
+  and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b raw complete-extension no-conjugacy bridge:
+  `CGTRawBranchHess.lean` is now warning-free focused GREEN through the public
+  `rawExt_no_conj`.  For every fenced raw complete-extension launch below the
+  curvature conjugacy scale it proves the native `IsConjVec` negation by a
+  first-interior-maximum Jacobi/index-form argument.  The conclusion retains
+  the positive-finrank instance already required by `IsConjVec` and
+  `expMapIntrinsic`; this is not a new assumption for any actual CGT consumer,
+  while the launch construction itself remains dimension-neutral.  The exact
+  `CGTScale`, `CGTRawBranchHess`, and `CGTRawCoreJoin` refreshes are GREEN, and
+  the lower canonical witness bridge `rawExtJoin_eq_min` is warning-free
+  focused plus exactly refreshed GREEN (4012/4012).  Its true downstream
+  `CGTRawProducer.rawCore_min_regular` is now warning-free focused GREEN
+  (24.2s): the complete-extension minimizing vector is fenced, length-bounded,
+  and nonconjugate.  This remains supporting machinery rather than either P1b
+  endpoint because actual raw half-squared-distance strict Jensen is still
+  unstated.  E1/E2
+  remain unstated (**0%**), aggregate P1 remains eleven of fourteen
+  (**78.6%**), dedicated P1b machinery remains conservatively about **97%**,
+  and the whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b post-pinned quantitative bridges: the E1 short-bigon lane is
+  warning-free focused GREEN through the raw-origin identity launch and public
+  `rawOrigin_strict` (63.8s), and through the prefix half of the compact
+  complete-extension scale estimate `rawExt_prefix` (67.6s).  The proof no
+  longer needs a monolithic high-heartbeat Hessian elaboration: it gives the
+  checked branch-Hessian theorem an explicit local target and derives strict
+  positivity directly.  The E2 lane is warning-free focused GREEN through the
+  arbitrary-curvature radial comparison `raw_ratio_anti_q`, the raw minimizing
+  segment bridge `raw_min_seg`, the exact raywise specialization
+  `raw_ratio_ray`, and the generic density continuity bridge `rawDn_cont`
+  (19.4s for the final three helper layers).  The reusable
+  `mapJac_contOn` was exposed at its existing measure-theory home under the
+  same weakest signature, is warning-free focused GREEN (14.6s), and its true
+  downstream refresh is GREEN (2868/2868).  Current next producers are the
+  suffix/combined compact scale estimate leading to `rawCore_short_inj`, and
+  the normal-frame polar equality leading to `rawBall_vol_rel`.  These are
+  verified producer advances, not theorem endpoints: E1 and E2 remain
+  unstated (**0%**), aggregate P1 remains eleven of fourteen (**78.6%**),
+  dedicated P1b machinery is conservatively about **98%**, and the
+  whole-Poincare theorem endpoint remains unstated (**0%**).
+- 2026-09-01 P1b edge-core and raw polar assembly: the complete-extension
+  prefix, suffix, and combined scale bounds are warning-free focused GREEN
+  (74.4s for the final combined pass), and the public `rawExt_edge_core` is
+  warning-free focused GREEN (76.0s).  This reusable theorem proves that every
+  point of the selected short complete-extension geodesic remains in the raw
+  norm core, using the already-checked strict origin convexity; it is the real
+  common dependency of compact short-bigon exclusion and actual-distance
+  Jensen.  In the E2 lane, `rawBall_normal` (19.5s) and `rawBall_polar` (20.3s)
+  are warning-free focused GREEN, giving the exact normal-frame and radial
+  integral formulas on a compact-buffer raw ball.  The source-written
+  `rawCore_jensen` now consumes `rawExt_edge_core`, `rawCore_dist_germ`, and
+  `rawBranch_hess_pos`, but remains unverified until the pending
+  `rawCore_short_inj` export closes its honest dependency.  E2 continues with
+  the raywise cross inequality and public `rawBall_vol_rel`.  Thus E1 and E2
+  theorem endpoints remain **0%**, aggregate P1 remains eleven of fourteen
+  (**78.6%**), dedicated P1b machinery is about **99%**, and the whole-Poincare
+  theorem endpoint remains unstated (**0%**).

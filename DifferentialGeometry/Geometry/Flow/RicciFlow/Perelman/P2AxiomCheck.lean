@@ -1,5 +1,7 @@
+import DifferentialGeometry.Analysis.Calculus.AbsolutelyContinuous
 import DifferentialGeometry.Analysis.Integration.Measure.Tight
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Fields.ScalarConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Shi.Local
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CostChartLip
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CompleteFlowBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedMinTime
@@ -12,7 +14,24 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.Naturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.CrossingCost
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedAction
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.ChangingDistance
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedActionLower
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedSegment
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedValue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensitySource
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RedDensityTail
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensityTest
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensitySourceTest
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.PointedDensityCC
+import DifferentialGeometry.Geometry.Compactness.CheegerGromov.Limit.BallCapture
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Compactness.Metric.CanonicalConstruction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.ReducedVolume
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.SegmentValue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.RiemannianTail
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.MinSpeed
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.LGeometry.MinPrefix
+import DifferentialGeometry.Geometry.Comparison.EndpointDistanceRate
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.MovingDistance
 import DifferentialGeometry.Geometry.Metric.Convergence.RicciFromJetsCompact
 
 set_option autoImplicit false
@@ -37,7 +56,80 @@ set_option autoImplicit false
 #print axioms DifferentialGeometry.HCGCompactness.lVelocity_src_map
 #print axioms DifferentialGeometry.HCGCompactness.lKinetic_src_pull
 #print axioms DifferentialGeometry.HCGCompactness.lLength_tendsto
+#print axioms DifferentialGeometry.PDE.RicciFlow.pathLength_timeDeriv_of_ricciFlow
+#print axioms DifferentialGeometry.PDE.RicciFlow.ricci_int_end_le
 #print axioms DifferentialGeometry.PDE.RicciFlow.dist_short_support
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_long_support
+#print axioms DifferentialGeometry.edistOf_triangle
+#print axioms DifferentialGeometry.edistOf_comm
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_moving_slope
+#print axioms DifferentialGeometry.Geometry.Riemannian.edist_inc_tendsto
+#print axioms DifferentialGeometry.PDE.RicciFlow.edist_smooth_rate
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_short_slope
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_long_slope
 #print axioms DifferentialGeometry.Analysis.Measure.mass_tendsto_of_cc
 #print axioms DifferentialGeometry.HCGCompactness.scalarSub_le_dNormOn
 #print axioms DifferentialGeometry.HCGCompactness.ConvOut.scalar_convOn
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.kinetic_convOn
+#print axioms DifferentialGeometry.HCGCompactness.lKinetic_map
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lDensity_aemeas
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.mapKin_convOn
+#print axioms DifferentialGeometry.HCGCompactness.lLength_conv_curve
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redDensity_gauss
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lLength_lower
+#print axioms DifferentialGeometry.HCGCompactness.movingShi_complete
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegValue_dpp
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegValue_mono
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegValue_exhaust
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegValue_gap
+#print axioms DifferentialGeometry.Analysis.Measure.gaussTail_zero
+#print axioms DifferentialGeometry.Analysis.Measure.gauss_tail_of_ball
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.riem_gauss_tail
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lExp_time_c1
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lExp_c1On
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lMinSpeed_eq
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lMinPrefix_le
+#print axioms AbsolutelyContinuousOnInterval.sub_le_integral_dini
+#print axioms AbsolutelyContinuousOnInterval.sub_le_int_loc_dini
+#print axioms DifferentialGeometry.HCGCompactness.lSegValue_limsup
+#print axioms DifferentialGeometry.PDE.RicciFlow.edist_curve_lip
+#print axioms DifferentialGeometry.PDE.RicciFlow.edistEquiv_Icc
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_lip_Icc
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_ac_Icc
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_ac_rm
+#print axioms DifferentialGeometry.Geometry.Curvature.chartGramOp_diff_le
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lKinetic_ae
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lKinetic_local_of
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.chartGram_convOn
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.chartKin_liminf
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.scalar_compOn
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lEnergy_cpt_subseq
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lEnergy_cpt_fix
+#print axioms DifferentialGeometry.HCGCompactness.lRegAction_pt_lsc
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lLength_sqrt_Icc
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.IsLSegAttainer
+#print axioms DifferentialGeometry.HCGCompactness.lSegValue_pt_lim
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegChartH1_fin
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegValue_eq_reg
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.lSegValue_eq_of_seg
+#print axioms DifferentialGeometry.HCGCompactness.redDensity_pt_lim
+#print axioms DifferentialGeometry.HCGCompactness.ConvOut.volDens_compOn
+#print axioms DifferentialGeometry.HCGCompactness.paramDens_src_eq
+#print axioms DifferentialGeometry.HCGCompactness.redDensity_cpt_lim
+#print axioms DifferentialGeometry.HCGCompactness.redDensity_src_lim
+#print axioms DifferentialGeometry.PDE.RicciFlow.Perelman.redDensity_tail_le
+#print axioms DifferentialGeometry.HCGCompactness.redDensity_wgt_lim
+#print axioms DifferentialGeometry.HCGCompactness.redDensity_src_wgt
+#print axioms DifferentialGeometry.HCGCompactness.ball_subset_image
+#print axioms DifferentialGeometry.Integral.Measure.lint_map_fin_loc
+#print axioms DifferentialGeometry.HCGCompactness.redDensitySrcMeas
+#print axioms DifferentialGeometry.HCGCompactness.redDensityLimMeas
+#print axioms DifferentialGeometry.HCGCompactness.redDensity_cc_lim
+#print axioms DifferentialGeometry.HCGCompactness.tailSystem_apply
+#print axioms DifferentialGeometry.HCGCompactness.tailInvIncl_apply
+#print axioms DifferentialGeometry.HCGCompactness.tailBall_capture
+#print axioms DifferentialGeometry.HCGCompactness.tailMember_chain
+#print axioms DifferentialGeometry.HCGCompactness.canon_ball_capture
+#print axioms DifferentialGeometry.Integral.Measure.map_inv_tail_le
+#print axioms DifferentialGeometry.HCGCompactness.redDensityTermMeas
+#print axioms DifferentialGeometry.HCGCompactness.redSrc_tail_le

@@ -29,13 +29,21 @@ scale estimate below are the current authority.
 
 ## 0. Scope ruling and the endpoint statement
 
-**"除拓扑 surgery 部分" is interpreted as:** the GEOMETRIC/ANALYTIC surgery
-construction (δ-necks, the surgery metric, Ricci flow with surgery as an
-analytic object, its noncollapsing and canonical-neighborhood induction) is IN
-scope; the purely TOPOLOGICAL inputs and readouts are OUT of scope and enter as
-an explicitly cited input bundle, exactly in the `MetricCompactnessInputs`
-pattern.  The excluded topology bundle (`PoincareTopologyInputs`, to be stated
-at assembly time) contains, per Morgan–Tian's usage:
+**Scope ruling — CORRECTED 2026-08-29, superseding the 2026-07-05 reading.**
+The GEOMETRIC/ANALYTIC surgery construction (δ-necks, the surgery metric, Ricci
+flow with surgery as an analytic object, its noncollapsing and
+canonical-neighborhood induction) is IN scope, unchanged.  What changed: the
+earlier reading of "除拓扑 surgery 部分" — that the topological inputs T1–T4 are
+permanently CITED — was a misreading, withdrawn at the user's instruction.
+**T1, T2, T3 and T4 are all in scope and must end as Lean theorems.**  Their
+execution plan is the T-lane, `../../../Topology/T_TOPOLOGY_PLAN.md`; this
+document keeps the P-phase analytic content only, and the two lanes meet at P9.
+
+`PoincareTopologyInputs` survives only as a temporary STAGING bundle, so that
+the analytic lane is never blocked by the T-lane: each field states exactly one
+T-target, the T-lane discharges the fields one at a time, and the bundle must be
+EMPTY by program end (the same standing requirement `PerelmanAnalyticInputs`
+already carries).  The four fields, with their Morgan–Tian usage:
 
 * T1 — a closed simply-connected 3-manifold has `π₃ ≠ 0` (homotopy-sphere
   facts: Hurewicz + Poincaré duality; not in Mathlib);
@@ -44,20 +52,30 @@ at assembly time) contains, per Morgan–Tian's usage:
   and `S²×S¹`-pieces (the topological bookkeeping of surgeries);
 * T3 — the final identification: a simply-connected such connected sum is `S³`
   (uses T2's pieces + elementary 3-manifold topology);
-* T4 — (**open ruling, 2026-08-27 audit; not settled here**) needed only if
-  P8 is run in the Poincaré-only form that skips Morgan–Tian's π₂ section:
-  every time-slice component of the Ricci flow with surgery started from a
+* T4 — every time-slice component of the Ricci flow with surgery started from a
   closed simply-connected `M` is again closed and simply connected, hence has
-  `π₂ = 0`.  Without T4 the π₂ half of `energy1` is IN scope and pulls in the
-  Sacks–Uhlenbeck minimal-2-sphere layer.  See P8 in §2 and §3 items 11–13.
+  `π₂ = 0`.  It splits into T4(a), the flow-free statement that a closed
+  simply-connected 3-manifold has `π₂ = 0` (same Hurewicz + duality engine as
+  T1), and T4(b), the surgery-stability statement, which is GATED on the P6b
+  RFWS object.  T4 is what lets P8 run in the Poincaré-only form that skips
+  Morgan–Tian's π₂ section; the alternative is to build the Sacks–Uhlenbeck
+  minimal-2-sphere layer (P8a).  Now that T4 is a proof obligation rather than a
+  citation, the P8 ruling is a workload choice between two proved routes, not
+  between a proof and an axiom.  See P8 in §2 and §3 items 11–13.
 
-**Endpoint (conditional form):**
+**Endpoint (staging form, during the program):**
 `poincare_of_inputs : Closed3Manifold M → SimplyConnected M →
 PoincareTopologyInputs M → PerelmanAnalyticInputs M → HomeomorphicToSphere M`
-— where `PerelmanAnalyticInputs` is expected to be EMPTY by program end (every
-analytic item below is planned to be proved, none cited), and the topology
-bundle stays.  If any analytic item is later demoted to a citation, it moves
-into an explicit bundle field, never a hidden wrapper (2026-07-05 audit rule).
+— both bundles EMPTY by program end.  If any analytic item is later demoted to a
+citation, it moves into an explicit bundle field, never a hidden wrapper
+(2026-07-05 audit rule).
+
+**Endpoint (final, unconditional).**  Mathlib already carries the target as a
+`proof_wanted` in `Mathlib/Geometry/Manifold/PoincareConjecture.lean`:
+`SimplyConnectedSpace.nonempty_diffeomorph_sphere_three`, i.e.
+`[T2Space M] [ChartedSpace ℝ³ M] [IsManifold (𝓡 3) ∞ M] [SimplyConnectedSpace M]
+[CompactSpace M] : Nonempty (M ≃ₘ⟮𝓡 3, 𝓡 3⟯ 𝕊³)`.  Adopting that exact shape as
+the joint P-lane/T-lane endpoint is free and removes later restatement risk.
 
 ## 1. What the tree already has (live inventory, 2026-08-27)
 
@@ -77,7 +95,7 @@ into an explicit bundle field, never a hidden wrapper (2026-07-05 audit rule).
 | Smooth gluing / jet splice (surgery seed) | engine built, 2 gates (`hglue` lane) |
 | Space forms / quotients | active lane |
 | Curvature *pinched toward positive* for generalized flows / RFWS | **absent** — the checked pinching is the compact smooth-flow version only (§3 item 11) |
-| Shi derivative estimates | compact whole-manifold and the P2 ball-local `shiRm1_ball` producer are checked; complete-flow `estimate_complete` remains a `sorry` (§3 item 12) |
+| Shi derivative estimates | compact whole-manifold and P2 ball-local `shiRm1_ball` are checked; `movingShi_complete` is the focused-green complete bounded-curvature solution endpoint (§3 item 12) |
 | Parabolic rescaling formalism, pointed flow sequences | in-tree |
 | Final Poincaré assembly | `poincare_of_inputs` is not yet declared |
 
@@ -87,10 +105,11 @@ Two traps for future agents (2026-08-27 audit).
 `Compactness/CheegerGromov/Pointed/Compactness.lean:1321` defines
 `metricCompactness` as `by sorry`; it is dead legacy code superseded by the
 live producer of the SAME NAME at `Compactness/Metric/Endpoint.lean:48`, which
-is the one P0 actually routes through.  And `Estimates/Shi/Complete.lean:2866`
-(`BernsteinTower.estimate_complete`) is a `sorry` that is already imported and
-applied at `Compactness/Shi/Local.lean:512`.  Both are off the audited P0 path;
-neither may be cited as “checked”.
+is the one P0 actually routes through. The former
+`BernsteinTower.estimate_complete` was also off the audited P0 path: its
+arbitrary-metric statement lacked the Kato and cutoff inputs used by the proof.
+It and its sole unused private caller were removed on 2026-08-30; the actual
+complete bounded-curvature solution endpoint is `movingShi_complete`.
 
 ## 2. Phase plan (mapped to Morgan–Tian)
 
@@ -190,7 +209,13 @@ pinching is the compact smooth-flow version and does not supply this.
 canonical-neighborhood structure of the standard flow on ℝ³.  Noncompact
 existence/uniqueness is genuinely hard analysis; M–T's own route keeps it
 semi-self-contained.  Needs the linear parabolic layer (§3-1) at full strength.
-(~4–6 months.)
+(~4–6 months.)  Execution plan: `P5_STANDARD_SOLUTION_PLAN.md`.
+
+**Live ruling (2026-08-29):** P5 may start now with its standard initial metric,
+compact-double existence, scoped noncompact parabolic, symmetry, and uniqueness
+lanes.  Its terminal `T=1` and canonical-neighborhood package remains gated by
+the complete-flow P2 bridge and the P3/P4 kappa-limit inputs.  P5 is therefore
+open for implementation but remains 0% as a completed theorem.
 
 **P6 — Surgery** (M–T `surgery.tex` chapters 13–15: δ-neck surgery, Ricci flow
 with surgery as a formal object, controlled RFWS).  Two distinct workloads:
@@ -225,14 +250,16 @@ halves, and mislabelled `W₂`:
    curve-shortening layer of §3-7.  It consumes P8a: the loop-width argument
    runs on components with trivial π₂.
 
-**Open ruling, required before P8 starts.**  Either (a) build the
-Sacks–Uhlenbeck minimal-2-sphere layer — a genuine new analytic frontier,
-comparable in size to §3-7 — or (b) take the Poincaré-only shortcut and skip
-P8a, which is legitimate ONLY with T4 of §0 added to the topology bundle, since
-T4 is exactly the statement that no time-slice component ever acquires
-non-trivial π₂.  Do not leave the pre-audit situation, in which the plan
-assumed (b)'s conclusion while §3 declared harmonic-map machinery out of scope
-and §0 carried no T4.
+**Open ruling, required before P8 starts** (restated 2026-08-29).  Either
+(a) build the Sacks–Uhlenbeck minimal-2-sphere layer — a genuine new analytic
+frontier, comparable in size to §3-7 — or (b) take the Poincaré-only route and
+skip P8a, which is legitimate exactly when T4 is available.  Since T4 is now a
+T-lane proof obligation rather than a citation (§0), route (b) is no longer a
+shortcut past a proof: it is a choice to spend the work in the T-lane
+(T4(b), gated on P6b) instead of in a new analytic layer.  Recommendation
+unchanged in direction, now honest in cost: prefer (b).  Do not reinstate the
+pre-audit situation, in which the plan assumed (b)'s conclusion while §3
+declared harmonic-map machinery out of scope and §0 carried no T4.
 
 Dependency correction: P8's statement consumes Theorem `MAIN`, the RFWS defined
 for all `t ∈ [0,∞)` (`energy1.tex:7`).  P8 may therefore be DEVELOPED against
@@ -240,7 +267,9 @@ the RFWS interface as soon as P6b exists, but it is not provable before P7.
 (~5–8 months for P8b, plus a comparable block for P8a under ruling (a).)
 
 **P9 — Assembly.**  `poincare_of_inputs` from P6–P8 + T1–T3, plus T4 if P8
-took ruling (b).  (~1–2 months.)
+took ruling (b); then the T-lane's discharge of the four bundle fields turns it
+into the unconditional endpoint of §0.  (~1–2 months for the P-side wiring; the
+T-side is `Topology/T_TOPOLOGY_PLAN.md`.)
 
 ## 3. Infrastructure gap list (the direct answer to "还需要哪些东西")
 
@@ -284,16 +313,29 @@ Ordered by how many phases consume them:
     pinched toward positive”): preserved by surgery, stable under blow-up
     limits, including the weak form at `bddcurvbdddist.tex:709`.  Consumers:
     P4, P6, P7.  Not supplied by the checked compact smooth-flow pinching.
-12. **Shi derivative estimates beyond the compact whole-manifold case.**  The
+12. **Shi derivative estimates beyond the compact whole-manifold case.** The
     local controlled-ball theorem `shiRm1_ball` used by `smooth_nlc` is checked.
-    The remaining concrete hole is `BernsteinTower.estimate_complete`
-    (`Estimates/Shi/Complete.lean:2866`), a `sorry` already consumed at
-    `Compactness/Shi/Local.lean:512`.  Remaining consumers include P3, P4, and
-    the complete bounded-curvature L8 refinements.
+    `movingShi_complete` is the native complete bounded-curvature solution
+    endpoint, assembling the existing barrier, Kato, and cutoff producers. The
+    obsolete under-specified generic declaration and its dead caller have been
+    removed. Focused regression is green, and the 32-endpoint direct audit shows
+    only `propext`, `Classical.choice`, and `Quot.sound`. Remaining P2b gaps are
+    reduced-geometry consumers, not another Shi wrapper.
 13. **(Conditional on the P8 ruling) minimal 2-spheres / Sacks–Uhlenbeck.**
-    Needed iff P8a is proved rather than replaced by input T4.  Consumer: P8.
-14. (Excluded, input bundle) 3-manifold topology T1–T3, plus T4 under P8
-    ruling (b).
+    Needed iff P8a is proved rather than replaced by T4.  Consumer: P8.
+14. **3-manifold topology T1–T4 — IN SCOPE as of 2026-08-29**, no longer an
+    excluded citation bundle.  Engines: singular homology with excision and
+    Mayer–Vietoris, cellular/Morse comparison, Hurewicz in degrees 2–3,
+    Poincaré duality for closed 3-manifolds, Seifert–van Kampen, connected sum,
+    and the surgery bookkeeping gated on P6b.  None of it is in Mathlib
+    `v4.29.0` (audited 2026-08-29) — but most of it EXISTS, sorry-free and
+    axiom-clean, in the Lean 4.33 extraction at
+    `E:/testdifferential-geometry-t1-433` (singular homology + Mayer–Vietoris,
+    Hurewicz 1–6, sphere homology, Seifert–van Kampen, Morse/handle machinery),
+    which is derived from this repo's own root `Solution.lean`.  What is still
+    missing for T1 is the handle chain complex computing `H_*` plus `χ(M³) = 0`;
+    Poincaré duality turned out NOT to be required.  Consumers: P8 (via T4), P9.
+    Full plan: `../../../Topology/T_TOPOLOGY_PLAN.md`.
 
 Explicitly NOT needed (avoid scope creep): full Alexandrov-space theory
 (M–T avoids it; only Toponogov-level statements), prime decomposition and
@@ -326,14 +368,18 @@ Recommended immediate order:
    Busemann first, and only the Toponogov statements Morgan–Tian actually uses.
 2. **Design P6b early but do not contaminate P2:** write and review the RFWS
    event/seam object before P4–P8 depend on it.
-3. **Continue the distinct L8 complete bounded-curvature refinement**, whose
-   remaining Shi input includes the honest `estimate_complete` frontier; only
-   after the P6b event/seam object exists should the surgery/eventwise L-length
-   extension begin.
+3. **Continue the distinct L8 complete bounded-curvature refinement** from the
+   actual `movingShi_complete` solution endpoint; only after the P6b event/seam
+   object exists should the surgery/eventwise L-length extension begin.
 4. **Two rulings that must be made before their phases open, not during
    them:** the P8a/T4 ruling of §2, and how “pinched toward positive” will be
    carried by the P6b RFWS object (it is a hypothesis of nearly every P4/P6/P7
    theorem, so the object must be able to state it from day one).
+5. **Open the T-lane in parallel** (`../../../Topology/T_TOPOLOGY_PLAN.md`).  It
+   shares essentially no code with the analytic tree, its first two stages
+   (statement file, Seifert–van Kampen) are unblocked today, and its long pole
+   — the singular-homology core — is the item most likely to become the
+   program's critical path if it starts late.
 
 ## 5. Honest scale estimate
 
@@ -346,8 +392,13 @@ Use two separate denominators:
   each **100%** and direct-axiom audited;
 * complete bounded-curvature L8 refinements and surgery/eventwise
   noncollapsing: separate incomplete stages, not counted in `smooth_nlc`;
-* full P0–P9 program infrastructure: approximately **15–25%**, with an
-  explicitly unreliable denominator (see the warning below).
+* full P0–P9 ANALYTIC program infrastructure: approximately **15–25%**, with an
+  explicitly unreliable denominator (see the warning below);
+* T-lane (T1–T4, in scope since 2026-08-29): each target **0%**, dedicated
+  machinery **~5–10%** (Morse/handle/cell attachment, covering spaces, de Rham
+  complex exist; homology, duality, Hurewicz, van Kampen, connected sum do not).
+  The T-lane is roughly **20–30% of the remaining total work**, so the whole
+  project including topology is approximately **12–20%**.
 
 The last range uses the phase workload, not file or lemma counts, and avoids
 double-counting infrastructure shared by P0, P1, and P2.  The old **3–5%**
@@ -438,3 +489,35 @@ input.
   surgery/eventwise extension, which must wait for the absent P6b RFWS
   event/seam presentation.  `poincare_of_inputs` remains 0%, and whole P0--P9
   infrastructure remains approximately 15--25%.
+- 2026-08-29 (P5 phase audit): `P5_STANDARD_SOLUTION_PLAN.md` freezes the
+  standard initial metric, compact-double existence, complete-flow geometry,
+  scoped noncompact uniqueness, and surgery-facing canonical-neighborhood
+  packages.  P5 can start at its initial-geometry and compact-approximation
+  gates without waiting for P3/P4, but its final canonical-neighborhood and
+  `T=1` endpoints consume complete-flow P2 plus P3/P4 limit results.  The P5
+  theorem remains 0%; no standard-solution theorem was claimed by this audit.
+- 2026-08-29 (scope correction, no code changed): the §0 ruling that T1–T4 are
+  cited inputs was withdrawn at the user's instruction.  T1–T4 are now proof
+  obligations with their own lane and plan
+  (`../../../Topology/T_TOPOLOGY_PLAN.md`), `PoincareTopologyInputs` is demoted
+  to a temporary staging bundle that must be empty by program end, and the final
+  endpoint is aligned with Mathlib's `proof_wanted`
+  `SimplyConnectedSpace.nonempty_diffeomorph_sphere_three`.  The T-lane audit
+  (same day, against the Mathlib `v4.29.0` pin) found no Hurewicz, no Poincaré
+  duality, no excision or Mayer–Vietoris, no cellular homology, no van Kampen
+  and no connected sum in Mathlib, and confirmed that this tree's ~63k-line
+  sorry-free `Topology/Morse` + `Topology/Handle` layer, its covering-space
+  layer and its de Rham complex are the lane's real starting assets.  No P-phase
+  status changed: P0 stays 100%, the compact ordinary-flow P2 capstone stays
+  100%, `poincare_of_inputs` stays 0%.  Whole-project estimate restated as
+  ~12–20% once the topology lane is inside the denominator.
+- 2026-08-29 (T-lane, second pass): the Lean 4.33 extraction at
+  `E:/testdifferential-geometry-t1-433` was audited and its `AxiomCheck` re-run
+  (sixteen endpoints, only the standard three axioms).  It supplies singular
+  homology with Mayer–Vietoris, Hurewicz 1–6, `H_{n+1}(Sⁿ⁺¹) ≅ ℤ`,
+  Seifert–van Kampen, Morse-function existence and handle cancellation, so the
+  T-lane's planned homology/Hurewicz/van-Kampen builds are cancelled and the
+  Poincaré-duality requirement for T1 is withdrawn.  Remaining T1 frontier: the
+  handle chain complex computes `H_*`, plus `χ(M³) = 0`.  New open ruling R5
+  (stay on 4.29 vs use the 4.33 project vs bump the tree) is in the T-lane plan.
+  No P-phase status changed.

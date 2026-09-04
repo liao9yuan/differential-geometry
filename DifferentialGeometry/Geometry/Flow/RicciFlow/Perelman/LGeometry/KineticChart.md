@@ -6,6 +6,21 @@ Focused verification passed without warnings or placeholders.
 
 ## Checked bridges
 
+`lKinetic_ae` is now the public lowest-level bridge for an arbitrary
+`MetricConnectionFamilyOn G` and arbitrary time map `tau`. It identifies the
+manifold kinetic quadratic density almost everywhere with the fixed-chart Gram
+operator applied to the `timeH1` weak derivative. The proof is the former
+private `SolutionOn` calculation generalized in place; it adds no smoothness,
+time-domain, completeness, or separation assumption.
+
+`lKinetic_local_of` integrates this generic almost-everywhere identity. The
+older `lKinetic_local` statement is unchanged and is now only the specialization
+`G = S.family`, `tau s = T - s^2`. This generic layer is suitable for the
+extended pointed metrics `gSeqExt`: after the chart identity, compact
+confinement and `lKinetic_map` can replace its source kinetic density by the
+mapped term-flow density without translating an almost-everywhere hypothesis
+between shifted time variables.
+
 `lKinetic_local` identifies the kinetic integral on `[a,b]` with the fixed-chart
 Gram quadratic form evaluated on the weak derivative of a directly supplied
 local representative `us : timeH1 E (b-a)`.  Its representative hypothesis is

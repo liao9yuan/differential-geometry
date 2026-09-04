@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.PullbackCross
+import DifferentialGeometry.Geometry.Metric.MetricExistence
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option autoImplicit false
@@ -53,57 +54,28 @@ private theorem localPullInner_symm
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 private theorem localPullInner_pos
     (g : SmoothRiemannianMetric J N) {f : M → N}
-    (hf : IsLocalDiffeomorph I J ∞ f)
+    (hinj : ∀ x, Function.Injective (mfderiv I J f x))
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < localPullInner (I := I) (J := J) g f x v v := by
   rw [localPullInner_apply]
   have hD :
       mfderiv I J f x v ≠ 0 := by
-    have hv' :
-        (hf.mfderivToContinuousLinearEquiv infty_ne_zero x) v ≠ 0 :=
-      (hf.mfderivToContinuousLinearEquiv infty_ne_zero x).map_ne_zero_iff.mpr hv
-    simpa only [
-      IsLocalDiffeomorph.mfderivToContinuousLinearEquiv_coe] using hv'
+    intro hzero
+    apply hv
+    exact hinj x (by simpa only [map_zero] using hzero)
   exact g.pos (f x) _ hD
 
-omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
+omit [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 private theorem localPullInner_bdd
     (g : SmoothRiemannianMetric J N) {f : M → N}
-    (hf : IsLocalDiffeomorph I J ∞ f) :
+    (hinj : ∀ x, Function.Injective (mfderiv I J f x)) :
     ∀ x : M, Bornology.IsVonNBounded Real
       {v : TangentSpace I x |
         localPullInner (I := I) (J := J) g f x v v < 1} := by
   intro x
-  let e : TangentSpace I x ≃L[Real] TangentSpace J (f x) :=
-    hf.mfderivToContinuousLinearEquiv infty_ne_zero x
-  have himg :=
-    (g.isVonNBounded (f x)).image
-      (e.symm : TangentSpace J (f x) →L[Real] TangentSpace I x)
-  have hset :
-      {v : TangentSpace I x |
-          localPullInner (I := I) (J := J) g f x v v < 1} =
-        ((e.symm : TangentSpace J (f x) →L[Real] TangentSpace I x) : _ → _)
-          '' {w : TangentSpace J (f x) | g.inner (f x) w w < 1} := by
-    ext v
-    simp only [Set.mem_setOf_eq, Set.mem_image]
-    constructor
-    · intro hv
-      refine ⟨e v, ?_, e.symm_apply_apply v⟩
-      rw [localPullInner_apply] at hv
-      simpa only [e,
-        IsLocalDiffeomorph.mfderivToContinuousLinearEquiv_coe] using hv
-    · rintro ⟨w, hw, rfl⟩
-      rw [localPullInner_apply]
-      have hD :
-          mfderiv I J f x
-            ((e.symm : TangentSpace J (f x) →L[Real] TangentSpace I x) w) = w := by
-        simpa only [e,
-          IsLocalDiffeomorph.mfderivToContinuousLinearEquiv_coe] using
-            e.apply_symm_apply w
-      rw [hD]
-      exact hw
-  rw [hset]
-  exact himg
+  exact Geometry.posDef_isVonNBounded (E := E)
+    (localPullInner (I := I) (J := J) g f x)
+    (localPullInner_pos (I := I) (J := J) g hinj x)
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
 private theorem push_smooth
@@ -118,74 +90,108 @@ private theorem push_smooth
         (f x) (mfderiv I J f x (Y x))) := by
   exact (hf.contMDiff_tangentMap (le_refl _)).comp hY
 
+omit [FiniteDimensional ℝ F] in
+/-- The bilinear section obtained by pulling back a smooth metric is smooth. -/
+theorem localPull_smooth
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric J N) (f : M → N)
+    (hf : ContMDiff I J ((⊤ : ℕ∞) : WithTop ℕ∞) f) :
+    ContMDiff I (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real))
+      ((⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => TotalSpace.mk' (E →L[Real] E →L[Real] Real) x
+        (localPullInner (I := I) (J := J) g f x)) := by
+  classical
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[Real] Real)
+    (φ := fun x : M => localPullInner (I := I) (J := J) g f x)
+  intro Y
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun _ : M => Real)
+    (φ := fun x : M =>
+      localPullInner (I := I) (J := J) g f x (Y x))
+  intro W
+  have hY := push_smooth (I := I) (J := J)
+    hf (fun x => Y x) Y.contMDiff
+  have hW := push_smooth (I := I) (J := J)
+    hf (fun x => W x) W.contMDiff
+  have hg :
+      ContMDiff I (J.prod 𝓘(Real, F →L[Real] F →L[Real] Real)) ∞
+        (fun x : M => TotalSpace.mk'
+          (F →L[Real] F →L[Real] Real)
+          (E := fun y : N =>
+            TangentSpace J y →L[Real] TangentSpace J y →L[Real] Real)
+          (f x) (g.inner (f x))) :=
+    g.contMDiff.comp hf
+  have htotal :
+      ContMDiff I (J.prod 𝓘(Real, Real)) ∞
+        (fun x : M => TotalSpace.mk' Real
+          (E := Bundle.Trivial N Real) (f x)
+          (g.inner (f x)
+            (mfderiv I J f x (Y x))
+            (mfderiv I J f x (W x)))) :=
+    ContMDiff.clm_bundle_apply₂
+      (E₁ := fun y : N => TangentSpace J y)
+      (E₂ := fun y : N => TangentSpace J y)
+      (E₃ := fun _ : N => Real)
+      (b := f)
+      (ψ := fun x => g.inner (f x))
+      (v := fun x => mfderiv I J f x (Y x))
+      (w := fun x => mfderiv I J f x (W x))
+      hg hY hW
+  have hscalar :
+      ContMDiff I 𝓘(Real, Real) ∞
+        (fun x : M =>
+          g.inner (f x)
+            (mfderiv I J f x (Y x))
+            (mfderiv I J f x (W x))) := by
+    intro x
+    have hx := htotal x
+    rw [contMDiffAt_totalSpace] at hx
+    exact hx.2
+  have hpull :
+      ContMDiff I 𝓘(Real, Real) ∞
+        (fun x : M =>
+          localPullInner (I := I) (J := J) g f x (Y x) (W x)) := by
+    simpa only [localPullInner_apply] using hscalar
+  intro x
+  rw [contMDiffAt_section]
+  refine hpull.contMDiffAt.congr_of_eventuallyEq ?_
+  filter_upwards with y
+  rfl
+
+/-- The smooth Riemannian metric obtained by pulling back along a smooth immersion. -/
+noncomputable def immersionPullMetric
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric J N) (f : M → N)
+    (hf : ContMDiff I J ((⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hinj : ∀ x, Function.Injective (mfderiv I J f x)) :
+    SmoothRiemannianMetric I M where
+  inner x := localPullInner (I := I) (J := J) g f x
+  symm x v w := localPullInner_symm (I := I) (J := J) g f x v w
+  pos x v hv := localPullInner_pos (I := I) (J := J) g hinj x v hv
+  isVonNBounded := localPullInner_bdd (I := I) (J := J) g hinj
+  contMDiff := localPull_smooth (I := I) (J := J) g f hf
+
+/-- A local diffeomorphism pulls a smooth Riemannian metric back to its source. -/
 noncomputable def localPullMetric
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (hf : IsLocalDiffeomorph I J ∞ f) :
-    SmoothRiemannianMetric I M where
-  inner x := localPullInner (I := I) (J := J) g f x
-  symm x v w := localPullInner_symm (I := I) (J := J) g f x v w
-  pos x v hv := localPullInner_pos (I := I) (J := J) g hf x v hv
-  isVonNBounded := localPullInner_bdd (I := I) (J := J) g hf
-  contMDiff := by
-    classical
-    apply cotangentCov_clmSection_smooth_aux
-      (V₂ := fun x : M => TangentSpace I x →L[Real] Real)
-      (φ := fun x : M => localPullInner (I := I) (J := J) g f x)
-    intro Y
-    apply cotangentCov_clmSection_smooth_aux
-      (V₂ := fun _ : M => Real)
-      (φ := fun x : M =>
-        localPullInner (I := I) (J := J) g f x (Y x))
-    intro W
-    have hY := push_smooth (I := I) (J := J)
-      hf.contMDiff (fun x => Y x) Y.contMDiff
-    have hW := push_smooth (I := I) (J := J)
-      hf.contMDiff (fun x => W x) W.contMDiff
-    have hg :
-        ContMDiff I (J.prod 𝓘(Real, F →L[Real] F →L[Real] Real)) ∞
-          (fun x : M => TotalSpace.mk'
-            (F →L[Real] F →L[Real] Real)
-            (E := fun y : N =>
-              TangentSpace J y →L[Real] TangentSpace J y →L[Real] Real)
-            (f x) (g.inner (f x))) :=
-      g.contMDiff.comp hf.contMDiff
-    have htotal :
-        ContMDiff I (J.prod 𝓘(Real, Real)) ∞
-          (fun x : M => TotalSpace.mk' Real
-            (E := Bundle.Trivial N Real) (f x)
-            (g.inner (f x)
-              (mfderiv I J f x (Y x))
-              (mfderiv I J f x (W x)))) :=
-      ContMDiff.clm_bundle_apply₂
-        (E₁ := fun y : N => TangentSpace J y)
-        (E₂ := fun y : N => TangentSpace J y)
-        (E₃ := fun _ : N => Real)
-        (b := f)
-        (ψ := fun x => g.inner (f x))
-        (v := fun x => mfderiv I J f x (Y x))
-        (w := fun x => mfderiv I J f x (W x))
-        hg hY hW
-    have hscalar :
-        ContMDiff I 𝓘(Real, Real) ∞
-          (fun x : M =>
-            g.inner (f x)
-              (mfderiv I J f x (Y x))
-              (mfderiv I J f x (W x))) := by
-      intro x
-      have hx := htotal x
-      rw [contMDiffAt_totalSpace] at hx
-      exact hx.2
-    have hpull :
-        ContMDiff I 𝓘(Real, Real) ∞
-          (fun x : M =>
-            localPullInner (I := I) (J := J) g f x (Y x) (W x)) := by
-      simpa only [localPullInner_apply] using hscalar
-    intro x
-    rw [contMDiffAt_section]
-    refine hpull.contMDiffAt.congr_of_eventuallyEq ?_
-    filter_upwards with y
-    rfl
+    SmoothRiemannianMetric I M :=
+  immersionPullMetric (I := I) (J := J) g f hf.contMDiff fun x =>
+    (hf.mfderivToContinuousLinearEquiv infty_ne_zero x).injective
+
+omit [FiniteDimensional ℝ F] in
+/-- Evaluation of the metric pulled back along a smooth immersion. -/
+theorem immersionPull_inner
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric J N) (f : M → N)
+    (hf : ContMDiff I J ((⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hinj : ∀ x, Function.Injective (mfderiv I J f x))
+    (x : M) (v w : TangentSpace I x) :
+    (immersionPullMetric (I := I) (J := J) g f hf hinj).inner x v w =
+      g.inner (f x) (mfderiv I J f x v) (mfderiv I J f x w) :=
+  localPullInner_apply (I := I) (J := J) g f x v w
 
 omit [FiniteDimensional ℝ F] in
 theorem localPullMetric_inner

@@ -447,7 +447,9 @@ private theorem weakIdentity_on_smoothTests
                 (gφS : MeasureTheory.Lp E 2 (volume.restrict Ω)) := repEq gφS
             _ = smoothGradToLp hΩ hφ := by rfl
 
-private theorem weakIdentity_of_smoothTests
+/-- Extend a bounded linear weak identity from smooth compactly supported
+tests to all `H₀¹` tests. -/
+theorem weak_eq_of_smooth
     {Ω : Set E}
     (hΩ : IsOpen Ω)
     (A : EllipticCoeff d Ω)
@@ -636,6 +638,29 @@ private theorem weakIdentity_of_smoothTests
     _ = bilinFormOfCoeff A hwu hvw := by
       exact bilinFormOfCoeff_eq_right hΩ A hwu hv hvw
     _ = rhs v := hChosen
+
+namespace IsSolution
+
+/-- On an open domain, being both a De Giorgi subsolution and supersolution is
+equivalent to satisfying the homogeneous weak equation against all `H₀¹`
+tests. -/
+theorem to_homogeneous
+    {Ω : Set E} (hΩ : IsOpen Ω)
+    {A : EllipticCoeff d Ω} {u : E → ℝ}
+    (hu : IsSolution A u) :
+    IsHomogeneousWeakSolution A u := by
+  refine ⟨hu.1.1, ?_⟩
+  intro huw v hv0 hvw
+  exact weak_eq_of_smooth hΩ A (fun _ => 0)
+    (by intros; simp)
+    (by intros; simp)
+    0
+    (by intros; simp)
+    huw
+    (fun hφ => bilin_eq_zero_smooth hΩ hu huw hφ)
+    huw v hv0 hvw
+
+end IsSolution
 
 -- Lax-Milgram existence assembly with instance synthesis
 /-- Existence of weak solutions via Lax-Milgram.
@@ -834,7 +859,7 @@ theorem weakProblem_exists
     exact weakIdentity_on_smoothTests hΩ A rhs repFun repSmooth repEq
       L0 (fun _ => rfl) L hL_eq gsol hLM hwu hwu_gradEq rhs_eq_of_sameGrad
   refine ⟨u, hu0, ?_⟩
-  exact weakIdentity_of_smoothTests hΩ A rhs hF_add hF_smul C_rhs
+  exact weak_eq_of_smooth hΩ A rhs hF_add hF_smul C_rhs
     hF_bound hwu hsmooth_eq
 
 /-- Existence of zero-Dirichlet weak solutions for divergence-form right-hand

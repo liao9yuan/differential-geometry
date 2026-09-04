@@ -378,6 +378,61 @@ private theorem metric_pair_Icc
     simpa only [abs_of_nonpos (sub_nonpos.mpr hst), neg_sub] using
       And.intro hleft hright
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [IsManifold I 1 M]
+  [SigmaCompactSpace M] in
+/-- A uniform absolute Ricci bound compares intrinsic extended distances at any
+two times in the same compact interval. -/
+theorem edistEquiv_Icc
+    (g : Real → SmoothRiemannianMetric I M)
+    {a b K s t : Real}
+    (hpde : ∀ r ∈ Set.Icc a b, ∀ x : M,
+      ∀ v w : TangentSpace I x,
+        HasDerivWithinAt (fun u : Real ↦ (g u).inner x v w)
+          ((-2 : Real) * ricciTensor (I := I) (g r) x v w)
+          (Set.Icc a b) r)
+    (hric : ∀ r ∈ Set.Icc a b, ∀ x : M,
+      ∀ v : TangentSpace I x,
+        |ricciTensor (I := I) (g r) x v v| ≤
+          K * (g r).inner x v v)
+    (hs : s ∈ Set.Icc a b) (ht : t ∈ Set.Icc a b)
+    (x y : M) :
+    ENNReal.ofReal (Real.exp (-K * |s - t|)) *
+          riemannianEDistOf (I := I) (g t) x y ≤
+        riemannianEDistOf (I := I) (g s) x y ∧
+      riemannianEDistOf (I := I) (g s) x y ≤
+        ENNReal.ofReal (Real.exp (K * |s - t|)) *
+          riemannianEDistOf (I := I) (g t) x y := by
+  have hpair := metric_pair_Icc (I := I) g hpde hric hs ht
+  have hsqrt_neg :
+      Real.sqrt (Real.exp (-(2 * K * |s - t|))) =
+        Real.exp (-K * |s - t|) := by
+    calc
+      Real.sqrt (Real.exp (-(2 * K * |s - t|))) =
+          Real.exp (-(2 * K * |s - t|) / 2) :=
+        (Real.exp_half _).symm
+      _ = Real.exp (-K * |s - t|) := by
+        congr 1
+        ring
+  have hsqrt_pos :
+      Real.sqrt (Real.exp (2 * K * |s - t|)) =
+        Real.exp (K * |s - t|) := by
+    calc
+      Real.sqrt (Real.exp (2 * K * |s - t|)) =
+          Real.exp ((2 * K * |s - t|) / 2) :=
+        (Real.exp_half _).symm
+      _ = Real.exp (K * |s - t|) := by
+        congr 1
+        ring
+  constructor
+  · simpa only [hsqrt_neg] using
+      le_edistOf_of_quad
+        (I := I) (g t) (g s) (Real.exp_pos _)
+        (fun z v ↦ (hpair z v).1) x y
+  · simpa only [hsqrt_pos] using
+      edistOf_le_of_quad
+        (I := I) (g t) (g s) (Real.exp_pos _)
+        (fun z v ↦ (hpair z v).2) x y
+
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem edistCont_Icc
     {D : RealTimeInterval}

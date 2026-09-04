@@ -457,6 +457,32 @@ theorem lLength_sqrt
       (sqReparam (sqrtReparam alpha)) alpha 0 (Real.sqrt tau) hEq)
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+/-- Reading a regularized curve on a nonnegative interval in backward time
+identifies its raw action on the corresponding squared interval. -/
+theorem lLength_sqrt_Icc
+    (S : SolutionOn (I := I) (M := M) D) (T : Real)
+    (alpha : Real → M) (a b : Real) (ha : 0 ≤ a) (hab : a ≤ b) :
+    lLength S T (sqrtReparam alpha) (a ^ 2) (b ^ 2) =
+      lRegAction S T alpha a b := by
+  have hsq := lLength_reg_ae (I := I) S T (sqrtReparam alpha)
+    (a ^ 2) (b ^ 2) (sq_nonneg a) (sq_nonneg b)
+  have hEq : Set.EqOn (sqReparam (sqrtReparam alpha)) alpha
+      (Set.uIoo a b) := by
+    intro s hs
+    have hs' : s ∈ Set.Ioo a b := by
+      simpa only [Set.uIoo_of_le hab] using hs
+    simp only [sqReparam, sqrtReparam,
+      Real.sqrt_sq (ha.trans hs'.1.le)]
+  calc
+    lLength S T (sqrtReparam alpha) (a ^ 2) (b ^ 2) =
+        lRegAction S T (sqReparam (sqrtReparam alpha)) a b := by
+      simpa only [Real.sqrt_sq ha, Real.sqrt_sq (ha.trans hab)] using hsq
+    _ = lRegAction S T alpha a b :=
+      lRegAction_congr (I := I) S T
+        (sqReparam (sqrtReparam alpha)) alpha a b hEq
+
+omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [SigmaCompactSpace M] in
 /-- Pointwise transverse derivative of the direct regularized Lagrangian. -/
 theorem lRegLag_deriv

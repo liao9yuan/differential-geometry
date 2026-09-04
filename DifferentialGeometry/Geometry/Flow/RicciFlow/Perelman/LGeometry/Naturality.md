@@ -9,6 +9,17 @@ The action-level additions recorded below also pass focused verification
 without warnings.  Their named module refresh and the unified P2 audit are
 also green.
 
+The first coordinated focused check of the 2026-08-30 open-restriction
+addition failed on two local elaboration issues: a mistyped real-model notation
+and a restricted metric projection that needed explicit definitional exposure.
+The coordinated retry then reached only a reflexive `0 = 0` goal in the
+nondifferentiable velocity branch and one unused-section-variable warning.
+After those repairs, the next focused check elaborated every declaration and
+reported only the same unused ambient instances on the private velocity helper.
+Those instances were omitted, and the final coordinated focused check passed
+without warnings.  The open-restriction declaration is now verified together
+with the earlier declarations.
+
 ## Intended chain
 
 - `lRegAccel_pull` transports the regularized acceleration using scalar,
@@ -63,13 +74,41 @@ Focused verification, the named module refresh, and the unified P2 audit all
 passed without warnings.  No mathematical, API, coercion, or tooling blocker
 remains.
 
+## 2026-08-30 open-restriction locality
+
+- `lLength_restrict` identifies the raw L-length in an open-restricted solution
+  with the ambient L-length of the subtype-valued curve.  It assumes neither a
+  solution predicate nor curve regularity, time-carrier conditions, curvature
+  bounds, or compactness.
+- The private velocity step treats both differentiable and nondifferentiable
+  points.  In the reverse direction, a local smooth retraction onto the open
+  subtype shows that differentiability of the ambient coercion forces
+  differentiability of the subtype-valued curve.
+- The density identity then uses the native scalar restriction theorem, the
+  restricted-metric inner-product identity, and the exact velocity identity;
+  interval integration gives the public result.
+- Static dependency review found the new `OpenRestriction` import acyclic.  No
+  placeholder, new class, notation, or frontier assumption was introduced.
+- The first focused check failed because the new helper accidentally used
+  `𝑐(Real, Real)` instead of the native real model and because
+  `restrictOpen_inner` could not match through the restricted solution's metric
+  projection.  The source now uses the native model and explicitly exposes the
+  restricted metric before rewriting.  The second check reduced the remaining
+  nondifferentiable branch to `0 = 0` and reported that the local smooth
+  retraction helper carried unused ambient manifold instances; a terminal
+  reflexivity step and the corresponding explicit omissions now resolve those
+  local issues.  The subsequent check elaborated the complete file and found
+  only the analogous unused instances on the private velocity helper; those
+  omissions were then applied.  The final single-thread focused check passed
+  without warnings.  No module refresh or build was run or needed.
+
 ## Project position
 
-The original six naturality declarations and the two action-level adapters are
-complete (100%), and their dedicated generic pullback infrastructure is
-complete (100%).  This closes the fixed-diffeomorphism naturality lane for
-`lRegCurve`, `lExp`, L-density, and L-length; it does not advance the later
-L-Jacobi, cut-domain, reduced-length, or reduced-volume phases.  Together with
-`Scaling.lean`, this closes L3.  Dedicated Perelman L-geometry machinery is
-about 30--32%, generic prerequisites about 75--80%, and reduced-volume
-monotonicity remains at 0%.
+The original six naturality declarations, the two fixed-diffeomorphism action
+adapters, and the open-restriction L-length producer are complete (100%).  Their
+dedicated naturality/locality infrastructure is complete (100%).  This closes
+fixed-diffeomorphism naturality and raw open-subflow action locality, but the
+broader P2b and P2c package endpoints remain unstated and therefore 0%.
+Compact ordinary-flow P2a, including `redVolume_anti`, remains 100%; P2d and
+the P3 asymptotic-shrinker endpoint remain 0%.  Whole P0--P9 infrastructure
+remains approximately 15--25%.

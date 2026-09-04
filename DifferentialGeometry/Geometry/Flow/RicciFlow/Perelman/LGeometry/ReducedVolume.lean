@@ -67,6 +67,27 @@ theorem redDensity_pos
     (tau : Real) : 0 < redDensity S T x y tau :=
   Real.exp_pos _
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
+  [CompactSpace M] in
+/-- A quadratic lower bound for reduced length gives the corresponding
+Gaussian upper bound for reduced density. -/
+theorem redDensity_gauss
+    (S : SolutionOn (I := I) (M := M) D)
+    (T : Real) (x q y : M) (tau c C : Real)
+    (hell : c / tau *
+          (riemannianEDistOf (I := I)
+            (S.base.metric (T - tau)) q y).toReal ^ 2 - C ≤
+        redLength S T x y tau) :
+    redDensity S T x y tau ≤
+      Real.exp
+        (C - c / tau *
+            (riemannianEDistOf (I := I)
+              (S.base.metric (T - tau)) q y).toReal ^ 2 -
+          ((Module.finrank Real E : Real) / 2) * Real.log tau -
+          ((Module.finrank Real E : Real) / 2) * Real.log (4 * Real.pi)) := by
+  rw [redDensity]
+  exact Real.exp_le_exp.mpr (by linarith)
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem exists_lExpPartial

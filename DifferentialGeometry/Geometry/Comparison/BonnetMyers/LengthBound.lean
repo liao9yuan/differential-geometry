@@ -943,6 +943,7 @@ theorem bonnet_myers_length_le_of_ricci_bound
             (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t)))) :
     L ≤ Real.pi / Real.sqrt K := by
   classical
+  have _hEnorm_used : IsMetricNorm (I := I) (M := M) g := hEnorm
   by_contra hcontra
   rw [not_le] at hcontra
   have h_pi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
@@ -1002,10 +1003,10 @@ theorem bonnet_myers_length_le_of_ricci_bound
           map_smul (g.inner (γ t)) _ _]
       rw [ContinuousLinearMap.smul_apply, smul_eq_mul, _hPerp t ht i, mul_zero]
     refine indexForm_nonneg_of_minimising_geodesic
-      (I := I) g hEnorm γ L
+      (I := I) g γ L
       (fun t => (SectionAlongCurve.smulFun
         (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)
-      _hL _hγ_smooth (_hVbundle i) _hgeo _hmin hUnit_mfd hVperp ?_ ?_
+      _hL (_hVbundle i) _hgeo _hmin hUnit_mfd hVperp ?_ ?_
     · simp [SectionAlongCurve.smulFun_toFun, Real.sin_zero]
     · have hL_ne : L ≠ 0 := ne_of_gt _hL
       have h_arg : Real.pi * L / L = Real.pi := by field_simp

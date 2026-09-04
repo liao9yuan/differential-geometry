@@ -416,6 +416,105 @@ noncomputable def MemW1pWitness.of_ae_eq
             exact integral_congr_ae hcongr
     _ = -∫ x in Ω, hw.weakGrad x i * φ x := hweak
 
+/-- A local `W^{1,2}` witness agrees on a compact subset with a whole-space
+Sobolev witness, including the chosen weak-gradient representative. -/
+theorem exists_global_wit
+    {Ω K : Set E} (hΩ : IsOpen Ω)
+    {u : E → ℝ} (hu : MemW1pWitness 2 u Ω)
+    (hK : IsCompact K) (hKΩ : K ⊆ Ω) :
+    ∃ (U : E → ℝ) (hU : MemW1pWitness 2 U Set.univ),
+      (∀ x ∈ K, U x = u x) ∧
+      (∀ x ∈ K, ∀ i : Fin d, hU.weakGrad x i = hu.weakGrad x i) := by
+  classical
+  obtain ⟨δ, hδ, hδΩ⟩ := hK.exists_cthickening_subset_open hΩ hKΩ
+  let K' : Set E := Metric.cthickening δ K
+  have hK'_compact : IsCompact K' := hK.cthickening
+  have hK'Ω : K' ⊆ Ω := hδΩ
+  obtain ⟨η, hη_smooth, hη_compact, hη_range, hη_one, hη_sub⟩ :=
+    exists_smooth_cutoff (d := d) hK'_compact hΩ hK'Ω
+  have hη_bound : ∀ x, |η x| ≤ 1 := by
+    intro x
+    rcases hη_range ⟨x, rfl⟩ with ⟨hx0, hx1⟩
+    simpa [abs_of_nonneg hx0] using hx1
+  have hη_deriv_compact : HasCompactSupport (fderiv ℝ η) :=
+    hη_compact.fderiv (𝕜 := ℝ)
+  obtain ⟨C, hC⟩ := hη_deriv_compact.isCompact.exists_bound_of_continuousOn
+    ((hη_smooth.continuous_fderiv (by simp)).continuousOn)
+  let C₁ : ℝ := max C 0
+  have hC₁ : 0 ≤ C₁ := le_max_right _ _
+  have hη_grad_bound : ∀ x, ‖fderiv ℝ η x‖ ≤ C₁ := by
+    intro x
+    by_cases hx : x ∈ tsupport (fderiv ℝ η)
+    · exact (hC x hx).trans (le_max_left _ _)
+    · have hzero : fderiv ℝ η x = 0 := image_eq_zero_of_notMem_tsupport hx
+      simp [C₁, hzero]
+  let hv : MemW1pWitness 2 (fun x => η x * u x) Ω :=
+    hu.mul_smooth_bounded_p (d := d) (by norm_num) hΩ hη_smooth
+      zero_le_one hC₁ hη_bound hη_grad_bound
+  have hv_compact : HasCompactSupport (fun x => η x * u x) :=
+    hη_compact.mul_right
+  have hv_sub : tsupport (fun x => η x * u x) ⊆ Ω :=
+    (tsupport_smul_subset_left η u).trans hη_sub
+  have hv₀ : MemW01p (ENNReal.ofReal (2 : ℝ)) (fun x => η x * u x) Ω := by
+    have hvW : MemW1p (ENNReal.ofReal (2 : ℝ)) (fun x => η x * u x) Ω := by
+      simpa [hv] using hv.memW1p
+    exact memW01p_of_memW1p_of_tsupport_subset
+      (d := d) hΩ (p := (2 : ℝ)) (by norm_num) hvW hv_compact hv_sub
+  let hvReal : MemW1pWitness (ENNReal.ofReal (2 : ℝ)) (fun x => η x * u x) Ω :=
+    { memLp := by simpa using hv.memLp
+      weakGrad := hv.weakGrad
+      weakGrad_component_memLp := by
+        intro i
+        simpa using hv.weakGrad_component_memLp i
+      isWeakGrad := hv.isWeakGrad }
+  let hExtRaw : MemW1pWitness (ENNReal.ofReal (2 : ℝ))
+      (Ω.indicator fun x => η x * u x) Set.univ :=
+    zeroExtend_memW1pWitness_p (d := d) hΩ
+      (p := 2) (by norm_num) hv₀ hvReal
+  have hindicator : Ω.indicator (fun x => η x * u x) = fun x => η x * u x := by
+    funext x
+    by_cases hx : x ∈ Ω
+    · simp [hx]
+    · have hηx : η x = 0 :=
+        zero_outside_of_tsupport_subset hη_sub hx
+      simp [hx, hηx]
+  let hExt : MemW1pWitness 2 (Ω.indicator fun x => η x * u x) Set.univ :=
+    { memLp := by simpa using hExtRaw.memLp
+      weakGrad := hExtRaw.weakGrad
+      weakGrad_component_memLp := by
+        intro i
+        simpa using hExtRaw.weakGrad_component_memLp i
+      isWeakGrad := hExtRaw.isWeakGrad }
+  let hU : MemW1pWitness 2 (fun x => η x * u x) Set.univ :=
+    MemW1pWitness.of_ae_eq
+      (Filter.Eventually.of_forall fun x => congrFun hindicator x) hExt
+  refine ⟨fun x => η x * u x, hU, ?_, ?_⟩
+  · intro x hx
+    have hηx : η x = 1 := hη_one x (Metric.self_subset_cthickening K hx)
+    simp [hηx]
+  · intro x hx i
+    have hxΩ : x ∈ Ω := hKΩ hx
+    have hηx : η x = 1 := hη_one x (Metric.self_subset_cthickening K hx)
+    have hη_eq : η =ᶠ[nhds x] fun _ => (1 : ℝ) := by
+      refine Filter.mem_of_superset
+        (Metric.ball_mem_nhds x (by linarith : 0 < δ / 2)) ?_
+      intro y hy
+      rw [Metric.mem_ball] at hy
+      have hy_closed : y ∈ Metric.closedBall x (δ / 2) := by
+        rw [Metric.mem_closedBall]
+        exact le_of_lt hy
+      have hy_thick_half : y ∈ Metric.cthickening (δ / 2) K :=
+        Metric.closedBall_subset_cthickening hx (δ / 2) hy_closed
+      exact hη_one y (Metric.cthickening_mono (by linarith : δ / 2 ≤ δ) K hy_thick_half)
+    have hη_deriv :
+        (fderiv ℝ η x) (EuclideanSpace.single i 1) = 0 := by
+      rw [Filter.EventuallyEq.fderiv_eq hη_eq]
+      simp
+    simp [hU, hExt, hExtRaw, hvReal, hv,
+      MemW1pWitness.of_ae_eq, zeroExtend_memW1pWitness_p,
+      MemW1pWitness.mul_smooth_bounded_p, PiLp.toLp_apply,
+      hxΩ, hηx, hη_deriv]
+
 theorem IsSubsolution.congr_ae
     {Ω : Set E} {A : EllipticCoeff d Ω} {u v : E → ℝ}
     (huv : u =ᵐ[volume.restrict Ω] v)

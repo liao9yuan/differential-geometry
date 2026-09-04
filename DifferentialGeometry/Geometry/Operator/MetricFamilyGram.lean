@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.LowerAllUpperIndices
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.MetricUniformUpperBound
+import DifferentialGeometry.Geometry.Metric.Convergence.UniformEquivalence
 import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 import DifferentialGeometry.Geometry.Metric.TensorInner.CoerciveBilinInverse
 import DifferentialGeometry.Bundle.TangentCoordChange
@@ -18,6 +20,7 @@ namespace DifferentialGeometry.Geometry.Curvature
 
 open Analysis.Parabolic.TensorSpectral
 open Geometry.Operator
+open DifferentialGeometry.HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E]
@@ -94,6 +97,64 @@ theorem chartGramOp_nonneg {D : RealTimeInterval}
       ((G.metric p.1).inner ((extChartAt I alpha).symm p.2)).map_zero
     simpa only [ContinuousLinearMap.zero_apply] using hzero.symm.le
   · exact ((G.metric p.1).pos ((extChartAt I alpha).symm p.2) w hw).le
+
+/-- On a compact coordinate set, the difference of two fixed-chart metric
+operators is controlled by the zeroth-order reference-metric derivative norm. -/
+theorem chartGramOp_diff_le {D : RealTimeInterval}
+    [T2Space M]
+    (R : SmoothRiemannianMetric I M) (alpha : M)
+    {K : Set E} (hKc : IsCompact K)
+    (hKchart : K ⊆ interior (extChartAt I alpha).target) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ (G G' : MetricConnectionFamilyOn (I := I) (M := M) D)
+        (p : Real × E), p.2 ∈ K →
+      ‖chartGramOp (I := I) G alpha p - chartGramOp (I := I) G' alpha p‖ ≤
+        C * metricDerivNorm (I := I) 0 (G.metric p.1) (G'.metric p.1) R
+          ((extChartAt I alpha).symm p.2) := by
+  have hKtgt : K ⊆ (extChartAt I alpha).target := hKchart.trans interior_subset
+  have hKbase : IsCompact ((extChartAt I alpha).symm '' K) :=
+    hKc.image_of_continuousOn
+      ((continuousOn_extChartAt_symm (I := I) alpha).mono hKtgt)
+  have hKsrc : (extChartAt I alpha).symm '' K ⊆ (chartAt H alpha).source := by
+    rintro x ⟨z, hz, rfl⟩
+    have hx := (extChartAt I alpha).map_target (hKtgt hz)
+    simpa only [extChartAt_source] using hx
+  obtain ⟨A, hA, hAbound⟩ :=
+    g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
+      (I := I) (M := M) R alpha hKbase hKsrc
+  refine ⟨A ^ 2, sq_nonneg A, ?_⟩
+  intro G G' p hp
+  apply ContinuousLinearMap.opNorm_le_of_re_inner_le
+  · exact mul_nonneg (sq_nonneg A) (Real.sqrt_nonneg _)
+  intro v w hv hw
+  simp only [RCLike.re_to_real, ContinuousLinearMap.sub_apply, inner_sub_left,
+    chartGramOp_inner]
+  let x := (extChartAt I alpha).symm p.2
+  let J := Tensor.Tensor0SRiemannian.chartTrivializationLinearMapSymm
+    (I := I) (M := M) alpha x
+  have hdiff := metricDiff_abs_le (I := I)
+    (G.metric p.1) (G'.metric p.1) R x (J v) (J w)
+  have hx : x ∈ (extChartAt I alpha).symm '' K := ⟨p.2, hp, rfl⟩
+  have hvR := hAbound x hx v
+  have hwR := hAbound x hx w
+  have hd0 : 0 ≤ metricDerivNorm (I := I) 0
+      (G.metric p.1) (G'.metric p.1) R x := Real.sqrt_nonneg _
+  have hv0 : 0 ≤ Real.sqrt (R.inner x (J v) (J v)) := Real.sqrt_nonneg _
+  have hw0 : 0 ≤ Real.sqrt (R.inner x (J w) (J w)) := Real.sqrt_nonneg _
+  calc
+    (G.metric p.1).inner x (J v) (J w) - (G'.metric p.1).inner x (J v) (J w)
+        ≤ |(G.metric p.1).inner x (J v) (J w) -
+            (G'.metric p.1).inner x (J v) (J w)| := le_abs_self _
+    _ ≤ metricDerivNorm (I := I) 0 (G.metric p.1) (G'.metric p.1) R x *
+          Real.sqrt (R.inner x (J v) (J v)) *
+          Real.sqrt (R.inner x (J w) (J w)) := hdiff
+    _ ≤ A ^ 2 * metricDerivNorm (I := I) 0
+          (G.metric p.1) (G'.metric p.1) R x := by
+      rw [hv, mul_one] at hvR
+      rw [hw, mul_one] at hwR
+      nlinarith [mul_nonneg hd0 hv0, mul_nonneg hd0 hA.le,
+        mul_nonneg (mul_nonneg hd0 hv0) hw0,
+        mul_nonneg (mul_nonneg hd0 hA.le) hA.le]
 
 /-- Fixed-chart metric operators vary continuously in time and chart position. -/
 theorem chartGramOp_cont {D : RealTimeInterval}

@@ -1297,6 +1297,62 @@ theorem riemVol_param_lint
   exact MeasureTheory.setLIntegral_withDensity_eq_setLIntegral_mul_non_measurable₀
     (modelHaar (E := E)) hdens (fun w => F (Ψ w)) hB_meas hdens_lt
 
+/-- Integrates a nonnegative function in the preferred coordinates at a point,
+using the chart density against the model Haar measure. -/
+theorem riemVol_chart_lint
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (F : M → ℝ≥0∞)
+    {B : Set E} (hB_meas : MeasurableSet B)
+    (hB_target : B ⊆ (extChartAt I x₀).target) :
+    ∫⁻ y in (extChartAt I x₀).symm '' B, F y
+        ∂riemannianVolumeMeasure (I := I) (M := M) g =
+      ∫⁻ w in B,
+        ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm w)) *
+          F ((extChartAt I x₀).symm w) ∂modelHaar (E := E) := by
+  let Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1 :=
+    { toPartialEquiv := (extChartAt I x₀).symm
+      open_source := isOpen_extChartAt_target x₀
+      open_target := isOpen_extChartAt_source x₀
+      contMDiffOn_toFun :=
+        contMDiffOn_extChartAt_symm (I := I) (n := 1) x₀
+      contMDiffOn_invFun := by
+        change ContMDiffOn I 𝓘(ℝ, E) 1 (extChartAt I x₀)
+          (extChartAt I x₀).source
+        rw [extChartAt_source_eq_chartAt_source (I := I)]
+        exact contMDiffOn_extChartAt (I := I) (n := 1) (x := x₀) }
+  have hB_source : B ⊆ Ψ.source := by
+    simpa only [Ψ] using hB_target
+  have hmain := riemVol_param_lint (I := I) g Ψ F hB_meas hB_source
+  rw [show (extChartAt I x₀).symm '' B = Ψ '' B by rfl]
+  rw [hmain]
+  apply MeasureTheory.setLIntegral_congr_fun hB_meas
+  intro w hw
+  have hw_source : w ∈ Ψ.source := hB_source hw
+  have hw_target : w ∈ (extChartAt I x₀).target := hB_target hw
+  have hx_chart : Ψ w ∈ (chartAt H x₀).source := by
+    rw [← extChartAt_source_eq_chartAt_source (I := I)]
+    simpa only [Ψ] using (extChartAt I x₀).map_target hw_target
+  have hx : Ψ w ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by
+    simpa only [trivializationAt_baseSet_eq_chartAt_source] using hx_chart
+  have hlocal : paramChartMap (I := I) x₀ Ψ =ᶠ[𝓝 w] id := by
+    filter_upwards [(isOpen_extChartAt_target x₀).mem_nhds hw_target] with z hz
+    simpa only [paramChartMap, Ψ, id_eq] using (extChartAt I x₀).right_inv hz
+  have hfderiv : fderiv ℝ (paramChartMap (I := I) x₀ Ψ) w =
+      ContinuousLinearMap.id ℝ E := by
+    rw [hlocal.fderiv_eq]
+    exact fderiv_id
+  change ENNReal.ofReal (paramDensity (I := I) g Ψ w) * F (Ψ w) =
+    ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm w)) *
+      F ((extChartAt I x₀).symm w)
+  have hdet : ((ContinuousLinearMap.id ℝ E) : E →L[ℝ] E).det = 1 := by
+    change LinearMap.det (LinearMap.id : E →ₗ[ℝ] E) = 1
+    exact LinearMap.det_id
+  rw [paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ hw_source hx,
+    hfderiv, hdet]
+  simp only [abs_one, one_mul]
+  rfl
+
 theorem param_vol_ge
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

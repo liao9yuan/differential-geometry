@@ -1986,6 +1986,48 @@ theorem lExp_smoothOn
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
+/-- Fixing the initial tangent makes an L-exponential ray locally `C1` at
+every positive point of its domain. -/
+theorem lExp_time_c1
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : Real) (x : M)
+    {Z : TangentSpace I x} {tau : Real}
+    (hdom : (Z, tau) ∈ lExpPosDom S T x) :
+    ContMDiffAt 𝓘(Real, Real) I 1
+      (fun r : Real ↦ lExp S T x Z r) tau := by
+  let z : E := Z
+  have hzdom : (z, tau) ∈ lExpPosDom S T x := by
+    simpa only [z] using hdom
+  have hpair : ContMDiffAt 𝓘(Real, Real)
+      (𝓘(Real, E).prod 𝓘(Real, Real)) ∞
+      (fun r : Real ↦ (z, r)) tau :=
+    (contMDiff_const.prodMk contMDiff_id).contMDiffAt
+  have hexp : ContMDiffAt (𝓘(Real, E).prod 𝓘(Real, Real)) I ∞
+      (fun p : E × Real ↦ lExp S T x p.1 p.2) (z, tau) :=
+    ((lExp_smoothOn S hS T x) (z, tau) hzdom).contMDiffAt
+      ((lExpPosDom_open S hS T x).mem_nhds hzdom)
+  simpa only [z] using (hexp.comp tau hpair).of_le (by norm_num)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
+/-- A positive L-exponential ray is `C1` on every closed interval below a
+positive domain time. -/
+theorem lExp_c1On
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : Real) (x : M)
+    {Z : TangentSpace I x} {a b tau : Real}
+    (hdom : (Z, tau) ∈ lExpPosDom S T x)
+    (ha : 0 < a) (hb : b ≤ tau) :
+    ContMDiffOn 𝓘(Real, Real) I 1
+      (fun r : Real ↦ lExp S T x Z r) (Icc a b) := by
+  intro r hr
+  exact (lExp_time_c1 S hS T x
+    (lExpPosDom_down S T x Z hdom (ha.trans_le hr.1) (hr.2.trans hb))).contMDiffWithinAt
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace Real E] [SigmaCompactSpace M] in
 /-- At a regular terminal time, the L-exponential map is jointly smooth in
 initial tangent vector and positive backward time on a uniform short interval. -/
 theorem exists_lExpFamily

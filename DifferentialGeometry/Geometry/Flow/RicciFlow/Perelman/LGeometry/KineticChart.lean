@@ -37,31 +37,32 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 variable {D : RealTimeInterval}
 
-private theorem lKinetic_ae
-    (S : SolutionOn (I := I) (M := M) D) (T : Real)
-    (alpha : Real → M) (p : M) {L : Real} (us : timeH1 E L)
-    (a b : Real) (hab : a ≤ b)
+/-- In one fixed chart, the kinetic quadratic form of an arbitrary metric
+family agrees almost everywhere with its Gram-operator expression. -/
+theorem lKinetic_ae
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
+    (tau : Real → Real) (alpha : Real → M) (p : M)
+    (a b : Real) (hab : a ≤ b) (us : timeH1 E (b - a))
     (hsrc : MapsTo alpha (Icc a b) (chartAt H p).source)
     (hslice : EqOn us.toFun
-      (fun r ↦ extChartAt I p (alpha (a + r))) (Icc (0 : Real) L))
-    (hL : L = b - a)
-    (hdiff : ∀ᵐ r ∂timeMeasure L,
+      (fun r ↦ extChartAt I p (alpha (a + r))) (Icc (0 : Real) (b - a)))
+    (hdiff : ∀ᵐ r ∂timeMeasure (b - a),
       MDifferentiableAt (modelWithCornersSelf Real Real) I alpha (a + r)) :
     (fun r ↦ (1 / 2 : Real) *
-      (S.base.metric (T - (r + a) ^ 2)).inner (alpha (r + a))
+      (G.metric (tau (r + a))).inner (alpha (r + a))
         (lVelocity (I := I) alpha (r + a))
-        (lVelocity (I := I) alpha (r + a))) =ᵐ[timeMeasure L]
+        (lVelocity (I := I) alpha (r + a))) =ᵐ[timeMeasure (b - a)]
       fun r ↦ inner Real
-        (((1 / 2 : Real) • chartGramOp (I := I) S.family p
-          (T - (a + r) ^ 2, us.toFun r)) (us.deriv r)) (us.deriv r) := by
-  have hL0 : 0 ≤ L := by rw [hL]; exact sub_nonneg.mpr hab
-  have hmem : ∀ᵐ r ∂timeMeasure L, r ∈ Ioo (0 : Real) L := by
+        (((1 / 2 : Real) • chartGramOp (I := I) G p
+          (tau (a + r), us.toFun r)) (us.deriv r)) (us.deriv r) := by
+  have hL0 : 0 ≤ b - a := sub_nonneg.mpr hab
+  have hmem : ∀ᵐ r ∂timeMeasure (b - a), r ∈ Ioo (0 : Real) (b - a) := by
     unfold timeMeasure
     rw [← restrict_Ioo_eq_restrict_Icc]
     exact ae_restrict_mem measurableSet_Ioo
   filter_upwards [us.ae_hasDerivWithinAt_toFun, hdiff, hmem] with r hu hmdiff hr
-  have hrcc : r ∈ Icc (0 : Real) L := ⟨hr.1.le, hr.2.le⟩
-  have hnhds : Icc (0 : Real) L ∈ nhds r := Icc_mem_nhds hr.1 hr.2
+  have hrcc : r ∈ Icc (0 : Real) (b - a) := ⟨hr.1.le, hr.2.le⟩
+  have hnhds : Icc (0 : Real) (b - a) ∈ nhds r := Icc_mem_nhds hr.1 hr.2
   have hcoord : HasDerivAt
       (fun q ↦ extChartAt I p (alpha (a + q))) (us.deriv r) r := by
     apply hu.hasDerivAt hnhds |>.congr_of_eventuallyEq
@@ -74,7 +75,6 @@ private theorem lKinetic_ae
     rw [← deriv_comp_const_add]
     simpa only [Function.comp_apply] using hcoord.deriv
   have hrab : a + r ∈ Icc a b := by
-    rw [hL] at hrcc
     exact ⟨le_add_of_nonneg_right hrcc.1, by linarith [hrcc.2]⟩
   have hars : alpha (a + r) ∈ (chartAt H p).source := hsrc hrab
   have hraw :=
@@ -90,13 +90,53 @@ private theorem lKinetic_ae
     chartGramOp_inner, hinv]
   rw [add_comm r a]
   change (1 / 2 : Real) *
-      (S.base.metric (T - (a + r) ^ 2)).inner (alpha (a + r))
+      (G.metric (tau (a + r))).inner (alpha (a + r))
         ((mfderiv (modelWithCornersSelf Real Real) I alpha (a + r) :
           Real →L[Real] _) (1 : Real))
         ((mfderiv (modelWithCornersSelf Real Real) I alpha (a + r) :
           Real →L[Real] _) (1 : Real)) = _
   rw [hraw]
   rfl
+
+/-- On a fixed-chart subinterval, a local `timeH1` representative realizes an
+arbitrary metric family's kinetic quadratic integral in Gram coordinates. -/
+theorem lKinetic_local_of
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
+    (tau : Real → Real) (alpha : Real → M) (p : M)
+    (a b : Real) (hab : a ≤ b) (us : timeH1 E (b - a))
+    (hsrc : MapsTo alpha (Icc a b) (chartAt H p).source)
+    (hslice : EqOn us.toFun
+      (fun r ↦ extChartAt I p (alpha (a + r))) (Icc (0 : Real) (b - a)))
+    (hdiff : ∀ᵐ r ∂timeMeasure (b - a),
+      MDifferentiableAt (modelWithCornersSelf Real Real) I alpha (a + r)) :
+    (∫ s in a..b, (1 / 2 : Real) *
+      (G.metric (tau s)).inner (alpha s)
+        (lVelocity (I := I) alpha s) (lVelocity (I := I) alpha s)) =
+      ∫ r in (0 : Real)..b - a,
+        inner Real
+          (((1 / 2 : Real) • chartGramOp (I := I) G p
+            (tau (a + r), us.toFun r)) (us.deriv r))
+          (us.deriv r) := by
+  have hba : 0 ≤ b - a := sub_nonneg.mpr hab
+  have hpoint := lKinetic_ae G tau alpha p a b hab us hsrc hslice hdiff
+  have hshift :
+      (∫ r in (0 : Real)..b - a, (1 / 2 : Real) *
+        (G.metric (tau (r + a))).inner (alpha (r + a))
+          (lVelocity (I := I) alpha (r + a))
+          (lVelocity (I := I) alpha (r + a))) =
+        ∫ s in a..b, (1 / 2 : Real) *
+          (G.metric (tau s)).inner (alpha s)
+            (lVelocity (I := I) alpha s) (lVelocity (I := I) alpha s) := by
+    simpa only [zero_add, sub_add_cancel] using
+      (intervalIntegral.integral_comp_add_right
+        (fun s ↦ (1 / 2 : Real) *
+          (G.metric (tau s)).inner (alpha s)
+            (lVelocity (I := I) alpha s) (lVelocity (I := I) alpha s))
+        (a := 0) (b := b - a) a)
+  rw [← hshift]
+  apply intervalIntegral.integral_congr_ae_restrict
+  simpa only [timeMeasure, uIoc_of_le hba,
+    restrict_Ioc_eq_restrict_Icc] using hpoint
 
 /-- On a fixed-chart subinterval, a local `timeH1` representative realizes the
 kinetic part of the regularized Lagrangian as a chart Gram quadratic form. -/
@@ -118,26 +158,9 @@ theorem lKinetic_local
             chartGramOp (I := I) S.family p
               (T - (a + r) ^ 2, us.toFun r)) (us.deriv r))
           (us.deriv r) := by
-  have hba : 0 ≤ b - a := sub_nonneg.mpr hab
-  have hpoint := lKinetic_ae S T alpha p us a b hab hsrc hslice rfl hdiff
-  have hshift :
-      (∫ r in (0 : Real)..b - a, (1 / 2 : Real) *
-        (S.base.metric (T - (r + a) ^ 2)).inner (alpha (r + a))
-          (lVelocity (I := I) alpha (r + a))
-          (lVelocity (I := I) alpha (r + a))) =
-        ∫ s in a..b, (1 / 2 : Real) *
-          (S.base.metric (T - s ^ 2)).inner (alpha s)
-            (lVelocity (I := I) alpha s) (lVelocity (I := I) alpha s) := by
-    simpa only [zero_add, sub_add_cancel] using
-      (intervalIntegral.integral_comp_add_right
-        (fun s ↦ (1 / 2 : Real) *
-          (S.base.metric (T - s ^ 2)).inner (alpha s)
-            (lVelocity (I := I) alpha s) (lVelocity (I := I) alpha s))
-        (a := 0) (b := b - a) a)
-  rw [← hshift]
-  apply intervalIntegral.integral_congr_ae_restrict
-  simpa only [timeMeasure, uIoc_of_le hba,
-    restrict_Ioc_eq_restrict_Icc] using hpoint
+  simpa only [SolutionOn.family_metric] using
+    lKinetic_local_of S.family (fun s ↦ T - s ^ 2) alpha p a b hab us
+      hsrc hslice hdiff
 
 /-- The global-representative kinetic identity is the local identity applied
 to `timeH1.slice`. -/
@@ -230,7 +253,8 @@ theorem lKinetic_int_local
       have hC0 := NNReal.coe_nonneg C
       linarith)
   have hquad := timeQuad_int A hA C hC hL us.deriv
-  have hpoint := lKinetic_ae S T alpha p us a b hab hsrc hslice rfl hdiff
+  have hpoint := lKinetic_ae S.family (fun s ↦ T - s ^ 2) alpha p a b hab us
+    hsrc hslice hdiff
   have hpoint' :
       (fun r ↦ (1 / 2 : Real) *
         (S.base.metric (T - (r + a) ^ 2)).inner (alpha (r + a))
@@ -238,7 +262,7 @@ theorem lKinetic_int_local
           (lVelocity (I := I) alpha (r + a))) =ᵐ[volume.restrict (Ι (0 : Real) L)]
         fun r ↦ inner Real (A r (us.deriv r)) (us.deriv r) := by
     simpa only [timeMeasure, uIoc_of_le hL, restrict_Ioc_eq_restrict_Icc,
-      A, τ] using hpoint
+      A, τ, SolutionOn.family_metric] using hpoint
   have hshift : IntervalIntegrable (fun r ↦ (1 / 2 : Real) *
       (S.base.metric (T - (r + a) ^ 2)).inner (alpha (r + a))
         (lVelocity (I := I) alpha (r + a))

@@ -1622,7 +1622,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [T2Space (TangentBundle I M)]
     [SigmaCompactSpace M] in
 theorem broken_minimizer_velocity_match
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)

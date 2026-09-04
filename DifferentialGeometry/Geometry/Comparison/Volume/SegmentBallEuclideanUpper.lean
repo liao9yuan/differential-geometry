@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDomain
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
+import DifferentialGeometry.Geometry.Comparison.Volume.BishopRawDensity
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentFrameBound
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentMeasure
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentNoConj
@@ -18,6 +19,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Variation
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E]
@@ -99,6 +101,174 @@ theorem gBall_model_eucl [ConnectedSpace M] [PseudoEMetricSpace M]
         (normalHaar_eq (E := E) (M := M) (I := I) g x)
     _ = (volume : Measure E)
         (L ⁻¹' closedGBall (I := I) g x R) := by
+      rw [Measure.map_apply L.continuous.measurable hclosed]
+    _ = (volume : Measure E) (Metric.closedBall (0 : E) R) := by
+      rw [hpreclosed]
+    _ = (volume : Measure E) (Metric.ball (0 : E) R) :=
+      Measure.addHaar_closedBall_eq_addHaar_ball
+        (volume : Measure E) (0 : E) R
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A compactly buffered metric ball with nonnegative Ricci curvature on the
+smaller closed ball has at most the canonical Euclidean ball volume. -/
+theorem ball_vol_le_eucl [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M]
+    [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
+    (p : M) {R R₀ : ℝ} (hRR₀ : R < R₀)
+    (hcpt : @IsCompact M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace
+      (Metric.closedEBall p (ENNReal.ofReal R₀)))
+    (hRic : ∀ q ∈ Metric.closedEBall p (ENNReal.ofReal R),
+      ∀ w : TangentSpace I q,
+        0 ≤ ricciTensor (I := I) g q w w) :
+    riemannianVolumeMeasure (I := I) (M := M) g
+        {q : M | riemannianEDist I p q < ENNReal.ofReal R}
+      ≤ (volume : Measure E) (Metric.ball (0 : E) R) := by
+  classical
+  letI : Nontrivial E :=
+    Module.nontrivial_of_finrank_pos
+      (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
+  let K : Set E :=
+    {v : E | ENNReal.ofReal (Real.sqrt
+        (g.inner p (show TangentSpace I p from v)
+          (show TangentSpace I p from v))) =
+      riemannianEDist I p
+        (expMap (I := I) g p (show TangentSpace I p from v))} ∩
+      closedGBall (I := I) g p R
+  let D : E → ℝ := fun v =>
+    curveDensity (I := I) g (radialCurve (I := I) g p v)
+      (fun i : Fin (Module.finrank ℝ E) =>
+        radialJacobiField (I := I) g p v (chartModelBasis E i)) 1
+  have hK : IsCompact K := by
+    simpa only [K] using isCompact_rawSeg (I := I) g hEnorm p hRR₀ hcpt
+  have hKmeas : MeasurableSet K := hK.measurableSet
+  have hvol :
+      riemannianVolumeMeasure (I := I) (M := M) g
+          {q : M | riemannianEDist I p q < ENNReal.ofReal R}
+        ≤ ∫⁻ v in K, ENNReal.ofReal (D v) ∂(modelHaar (E := E)) := by
+    simpa only [K, D, radialCurve, radialJacobiField] using
+      rawBall_vol_le_int (I := I) g hEnorm p hRR₀ hcpt
+  have hpoint : ∀ v ∈ K,
+      D v ≤ normalChartDensity (I := I) g p 0 := by
+    intro v hv
+    dsimp only [K] at hv
+    let γ : ℝ → M := radialCurve (I := I) g p v
+    let ℓ : ℝ := Real.sqrt (g.inner p v v)
+    have hdom : ∀ t ∈ Icc (0 : ℝ) 1,
+        (show TangentSpace I p from t • v) ∈ expDomain (I := I) g p := by
+      intro t ht
+      apply mem_expDom_of_cpt (I := I) g hEnorm p
+        (show TangentSpace I p from t • v) ?_ hcpt
+      change Real.sqrt (g.inner p
+        (t • (show TangentSpace I p from v))
+        (t • (show TangentSpace I p from v))) < R₀
+      rw [RadialSurjectivity.sqrt_gInner_smul_self
+        (I := I) g p ht.1 (show TangentSpace I p from v)]
+      calc
+        t * Real.sqrt (g.inner p v v)
+            ≤ 1 * Real.sqrt (g.inner p v v) :=
+          mul_le_mul_of_nonneg_right ht.2 (Real.sqrt_nonneg _)
+        _ = Real.sqrt (g.inner p v v) := one_mul _
+        _ ≤ R := hv.2
+        _ < R₀ := hRR₀
+    have hγsmooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc (0 : ℝ) 1) := by
+      intro t ht
+      have hline : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+          ((⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun s : ℝ => s • v) t :=
+        (contMDiff_id.smul contMDiff_const).contMDiffAt
+      have hexp := expMap_contMDiffAt (I := I) g p (hdom t ht)
+      simpa only [γ, radialCurve] using
+        ((hexp.comp t hline).of_le
+          (by decide : (1 : WithTop ℕ∞) ≤
+            ((⊤ : ℕ∞) : WithTop ℕ∞))).contMDiffWithinAt
+    have hγball : ∀ t ∈ Icc (0 : ℝ) 1,
+        γ t ∈ Metric.closedEBall p (ENNReal.ofReal R) := by
+      intro t ht
+      have hdist : riemannianEDist I p (γ t) ≤ ENNReal.ofReal (ℓ * t) := by
+        have hd := HopfRinow.curve_edist_le_speed_mul_time
+          (I := I) (γ := γ) (s := 0) (t := t) (c := ℓ)
+          (Real.sqrt_nonneg _) ht.1
+          (hγsmooth.mono fun s hs => ⟨hs.1, hs.2.trans ht.2⟩)
+          (fun s hs => by
+            rw [hEnorm]
+            apply ENNReal.ofReal_le_ofReal
+            have hsSq := rawSpeed_sq (I := I) g p v s hs.1
+              (fun r hr => hdom r
+                ⟨hr.1, hr.2.trans (hs.2.trans ht.2)⟩)
+            change Real.sqrt (g.inner (γ s)
+              (curveVelocity (I := I) γ s)
+              (curveVelocity (I := I) γ s)) ≤ ℓ
+            have hsSq' : g.inner (γ s)
+                (curveVelocity (I := I) γ s)
+                (curveVelocity (I := I) γ s) = g.inner p v v := by
+              simpa only [γ] using hsSq
+            rw [hsSq'])
+        have hγ0 : γ 0 = p := by
+          simp only [γ, radialCurve, zero_smul]
+          exact expMap_zero (I := I) g p
+        simpa only [hγ0, sub_zero] using hd
+      have hℓtR : ℓ * t ≤ R := by
+        calc
+          ℓ * t ≤ ℓ * 1 :=
+            mul_le_mul_of_nonneg_left ht.2 (Real.sqrt_nonneg _)
+          _ = ℓ := mul_one _
+          _ ≤ R := hv.2
+      rw [Metric.mem_closedEBall', IsRiemannianManifold.out (I := I) p (γ t)]
+      exact hdist.trans (ENNReal.ofReal_le_ofReal hℓtR)
+    have hRicRay : ∀ t ∈ Ioo (0 : ℝ) 1,
+        0 ≤ ricciTensor (I := I) g (radialCurve (I := I) g p v t)
+          (curveVelocity (I := I) (radialCurve (I := I) g p v) t)
+          (curveVelocity (I := I) (radialCurve (I := I) g p v) t) := by
+      intro t ht
+      exact hRic _ (hγball t ⟨ht.1.le, ht.2.le⟩) _
+    simpa only [D] using rawDens_le_zero (I := I) g hEnorm p v hdom hv.1.le hRicRay
+  have hpointAE : ∀ᵐ v ∂(modelHaar (E := E)), v ∈ K →
+      ENNReal.ofReal (D v) ≤
+        ENNReal.ofReal (normalChartDensity (I := I) g p 0) := by
+    filter_upwards with v
+    intro hv
+    exact ENNReal.ofReal_le_ofReal (hpoint v hv)
+  have hmono :
+      (∫⁻ v in K, ENNReal.ofReal (D v) ∂(modelHaar (E := E))) ≤
+        ∫⁻ _v in K, ENNReal.ofReal
+          (normalChartDensity (I := I) g p 0) ∂(modelHaar (E := E)) :=
+    setLIntegral_mono_ae' hKmeas hpointAE
+  let L : E ≃L[ℝ] E := normalFrame (I := I) (E := E) g p
+  have hpreclosed :
+      L ⁻¹' closedGBall (I := I) g p R = Metric.closedBall (0 : E) R := by
+    ext w
+    simp only [Set.mem_preimage, closedGBall, Set.mem_setOf_eq,
+      Metric.mem_closedBall, dist_zero_right]
+    have hsqrt : Real.sqrt (g.inner p (L w) (L w)) = ‖w‖ := by
+      simpa only [L] using normalFrame_sqrt (I := I) g p w
+    rw [hsqrt]
+  have hclosed : MeasurableSet (closedGBall (I := I) g p R) :=
+    (isClosed_closedGBall (I := I) g p R).measurableSet
+  calc
+    riemannianVolumeMeasure (I := I) (M := M) g
+          {q : M | riemannianEDist I p q < ENNReal.ofReal R}
+        ≤ ∫⁻ v in K, ENNReal.ofReal (D v) ∂(modelHaar (E := E)) := hvol
+    _ ≤ ∫⁻ _v in K, ENNReal.ofReal
+          (normalChartDensity (I := I) g p 0) ∂(modelHaar (E := E)) := hmono
+    _ ≤ ∫⁻ _v in closedGBall (I := I) g p R,
+          ENNReal.ofReal (normalChartDensity (I := I) g p 0)
+            ∂(modelHaar (E := E)) :=
+      lintegral_mono_set (Set.inter_subset_right : K ⊆ closedGBall (I := I) g p R)
+    _ = ENNReal.ofReal (normalChartDensity (I := I) g p 0) *
+          (modelHaar (E := E)) (closedGBall (I := I) g p R) := by
+      rw [setLIntegral_const]
+    _ = (ENNReal.ofReal (normalChartDensity (I := I) g p 0) •
+          modelHaar (E := E)) (closedGBall (I := I) g p R) := by
+      simp only [Measure.smul_apply, smul_eq_mul]
+    _ = (Measure.map L (volume : Measure E))
+          (closedGBall (I := I) g p R) := by
+      simpa only [L] using congrArg
+        (fun μ : Measure E => μ (closedGBall (I := I) g p R))
+        (normalHaar_eq (E := E) (M := M) (I := I) g p)
+    _ = (volume : Measure E) (L ⁻¹' closedGBall (I := I) g p R) := by
       rw [Measure.map_apply L.continuous.measurable hclosed]
     _ = (volume : Measure E) (Metric.closedBall (0 : E) R) := by
       rw [hpreclosed]

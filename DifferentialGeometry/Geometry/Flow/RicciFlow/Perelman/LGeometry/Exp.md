@@ -45,6 +45,12 @@ chain without adding a new solution class or a stronger consumer assumption:
 `lExpDomain` is the nonnegative pullback of `lRegDomain` by `sqrt`, and `lExp`
 evaluates `lRegCurve` at square-root time.  `lExpPosDom` is its joint positive
 part; it is open, and `lExp_smoothOn` proves joint smoothness throughout it.
+`lExp_time_c1` fixes the initial tangent and specializes this joint result to
+the locally `C1` ordinary backward-time ray required by the moving-endpoint
+distance estimates.  It is intentionally positive-time only; no extra flow or
+curvature hypothesis is introduced.  `lExp_c1On` packages that pointwise fact
+on every positive closed interval below a positive domain time, without an
+unneeded interval-order hypothesis.
 At every positive backward time, `lExp_vel_sqrt` identifies the terminal
 regularized velocity with `2 * sqrt tau` times the velocity of the ordinary
 backward-time `lExp` ray.  This is a pure reparameterization identity and needs
@@ -60,7 +66,8 @@ to define `lExp`.
 ## Verification and boundary
 
 Focused verification passed without warnings after the endpoint-facing,
-domain-restriction, restart-facing, and velocity-reparameterization exports.
+domain-restriction, restart-facing, velocity-reparameterization, and fixed-ray
+positive-time `C1` exports.
 Axiom audits of `lRegCurve_c1On` and
 `lExpPosDom_reg` report only `propext`, classical choice, and quotient
 soundness.  The file contains no `sorry`, `admit`, or new axiom.
@@ -72,8 +79,8 @@ are now complete in `Naturality.lean` and `Scaling.lean`, so L3 is closed.  L4
 Jacobi work may use `lExp_smoothOn`, but must still keep zero-time arguments in
 the regularized formulation.
 
-`redVolume_anti` remains **0%**.  The compact global-regularized-C1 minimizer
-and its identification with `lExp` are complete; the global cut-domain stage
-has only its local-diffeomorphism and endpoint-identification producers.
-P2 remains below **1%**, and the whole Poincare program remains about
-**3--5%**.
+Compact ordinary-flow P2a remains **100%**.  The broader P2b package theorem is
+still unstated at **0%**, with its dedicated reduced-geometry machinery about
+**62--66%** before the exact minimizing-speed identity is integrated.  The
+ancient Hamilton--Harnack speed bound is a P3 producer, not an assumption to be
+hidden in this file.  The whole P0--P9 program remains about **15--25%**.

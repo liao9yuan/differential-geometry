@@ -1,0 +1,16 @@
+import DifferentialGeometry.Geometry.Comparison.EndpointDistanceRate
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Estimates.Distance.MovingDistance
+
+set_option autoImplicit false
+
+#print axioms DifferentialGeometry.PDE.RicciFlow.pathLength_timeDeriv_of_ricciFlow
+#print axioms DifferentialGeometry.PDE.RicciFlow.ricci_int_end_le
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_short_support
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_long_support
+#print axioms DifferentialGeometry.edistOf_triangle
+#print axioms DifferentialGeometry.edistOf_comm
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_moving_slope
+#print axioms DifferentialGeometry.Geometry.Riemannian.edist_inc_tendsto
+#print axioms DifferentialGeometry.PDE.RicciFlow.edist_smooth_rate
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_short_slope
+#print axioms DifferentialGeometry.PDE.RicciFlow.dist_long_slope

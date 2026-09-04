@@ -714,3 +714,56 @@ theorem endpoints, and the dedicated compact ordinary-flow L-geometry stage is
 100%.  Complete bounded-curvature L8 refinements and surgery/eventwise
 noncollapsing remain distinct later phases.  The latter has no honest theorem
 signature until P6b supplies the absent RFWS event/seam object.
+
+## 2026-08-29 pointed-action and segment interfaces
+
+The import-only umbrella now also exports `PointedAction`,
+`PointedConvergence`, and `SegmentValue`.  This makes the verified fixed-C1
+pointed action-convergence theorem `lLength_conv_curve`, the exact mapped
+kinetic identity `lKinetic_map`, and the same-clock scalar lower bound
+`lLength_lower` available from the stable L-geometry import path.
+
+The updated umbrella passes a warning-free focused check.  No named refresh
+was needed because no downstream module currently consumes the import-only
+wrapper itself; the producer modules used by real downstream checks were
+refreshed separately.
+
+## 2026-08-31 pointed restricted-value convergence
+
+The umbrella now exports `PointedValue`.  Its `lSegValue_pt_lim` theorem proves
+convergence of exact restricted same-clock L-values on a positive regular-time
+interval from the checked fixed-competitor limsup and varying-action liminf,
+under explicit source/limit attainers and compact chart-H1 confinement.  The
+updated umbrella is warning-free focused green.
+
+## 2026-09-01 pointed reduced-density integration
+
+The import-only umbrella now exports the checked pointwise, compact common-
+coordinate, and source-manifold reduced-density convergence chain through
+`PointedDensitySource`.  It also exports `RedDensityTail`, whose
+`redDensity_tail_le` converts an explicit quadratic reduced-length lower bound
+into the intrinsic Gaussian exterior-mass estimate needed by later pointed
+tightness arguments.  The quadratic blow-down coercivity and reverse compact-
+ball capture remain separate P3 inputs; no no-mass-loss wrapper is asserted.
+
+Both new producer modules are exact-refresh GREEN, and the updated umbrella is
+warning-free focused GREEN.
+
+The umbrella also exports `PointedDensityTest` and source-imports
+`PointedDensitySourceTest`.  Their `redDensity_wgt_lim` and
+`redDensity_src_wgt` theorems are the warning-free focused-green single-chart
+weighted dominated-convergence and actual source-manifold change-of-variables
+producers.  Both producer artifacts are exact-refresh GREEN, and the updated
+umbrella is warning-free focused GREEN.
+
+The umbrella now additionally exports `PointedDensityCC`.  Its
+`redDensity_cc_lim` theorem derives the finite preferred-chart partition,
+positive/negative signed-test split, eventual source containment, and raw
+partial-map transport internally.  It therefore proves convergence against
+every compactly supported real test without assuming the desired convergence,
+global finite mass, tightness, or no-mass-loss.  The producer is warning-free
+focused/refresh GREEN; the umbrella and 89-item P2 audit are focused GREEN, and
+the endpoint audit uses only the three standard logical axioms.  This closes
+the fixed-space compact-test endpoint at 100%; geometric no-mass-loss remains
+0% pending canonical reverse ball capture and the P3 moving-center coercivity
+input.
